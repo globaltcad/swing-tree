@@ -448,8 +448,11 @@ public final class UI extends UIFactoryMethods
         SMOOTH_SPOTS(NoiseFunctions::smoothSpots),
         SPIRALS(NoiseFunctions::spirals),
         TILES(NoiseFunctions::tiles),
-        TISSUE(NoiseFunctions::voronoiBasedCells),
-        WAVES(NoiseFunctions::voronoiBasedWaves);
+        TISSUE(NoiseFunctions::voronoiBasedCellTissue),
+        POND_IN_DRIZZLE(NoiseFunctions::voronoiBasedPondInDrizzle),
+        POND_IN_RAIN(NoiseFunctions::voronoiBasedPondInRain),
+        POND_OF_STRINGS(NoiseFunctions::voronoiBasedPondOfStrings),
+        POND_OF_TANGLED_STRINGS(NoiseFunctions::voronoiBasedPondOfTangledStrings);
 
 
         private final NoiseFunction function;

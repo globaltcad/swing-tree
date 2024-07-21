@@ -307,7 +307,7 @@ public final class NoiseFunctions
         return (float) (1 - Math.log(iteration) / Math.log(MAX_ITERATIONS));
     }
 
-    public static float voronoiBasedCells(float xIn, float yIn ) {
+    public static float voronoiBasedCellTissue(float xIn, float yIn ) {
         float scale = 1f/32;
         return _coordinateToWorleyDistanceValue(xIn*scale, yIn*scale);
     }
@@ -363,12 +363,33 @@ public final class NoiseFunctions
         return Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
     }
 
-    public static float voronoiBasedWaves(float xIn, float yIn ) {
+    public static float voronoiBasedPondInDrizzle(float xIn, float yIn ) {
         float scale = 0.5f/32;
-        return _voronoiBasedWaves(xIn*scale, yIn*scale);
+        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale);
+        return (float) _wave(Math.pow(Math.abs(pool), 2));
     }
 
-    private static float _voronoiBasedWaves( float xIn, float yIn ) {
+    public static float voronoiBasedPondInRain(float xIn, float yIn ) {
+        float scale = 0.5f/32;
+        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale)*1.5;
+        pool += _voronoiBasedWavesSum(yIn*scale*2, -xIn*scale*2)/1.5;
+        return (float) _wave(Math.abs(pool*1.5));
+    }
+
+    public static float voronoiBasedPondOfStrings(float xIn, float yIn ) {
+        float scale = 0.5f/32;
+        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale);
+        return (float) _wave(Math.pow(Math.abs(pool*4), 0.5));
+    }
+
+    public static float voronoiBasedPondOfTangledStrings(float xIn, float yIn ) {
+        float scale = 0.5f/32;
+        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale)*1.5;
+        pool += _voronoiBasedWavesSum(yIn*scale*2, -xIn*scale*2)/1.5;
+        return (float) _wave(Math.pow(Math.abs(pool*3), 0.5));
+    }
+
+    private static double _voronoiBasedWavesSum( float xIn, float yIn ) {
         final int minX1 = (int) Math.floor(xIn) - 1 ;
         final int minX2 = (int) Math.floor(xIn)     ;
         final int minX3 = (int) Math.floor(xIn) + 1 ;
@@ -421,7 +442,7 @@ public final class NoiseFunctions
         pool += _rippleAmplitude( distanceTopRight   , randomTopRight    );
         pool += _rippleAmplitude( distanceBottomLeft , randomBottomLeft  );
         pool += _rippleAmplitude( distanceBottomRight, randomBottomRight );
-        return (float) _wave(Math.pow(Math.abs(pool), 2));
+        return pool;
     }
 
     private static double _rippleAmplitude( double distance, double random ) {
