@@ -46,15 +46,18 @@ public class BoxShadowPickerView extends Panel
         Var<Color> foundationColor = vm.zoomTo(BoxShadowPickerViewModel::foundationColor, BoxShadowPickerViewModel::withFoundationColor);
 
         Var<Boolean> drawSmiley     = vm.zoomTo(BoxShadowPickerViewModel::drawSmiley, BoxShadowPickerViewModel::withDrawSmiley);
-        Var<UI.Corner> borderCorner = vm.zoomTo(BoxShadowPickerViewModel::borderCorner, BoxShadowPickerViewModel::withBorderCorner);
-        Var<BoxShadowPickerViewModel.BorderCornerViewModel> currentCornerModel = vm.zoomTo(BoxShadowPickerViewModel::currentCornerModel, BoxShadowPickerViewModel::withCurrentCornerModel);
+        Var<UI.Corner> borderCorner = vm.zoomTo(BoxShadowPickerViewModel::borderCorner, BoxShadowPickerViewModel::updateBorderCorner);
+        Var<BoxShadowPickerViewModel.BorderCornerViewModel> currentCornerModel = vm.zoomTo(BoxShadowPickerViewModel::currentCornerModel, BoxShadowPickerViewModel::updateCurrentCornerModel);
         Var<Integer> borderArcWidth  = currentCornerModel.zoomTo(BoxShadowPickerViewModel.BorderCornerViewModel::borderArcWidth, BoxShadowPickerViewModel.BorderCornerViewModel::withBorderArcWidth);
         Var<Integer> borderArcHeight = currentCornerModel.zoomTo(BoxShadowPickerViewModel.BorderCornerViewModel::borderArcHeight, BoxShadowPickerViewModel.BorderCornerViewModel::withBorderArcHeight);
-        Var<UI.Edge> borderEdge      = vm.zoomTo(BoxShadowPickerViewModel::borderEdge, BoxShadowPickerViewModel::withBorderEdge);
-        Var<BoxShadowPickerViewModel.BorderEdgeViewModel> currentEdgeModel = vm.zoomTo(BoxShadowPickerViewModel::currentEdgeModel, BoxShadowPickerViewModel::withCurrentEdgeModel);
+        Var<UI.Edge> borderEdge      = vm.zoomTo(BoxShadowPickerViewModel::borderEdge, BoxShadowPickerViewModel::updateBorderEdge);
+        Var<BoxShadowPickerViewModel.BorderEdgeViewModel> currentEdgeModel = vm.zoomTo(BoxShadowPickerViewModel::currentEdgeModel, BoxShadowPickerViewModel::updateCurrentEdgeModel);
         Var<Integer> borderWidth     = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderWidth, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderWidth);
         Var<Color> borderColor       = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderColor, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderColor);
         Val<String> code             = vm.viewAsString(BoxShadowPickerViewModel::createCode);
+
+        Var<NoiseType> noise = vm.zoomTo(BoxShadowPickerViewModel::noise, BoxShadowPickerViewModel::withNoise);
+        Var<String> noiseColors = vm.zoomTo(BoxShadowPickerViewModel::noiseColors, BoxShadowPickerViewModel::withNoiseColors);
 
         FlatLightLaf.setup();
         of(this).withLayout(WRAP(2).and(INS(12)), "[]12[]")
@@ -202,6 +205,10 @@ public class BoxShadowPickerView extends Panel
                          .shadowIsInset(shadowInset.get())
                          .borderWidths(vm.get().topBorderWidth(), vm.get().rightBorderWidth(), vm.get().bottomBorderWidth(), vm.get().leftBorderWidth())
                          .borderColors(vm.get().topBorderColor(), vm.get().rightBorderColor(), vm.get().bottomBorderColor(), vm.get().leftBorderColor())
+                         .noise( noiseConf -> noiseConf
+                             .function(noise.get())
+                             .colors(noiseColors.get().split(","))
+                         )
                     )
                     .add(TOP.and(SPAN).and(ALIGN_CENTER), label("Label"))
                     .add(LEFT, button("Button"))
@@ -211,27 +218,38 @@ public class BoxShadowPickerView extends Panel
             )
         )
         .add(GROW.and(PUSH_X),
-            panel(FILL.and(INS(16))).withBorderTitled("Code")
-            .add(GROW,
-                scrollPane()
-                .withStyle( it -> it.borderWidth(0).borderColor(Color.BLUE) )
-                .add(
-                    textArea(code).withLayout(FILL)
-                    .isEditableIf(false)
-                    .withStyle( it ->
-                        it.font(new Font("Monospaced", Font.PLAIN, 15))
-                          .fontColor(Color.BLUE.darker())
-                          .fontSelectionColor(new Color(20, 200, 100, 100))
-                          .borderWidth(0)
-                          .borderColor(Color.GREEN)
-                    )
-                    .add(TOP.and(RIGHT),
-                        button("Copy").onClick( e -> {
-                            // Copy to clipboard
-                            StringSelection stringSelection = new StringSelection(code.get());
-                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                            clipboard.setContents(stringSelection, null);
-                        })
+            panel(FILL.and(INS(16)).and(WRAP(1)))
+            .withPrefHeight(350)
+            .add(GROW_X,
+                panel(FILL.and(WRAP(2)), "[shrink][grow]").withBorderTitled("Noise")
+                .add(label("Type:"))
+                .add(GROW_X, comboBox(noise))
+                .add(label("Colors:"))
+                .add(GROW_X, textField(noiseColors))
+            )
+            .add(GROW.and(PUSH),
+                panel(FILL).withBorderTitled("Code")
+                .add(GROW,
+                    scrollPane()
+                    .withStyle( it -> it.borderWidth(0).borderColor(Color.BLUE) )
+                    .add(
+                        textArea(code).withLayout(FILL)
+                        .isEditableIf(false)
+                        .withStyle( it ->
+                            it.font(new Font("Monospaced", Font.PLAIN, 15))
+                              .fontColor(Color.BLUE.darker())
+                              .fontSelectionColor(new Color(20, 200, 100, 100))
+                              .borderWidth(0)
+                              .borderColor(Color.GREEN)
+                        )
+                        .add(TOP.and(RIGHT),
+                            button("Copy").onClick( e -> {
+                                // Copy to clipboard
+                                StringSelection stringSelection = new StringSelection(code.get());
+                                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                                clipboard.setContents(stringSelection, null);
+                            })
+                        )
                     )
                 )
             )
