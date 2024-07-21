@@ -109,34 +109,20 @@ public final class BoxShadowPickerViewModel
     }
 
     public BoxShadowPickerViewModel updateBorderCorner(UI.Corner borderCorner) {
-        return new BoxShadowPickerViewModel(
-                paddingTop, paddingLeft, paddingRight, paddingBottom, marginTop, marginLeft, marginRight, marginBottom,
-                borderEdge, borderCorner, edgeModels, cornerModels, currentEdgeModel, currentCornerModel, backgroundColor,
-                foundationColor, horizontalShadowOffset, verticalShadowOffset, shadowBlurRadius, shadowSpreadRadius,
-                shadowColor, shadowInset, noise, noiseColors, drawSmiley
-        )
+        return withBorderCorner(borderCorner)
             .updateCornerSelection(borderCorner);
     }
 
     public BoxShadowPickerViewModel updateBorderEdge(UI.Edge borderEdge) {
-        return new BoxShadowPickerViewModel(
-                paddingTop, paddingLeft, paddingRight, paddingBottom, marginTop, marginLeft, marginRight, marginBottom,
-                borderEdge, borderCorner, edgeModels, cornerModels, currentEdgeModel, currentCornerModel, backgroundColor,
-                foundationColor, horizontalShadowOffset, verticalShadowOffset, shadowBlurRadius, shadowSpreadRadius,
-                shadowColor, shadowInset, noise, noiseColors, drawSmiley
-        )
+        return withBorderEdge(borderEdge)
             .updateEdgeSelection(borderEdge);
     }
 
     public BoxShadowPickerViewModel updateCurrentEdgeModel(BorderEdgeViewModel currentEdgeModel) {
         Map<UI.Edge, BorderEdgeViewModel> newEdgeModels = new HashMap<>(edgeModels);
         newEdgeModels.put(borderEdge, currentEdgeModel);
-        return new BoxShadowPickerViewModel(
-                paddingTop, paddingLeft, paddingRight, paddingBottom, marginTop, marginLeft, marginRight, marginBottom,
-                borderEdge, borderCorner, newEdgeModels, cornerModels, currentEdgeModel, currentCornerModel, backgroundColor,
-                foundationColor, horizontalShadowOffset, verticalShadowOffset, shadowBlurRadius, shadowSpreadRadius,
-                shadowColor, shadowInset, noise, noiseColors, drawSmiley
-        );
+        return withEdgeModels(newEdgeModels)
+                .withCurrentEdgeModel(currentEdgeModel);
     }
 
     public int leftBorderWidth() { return getEdgeModel(UI.Edge.LEFT).borderWidth(); }
@@ -159,12 +145,8 @@ public final class BoxShadowPickerViewModel
     public BoxShadowPickerViewModel updateCurrentCornerModel(BorderCornerViewModel currentCornerModel) {
         Map<UI.Corner, BorderCornerViewModel> newCornerModels = new HashMap<>(cornerModels);
         newCornerModels.put(borderCorner, currentCornerModel);
-        return new BoxShadowPickerViewModel(
-                paddingTop, paddingLeft, paddingRight, paddingBottom, marginTop, marginLeft, marginRight, marginBottom,
-                borderEdge, borderCorner, edgeModels, newCornerModels, currentEdgeModel, currentCornerModel, backgroundColor,
-                foundationColor, horizontalShadowOffset, verticalShadowOffset, shadowBlurRadius, shadowSpreadRadius,
-                shadowColor, shadowInset, noise, noiseColors, drawSmiley
-        );
+        return withCornerModels(newCornerModels)
+                .withCurrentCornerModel(currentCornerModel);
     }
 
     public int arcWidthAt(UI.Corner corner) { return getCornerModel(corner).borderArcWidth(); }
