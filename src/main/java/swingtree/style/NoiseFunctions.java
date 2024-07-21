@@ -363,6 +363,82 @@ public final class NoiseFunctions
         return Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
     }
 
+    public static float voronoiBasedWaves(float xIn, float yIn ) {
+        float scale = 0.5f/32;
+        return _voronoiBasedWaves(xIn*scale, yIn*scale);
+    }
+
+    private static float _voronoiBasedWaves( float xIn, float yIn ) {
+        final int minX1 = (int) Math.floor(xIn) - 1 ;
+        final int minX2 = (int) Math.floor(xIn)     ;
+        final int minX3 = (int) Math.floor(xIn) + 1 ;
+        final int minY1 = (int) Math.floor(yIn) - 1 ;
+        final int minY2 = (int) Math.floor(yIn)     ;
+        final int minY3 = (int) Math.floor(yIn) + 1 ;
+        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);
+        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);
+        final double randomCenter = _fastPseudoRandomDoubleFrom((float) centerX, (float) centerY);
+        final double distanceCenter = _invDistanceBetween(centerX, centerY, xIn, yIn);
+        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);
+        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);
+        final double randomLeft = _fastPseudoRandomDoubleFrom((float) leftX, (float) leftY);
+        final double distanceLeft = _invDistanceBetween(leftX, leftY, xIn, yIn);
+        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);
+        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);
+        final double randomRight = _fastPseudoRandomDoubleFrom((float) rightX, (float) rightY);
+        final double distanceRight = _invDistanceBetween(rightX, rightY, xIn, yIn);
+        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);
+        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);
+        final double randomTop = _fastPseudoRandomDoubleFrom((float) topX, (float) topY);
+        final double distanceTop = _invDistanceBetween(topX, topY, xIn, yIn);
+        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);
+        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);
+        final double randomBottom = _fastPseudoRandomDoubleFrom((float) bottomX, (float) bottomY);
+        final double distanceBottom = _invDistanceBetween(bottomX, bottomY, xIn, yIn);
+        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);
+        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);
+        final double randomTopLeft = _fastPseudoRandomDoubleFrom((float) topLeftX, (float) topLeftY);
+        final double distanceTopLeft = _invDistanceBetween(topLeftX, topLeftY, xIn, yIn);
+        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);
+        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);
+        final double randomTopRight = _fastPseudoRandomDoubleFrom((float) topRightX, (float) topRightY);
+        final double distanceTopRight = _invDistanceBetween(topRightX, topRightY, xIn, yIn);
+        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);
+        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);
+        final double randomBottomLeft = _fastPseudoRandomDoubleFrom((float) bottomLeftX, (float) bottomLeftY);
+        final double distanceBottomLeft = _invDistanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);
+        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);
+        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);
+        final double randomBottomRight = _fastPseudoRandomDoubleFrom((float) bottomRightX, (float) bottomRightY);
+        final double distanceBottomRight = _invDistanceBetween(bottomRightX, bottomRightY, xIn, yIn);
+        double pool = 0;
+        pool += _rippleAmplitude( distanceCenter     , randomCenter      );
+        pool += _rippleAmplitude( distanceLeft       , randomLeft        );
+        pool += _rippleAmplitude( distanceRight      , randomRight       );
+        pool += _rippleAmplitude( distanceTop        , randomTop         );
+        pool += _rippleAmplitude( distanceBottom     , randomBottom      );
+        pool += _rippleAmplitude( distanceTopLeft    , randomTopLeft     );
+        pool += _rippleAmplitude( distanceTopRight   , randomTopRight    );
+        pool += _rippleAmplitude( distanceBottomLeft , randomBottomLeft  );
+        pool += _rippleAmplitude( distanceBottomRight, randomBottomRight );
+        return (float) _wave(Math.pow(Math.abs(pool), 2));
+    }
+
+    private static double _rippleAmplitude( double distance, double random ) {
+        double impactForce = ( 3 + 32 * random );
+        double amplitude = distance * Math.sin( ( 1 + Math.pow( distance, 2 ) ) * impactForce );
+        double fadeAway = ( 0.5 + random );
+        return amplitude * fadeAway;
+    }
+
+    private static double _wave(double in) {
+        return 1 - ( 1 + Math.cos(in) ) / 2;
+    }
+
+    private static double _invDistanceBetween(double x1, double y1, double x2, double y2 ) {
+        return Math.max(0, 1 - Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) ));
+    }
+
     private static double _sigmoid( double x ) {
         return 1 / (1 + Math.exp(-x));
     }
