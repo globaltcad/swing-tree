@@ -2,6 +2,7 @@ package examples.mvi.stylepicker;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.From;
+import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 
@@ -53,7 +54,7 @@ public class BoxShadowPickerView extends Panel
         Var<BoxShadowPickerViewModel.BorderEdgeViewModel> currentEdgeModel = vm.zoomTo(BoxShadowPickerViewModel::currentEdgeModel, BoxShadowPickerViewModel::withCurrentEdgeModel);
         Var<Integer> borderWidth     = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderWidth, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderWidth);
         Var<Color> borderColor       = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderColor, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderColor);
-        Var<String> code             = vm.zoomTo(BoxShadowPickerViewModel::code, BoxShadowPickerViewModel::withCode);
+        Val<String> code             = vm.viewAsString(BoxShadowPickerViewModel::createCode);
 
         FlatLightLaf.setup();
         of(this).withLayout(WRAP(2).and(INS(12)), "[]12[]")
