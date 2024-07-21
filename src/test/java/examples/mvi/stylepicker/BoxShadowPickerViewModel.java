@@ -71,6 +71,7 @@ public final class BoxShadowPickerViewModel
 
     private final UI.NoiseType noise;
     private final String noiseColors;
+    private final UI.ComponentArea noiseArea;
 
     // Smiley (For fun)
     private final boolean drawSmiley;// = false;
@@ -96,7 +97,7 @@ public final class BoxShadowPickerViewModel
                     BorderEdgeViewModel.DEFAULT, BorderCornerViewModel.DEFAULT,
                     new Color(0.1f, 0.75f, 0.9f), new Color(1f,1f,1f),
                     0, 0, 6, 5, Color.DARK_GRAY, false,
-                UI.NoiseType.TISSUE, "", false
+                    UI.NoiseType.TISSUE, "", UI.ComponentArea.ALL, false
         );
     }
 

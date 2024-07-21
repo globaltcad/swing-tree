@@ -58,6 +58,7 @@ public class BoxShadowPickerView extends Panel
 
         Var<NoiseType> noise = vm.zoomTo(BoxShadowPickerViewModel::noise, BoxShadowPickerViewModel::withNoise);
         Var<String> noiseColors = vm.zoomTo(BoxShadowPickerViewModel::noiseColors, BoxShadowPickerViewModel::withNoiseColors);
+        Var<UI.ComponentArea> noiseArea = vm.zoomTo(BoxShadowPickerViewModel::noiseArea, BoxShadowPickerViewModel::withNoiseArea);
 
         FlatLightLaf.setup();
         of(this).withLayout(WRAP(2).and(INS(12)), "[]12[]")
@@ -208,6 +209,7 @@ public class BoxShadowPickerView extends Panel
                          .noise( noiseConf -> noiseConf
                              .function(noise.get())
                              .colors(noiseColors.get().split(","))
+                             .clipTo(noiseArea.get())
                          )
                     )
                     .add(TOP.and(SPAN).and(ALIGN_CENTER), label("Label"))
@@ -226,6 +228,8 @@ public class BoxShadowPickerView extends Panel
                 .add(GROW_X, comboBox(noise))
                 .add(label("Colors:"))
                 .add(GROW_X, textField(noiseColors))
+                .add(label("Area:"))
+                .add(GROW_X, comboBox(noiseArea))
             )
             .add(GROW.and(PUSH),
                 panel(FILL).withBorderTitled("Code")
