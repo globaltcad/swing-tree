@@ -204,6 +204,15 @@ public final class BoxShadowPickerViewModel
                 "         " + str(leftBorderColor()) + "\n" +
                 "     )\n";
 
+        String noiseGrad = "";
+        if ( !this.noiseColors.trim().isEmpty() )
+            noiseGrad =
+                "     .noise( noiseConf -> noiseConf\n" +
+                "         .function(UI."+noise.name()+")\n" +
+                "         .colors("+noiseColors+")\n" +
+                "         .clipTo(UI."+noiseArea+")\n" +
+                "     )\n";
+
         return (
             "panel(FILL)\n" +
             ".withStyle( it -> it\n" +
@@ -230,6 +239,7 @@ public final class BoxShadowPickerViewModel
             ( shadowBlurRadius == 0 ? "" : "     .shadowBlurRadius(" + str(shadowBlurRadius) + ")\n" ) +
             ( shadowSpreadRadius == 0 ? "" : "     .shadowSpreadRadius(" + str(shadowSpreadRadius) + ")\n" ) +
             "     .shadowIsInset(" + shadowInset + ")\n" +
+            noiseGrad +
             ")\n" +
             ( !drawSmiley ? "" : "\n\n...\n\n" +
                     "void drawASmiley(Graphics2D g2d, int x, int y, int w, int h) {\n" +
