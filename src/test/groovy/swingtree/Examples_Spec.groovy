@@ -18,8 +18,8 @@ import examples.simple.Form
 import examples.simple.ListRendering
 import examples.simple.NamedFieldsView
 import examples.simple.TodoApp
-import examples.stylish.BoxShadowPickerView
-import examples.stylish.BoxShadowPickerViewModel
+import examples.mvvm.stylepicker.BoxShadowPickerView
+import examples.mvvm.stylepicker.BoxShadowPickerViewModel
 import examples.stylish.GlassUIView
 import examples.stylish.SoftUIView
 import examples.stylish.WellRoundedView

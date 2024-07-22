@@ -1,4 +1,4 @@
-package examples.stylish;
+package examples.mvvm.stylepicker;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.From;
