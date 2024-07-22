@@ -168,6 +168,11 @@ public class BoxShadowPickerView extends UI.Panel
                          .shadowIsInset(vm.shadowInset().get())
                          .borderWidths(vm.topBorderWidth(), vm.rightBorderWidth(), vm.bottomBorderWidth(), vm.leftBorderWidth())
                          .borderColors(vm.topBorderColor(), vm.rightBorderColor(), vm.bottomBorderColor(), vm.leftBorderColor())
+                         .noise( noiseConf -> noiseConf
+                             .function(vm.noise().get())
+                             .colors(vm.noiseColors().get().split(","))
+                             .clipTo(vm.noiseArea().get())
+                         )
                     )
                     .add(TOP.and(SPAN).and(ALIGN_CENTER), label("Label"))
                     .add(LEFT, button("Button"))
@@ -177,28 +182,41 @@ public class BoxShadowPickerView extends UI.Panel
             )
         )
         .add(GROW.and(PUSH_X),
-            panel(FILL.and(INS(16))).withBorderTitled("Code")
-            .add(GROW,
-                scrollPane()
-                .withStyle( it -> it.borderWidth(0).borderColor(Color.BLUE) )
-                .add(
-                    textArea(vm.code()).withLayout(FILL)
-                    .isEditableIf(false)
-                    .withStyle( it ->
-                        it.font(new Font("Monospaced", Font.PLAIN, 15))
-                          .fontColor(Color.BLUE.darker())
-                          .fontSelectionColor(new Color(20, 200, 100, 100))
-                          .borderWidth(0)
-                          .borderColor(Color.GREEN)
-                    )
-                    .add(TOP.and(RIGHT),
-                        button("Copy").onClick( e -> {
-                            String code = vm.code().get();
-                            // Copy to clipboard
-                            StringSelection stringSelection = new StringSelection(code);
-                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                            clipboard.setContents(stringSelection, null);
-                        })
+            panel(FILL.and(INS(16)).and(WRAP(1)))
+            .withPrefHeight(350)
+            .add(GROW_X,
+                panel(FILL.and(WRAP(2)), "[shrink][grow]").withBorderTitled("Noise")
+                .add(label("Type:"))
+                .add(GROW_X, comboBox(vm.noise()))
+                .add(label("Colors:"))
+                .add(GROW_X, textField(vm.noiseColors()))
+                .add(label("Area:"))
+                .add(GROW_X, comboBox(vm.noiseArea()))
+            )
+            .add(GROW.and(PUSH),
+                panel(FILL).withBorderTitled("Code")
+                .add(GROW,
+                    scrollPane()
+                    .withStyle( it -> it.borderWidth(0).borderColor(Color.BLUE) )
+                    .add(
+                        textArea(vm.code()).withLayout(FILL)
+                        .isEditableIf(false)
+                        .withStyle( it ->
+                            it.font(new Font("Monospaced", Font.PLAIN, 15))
+                              .fontColor(Color.BLUE.darker())
+                              .fontSelectionColor(new Color(20, 200, 100, 100))
+                              .borderWidth(0)
+                              .borderColor(Color.GREEN)
+                        )
+                        .add(TOP.and(RIGHT),
+                            button("Copy").onClick( e -> {
+                                String code = vm.code().get();
+                                // Copy to clipboard
+                                StringSelection stringSelection = new StringSelection(code);
+                                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                                clipboard.setContents(stringSelection, null);
+                            })
+                        )
                     )
                 )
             )

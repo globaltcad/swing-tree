@@ -5,10 +5,8 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
-import swingtree.components.JBox;
 
-import javax.swing.JComponent;
-import java.awt.Color;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +70,10 @@ public class BoxShadowPickerViewModel
     private final Var<Integer> shadowSpreadRadius = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
     private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY).onChange(From.VIEW,  it -> repaint.fire() );
     private final Var<Boolean> shadowInset = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
+
+    private final Var<UI.NoiseType>     noise       = Var.of(UI.NoiseType.TISSUE).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<String>           noiseColors = Var.of("").onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<UI.ComponentArea> noiseArea   = Var.of(UI.ComponentArea.ALL).onChange(From.VIEW,  it -> repaint.fire() );
 
     // Smiley (For fun)
     private final Var<Boolean> drawSmiley = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
@@ -178,6 +180,10 @@ public class BoxShadowPickerViewModel
     public Var<Boolean> shadowInset() { return shadowInset; }
 
     public Var<Boolean> drawSmiley() { return drawSmiley; }
+
+    public Var<UI.NoiseType>     noise()       { return noise; }
+    public Var<String>           noiseColors() { return noiseColors; }
+    public Var<UI.ComponentArea> noiseArea()   { return noiseArea; }
 
     public Var<String> code() { return code; }
 
