@@ -1,4 +1,4 @@
-package examples.stylish;
+package examples.mvvm.tabs;
 
 import sprouts.Event;
 import sprouts.From;
