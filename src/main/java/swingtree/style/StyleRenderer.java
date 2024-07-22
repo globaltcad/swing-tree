@@ -789,7 +789,14 @@ final class StyleRenderer
         Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
         Area areaToFill = conf.areas().get(noise.area());
         g2d.setPaint(noisePaint);
-        g2d.fill(areaToFill);
+        if ( areaToFill != null )
+            g2d.fill(areaToFill);
+        else
+            g2d.fillRect(
+                    0, 0,
+                    conf.boxModel().size().width().map(Float::intValue).orElse(0),
+                    conf.boxModel().size().height().map(Float::intValue).orElse(0)
+                );
     }
 
     static Paint _createNoisePaint(
