@@ -112,7 +112,7 @@ final class ComponentAreas
     }
 
 
-    public Area get( UI.ComponentArea areaType ) {
+    public Shape get( UI.ComponentArea areaType ) {
         BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
         switch ( areaType ) {
             case BODY:
@@ -125,11 +125,11 @@ final class ComponentAreas
                 return _exteriorArea.getFor(boxModel, this); // all - border - interior
             case ALL:
             default:
-                return new Area(new Rectangle(
+                return new Rectangle(
                         0, 0,
                         boxModel.size().width().map(Float::intValue).orElse(0),
                         boxModel.size().height().map(Float::intValue).orElse(0)
-                    ));
+                    );
         }
     }
 

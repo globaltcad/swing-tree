@@ -160,7 +160,7 @@ final class StyleRenderer
 
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
             try {
-                Area borderArea = conf.areas().get(UI.ComponentArea.BORDER);
+                Shape borderArea = conf.areas().get(UI.ComponentArea.BORDER);
                 Objects.requireNonNull(borderArea);
                 if ( colors.isHomogeneous() ) {
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
@@ -652,7 +652,7 @@ final class StyleRenderer
         else {
             Paint paint = _createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
-                Area areaToFill = conf.areas().get(gradient.area());
+                Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
                 g2d.fill(areaToFill);
             }
@@ -787,7 +787,7 @@ final class StyleRenderer
         final Graphics2D g2d
     ) {
         Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
-        Area areaToFill = conf.areas().get(noise.area());
+        Shape areaToFill = conf.areas().get(noise.area());
         g2d.setPaint(noisePaint);
         g2d.fill(areaToFill);
     }
