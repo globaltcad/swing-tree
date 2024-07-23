@@ -1,4 +1,4 @@
-package examples.stylish;
+package examples.mvi.tabs;
 
 import sprouts.Event;
 import sprouts.From;
@@ -14,11 +14,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 /**
  *  A custom tabs view implementation similar to {@link JTabbedPane},
- *  but based on a declarative design and custom styling.
+ *  but based on a declarative MVI design and custom styling.
  */
 public class MyTabsView extends Panel
 {
@@ -29,10 +30,13 @@ public class MyTabsView extends Panel
     private JComponent             currentlyVisible = null;
 
 
-    public MyTabsView( MyTabsViewModel vm ) {
+    public MyTabsView( Var<MyTabsViewModel> vm ) {
         Color HIGHLIGHT_COLOR = new Color(153, 243, 206);
         Color DEFAULT_COLOR   = new Color(119, 188, 213);
         Color OUTLINE_COLOR   = new Color( 0,   0,   0, 0.5f);
+
+        Var<MyTabsViewModel.TabModel> currentTab = vm.zoomTo(MyTabsViewModel::currentTab, MyTabsViewModel::withCurrentTab);
+        Var<List<MyTabsViewModel.TabModel>> tabs = vm.zoomTo(MyTabsViewModel::tabs, MyTabsViewModel::withTabs);
 
         UI.of(this).withLayout("fill, ins 0, gap 0, wrap 1")
         .add(GROW_X,
@@ -41,52 +45,56 @@ public class MyTabsView extends Panel
                 .borderWidthAt(Edge.BOTTOM, 1)
                 .padding(2, 5, -1, 5)
             )
-            .add(vm.getTabs(), tabModel ->
-                button(tabModel.title()).withMaxHeight(38).withMinHeight(38).withFontSize(12)
-                .withRepaintOn(repaintEvent)
-                .withTooltip(tabModel.tip())
-                .peek( b ->
-                    tabModel.iconSource().onChange(From.VIEW_MODEL, i -> {
-                        Optional<ImageIcon> icon = i.get().find();
-                        if ( icon.isPresent() ) {
-                            b.setIcon(icon.get());
-                            b.setText("");
-                        } else {
-                            b.setIcon(null);
-                            b.setText(tabModel.title().get());}
-                    })
-                )
-                .withStyle( it -> it
-                    .gradient( gradient -> gradient
-                        .span(Span.TOP_TO_BOTTOM)
-                        .colors(determineTabButtonColorsFor(tabModel, it.component(), vm))
-                    )
-                    .applyIf(vm.getCurrentTab().is(tabModel), it2 -> it2
-                        .margin( 2, 2, 0, 2 )
-                        .padding(6, 6, 8, 6)
-                        .borderRadiusAt(Corner.TOP_LEFT, 12)
-                        .borderRadiusAt(Corner.TOP_RIGHT, 12)
-                        .border(1, OUTLINE_COLOR)
-                        .borderWidthAt(Edge.BOTTOM, 0)
-                        .backgroundColor(HIGHLIGHT_COLOR)
-                    )
-                    .applyIf(vm.getCurrentTab().isNot(tabModel), it2 -> it2
-                        .margin( 2, 2, 4, 2 )
-                        .padding(4, 6, 4, 6)
-                        .borderRadius(18)
-                        .border(1, OUTLINE_COLOR)
-                        .backgroundColor(DEFAULT_COLOR)
-                    )
-                    .applyIf(it.component().getModel().isPressed(), it2 -> it2
-                        .backgroundColor(DEFAULT_COLOR.brighter())
-                    )
-                )
-                .onClick( it -> {
-                    vm.getCurrentTab().set(From.VIEW, tabModel);
-                    select(vm.getCurrentTab().get());
-                    repaintEvent.fire();
-                })
-            )
+            .add(tabs, tabModels -> {
+                return UI.box().apply( ui -> {
+                    for (MyTabsViewModel.TabModel tabModel : tabModels) {
+                        ui.add(
+                            button(tabModel.title()).withMaxHeight(38).withMinHeight(38).withFontSize(12)
+                            .withRepaintOn(repaintEvent)
+                            .withTooltip(tabModel.tip())
+                            .peek( b -> {
+                                Optional<ImageIcon> icon = tabModel.iconSource().find();
+                                if ( icon.isPresent() ) {
+                                    b.setIcon(icon.get());
+                                    b.setText("");
+                                } else {
+                                    b.setIcon(null);
+                                    b.setText(tabModel.title());}
+                            })
+                            .withStyle( it -> it
+                                .gradient( gradient -> gradient
+                                    .span(Span.TOP_TO_BOTTOM)
+                                    .colors(determineTabButtonColorsFor(tabModel, it.component(), vm.get()))
+                                )
+                                .applyIf(currentTab.is(tabModel), it2 -> it2
+                                    .margin( 2, 2, 0, 2 )
+                                    .padding(6, 6, 8, 6)
+                                    .borderRadiusAt(Corner.TOP_LEFT, 12)
+                                    .borderRadiusAt(Corner.TOP_RIGHT, 12)
+                                    .border(1, OUTLINE_COLOR)
+                                    .borderWidthAt(Edge.BOTTOM, 0)
+                                    .backgroundColor(HIGHLIGHT_COLOR)
+                                )
+                                .applyIf(currentTab.isNot(tabModel), it2 -> it2
+                                    .margin( 2, 2, 4, 2 )
+                                    .padding(4, 6, 4, 6)
+                                    .borderRadius(18)
+                                    .border(1, OUTLINE_COLOR)
+                                    .backgroundColor(DEFAULT_COLOR)
+                                )
+                                .applyIf(it.component().getModel().isPressed(), it2 -> it2
+                                    .backgroundColor(DEFAULT_COLOR.brighter())
+                                )
+                            )
+                            .onClick( it -> {
+                                currentTab.set(From.VIEW, tabModel);
+                                select(currentTab.get());
+                                repaintEvent.fire();
+                            })
+                        );
+                    }
+                });
+            })
         )
         .add(GROW.and(PUSH),
             box().withStyle( it -> it
@@ -103,19 +111,16 @@ public class MyTabsView extends Panel
                 )
             )
         );
-        vm.getCurrentTab().ifPresent( this::select );
-        vm.getCurrentTab().onChange(From.VIEW_MODEL,  it -> select(it.get()) );
-        vm.getTabs().onChange( it -> {
+        currentTab.ifPresent( this::select );
+        currentTab.onChange(From.VIEW_MODEL,  it -> select(it.get()) );
+        tabs.onChange(From.ALL, it -> {
             updateContentComponents(
-                it.vals().stream()
+                it.get().stream()
                 .map(MyTabsViewModel.TabModel::contentView)
-                .map(Var::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList())
             );
         });
-        for ( MyTabsViewModel.TabModel tab : vm.getTabs() )
-            tab.iconSource().fireChange(From.VIEW_MODEL);
     }
 
     private void updateContentComponents(List<JComponent> newList) {
@@ -133,7 +138,7 @@ public class MyTabsView extends Panel
     }
 
     private void select( MyTabsViewModel.TabModel model ) {
-        JComponent current = model.contentView().orElseNull();
+        JComponent current = model.contentView();
         if ( current == currentlyVisible )
             return;
 
@@ -157,12 +162,12 @@ public class MyTabsView extends Panel
         contentPanel.add(current, "grow, push");
     }
 
-    private Color[] determineTabButtonColorsFor( MyTabsViewModel.TabModel tab, JButton button, MyTabsViewModel vm) {
+    private Color[] determineTabButtonColorsFor(MyTabsViewModel.TabModel tab, JButton button, MyTabsViewModel vm) {
         ButtonModel model = button.getModel();
         return new Color[]{
                 new Color(1f, 1f, 1f, 0.45f),
                 new Color(1f, 1f, 1f, model.isRollover() ? 0.5f : 0.0f),
-                new Color(1f, 1f, 1f, vm.getCurrentTab().is(tab) ? 0f : 0.45f)
+                new Color(1f, 1f, 1f, vm.currentTab() == tab ? 0f : 0.45f)
         };
     }
 
@@ -174,16 +179,18 @@ public class MyTabsView extends Panel
         MyTabsViewModel.TabModel tab2 = new DummyTab("Tab 2", "img/two-16th-notes.svg").getModel();
         MyTabsViewModel.TabModel tab3 = new DummyTab("Tab 3", "img/funnel.svg").getModel();
 
-        MyTabsViewModel vm = new MyTabsViewModel();
-        vm.getTabs().add(tab1);
-        vm.getTabs().add(tab2);
-        vm.getTabs().add(tab3);
+        List<MyTabsViewModel.TabModel> tabs = new ArrayList<>();
+        tabs.add(tab1);
+        tabs.add(tab2);
+        tabs.add(tab3);
+        MyTabsViewModel vm = new MyTabsViewModel(tab1, tabs);
 
-        vm.getCurrentTab().set(tab2);
+        vm = vm.withCurrentTab(tab2);
 
+        Var<MyTabsViewModel> state = Var.of(vm);
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(new MyTabsView(vm));
+        frame.setContentPane(new MyTabsView(state));
         frame.pack();
         frame.setVisible(true);
     }
@@ -203,12 +210,12 @@ public class MyTabsView extends Panel
         @Override
         public MyTabsViewModel.TabModel getModel() {
             MyTabsViewModel.TabModel model = new MyTabsViewModel.TabModel(this);
-            model.iconSource().set(()->icon);
+            model = model.withIconSource(()->icon);
             JButton b = new JButton(name);
             b.setFont(b.getFont().deriveFont(UI.scale(12f)));
-            model.contentView().set(b);
-            model.tip().set("This is a tip for " + name);
-            model.title().set(name);
+            model = model.withContentView(b);
+            model = model.withTip("This is a tip for " + name);
+            model = model.withTitle(name);
             return model;
         }
     }

@@ -1,14 +1,12 @@
-package examples.stylish;
+package examples.mvvm.stylepicker;
 
 import sprouts.Event;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
-import swingtree.components.JBox;
 
-import javax.swing.JComponent;
-import java.awt.Color;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +70,10 @@ public class BoxShadowPickerViewModel
     private final Var<Integer> shadowSpreadRadius = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
     private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY).onChange(From.VIEW,  it -> repaint.fire() );
     private final Var<Boolean> shadowInset = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
+
+    private final Var<UI.NoiseType>     noise       = Var.of(UI.NoiseType.TISSUE).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<String>           noiseColors = Var.of("").onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<UI.ComponentArea> noiseArea   = Var.of(UI.ComponentArea.ALL).onChange(From.VIEW,  it -> repaint.fire() );
 
     // Smiley (For fun)
     private final Var<Boolean> drawSmiley = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
@@ -179,6 +181,10 @@ public class BoxShadowPickerViewModel
 
     public Var<Boolean> drawSmiley() { return drawSmiley; }
 
+    public Var<UI.NoiseType>     noise()       { return noise; }
+    public Var<String>           noiseColors() { return noiseColors; }
+    public Var<UI.ComponentArea> noiseArea()   { return noiseArea; }
+
     public Var<String> code() { return code; }
 
     private void createCode() {
@@ -224,6 +230,15 @@ public class BoxShadowPickerViewModel
                 "         " + str(leftBorderColor()) + "\n" +
                 "     )\n";
 
+        String noiseGrad = "";
+        if ( !this.noiseColors.get().trim().isEmpty() )
+            noiseGrad =
+                "     .noise( noiseConf -> noiseConf\n" +
+                "         .function(UI."+noise.get().name()+")\n" +
+                "         .colors("+noiseColors.get()+")\n" +
+                "         .clipTo(UI."+noiseArea.get()+")\n" +
+                "     )\n";
+
         code.set(
             "panel(FILL)\n" +
             ".withStyle( it -> it\n" +
@@ -250,6 +265,7 @@ public class BoxShadowPickerViewModel
             ( shadowBlurRadius.is(0) ? "" : "     .shadowBlurRadius(" + str(shadowBlurRadius) + ")\n" ) +
             ( shadowSpreadRadius.is(0) ? "" : "     .shadowSpreadRadius(" + str(shadowSpreadRadius) + ")\n" ) +
             "     .shadowIsInset(" + str(shadowInset) + ")\n" +
+            noiseGrad +
             ")\n" +
             ( drawSmiley.is(false) ? "" : "\n\n...\n\n" +
                     "void drawASmiley(Graphics2D g2d, int x, int y, int w, int h) {\n" +

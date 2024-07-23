@@ -1,4 +1,4 @@
-package examples.stylish;
+package examples.mvvm.tabs;
 
 import sprouts.Var;
 import sprouts.Vars;
