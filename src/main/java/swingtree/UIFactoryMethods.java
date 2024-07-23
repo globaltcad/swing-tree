@@ -214,13 +214,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         UI.Font font = null;
         try {
             if ( mayBeProperty == null )
-                font = UI.Font.of(Font.decode(fontString));
+                font = _decodeFont(fontString);
         } catch( Exception e ) {
             potentialProblem1 = e;
         }
         try {
             if ( mayBeProperty != null )
-                font = UI.Font.of(Font.decode(mayBeProperty));
+                font = _decodeFont(mayBeProperty);
         } catch( Exception e ) {
             potentialProblem2 = e;
         }
@@ -240,6 +240,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             }
         }
         return font;
+    }
+
+    private static UI.Font _decodeFont( String fontString ) {
+        if ( !_endsWithFontSize(fontString) )
+            fontString += ( "-" + UI.scale(12) );
+        return UI.Font.of(Font.decode(fontString));
+    }
+
+    private static boolean _endsWithFontSize( String fontString ) {
+        return fontString.matches(".*-+\\d+$");
     }
 
     /**

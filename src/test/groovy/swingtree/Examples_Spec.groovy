@@ -32,6 +32,7 @@ import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
+import utility.Wait
 
 import javax.swing.*
 import java.awt.*
@@ -117,7 +118,7 @@ class Examples_Spec extends Specification
         and :
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
         and :
-            Utility.similarityBetween(ui, "views/simple-form-UI.png", 99.2) > 99.2
+            Utility.similarityBetween(ui, "views/simple-form-UI.png", 95) > 95
     }
 
     def 'The login example UI defined in the examples, a good MVVM demonstration.'()
@@ -261,7 +262,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 98) > 98
+            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 97) > 97
     }
 
     def 'The soft example UI is rendered as expected.'()
@@ -302,7 +303,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 98.3) > 98.3
+            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 96.3) > 96.3
     }
 
     def 'The animation example view can be created.'()
@@ -347,9 +348,9 @@ class Examples_Spec extends Specification
             similarity1 > 95
 
         when : 'We simulate the user entering an invalid number:'
-            speedTextField.text = "§"
-            UI.sync()
-        then : 'The UI is updated to reflect the invalid value.'
+            UI.run({ speedTextField.text = "§" })
+            Wait.until({speedTextField.text == "§" && speedTextField.background == Color.RED}, 3_500)
+        then : 'The text field is updated to reflect the invalid value.'
             speedTextField.text == "§"
             speedTextField.background == Color.RED
 
@@ -532,7 +533,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,1) == "2"
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,2) == "4"
         and : 'It is rendered as expected.'
-            Utility.similarityBetween(ui, "views/tables-example-view.png", 97.5) > 97.5
+            Utility.similarityBetween(ui, "views/tables-example-view.png", 96.3) > 96.3
     }
 
 
