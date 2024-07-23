@@ -140,10 +140,10 @@ final class StyleRenderer
     }
 
 
-    private static void _paintClippedTo( @Nullable Shape newClip, Graphics g, Runnable painter ) {
+    private static void _paintClippedTo( Shape newClip, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        if ( newClip != null && newClip != oldClip ) {
+        if ( newClip != oldClip ) {
             newClip = StyleUtil.intersect(newClip, oldClip);
             g.setClip(newClip);
         }
@@ -789,14 +789,7 @@ final class StyleRenderer
         Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
         Area areaToFill = conf.areas().get(noise.area());
         g2d.setPaint(noisePaint);
-        if ( areaToFill != null )
-            g2d.fill(areaToFill);
-        else
-            g2d.fillRect(
-                    0, 0,
-                    conf.boxModel().size().width().map(Float::intValue).orElse(0),
-                    conf.boxModel().size().height().map(Float::intValue).orElse(0)
-                );
+        g2d.fill(areaToFill);
     }
 
     static Paint _createNoisePaint(
@@ -1270,7 +1263,7 @@ final class StyleRenderer
 
             Shape newClip = conf.areas().get(style.clipArea());
             // We merge the new clip with the old one:
-            if ( newClip != null && oldClip != null )
+            if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
 
             g2d.setClip(newClip);
@@ -1461,9 +1454,6 @@ final class StyleRenderer
         try {
             ComponentAreas areas = boxModelConf.areas();
             Shape newClip = areas.get(filterConf.area());
-            if (newClip == null) {
-                newClip = new Rectangle(0, 0, (int) width, (int) height);
-            }
             g2d.setClip(newClip);
             g2d.drawImage(filtered, -offsetX, -offsetY, null);
         } catch (Exception e) {

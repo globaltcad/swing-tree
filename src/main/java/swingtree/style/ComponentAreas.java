@@ -1,10 +1,9 @@
 package swingtree.style;
 
-import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
-import java.awt.Polygon;
+import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -113,11 +112,9 @@ final class ComponentAreas
     }
 
 
-    public @Nullable Area get( UI.ComponentArea areaType ) {
+    public Area get( UI.ComponentArea areaType ) {
         BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
         switch ( areaType ) {
-            case ALL:
-                return null; // No clipping
             case BODY:
                 return _bodyArea.getFor(boxModel, this); // all - exterior == interior + border
             case INTERIOR:
@@ -126,8 +123,13 @@ final class ComponentAreas
                 return _borderArea.getFor(boxModel, this); // all - exterior - interior
             case EXTERIOR:
                 return _exteriorArea.getFor(boxModel, this); // all - border - interior
+            case ALL:
             default:
-                return null;
+                return new Area(new Rectangle(
+                        0, 0,
+                        boxModel.size().width().map(Float::intValue).orElse(0),
+                        boxModel.size().height().map(Float::intValue).orElse(0)
+                    ));
         }
     }
 
