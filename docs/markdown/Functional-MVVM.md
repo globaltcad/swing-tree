@@ -1,37 +1,46 @@
 
-# Functional MVVM / MVI # 
+# MVVM / MVI / MVL # 
 
 > This guide is strongly related to the [Advanced MVVM](Advanced-MVVM.md) guide.
-> You may want to check it out first if you are not familiar with the MVVM pattern.
+> You may want to check it out later if you are not familiar with the MVVM pattern.
+> But, you do not need to know about MVVM to understand this guide.
 
 <img src="../img/tutorial/the-MVI-cycle.png" style = "float: right; width: 33%; margin: 2em;">
 
 One of the most powerful feature built into SwingTree
-and its [MVVM property API](https://github.com/globaltcad/sprouts)
-is the ability to design the Model-View-ViewModel architecture
-with **immutable view models** and models as a basis for the UI.
+and its [property API](https://github.com/globaltcad/sprouts)
+is the ability to design various M-V-*x* architectures, like the 
+classical MVVM (Model-View-ViewModel) pattern, the MVP (Model-View-Presenter) 
+pattern and the age-old MVC (Model-View-Controller).
+
+In this guide we will focus on two new patterns that are specifically
+recommended to be used when writing SwingTree applications.
+These two architecture pattern derived from MVVM
+architecture and therefore very similar to it, but with one big
+difference: immutable view models.
 
 Yes, you heard right: **immutable** view models.
 
 This may sound like a contradiction since the view model
 defines the state of the UI and the UI changes over time
-based on the user's input and application logic. <br>4
+based on the user's input and application logic. <br>
 But it turns out that in the world of functional programming
 where large nested immutable data structures are used to model
 all kinds of complex systems, the problem of updating 
 these data structures effectively has long been solved by
-using techniques such as *structural sharing*, *withers*
+using techniques such as *structural sharing*, *withers*, *event sourcing*
 and *lenses*. 
 
 Applying these patterns to the MVVM architecture gives rise
 to a new kind of MVVM architecture that is also known as
-the **MVI (Model-View-Intent)** architecture. ✨
+the **MVI (Model-View-Intent)** architecture and more specifically
+the SwingTree derivative **MVL (Model-View-Lenses)**. ✨
 
 But let's not get lost in a sea of buzzwords <br>
 and first look at a simple example to see 
 how this works in practice:
 
-## A simple example ##
+## A simple MVI/MVL example ##
 
 Let's say we have a simple calculator UI with two input fields,
 an operator selector and a result label.
@@ -166,14 +175,15 @@ through one of its *withers*. <br>
 You can define these lenses recursively to focus on nested components
 of the view model, which is a powerful way to create sub-views for sub-models.
 
-What happens under the hood is that the lens creates a new `Var` property
-that is **bi-directionally bound to the original `Var` and only
-updates the focused field of the view model** when the lens is modified through `set`. <br>
-You can also register change listeners on the lens to react to changes
+What happens under the hood is that any particular property lens is
+**bi-directionally bound to the root `Var` property holding the view model so that it only
+updates the focused field of the view model** through the `set` method, while also
+only getting updated when the focused field changes on the view model. <br>
+So you can also register change listeners on the lens to react to changes
 to the focused field. Note that lenses are smart, they will only
 trigger change events when the focused field actually changes.
 So even if the whole view model is updated, only a change of the focused field
-will trigger a change event in the lens.
+will trigger a change event in the lens and subsequently in the view.
 
 ### Where is the Model? ###
 
@@ -243,14 +253,21 @@ check out the following in this project:
 - [A Style Picker](../../src/test/java/examples/mvi/stylepicker/BoxShadowPickerView.java)
 - [Team View](../../src/test/java/examples/mvi/team/TeamView.java)
 
-## MVI Theory ##
+## MVI or MVL? ##
 
-Now after we have seen a simple example of how to implement
-this architecture in SwingTree, let's take a step back
-and again look at the theory behind it.
+So what is the difference between MVI and MVL? <br>
 
-As previously mentioned, the underlying pattern here is MVI, short for Model-View-Intent.
-It is a relatively new architecture pattern that is used a lot in Android development.
+Now after we have seen some example code in SwingTree, 
+let's take a step back and again look at the theory behind it.
+The SwingTree based example code defined above is what we call Model-View-Lenses,
+a very close derivative of the Model-View-Intent architecture pattern, 
+where we route the intent of the user directly to the view model
+through property lenses, instead of going through a separate
+intent layer. <br>
+
+But let's focus on the MVI pattern for a moment:
+
+MVI is a relatively new architecture pattern that is used a lot in Android development.
 It was inspired by [cycle.js](https://cycle.js.org/) by [André Medeiros (Staltz)](https://twitter.com/andrestaltz) 
 and then adopted by the Android world through Hannes Dorfmann among others.
 From a theoretical (and mathematical) point of view the Model-View-Intent architecture can
@@ -307,7 +324,8 @@ public CalculatorViewModel intent(CalculatorViewModel model, CalcAction action){
 
 As you can see, instead of multiple wither methods for updating the model state,
 we have a single method that takes in the old model, an action and then returns 
-a new model based on the action.
+a new model based on the action. The usage of the `CalcAction` constitutes
+the "event sourcing" part of the MVI pattern.
 This is a common pattern in the original MVI, where all GUI components
 dispatch all of their actions solely through this single `intent()` function,
 which then updates the model accordingly. <br>
@@ -319,8 +337,8 @@ since we can safely track where each wither / update method is called from.
 This is also true for the `model()` function, which in the example is represented
 by the `runCalculation()` method of the view model. <br>
 The GUI components in the original MVI pattern would not call the `model()` function
-directly, but instead dispatch actions to the `intent()` function, which then calls the `model()`
-function to get the updated model. <br>
+directly, but instead dispatch actions to the `intent()` function, which then 
+calls the `model()` function to get the updated model. <br>
 But again, there is no reason to have this action needing to go through
 an extra layer of indirection/encapsulation in Java, since we can safely
 track where each update method is called from.
