@@ -1,4 +1,4 @@
-package examples.mvi.stylepicker;
+package examples.stylepicker.mvi;
 
 import com.google.errorprone.annotations.Immutable;
 import lombok.*;

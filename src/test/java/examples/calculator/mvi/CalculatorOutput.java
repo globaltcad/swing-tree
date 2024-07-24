@@ -1,4 +1,4 @@
-package examples.mvi.calculator;
+package examples.calculator.mvi;
 
 final class CalculatorOutput {
     private final double result;

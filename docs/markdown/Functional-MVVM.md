@@ -249,9 +249,9 @@ If you want to see some fully executable examples
 of the SwingTree based MVI architecture in action,
 check out the following in this project:
 
-- [A Calculator](../../src/test/java/examples/mvi/calculator/CalculatorView.java)
-- [A Style Picker](../../src/test/java/examples/mvi/stylepicker/BoxShadowPickerView.java)
-- [Team View](../../src/test/java/examples/mvi/team/TeamView.java)
+- [A Calculator](../../src/test/java/examples/calculator/mvi/CalculatorView.java)
+- [A Style Picker](../../src/test/java/examples/stylepicker/mvi/BoxShadowPickerView.java)
+- [Team View](../../src/test/java/examples/team/mvi/TeamView.java)
 
 ## MVI or MVL? ##
 
@@ -338,7 +338,7 @@ This is also true for the `model()` function, which in the example is represente
 by the `runCalculation()` method of the view model. <br>
 The GUI components in the original MVI pattern would not call the `model()` function
 directly, but instead dispatch actions to the `intent()` function, which then 
-calls the `model()` function to get the updated model. <br>
+calls the `model()`function to get the updated model. <br>
 But again, there is no reason to have this action needing to go through
 an extra layer of indirection/encapsulation in Java, since we can safely
 track where each update method is called from.

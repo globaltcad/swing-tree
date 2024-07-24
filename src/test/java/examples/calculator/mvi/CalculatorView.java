@@ -1,4 +1,4 @@
-package examples.mvi.calculator;
+package examples.calculator.mvi;
 
 import sprouts.Var;
 import swingtree.UI;

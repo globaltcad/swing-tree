@@ -1,4 +1,4 @@
-package examples.mvvm.stylepicker;
+package examples.stylepicker.mvvm;
 
 import sprouts.Event;
 import sprouts.From;

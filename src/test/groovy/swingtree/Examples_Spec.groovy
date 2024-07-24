@@ -11,15 +11,15 @@ import examples.games.notepicker.NoteGuesserViewModel
 import examples.games.kanapicker.KanaPickerView
 import examples.games.kanapicker.KanaPickerViewModel
 import examples.lists.ListTestExample
-import examples.mvi.calculator.CalculatorView
-import examples.mvi.team.TeamView
+import examples.calculator.mvi.CalculatorView
+import examples.team.mvi.TeamView
 import examples.mvvm.*
 import examples.simple.Form
 import examples.simple.ListRendering
 import examples.simple.NamedFieldsView
 import examples.simple.TodoApp
-import examples.mvvm.stylepicker.BoxShadowPickerView
-import examples.mvvm.stylepicker.BoxShadowPickerViewModel
+import examples.stylepicker.mvvm.BoxShadowPickerView
+import examples.stylepicker.mvvm.BoxShadowPickerViewModel
 import examples.stylish.GlassUIView
 import examples.stylish.SoftUIView
 import examples.stylish.WellRoundedView
@@ -163,13 +163,13 @@ class Examples_Spec extends Specification
     def 'The MVI based box shadow picker example UI defined in the examples can be created.'()
     {
         reportInfo """
-            Not only is the ${Utility.link('box shadow picker example', examples.mvi.stylepicker.BoxShadowPickerView)} 
+            Not only is the ${Utility.link('box shadow picker example', examples.stylepicker.mvi.BoxShadowPickerView)} 
             an advanced example of how to write MVI applications with SwingTree,
             it is also a nice little tool that shows you how to use the 
             SwingTree style API to override the default look and feel of Swing components.
         """
-        expect : new examples.mvi.stylepicker.BoxShadowPickerView(
-                    sprouts.Var.of(examples.mvi.stylepicker.BoxShadowPickerViewModel.ini())
+        expect : new examples.stylepicker.mvi.BoxShadowPickerView(
+                    sprouts.Var.of(examples.stylepicker.mvi.BoxShadowPickerViewModel.ini())
                 )
     }
 

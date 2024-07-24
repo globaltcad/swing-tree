@@ -1,4 +1,4 @@
-package examples.mvi.team;
+package examples.team.mvi;
 
 enum Gender {
     MALE, FEMALE, DIVERSE

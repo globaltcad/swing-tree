@@ -1,9 +1,7 @@
-package examples.mvi.tabs;
+package examples.tabs.mvi;
 
 import lombok.*;
 import lombok.experimental.Accessors;
-import sprouts.Var;
-import sprouts.Vars;
 import swingtree.api.IconDeclaration;
 
 import javax.swing.*;

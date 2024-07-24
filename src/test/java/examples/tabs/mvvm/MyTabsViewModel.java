@@ -1,4 +1,4 @@
-package examples.mvvm.tabs;
+package examples.tabs.mvvm;
 
 import sprouts.Var;
 import sprouts.Vars;

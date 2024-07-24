@@ -1,4 +1,4 @@
-package examples.mvi.team;
+package examples.team.mvi;
 
 final class Occupation {
     private final String name;

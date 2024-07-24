@@ -1,4 +1,4 @@
-package examples.mvi.team;
+package examples.team.mvi;
 
 final class Team {
     private final String id;

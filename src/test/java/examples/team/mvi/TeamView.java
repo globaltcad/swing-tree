@@ -1,4 +1,4 @@
-package examples.mvi.team;
+package examples.team.mvi;
 
 import sprouts.Var;
 import swingtree.UI;

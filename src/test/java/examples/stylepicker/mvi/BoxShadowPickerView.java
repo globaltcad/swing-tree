@@ -1,4 +1,4 @@
-package examples.mvi.stylepicker;
+package examples.stylepicker.mvi;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.From;
