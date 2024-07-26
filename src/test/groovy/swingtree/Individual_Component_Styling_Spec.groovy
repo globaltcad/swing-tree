@@ -1,8 +1,8 @@
 package swingtree
 
 import com.formdev.flatlaf.FlatLightLaf
-import examples.mvvm.tabs.MyTabsView
-import examples.mvvm.tabs.MyTabsViewModel
+import examples.tabs.mvvm.MyTabsView
+import examples.tabs.mvvm.MyTabsViewModel
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification

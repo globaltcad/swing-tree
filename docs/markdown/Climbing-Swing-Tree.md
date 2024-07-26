@@ -219,10 +219,14 @@ we can start looking at some of the more advanced features
 that Swing-Tree provides.
 
 Besides being able to build Swing UIs in a declarative fashion
-you can also do clean `MVVM`/`MVC` and `MVP` application development.
-These fancy `MVVM`/`MVC`/`MVP` shortcuts all stand for `Model`-`View`-`ViewModel/Controller/Presenter` 
-which are all different design patterns for achieving essentially
-the same fundamental goal: 
+you can also do clean `MVVM`/`MVC` and `MVP` application development,
+which stands for `Model`-`View`-`ViewModel/Controller/Presenter`.
+But in this guide however we focus on the `MVI`/`MVL` pattern,
+which is the recommended pattern for building SwingTree applications.
+If you want to go go deeper with the traditional `MVVM` pattern
+[check out this short little guide](./Basic-MVVM.md).
+Note however, that all these different kinds of fancy design patterns 
+exists for achieving essentially the same fundamental goal: 
 
 **Separating the UI from the business logic!**
 
@@ -234,57 +238,62 @@ These listeners thereby make it possible to dynamically update UI components
 when your business logic mutates the properties, and also to
 update the properties when the user interacts with the UI.
 This **bidirectional observer/listener pattern** is called **data binding**,
-and it is the fundamental building block of `MVVM` application development.
+and it is the fundamental building block of `MVI`/`MVL` application development.
 
 Let's consider the following business logic, which we will call "**view model**" 
-from now on in accordance with the `MVVM` design and naming conventions:
+from now on in accordance with the `MVI`/`MVL` design and naming conventions:
 
 ```java
-import sprouts.Var;
-
-public class PersonViewModel {
-    private final Var<String> firstName = Var.of("Joseph");
-    private final Var<String> lastName = Var.of("Armstrong");
-    private final Var<String> fullName  = Var.of("");
-	
-    public PersonViewModel() {
-        firstName.onAct( it -> fullName.set(it + " " + lastName.get()) );
-        lastName.onAct( it -> fullName.set(firstName.get() + " " + it) );
-        fullName.set(firstName.get() + " " + lastName.get());
+public record PersonViewModel(String firstName, String lastName, String fullName) {
+    
+    public PersonViewModel() { this("Joseph", "Armstrong", "Joseph Armstrong"); }
+    
+    public PersonViewModel withFirstName(String firstName) {
+        return new PersonViewModel(firstName, lastName, firstName + " " + lastName);
     }
     
-    public Var<String> firstName() { return firstName; }
-    public Var<String> lastName()  { return lastName;  }
-    public Val<String> fullName()  { return fullName;  }
+    public PersonViewModel withLastName(String lastName) {
+        return new PersonViewModel(firstName, lastName, firstName + " " + lastName);
+    }
+    
+    public String withFullName(String fullName) {
+        return new PersonViewModel(firstName, lastName, fullName);
+    }
 }
+```
+
+And here the corresponding SwingTree UI:
+
+```java
+ var vm = Var.of(new PersonViewModel());
+ Var<String> firstName = vm.zoomTo(PersonViewModel::firstName, PersonViewModel::withFirstName);
+ Var<String> lastName  = vm.zoomTo(PersonViewModel::lastName, PersonViewModel::withLastName);
+ Val<String> fullName  = vm.viewAsString(PersonViewModel::fullName);
+ UI.show(
+    UI.panel("wrap 2")
+    .add(UI.label("First Name:"))
+    .add("grow", UI.textField(firstName))
+    .add(UI.label("Last Name:"))
+    .add("grow", UI.textField(lastName))
+    .add("span", UI.separator())
+    .add("wrap", UI.label("Full Name:"))
+    .add("span, grow", UI.textField(fullName))
+ );
 ```
 
 Properties are represented by the `sprouts.Var` and `sprouts.Val` classes.
 They can wrap any kind of value whose type you can specify using the generic 
 type parameter. 
-In this example we have 3 properties wrapping a String each.
+In this example we have 3 properties representing the String based
+fields of the `PersonViewModel` class.
 The most important property type is the `Var` type.
 It has both getters and setters for the wrapped value. 
 The `Val` type on the other hand is an immutable property / read-only view of a `Var`.
 Note that `Var` is a subtype of `Val`, which allows you to 
 design your view model API in a way which does
 not leak mutable state to the outside world. :partying_face:
-
-Now let's consider the corresponding Swing UI:
-
-```java
- var vm = new PersonViewModel();
- UI.show(
-    UI.panel("wrap 2")
-    .add(UI.label("First Name:"))
-    .add("grow", UI.textField(vm.firstName()))
-    .add(UI.label("Last Name:"))
-    .add("grow", UI.textField(vm.lastName()))
-    .add("span", UI.separator())
-    .add("wrap", UI.label("Full Name:"))
-    .add("span, grow", UI.textField(vm.fullName()))
- );
-```
+So the text field of the full name will not be able to change the full name, 
+meaning the user can only change the full name by changing the first name or the last name.
 
 This will look like this:
 
@@ -292,13 +301,15 @@ This will look like this:
 
 Swing-Tree will bind the `firstName` and `lastName` properties
 of the `PersonViewModel` to the `JTextField` components
-and will automatically update the `JTextField` components
-whenever the `firstName` or `lastName` properties change (their `set` methods are called).
+which will automatically update the `JTextField` components
+whenever the `firstName` or `lastName` properties change (their `set` methods are called
+or the view model field changes through a parent property).
 Conversely, whenever the user changes the text in the `JTextField`
 components the `firstName` and `lastName` properties will be updated
-as well, which will in turn trigger the `onAct` callbacks!
-In this example the `onAct` change listener will set the `fullName` property,
-which will automatically translate to the corresponding `JTextField` component in the UI.
+as well, which will cause their *wither* methods to also change the `fullName` property.
+And this change to the `fullName` property will then trigger the `onChange` callbacks
+registered by the corresponding `JTextField` component in the UI
+that actually displays the full name.
 
 The powerful thing about this example is that we managed 
 to affect the state of the UI (the full name) without
@@ -312,10 +323,15 @@ implementation without having to change the business logic at all!
 
 How cool is that? :)
 
-If you want to dive deeper into doing MVVM in Swing-Tree,
-check out the [MVVM tutorial](./Advanced-MVVM.md). <br>
-We **especially** recommend the [MVI](./Functional-MVVM.md) guide
-if you are interested in a more functional (side effect free) approach to MVVM.
+Also note how the view model is actually a record type.
+Which means that it is fully immutable and therefore much 
+easier to reason about and test than a mutable class.
+
+If you want to dive deeper into doing MVI/MVL in Swing-Tree,
+check out the [MVI/MVL guide](./Functional-MVVM.md).<br>
+If you are interested in the traditional MVVM pattern, then
+you may also want to check out the [basic MVVM guide](./Basic-MVVM.md) 
+or the [advanced MVVM guide](./Advanced-MVVM.md)
 
 ## Growing Leaves ##
 
