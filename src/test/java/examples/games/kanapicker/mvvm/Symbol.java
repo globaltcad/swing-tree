@@ -1,10 +1,10 @@
-package examples.games.kanapicker;
+package examples.games.kanapicker.mvvm;
 
 import sprouts.Var;
 
 import java.util.Optional;
 
-public class Symbol
+public final class Symbol
 {
     private final char _symbol;
     private final String _sound;

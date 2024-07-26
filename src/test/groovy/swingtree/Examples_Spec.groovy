@@ -8,8 +8,8 @@ import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
 import examples.games.notepicker.NoteGuesserView
 import examples.games.notepicker.NoteGuesserViewModel
-import examples.games.kanapicker.KanaPickerView
-import examples.games.kanapicker.KanaPickerViewModel
+import examples.games.kanapicker.mvvm.KanaPickerView
+import examples.games.kanapicker.mvvm.KanaPickerViewModel
 import examples.lists.ListTestExample
 import examples.calculator.mvi.CalculatorView
 import examples.team.mvi.TeamView

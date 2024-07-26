@@ -1,4 +1,4 @@
-package examples.games.kanapicker;
+package examples.games.kanapicker.mvvm;
 
 import sprouts.Event;
 import sprouts.From;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class KanaPickerViewModel
+public final class KanaPickerViewModel
 {
     private final Event repaint = Event.create();
     private final Var<String> feedback = Var.of("Choose:");

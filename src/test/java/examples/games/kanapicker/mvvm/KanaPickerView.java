@@ -1,4 +1,4 @@
-package examples.games.kanapicker;
+package examples.games.kanapicker.mvvm;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
@@ -8,7 +8,7 @@ import javax.swing.*;
 import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
-public class KanaPickerView extends Panel
+public final class KanaPickerView extends Panel
 {
     private final java.awt.Color BACKGROUND = new java.awt.Color(255, 255, 255,255);
 

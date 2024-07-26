@@ -1,10 +1,10 @@
-package examples.games.kanapicker;
+package examples.games.kanapicker.mvvm;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Alphabet
+public final class Alphabet
 {
     private final String _name;
     private final List<Symbol> _symbols = new ArrayList<>();
