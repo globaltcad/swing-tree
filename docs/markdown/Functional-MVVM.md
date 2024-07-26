@@ -15,7 +15,7 @@ pattern and the age-old MVC (Model-View-Controller).
 
 In this guide we will focus on two new patterns that are specifically
 recommended to be used when writing SwingTree applications.
-These two architecture pattern derived from MVVM
+These two architecture pattern are derived from MVVM
 architecture and therefore very similar to it, but with one big
 difference: immutable view models.
 
