@@ -248,8 +248,8 @@ public class PersonViewModel {
     private final Var<String> fullName  = Var.of("");
 	
     public PersonViewModel() {
-        firstName.onAct( it -> fullName.set(it + " " + lastName.get()) );
-        lastName.onAct( it -> fullName.set(firstName.get() + " " + it) );
+        firstName.onChange(From.VIEW_MODEL, it -> fullName.set(it + " " + lastName.get()) );
+        lastName.onChange(From.VIEW_MODEL, it -> fullName.set(firstName.get() + " " + it) );
         fullName.set(firstName.get() + " " + lastName.get());
     }
     
@@ -296,8 +296,8 @@ and will automatically update the `JTextField` components
 whenever the `firstName` or `lastName` properties change (their `set` methods are called).
 Conversely, whenever the user changes the text in the `JTextField`
 components the `firstName` and `lastName` properties will be updated
-as well, which will in turn trigger the `onAct` callbacks!
-In this example the `onAct` change listener will set the `fullName` property,
+as well, which will in turn trigger the `onChange` callbacks!
+In this example the `onChange` change listener will set the `fullName` property,
 which will automatically translate to the corresponding `JTextField` component in the UI.
 
 The powerful thing about this example is that we managed 
