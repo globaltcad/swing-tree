@@ -38,10 +38,10 @@ import java.util.function.Predicate;
  */
 public class Animator
 {
-    private final LifeTime                _lifeTime;  // Never null
-    private final Stride                  _stride;    // Never null
-    private final @Nullable Component     _component; // may be null
-    private final @Nullable RunCondition _condition; // may be null
+    private final LifeTime                _lifeTime;
+    private final Stride                  _stride;
+    private final @Nullable Component     _component;
+    private final @Nullable RunCondition  _condition;
 
 
     /**

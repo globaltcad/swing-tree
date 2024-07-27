@@ -3,6 +3,7 @@ package swingtree.animation;
 import com.google.errorprone.annotations.Immutable;
 import sprouts.Event;
 import sprouts.Val;
+import sprouts.Var;
 import swingtree.SwingTree;
 import swingtree.SwingTreeConfigurator;
 import swingtree.api.AnimatedStyler;
@@ -41,13 +42,29 @@ import java.util.concurrent.TimeUnit;
  *    );
  *  }))
  *  }</pre>
+ *  Also see {@link Animatable} and {@link swingtree.UI#animate(Var, Animatable)}
+ *  for more information on how to animate your view models and consequently
+ *  also the GUI components bound to them.
  */
 @Immutable
 public final class LifeTime
 {
+    private static final LifeTime _NONE = new LifeTime(0, 0, 0);
+
     private final long _delay; // in milliseconds
     private final long _duration;
     private final long _interval;
+
+    /**
+     *  Returns a lifetime that does nothing when run due to it having a duration, delay and interval of zero.
+     *  This is useful as a way to define no-op animations, and it may also be generally used
+     *  instead of a {@code null} reference...
+     *
+     * @return A lifetime that does nothing.
+     */
+    public static LifeTime none() {
+        return _NONE;
+    }
 
     /**
      *  Creates a new lifetime that will run for the given duration

@@ -42,7 +42,9 @@ class ComponentAnimator
         _animation = Objects.requireNonNull(animation);
     }
 
-    public LifeSpan lifeSpan() { return _lifeSpan; }
+    public LifeSpan lifeSpan() {
+        return _lifeSpan;
+    }
 
     public Optional<JComponent> component() {
         if ( _compRef == null ) return Optional.empty();

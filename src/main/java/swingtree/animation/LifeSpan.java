@@ -25,7 +25,7 @@ public final class LifeSpan
         return new LifeSpan(lifeTime, System.currentTimeMillis() + inMillis);
     }
 
-            public static LifeSpan endingNowWith( LifeTime lifeTime ) {
+    public static LifeSpan endingNowWith( LifeTime lifeTime ) {
         return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));
     }
 

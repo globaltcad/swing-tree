@@ -5,7 +5,6 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
-import swingtree.UIForPanel;
 
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -65,7 +64,9 @@ public final class KanaPickerView extends Panel
                     .onClick( e -> vm.update(KanaPickerViewModel::newRandomSymbol) )
                 )
                 .add(
-                    toggleButton("Cheat", cheatMode).onClick( it -> vm.update(KanaPickerViewModel::cheated) )
+                    toggleButton("Cheat", cheatMode).onClick( it -> {
+                        UI.animate(vm, KanaPickerViewModel::cheated);
+                    })
                 )
                 .add(RIGHT,
                     panel(INS(0, 12, 0, 12), "[]12[]")
@@ -122,7 +123,7 @@ public final class KanaPickerView extends Panel
                             .withFontSize(12)
                             .withMinSize( 51, 51 ).withMaxSize( 51, 51 )
                             .onClick( e -> {
-                                vm.update(m->m.selectSymbol(symbol));
+                                UI.animate(vm, m->m.selectSymbol(symbol));
                                 alphabets.fireChange(From.ALL);
                             })
                         );
