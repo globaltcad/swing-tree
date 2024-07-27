@@ -19,7 +19,7 @@ public interface Animation
      *                 a value to be transformed and returned based in the status.
      * @return The created {@link Animation}.
      */
-    static <T> Animation of( Var<T> target, AnimationFor<T> animator )
+    static <T> Animation of( Var<T> target, AnimationTransformation<T> animator )
     {
         return new Animation() {
             @Override

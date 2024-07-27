@@ -5552,16 +5552,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  }</pred>
      *
      * @param state A mutable property or property lens holding an immutable item which should
-     *              be updated repeatedly by the {@link AnimationFor} inside the {@link Animatable}.
+     *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
      *              The item may also be an immutable view model in case of MVI/MVL design patterns.
-     * @param animatable A wrapper for the transformational {@link AnimationFor} and the {@link LifeTime}
+     * @param animatable A wrapper for the transformational {@link AnimationTransformation} and the {@link LifeTime}
      *                   defining the duration of the animation.
      * @param <T> The type of the property or property lens.
      */
     public static <T> void animate( Var<T> state, Animatable<T> animatable ) {
         Optional<T>     initialState = animatable.initialState();
         LifeTime        lifeTime     = animatable.lifeTime();
-        AnimationFor<T> animator     = animatable.animator();
+        AnimationTransformation<T> animator     = animatable.animator();
 
         initialState.ifPresent(state::set);
 
@@ -5583,10 +5583,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  }</pred>
      *
      * @param state A mutable property or property lens holding an immutable item which should
-     *              be updated repeatedly by the {@link AnimationFor} inside the {@link Animatable}.
+     *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
      *              The item may also be an immutable view model in case of MVI/MVL design patterns.
      * @param animatable A function taking in the current property item and returning
-     *                   a wrapper for the transformational {@link AnimationFor} and the {@link LifeTime}
+     *                   a wrapper for the transformational {@link AnimationTransformation} and the {@link LifeTime}
      *                   defining the duration of the animation.
      * @param <T> The type of the property or property lens.
      */

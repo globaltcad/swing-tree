@@ -15,7 +15,7 @@ import java.util.function.Predicate;
  *  {@link swingtree.UI} API or the user event delegation API (see {@link ComponentDelegate}). <br>
  *  The UI API can be used like so:
  *  <pre>{@code
- *    UI.schedule( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance
+ *    UI.animateFor( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance
  *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
  *       .go( status -> {
  *          // do something

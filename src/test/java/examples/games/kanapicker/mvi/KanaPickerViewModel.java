@@ -173,7 +173,7 @@ public final class KanaPickerViewModel
     private Animatable<KanaPickerViewModel> animateFeedbackAndThen(
             Function<KanaPickerViewModel, KanaPickerViewModel> onEnd
     ) {
-        return Animatable.of(LifeTime.of(0.45, TimeUnit.SECONDS), this, new AnimationFor<KanaPickerViewModel>() {
+        return Animatable.of(LifeTime.of(0.45, TimeUnit.SECONDS), this, new AnimationTransformation<KanaPickerViewModel>() {
             @Override
             public KanaPickerViewModel run(AnimationStatus status, KanaPickerViewModel value) {
                 return value.withFeedbackFontSize((int) (24 + status.pulse() * 16));

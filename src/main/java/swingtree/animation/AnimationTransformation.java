@@ -26,10 +26,32 @@ package swingtree.animation;
  *           through repeated transformations.
  */
 @FunctionalInterface
-public interface AnimationFor<T>
+public interface AnimationTransformation<T>
 {
+    /**
+     *  This takes in the current {@link AnimationStatus} and an immutable
+     *  value of type {@code T} and returns a new updated value of type {@code T}.
+     *  This may typically be an immutable view model whose fields are bound
+     *  to the UI components of your application through property lenses.
+     *
+     * @param status The current status of the animation.
+     * @param value The current value of the animated item.
+     * @return The updated value of the animated item based on the current status,
+     *          typically the {@link AnimationStatus#progress()} number.
+     */
     T run( AnimationStatus status, T value );
 
+    /**
+     *  This method is called after the animation has finished.
+     *  The default implementation does nothing but returns the
+     *  supplied value. <br>
+     *  Implement this to create a cleaned up version of the
+     *  animated item after the animation has finished.
+     *
+     * @param state The current state of the animation.
+     * @param value The final value of the animated item.
+     * @return The final value of the animated item after the animation has finished.
+     */
     default T finish(AnimationStatus state, T value ) {
         return value;
     }

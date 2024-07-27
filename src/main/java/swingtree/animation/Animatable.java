@@ -10,10 +10,10 @@ import java.util.function.Function;
 /**
  *  This defines what is needed for animating an immutable
  *  value type {@code T} through a transformation function
- *  {@link AnimationFor} and a {@link LifeTime} determining
+ *  {@link AnimationTransformation} and a {@link LifeTime} determining
  *  when the animation should run.
  *  It is essentially just an immutable wrapper for {@code T},
- *  {@link AnimationFor} and a {@link LifeTime}.
+ *  {@link AnimationTransformation} and a {@link LifeTime}.
  *  <p>
  *  An {@link Animatable} is designed to be provided by an immutable
  *  view model to animate its properties using the {@link swingtree.UI#animate(Var, Animatable)}
@@ -23,7 +23,7 @@ import java.util.function.Function;
  *  repeatedly during the iterations of the entire animation lifetime.
  *
  * @param <T> The type of the value that is continuously transformed
- *           by the {@link AnimationFor}.
+ *           by the {@link AnimationTransformation}.
  */
 public final class Animatable<T>
 {
@@ -31,7 +31,7 @@ public final class Animatable<T>
 
     private final LifeTime        _lifeTime;
     private final @Nullable T     _initialValue;
-    private final AnimationFor<T> _animation;
+    private final AnimationTransformation<T> _animation;
 
     /**
      *  Returns an {@link Animatable} instance that does nothing
@@ -66,7 +66,7 @@ public final class Animatable<T>
 
     /**
      *  Returns an {@link Animatable} instance that animates the supplied
-     *  value through the provided {@link AnimationFor} function during
+     *  value through the provided {@link AnimationTransformation} function during
      *  the specified {@link LifeTime} starting with the supplied initial value
      *  as initial application/animation state.
      *
@@ -77,12 +77,12 @@ public final class Animatable<T>
      * @param <T> The type of the value that is animated.
      * @return An {@link Animatable} instance that animates the supplied value.
      * @throws NullPointerException If any of the arguments is {@code null}.
-     * @see #of(LifeTime, AnimationFor) for an {@link Animatable} without an initial value.
+     * @see #of(LifeTime, AnimationTransformation) for an {@link Animatable} without an initial value.
      */
     public static <T> Animatable<T> of(
         LifeTime        lifeTime,
         T               initialValue,
-        AnimationFor<T> animation
+        AnimationTransformation<T> animation
     ) {
         Objects.requireNonNull(lifeTime);
         Objects.requireNonNull(animation);
@@ -92,7 +92,7 @@ public final class Animatable<T>
 
     /**
      *  Returns an {@link Animatable} instance that is used to
-     *  transform {@code T} values using the supplied {@link AnimationFor} function
+     *  transform {@code T} values using the supplied {@link AnimationTransformation} function
      *  during the specified {@link LifeTime}.
      *
      * @param lifeTime The lifetime of the animation.
@@ -101,11 +101,11 @@ public final class Animatable<T>
      * @param <T> The type of the value that is animated.
      * @return An {@link Animatable} instance that animates the supplied value.
      * @throws NullPointerException If any of the arguments is {@code null}.
-     * @see #of(LifeTime, Object, AnimationFor) for an {@link Animatable} with an initial value.
+     * @see #of(LifeTime, Object, AnimationTransformation) for an {@link Animatable} with an initial value.
      */
     public static <T> Animatable<T> of(
         LifeTime        lifeTime,
-        AnimationFor<T> animation
+        AnimationTransformation<T> animation
     ) {
         Objects.requireNonNull(lifeTime);
         Objects.requireNonNull(animation);
@@ -115,7 +115,7 @@ public final class Animatable<T>
     private Animatable(
         LifeTime        lifeTime,
         @Nullable T     initialValue,
-        AnimationFor<T> animation
+        AnimationTransformation<T> animation
     ) {
         _lifeTime     = lifeTime;
         _initialValue = initialValue;
@@ -142,8 +142,8 @@ public final class Animatable<T>
      *  transformation is used as the initial state of the animation.
      *
      * @return The initial value of the animation state.
-     * @see #of(LifeTime, AnimationFor) for an {@link Animatable} without an initial value.
-     * @see #of(LifeTime, Object, AnimationFor) for an {@link Animatable} with an initial value.
+     * @see #of(LifeTime, AnimationTransformation) for an {@link Animatable} without an initial value.
+     * @see #of(LifeTime, Object, AnimationTransformation) for an {@link Animatable} with an initial value.
      */
     public Optional<T> initialState() {
         return Optional.ofNullable(_initialValue);
@@ -157,7 +157,7 @@ public final class Animatable<T>
      *
      * @return The transformation function of the animation.
      */
-    public AnimationFor<T> animator() {
+    public AnimationTransformation<T> animator() {
         return _animation;
     }
 
