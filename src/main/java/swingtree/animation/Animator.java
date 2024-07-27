@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  *  <pre>{@code
  *    UI.schedule( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance
  *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
- *       .go( state -> {
+ *       .go( status -> {
  *          // do something
  *          someComponent.setValue( it.progress() );
  *          // ...
@@ -29,7 +29,7 @@ import java.util.function.Predicate;
  *       panel()
  *       .onMouseClick( it -> {
  *           it.animateFor( 100, TimeUnit.MILLISECONDS )
- *           .goOnce( state -> {
+ *           .goOnce( status -> {
  *               int width = (int) (100 * state.progress());
  *               it.getComponent().setSize( width, 100 );
  *           });
@@ -129,9 +129,9 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
      */
     public Animator asLongAs( Predicate<AnimationStatus> shouldRun ) {
-        return new Animator(_lifeTime, _stride, _component, state -> {
-                    if ( shouldRun.test(state) )
-                        return _condition == null || _condition.shouldContinue(state);
+        return new Animator(_lifeTime, _stride, _component, status -> {
+                    if ( shouldRun.test(status) )
+                        return _condition == null || _condition.shouldContinue(status);
 
                     return false;
                 });
@@ -140,13 +140,13 @@ public class Animator
     /**
      *  Runs the given animation based on the stop condition defined by {@link #until(Predicate)} or {@link #asLongAs(Predicate)}.
      *  If no stop condition was defined, the animation will be executed once.
-     *  If you want to run an animation forever, simply pass {@code state -> true} to
-     *  the {@link #asLongAs(Predicate)} method, or {@code state -> false} to the {@link #until(Predicate)} method.
+     *  If you want to run an animation forever, simply pass {@code status -> true} to
+     *  the {@link #asLongAs(Predicate)} method, or {@code status -> false} to the {@link #until(Predicate)} method.
      *
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -> state.repeats() == 0 );
+        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( status -> status.repeats() == 0 );
         AnimationRunner.add( new ComponentAnimator(
                 _component,
                 LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),
@@ -175,7 +175,7 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void goWithOffset( long offset, TimeUnit unit, Animation animation ) {
-        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -> state.repeats() == 0 );
+        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( status -> status.repeats() == 0 );
         AnimationRunner.add( new ComponentAnimator(
                 _component,
                 LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),

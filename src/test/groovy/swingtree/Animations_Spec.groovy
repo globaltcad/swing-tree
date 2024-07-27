@@ -127,14 +127,14 @@ class Animations_Spec extends Specification
                     .onClick({
                         it.animateFor(0.2, TimeUnit.SECONDS)
                             .asLongAs({ it.repeats() < 4 })
-                            .go(state -> {
-                                println state
-                                if ( !iterations.contains(state.repeats()) )
-                                    iterations << state.repeats()
-                                progresses    << state.progress()
-                                cycles        << state.cycle()
-                                cyclesPlus42  << state.cyclePlus(0.42)
-                                cyclesMinus42 << state.cycleMinus(0.42)
+                            .go(status -> {
+                                println status
+                                if ( !iterations.contains(status.repeats()) )
+                                    iterations << status.repeats()
+                                progresses    << status.progress()
+                                cycles        << status.cycle()
+                                cyclesPlus42  << status.cyclePlus(0.42)
+                                cyclesMinus42 << status.cycleMinus(0.42)
                             })
                     })
                     .get(JButton)
@@ -205,10 +205,10 @@ class Animations_Spec extends Specification
             var label =
                     UI.label("Some text! :)")
                     .onMouseClick(it -> {
-                        it.animateFor(1, TimeUnit.SECONDS, state ->{
-                            float highlight = (float) (1f - (float) state.progress())
+                        it.animateFor(1, TimeUnit.SECONDS, status ->{
+                            float highlight = (float) (1f - (float) status.progress())
                             it.component.setForeground(new Color(highlight, 1, highlight))
-                            trace << state.progress()
+                            trace << status.progress()
                           })
                     })
                     .get(JLabel)

@@ -28,12 +28,12 @@ public class SoftUIView extends Panel
                         )
                     )
                     .onMouseMove( it -> {
-                        it.animateFor(1, TimeUnit.SECONDS, state -> {
-                            double r = 30 * state.fadeIn() * it.getScale();
+                        it.animateFor(1, TimeUnit.SECONDS, status -> {
+                            double r = 30 * status.fadeIn() * it.getScale();
                             double x = it.mouseX() - r / 2.0;
                             double y = it.mouseY() - r / 2.0;
-                            it.paint(state, g -> {
-                                g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+                            it.paint(status, g -> {
+                                g.setColor(new Color(1f, 1f, 0f, (float) status.fadeOut()));
                                 g.fillOval((int) x, (int) y, (int) r, (int) r);
                             });
                         });
@@ -131,11 +131,11 @@ public class SoftUIView extends Panel
                     })
                 )
             )
-            .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
-                it.paint(state, g -> {
-                    g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
+            .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
+                it.paint(status, g -> {
+                    g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) status.fadeOut()));
                     for ( int i = 0; i < 5; i++ ) {
-                        double r = 300 * state.fadeIn() * ( 1 - i * 0.2 ) * it.getScale();
+                        double r = 300 * status.fadeIn() * ( 1 - i * 0.2 ) * it.getScale();
                         double x = it.mouseX() - r / 2;
                         double y = it.mouseY() - r / 2;
                         g.drawOval((int) x, (int) y, (int) r, (int) r);

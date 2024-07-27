@@ -34,11 +34,11 @@ import java.util.concurrent.TimeUnit;
  *  This may look like this:
  *  <pre>{@code
  *  UI.button("I pop when you hover over me")
- *  .onMouseEnter( it -> it.animateFor(1, TimeUnit.SECONDS, state -> {
+ *  .onMouseEnter( it -> it.animateFor(1, TimeUnit.SECONDS, status -> {
  *    it.style(state, conf -> conf
- *      .borderWidth( 10 * state.cycle() )
- *      .borderColor(UI.color(1,1,0,1-state.cycle()))
- *      .borderRadius( 100 * state.cycle() )
+ *      .borderWidth( 10 * status.cycle() )
+ *      .borderColor(UI.color(1,1,0,1-status.cycle()))
+ *      .borderRadius( 100 * status.cycle() )
  *    );
  *  }))
  *  }</pre>

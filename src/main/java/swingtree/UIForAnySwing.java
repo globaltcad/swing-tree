@@ -2267,9 +2267,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
                     styleEvent.subscribe( ()->{
-                        Animator.animateFor(styleLifeTime, thisComponent).go( state ->
+                        Animator.animateFor(styleLifeTime, thisComponent).go( status ->
                             ComponentExtension.from(thisComponent)
-                                .addAnimatedStyler(state, conf -> styler.style(state, conf))
+                                .addAnimatedStyler(status, conf -> styler.style(status, conf))
                         );
                     });
                 })
@@ -3598,10 +3598,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  <pre>{@code
      *  UI.label("I have a color animation!")
      *  .on(viewModel.someEvent(), it ->
-     *    it.animateFor(3, TimeUnit.SECONDS, state -> {
-     *      double r = state.progress();
-     *      double g = 1 - state.progress();
-     *      double b = state.pulse();
+     *    it.animateFor(3, TimeUnit.SECONDS, status -> {
+     *      double r = status.progress();
+     *      double g = 1 - status.progress();
+     *      double b = status.pulse();
      *      it.setBackgroundColor(r, g, b);
      *    })
      *  )

@@ -97,11 +97,11 @@ class Style_Animations_Spec extends Specification
         given : 'We create a simple `JLabel` UI component with a style animation.'
             var ui = UI.label("Click me!")
                         .onMouseClick(it ->
-                            it.animateFor(1, TimeUnit.MINUTES, state ->
-                                it.style(state, style -> style
-                                    .borderWidth((int) (10 * state.cycle()))
+                            it.animateFor(1, TimeUnit.MINUTES, status ->
+                                it.style(status, style -> style
+                                    .borderWidth((int) (10 * status.cycle()))
                                     .borderColor(new Color(0, 100,200))
-                                    .backgroundColor(new Color(255, 100, 0, (int) (255 * state.cycle())))
+                                    .backgroundColor(new Color(255, 100, 0, (int) (255 * status.cycle())))
                                 )
                             )
                         )
@@ -203,10 +203,10 @@ class Style_Animations_Spec extends Specification
         given : 'We create a simple `JLabel` UI component with a style animation.'
             var ui = UI.label("Click me!")
                         .onMouseClick(it ->
-                            it.animateFor(1, TimeUnit.SECONDS, state ->
-                                it.style(state, style -> style
-                                    .borderWidth((int) (10 * state.cycle()))
-                                    .backgroundColor(new Color(255, 100, 0, (int) (255 * state.cycle())))
+                            it.animateFor(1, TimeUnit.SECONDS, status ->
+                                it.style(status, style -> style
+                                    .borderWidth((int) (10 * status.cycle()))
+                                    .backgroundColor(new Color(255, 100, 0, (int) (255 * status.cycle())))
                                 )
                             )
                         )
@@ -266,10 +266,10 @@ class Style_Animations_Spec extends Specification
         given : 'We create a simple `JButton` UI component with a style animation.'
             var ui = UI.button("Click me!")
                         .onClick(it ->
-                            it.animateFor(300, TimeUnit.MILLISECONDS, state ->
-                                it.style(state, style -> style
-                                    .border((int) (12 * state.cycle()), Color.RED)
-                                    .backgroundColor(new Color(255, 100, 0, (int) (255 * state.cycle())))
+                            it.animateFor(300, TimeUnit.MILLISECONDS, status ->
+                                it.style(status, style -> style
+                                    .border((int) (12 * status.cycle()), Color.RED)
+                                    .backgroundColor(new Color(255, 100, 0, (int) (255 * status.cycle())))
                                     .margin(12)
                                     .foundationColor(new Color(0, 100, 200))
                                     .painter(UI.Layer.BACKGROUND, g2d -> {

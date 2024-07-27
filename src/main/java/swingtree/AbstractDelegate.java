@@ -1197,12 +1197,12 @@ abstract class AbstractDelegate<C extends JComponent>
      *  Here is an example of how to use this method as part of a fancy button animation:
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
-     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
-     *          double r = 300 * state.progress() * it.scale();
+     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
+     *          double r = 300 * status.progress() * it.scale();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
-     *          it.paint(state, g -> {
-     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
+     *          it.paint(status, g -> {
+     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - status.progress())));
      *              g.fillOval((int) x, (int) y, (int) r, (int) r);
      *          });
      *      }))
@@ -1232,12 +1232,12 @@ abstract class AbstractDelegate<C extends JComponent>
      *  Here is an example of how to use this method as part of a button animation:
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
-     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
-     *          double r = 300 * state.progress() * it.scale();
+     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
+     *          double r = 300 * status.progress() * it.scale();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.ComponentArea.BORDER, state, g -> {
-     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
+     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - status.progress())));
      *              g.fillOval((int) x, (int) y, (int) r, (int) r);
      *          });
      *      }))
@@ -1281,8 +1281,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  and {@link #style(AnimationStatus, Styler)} as follows:</b>
      *  <pre>{@code
      *    UI.button("Click me").withPrefSize(400, 400)
-     *    .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
-     *        it.style(state, style -> style
+     *    .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
+     *        it.style(status, style -> style
      *            // This is the same as the animateStyleFor() method above!
      *        );
      *    }))
@@ -1303,8 +1303,8 @@ abstract class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
-            this.animateFor(duration, unit, state ->
-                ComponentExtension.from(_component).addAnimatedStyler(state, conf -> styler.style(state, conf))
+            this.animateFor(duration, unit, status ->
+                ComponentExtension.from(_component).addAnimatedStyler(status, conf -> styler.style(status, conf))
             );
         });
     }
@@ -1331,8 +1331,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  and {@link #style(AnimationStatus, Styler)} as follows:</b>
      *  <pre>{@code
      *    UI.button("Click me").withPrefSize(400, 400)
-     *    .onMouseClick( it -> it.animateFor(UI.lifetime(2, TimeUnit.SECONDS), state -> {
-     *        it.style(state, style -> style
+     *    .onMouseClick( it -> it.animateFor(UI.lifetime(2, TimeUnit.SECONDS), status -> {
+     *        it.style(status, style -> style
      *            // This is the same as the animateStyleFor() method above!
      *        );
      *    }))
@@ -1353,8 +1353,8 @@ abstract class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
-            this.animateFor(lifetime, state ->
-                ComponentExtension.from(_component).addAnimatedStyler(state, conf -> styler.style(state, conf))
+            this.animateFor(lifetime, status ->
+                ComponentExtension.from(_component).addAnimatedStyler(status, conf -> styler.style(status, conf))
             );
         });
     }
@@ -1370,11 +1370,11 @@ abstract class AbstractDelegate<C extends JComponent>
      *  Here is an example of how to use this method as part of a fancy styling animation:
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
-     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
-     *          it.style(state, style -> style
-     *              .borderWidth((int)(10 * state.progress()))
-     *              .borderColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())))
-     *              .borderRadius((int)(100 * state.progress()))
+     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
+     *          it.style(status, style -> style
+     *              .borderWidth((int)(10 * status.progress()))
+     *              .borderColor(new Color(1f, 1f, 0f, (float) (1 - status.progress())))
+     *              .borderRadius((int)(100 * status.progress()))
      *          );
      *      }))
      *  }</pre>

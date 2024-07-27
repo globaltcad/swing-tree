@@ -23,9 +23,9 @@ public class AnimatedView extends Panel
         .add(SPAN,
             label(TEXT)
             .onMouseClick( it -> {
-                it.animateFor(10, TimeUnit.SECONDS, state -> {
+                it.animateFor(10, TimeUnit.SECONDS, status -> {
                     JLabel label = it.getComponent();
-                    double progress = Math.abs(state.progress() - 0.5) * 2;
+                    double progress = Math.abs(status.progress() - 0.5) * 2;
                     // Let's make the text shift like a ring buffer based on the progress.
                     int shift = (int) (TEXT.length() * progress);
                     String text = TEXT.substring(shift) + TEXT.substring(0, shift);
@@ -56,12 +56,12 @@ public class AnimatedView extends Panel
             )
             .add(
                 button("Button")
-                .onMouseEnter(it -> it.animateFor(0.5, TimeUnit.SECONDS, state -> {
-                    float highlight = 1f - (float) state.progress() * 0.5f;
+                .onMouseEnter(it -> it.animateFor(0.5, TimeUnit.SECONDS, status -> {
+                    float highlight = 1f - (float) status.progress() * 0.5f;
                     it.setBackground(new Color(highlight, 1, highlight));
                 }))
-                .onMouseExit( it -> it.animateFor(0.5, TimeUnit.SECONDS, state -> {
-                    float highlight = 0.5f + (float) state.progress() * 0.5f;
+                .onMouseExit( it -> it.animateFor(0.5, TimeUnit.SECONDS, status -> {
+                    float highlight = 0.5f + (float) status.progress() * 0.5f;
                     it.setBackground(new Color(highlight, 1f, highlight));
                 }))
             )
@@ -75,15 +75,15 @@ public class AnimatedView extends Panel
                         // When it is selected we start an animation that will
                         // move the button to the right end of the parent panel.
                         if ( it.get().isSelected() )
-                            it.animateFor(1, TimeUnit.SECONDS, state -> {
-                                int x = (int) (state.progress() * (it.getParent().getWidth() - it.getWidth()));
+                            it.animateFor(1, TimeUnit.SECONDS, status -> {
+                                int x = (int) (status.progress() * (it.getParent().getWidth() - it.getWidth()));
                                 it.setBounds(x, 0, 100, 30);
                             });
                         // When it is deselected we start an animation that will
                         // move the button to the left end of the parent panel.
                         else
-                            it.animateFor(1, TimeUnit.SECONDS, state -> {
-                                int x = (int) ((1 - state.progress()) * (it.getParent().getWidth() - it.getWidth()));
+                            it.animateFor(1, TimeUnit.SECONDS, status -> {
+                                int x = (int) ((1 - status.progress()) * (it.getParent().getWidth() - it.getWidth()));
                                 it.setBounds(x, 0, 100, 30);
                             });
                     })
@@ -99,7 +99,7 @@ public class AnimatedView extends Panel
         );
 
         animateFor(1, TimeUnit.SECONDS)
-            .go(state -> { w.set((int) (100 * state.cycle())); } );
+            .go(status -> { w.set((int) (100 * status.cycle())); } );
 
     }
 
