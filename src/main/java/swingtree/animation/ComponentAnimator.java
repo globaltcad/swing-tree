@@ -57,12 +57,12 @@ class ComponentAnimator
         if ( now < _lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS) )
             return true;
 
-        AnimationState state = AnimationState.of(_lifeSpan, _stride, event, now);
+        AnimationStatus status = AnimationStatus.of(_lifeSpan, _stride, event, now);
         boolean shouldContinue = false;
 
         try {
-            long duration = state.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
-            shouldContinue = _condition.shouldContinue(state) && duration > 0;
+            long duration = status.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
+            shouldContinue = _condition.shouldContinue(status) && duration > 0;
         } catch ( Exception e ) {
             log.warn("An exception occurred while checking if an animation should continue!", e);
             /*
@@ -97,9 +97,9 @@ class ComponentAnimator
 
         if ( !shouldContinue ) {
             try {
-                state = AnimationState.endOf(state.lifeSpan(), _stride, state.event(), _currentRepeat.get());
-                _animation.run(state); // We run the animation one last time to make sure the component is in its final state.
-                _animation.finish(state); // This method may or may not be overridden by the user.
+                status = AnimationStatus.endOf(status.lifeSpan(), _stride, status.event(), _currentRepeat.get());
+                _animation.run(status); // We run the animation one last time to make sure the component is in its final state.
+                _animation.finish(status); // This method may or may not be overridden by the user.
                 // An animation may want to do something when it is finished (e.g. reset the component to its original state).
             } catch ( Exception e ) {
                 log.warn("An exception occurred while executing the finish procedure of an animation!", e);
@@ -120,8 +120,8 @@ class ComponentAnimator
         }
 
         try {
-            _currentRepeat.set(state.repeats());
-            _animation.run(state);
+            _currentRepeat.set(status.repeats());
+            _animation.run(status);
         } catch ( Exception e ) {
             log.warn("An exception occurred while executing an animation!", e);
             /*

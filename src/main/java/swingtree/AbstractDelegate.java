@@ -3,7 +3,7 @@ package swingtree;
 import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
@@ -1211,13 +1211,13 @@ abstract class AbstractDelegate<C extends JComponent>
      *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
-     * @param state The current animation state, which is important so that the rendering can be synchronized with the animation.
+     * @param status The current animation progress status, which is important so that the rendering can be synchronized with the animation.
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
-    public final void paint( AnimationState state, Painter painter ) {
-        Objects.requireNonNull(state);
+    public final void paint( AnimationStatus status, Painter painter ) {
+        Objects.requireNonNull(status);
         Objects.requireNonNull(painter);
-        paint(UI.ComponentArea.BODY, state, painter);
+        paint(UI.ComponentArea.BODY, status, painter);
     }
 
     /**
@@ -1250,7 +1250,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param state The current animation state, which is important so that the rendering can be synchronized with the animation.
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
-    public final void paint( UI.ComponentArea area, AnimationState state, Painter painter ) {
+    public final void paint(UI.ComponentArea area, AnimationStatus state, Painter painter ) {
         Objects.requireNonNull(state);
         Objects.requireNonNull(painter);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
@@ -1278,7 +1278,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *    ))
      *  }</pre>
      *  <b>Not that the effect of this method can also be modelled using {@link #animateFor(LifeTime, Animation)}
-     *  and {@link #style(AnimationState, Styler)} as follows:</b>
+     *  and {@link #style(AnimationStatus, Styler)} as follows:</b>
      *  <pre>{@code
      *    UI.button("Click me").withPrefSize(400, 400)
      *    .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
@@ -1328,7 +1328,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *    ))
      *  }</pre>
      *  <b>Not that the effect of this method can also be modelled using {@link #animateFor(LifeTime, Animation)}
-     *  and {@link #style(AnimationState, Styler)} as follows:</b>
+     *  and {@link #style(AnimationStatus, Styler)} as follows:</b>
      *  <pre>{@code
      *    UI.button("Click me").withPrefSize(400, 400)
      *    .onMouseClick( it -> it.animateFor(UI.lifetime(2, TimeUnit.SECONDS), state -> {
@@ -1382,7 +1382,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param state The current animation state, which is important so that the styling can be synchronized with the animation.
      * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
      */
-    public final void style( AnimationState state, Styler<C> styler ) {
+    public final void style(AnimationStatus state, Styler<C> styler ) {
         Objects.requireNonNull(state);
         Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
@@ -1465,7 +1465,7 @@ abstract class AbstractDelegate<C extends JComponent>
     /**
      *  The number returned by this method is used to scale the UI
      *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
+     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
      *  to scale custom {@link Graphics2D} painting operations.
      *
      * @return The current UI scale factor, which is used to scale the UI
@@ -1476,7 +1476,7 @@ abstract class AbstractDelegate<C extends JComponent>
     /**
      *  The number returned by this method is used to scale the UI
      *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
+     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
      *  to scale custom {@link Graphics2D} painting operations.
      *
      * @return The current UI scale factor, which is used to scale the UI
@@ -1485,7 +1485,7 @@ abstract class AbstractDelegate<C extends JComponent>
     public float scale() { return UI.scale(); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
+     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
      *  to scale an {@code int} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code int} value to scale.
@@ -1494,7 +1494,7 @@ abstract class AbstractDelegate<C extends JComponent>
     public int scale( int value ) { return UI.scale(value); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
+     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
      *  to scale a {@code float} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code float} value to scale.
@@ -1503,7 +1503,7 @@ abstract class AbstractDelegate<C extends JComponent>
     public float scale( float value ) { return UI.scale(value); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
+     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
      *  to scale a {@code double} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code double} value to scale.

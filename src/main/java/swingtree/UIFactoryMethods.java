@@ -5542,7 +5542,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to animate the contents of a property through using an {@link Animatable}
-     *  instance holding a transformational function for the intended {@link AnimationState}
+     *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
      *  Here how this method may be used as part of a UI declaration: <br>
      *  <pred>{@code
@@ -5573,7 +5573,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to animate the contents of a property through using an {@link Animatable}
-     *  instance holding a transformational function for the intended {@link AnimationState}
+     *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
      *  Here how this method is may be used as part of a UI declaration: <br>
      *  <pred>{@code

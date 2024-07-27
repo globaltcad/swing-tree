@@ -8,7 +8,7 @@ import swingtree.animation.Stride
 import swingtree.threading.EventProcessor
 import swingtree.animation.Animator
 import swingtree.animation.Animation
-import swingtree.animation.AnimationState
+import swingtree.animation.AnimationStatus
 import swingtree.animation.LifeTime
 import utility.Wait
 
@@ -187,8 +187,8 @@ class Animations_Spec extends Specification
             UI.animateFor(1, TimeUnit.MILLISECONDS)
               .asLongAs({ it.repeats() < 4 })
               .go(new Animation() {
-                  @Override void run(AnimationState state) {}
-                  @Override void finish(AnimationState state) { wasFinished++ }
+                  @Override void run(AnimationStatus status) {}
+                  @Override void finish(AnimationStatus status) { wasFinished++ }
               })
         and :
             Wait.until({ wasFinished > 0 },2_500)

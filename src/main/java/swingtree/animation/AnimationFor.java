@@ -2,7 +2,7 @@ package swingtree.animation;
 
 /**
  *  Defines an animation in terms of functional transformations
- *  taking in an {@link AnimationState} together with a value
+ *  taking in an {@link AnimationStatus} together with a value
  *  and returning an updated value. <br>
  *  The value is expected to be immutable and may be everything
  *  from a simple {@link java.lang.Number} to a complex view model
@@ -28,9 +28,9 @@ package swingtree.animation;
 @FunctionalInterface
 public interface AnimationFor<T>
 {
-    T run( AnimationState state, T value );
+    T run( AnimationStatus status, T value );
 
-    default T finish( AnimationState state, T value ) {
+    default T finish(AnimationStatus state, T value ) {
         return value;
     }
 }

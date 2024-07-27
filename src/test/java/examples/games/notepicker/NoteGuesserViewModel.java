@@ -6,7 +6,7 @@ import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.animation.Animation;
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 
 import java.awt.Color;
 import java.nio.file.Files;
@@ -103,11 +103,11 @@ public class NoteGuesserViewModel
     private void animateFeedbackAndThen(Runnable onEnd) {
         UI.animateFor(0.45, TimeUnit.SECONDS).go(new Animation() {
             @Override
-            public void run( AnimationState state ) {
-                feedbackFontSize.set((int) (24 + state.pulse() * 16));
+            public void run( AnimationStatus status) {
+                feedbackFontSize.set((int) (24 + status.pulse() * 16));
             }
             @Override
-            public void finish( AnimationState state ) {
+            public void finish( AnimationStatus status) {
                 feedbackFontSize.set(24);
                 onEnd.run();
             }

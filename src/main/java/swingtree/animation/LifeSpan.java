@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
  *  It consists of a start time and {@link LifeTime}, which defines a delay, interval and duration
  *  as well as a unique id which ensures that two instances of this class are never equal.
  *  <br>
- *  This object is intended to be accessed as part of an {@link AnimationState} within
+ *  This object is intended to be accessed as part of an {@link AnimationStatus} within
  *  an {@link Animation} and is typically used to decide how an animation should behave.
  */
 @Immutable

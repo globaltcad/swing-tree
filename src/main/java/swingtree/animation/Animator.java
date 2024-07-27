@@ -117,7 +117,7 @@ public class Animator
      *                   until this condition is true.
      * @return A new {@link Animator} instance that will be executed until the given stop condition is true.
      */
-    public Animator until( Predicate<AnimationState> shouldStop ) {
+    public Animator until( Predicate<AnimationStatus> shouldStop ) {
         return this.asLongAs( shouldStop.negate() );
     }
 
@@ -128,7 +128,7 @@ public class Animator
      *                  as long as this condition is true.
      * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
      */
-    public Animator asLongAs( Predicate<AnimationState> shouldRun ) {
+    public Animator asLongAs( Predicate<AnimationStatus> shouldRun ) {
         return new Animator(_lifeTime, _stride, _component, state -> {
                     if ( shouldRun.test(state) )
                         return _condition == null || _condition.shouldContinue(state);
@@ -160,15 +160,15 @@ public class Animator
      *  Runs the given animation based on a time offset in the given time unit
      *  and the stop condition defined by {@link #until(Predicate)} or {@link #asLongAs(Predicate)}.
      *  If no stop condition was defined, the animation will be executed once.
-     *  If you want to run an animation forever, simply pass {@code state -> true} to
-     *  the {@link #asLongAs(Predicate)} method, or {@code state -> false} to the {@link #until(Predicate)} method.
+     *  If you want to run an animation forever, simply pass {@code status -> true} to
+     *  the {@link #asLongAs(Predicate)} method, or {@code status -> false} to the {@link #until(Predicate)} method.
      *  <p>
      *  This method is useful in cases where you want an animation to start in the future,
-     *  or somewhere in the middle of their lifespan progress (see {@link AnimationState#progress()}).
+     *  or somewhere in the middle of their lifespan progress (see {@link AnimationStatus#progress()}).
      *
      * @param offset The offset in the given time unit after which the animation should be executed.
      *               This number may also be negative, in which case the animation will be executed
-     *               immediately, and with a {@link AnimationState#progress()} value that is
+     *               immediately, and with a {@link AnimationStatus#progress()} value that is
      *               advanced according to the offset.
      *
      * @param unit The time unit in which the offset is specified.

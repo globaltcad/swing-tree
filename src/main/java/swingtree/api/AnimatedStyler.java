@@ -1,6 +1,6 @@
 package swingtree.api;
 
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.style.ComponentStyleDelegate;
 
@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link AnimatedStyler} is conceptually a union of the {@link swingtree.animation.Animation}
- * and {@link Styler} functions, which is to say that it takes both an {@link AnimationState} and a
+ * and {@link Styler} functions, which is to say that it takes both an {@link AnimationStatus} and a
  * {@link ComponentStyleDelegate} to produce a new {@link ComponentStyleDelegate}
- * with some style properties applied to it (usually based on the {@link AnimationState}). <br>
+ * with some style properties applied to it (usually based on the {@link AnimationStatus}). <br>
  * Note that both paramters are immutable value oriented objects, so the function is pure and
- * does not modify the original {@link ComponentStyleDelegate} or {@link AnimationState} objects. <br>
+ * does not modify the original {@link ComponentStyleDelegate} or {@link AnimationStatus} objects. <br>
  * This design makes the underlying style engine of SwingTree very flexible and scalable
  * because it allows for the composition of styles and reuse of style logic across many components
  * (see {@link swingtree.style.StyleSheet} for more advanced usage).
@@ -42,12 +42,12 @@ public interface AnimatedStyler<C extends JComponent>
     /**
      * Applies some style to the given {@link ComponentStyleDelegate} and returns a new {@link ComponentStyleDelegate}
      * that has the style applied (if any).
-     * @param state The {@link AnimationState} which is used to configure the style
-     *              (usually based on the {@link AnimationState#progress}).
+     * @param status The {@link AnimationStatus} which is used to configure the style
+     *              (usually based on the {@link AnimationStatus#progress()}).
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
      */
-    ComponentStyleDelegate<C> style( AnimationState state, ComponentStyleDelegate<C> delegate );
+    ComponentStyleDelegate<C> style(AnimationStatus status, ComponentStyleDelegate<C> delegate );
 
     /**
      * Returns a new {@link AnimatedStyler} that applies the style of this {@link AnimatedStyler} and then applies the style

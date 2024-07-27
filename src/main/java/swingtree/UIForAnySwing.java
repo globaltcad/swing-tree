@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.*;
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
@@ -2197,19 +2197,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *
      *
      * @param transitionToggle The boolean {@link Val} property which determines the state to which the style should transition.
-     *                         When the value of this property is {@code true}, the style will transition to a {@link AnimationState#progress()}
+     *                         When the value of this property is {@code true}, the style will transition to a {@link AnimationStatus#progress()}
      *                         of {@code 1.0} over the provided {@link LifeTime}.
-     *                         And when the value of this property is {@code false}, the style will transition to a {@link AnimationState#progress()}
+     *                         And when the value of this property is {@code false}, the style will transition to a {@link AnimationStatus#progress()}
      *                         of {@code 0.0} over the provided {@link LifeTime}.
      *
      * @param transitionLifeTime The {@link LifeTime} of the transition animation.
-     *                           It defines for ow long the {@link AnimationState#progress()} will transition from {@code 0} to {@code 1} or vice versa.
+     *                           It defines for ow long the {@link AnimationStatus#progress()} will transition from {@code 0} to {@code 1} or vice versa.
      *
      * @param styler An {@link AnimatedStyler} lambda can define a set of style rules for the component wrapped by this builder
-     *               by receiving an {@link AnimationState} and a {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               by receiving an {@link AnimationStatus} and a {@link swingtree.style.ComponentStyleDelegate} and returning
      *               an updated version with the desired style rules applied.
-     *               The {@link AnimatedStyler} may apply the style properties according to the {@link AnimationState}
-     *               and its {@link AnimationState#progress()} method (or other methods) to create a smooth
+     *               The {@link AnimatedStyler} may apply the style properties according to the {@link AnimationStatus}
+     *               and its {@link AnimationStatus#progress()} method (or other methods) to create a smooth
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
@@ -2248,10 +2248,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param styleEvent The {@link Event} which should trigger the style animation.
      * @param styleLifeTime The {@link LifeTime} of the style animation.
      * @param styler An {@link AnimatedStyler} lambda can define a set of style rules for the component wrapped by this builder
-     *               by receiving an {@link AnimationState} and a {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               by receiving an {@link AnimationStatus} and a {@link swingtree.style.ComponentStyleDelegate} and returning
      *               an updated version with the desired style rules applied.
-     *               The {@link AnimatedStyler} may apply the style properties according to the {@link AnimationState}
-     *               and its {@link AnimationState#progress()} method (or other methods) to create a smooth
+     *               The {@link AnimatedStyler} may apply the style properties according to the {@link AnimationStatus}
+     *               and its {@link AnimationStatus#progress()} method (or other methods) to create a smooth
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.

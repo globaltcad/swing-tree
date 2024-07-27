@@ -3,7 +3,7 @@ package examples.animated;
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 import swingtree.animation.Animation;
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -94,16 +94,16 @@ public class AnimatedButtonsView extends Panel
                         .asLongAs( state -> state.repeats() <= 1 )
                         .go(new Animation() {
                             final Dimension prefSize = it.get().getPreferredSize();
-                            @Override public void run(AnimationState state) {
+                            @Override public void run(AnimationStatus status) {
                                 double centerX = it.getWidth() / 2.0;
-                                double phase = (state.pulse()*2 - 1);
+                                double phase = (status.pulse()*2 - 1);
                                 int h = (int) ( prefSize.width * Math.abs(phase) / 2 );
                                 AffineTransform at = AffineTransform.getRotateInstance(phase * Math.PI/12, centerX, 0);
                                 at.translate(0, h/12d);
                                 it.setFont(it.getFont().deriveFont(at));
                                 it.setPrefSize(prefSize.width, h + prefSize.height);
                             }
-                            @Override public void finish(AnimationState state) {
+                            @Override public void finish(AnimationStatus status) {
                                 AffineTransform at = AffineTransform.getRotateInstance(0, 0, 0);
                                 it.setFont(it.getFont().deriveFont(at));
                                 it.setPrefSize(prefSize);

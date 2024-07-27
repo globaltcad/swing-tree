@@ -11,23 +11,23 @@ import java.util.concurrent.TimeUnit;
  * Use the numbers exposed by the methods of this value based class to define how
  * your animation should progress over time.
  */
-public final class AnimationState implements Progress
+public final class AnimationStatus implements Progress
 {
-    private final static Logger log = org.slf4j.LoggerFactory.getLogger(AnimationState.class);
+    private final static Logger log = org.slf4j.LoggerFactory.getLogger(AnimationStatus.class);
 
-    public static AnimationState of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now ) {
+    public static AnimationStatus of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now ) {
         return _of(lifeSpan, stride, event, now, false);
     }
 
-    public static AnimationState endOf(LifeSpan lifeSpan, Stride stride, ActionEvent event, long iteration) {
+    public static AnimationStatus endOf( LifeSpan lifeSpan, Stride stride, ActionEvent event, long iteration ) {
         return _of(lifeSpan, stride, event, lifeSpan.getEndTimeIn(TimeUnit.MILLISECONDS, iteration), true);
     }
 
-    public static AnimationState startOf(LifeSpan lifeSpan, Stride stride, ActionEvent event) {
+    public static AnimationStatus startOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
         return _of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS), false);
     }
 
-    private static AnimationState _of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now, boolean isEnd ) {
+    private static AnimationStatus _of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now, boolean isEnd ) {
         long duration = lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
         long interval = lifeSpan.lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
         long howLongIsRunning = Math.max(0, now - lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
@@ -63,7 +63,7 @@ public final class AnimationState implements Progress
             In the above line, we round the progress to the nearest step.
             This makes animations more deterministic and cache friendly.
         */
-        return new AnimationState(progress, howManyLoops, lifeSpan, event);
+        return new AnimationStatus(progress, howManyLoops, lifeSpan, event);
     }
 
 
@@ -73,7 +73,7 @@ public final class AnimationState implements Progress
     private final ActionEvent event;
 
 
-    private AnimationState( double progress, long howManyLoops, LifeSpan lifeSpan, ActionEvent event ) {
+    private AnimationStatus(double progress, long howManyLoops, LifeSpan lifeSpan, ActionEvent event ) {
         this.progress     = progress;
         this.howManyLoops = howManyLoops;
         this.lifeSpan     = lifeSpan;
@@ -185,7 +185,7 @@ public final class AnimationState implements Progress
         if ( this == o ) return true;
         if ( o == null || getClass() != o.getClass() ) return false;
 
-        AnimationState that = (AnimationState) o;
+        AnimationStatus that = (AnimationStatus) o;
 
         if ( Double.compare(that.progress, progress) != 0 ) return false;
         if ( howManyLoops != that.howManyLoops ) return false;

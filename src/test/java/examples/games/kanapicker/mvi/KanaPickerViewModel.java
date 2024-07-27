@@ -175,11 +175,11 @@ public final class KanaPickerViewModel
     ) {
         return Animatable.of(LifeTime.of(0.45, TimeUnit.SECONDS), this, new AnimationFor<KanaPickerViewModel>() {
             @Override
-            public KanaPickerViewModel run(AnimationState state, KanaPickerViewModel value) {
-                return value.withFeedbackFontSize((int) (24 + state.pulse() * 16));
+            public KanaPickerViewModel run(AnimationStatus status, KanaPickerViewModel value) {
+                return value.withFeedbackFontSize((int) (24 + status.pulse() * 16));
             }
             @Override
-            public KanaPickerViewModel finish(AnimationState state, KanaPickerViewModel value) {
+            public KanaPickerViewModel finish(AnimationStatus state, KanaPickerViewModel value) {
                 return onEnd.apply(value.withFeedbackFontSize(24));
             }
         });

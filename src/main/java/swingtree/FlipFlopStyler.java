@@ -23,7 +23,7 @@ class FlipFlopStyler<C extends JComponent>
     private final AnimatedStyler<C> _styler;
     private final WeakReference<C>  _owner;
 
-    private @Nullable AnimationState _state = null;
+    private @Nullable AnimationStatus _status = null;
     private boolean _isOn = false;
     private boolean _isCurrentlyRunningAnimation = false;
     private @Nullable DisposableAnimation _animation = null;
@@ -37,16 +37,16 @@ class FlipFlopStyler<C extends JComponent>
 
 
     ComponentStyleDelegate<C> style( ComponentStyleDelegate<C> delegate ) {
-        AnimationState state = _state;
-        if ( state == null )
-            state = AnimationState.startOf(
+        AnimationStatus status = _status;
+        if ( status == null )
+            status = AnimationStatus.startOf(
                                 LifeSpan.startingNowWith(_lifetime),
                                 Stride.PROGRESSIVE,
                                 new ActionEvent(this, 0, null)
                             );
 
-        _state = state;
-        return _styler.style(state, delegate);
+        _status = status;
+        return _styler.style(status, delegate);
     }
 
     void set( final boolean isOn ) {
@@ -69,7 +69,7 @@ class FlipFlopStyler<C extends JComponent>
                 of the current animation. So we need to calculate the time offset for the new animation
                 based on the progress of the current animation.
             */
-            double progress = _state == null ? 0 : _state.progress();
+            double progress = _status == null ? 0 : _status.progress();
             if ( _isOn )
                 progress = 1 - progress;
             long animationDuration = lifetime.getDurationIn(TimeUnit.MILLISECONDS);
@@ -80,13 +80,13 @@ class FlipFlopStyler<C extends JComponent>
 
         _animation = new DisposableAnimation(new Animation() {
             @Override
-            public void run( AnimationState state ) {
-                _state = state;
+            public void run( AnimationStatus status ) {
+                _status = status;
                 _isOn = isOn;
             }
             @Override
-            public void finish( AnimationState state ) {
-                _state = state;
+            public void finish( AnimationStatus status ) {
+                _status = status;
                 _isOn = isOn;
                 _isCurrentlyRunningAnimation = false;
             }
@@ -105,15 +105,15 @@ class FlipFlopStyler<C extends JComponent>
         }
 
         @Override
-        public void run(AnimationState state) {
+        public void run( AnimationStatus status ) {
             if ( _animation != null )
-                _animation.run(state);
+                _animation.run(status);
         }
 
         @Override
-        public void finish(AnimationState state) {
+        public void finish( AnimationStatus status ) {
             if ( _animation != null )
-                _animation.finish(state);
+                _animation.finish(status);
 
             dispose();
         }

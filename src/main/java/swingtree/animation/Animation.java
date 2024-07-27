@@ -23,13 +23,13 @@ public interface Animation
     {
         return new Animation() {
             @Override
-            public void run(AnimationState state) {
-                T newValue = animator.run(state, target.get());
+            public void run( AnimationStatus status ) {
+                T newValue = animator.run(status, target.get());
                 target.set( newValue );
             }
             @Override
-            public void finish(AnimationState state) {
-                T newValue = animator.finish(state, target.get());
+            public void finish( AnimationStatus status ) {
+                T newValue = animator.finish(status, target.get());
                 target.set( newValue );
             }
         };
@@ -37,11 +37,11 @@ public interface Animation
 
     /**
      *  This method is called repeatedly during the lifetime of the animation.
-     *  The {@link AnimationState} contains information about the current state of the animation.
+     *  The {@link AnimationStatus} contains information about the current state of the animation.
      *
-     * @param state The current state of the animation.
+     * @param status The current state of the animation.
      */
-    void run( AnimationState state );
+    void run( AnimationStatus status );
 
     /**
      *  This method is called after the animation has finished.
@@ -49,9 +49,9 @@ public interface Animation
      *  Use this to clean up the state of your components
      *  any used resources after the animation has finished.
      *
-     * @param state The current state of the animation.
+     * @param status The current state of the animation.
      */
-    default void finish( AnimationState state ) {
+    default void finish( AnimationStatus status ) {
         /* Override this method to perform cleanup after the animation has finished */
     }
 }
