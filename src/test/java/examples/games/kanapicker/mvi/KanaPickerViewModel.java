@@ -179,7 +179,7 @@ public final class KanaPickerViewModel
                 return value.withFeedbackFontSize((int) (24 + status.pulse() * 16));
             }
             @Override
-            public KanaPickerViewModel finish(AnimationStatus state, KanaPickerViewModel value) {
+            public KanaPickerViewModel finish(AnimationStatus status, KanaPickerViewModel value) {
                 return onEnd.apply(value.withFeedbackFontSize(24));
             }
         });

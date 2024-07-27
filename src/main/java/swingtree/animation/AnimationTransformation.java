@@ -21,6 +21,10 @@ package swingtree.animation;
  *      );
  *  }
  *  </pre>
+ *  An {@link Animatable} may then be passed to
+ *  {@link swingtree.UI#animate(sprouts.Var, Animatable)} together
+ *  with a {@link sprouts.Var} property to repeatedly transform
+ *  the property item during the iterations of the entire animation lifetime.
  *
  * @param <T> The type of the value that is animated
  *           through repeated transformations.
@@ -45,14 +49,19 @@ public interface AnimationTransformation<T>
      *  This method is called after the animation has finished.
      *  The default implementation does nothing but returns the
      *  supplied value. <br>
-     *  Implement this to create a cleaned up version of the
-     *  animated item after the animation has finished.
+     *  Implement this to create a cleaned up final version
+     *  of the item after the animation has finished.
      *
-     * @param state The current state of the animation.
-     * @param value The final value of the animated item.
+     * @param status The current progress status of the animation, which
+     *               is used to determine the intermediate values of
+     *               the animated item. You may typically want to use
+     *               the {@link AnimationStatus#progress()} number to
+     *               interpolate fields of your view model.
+     * @param value The final value of the animated item, which is
+     *              expected to be an immutable object.
      * @return The final value of the animated item after the animation has finished.
      */
-    default T finish(AnimationStatus state, T value ) {
+    default T finish( AnimationStatus status, T value ) {
         return value;
     }
 }
