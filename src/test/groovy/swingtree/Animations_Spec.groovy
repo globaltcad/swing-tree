@@ -4,17 +4,13 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.animation.Stride
+import sprouts.Var
+import swingtree.animation.*
 import swingtree.threading.EventProcessor
-import swingtree.animation.AnimationDispatcher
-import swingtree.animation.Animation
-import swingtree.animation.AnimationStatus
-import swingtree.animation.LifeTime
 import utility.Wait
 
-import javax.swing.JButton
-import javax.swing.JLabel
-import java.awt.Color
+import javax.swing.*
+import java.awt.*
 import java.awt.event.MouseEvent
 import java.util.concurrent.TimeUnit
 
@@ -34,6 +30,52 @@ class Animations_Spec extends Specification
     def setupSpec() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
+    }
+
+    def 'Use `Animatable<M>` to define animations for immutable view models.'()
+    {
+        reportInfo """
+            A very well proven design pattern is the MVI/MVL pattern,
+            which stands for Model-View-Intent/Lenses. This pattern
+            is based on the idea that the view is immutable and can only change 
+            through an intent or a property lens.
+            
+            But then how do you animate the view if it is immutable?
+            More specifically, how can you make the animation logic and
+            code part of the view model?
+            
+            The answer is the `Animatable<M>` object, a wrapper for
+            a `LifeTime` and a lambda function which maps the animation
+            status and a custom model `M` to a new model `M`.
+            
+            Your immutable view model can then return an `Animatable<M>`
+            object which will be used by the views lenses to animate the view model
+            as well and indirectly through other property lenses also the view.
+            
+        """
+        given : 'A simple pseudo "immutable" view model and a mutable property for holding the model.'
+            var model = [text:"Hello World!", color:Color.BLACK]
+            var state = Var.of(model)
+        and : 'A simple list used as a trace for the animation runs.'
+            var trace = []
+        and : 'An `Animatable<M>` object that will animate the color of the view model.'
+            var animatable = Animatable.of(LifeTime.of(1, TimeUnit.SECONDS), model, (status, m) -> {
+                trace << status.progress()
+                float highlight = (float) (1f - (float) status.progress())
+                return [text:m.text, color:new Color(highlight, 1, highlight)]
+            })
+        when : 'We animate the view model with the `Animatable<M>` object.'
+            UI.animate(state, animatable)
+
+        then : 'The view model has been animated.'
+            Wait.until({ trace.contains(1d) },3_500)
+        and : 'The view model has the correct color.'
+            state.get().color.getRed() < 10
+            state.get().color.getGreen() == 255
+            state.get().color.getBlue() < 10
+        and : 'We can savely assume that the initial model still has the same state.'
+            model.text == "Hello World!"
+            model.color == Color.BLACK
     }
 
     def 'Use the API exposed by `UI.animateFor(..)` to schedule animations'()
