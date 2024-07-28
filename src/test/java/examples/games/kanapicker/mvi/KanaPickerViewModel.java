@@ -3,8 +3,7 @@ package examples.games.kanapicker.mvi;
 import lombok.*;
 import lombok.experimental.Accessors;
 import swingtree.UI;
-import swingtree.animation.Animation;
-import swingtree.animation.AnimationState;
+import swingtree.animation.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -143,7 +142,7 @@ public final class KanaPickerViewModel
         return this.score / 10;
     }
 
-    KanaPickerViewModel cheated() {
+    Animatable<KanaPickerViewModel> cheated() {
         return this
                 .withFeedback("Cheater!")
                 .withFeedbackColor(Color.RED)
@@ -151,7 +150,7 @@ public final class KanaPickerViewModel
                 .animateFeedbackAndThen(m->m);
     }
 
-    public KanaPickerViewModel selectSymbol( Symbol symbol ) {
+    public Animatable<KanaPickerViewModel> selectSymbol( Symbol symbol ) {
         KanaPickerViewModel vm = this;
         if ( currentSymbol == symbol ) {
             vm = vm.withCurrentSymbol(symbol.incrementSuccesses());
@@ -160,32 +159,30 @@ public final class KanaPickerViewModel
             if ( !cheatMode )
                 vm = vm.withScore(score + 1);
 
-            vm = vm.animateFeedbackAndThen( m -> m.newRandomSymbol() );
+            return vm.newRandomSymbol().animateFeedbackAndThen( m -> m );
         }
         else {
             vm = vm.withFeedback( "Try again!" );
             vm = vm.withFeedbackColor( Color.RED );
             // The score is not completely reset, we simply fall back to the level we were at before
             vm = vm.withScore( level() * 10 );
-            vm = animateFeedbackAndThen( m->m );
+            return animateFeedbackAndThen( m->m );
         }
-        return vm;
     }
 
-    private KanaPickerViewModel animateFeedbackAndThen(Function<KanaPickerViewModel, KanaPickerViewModel> onEnd) {
-        //UI.animateFor(0.45, TimeUnit.SECONDS).go(new Animation() {
-        //    @Override
-        //    public void run(AnimationState state) {
-        //        feedbackFontSize.set((int) (24 + state.pulse() * 16));
-        //    }
-        //    @Override
-        //    public void finish(AnimationState state) {
-        //        feedbackFontSize.set(24);
-        //        onEnd.apply(KanaPickerViewModel.this);
-        //    }
-        //});
-
-        return onEnd.apply(this);
+    private Animatable<KanaPickerViewModel> animateFeedbackAndThen(
+            Function<KanaPickerViewModel, KanaPickerViewModel> onEnd
+    ) {
+        return Animatable.of(LifeTime.of(0.45, TimeUnit.SECONDS), this, new AnimationTransformation<KanaPickerViewModel>() {
+            @Override
+            public KanaPickerViewModel run(AnimationStatus status, KanaPickerViewModel value) {
+                return value.withFeedbackFontSize((int) (24 + status.pulse() * 16));
+            }
+            @Override
+            public KanaPickerViewModel finish(AnimationStatus status, KanaPickerViewModel value) {
+                return onEnd.apply(value.withFeedbackFontSize(24));
+            }
+        });
     }
 
     public List<Alphabet> getAlphabets() {

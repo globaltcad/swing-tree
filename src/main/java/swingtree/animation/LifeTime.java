@@ -3,6 +3,7 @@ package swingtree.animation;
 import com.google.errorprone.annotations.Immutable;
 import sprouts.Event;
 import sprouts.Val;
+import sprouts.Var;
 import swingtree.SwingTree;
 import swingtree.SwingTreeConfigurator;
 import swingtree.api.AnimatedStyler;
@@ -33,21 +34,37 @@ import java.util.concurrent.TimeUnit;
  *  This may look like this:
  *  <pre>{@code
  *  UI.button("I pop when you hover over me")
- *  .onMouseEnter( it -> it.animateFor(1, TimeUnit.SECONDS, state -> {
+ *  .onMouseEnter( it -> it.animateFor(1, TimeUnit.SECONDS, status -> {
  *    it.style(state, conf -> conf
- *      .borderWidth( 10 * state.cycle() )
- *      .borderColor(UI.color(1,1,0,1-state.cycle()))
- *      .borderRadius( 100 * state.cycle() )
+ *      .borderWidth( 10 * status.cycle() )
+ *      .borderColor(UI.color(1,1,0,1-status.cycle()))
+ *      .borderRadius( 100 * status.cycle() )
  *    );
  *  }))
  *  }</pre>
+ *  Also see {@link Animatable} and {@link swingtree.UI#animate(Var, Animatable)}
+ *  for more information on how to animate your view models and consequently
+ *  also the GUI components bound to them.
  */
 @Immutable
 public final class LifeTime
 {
+    private static final LifeTime _NONE = new LifeTime(0, 0, 0);
+
     private final long _delay; // in milliseconds
     private final long _duration;
     private final long _interval;
+
+    /**
+     *  Returns a lifetime that does nothing when run due to it having a duration, delay and interval of zero.
+     *  This is useful as a way to define no-op animations, and it may also be generally used
+     *  instead of a {@code null} reference...
+     *
+     * @return A lifetime that does nothing.
+     */
+    public static LifeTime none() {
+        return _NONE;
+    }
 
     /**
      *  Creates a new lifetime that will run for the given duration

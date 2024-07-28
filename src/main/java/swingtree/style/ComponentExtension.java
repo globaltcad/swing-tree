@@ -3,7 +3,7 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 
@@ -262,20 +262,20 @@ public final class ComponentExtension<C extends JComponent>
     /**
      *  Use this to add a {@link Painter} based animation to the component.
      *
-     * @param state The {@link AnimationState} which defines when the animation is active.
+     * @param status The {@link AnimationStatus} which defines when the animation is active.
      * @param layer The {@link UI.Layer} which defines the layer on which the animation is rendered.
      * @param clipArea The {@link UI.ComponentArea} which defines the area of the component which is animated.
      * @param painter The {@link Painter} which defines how the animation is rendered.
      */
     public void addAnimatedPainter(
-        AnimationState        state,
+        AnimationStatus       status,
         UI.Layer              layer,
         UI.ComponentArea      clipArea,
         swingtree.api.Painter painter
     ) {
         _anonymousPainterCounter++;
         String painterName = "anonymous-painter-"+_anonymousPainterCounter;
-        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), it -> it.painter(layer, clipArea, painterName, painter));
+        _styleSource = _styleSource.withAnimationStyler(status.lifeSpan(), it -> it.painter(layer, clipArea, painterName, painter));
         _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());
         _styleInstaller.recalculateInsets(_owner, _styleEngine.getComponentConf().style());
         /*
@@ -286,10 +286,10 @@ public final class ComponentExtension<C extends JComponent>
     /**
      *  Use this to add a {@link Styler} based animation to the component.
      *
-     * @param state The {@link AnimationState} which defines when the animation is active.
+     * @param state The {@link AnimationStatus} which defines when the animation is active.
      * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
      */
-    public void addAnimatedStyler( AnimationState state, Styler<C> styler ) {
+    public void addAnimatedStyler(AnimationStatus state, Styler<C> styler ) {
         _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);
     }
 

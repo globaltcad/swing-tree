@@ -8,12 +8,12 @@ package swingtree.animation;
 public enum Stride
 {
     /**
-     *  The animation progress defined by {@link AnimationState#progress()}
+     *  The animation progress defined by {@link AnimationStatus#progress()}
      *  will start at 0 and end at 1.
      */
     PROGRESSIVE,
     /**
-     *  The animation progress defined by {@link AnimationState#progress()}
+     *  The animation progress defined by {@link AnimationStatus#progress()}
      *  will start at 1 and end at 0.
      */
     REGRESSIVE

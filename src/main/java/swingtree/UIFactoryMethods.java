@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Event;
 import sprouts.*;
-import swingtree.animation.Animator;
-import swingtree.animation.LifeTime;
-import swingtree.animation.Stride;
+import swingtree.animation.*;
 import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
 import swingtree.api.MenuBuilder;
@@ -5542,10 +5540,63 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 .withTitle(title);
     }
 
+    /**
+     *  Use this to animate the contents of a property through using an {@link Animatable}
+     *  instance holding a transformational function for the intended {@link AnimationStatus}
+     *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
+     *  Here how this method may be used as part of a UI declaration: <br>
+     *  <pred>{@code
+     *    UI.button("Login").onClick( it -> {
+     *      UI.animate(vm, vm.get().withLoginAnimation());
+     *    })
+     *  }</pred>
+     *
+     * @param state A mutable property or property lens holding an immutable item which should
+     *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
+     *              The item may also be an immutable view model in case of MVI/MVL design patterns.
+     * @param animatable A wrapper for the transformational {@link AnimationTransformation} and the {@link LifeTime}
+     *                   defining the duration of the animation.
+     * @param <T> The type of the property or property lens.
+     */
+    public static <T> void animate( Var<T> state, Animatable<T> animatable ) {
+        Optional<T>     initialState = animatable.initialState();
+        LifeTime        lifeTime     = animatable.lifeTime();
+        AnimationTransformation<T> animator     = animatable.animator();
+
+        initialState.ifPresent(state::set);
+
+        if ( !lifeTime.equals(LifeTime.none()) ) {
+            Animation animation = Animation.of(state, animator);
+            UI.animateFor(lifeTime).go(animation);
+        }
+    }
+
+    /**
+     *  Use this to animate the contents of a property through using an {@link Animatable}
+     *  instance holding a transformational function for the intended {@link AnimationStatus}
+     *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
+     *  Here how this method is may be used as part of a UI declaration: <br>
+     *  <pred>{@code
+     *    UI.button("Login").onClick( it -> {
+     *      UI.animate(vm, LoginViewModel::withLoginAnimation);
+     *    })
+     *  }</pred>
+     *
+     * @param state A mutable property or property lens holding an immutable item which should
+     *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
+     *              The item may also be an immutable view model in case of MVI/MVL design patterns.
+     * @param animatable A function taking in the current property item and returning
+     *                   a wrapper for the transformational {@link AnimationTransformation} and the {@link LifeTime}
+     *                   defining the duration of the animation.
+     * @param <T> The type of the property or property lens.
+     */
+    public static <T> void animate( Var<T> state, Function<T, Animatable<T>> animatable ) {
+        animate(state, animatable.apply(state.get()));
+    }
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     *  This is a convenience method for {@link AnimationDispatcher#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
      *    UI.animateFor( 100, TimeUnit.MILLISECONDS )
@@ -5557,19 +5608,23 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  Also see {@link UI#animate(Var, Animatable)} for a more straight
+     *  forward approach to animating the state of your view models and
+     *  consequently also the GUI components bound to them.
+     *
      *  @param duration The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      *  @param unit The time unit of the duration.
-     *  @return An {@link Animator} instance which allows you to configure the animation.
+     *  @return An {@link AnimationDispatcher} instance which allows you to configure the animation.
      */
-    public static Animator animateFor( long duration, TimeUnit unit ) {
+    public static AnimationDispatcher animateFor( long duration, TimeUnit unit ) {
         Objects.requireNonNull(unit, "unit");
-        return Animator.animateFor( LifeTime.of(duration, unit) );
+        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit) );
     }
 
     /**
      *  Exposes a builder API for creating and scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     *  This is a convenience method for {@link AnimationDispatcher#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
      *    UI.animateFor( 0.1, TimeUnit.MINUTES )
@@ -5581,18 +5636,22 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  Also see {@link UI#animate(Var, Animatable)} for a more straight
+     *  forward approach to animating the state of your view models and
+     *  consequently also the GUI components bound to them.
+     *
      *  @param duration The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      *  @param unit The time unit of the duration.
-     *  @return An {@link Animator} instance which allows you to configure the animation.
+     *  @return An {@link AnimationDispatcher} instance which allows you to configure the animation.
      */
-    public static Animator animateFor( double duration, TimeUnit unit ) {
-        return Animator.animateFor( LifeTime.of(duration, unit) );
+    public static AnimationDispatcher animateFor( double duration, TimeUnit unit ) {
+        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit) );
     }
 
     /**
      *  Exposes a builder API for creating and scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animator#animateFor(LifeTime, Stride)}. <br>
+     *  This is a convenience method for {@link AnimationDispatcher#animateFor(LifeTime, Stride)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
      *    UI.animateFor( 0.1, TimeUnit.MINUTES, Stride.REGRESSIVE )
@@ -5604,20 +5663,24 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  Also see {@link UI#animate(Var, Animatable)} for a more straight
+     *  forward approach to animating the state of your view models and
+     *  consequently also the GUI components bound to them.
+     *
      *  @param duration The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      *  @param unit The time unit of the duration.
      *  @param stride The stride of the animation, which determines whether the animation
      *                progresses going forward or backwards.
-     *  @return An {@link Animator} instance which allows you to configure the animation.
+     *  @return An {@link AnimationDispatcher} instance which allows you to configure the animation.
      */
-    public static Animator animateFor(double duration, TimeUnit unit, Stride stride) {
-        return Animator.animateFor( LifeTime.of(duration, unit), stride );
+    public static AnimationDispatcher animateFor( double duration, TimeUnit unit, Stride stride ) {
+        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit), stride );
     }
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     *  This is a convenience method for {@link AnimationDispatcher#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
      *    UI.animateFor( LifeTime.of(0.1, TimeUnit.MINUTES) )
@@ -5629,20 +5692,24 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  Also see {@link UI#animate(Var, Animatable)} for a more straight
+     *  forward approach to animating the state of your view models and
+     *  consequently also the GUI components bound to them.
+     *
      *  @param duration The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      *
-     *  @return An {@link Animator} instance which allows you to configure the animation.
+     *  @return An {@link AnimationDispatcher} instance which allows you to configure and run the animation.
      */
-    public static Animator animateFor( LifeTime duration ) {
-        return Animator.animateFor( duration );
+    public static AnimationDispatcher animateFor( LifeTime duration ) {
+        return AnimationDispatcher.animateFor( duration );
     }
 
     /**
      * Exposes an API for scheduling periodic animation updates
      * for a specific component whose {@link java.awt.Component#repaint()}
      * method should be called after every animation update.
-     * This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     * This is a convenience method for {@link AnimationDispatcher#animateFor(LifeTime)}. <br>
      * A typical usage would be:
      * <pre>{@code
      *    UI.animateFor( UI.lifeTime(0.1, TimeUnit.MINUTES), someComponent )
@@ -5652,14 +5719,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
      *       });
      *  }</pre>
+     *  Also see {@link UI#animate(Var, Animatable)} for a more straight
+     *  forward approach to animating the state of your view models and
+     *  consequently also the GUI components bound to them.
      *
      * @param duration  The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      * @param component The component which should be repainted after every animation update.
-     * @return An {@link Animator} instance which allows you to configure the animation.
+     * @return An {@link AnimationDispatcher} instance which allows you to configure and then run the animation.
      */
-    public static Animator animateFor( LifeTime duration, java.awt.Component component ) {
-        return Animator.animateFor( duration, component );
+    public static AnimationDispatcher animateFor( LifeTime duration, java.awt.Component component ) {
+        return AnimationDispatcher.animateFor( duration, component );
     }
 
     /**
@@ -5668,7 +5738,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is a convenience method for {@link LifeTime#of(long, TimeUnit)}.
      *  The {@link LifeTime} instance is an immutable value type
      *  which is used for scheduling animations, usually through
-     *  {@link Animator#animateFor(LifeTime)} or the convenience methods
+     *  {@link AnimationDispatcher#animateFor(LifeTime)} or the convenience methods
      *  {@link UI#animateFor(long, TimeUnit)}, {@link UI#animateFor(double, TimeUnit)},
      *  {@link UI#animateFor(LifeTime)} or {@link UI#animateFor(LifeTime, java.awt.Component)}.
      *  A typical usage would be:
@@ -5679,6 +5749,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          // do something
      *      });
      *  }</pre>
+     *  You may also want to use a lifetime through an {@link Animatable} passed
+     *  to {@link UI#animate(Var, Animatable)} for a more straight
+     *  forward approach to animating the state of your view models and
+     *  consequently also the GUI components bound to them.
      *
      * @param duration The duration of the animation.
      * @param unit The time unit of the duration.

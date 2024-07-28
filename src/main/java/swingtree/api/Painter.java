@@ -3,7 +3,7 @@ package swingtree.api;
 
 import swingtree.UI;
 import swingtree.animation.Animation;
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  *  <br>
  *  You can also use painter implementations
  *  for <b>defining custom component event based animations</b> by registering through the
- *  {@link swingtree.ComponentDelegate#paint(AnimationState, Painter)} method
+ *  {@link swingtree.ComponentDelegate#paint(AnimationStatus, Painter)} method
  *  inside of an {@link Animation} registered through
  *  {@link swingtree.ComponentDelegate#animateFor(double, TimeUnit, Animation)}.
  *  <br><br>

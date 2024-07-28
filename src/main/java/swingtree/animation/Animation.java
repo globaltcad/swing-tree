@@ -1,5 +1,7 @@
 package swingtree.animation;
 
+import sprouts.Var;
+
 /**
  * An animation is a function which is called repeatedly during its lifetime,
  * which is determined by a {@link LifeTime} and a {@link RunCondition}.
@@ -8,12 +10,38 @@ package swingtree.animation;
 public interface Animation
 {
     /**
-     *  This method is called repeatedly during the lifetime of the animation.
-     *  The {@link AnimationState} contains information about the current state of the animation.
+     *  Creates an {@link Animation} that animates the item
+     *  of the supplied {@link Var} property in a transformative way,
+     *  instead of producing side effects on the property item itself.
      *
-     * @param state The current state of the animation.
+     * @param target The value that is animated.
+     * @param animator A function taking in the current animation status and
+     *                 a value to be transformed and returned based in the status.
+     * @return The created {@link Animation}.
      */
-    void run( AnimationState state );
+    static <T> Animation of( Var<T> target, AnimationTransformation<T> animator )
+    {
+        return new Animation() {
+            @Override
+            public void run( AnimationStatus status ) {
+                T newValue = animator.run(status, target.get());
+                target.set( newValue );
+            }
+            @Override
+            public void finish( AnimationStatus status ) {
+                T newValue = animator.finish(status, target.get());
+                target.set( newValue );
+            }
+        };
+    }
+
+    /**
+     *  This method is called repeatedly during the lifetime of the animation.
+     *  The {@link AnimationStatus} contains information about the current state of the animation.
+     *
+     * @param status The current state of the animation.
+     */
+    void run( AnimationStatus status );
 
     /**
      *  This method is called after the animation has finished.
@@ -21,9 +49,9 @@ public interface Animation
      *  Use this to clean up the state of your components
      *  any used resources after the animation has finished.
      *
-     * @param state The current state of the animation.
+     * @param status The current state of the animation.
      */
-    default void finish( AnimationState state ) {
+    default void finish( AnimationStatus status ) {
         /* Override this method to perform cleanup after the animation has finished */
     }
 }

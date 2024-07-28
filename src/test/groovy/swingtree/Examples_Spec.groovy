@@ -6,8 +6,8 @@ import examples.animated.AnimatedView
 import examples.animated.TransitionalAnimation
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
-import examples.games.notepicker.NoteGuesserView
-import examples.games.notepicker.NoteGuesserViewModel
+import examples.games.notepicker.mvvm.NoteGuesserView
+import examples.games.notepicker.mvvm.NoteGuesserViewModel
 import examples.games.kanapicker.mvvm.KanaPickerView
 import examples.games.kanapicker.mvvm.KanaPickerViewModel
 import examples.lists.ListTestExample
