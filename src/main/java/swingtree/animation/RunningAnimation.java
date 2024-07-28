@@ -1,7 +1,6 @@
 package swingtree.animation;
 
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
 
 import javax.swing.JComponent;
 import java.awt.Component;
@@ -13,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeSpan} and a {@link RunCondition}.
  */
-class ComponentAnimator
+final class RunningAnimation
 {
     private final @Nullable WeakReference<Component> _compRef;
     private final LifeSpan      _lifeSpan;
@@ -23,7 +22,7 @@ class ComponentAnimator
     private final AtomicLong    _currentRepeat = new AtomicLong(0);
 
 
-    ComponentAnimator(
+    RunningAnimation(
         @Nullable Component component, // may be null if the animation is not associated with a specific component
         LifeSpan            lifeSpan,
         Stride              stride,

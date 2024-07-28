@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  This is a singleton class responsible for running {@link ComponentAnimator}
+ *  This is a singleton class responsible for running {@link RunningAnimation}
  *  instances (which are wrapper classes for {@link Animation} instances)
  *  in a regular interval based on a Swing {@link Timer}.
  *  The timer is started when the first animation is scheduled and stopped when the last animation is finished.
@@ -23,17 +23,17 @@ class AnimationRunner
     private static final Map<Integer,AnimationRunner> _INSTANCES = new HashMap<>();
 
 
-    public static void add( ComponentAnimator animator ) {
-        Objects.requireNonNull(animator);
-        int interval = (int) animator.lifeSpan().lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
+    public static void add( RunningAnimation toBeRun ) {
+        Objects.requireNonNull(toBeRun);
+        int interval = (int) toBeRun.lifeSpan().lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
         AnimationRunner runner = _INSTANCES.computeIfAbsent(interval, it -> new AnimationRunner(interval));
-        runner._add(animator);
+        runner._add(toBeRun);
     }
 
 
     private final Timer _timer;
 
-    private final List<ComponentAnimator> _animators = new ArrayList<>();
+    private final List<RunningAnimation> _runningAnimations = new ArrayList<>();
     private final List<JComponent> _toBeCleaned = new ArrayList<>();
 
 
@@ -48,45 +48,45 @@ class AnimationRunner
             _toBeCleaned.remove(component);
         }
 
-        if ( _animators.isEmpty() && _toBeCleaned.isEmpty() ) {
+        if ( _runningAnimations.isEmpty() && _toBeCleaned.isEmpty() ) {
             _timer.stop();
             // We can remove the instance from the map since it's not needed anymore
             _INSTANCES.remove(_timer.getDelay());
             return;
         }
 
-        for ( ComponentAnimator animator : new ArrayList<>(_animators) )
-            animator.component().ifPresent( component -> {
+        for ( RunningAnimation running : new ArrayList<>(_runningAnimations) )
+            running.component().ifPresent( component -> {
                 ComponentExtension.from(component).clearAnimations();
             });
 
         long now = System.currentTimeMillis();
 
-        for ( ComponentAnimator animator : new ArrayList<>(_animators) )
-            if ( !_run(animator, now, event) ) {
-                _animators.remove(animator);
-                animator.component().ifPresent( _toBeCleaned::add );
+        for ( RunningAnimation running : new ArrayList<>(_runningAnimations) )
+            if ( !_run(running, now, event) ) {
+                _runningAnimations.remove(running);
+                running.component().ifPresent( _toBeCleaned::add );
             }
     }
 
-    private void _add( ComponentAnimator toBeRun ) {
-        Objects.requireNonNull(toBeRun, "Null is not a valid animator!");
-        _animators.add(toBeRun);
+    private void _add( RunningAnimation runningAnimation ) {
+        Objects.requireNonNull(runningAnimation, "Null is not a valid animator!");
+        _runningAnimations.add(runningAnimation);
         if ( !_timer.isRunning() )
             _timer.start();
     }
 
-    boolean _run( ComponentAnimator toBeRun, long now, ActionEvent event )
+    boolean _run( RunningAnimation runningAnimation, long now, ActionEvent event )
     {
-        if ( now < toBeRun.lifeSpan().getStartTimeIn(TimeUnit.MILLISECONDS) )
+        if ( now < runningAnimation.lifeSpan().getStartTimeIn(TimeUnit.MILLISECONDS) )
             return true;
 
-        AnimationStatus status = AnimationStatus.of(toBeRun.lifeSpan(), toBeRun.stride(), event, now);
+        AnimationStatus status = AnimationStatus.of(runningAnimation.lifeSpan(), runningAnimation.stride(), event, now);
         boolean shouldContinue = false;
 
         try {
             long duration = status.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
-            shouldContinue = toBeRun.condition().shouldContinue(status) && duration > 0;
+            shouldContinue = runningAnimation.condition().shouldContinue(status) && duration > 0;
         } catch ( Exception e ) {
             log.warn("An exception occurred while checking if an animation should continue!", e);
             /*
@@ -102,9 +102,9 @@ class AnimationRunner
             */
         }
 
-        Component component = toBeRun.compRef() == null ? null : toBeRun.compRef().get();
+        Component component = runningAnimation.compRef() == null ? null : runningAnimation.compRef().get();
 
-        if ( toBeRun.compRef() != null && component == null )
+        if ( runningAnimation.compRef() != null && component == null )
             return false; // There was a component, but it has been garbage collected.
 
         Runnable requestComponentRepaint = () -> {
@@ -121,9 +121,9 @@ class AnimationRunner
 
         if ( !shouldContinue ) {
             try {
-                status = AnimationStatus.endOf(status.lifeSpan(), toBeRun.stride(), status.event(), toBeRun.currentRepeat());
-                toBeRun.animation().run(status); // We run the animation one last time to make sure the component is in its final state.
-                toBeRun.animation().finish(status); // This method may or may not be overridden by the user.
+                status = AnimationStatus.endOf(status.lifeSpan(), runningAnimation.stride(), status.event(), runningAnimation.currentRepeat());
+                runningAnimation.animation().run(status); // We run the animation one last time to make sure the component is in its final state.
+                runningAnimation.animation().finish(status); // This method may or may not be overridden by the user.
                 // An animation may want to do something when it is finished (e.g. reset the component to its original state).
             } catch ( Exception e ) {
                 log.warn("An exception occurred while executing the finish procedure of an animation!", e);
@@ -144,8 +144,8 @@ class AnimationRunner
         }
 
         try {
-            toBeRun.setCurrentRepeat(status.repeats());
-            toBeRun.animation().run(status);
+            runningAnimation.setCurrentRepeat(status.repeats());
+            runningAnimation.animation().run(status);
         } catch ( Exception e ) {
             log.warn("An exception occurred while executing an animation!", e);
             /*

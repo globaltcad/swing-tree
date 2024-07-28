@@ -147,7 +147,7 @@ public class AnimationDispatcher
      */
     public void go( Animation animation ) {
         RunCondition shouldRun = Optional.ofNullable(_condition).orElse( status -> status.repeats() == 0 );
-        AnimationRunner.add( new ComponentAnimator(
+        AnimationRunner.add( new RunningAnimation(
                 _component,
                 LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),
                 _stride,
@@ -176,7 +176,7 @@ public class AnimationDispatcher
      */
     public void goWithOffset( long offset, TimeUnit unit, Animation animation ) {
         RunCondition shouldRun = Optional.ofNullable(_condition).orElse( status -> status.repeats() == 0 );
-        AnimationRunner.add( new ComponentAnimator(
+        AnimationRunner.add( new RunningAnimation(
                 _component,
                 LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),
                 _stride,
