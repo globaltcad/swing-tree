@@ -1,4 +1,4 @@
-package examples.games.notepicker;
+package examples.games.notepicker.mvi;
 
 public final class Note
 {

@@ -1,4 +1,4 @@
-package examples.games.notepicker;
+package examples.games.notepicker.mvvm;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UIForPanel;

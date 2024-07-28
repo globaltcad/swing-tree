@@ -1,4 +1,4 @@
-package examples.games.notepicker;
+package examples.games.notepicker.mvvm;
 
 import sprouts.Event;
 import sprouts.From;
