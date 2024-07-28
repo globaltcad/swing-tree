@@ -6,7 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.animation.Stride
 import swingtree.threading.EventProcessor
-import swingtree.animation.Animator
+import swingtree.animation.AnimationDispatcher
 import swingtree.animation.Animation
 import swingtree.animation.AnimationStatus
 import swingtree.animation.LifeTime
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
     your animations and then remove them from the scheduler once they are finished.
 
 ''')
-@Subject([Animator, UI, LifeTime])
+@Subject([AnimationDispatcher, UI, LifeTime])
 class Animations_Spec extends Specification
 {
     def setupSpec() {

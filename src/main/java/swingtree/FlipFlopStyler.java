@@ -91,7 +91,7 @@ class FlipFlopStyler<C extends JComponent>
                 _isCurrentlyRunningAnimation = false;
             }
         });
-        Animator.animateFor(lifetime, isOn ? Stride.PROGRESSIVE : Stride.REGRESSIVE, owner)
+        AnimationDispatcher.animateFor(lifetime, isOn ? Stride.PROGRESSIVE : Stride.REGRESSIVE, owner)
                 .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);
     }
 

@@ -4,7 +4,7 @@ import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationStatus;
-import swingtree.animation.Animator;
+import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Painter;
@@ -1394,28 +1394,28 @@ abstract class AbstractDelegate<C extends JComponent>
     /**
      *  Exposes access the animation builder API, where you can define the conditions
      *  under which the animation should be executed and then dispatch the animation to the EDT
-     *  through the {@link Animator#go(Animation)} method.
+     *  through the {@link AnimationDispatcher#go(Animation)} method.
      *
      *  @param duration The duration of the animation.
      *  @param unit The time unit of the duration.
-     *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
+     *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
-    public final Animator animateFor( double duration, TimeUnit unit ) {
+    public final AnimationDispatcher animateFor(double duration, TimeUnit unit ) {
         Objects.requireNonNull(unit);
-        return Animator.animateFor(LifeTime.of(duration, unit), _component());
+        return AnimationDispatcher.animateFor(LifeTime.of(duration, unit), _component());
     }
 
     /**
      *  Exposes access the animation builder API, where you can define the conditions
      *  under which the animation should be executed and then dispatch the animation to the EDT
-     *  through the {@link Animator#go(Animation)} method.
+     *  through the {@link AnimationDispatcher#go(Animation)} method.
      *
      *  @param lifeTime The lifetime of the animation.
-     *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
+     *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
-    public final Animator animateFor( LifeTime lifeTime ) {
+    public final AnimationDispatcher animateFor(LifeTime lifeTime ) {
         Objects.requireNonNull(lifeTime);
-        return Animator.animateFor(lifeTime, _component());
+        return AnimationDispatcher.animateFor(lifeTime, _component());
     }
 
     /**
@@ -1443,7 +1443,7 @@ abstract class AbstractDelegate<C extends JComponent>
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
         Objects.requireNonNull(lifeTime);
         Objects.requireNonNull(animation);
-        Animator.animateFor(lifeTime, _component()).go(animation);
+        AnimationDispatcher.animateFor(lifeTime, _component()).go(animation);
     }
 
     /**

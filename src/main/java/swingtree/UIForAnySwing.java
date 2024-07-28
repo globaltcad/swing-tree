@@ -12,7 +12,7 @@ import sprouts.Action;
 import sprouts.Event;
 import sprouts.*;
 import swingtree.animation.AnimationStatus;
-import swingtree.animation.Animator;
+import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Peeker;
@@ -2267,7 +2267,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
                     styleEvent.subscribe( ()->{
-                        Animator.animateFor(styleLifeTime, thisComponent).go( status ->
+                        AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
                             ComponentExtension.from(thisComponent)
                                 .addAnimatedStyler(status, conf -> styler.style(status, conf))
                         );

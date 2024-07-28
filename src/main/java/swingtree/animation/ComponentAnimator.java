@@ -23,7 +23,7 @@ class ComponentAnimator
     private final @Nullable WeakReference<Component> _compRef;
     private final LifeSpan      _lifeSpan;
     private final Stride        _stride;
-    private final RunCondition _condition;
+    private final RunCondition  _condition;
     private final Animation     _animation;
     private final AtomicLong    _currentRepeat = new AtomicLong(0);
 

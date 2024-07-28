@@ -36,7 +36,7 @@ import java.util.function.Predicate;
  *       })
  *   }</pre>
  */
-public class Animator
+public class AnimationDispatcher
 {
     private final LifeTime                _lifeTime;
     private final Stride                  _stride;
@@ -45,45 +45,45 @@ public class Animator
 
 
     /**
-     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * Creates an {@link AnimationDispatcher} instance which allows you to define the stop condition
      * for an animation as well as an {@link Animation} that will be executed
      * when passed to the {@link #go(Animation)} method.
      *
      * @param lifeTime The schedule that defines when the animation should be executed and for how long.
-     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     * @return An {@link AnimationDispatcher} instance that can be used to define how the animation should be executed.
      */
-    public static Animator animateFor( LifeTime lifeTime ) {
+    public static AnimationDispatcher animateFor( LifeTime lifeTime ) {
         return animateFor( lifeTime, Stride.PROGRESSIVE );
     }
 
     /**
-     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * Creates an {@link AnimationDispatcher} instance which allows you to define the stop condition
      * for an animation as well as an {@link Animation} that will be executed
      * when passed to the {@link #go(Animation)} method.
      *
      * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
-     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     * @return An {@link AnimationDispatcher} instance that can be used to define how the animation should be executed.
      */
-    public static Animator animateFor( LifeTime lifeTime, Stride stride ) {
-        return new Animator( lifeTime, stride, null, null );
+    public static AnimationDispatcher animateFor( LifeTime lifeTime, Stride stride ) {
+        return new AnimationDispatcher( lifeTime, stride, null, null );
     }
 
     /**
-     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * Creates an {@link AnimationDispatcher} instance which allows you to define the stop condition
      * for an animation as well as an {@link Animation} that will be executed
      * when passed to the {@link #go(Animation)} method.
      *
      * @param lifeTime  The schedule that defines when the animation should be executed and for how long.
      * @param component The component that should be repainted after each animation step.
-     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     * @return An {@link AnimationDispatcher} instance that can be used to define how the animation should be executed.
      */
-    public static Animator animateFor( LifeTime lifeTime, Component component ) {
+    public static AnimationDispatcher animateFor( LifeTime lifeTime, Component component ) {
         return animateFor( lifeTime, Stride.PROGRESSIVE, component );
     }
 
     /**
-     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * Creates an {@link AnimationDispatcher} instance which allows you to define the stop condition
      * for an animation as well as an {@link Animation} that will be executed
      * when passed to the {@link #go(Animation)} method.
      *
@@ -91,14 +91,14 @@ public class Animator
      * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
      *                 See {@link Stride} for more information.
      * @param component The component that should be repainted after each animation step.
-     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     * @return An {@link AnimationDispatcher} instance that can be used to define how the animation should be executed.
      */
-    public static Animator animateFor( LifeTime lifeTime, Stride stride, Component component ) {
-        return new Animator( lifeTime, stride, component, null );
+    public static AnimationDispatcher animateFor( LifeTime lifeTime, Stride stride, Component component ) {
+        return new AnimationDispatcher( lifeTime, stride, component, null );
     }
 
 
-    private Animator(
+    private AnimationDispatcher(
         LifeTime               lifeTime,
         Stride                 stride,
         @Nullable Component    component,
@@ -115,9 +115,9 @@ public class Animator
      *
      * @param shouldStop The stop condition for the animation, i.e. the animation will be executed
      *                   until this condition is true.
-     * @return A new {@link Animator} instance that will be executed until the given stop condition is true.
+     * @return A new {@link AnimationDispatcher} instance that will be executed until the given stop condition is true.
      */
-    public Animator until( Predicate<AnimationStatus> shouldStop ) {
+    public AnimationDispatcher until( Predicate<AnimationStatus> shouldStop ) {
         return this.asLongAs( shouldStop.negate() );
     }
 
@@ -126,10 +126,10 @@ public class Animator
      *
      * @param shouldRun The running condition for the animation, i.e. the animation will be executed
      *                  as long as this condition is true.
-     * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
+     * @return A new {@link AnimationDispatcher} instance that will be executed as long as the given running condition is true.
      */
-    public Animator asLongAs( Predicate<AnimationStatus> shouldRun ) {
-        return new Animator(_lifeTime, _stride, _component, status -> {
+    public AnimationDispatcher asLongAs( Predicate<AnimationStatus> shouldRun ) {
+        return new AnimationDispatcher(_lifeTime, _stride, _component, status -> {
                     if ( shouldRun.test(status) )
                         return _condition == null || _condition.shouldContinue(status);
 
