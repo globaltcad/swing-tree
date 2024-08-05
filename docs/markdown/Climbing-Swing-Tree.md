@@ -582,6 +582,13 @@ which are very similar to each other.
 The only difference is that the radius of the expanding circle
 is far larger when the user clicks the button.
 
+Note that the above examples for animations are 
+all entirely view based. If you want to learn more about 
+robust animation design compatible with the `MVI`/`MVL` pattern,
+then [check out this guide](./Modelling-Animations.md)
+which demonstrates how the state and business logic
+of your animations can be modelled by the view model.
+
 ---
 
 # Conclusion #

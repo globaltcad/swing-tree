@@ -70,10 +70,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This means that the component will be repainted whenever the event is fired.
      *
      * @param event The event to which the repaint method of the component will be bound.
-     * @return The JComponent type which will be managed by this builder.
+     * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Observable event ) {
         return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
+    }
+
+    /**
+     *  This method exposes a concise way to bind multiple {@link Observable}s (usually sprouts.Events)
+     *  to the {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
+     *  This means that the component will be repainted whenever any of the events are fired.
+     *
+     * @param first The first event to which the repaint method of the component will be bound.
+     * @param second The second event to which the repaint method of the component will be bound.
+     * @param rest The rest of the events to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Observable first, Observable second, Observable... rest ) {
+        return _with( c -> {
+            first.subscribe( () -> _runInUI(c::repaint) );
+            second.subscribe( () -> _runInUI(c::repaint) );
+            for ( Observable o : rest ) {
+                o.subscribe( () -> _runInUI(c::repaint) );
+            }
+        })._this();
     }
 
     /**
