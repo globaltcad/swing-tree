@@ -31,16 +31,16 @@ import java.util.function.Predicate;
  *  <pre>{@code
  *      .withCells( it -> it
  *          .when( Number.class )
- *          .asText( cell -> cell.valueAsString().orElse("")+" km/h" )
+ *          .asText( cell -> cell.entryAsString()+" km/h" )
  *          .when( String.class )
  *          .as( cell -> {
  *              // do component based rendering:
- *              cell.setRenderer( new JLabel( cell.valueAsString().orElse("") ) );
+ *              return cell.view( new JLabel( cell.entryAsString() ) );
  *              // or do 2D graphics rendering directly:
- *              cell.setRenderer( g -> {
+ *              return cell.renderer(Size.of(200,100), g -> {
  *              	// draw something
- *                  g.setColor( UI.color( cell.valueAsString().orElse("") ) );
- *                  g.fillRect( 0, 0, cell.getComponent().getWidth(), cell.getComponent().getHeight() );
+ *                  g.setColor( UI.color( cell.entryAsString() ) );
+ *                  g.fillRect( 0, 0, 200, 100 );
  *              });
  *          })
  *      )

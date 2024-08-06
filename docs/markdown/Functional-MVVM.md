@@ -43,7 +43,7 @@ how this works in practice:
 ## A simple MVI/MVL example ##
 
 Let's say we have a simple calculator UI with two input fields,
-an operator selector and a result label.
+an operator selector and a result label. <br>
 The full view model code for this example 
 is fairly straight forward:
 
@@ -106,7 +106,7 @@ What distinguishes these records from regular Java beans
 is that they are immutable and have no setters,
 instead they have "withers", which are the equivalent
 to "setters" in the world of immutable data structures
-and functional programming.
+and functional programming. <br>
 Even the `runCalculation` method returns a new instance
 of the `CalculatorViewModel` with the updated output
 record, instead of modifying the existing instance.
@@ -167,7 +167,7 @@ Running this code will render the following UI:
 
 ![Calculator](../img/tutorial/Functional-MVVM-Calculator.png)
 
-Take a moment to read through the code and get a feel for it. <br>
+Take a moment to carefully read through the code and get a feel for it. <br>
 What you may find particularly interesting is the `zoomTo` method.
 It returns a so-called *property lens* that allows you to
 focus on a specific field on the view model and update it
@@ -185,16 +185,30 @@ trigger change events when the focused field actually changes.
 So even if the whole view model is updated, only a change of the focused field
 will trigger a change event in the lens and subsequently in the view.
 
+When you pass a property lens to a UI component builder
+like `textField` or `label`, the component will automatically
+update itself when the focused field changes on the view model,
+and conversely, when the user interacts with the component,
+the change will be propagated to the focused field on the view model. <br>
+So the entire data structure will be updated from the focused field
+upwards to the root view model.
+
 ### Where is the Model? ###
 
-You may have noticed that the example does not include a "Model" class,
-as in the classical MVVM (Model-View-ViewModel) pattern.
-The reason is simply that this example is too basic to require one.
-But in a real-world application you would want to maintain a model
-that holds the business logic and data of the internal application layer 
-like for example a model for application settings, database entities or
-network data. The model would typically be updated by the view model, 
-whereas the view does not interact with the model directly.
+You may have noticed that the example only includes "-ViewModel" classes
+and no "-Model" class as in the classical MVVM (Model-View-ViewModel) pattern. <br>
+This is first and foremost because the MVI/MVL pattern does not
+specify a separate "Model" class like MVVM does. <br>
+But it is also not prohibited to have a separate model class in MVI/MVL. <br>
+The above example however, is too basic to require a separate model class,
+since the view model already holds all the data and business logic
+necessary to model the UI state and behavior. <br>
+But in a real-world application you would want to maintain another model
+class besides the view model that holds data and business logic of a more
+internal application layer like for example a for application 
+settings, database entities or network data. <br>
+This model would then typically be updated by the view model, 
+whereas the view is not allowed to interact with the model directly!
 
 ### Dealing with Lists ###
 
@@ -223,8 +237,9 @@ You can't react to **specific changes** in the list
 like you can with observable lists.
 So when the list change listener in classical MVVM
 reports a removal between the item at index `x` and 
-`y`, SwingTree can update the view efficiently by 
-removing the sub-views for the items at index `x` to `y`.
+the item at index `y`, SwingTree can update the view 
+efficiently by only removing the sub-views for the items 
+at index `x` to `y`. <br>
 But when doing this with a lens on a list field,
 you would have to rebuild all sub-views for the list
 from scratch, which is not very efficient.
@@ -246,7 +261,7 @@ and caching.
 ### More Code Please! ###
 
 If you want to see some fully executable examples
-of the SwingTree based MVI architecture in action,
+of the SwingTree based MVI/MVL architecture in action,
 check out the following in this project:
 
 - [A Calculator](../../src/test/java/examples/calculator/mvi/CalculatorView.java)
@@ -257,15 +272,17 @@ check out the following in this project:
 
 So what is the difference between MVI and MVL? <br>
 
-Now after we have seen some example code in SwingTree, 
-let's take a step back and again look at the theory behind it.
-The SwingTree based example code defined above is what we call Model-View-Lenses,
-a very close derivative of the Model-View-Intent architecture pattern, 
-where we route the intent of the user directly to the view model
-through property lenses, instead of going through a separate
-intent layer. <br>
+In our example, we are using property lenses to make the MVI pattern
+more similar to the classical MVVM pattern, where the view model
+is updated directly by the view. <br>
+This however is very different to the classical
+MVI design pattern, where the view model is updated
+solely by the "intent" layer. <br>
+So in that sense, the MVL design is also a bit of a 
+hybrid between MVVM and MVI.
 
-But let's focus on the MVI pattern for a moment:
+But let's take a step back <br>
+and take a closer look at the theory behind MVI:
 
 MVI is a relatively new architecture pattern that is used a lot in Android development.
 It was inspired by [cycle.js](https://cycle.js.org/) by [André Medeiros (Staltz)](https://twitter.com/andrestaltz) 
@@ -279,10 +296,10 @@ events = view( model( intent( events ) ) )
 
 - `intent()`: This function takes the input from the user 
   (i.e. UI events, like click events) and translate it to “something” 
-  that will be passed as parameter to `model()` function.
-  This could be a simple string to set a value of the model to or 
-  more complex data structure like an Object. 
-  This function exists to translate the user input to a format that
+  that will be passed as parameter to the `model()` function.
+  This could be a simple string to update a field in the model, or 
+  an update a more complex data structure like a list or map. 
+  The purpose of this is to translate the user input to a format that
   represents their intention to change the model.
   So it is also where we have parts of our business logic.
 - `model()`: The `model()` function takes the output from `intent()` as 
@@ -334,8 +351,8 @@ and call site checking, like JavaScript, where the pattern initially originated 
 it is not necessary in Java to implement this sort of action routing, 
 since we can safely track where each wither / update method is called from.
 
-This is also true for the `model()` function, which in the example is represented
-by the `runCalculation()` method of the view model. <br>
+This is also true for the `model()` function, which in our example is sort of
+represented by the `runCalculation()` method of the view model. <br>
 The GUI components in the original MVI pattern would not call the `model()` function
 directly, but instead dispatch actions to the `intent()` function, which then 
 calls the `model()`function to get the updated model. <br>
