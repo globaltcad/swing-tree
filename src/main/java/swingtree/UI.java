@@ -436,7 +436,7 @@ public final class UI extends UIFactoryMethods
     public enum NoiseType implements UIEnum<NoiseType>, NoiseFunction
     {
         CELLS(NoiseFunctions::cells),
-        FIBERS(NoiseFunctions::fibery),
+        FABRIC(NoiseFunctions::fabric),
         GRAINY(NoiseFunctions::grainy),
         HARD_SPOTS(NoiseFunctions::hardSpots),
         HARD_TOPOLOGY(NoiseFunctions::hardTopology),
