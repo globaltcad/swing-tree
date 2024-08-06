@@ -3047,7 +3047,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .noise( conf -> conf
                                  .colors("dark purple", "dark skyblue", "bright skyblue")
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .function(UI.NoiseType.FIBERS)
+                                 .function(UI.NoiseType.FABRIC)
                                  .offset(10, 15)
                              )
                          )

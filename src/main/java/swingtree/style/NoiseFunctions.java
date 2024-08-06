@@ -111,7 +111,7 @@ public final class NoiseFunctions
         return sum;
     }
 
-    public static float fibery( float xIn, float yIn ) {
+    public static float fabric( float xIn, float yIn ) {
         float scale = 5;
         int kernelSize = 4;
         double sum = _coordinateToFiberValue(kernelSize, xIn/scale, yIn/scale);
