@@ -463,7 +463,7 @@ you may also want to check out the following pieces of documentation:
 
 ## Harvesting Fruit ##
 
-The final step in mastering SwingTree are animations.
+The final step in mastering SwingTree are animations. <br>
 Yes you read that right, SwingTree supports animations
 and advanced custom rendering for all Swing components 
 out of the box!
@@ -587,7 +587,7 @@ all entirely view based. If you want to learn more about
 robust animation design compatible with the `MVI`/`MVL` pattern,
 then [check out this guide](./Modelling-Animations.md)
 which demonstrates how the state and business logic
-of your animations can be modelled by the view model.
+of your animations can be modelled in the view model.
 
 ---
 

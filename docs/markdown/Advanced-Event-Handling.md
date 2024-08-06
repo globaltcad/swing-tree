@@ -10,7 +10,7 @@ is all about.
 ## Custom Events ##
 
 Advanced event handling requires custom events
-which are all based on one fundamental type, the `Observable` interface.
+which are all based on one fundamental type, the `sprouts.Observable` interface. <br>
 A classic representation of the observer pattern.
 It defines a thing that allows for the registration of `Observer`s
 which are notified when something happens.
@@ -22,7 +22,10 @@ The most common and basic type of `Observable` is the `Event` type,
 which is a trigger-able event which you can instantiate using `Event.create()`.
 But there are other types of `Observable`s as well, such as the `Val` and `Var`
 properties, which are wrapper types used for modelling the state of your view models.
-([Click here](Advanced-MVVM.md) for more information about MVVM in SwingTree)
+
+If you want to know more about design patterns for decoupling your UI
+from its business logic, then [check out this guide about MVI/MVL based modelling](Functional-MVVM.md),
+or [click here](Advanced-MVVM.md) for more information about classic MVVM.
 
 ## View Events ##
 
@@ -86,7 +89,7 @@ by the GUI thread instead of the application thread.
 An application event is an event whose handling ought to be executed by the
 application thread instead of the GUI thread.
 This is what the `on` method is for.
-Take a look at it's signature:
+Take a look at its signature:
 
 `<E extends Observable> I on(E event, Action<ComponentDelegate<C, E>> action)`
 
