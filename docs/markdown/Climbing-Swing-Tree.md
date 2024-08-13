@@ -327,6 +327,26 @@ Also note how the view model is actually a record type.
 Which means that it is fully immutable and therefore much 
 easier to reason about and test than a mutable class.
 
+Here a diagram illustrating the flow of state changes in this design:
+
+```mermaid
+---
+title: MVL
+
+---
+graph LR;
+    V-->P(Property Lenses);
+    V-->P;
+    V-->P;
+
+    P-->V(View);
+    P-->V;
+    P-->V;
+
+    P== new model ==>VM(Immutable View Model);
+    VM== new model ==>P;
+```
+
 If you want to dive deeper into doing MVI/MVL in Swing-Tree,
 check out the [MVI/MVL guide](./Functional-MVVM.md).<br>
 If you are interested in the traditional MVVM pattern, then
