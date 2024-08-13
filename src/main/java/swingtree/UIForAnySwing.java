@@ -16,6 +16,7 @@ import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.*;
 import swingtree.api.mvvm.ViewSupplier;
+import swingtree.event.AdvancedEventDispatcher;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.LayoutConstraint;
@@ -3508,11 +3509,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
         return _with( c -> {
-                    c.addMouseListener(new MouseAdapter() {
+                    MouseListener listener = new MouseAdapter() {
                         @Override public void mouseEntered(MouseEvent e) {
                             _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(c, e )));
                         }
-                    });
+                    };
+                    c.addMouseListener(listener);
+                    AdvancedEventDispatcher.addMouseEnterListener(c, listener);
                 })
                 ._this();
     }
@@ -3529,11 +3532,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
         return _with( c -> {
-                    c.addMouseListener(new MouseAdapter() {
+                    MouseListener listener = new MouseAdapter() {
                         @Override public void mouseExited(MouseEvent e) {
                             _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(c, e )));
                         }
-                    });
+                    };
+                    c.addMouseListener(listener);
+                    AdvancedEventDispatcher.addMouseExitListener(c, listener);
                 })
                 ._this();
     }

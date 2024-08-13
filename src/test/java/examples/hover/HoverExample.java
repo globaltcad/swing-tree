@@ -1,44 +1,49 @@
 package examples.hover;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Action;
+import swingtree.ComponentMouseEventDelegate;
 import swingtree.UI;
 
 import javax.swing.*;
 
-import java.awt.*;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.AWTEventListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import static swingtree.UI.*;
 
+// https://stackoverflow.com/questions/11091531/swing-mouse-listeners-being-intercepted-by-child-components
+
+@NullMarked
 public class HoverExample extends JPanel {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(HoverExample.class);
 
     private static final Color COLOR_1 = new Color(189, 189, 189);
-    private static final Color COLOR_1_HOVER = new Color(253, 100, 100);
-
     private static final Color COLOR_2 = new Color(139, 139, 139);
+    private static final Color COLOR_1_HOVER = new Color(253, 100, 100);
     private static final Color COLOR_2_HOVER = new Color(100, 207, 253);
+    private static final Color COLOR_3_HOVER = new Color(215, 253, 100);
 
 
     public HoverExample() {
-
-        of(this).withLayout("wrap 2, fill", "20[100]20[100]20", "20[100]20[100]20")
-            .withBackground(COLOR_1)
-            .onMouseEnter(delegate -> delegate.getComponent().setBackground(COLOR_1_HOVER))
-            .onMouseExit(delegate -> delegate.getComponent().setBackground(COLOR_1))
-
-            .add(GROW,panel().withBackground(COLOR_2)
-                .onMouseEnter(delegate -> delegate.getComponent().setBackground(COLOR_2_HOVER))
-                .onMouseExit(delegate -> delegate.getComponent().setBackground(COLOR_2))
-                .add(label("With listener"))
-            )
-            .add(GROW, panel().withBackground(COLOR_2).add(label("No listener")))
-            .add(GROW, panel().withBackground(COLOR_2).add(label("No listener")))
-            .add(GROW, panel().withBackground(COLOR_2).add(label("No listener")));
+        of(this).withLayout("wrap 2, fill", "0[100]20[100]20", "20[100]20[100]20")
+                .withBackground(COLOR_1)
+                .onMouseEnter(changeBackground(COLOR_1_HOVER))
+                .onMouseExit(changeBackground(COLOR_1))
+                .add(GROW, panel().withBackground(COLOR_2)
+                        .peek(p -> p.addMouseListener(hover(COLOR_2_HOVER)))
+                        .add(label("With listener"))
+                )
+                .add(GROW, panel().withBackground(COLOR_2).add(label("No listener")))
+                .add(GROW, panel().withBackground(COLOR_2).add(label("No listener")))
+                .add(GROW, panel().withBackground(COLOR_2).add(label("With listener"))
+                        .onMouseEnter(changeBackground(COLOR_3_HOVER))
+                        .onMouseExit(changeBackground(COLOR_2))
+                );
 
     }
 
@@ -49,4 +54,30 @@ public class HoverExample extends JPanel {
         });
     }
 
+    private static <C extends JComponent> Action<ComponentMouseEventDelegate<C>> changeBackground(Color color) {
+        return delegate -> {
+            delegate.getComponent().setBackground(color);
+        };
+    }
+
+    private static MouseListener hover(final Color color) {
+        return new MouseAdapter() {
+            private final Color hoverColor = color;
+            private @Nullable Color oldColor = null;
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                oldColor = e.getComponent().getBackground();
+                e.getComponent().setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (oldColor != null) {
+                    e.getComponent().setBackground(oldColor);
+                    oldColor = null;
+                }
+            }
+        };
+    }
 }
