@@ -47,11 +47,11 @@ dependencies {
         errorprone "com.google.errorprone:error_prone_core:2.9.+"
 
     implementation group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.27.0'
-    implementation group: 'org.jspecify', name: 'jspecify', version: '0.3.0'
+    implementation group: 'org.jspecify', name: 'jspecify', version: '[1+, )'
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M7'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M8'
     api group: 'com.github.weisj',     name: 'jsvg',            version: '1.4.0'
 
     // Logging :
