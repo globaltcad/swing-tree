@@ -28,6 +28,36 @@ update the properties when the user interacts with the UI.
 This **bidirectional observer/listener pattern** is called **data binding**,
 and it is the fundamental building block of `MVVM` application development.
 
+Here a diagram illustrating the flow of state changes in this design:
+
+```mermaid
+---
+title: MVVM
+
+---
+graph RL;
+    subgraph View
+        x
+        y
+        z
+    end
+    subgraph View Model
+        X
+        Y
+        Z
+    end
+    
+    x --> X(P1)
+    X --> x(C1)
+    
+    y --> Y(P2)
+    Y --> y(C2)
+    
+    z --> Z(P3)
+    Z --> z(C3)
+```
+
+But enough theory! <br>
 Let's consider the following business logic, which we will call "**view model**"
 from now on in accordance with the `MVVM` design and naming conventions:
 

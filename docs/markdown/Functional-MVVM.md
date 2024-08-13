@@ -374,6 +374,70 @@ check out the following links:
 - [MVI Design Pattern on Android](https://xizzhu.me/post/2021-06-21-android-mvi-kotlin-coroutines-flow-compose/)
 - [Reactive Android Apps with MVI](https://hannesdorfmann.com/android/mosby3-mvi-1/)
 
+### Patterns Overview ###
+
+Here a visual overview over the 3 architectural patterns discussed in this guide.
+
+```mermaid
+---
+title: MVL
+
+---
+  graph LR;
+      V-->P(Property Lenses);
+      V-->P;
+      V-->P;
+      
+      P-->V(View);
+      P-->V;
+      P-->V;
+      
+      P== new model ==>VM(Immutable View Model);
+      VM== new model ==>P;
+```
+
+```mermaid
+---
+title: MVI
+
+---
+  graph LR;
+      V== events ==>I(Intent);
+      
+      I== updates ==>M(Model);
+      
+      M== re-render new model ==>V(View);
+
+```
+
+```mermaid
+---
+title: MVVM
+
+---
+graph RL;
+    subgraph View
+        x
+        y
+        z
+    end
+    subgraph View Model
+        X
+        Y
+        Z
+    end
+    
+    x --> X(P1)
+    X --> x(C1)
+    
+    y --> Y(P2)
+    Y --> y(C2)
+    
+    z --> Z(P3)
+    Z --> z(C3)
+```
+
+
 
 
 
