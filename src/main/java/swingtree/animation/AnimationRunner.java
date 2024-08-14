@@ -34,7 +34,8 @@ class AnimationRunner
     private final Timer _timer;
 
     private final List<RunningAnimation> _runningAnimations = new ArrayList<>();
-    private final List<JComponent> _toBeCleaned = new ArrayList<>();
+    private final List<Runnable>         _toBeFinished = new ArrayList<>();
+    private final List<JComponent>       _toBeCleaned = new ArrayList<>();
 
 
     private AnimationRunner( int delay ) {
@@ -43,12 +44,21 @@ class AnimationRunner
 
     private void _run( ActionEvent event ) {
 
+        for ( Runnable finisher : new ArrayList<>(_toBeFinished) ) {
+            try {
+                finisher.run();
+            } catch ( Exception e ) {
+                log.warn( "Error finishing animation!", e );
+            }
+            _toBeFinished.remove(finisher);
+        }
+
         for ( JComponent component : new ArrayList<>(_toBeCleaned) ) {
             ComponentExtension.from(component).clearAnimations();
             _toBeCleaned.remove(component);
         }
 
-        if ( _runningAnimations.isEmpty() && _toBeCleaned.isEmpty() ) {
+        if ( _runningAnimations.isEmpty() && _toBeFinished.isEmpty() && _toBeCleaned.isEmpty() ) {
             _timer.stop();
             // We can remove the instance from the map since it's not needed anymore
             _INSTANCES.remove(_timer.getDelay());
@@ -63,7 +73,7 @@ class AnimationRunner
         long now = System.currentTimeMillis();
 
         for ( RunningAnimation running : new ArrayList<>(_runningAnimations) )
-            if ( !_run(running, now, event) ) {
+            if ( !_runAndCheck(running, now, event) ) {
                 _runningAnimations.remove(running);
                 running.component().ifPresent( _toBeCleaned::add );
             }
@@ -76,7 +86,7 @@ class AnimationRunner
             _timer.start();
     }
 
-    boolean _run( RunningAnimation runningAnimation, long now, ActionEvent event )
+    boolean _runAndCheck( RunningAnimation runningAnimation, long now, ActionEvent event )
     {
         if ( now < runningAnimation.lifeSpan().getStartTimeIn(TimeUnit.MILLISECONDS) )
             return true;
@@ -123,8 +133,12 @@ class AnimationRunner
             try {
                 status = AnimationStatus.endOf(status.lifeSpan(), runningAnimation.stride(), status.event(), runningAnimation.currentRepeat());
                 runningAnimation.animation().run(status); // We run the animation one last time to make sure the component is in its final state.
-                runningAnimation.animation().finish(status); // This method may or may not be overridden by the user.
-                // An animation may want to do something when it is finished (e.g. reset the component to its original state).
+                AnimationStatus finishingStatus = status;
+                _toBeFinished.add(()->{
+                    runningAnimation.animation().finish(finishingStatus); // This method may or may not be overridden by the user.
+                    // An animation may want to do something when it is finished (e.g. reset the component to its original state).
+                    requestComponentRepaint.run();
+                });
             } catch ( Exception e ) {
                 log.warn("An exception occurred while executing the finish procedure of an animation!", e);
                 /*
