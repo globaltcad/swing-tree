@@ -162,9 +162,10 @@ final class StyleInstaller<C extends JComponent>
             };
         }
 
+        StyleConf oldStyle = engine.getComponentConf().style();
         if ( !force ) {
             // We check if it makes sense to apply the new style:
-            if ( !backgroundWasSetSomewhereElse && engine.getComponentConf().style().equals(newStyle) )
+            if ( !backgroundWasSetSomewhereElse && oldStyle.equals(newStyle) )
                 doInstallation = false;
         }
 
@@ -792,7 +793,7 @@ final class StyleInstaller<C extends JComponent>
         try {
             other = (JComponent) type.newInstance();
         } catch (Exception e) {
-            log.warn(
+            log.debug(
                     "Failed to instantiate component '"+type.getName()+"' as part " +
                     "part of an attempt to get the default color of said type!",
                     e

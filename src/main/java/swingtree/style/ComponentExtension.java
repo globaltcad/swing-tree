@@ -289,7 +289,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param state The {@link AnimationStatus} which defines when the animation is active.
      * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
      */
-    public void addAnimatedStyler(AnimationStatus state, Styler<C> styler ) {
+    public void addAnimatedStyler( AnimationStatus state, Styler<C> styler ) {
         _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);
     }
 
