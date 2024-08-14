@@ -6,6 +6,8 @@ import net.miginfocom.layout.DimConstraint;
 import net.miginfocom.layout.UnitValue;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.components.JIcon;
@@ -46,6 +48,8 @@ import java.util.Optional;
  */
 final class StyleInstaller<C extends JComponent>
 {
+    private static final Logger log = LoggerFactory.getLogger(StyleInstaller.class);
+
     private DynamicLaF        _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
     private @Nullable Color   _outSideBackgroundColor    = null;
     private @Nullable Color   _lastInsideBackgroundColor = null;
@@ -133,7 +137,19 @@ final class StyleInstaller<C extends JComponent>
         StyleConf            newStyle,
         final boolean        force
     ) {
-        Runnable backgroundSetter = ()->{};
+        Runnable backgroundSetter = ()->{
+            if ( owner.getBackground() == UI.Color.UNDEFINED )
+                _establishDefaultBackgroundColorFor(owner);
+            /*
+                The default background setter ensures that the background
+                cannot be in an undefined state, we use the identity of the
+                UI.Color.UNDEFINED constant to check this.
+
+                Note that the undefined background is a state
+                unique to a certain style state where we need to override
+                the native look and feel...
+            */
+        };
 
         boolean doInstallation = true;
         boolean backgroundWasSetSomewhereElse = this.backgroundWasChangedSomewhereElse(owner);
@@ -146,9 +162,10 @@ final class StyleInstaller<C extends JComponent>
             };
         }
 
+        StyleConf oldStyle = engine.getComponentConf().style();
         if ( !force ) {
             // We check if it makes sense to apply the new style:
-            if ( !backgroundWasSetSomewhereElse && engine.getComponentConf().style().equals(newStyle) )
+            if ( !backgroundWasSetSomewhereElse && oldStyle.equals(newStyle) )
                 doInstallation = false;
         }
 
@@ -219,8 +236,10 @@ final class StyleInstaller<C extends JComponent>
                     owner.setOpaque(_initialIsOpaque);
                 _initialIsOpaque = null;
             }
-            if ( !isStyled )
+            if ( !isStyled ) {
+                backgroundSetter.run();
                 return _updateEngine(owner, engine, newStyle, marginCorrection);
+            }
         }
 
         if ( _initialIsOpaque == null )
@@ -766,6 +785,25 @@ final class StyleInstaller<C extends JComponent>
                 _makeAllChildrenTransparent(jChild);
             }
         }
+    }
+
+    private void _establishDefaultBackgroundColorFor(JComponent owner) {
+        Class<?> type = owner.getClass();
+        JComponent other = null;
+        try {
+            other = (JComponent) type.newInstance();
+        } catch (Exception e) {
+            log.debug(
+                    "Failed to instantiate component '"+type.getName()+"' as part " +
+                    "part of an attempt to get the default color of said type!",
+                    e
+                );
+        }
+        Color defaultBackgroundColor = null;
+        if ( other != null ) {
+            defaultBackgroundColor = other.getBackground();
+        }
+        owner.setBackground(defaultBackgroundColor);
     }
 
 }

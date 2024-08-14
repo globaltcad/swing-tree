@@ -1074,7 +1074,7 @@ class Opaqueness_Styles_Spec extends Specification
                         state.progress() == 1 ? styler.style(it) : it
                     )
 
-        and : 'We build the underlying menu:'
+        and : 'We build the underlying text pane:'
             var textPane = ui.get(JTextPane)
 
         expect : """
@@ -1082,6 +1082,7 @@ class Opaqueness_Styles_Spec extends Specification
             So the parent component will not be visible behind the background.
         """
             textPane.isOpaque() == true
+            textPane.getBackground() == new JTextPane().getBackground()
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
             isOn.set(true)
@@ -1090,7 +1091,7 @@ class Opaqueness_Styles_Spec extends Specification
             UI.sync()
 
         then : """
-            The menu has the expected opaqueness because the `isOn` flag is true, which translates to 
+            The text pane has the expected opaqueness because the `isOn` flag is true, which translates to 
             an animation progress transitioning to 1,
             causing the various styles to take effect!
         """
@@ -1107,6 +1108,7 @@ class Opaqueness_Styles_Spec extends Specification
             We are back to the initial state where the text pane is now opaque again
         """
             textPane.isOpaque() == true
+            textPane.getBackground() == new JTextPane().getBackground()
 
         where :
             opaque | styler
@@ -1120,6 +1122,83 @@ class Opaqueness_Styles_Spec extends Specification
             false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "transparent green"))}
             true   | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "blue")}
             false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "transparent blue")}
+    }
+
+    def 'A `JComboBox` (which typically opaque) may become non-opaque when transitioning to various styles.'(
+        boolean opaque, Styler<?> styler
+    ) {
+        reportInfo """
+ 
+            A simple combo box is a component that is opaque by default,
+            but when you style it through the style API then it may
+            become non-opaque/transparent to accommodate that style.
+            
+            When reverting the style, the openness should revert to the
+            initial opaqueness.
+            This test demonstrates that it may or may not change its opaqueness
+            depending on what kind of styles are applied to it.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the combo box based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.comboBox()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) ->
+                        state.progress() == 1 ? styler.style(it) : it
+                    )
+
+        and : 'We then build the combo box:'
+            var comboBox = ui.get(JComboBox)
+
+        expect : """
+            The component has to be opaque initially because it was not yet styled and it is also opaque by default.
+            This flag tells us that the parent component will not be visible behind the background.
+        """
+            comboBox.isOpaque() == true
+            comboBox.getBackground() == new JComboBox().getBackground()
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The combo box has the expected opaqueness because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the various styles to take effect!
+            
+            We check if the combo box has the correct opaqueness:
+        """
+            comboBox.isOpaque() == opaque
+
+        when : """
+            We now go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the text pane is now opaque again
+        """
+            comboBox.isOpaque() == true
+            comboBox.getBackground() == new JComboBox().getBackground()
+
+        where :
+            opaque | styler
+            true   | {it}
+            true   | {it.backgroundColor("red")}
+            false  | {it.backgroundColor("transparent red")}
+            true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            false  | {it.backgroundColor(UI.color(255,255,255, 254))}
+            false  | {it.backgroundColor(UI.Color.TRANSPARENT)}
+            true   | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green"))}
+            false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "transparent green"))}
+            true   | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "blue")}
+            false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "transparent blue")}
+            true   | {it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}
     }
 
     def 'A plain button will be opaque, even if it has a custom painter.'(
