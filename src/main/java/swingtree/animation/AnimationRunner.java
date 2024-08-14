@@ -44,28 +44,28 @@ class AnimationRunner
 
     private void _run( ActionEvent event ) {
 
-        for ( Runnable finisher : new ArrayList<>(_toBeFinished) ) {
+        // We call "Animation.finish(..)" and trigger the last repaint cycle for components with terminated animations:
+        for ( Runnable finisher : _toBeFinished )
             try {
                 finisher.run();
             } catch ( Exception e ) {
                 log.warn( "Error finishing animation!", e );
             }
-            _toBeFinished.remove(finisher);
-        }
+        _toBeFinished.clear();
 
-        for ( JComponent component : new ArrayList<>(_toBeCleaned) ) {
+        // In a previous run the animation terminated, so we remove animations from the component state:
+        for ( JComponent component : _toBeCleaned )
             ComponentExtension.from(component).clearAnimations();
-            _toBeCleaned.remove(component);
-        }
+        _toBeCleaned.clear();
 
-        if ( _runningAnimations.isEmpty() && _toBeFinished.isEmpty() && _toBeCleaned.isEmpty() ) {
+        if ( _runningAnimations.isEmpty() ) {
             _timer.stop();
             // We can remove the instance from the map since it's not needed anymore
             _INSTANCES.remove(_timer.getDelay());
             return;
         }
 
-        for ( RunningAnimation running : new ArrayList<>(_runningAnimations) )
+        for ( RunningAnimation running : _runningAnimations )
             running.component().ifPresent( component -> {
                 ComponentExtension.from(component).clearAnimations();
             });
