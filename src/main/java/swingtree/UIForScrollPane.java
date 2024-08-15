@@ -6,6 +6,7 @@ import swingtree.api.Configurator;
 import swingtree.components.JScrollPanels;
 import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -64,7 +65,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
     @Override
     protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable Object constraints ) {
         if ( _configurator != null ) {
-            addedComponent = new ScrollableBox(addedComponent, _configurator);
+            addedComponent = new ScrollableBox(thisComponent, addedComponent, _configurator);
         }
         super._addComponentTo(thisComponent, addedComponent, constraints);
     }
@@ -78,16 +79,40 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
      */
     private static class ScrollableBox extends UI.Box implements Scrollable
     {
-        private final JComponent _child;
+        private final JScrollPane _parent;
+        private final JComponent  _child;
         private final Configurator<ScrollableComponentDelegate> _configurator;
 
-        ScrollableBox( JComponent child, Configurator<ScrollableComponentDelegate> configurator ) {
-            _child    = child;
+        ScrollableBox( JScrollPane parent, JComponent child, Configurator<ScrollableComponentDelegate> configurator ) {
+            _parent       = parent;
+            _child        = child;
             _configurator = configurator;
         }
 
         private ScrollableComponentDelegate _getConf() {
-            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.none();
+            int averageBlockIncrement  = 10;
+            int averageUnitIncrement   = 10;
+            try {
+                int verticalBlockIncrement   = _parent.getVerticalScrollBar().getBlockIncrement();
+                int horizontalBlockIncrement = _parent.getHorizontalScrollBar().getBlockIncrement();
+                averageBlockIncrement = (verticalBlockIncrement + horizontalBlockIncrement) / 2;
+            } catch ( Exception e ) {
+                log.error("Error while calculating average block increment for scrollable component.", e);
+            }
+            try {
+                int verticalUnitIncrement   = _parent.getVerticalScrollBar().getUnitIncrement();
+                int horizontalUnitIncrement = _parent.getHorizontalScrollBar().getUnitIncrement();
+                averageUnitIncrement = (verticalUnitIncrement + horizontalUnitIncrement) / 2;
+            } catch ( Exception e ) {
+                log.error("Error while calculating average unit increment for scrollable component.", e);
+            }
+            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
+                                                            _parent, _child,
+                                                            Size.of(_child.getPreferredSize()),
+                                                            averageUnitIncrement,
+                                                            averageBlockIncrement,
+                                                            false, false
+                                                       );
             try {
                 delegate = _configurator.configure(delegate);
             } catch ( Exception e ) {
