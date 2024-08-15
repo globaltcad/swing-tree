@@ -2387,6 +2387,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         return new UIForScrollPane<>(new BuilderState(UI.ScrollPane.class, UI.ScrollPane::new));
     }
 
+    public static UIForScrollPane<JScrollPane> scrollPane(
+        Configurator<ScrollableComponentDelegate> configurator
+    ) {
+        return new UIForScrollPane<>(new BuilderState(UI.ScrollPane.class, UI.ScrollPane::new), configurator);
+    }
+
     /**
      *  Use this to create a builder for the provided {@link JScrollPanels} component.
      *

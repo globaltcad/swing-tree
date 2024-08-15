@@ -12,6 +12,7 @@ class Constants
     static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();
     static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
 
+    static final ScrollIncrementSupplier SCROLLABLE_INCREMENT_SUPPLIER_NONE = (viewRectangle, orientation, direction) -> 0;
     static final Painter PAINTER_NONE = new Painter() {
                                             @Override
                                             public void paint(Graphics2D g2d) {
