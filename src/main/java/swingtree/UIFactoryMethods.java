@@ -2383,15 +2383,22 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      * @see #scrollPane(Configurator) for a more advanced version of this method
-     *       where you can configure how the scroll pane should
-     *       behave in relation to its contained component.
+     *       where you can configure how the contents of the scroll pane should behave
+     *       in the viewport.
      */
     public static UIForScrollPane<JScrollPane> scrollPane() {
         return new UIForScrollPane<>(new BuilderState(UI.ScrollPane.class, UI.ScrollPane::new));
     }
 
     /**
-     * Here a short code snippet deomstrating how this factory method
+     * Allows you to create a declarative builder for the {@link JScrollPane} component type,
+     * where you can also configure how the contained component should behave in the scroll pane viewport
+     * through a {@link Configurator} lambda. <br>
+     * The configurator receives a {@link ScrollableComponentDelegate} on which you can define
+     * properties like the preferred viewport size, unit increment, block increment, and whether the component should
+     * fit the width or height of the viewport. <br>
+     * <p>
+     * Here a short code snippet demonstrating how this factory method
      * is typically used:
      * <pre>{@code
      * UI.panel()
@@ -2406,7 +2413,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *     )
      * )
      * }</pre>
-     * @param configurator The configurator which allows you to configure the scroll pane.
+     * Note that these properties are directly translated to an underlying implementation
+     * of the {@link Scrollable} interface which will wrap your content component
+     * seamlessly in the scroll pane when added using one of the various {@code add} methods. <br>
+     * <b>So you do not have to implement the {@link Scrollable} interface yourself!</b><br>
+     * <p>
+     * Note that the provided {@link Configurator} will be called
+     * for every call to a method of the underlying {@link javax.swing.Scrollable}
+     * component implementation, so the settings you provide can
+     * also change dynamically based on the context captured by the lambda.
+     *
+     * @param configurator A configurator for configuring the scrollable content of the scroll pane.
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
     public static UIForScrollPane<JScrollPane> scrollPane(
