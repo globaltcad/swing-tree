@@ -2382,11 +2382,33 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  }</pre>
      *
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
+     * @see #scrollPane(Configurator) for a more advanced version of this method
+     *       where you can configure how the scroll pane should
+     *       behave in relation to its contained component.
      */
     public static UIForScrollPane<JScrollPane> scrollPane() {
         return new UIForScrollPane<>(new BuilderState(UI.ScrollPane.class, UI.ScrollPane::new));
     }
 
+    /**
+     * Here a short code snippet deomstrating how this factory method
+     * is typically used:
+     * <pre>{@code
+     * UI.panel()
+     * .withBorderTitled("Scrollable Panel")
+     * .add(
+     *     UI.scrollPane(conf -> conf
+     *         .prefSize(400, 300)
+     *         .unitIncrement(20)
+     *         .blockIncrement(50)
+     *         .fitWidth(true)
+     *         .fitHeight(false)
+     *     )
+     * )
+     * }</pre>
+     * @param configurator The configurator which allows you to configure the scroll pane.
+     * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
+     */
     public static UIForScrollPane<JScrollPane> scrollPane(
         Configurator<ScrollableComponentDelegate> configurator
     ) {
