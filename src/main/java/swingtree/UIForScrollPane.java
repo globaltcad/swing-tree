@@ -1,5 +1,6 @@
 package swingtree;
 
+import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.api.Configurator;
@@ -16,7 +17,9 @@ import java.awt.Dimension;
 import java.util.Objects;
 
 /**
- *  A SwingTree builder node designed for configuring {@link JScrollPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JScrollPane} instances. <br>
+ *  Use {@link UI#scrollPane()} or {@link UI#scrollPane(Configurator)} to create a new instance
+ *  of this builder type.
  */
 public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScrollPane<UIForScrollPane<P>,P>
 {
@@ -62,14 +65,34 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         return new UIForScrollPane<>(newState);
     }
 
+    /**
+     *  We override this method to wrap the added component in a {@link ScrollableBox} instance
+     *  in case a {@link Configurator} for {@link ScrollableComponentDelegate} instances was provided.
+     *  We then use the continuously supplied {@link ScrollableComponentDelegate} objects
+     *  to satisfy the needs of the {@link Scrollable} implementation of the {@link ScrollableBox}. <br>
+     *  <b>
+     *      This way the user can take advantage of the Scrollable
+     *      interface without the need for a custom implementation
+     *  </b>
+     *
+     * @param thisComponent  The component which is wrapped by this builder.
+     * @param addedComponent A component instance which ought to be added to the wrapped component type.
+     * @param constraints    The layout constraint which ought to be used to add the component to the wrapped component type.
+     */
     @Override
     protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable Object constraints ) {
         if ( _configurator != null ) {
-            addedComponent = new ScrollableBox(thisComponent, addedComponent, _configurator);
+            ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);
+            if ( constraints != null ) {
+                wrapper.add(addedComponent, constraints);
+            } else {
+                wrapper.add(addedComponent);
+            }
+            super._addComponentTo(thisComponent, wrapper, null);
         }
-        super._addComponentTo(thisComponent, addedComponent, constraints);
+        else
+            super._addComponentTo(thisComponent, addedComponent, constraints);
     }
-
 
     /**
      *  A simple internal wrapper type for {@link JComponent} instances that are to be used as the content
@@ -84,12 +107,13 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         private final Configurator<ScrollableComponentDelegate> _configurator;
 
         ScrollableBox( JScrollPane parent, JComponent child, Configurator<ScrollableComponentDelegate> configurator ) {
+            setLayout(new MigLayout("fill, ins 0, hidemode 2, gap 0"));
             _parent       = parent;
             _child        = child;
             _configurator = configurator;
         }
 
-        private ScrollableComponentDelegate _getConf() {
+        private ScrollableComponentDelegate _createNewScrollableConf() {
             int averageBlockIncrement  = 10;
             int averageUnitIncrement   = 10;
             try {
@@ -153,7 +177,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public Dimension getPreferredScrollableViewportSize() {
-            ScrollableComponentDelegate delegate = _getConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
                 return delegate.preferredSize().toDimension();
             } catch ( Exception e ) {
@@ -164,7 +188,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public int getScrollableUnitIncrement( java.awt.Rectangle visibleRect, int orientation, int direction ) {
-            ScrollableComponentDelegate delegate = _getConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
                 Bounds bounds = Bounds.of(visibleRect);
                 UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
@@ -177,7 +201,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public int getScrollableBlockIncrement( java.awt.Rectangle visibleRect, int orientation, int direction ) {
-            ScrollableComponentDelegate delegate = _getConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
                 Bounds bounds = Bounds.of(visibleRect);
                 UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
@@ -190,7 +214,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public boolean getScrollableTracksViewportWidth() {
-            ScrollableComponentDelegate delegate = _getConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
                 return delegate.fitWidth();
             } catch ( Exception e ) {
@@ -201,7 +225,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public boolean getScrollableTracksViewportHeight() {
-            ScrollableComponentDelegate delegate = _getConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
                 return delegate.fitHeight();
             } catch ( Exception e ) {
