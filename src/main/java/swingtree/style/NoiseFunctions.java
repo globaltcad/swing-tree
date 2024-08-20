@@ -308,8 +308,8 @@ public final class NoiseFunctions
     }
 
     public static float voronoiBasedCellTissue(float xIn, float yIn ) {
-        float scale = 1f/32;
-        return _coordinateToWorleyDistanceValue(xIn*scale, yIn*scale);
+        float scale = 32f;
+        return _coordinateToWorleyDistanceValue(xIn/scale, yIn/scale);
     }
 
     private static float _coordinateToWorleyDistanceValue(float xIn, float yIn ) {
@@ -360,8 +360,8 @@ public final class NoiseFunctions
     }
 
     public static float voronoiBasedCellMosaic(float xIn, float yIn ) {
-        float scale = 1f/32;
-        return _coordinateToRandomValueFromClosestWorleyCell(xIn*scale, yIn*scale);
+        float scale = 32f;
+        return _coordinateToRandomValueFromClosestWorleyCell(xIn/scale, yIn/scale);
     }
 
     private static float _coordinateToRandomValueFromClosestWorleyCell( float xIn, float yIn ) {
@@ -451,8 +451,8 @@ public final class NoiseFunctions
     }
 
     public static float voronoiBasedPolygonCell(float xIn, float yIn ) {
-        float scale = 1f/62;
-        return _coordinateToClosestWorleyCellEdge(xIn*scale, yIn*scale);
+        float scale = 32f;
+        return _coordinateToClosestWorleyCellEdge(xIn/scale, yIn/scale);
     }
 
     private static float _coordinateToClosestWorleyCellEdge( float xIn, float yIn ) {
