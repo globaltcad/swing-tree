@@ -442,6 +442,8 @@ public final class UI extends UIFactoryMethods
         HARD_TOPOLOGY(NoiseFunctions::hardTopology),
         HAZE(NoiseFunctions::haze),
         MANDELBROT(NoiseFunctions::mandelbrot),
+        MOSAIC(NoiseFunctions::voronoiBasedCellMosaic),
+        GEM_STONES(NoiseFunctions::voronoiBasedPolygonCell),
         RETRO(NoiseFunctions::retro),
         STOCHASTIC(NoiseFunctions::stochastic),
         SMOOTH_TOPOLOGY(NoiseFunctions::smoothTopology),
