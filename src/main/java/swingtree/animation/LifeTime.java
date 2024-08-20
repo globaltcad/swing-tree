@@ -13,28 +13,28 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  The lifetime is an immutable and thread safe value based object, which
- *  defines for how long an {@link Animation} should run.
- *  It consists of a delay, interval and duration as well as a unique id
- *  which ensures that two instances of this class are never equal.
+ *  The lifetime is an immutable and thread safe value based object consisting
+ *  of a delay, interval and duration which are used to determine the start,
+ *  end and refresh rate of an {@link Animation} as part of a {@link LifeSpan}.
  *  <br>
  *  You can create a new lifetime using the static factory methods {@link #of(long, TimeUnit)},
  *  {@link #of(double, TimeUnit)}, {@link #of(long, TimeUnit, long, TimeUnit)} and {@link #of(double, TimeUnit, double, TimeUnit)}.
  *  <br>
  *  Update an existing lifetime using the methods {@link #startingIn(long, TimeUnit)} and {@link #withInterval(long, TimeUnit)}.
- *  Note that the default interval of a newly created lifetime is always 16 ms which corresponds to 60 fps.
- *  <br><br>
- *  This class is typically used to schedule animations.
- *  The most straight forward way would be to call
- *  {@link swingtree.UI#animateFor(LifeTime)} or {@link swingtree.UI#animateFor(LifeTime, Component)}.
+ *  Note that the default interval of a newly created lifetime is always 16 ms which corresponds to 60 fps. <br>
+ *  <p>
+ *  This class is typically used to schedule animations through
+ *  various utility methods on the {@link swingtree.UI} class. <br>
+ *  The most straight forward way would be to call {@link swingtree.UI#animateFor(LifeTime)}
+ *  or {@link swingtree.UI#animateFor(LifeTime, Component)}.
  *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)}
  *  or {@link swingtree.UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)}. <br>
  *  Another use case is to schedule an animation through the component event delegate
- *  as part of your event handling code using {@link swingtree.ComponentDelegate#animateFor(LifeTime)}. <br>
+ *  as part of your event handling code using {@link swingtree.ComponentDelegate#animateStyleFor(LifeTime, AnimatedStyler)}. <br>
  *  This may look like this:
  *  <pre>{@code
  *  UI.button("I pop when you hover over me")
- *  .onMouseEnter( it -> it.animateFor(1, TimeUnit.SECONDS, status -> {
+ *  .onMouseEnter( it -> it.animateFor(LifeTime.of(1, TimeUnit.SECONDS), status -> {
  *    it.style(state, conf -> conf
  *      .borderWidth( 10 * status.cycle() )
  *      .borderColor(UI.color(1,1,0,1-status.cycle()))
@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  *  }))
  *  }</pre>
  *  Also see {@link Animatable} and {@link swingtree.UI#animate(Var, Animatable)}
- *  for more information on how to animate your view models and consequently
+ *  for more information about how to animate your view models and consequently
  *  also the GUI components bound to them.
  */
 @Immutable
