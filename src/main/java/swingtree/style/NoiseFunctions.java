@@ -320,31 +320,31 @@ public final class NoiseFunctions
         final int minY2 = (int) Math.floor(yIn)     ;
         final int minY3 = (int) Math.floor(yIn) + 1 ;
         final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);
-        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);
+        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX2);
         final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);
         final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);
-        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);
+        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX1);
         final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);
         final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);
-        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);
+        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX3);
         final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);
         final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);
-        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);
+        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX2);
         final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);
         final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);
-        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);
+        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX2);
         final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);
         final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);
-        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);
+        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX1);
         final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);
         final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);
-        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);
+        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX3);
         final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);
         final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);
-        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);
+        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX1);
         final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);
         final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);
-        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);
+        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX3);
         final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);
         double min = 1;
         min = Math.min(min, distanceCenter);
@@ -376,7 +376,7 @@ public final class NoiseFunctions
         double minY = Double.POSITIVE_INFINITY;
         double minDistance = Double.POSITIVE_INFINITY;
         final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);
-        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);
+        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX2);
         final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);
         if (distanceCenter < minDistance) {
             minDistance = distanceCenter;
@@ -384,7 +384,7 @@ public final class NoiseFunctions
             minY = centerY;
         }
         final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);
-        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);
+        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX1);
         final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);
         if (distanceLeft < minDistance) {
             minDistance = distanceLeft;
@@ -392,7 +392,7 @@ public final class NoiseFunctions
             minY = leftY;
         }
         final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);
-        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);
+        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX3);
         final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);
         if (distanceRight < minDistance) {
             minDistance = distanceRight;
@@ -400,7 +400,7 @@ public final class NoiseFunctions
             minY = rightY;
         }
         final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);
-        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);
+        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX2);
         final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);
         if (distanceTop < minDistance) {
             minDistance = distanceTop;
@@ -408,7 +408,7 @@ public final class NoiseFunctions
             minY = topY;
         }
         final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);
-        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);
+        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX2);
         final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);
         if (distanceBottom < minDistance) {
             minDistance = distanceBottom;
@@ -416,7 +416,7 @@ public final class NoiseFunctions
             minY = bottomY;
         }
         final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);
-        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);
+        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX1);
         final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);
         if (distanceTopLeft < minDistance) {
             minDistance = distanceTopLeft;
@@ -424,7 +424,7 @@ public final class NoiseFunctions
             minY = topLeftY;
         }
         final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);
-        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);
+        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX3);
         final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);
         if (distanceTopRight < minDistance) {
             minDistance = distanceTopRight;
@@ -432,7 +432,7 @@ public final class NoiseFunctions
             minY = topRightY;
         }
         final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);
-        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);
+        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX1);
         final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);
         if (distanceBottomLeft < minDistance) {
             minDistance = distanceBottomLeft;
@@ -440,7 +440,7 @@ public final class NoiseFunctions
             minY = bottomLeftY;
         }
         final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);
-        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);
+        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX3);
         final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);
         if (distanceBottomRight < minDistance) {
             minDistance = distanceBottomRight;
@@ -471,7 +471,7 @@ public final class NoiseFunctions
         double minDistance2 = Double.POSITIVE_INFINITY;
 
         final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);
-        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);
+        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX2);
         final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);
         if (distanceCenter < minDistance1 || distanceCenter < minDistance2) {
             if (distanceCenter < minDistance1) {
@@ -488,7 +488,7 @@ public final class NoiseFunctions
             }
         }
         final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);
-        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);
+        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX1);
         final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);
         if (distanceLeft < minDistance1 || distanceLeft < minDistance2) {
             if (distanceLeft < minDistance1) {
@@ -505,7 +505,7 @@ public final class NoiseFunctions
             }
         }
         final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);
-        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);
+        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX3);
         final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);
         if (distanceRight < minDistance1 || distanceRight < minDistance2) {
             if (distanceRight < minDistance1) {
@@ -522,7 +522,7 @@ public final class NoiseFunctions
             }
         }
         final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);
-        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);
+        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX2);
         final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);
         if (distanceTop < minDistance1 || distanceTop < minDistance2) {
             if (distanceTop < minDistance1) {
@@ -539,7 +539,7 @@ public final class NoiseFunctions
             }
         }
         final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);
-        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);
+        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX2);
         final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);
         if (distanceBottom < minDistance1 || distanceBottom < minDistance2) {
             if (distanceBottom < minDistance1) {
@@ -556,7 +556,7 @@ public final class NoiseFunctions
             }
         }
         final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);
-        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);
+        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX1);
         final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);
         if (distanceTopLeft < minDistance1 || distanceTopLeft < minDistance2) {
             if (distanceTopLeft < minDistance1) {
@@ -573,7 +573,7 @@ public final class NoiseFunctions
             }
         }
         final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);
-        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);
+        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX3);
         final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);
         if (distanceTopRight < minDistance1 || distanceTopRight < minDistance2) {
             if (distanceTopRight < minDistance1) {
@@ -590,7 +590,7 @@ public final class NoiseFunctions
             }
         }
         final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);
-        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);
+        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX1);
         final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);
         if (distanceBottomLeft < minDistance1 || distanceBottomLeft < minDistance2) {
             if (distanceBottomLeft < minDistance1) {
@@ -607,7 +607,7 @@ public final class NoiseFunctions
             }
         }
         final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);
-        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);
+        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX3);
         final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);
         if (distanceBottomRight < minDistance1 || distanceBottomRight < minDistance2) {
             if (distanceBottomRight < minDistance1) {
