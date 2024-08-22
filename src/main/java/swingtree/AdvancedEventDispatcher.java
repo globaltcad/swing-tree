@@ -1,21 +1,23 @@
-package swingtree.event;
+package swingtree;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
-public class AdvancedEventDispatcher {
+final class AdvancedEventDispatcher {
 
     private static final AdvancedEventDispatcher eventDispatcher = new AdvancedEventDispatcher();
 
-    public static void addMouseEnterListener(Component component, MouseListener listener) {
+    static void addMouseEnterListener(Component component, MouseListener listener) {
         List<MouseListener> listeners = eventDispatcher.enterListeners.computeIfAbsent(component, k -> new ArrayList<>());
         listeners.add(listener);
     }
 
-    public static void addMouseExitListener(Component component, MouseListener listener) {
+    static void addMouseExitListener(Component component, MouseListener listener) {
         List<MouseListener> listeners = eventDispatcher.exitListeners.computeIfAbsent(component, k -> new ArrayList<>());
         listeners.add(listener);
     }
@@ -24,8 +26,8 @@ public class AdvancedEventDispatcher {
     private final Map<Component, List<MouseListener>> exitListeners;
 
     private AdvancedEventDispatcher() {
-        enterListeners = new HashMap<>();
-        exitListeners = new HashMap<>();
+        enterListeners = new WeakHashMap<>();
+        exitListeners  = new WeakHashMap<>();
 
         Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
     }
@@ -53,8 +55,9 @@ public class AdvancedEventDispatcher {
             List<MouseListener> listeners = enterListeners.get(component);
 
             if (listeners != null) {
+                MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
                 for (MouseListener listener : listeners) {
-                    listener.mouseEntered(mouseEvent);
+                    listener.mouseEntered(localMouseEvent);
                 }
             }
 
@@ -69,8 +72,9 @@ public class AdvancedEventDispatcher {
             List<MouseListener> listeners = exitListeners.get(component);
 
             if (listeners != null) {
+                MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
                 for (MouseListener listener : listeners) {
-                    listener.mouseExited(mouseEvent);
+                    listener.mouseExited(localMouseEvent);
                 }
             }
 
@@ -78,7 +82,21 @@ public class AdvancedEventDispatcher {
         }
     }
 
-    public static boolean containsScreenLocation(Component component, Point screenLocation) {
+    private MouseEvent withNewSource( MouseEvent event, Component newSource ) {
+        return new MouseEvent(
+                newSource,
+                event.getID(),
+                event.getWhen(),
+                event.getModifiersEx(),
+                event.getX(),
+                event.getY(),
+                event.getClickCount(),
+                event.isPopupTrigger(),
+                event.getButton()
+        );
+    }
+
+    private static boolean containsScreenLocation(Component component, Point screenLocation) {
         Point compLocation = component.getLocationOnScreen();
         Dimension compSize = component.getSize();
         int relativeX = screenLocation.x - compLocation.x;

@@ -16,7 +16,6 @@ import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.*;
 import swingtree.api.mvvm.ViewSupplier;
-import swingtree.event.AdvancedEventDispatcher;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.LayoutConstraint;
@@ -29,6 +28,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
@@ -3508,14 +3508,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
-        return _with( c -> {
+        return _with( thisComponent -> {
+                    WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
                     MouseListener listener = new MouseAdapter() {
                         @Override public void mouseEntered(MouseEvent e) {
-                            _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(c, e )));
+                            @Nullable C localComponent = source.get();
+                            if ( localComponent != null )
+                                _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
-                    c.addMouseListener(listener);
-                    AdvancedEventDispatcher.addMouseEnterListener(c, listener);
+                    thisComponent.addMouseListener(listener);
+                    AdvancedEventDispatcher.addMouseEnterListener(thisComponent, listener);
                 })
                 ._this();
     }
@@ -3531,14 +3534,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
-        return _with( c -> {
+        return _with( thisComponent -> {
+                    WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
                     MouseListener listener = new MouseAdapter() {
                         @Override public void mouseExited(MouseEvent e) {
-                            _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(c, e )));
+                            @Nullable C localComponent = source.get();
+                            if ( localComponent != null )
+                                _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
-                    c.addMouseListener(listener);
-                    AdvancedEventDispatcher.addMouseExitListener(c, listener);
+                    thisComponent.addMouseListener(listener);
+                    AdvancedEventDispatcher.addMouseExitListener(thisComponent, listener);
                 })
                 ._this();
     }
