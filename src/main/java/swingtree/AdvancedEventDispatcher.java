@@ -27,7 +27,7 @@ final class AdvancedEventDispatcher {
 
     private AdvancedEventDispatcher() {
         enterListeners = new WeakHashMap<>();
-        exitListeners  = new WeakHashMap<>();
+        exitListeners = new WeakHashMap<>();
 
         Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
     }
@@ -49,6 +49,9 @@ final class AdvancedEventDispatcher {
     }
 
     private void onMouseEnter(MouseEvent mouseEvent) {
+        if (enterListeners.isEmpty())
+            return;
+
         Component component = mouseEvent.getComponent().getParent();
 
         while (component != null) {
@@ -66,6 +69,9 @@ final class AdvancedEventDispatcher {
     }
 
     private void onMouseExit(MouseEvent mouseEvent) {
+        if (exitListeners.isEmpty())
+            return;
+
         Component component = mouseEvent.getComponent().getParent();
 
         while (component != null) {
@@ -82,7 +88,7 @@ final class AdvancedEventDispatcher {
         }
     }
 
-    private MouseEvent withNewSource( MouseEvent event, Component newSource ) {
+    private MouseEvent withNewSource(MouseEvent event, Component newSource) {
         return new MouseEvent(
                 newSource,
                 event.getID(),
