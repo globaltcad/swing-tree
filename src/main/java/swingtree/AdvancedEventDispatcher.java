@@ -1,5 +1,8 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -10,6 +13,7 @@ import java.util.WeakHashMap;
 
 final class AdvancedEventDispatcher {
 
+    private static final Logger log = LoggerFactory.getLogger(AdvancedEventDispatcher.class);
     private static final AdvancedEventDispatcher eventDispatcher = new AdvancedEventDispatcher();
 
     static void addMouseEnterListener(Component component, MouseListener listener) {
@@ -60,7 +64,11 @@ final class AdvancedEventDispatcher {
             if (listeners != null) {
                 MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
                 for (MouseListener listener : listeners) {
-                    listener.mouseEntered(localMouseEvent);
+                    try {
+                        listener.mouseEntered(localMouseEvent);
+                    } catch (Exception e) {
+                        log.error("Failed to process mouseEntered event {}. Error: {}", localMouseEvent, e.getMessage(), e);
+                    }
                 }
             }
 
@@ -80,7 +88,11 @@ final class AdvancedEventDispatcher {
             if (listeners != null) {
                 MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
                 for (MouseListener listener : listeners) {
-                    listener.mouseExited(localMouseEvent);
+                    try {
+                        listener.mouseExited(localMouseEvent);
+                    } catch (Exception e) {
+                        log.error("Failed to process mouseExited event {}. Error: {}", localMouseEvent, e.getMessage(), e);
+                    }
                 }
             }
 
