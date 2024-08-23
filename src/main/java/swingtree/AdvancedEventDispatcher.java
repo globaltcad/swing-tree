@@ -68,7 +68,7 @@ final class AdvancedEventDispatcher {
     private void onMouseExit(MouseEvent mouseEvent) {
         Component component = mouseEvent.getComponent().getParent();
 
-        while (component != null && !containsScreenLocation(component, mouseEvent.getLocationOnScreen())) {
+        while (component != null) {
             List<MouseListener> listeners = exitListeners.get(component);
 
             if (listeners != null) {
@@ -96,11 +96,4 @@ final class AdvancedEventDispatcher {
         );
     }
 
-    private static boolean containsScreenLocation(Component component, Point screenLocation) {
-        Point compLocation = component.getLocationOnScreen();
-        Dimension compSize = component.getSize();
-        int relativeX = screenLocation.x - compLocation.x;
-        int relativeY = screenLocation.y - compLocation.y;
-        return (relativeX >= 0 && relativeX < compSize.width && relativeY >= 0 && relativeY < compSize.height);
-    }
 }
