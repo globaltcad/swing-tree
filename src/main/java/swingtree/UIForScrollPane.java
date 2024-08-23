@@ -187,10 +187,12 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         }
 
         @Override
-        public int getScrollableUnitIncrement( java.awt.Rectangle visibleRect, int orientation, int direction ) {
+        public int getScrollableUnitIncrement( java.awt.@Nullable Rectangle visibleRect, int orientation, int direction ) {
             ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
-                Bounds bounds = Bounds.of(visibleRect);
+                Bounds bounds = Bounds.none();
+                if ( visibleRect != null )
+                    bounds = Bounds.of(visibleRect);
                 UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
                 return delegate.unitIncrement(bounds, align, direction);
             } catch ( Exception e ) {
@@ -200,10 +202,12 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         }
 
         @Override
-        public int getScrollableBlockIncrement( java.awt.Rectangle visibleRect, int orientation, int direction ) {
+        public int getScrollableBlockIncrement( java.awt.@Nullable Rectangle visibleRect, int orientation, int direction ) {
             ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
-                Bounds bounds = Bounds.of(visibleRect);
+                Bounds bounds = Bounds.none();
+                if ( visibleRect != null )
+                    bounds = Bounds.of(visibleRect);
                 UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
                 return delegate.blockIncrement(bounds, align, direction);
             } catch ( Exception e ) {

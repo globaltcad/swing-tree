@@ -151,4 +151,45 @@ class Scroll_Pane_Spec extends Specification
             scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42
             scrollPane.getVerticalScrollBar().getBlockIncrement() == 42
     }
+
+    def 'Use a declarative configurator lambda instead implementing the `Scrollable` interface manually.'()
+    {
+        reportInfo """
+            Classical Swing has the `Scrollable` interface, which is an optional
+            interface the scroll pane content component may implement in order
+            to configure how the component should be scrolled in the
+            viewport of the scroll pane.
+            
+            This is a bit cumbersome to implement, and it prevents you from keeping your
+            UI declarative, as you have to use inheritance instead of composition.
+            
+            Swing-Tree offers a solution to this through a declarative configurator lambda
+            passed to the ´UI.scrollPane(Configurator)´ factory method.
+            In this lambda, you can configure the scroll pane content component
+            behavior in the viewport as you would with the `Scrollable` interface.
+        """
+        given : 'We create a scroll pane with a custom scrollable configurator.'
+            var ui =
+                    UI.scrollPane( it -> it
+                        .prefSize(160, 130)
+                        .blockIncrement(7)
+                        .unitIncrement(5)
+                        .fitHeight(false)
+                        .fitWidth(true)
+                    )
+                    .add(
+                        UI.panel().withSize(140, 100)
+                        .add(
+                            UI.html("<p> This is a long text that should be scrollable. </p>")
+                        )
+                    )
+        and : 'We then build the component:'
+            var scrollPane = ui.get(JScrollPane)
+        expect : 'The scroll pane has the expected scrollable behavior.'
+            scrollPane.getViewport().getView().getPreferredSize() == new java.awt.Dimension(160, 130)
+            scrollPane.getViewport().getView().getScrollableBlockIncrement(null, 0,0) == 7
+            scrollPane.getViewport().getView().getScrollableUnitIncrement(null, 0,0) == 5
+            scrollPane.getViewport().getView().getScrollableTracksViewportHeight() == false
+            scrollPane.getViewport().getView().getScrollableTracksViewportWidth() == true
+    }
 }
