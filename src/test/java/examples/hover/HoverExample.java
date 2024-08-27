@@ -16,8 +16,6 @@ import java.awt.event.MouseListener;
 
 import static swingtree.UI.*;
 
-// https://stackoverflow.com/questions/11091531/swing-mouse-listeners-being-intercepted-by-child-components
-
 @NullMarked
 public class HoverExample extends JPanel {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(HoverExample.class);
