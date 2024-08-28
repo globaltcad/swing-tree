@@ -8,7 +8,6 @@ import swingtree.api.Painter;
 import swingtree.api.Styler;
 
 import javax.swing.JComponent;
-import javax.swing.JScrollPane;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -613,9 +612,15 @@ public final class ComponentExtension<C extends JComponent>
         });
     }
 
-    void paintWithContentAreaClip( Graphics g, Runnable painter ) {
+    void gatherStyleAndPaintInScope( Graphics g, Runnable painter ) {
         gatherApplyAndInstallStyleConfig();
-        _styleEngine.paintClippedTo(UI.ComponentArea.BODY, g, painter);
+        Shape oldClip = g.getClip();
+        try {
+            painter.run();
+        } catch (Exception e) {
+            log.warn("Error while rendering component of type '"+_owner.getClass().getName()+"'.", e);
+        }
+        g.setClip(oldClip);
     }
 
     static void paintWithClip( Graphics2D g2d, @Nullable Shape clip, Runnable paintTask ) {
