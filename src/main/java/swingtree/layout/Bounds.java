@@ -189,6 +189,25 @@ public final class Bounds
         return new Bounds(_location, _size.withHeight(height));
     }
 
+    public Bounds merge( Bounds other ) {
+        float thisLeft   = _location.x();
+        float thisTop    = _location.y();
+        float thisRight  = thisLeft + _size._width;
+        float thisBottom = thisTop + _size._height;
+
+        float otherLeft   = other._location.x();
+        float otherTop    = other._location.y();
+        float otherRight  = otherLeft + other._size._width;
+        float otherBottom = otherTop + other._size._height;
+
+        float left   = Math.min(thisLeft, otherLeft);
+        float top    = Math.min(thisTop, otherTop);
+        float right  = Math.max(thisRight, otherRight);
+        float bottom = Math.max(thisBottom, otherBottom);
+
+        return Bounds.of(left, top, right - left, bottom - top);
+    }
+
     /**
      *  Allows you to check weather the bounds object has the specified
      *  width and height, which is true if the width and height are equal

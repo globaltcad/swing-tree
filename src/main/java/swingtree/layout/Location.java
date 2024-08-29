@@ -112,6 +112,56 @@ public final class Location
     }
 
     /**
+     *  Creates a new location where the specified {@code dx} and
+     *  {@code dy} values are added to the x- and y-coordinates of this location.
+     *
+     * @param dx The amount to increase the x-coordinate by.
+     * @param dy The amount to increase the y-coordinate by.
+     * @return A new location with the x- and y-coordinates of this location
+     *         increased by the specified values.
+     */
+    public Location plus( float dx, float dy ) {
+        return of( _x + dx, _y + dy );
+    }
+
+    /**
+     *  Creates a new location where the x- and y-coordinates of the specified
+     *  {@link Location} are added to the x- and y-coordinates of this location.
+     *
+     * @param other The location to add to this location.
+     * @return A new location with the x- and y-coordinates of this location
+     *         increased by the x- and y-coordinates of the specified location.
+     */
+    public Location plus( Location other ) {
+        return of( _x + other._x, _y + other._y );
+    }
+
+    /**
+     *  Creates a new location where the specified {@code dx} and
+     *  {@code dy} values are subtracted from the x- and y-coordinates of this location.
+     *
+     * @param dx The amount to decrease the x-coordinate by.
+     * @param dy The amount to decrease the y-coordinate by.
+     * @return A new location with the x- and y-coordinates of this location
+     *         decreased by the specified values.
+     */
+    public Location minus( float dx, float dy ) {
+        return of( _x - dx, _y - dy );
+    }
+
+    /**
+     *  Creates a new location where the x- and y-coordinates of the specified
+     *  {@link Location} are subtracted from the x- and y-coordinates of this location.
+     *
+     * @param other The location to subtract from this location.
+     * @return A new location with the x- and y-coordinates of this location
+     *         decreased by the x- and y-coordinates of the specified location.
+     */
+    public Location minus( Location other ) {
+        return of( _x - other._x, _y - other._y );
+    }
+
+    /**
      *  A {@link Location} consists of two x and y coordinates in 2D space, which is
      *  why this convenience method allows you to transform this
      *  {@link Location} object to an AWT {@link Point}.
