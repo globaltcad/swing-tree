@@ -1288,73 +1288,73 @@ public final class UI extends UIFactoryMethods
 
     /** {inheritDoc} */
     public static class Component extends JComponent implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Panel extends JPanel implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Label extends JLabel implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class TextField extends JTextField implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class TextArea extends JTextArea implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class CheckBox extends JCheckBox implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Button extends JButton implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class ToggleButton extends JToggleButton implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class RadioButton extends JRadioButton implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class ComboBox<E> extends JComboBox<E> implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class List<E> extends JList<E> implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Table extends JTable implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
@@ -1382,7 +1382,7 @@ public final class UI extends UIFactoryMethods
             Objects.requireNonNull(toolTips);
             setToolTipsSupplier( i -> toolTips[i] );
         }
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintComponent); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
         @Override public String getToolTipText(MouseEvent e) {
@@ -1403,43 +1403,43 @@ public final class UI extends UIFactoryMethods
     }
     /** {inheritDoc} */
     public static class Slider extends JSlider implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class PopupMenu extends JPopupMenu implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class MenuItem extends JMenuItem implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class RadioButtonMenuItem extends JRadioButtonMenuItem implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
      public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {
-         @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
          @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
      }
     /** {inheritDoc} */
     public static class Menu extends JMenu implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class MenuBar extends JMenuBar implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
@@ -1450,74 +1450,74 @@ public final class UI extends UIFactoryMethods
             super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
         }
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class TabbedPane extends JTabbedPane implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class ToolBar extends JToolBar implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class ToolTip extends JToolTip implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Tree extends JTree implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class TextPane extends JTextPane implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Spinner extends JSpinner implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class SplitPane extends JSplitPane implements StylableComponent {
         SplitPane( Align align ) { super(align.forSplitPane()); }
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class PasswordField extends JPasswordField implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class ProgressBar extends JProgressBar implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class EditorPane extends JEditorPane implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {@inheritDoc} */
     public static class FormattedTextField extends JFormattedTextField implements StylableComponent {
-        @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g){ paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
