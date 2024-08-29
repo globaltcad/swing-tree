@@ -249,7 +249,29 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public int getStateHash() {
-        return _styleEngine.getComponentConf().hashCode();
+        int hashCode = _styleEngine.getComponentConf().hashCode();
+        if ( _owner instanceof JSlider ) {
+            JSlider slider = (JSlider) _owner;
+            hashCode = hashCode * 31 + slider.getValue();
+            hashCode = hashCode * 31 + slider.getMinimum();
+            hashCode = hashCode * 31 + slider.getMaximum();
+        }
+        if ( _owner instanceof JProgressBar ) {
+            JProgressBar bar = (JProgressBar) _owner;
+            hashCode = hashCode * 31 + bar.getValue();
+            hashCode = hashCode * 31 + bar.getMinimum();
+            hashCode = hashCode * 31 + bar.getMaximum();
+        }
+        if ( _owner instanceof JTextComponent ) {
+            JTextComponent textComp = (JTextComponent) _owner;
+            String text = textComp.getText();
+            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());
+        }
+        if ( _owner instanceof AbstractButton ) {
+            AbstractButton button = (AbstractButton) _owner;
+            hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);
+        }
+        return hashCode + ( _owner.isEnabled() ? 1 : 0 );
     }
 
     /**
