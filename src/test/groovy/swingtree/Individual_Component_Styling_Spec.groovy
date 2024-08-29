@@ -1784,7 +1784,6 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(120, 120)
                             .image("Image 1", ground -> ground
                                 .image(img)
-                                .autoFit(true)
                                 .width(40)
                                 .placement(UI.Placement.TOP_LEFT)
                                 .opacity(0.5f)
@@ -1792,7 +1791,6 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                             .image("Image 2", ground -> ground
                                 .image(img)
-                                .autoFit(true)
                                 .height(40)
                                 .placement(UI.Placement.TOP_LEFT)
                                 .opacity(0.5f)
