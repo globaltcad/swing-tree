@@ -211,7 +211,7 @@ class Style_Animations_Spec extends Specification
                             )
                         )
             var label = ui.get(JLabel)
-
+            label.setSize(200, 60) // We set the size of the label to make it visible.
         expect : 'It has the expected initial state.'
             label.border == null
             label.background == new Color(238, 238, 238) // default background color of a JLabel

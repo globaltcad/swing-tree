@@ -618,6 +618,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
         and : 'We build the label:'
             var label = ui.get(JLabel)
+            label.setSize(200, 60) // We set the size of the label to make it visible.
 
         expect : """
             There is now a custom border installed on the label.
@@ -651,6 +652,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
         and : 'We build the label:'
             var label = ui.get(JLabel)
+            label.setSize(200, 60) // We set the size of the label to make it visible.
 
         expect : """
             Initially there is a custom border installed on the label.
