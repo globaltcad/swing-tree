@@ -17,10 +17,7 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import swingtree.components.JBox;
-import swingtree.components.JIcon;
-import swingtree.components.JScrollPanels;
-import swingtree.components.JSplitButton;
+import swingtree.components.*;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialog;
 import swingtree.dialogs.MessageDialog;
@@ -6249,6 +6246,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 frame.setLocationRelativeTo(null);
                 // We set the size to fit the component:
                 _determineSize();
+                JGlassPane glassPane = new JGlassPane();
+                frame.setGlassPane(new JGlassPane());
+                glassPane.toRootPane(frame.getRootPane());
                 frame.setVisible(true);
             });
         }
