@@ -248,6 +248,10 @@ public final class ComponentExtension<C extends JComponent>
         return _styleEngine.getComponentConf();
     }
 
+    public int getStateHash() {
+        return _styleEngine.getComponentConf().hashCode();
+    }
+
     /**
      *  Removes all animations from the component.
      *  This includes both {@link Painter} based animations

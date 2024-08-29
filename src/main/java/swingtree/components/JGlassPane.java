@@ -6,10 +6,7 @@ import org.jspecify.annotations.Nullable;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
 import java.awt.*;
@@ -36,6 +33,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
     private final EventListenerList listeners = new EventListenerList();
 
     protected @Nullable JRootPane rootPane;
+    private ActiveDrag activeDrag = ActiveDrag.none();
 
 
     public JGlassPane() {
@@ -45,6 +43,26 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     this,
                     MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
                 );
+        this.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                activeDrag = activeDrag.dragged(e, rootPane);
+            }
+        });
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                activeDrag = activeDrag.begin(e, rootPane);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                activeDrag = ActiveDrag.none();
+                if ( rootPane != null ) {
+                    rootPane.repaint();
+                }
+            }
+        });
     }
 
     public JGlassPane(JRootPane rootPane) {
@@ -61,6 +79,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
+        activeDrag.paint(g);
     }
 
     @Override public void setUISilently( ComponentUI ui ) {
