@@ -7,7 +7,7 @@ import swingtree.animation.AnimationStatus;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -573,8 +573,9 @@ public final class ComponentExtension<C extends JComponent>
     void paintForeground( Graphics2D graphics, Consumer<Graphics> superPaint )
     {
         _doPaintStep(PaintStep.FOREGROUND, graphics, internalGraphics -> {
-            Shape clip = _outerBaseClip != null ? _outerBaseClip : internalGraphics.getClip();
-            if ( _owner instanceof JScrollPane ) {
+            // We remember the clip:
+            Shape formerClip = internalGraphics.getClip();
+            if ( _owner instanceof JScrollPane) {
                 /*
                     Scroll panes are not like other components, they have a viewport
                     which clips the children.
@@ -582,11 +583,13 @@ public final class ComponentExtension<C extends JComponent>
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-                clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
+                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea().orElse(formerClip), formerClip );
+                paintWithClip(internalGraphics, localClip, ()->{
+                    superPaint.accept(internalGraphics);
+                });
             }
-            paintWithClip(internalGraphics, clip, ()->{
+            else
                 superPaint.accept(internalGraphics);
-            });
 
             // We remember if antialiasing was enabled before we render:
             boolean antialiasingWasEnabled = internalGraphics.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -594,21 +597,18 @@ public final class ComponentExtension<C extends JComponent>
             if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
                 internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-            // We remember the clip:
-            Shape formerClip = internalGraphics.getClip();
-
             Font componentFont = _owner.getFont();
             if ( componentFont != null && !componentFont.equals(internalGraphics.getFont()) )
                 internalGraphics.setFont( componentFont );
 
             _styleEngine.paintForeground(internalGraphics);
 
+            // Reset antialiasing to its previous state:
+            internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
             // We restore the clip:
             if ( internalGraphics.getClip() != formerClip )
                 internalGraphics.setClip(formerClip);
-
-            // Reset antialiasing to its previous state:
-            internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
         });
     }
 
