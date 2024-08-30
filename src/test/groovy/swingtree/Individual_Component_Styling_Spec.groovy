@@ -618,6 +618,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
         and : 'We build the label:'
             var label = ui.get(JLabel)
+            label.setSize(200, 60) // We set the size of the label to make it visible.
 
         expect : """
             There is now a custom border installed on the label.
@@ -651,6 +652,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
         and : 'We build the label:'
             var label = ui.get(JLabel)
+            label.setSize(200, 60) // We set the size of the label to make it visible.
 
         expect : """
             Initially there is a custom border installed on the label.
@@ -1782,7 +1784,6 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(120, 120)
                             .image("Image 1", ground -> ground
                                 .image(img)
-                                .autoFit(true)
                                 .width(40)
                                 .placement(UI.Placement.TOP_LEFT)
                                 .opacity(0.5f)
@@ -1790,7 +1791,6 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                             .image("Image 2", ground -> ground
                                 .image(img)
-                                .autoFit(true)
                                 .height(40)
                                 .placement(UI.Placement.TOP_LEFT)
                                 .opacity(0.5f)

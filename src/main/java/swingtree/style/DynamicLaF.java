@@ -359,7 +359,7 @@ final class DynamicLaF
             if ( !getComponent().isOpaque() )
                 paintBackground(g);
 
-            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()->{
+            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()->{
                 super.paintSafely(g);// Paints the text
             });
         }
@@ -373,7 +373,7 @@ final class DynamicLaF
             int insetRight  = margins.right ;
 
             g.setColor(c.getBackground());
-            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()->{
+            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()->{
                 g.fillRect(
                         insetLeft, insetTop,
                         c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
@@ -404,7 +404,7 @@ final class DynamicLaF
                 if ( !hasMargin && !hasBorderRadius )
                     formerUI.update(g, c);
                 else {
-                    ComponentExtension.from(c).paintWithContentAreaClip(g, ()->{
+                    ComponentExtension.from(c).gatherStyleAndPaintInScope(g, ()->{
                         formerUI.update(g, c);
                     });
                 }

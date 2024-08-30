@@ -4,12 +4,10 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -53,20 +51,6 @@ final class StyleEngine
     LayerCache[] getLayerCaches() { return _layerCaches; }
 
     BoxModelConf getBoxModelConf() { return _boxModelConf; }
-
-    void paintClippedTo( UI.ComponentArea area, Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-
-        Shape newClip = ComponentAreas.of(_boxModelConf).get(area);
-        if ( newClip != oldClip ) {
-            newClip = StyleUtil.intersect(newClip, oldClip);
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
-    }
 
     Optional<Shape> componentArea() {
         Shape contentClip = null;

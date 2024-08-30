@@ -125,11 +125,6 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
     }
 
     /** {@inheritDoc} */
-    @Override public void paint(Graphics g){
-        paintBackground(g, super::paint);
-    }
-
-    /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
     }
@@ -384,7 +379,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
 
     @Override
     protected void paintComponent(final Graphics g) {
-        super.paintComponent(g);
+        paintBackground(g, super::paintComponent);
         Color oldColor = g.getColor();
         int splitWidth = _calculateSplitWidth();
         splitRectangle = new Rectangle(getWidth() - splitWidth, 0, splitWidth, getHeight());

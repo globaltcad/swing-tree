@@ -87,8 +87,8 @@ public class JBox extends JComponent implements Accessible, StylableComponent
     }
 
     /** {@inheritDoc} */
-    @Override public void paint(Graphics g){
-        paintBackground(g, super::paint);
+    @Override public void paintComponent(Graphics g){
+        paintBackground(g, super::paintComponent);
     }
 
     /** {@inheritDoc} */
