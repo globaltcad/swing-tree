@@ -86,71 +86,9 @@ final class StyleRenderer
             _renderText( text, conf, g2d );
 
         // 6. Painters, which are provided by the user and can be anything
-        List<PainterConf> painters = conf.layer().painters().sortedByNames();
+        _executeUserPainters(layer, conf, g2d);
 
-        if ( !painters.isEmpty() )
-        {
-            for ( PainterConf painterConf : painters )
-            {
-                Painter backgroundPainter = painterConf.painter();
-
-                if ( backgroundPainter == Painter.none() )
-                    continue;
-
-                Shape allowedArea = conf.areas().get(painterConf.clipArea());
-
-                _paintClippedTo( allowedArea, g2d, () -> {
-                    // We remember the current transform and clip so that we can reset them after each painter:
-                    AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
-                    Shape           currentClip      = g2d.getClip();
-
-                    // We remember if antialiasing was enabled before we render:
-                    boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-                    try {
-                        backgroundPainter.paint(g2d);
-                    } catch (Exception e) {
-                        log.warn(
-                            "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                            "on layer '" + layer + "' for style '" + conf + "' ",
-                            e
-                        );
-                        /*
-                            If exceptions happen in user provided painters, we don't want to
-                            mess up the rendering of the rest of the component, so we catch them here!
-
-                            We log as warning because exceptions during rendering are not considered
-                            as harmful as elsewhere!
-
-                            Hi there! If you are reading this, you are probably a developer using the SwingTree
-                            library, thank you for using it! Good luck finding out what went wrong! :)
-                        */
-                    } finally {
-                        // We do not know what the painter did to the graphics object, so we reset it:
-                        g2d.setTransform(currentTransform);
-                        g2d.setClip(currentClip);
-
-                        // Reset antialiasing to its previous state:
-                        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-                    }
-                });
-            }
-        }
         // And that's it! We have rendered a style layer!
-    }
-
-
-    private static void _paintClippedTo( Shape newClip, Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-
-        if ( newClip != oldClip ) {
-            newClip = StyleUtil.intersect(newClip, oldClip);
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
     }
 
     private static void _drawBorder( LayerRenderConf conf, BorderColorsConf colors, Graphics2D g2d )
@@ -1399,6 +1337,66 @@ final class StyleRenderer
             g2d.setFont(initialFont);
             g2d.setClip(oldClip);
         }
+    }
+
+    private static void _executeUserPainters( UI.Layer layer, LayerRenderConf conf, Graphics2D g2d ) {
+        List<PainterConf> painters = conf.layer().painters().sortedByNames();
+
+        if ( painters.isEmpty() )
+            return;
+
+        // We remember the current clip so that we can reset it later:
+        final Shape currentClip = g2d.getClip();
+
+        UI.ComponentArea allowedArea = null;
+        Shape localClip = null;
+
+        for ( PainterConf painterConf : painters ) {
+            Painter backgroundPainter = painterConf.painter();
+
+            if ( backgroundPainter == Painter.none() )
+                continue;
+
+            // We remember if antialiasing was enabled before we render:
+            boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+            // We remember the current transform and clip so that we can reset them after each painter:
+            AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
+
+            if ( allowedArea == null || allowedArea != painterConf.clipArea() ) {
+                allowedArea = painterConf.clipArea();
+                localClip = conf.areas().get(allowedArea);
+                localClip = StyleUtil.intersect(localClip, currentClip);
+            }
+            g2d.setClip(localClip);
+
+            try {
+                backgroundPainter.paint(g2d);
+            } catch (Exception e) {
+                log.warn(
+                    "An exception occurred while executing painter '" + backgroundPainter + "' " +
+                    "on layer '" + layer + "' for style '" + conf + "' ",
+                    e
+                );
+                /*
+                    If exceptions happen in user provided painters, we don't want to
+                    mess up the rendering of the rest of the component, so we catch them here!
+
+                    We log as warning because exceptions during rendering are not considered
+                    as harmful as elsewhere!
+
+                    Hi there! If you are reading this, you are probably a developer using the SwingTree
+                    library, thank you for using it! Good luck finding out what went wrong! :)
+                */
+            } finally {
+                // We do not know what the painter did to the graphics transform, so we reset it:
+                g2d.setTransform(currentTransform);
+
+                // Reset antialiasing to its previous state:
+                g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+            }
+        }
+        // We are done with the painters, so we can reset the clip:
+        g2d.setClip(currentClip);
     }
 
     static void renderParentFilter(
