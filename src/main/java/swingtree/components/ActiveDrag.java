@@ -79,8 +79,7 @@ final class ActiveDrag {
          */
         java.awt.Component component = getDeepestComponentAt(
                                                 rootPane.getContentPane(),
-                                                e.getX(),
-                                                e.getY()
+                                                e.getX(), e.getY()
                                             );
         if ( component == null )
             return this;
@@ -133,8 +132,7 @@ final class ActiveDrag {
     {
         if ( draggedComponent != null ) {
             Point point = e.getPoint();
-            ActiveDrag updatedDrag = this.renderComponentIntoImage(draggedComponent)
-                                         .withOffset(Location.of(point.x - start.x(), point.y - start.y()))
+            ActiveDrag updatedDrag = this.withOffset(Location.of(point.x - start.x(), point.y - start.y()))
                                          .renderComponentIntoImage(draggedComponent);
             if ( rootPane != null ) {
                 Location previousWhereToRender = getRenderPosition();
