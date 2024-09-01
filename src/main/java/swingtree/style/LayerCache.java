@@ -6,14 +6,15 @@ import org.slf4j.LoggerFactory;
 import swingtree.UI;
 import swingtree.layout.Size;
 
-import javax.swing.ImageIcon;
-import java.awt.Graphics2D;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
@@ -21,56 +22,34 @@ import java.util.function.BiConsumer;
  *  is rendered again. <br>
  *  This is made possible by the fact that the {@link LayerRenderConf} is deeply immutable and can be used
  *  as a key data structure for caching.
+ *  <br>
+ *  Instances of this exist for every component (inside their style engine) and are used to
+ *  safely do cache based rendering of the component's style.
  */
 final class LayerCache
 {
-    private static final Map<LayerRenderConf, CachedImage> _CACHE = new WeakHashMap<>();
     private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
 
+    private static final int    MAX_NUMBER_OF_CACHE_ENTRIES       = 128;
+    private static final int    CACHE_AGGRESSIVENESS              = 10;        // Higher means more memory usage but better performance
+    private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1;       // Has to be between 0 and 1!
+    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
 
-    private static final class CachedImage extends BufferedImage
-    {
-        private WeakReference<LayerRenderConf> _key;
-        private boolean _isRendered = false;
-
-        CachedImage( int width, int height, LayerRenderConf cacheKey ) {
-            super(width, height, BufferedImage.TYPE_INT_ARGB);
-            _key = new WeakReference<>(cacheKey);
-        }
-
-        @Override
-        public Graphics2D createGraphics() {
-            if ( _isRendered )
-                throw new IllegalStateException("This image has already been rendered into!");
-            _isRendered = true;
-            return super.createGraphics();
-        }
-
-        public LayerRenderConf getKeyOrElse( LayerRenderConf newFallbackKey ) {
-            LayerRenderConf key = _key.get();
-            if ( key == null ) {
-                _key = new WeakReference<>(newFallbackKey);
-                key = newFallbackKey;
-            }
-            return key;
-        }
-
-        public boolean isRendered() {
-            return _isRendered;
-        }
-    }
+    private static final Map<LayerRenderConf, CachedImage> _CACHE = new WeakHashMap<>();
 
 
     private final UI.Layer        _layer;
     private @Nullable CachedImage _localCache;
     private LayerRenderConf       _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-    private boolean               _cachingMakesSense = false;
-    private boolean               _isInitialized     = false;
+    private int                   _cacheHitsUntilAllocation;
+    private boolean               _isInitialized;
 
 
     public LayerCache( UI.Layer layer ) {
-        _layer           = Objects.requireNonNull(layer);
-        _layerRenderData = LayerRenderConf.none();
+        _layer                    = Objects.requireNonNull(layer);
+        _layerRenderData          = LayerRenderConf.none();
+        _cacheHitsUntilAllocation = -1;
+        _isInitialized            = false;
     }
 
     LayerRenderConf getCurrentRenderInputData() {
@@ -81,7 +60,7 @@ final class LayerCache
         return _localCache != null;
     }
 
-    private void _allocateOrGetCachedBuffer( LayerRenderConf layerRenderConf)
+    private void _allocateOrGetCachedBuffer( LayerRenderConf layerRenderConf )
     {
         Map<LayerRenderConf, CachedImage> CACHE = _CACHE;
 
@@ -89,11 +68,7 @@ final class LayerCache
 
         if ( bufferedImage == null ) {
             Size size = layerRenderConf.boxModel().size();
-            bufferedImage = new CachedImage(
-                                size.width().map(Number::intValue).orElse(1),
-                                size.height().map(Number::intValue).orElse(1),
-                                layerRenderConf
-                            );
+            bufferedImage = new CachedImage(size, layerRenderConf, _cacheHitsUntilAllocation);
             CACHE.put(layerRenderConf, bufferedImage);
 
             _layerRenderData = layerRenderConf;
@@ -115,9 +90,9 @@ final class LayerCache
     }
 
     private void _freeLocalCache() {
-        _localCache        = null;
-        _cachingMakesSense = false;
-        _isInitialized     = false;
+        _localCache               = null;
+        _cacheHitsUntilAllocation = -1;
+        _isInitialized            = false;
     }
 
     public final void validate( ComponentConf oldConf, ComponentConf newConf )
@@ -134,17 +109,20 @@ final class LayerCache
 
         _isInitialized = true;
 
-        if ( validationNeeded )
-            _cachingMakesSense = _cachingMakesSenseFor(newState);
+        if ( validationNeeded ) {
+            _cacheHitsUntilAllocation = _cachingMakesSenseFor(newState);
+            if ( _localCache != null )
+                _localCache.updateNumberOfHitsUntilAllocation(_cacheHitsUntilAllocation);
+        }
 
-        if ( !_cachingMakesSense ) {
+        if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             _freeLocalCache();
             _layerRenderData = newState;
             return;
         }
 
         boolean cacheIsInvalid = true;
-        boolean cacheIsFull    = _CACHE.size() > 128;
+        boolean cacheIsFull    = _CACHE.size() > MAX_NUMBER_OF_CACHE_ENTRIES;
 
         boolean newBufferNeeded = false;
 
@@ -174,7 +152,7 @@ final class LayerCache
         if ( size.width().orElse(0f) == 0f || size.height().orElse(0f) == 0f )
             return;
 
-        if ( !_cachingMakesSense ) {
+        if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             renderer.accept(_layerRenderData, g);
             return;
         }
@@ -184,6 +162,15 @@ final class LayerCache
 
         if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics();
+            if ( g2 == null ) {
+                /*
+                    The cache is not yet ready to render into!
+                    It will need a few more hits to be ready...
+                    So we just do normal rendering instead:
+                */
+                renderer.accept(_layerRenderData, g);
+                return;
+            }
             try {
                 StyleUtil.transferConfigurations(g, g2);
             }
@@ -196,18 +183,18 @@ final class LayerCache
             }
         }
 
-        g.drawImage(_localCache, 0, 0, null);
+        g.drawImage(_localCache.getImage(), 0, 0, null);
     }
 
-    public boolean _cachingMakesSenseFor( LayerRenderConf state )
+    public int _cachingMakesSenseFor( LayerRenderConf state )
     {
         final Size size = state.boxModel().size();
 
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
-            return false;
+            return -1;
 
         if ( state.layer().hasPaintersWhichCannotBeCached() )
-            return false; // We don't know what the painters will do, so we don't cache their painting!
+            return -1; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;
 
@@ -224,7 +211,7 @@ final class LayerCache
                 heavyStyleCount++;
         for ( NoiseConf noise : state.layer().noises().sortedByNames() )
             if ( !noise.equals(NoiseConf.none()) && noise.colors().length > 0 )
-                heavyStyleCount++;
+                heavyStyleCount += 2;
         for ( TextConf text : state.layer().texts().sortedByNames() )
             if ( !text.equals(TextConf.none()) && !text.content().isEmpty() )
                 heavyStyleCount++;
@@ -253,12 +240,92 @@ final class LayerCache
         }
 
         if ( heavyStyleCount < 1 )
-            return false;
+            return -1;
 
-        final int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
-        final int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));
+        final int maxSizeLimit         = CACHE_AGGRESSIVENESS * PIXELS_PER_UNIT_OF_AGGRESSIVENESS;
+        final int eagerAllocationLimit = (int) (maxSizeLimit * EAGER_ALLOCATION_FRIENDLINESS);
+        final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
 
-        return pixelCount <= threshold;
+        final int pixelCount           = (int) (size.width().orElse(0f) * size.height().orElse(0f));
+        final int score = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!
+
+        if ( score > maxSizeLimit )
+            return -1; // We are not going to cache such a large image!
+        else if ( score <= eagerAllocationLimit )
+            return 0; // Nice and small, definitely worth caching!
+        else
+            return Math.max(-1, score - eagerAllocationLimit) / (cacheHitCountLimit / 10);
+    }
+
+    /**
+     *  A wrapper for a cached image that is either rendered or not yet allocated and
+     *  associated with a particular {@link LayerRenderConf} key, which is used
+     *  by the {@link LayerCache} instance of a particular component to get a strong
+     *  reference to the key (causing it to stay in cache and not get garbage collected). <br>
+     *  <br>
+     *  So instances of this are stored as values in the global {@link #_CACHE},
+     *  and can be accessed and shared by multiple {@link LayerCache} instances.
+     *  (So be careful with modifying this class!)<br>
+     *  The image can be allocated lazily only after a certain number of cache
+     *  hits have been reached. This is to avoid allocating and rendering cache
+     *  data for short-lived paint jobs (like animations for example).
+     */
+    private static final class CachedImage
+    {
+        private final Supplier<BufferedImage>  _imageAllocator;
+        private WeakReference<LayerRenderConf> _key;
+        private @Nullable BufferedImage        _image;
+        private boolean                        _isRendered;
+        private int                            _numberOfHitsUntilAllocation;
+
+
+        CachedImage( Size size, LayerRenderConf cacheKey, int numberOfHitsUntilAllocation ) {
+            _key                         = new WeakReference<>(cacheKey);
+            _isRendered                  = false;
+            _imageAllocator              = () -> new BufferedImage(size.width().map(Number::intValue).orElse(1), size.height().map(Number::intValue).orElse(1), BufferedImage.TYPE_INT_ARGB);
+            _image                       = null;
+            _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;
+        }
+
+        public void updateNumberOfHitsUntilAllocation( int latestNumberOfHitsUntilAllocation ) {
+            if ( _numberOfHitsUntilAllocation < 0 )
+                _numberOfHitsUntilAllocation = latestNumberOfHitsUntilAllocation;
+        }
+
+        public @Nullable BufferedImage getImage() {
+            return _image;
+        }
+
+        /**
+         * @return a {@link Graphics2D} object for rendering into the cached image or null if
+         *         the image is not yet allocated. Continuous calls to this method will eventually
+         *         allocate the image.
+         */
+        public @Nullable Graphics2D createGraphics() {
+            if ( _isRendered )
+                throw new IllegalStateException("This image has already been rendered into!");
+            if ( _numberOfHitsUntilAllocation > 0 ) {
+                _numberOfHitsUntilAllocation--;
+                return null;
+            }
+            if ( _image == null )
+                _image = _imageAllocator.get();
+            _isRendered = true;
+            return _image.createGraphics();
+        }
+
+        public LayerRenderConf getKeyOrElse( LayerRenderConf newFallbackKey ) {
+            LayerRenderConf key = _key.get();
+            if ( key == null ) {
+                _key = new WeakReference<>(newFallbackKey);
+                key = newFallbackKey;
+            }
+            return key;
+        }
+
+        public boolean isRendered() {
+            return _isRendered;
+        }
     }
 
 }
