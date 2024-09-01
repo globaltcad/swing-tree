@@ -46,6 +46,14 @@ import java.awt.image.BufferedImage
 ''')
 class Render_Cache_Spec extends Specification
 {
+    def setupSpec() {
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 10
+    }
+
+    def cleanupSpec() {
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = -1
+    }
+
     def 'The cache can be created and used for painting.'()
     {
         reportInfo """
