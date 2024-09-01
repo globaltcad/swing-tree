@@ -36,11 +36,15 @@ final class LayerCache
     private static final double EAGER_ALLOCATION_FRIENDLINESS        = 0.1; // Has to be between 0 and 1!
     private static final int    MAX_CACHE_HIT_COUNT                  = 12;
 
+    static int CACHE_AGGRESSIVENESS_OVERRIDE = -1;
+
     // Higher means more memory usage but better performance
     private static int DYNAMIC_CACHE_AGGRESSIVENESS() {
+        if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
+            return CACHE_AGGRESSIVENESS_OVERRIDE;
         double availableGiB = ( Runtime.getRuntime().maxMemory() * 1000 >> 30 ) / 1e3;
-        double aggressiveness = Math.max( 0, 4 * Math.log(availableGiB-1) );
-        return (int) Math.round( aggressiveness );
+        int aggressiveness = (int) Math.round( Math.max( 0, 4 * Math.log(Math.max(1, availableGiB-1)) ) );
+        return Math.max( aggressiveness, 0 );
     }
     private static int DYNAMIC_CACHE_CAP() {
         return Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * DYNAMIC_CACHE_AGGRESSIVENESS());
