@@ -30,10 +30,21 @@ final class LayerCache
 {
     private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
 
-    private static final int    MAX_NUMBER_OF_CACHE_ENTRIES       = 128;
-    private static final int    CACHE_AGGRESSIVENESS              = 10;        // Higher means more memory usage but better performance
-    private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1;       // Has to be between 0 and 1!
-    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
+    private static final int    MAX_CACHE_ENTRIES                    = 1024; // There can never be more entries!
+    private static final int    MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS = 32; // for every dynamic cache aggressiveness unit, we get more entries!
+    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS    = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
+    private static final double EAGER_ALLOCATION_FRIENDLINESS        = 0.1; // Has to be between 0 and 1!
+    private static final int    MAX_CACHE_HIT_COUNT                  = 12;
+
+    // Higher means more memory usage but better performance
+    private static int DYNAMIC_CACHE_AGGRESSIVENESS() {
+        double availableGiB = ( Runtime.getRuntime().maxMemory() * 1000 >> 30 ) / 1e3;
+        double aggressiveness = Math.max( 0, 4 * Math.log(availableGiB-1) );
+        return (int) Math.round( aggressiveness );
+    }
+    private static int DYNAMIC_CACHE_CAP() {
+        return Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * DYNAMIC_CACHE_AGGRESSIVENESS());
+    }
 
     private static final Map<LayerRenderConf, CachedImage> _CACHE = new WeakHashMap<>();
 
@@ -122,7 +133,7 @@ final class LayerCache
         }
 
         boolean cacheIsInvalid = true;
-        boolean cacheIsFull    = _CACHE.size() > MAX_NUMBER_OF_CACHE_ENTRIES;
+        boolean cacheIsFull    = _CACHE.size() > DYNAMIC_CACHE_CAP();
 
         boolean newBufferNeeded = false;
 
@@ -186,12 +197,21 @@ final class LayerCache
         g.drawImage(_localCache.getImage(), 0, 0, null);
     }
 
-    public int _cachingMakesSenseFor( LayerRenderConf state )
+    /**
+     *  Determines if caching makes sense for the given rendering configuration of the layer
+     *  represented as a number indicating the number of cache hits until allocation and rendering
+     *  should happen, or -1 if caching does not make sense for the given rendering configuration.
+     *
+     * @param state The rendering configuration of the layer.
+     * @return A number indicating the number of cache hits until allocation and rendering should happen,
+     *         or -1 if caching does not make sense for the given rendering configuration.
+     */
+    private int _cachingMakesSenseFor( LayerRenderConf state )
     {
         final Size size = state.boxModel().size();
 
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
-            return -1;
+            return -1; // The component does not have a size that can be displayed.
 
         if ( state.layer().hasPaintersWhichCannotBeCached() )
             return -1; // We don't know what the painters will do, so we don't cache their painting!
@@ -242,19 +262,20 @@ final class LayerCache
         if ( heavyStyleCount < 1 )
             return -1;
 
-        final int maxSizeLimit         = CACHE_AGGRESSIVENESS * PIXELS_PER_UNIT_OF_AGGRESSIVENESS;
+        final int maxSizeLimit         = DYNAMIC_CACHE_AGGRESSIVENESS() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS;
         final int eagerAllocationLimit = (int) (maxSizeLimit * EAGER_ALLOCATION_FRIENDLINESS);
         final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
 
-        final int pixelCount           = (int) (size.width().orElse(0f) * size.height().orElse(0f));
-        final int score = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!
+        final int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));
+        final int score      = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!
 
         if ( score > maxSizeLimit )
             return -1; // We are not going to cache such a large image!
         else if ( score <= eagerAllocationLimit )
-            return 0; // Nice and small, definitely worth caching!
+            return 0; // Nice and small, definitely worth allocating and caching right away!
         else
-            return Math.max(-1, score - eagerAllocationLimit) / (cacheHitCountLimit / 10);
+            return 1 + (score - eagerAllocationLimit) / Math.max(1, cacheHitCountLimit / MAX_CACHE_HIT_COUNT);
+            // Here we return the number of cache hits until allocation and rendering should happen.
     }
 
     /**
