@@ -285,6 +285,7 @@ public final class ComponentExtension<C extends JComponent>
             JTextComponent textComp = (JTextComponent) _owner;
             String text = textComp.getText();
             hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());
+            hashCode = hashCode * 31 + textComp.getCaretPosition();
         }
         if ( _owner instanceof AbstractButton ) {
             AbstractButton button = (AbstractButton) _owner;
