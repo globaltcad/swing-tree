@@ -45,7 +45,7 @@ class UI_Scaling_Spec extends Specification
 
     def 'The dimensionality of components will be scaled by the scaling factor'() {
         given:
-        SwingTree.get().setUiScaleFactor(2.0f)
+            SwingTree.get().setUiScaleFactor(2.0f)
 
         when : 'We build a simple panel with a number of various components and custom dimensions'
             var panel =
@@ -85,6 +85,10 @@ class UI_Scaling_Spec extends Specification
                     .withMaxHeight(40)
                     .withHeight(60)
                 )
+                .add(
+                    UI.textArea("TextArea")
+                    .withSizeExactly(Size.of(55, 88))
+                )
                 .get(JPanel)
 
         and : 'We unpack the tree of components:'
@@ -93,6 +97,7 @@ class UI_Scaling_Spec extends Specification
             var slider       = panel.components[2]
             var label        = panel.components[3]
             var textField    = panel.components[4]
+            var textArea     = panel.components[5]
 
         then : 'The specified dimensions of the components will be scaled by the scaling factor'
             button.preferredSize == new Dimension(200, 100)
@@ -115,6 +120,10 @@ class UI_Scaling_Spec extends Specification
             textField.minimumSize.height == 72
             textField.maximumSize.height == 80
             textField.size.height == 120
+            textArea.preferredSize == new Dimension(110, 176)
+            textArea.minimumSize == new Dimension(110, 176)
+            textArea.maximumSize == new Dimension(110, 176)
+            textArea.size == new Dimension(0, 0)
     }
 
 
@@ -286,7 +295,6 @@ class UI_Scaling_Spec extends Specification
             button.size == new Dimension(600, 240)
     }
 
-
     def 'Dimensionality scaling works for properties bound to `withSizeExactly`, `withWidthExactly` and `withHeightExactly`.'()
     {
         reportInfo """
@@ -343,6 +351,59 @@ class UI_Scaling_Spec extends Specification
             button.size == new Dimension(0, 0)
 
         when : 'We change the third set of properties...'
+            height.set(120)
+            UI.sync() // We need to wait for the UI thread to update the UI
+
+        then : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(1554, 240)
+            button.minimumSize == new Dimension(1554, 240)
+            button.maximumSize == new Dimension(1554, 240)
+            button.size == new Dimension(0, 0)
+    }
+
+    def 'Dimensionality scaling works for properties bound to `withSizeExactly(Val,Val)`.'()
+    {
+        reportInfo """
+            SwingTree supports MVI, MVL and MVVM (Model-View-ViewModel) and therefore allows you to bind
+            properties of the UI components to properties of a view model.
+            The values of properties modeling the dimensionality of the components are also scaled by the
+            scaling factor when applied to the UI components dynamically.
+        """
+        given : 'We set the scaling factor to 2.0'
+            SwingTree.get().setUiScaleFactor(2.0f)
+        and : 'We create a whole lot of properties:'
+            var width  = Var.of(128)
+            var height = Var.of(52)
+
+        and : 'We create a UI with a button where all of these properties are bound to:'
+            var panel =
+                UI.panel()
+                .add(
+                    UI.button("Button")
+                    .withSizeExactly(width,height)
+                )
+                .get(JPanel)
+
+        and : 'We unpack the tree of components:'
+            var button = panel.components[0]
+
+        expect : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(256, 104)
+            button.minimumSize == new Dimension(256, 104)
+            button.maximumSize == new Dimension(256, 104)
+            button.size == new Dimension(0, 0)
+
+        when : 'We change the widths of the component...'
+            width.set(777)
+            UI.sync() // We need to wait for the UI thread to update the UI
+
+        then : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(1554, 104)
+            button.minimumSize == new Dimension(1554, 104)
+            button.maximumSize == new Dimension(1554, 104)
+            button.size == new Dimension(0, 0)
+
+        when : 'We change the heights of the component through the property...'
             height.set(120)
             UI.sync() // We need to wait for the UI thread to update the UI
 
