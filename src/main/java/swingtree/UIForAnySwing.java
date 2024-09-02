@@ -3144,6 +3144,234 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
+     *   Allows you to define a common width and height for the minimum, maximum, and preferred size of this component.
+     *   This is a convenience method, which is equivalent to:
+     *   <pre>{@code
+     *      .withMinSize(width, height)
+     *      .withMaxSize(width, height)
+     *      .withPrefSize(width, height)
+     *   }</pre>
+     *   This method call translates to calling {@link JComponent#setMinimumSize(Dimension)},
+     *   {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *   on the underlying component.
+     *
+     * @param width The min-, max- and preferred with of the component.
+     * @param height The min-, max- and preferred height of the component.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withSizeExactly( int width, int height ) {
+        UIForAnySwing<I, C> self = this;
+        self = UIForAnySwing.class.cast(self.withMinSize(width, height));
+        self = UIForAnySwing.class.cast(self.withMaxSize(width, height));
+        self = UIForAnySwing.class.cast(self.withPrefSize(width, height));
+        return self._this();
+    }
+
+    /**
+     *  Allows you to define a common width and height for the minimum, maximum, and preferred size of this component
+     *  in the form of the supplied {@link Size} object.
+     *  This is in essence a convenience method equivalent to:
+     *  <pre>{@code
+     *      .withMinSize(size)
+     *      .withMaxSize(size)
+     *      .withPrefSize(size)
+     *  }</pre>
+     *  Underneath, this method call translates to calling {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param size The min-, max- and preferred {@link Size} of the component.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withSizeExactly( Size size ) {
+        Objects.requireNonNull(size, "size");
+        if ( size.equals(Size.unknown()) )
+            return _this();
+
+        if ( !size.hasPositiveHeight() ) // Width only!
+            return withWidthExactly(size.width().map(Number::intValue).orElse(0));
+         else if ( !size.hasPositiveWidth() ) // Height only!
+            return withHeightExactly(size.height().map(Number::intValue).orElse(0));
+        else
+            return withSizeExactly(
+                    size.width().map(Number::intValue).orElse(0),
+                    size.height().map(Number::intValue).orElse(0)
+                );
+    }
+
+    /**
+     *  Bind to a {@link Size} object to dynamically update the common
+     *  width and height for the minimum, maximum, and preferred size of this component.
+     *  This is in essence a convenience method, which is equivalent to calling:
+     *  <pre>{@code
+     *      .withMinSize(width, height)
+     *      .withMaxSize(width, height)
+     *      .withPrefSize(width, height)
+     *  }</pre>
+     *  This method translates to calling {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param size A property wrapping the min-, max- and preferred {@link Size} of the component.
+     *             When the property item changes, the size of the component will be updated accordingly.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withSizeExactly( Val<Size> size ) {
+        NullUtil.nullArgCheck(size, "size", Val.class);
+        NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
+        return _withOnShow( size, (c,v) -> {
+                    c.setMinimumSize(UI.scale(v.toDimension()));
+                    c.setMaximumSize(UI.scale(v.toDimension()));
+                    c.setPreferredSize(UI.scale(v.toDimension()));
+                    _revalidate(c);
+                })
+                ._with( c -> {
+                    c.setMinimumSize(UI.scale(size.get().toDimension()));
+                    c.setMaximumSize(UI.scale(size.get().toDimension()));
+                    c.setPreferredSize(UI.scale(size.get().toDimension()));
+                })
+                ._this();
+    }
+
+    /**
+     *  Allows you to bind to two {@link Val} properties to dynamically update the common width and height
+     *  for the minimum, maximum, and preferred size of this component.
+     *  This is in essence a convenience method, which is equivalent to:
+     *  <pre>{@code
+     *      .withMinSize(width, height)
+     *      .withMaxSize(width, height)
+     *      .withPrefSize(width, height)
+     *  }</pre>
+     *  This method will translate the property updates to calling {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param width The min-, max- and preferred width of the component in the form of an integer property.
+     *              When the property item changes, the width of the component will be updated accordingly.
+     * @param height The min-, max- and preferred height of the component in the form of an integer property.
+     *               When the property item changes, the height of the component will be updated accordingly.
+     * @return A declarative builder instance to allow for further method chaining.
+     * @throws NullPointerException If any of the provided properties is {@code null}.
+     */
+    public final I withSizeExactly( Val<Integer> width, Val<Integer> height ) {
+        Objects.requireNonNull(width, "width");
+        Objects.requireNonNull(height, "height");
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
+        UIForAnySwing<I, C> self = this;
+        self = UIForAnySwing.class.cast(self.withMinSize(width, height));
+        self = UIForAnySwing.class.cast(self.withMaxSize(width, height));
+        self = UIForAnySwing.class.cast(self.withPrefSize(width, height));
+        return self._this();
+    }
+
+    /**
+     *  Use this to set the min-, max- and preferred width of this {@link JComponent} to the same value. <br>
+     *  This is a convenience method, which is equivalent to calling:
+     *  <pre>{@code
+     *      .withMinWidth(width)
+     *      .withMaxWidth(width)
+     *      .withPrefWidth(width)
+     *  }</pre>
+     *  An invocation to this method translates to {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param width The min-, max- and preferred width of the component.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withWidthExactly( int width ) {
+        UIForAnySwing<I, C> self = this;
+        self = UIForAnySwing.class.cast(self.withMinWidth(width));
+        self = UIForAnySwing.class.cast(self.withMaxWidth(width));
+        self = UIForAnySwing.class.cast(self.withPrefWidth(width));
+        return self._this();
+    }
+
+    /**
+     *  Use this to bind to a {@link Val} property to dynamically update the min-, max- and preferred width
+     *  of this {@link JComponent} to the same value. <br>
+     *  So whenever the item of the property changes, all these widths will
+     *  be updated automatically for you.
+     *  This is a convenience method, which is equivalent to calling {@link #withMinWidth(Val)},
+     *  {@link #withMaxWidth(Val)} and {@link #withPrefWidth(Val)} on the underlying component.
+     *  <pre>{@code
+     *      .withMinWidth(width)
+     *      .withMaxWidth(width)
+     *      .withPrefWidth(width)
+     *  }</pre>
+     *  Eventually, all of this ultimately translates to {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param width The min-, max- and preferred width of the component wrapped by a {@link Val}.
+     *              When the property item changes, the width of the component will be updated accordingly.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withWidthExactly( Val<Integer> width ) {
+        Objects.requireNonNull(width, "width");
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
+        UIForAnySwing<I, C> self = this;
+        self = UIForAnySwing.class.cast(self.withMinWidth(width));
+        self = UIForAnySwing.class.cast(self.withMaxWidth(width));
+        self = UIForAnySwing.class.cast(self.withPrefWidth(width));
+        return self._this();
+    }
+
+    /**
+     *  Use this to set the min-, max- and preferred height of this {@link JComponent} to the same value. <br>
+     *  This is a convenience method, which is equivalent to calling:
+     *  <pre>{@code
+     *      .withMinHeight(height)
+     *      .withMaxHeight(height)
+     *      .withPrefHeight(height)
+     *  }</pre>
+     *  An invocation to this method translates to {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param height The min-, max- and preferred height of the component.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withHeightExactly( int height ) {
+        UIForAnySwing<I, C> self = this;
+        self = UIForAnySwing.class.cast(self.withMinHeight(height));
+        self = UIForAnySwing.class.cast(self.withMaxHeight(height));
+        self = UIForAnySwing.class.cast(self.withPrefHeight(height));
+        return self._this();
+    }
+
+    /**
+     *  Use this to bind to a {@link Val} property to dynamically update the min-, max- and preferred height
+     *  of this {@link JComponent} to the same value. <br>
+     *  So whenever the item of the property changes, all these heights will
+     *  be updated automatically for you.
+     *  This is a convenience method, which is equivalent to calling {@link #withMinHeight(Val)},
+     *  {@link #withMaxHeight(Val)} and {@link #withPrefHeight(Val)} on the underlying component.
+     *  <pre>{@code
+     *      .withMinHeight(height)
+     *      .withMaxHeight(height)
+     *      .withPrefHeight(height)
+     *  }</pre>
+     *  Eventually, all of this ultimately translates to {@link JComponent#setMinimumSize(Dimension)},
+     *  {@link JComponent#setMaximumSize(Dimension)}, and {@link JComponent#setPreferredSize(Dimension)}
+     *  on the underlying component.
+     *
+     * @param height The min-, max- and preferred height of the component wrapped by a {@link Val}.
+     *               When the property item changes, the height of the component will be updated accordingly.
+     * @return A declarative builder instance to allow for further method chaining.
+     */
+    public final I withHeightExactly( Val<Integer> height ) {
+        Objects.requireNonNull(height, "height");
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
+        UIForAnySwing<I, C> self = this;
+        self = UIForAnySwing.class.cast(self.withMinHeight(height));
+        self = UIForAnySwing.class.cast(self.withMaxHeight(height));
+        self = UIForAnySwing.class.cast(self.withPrefHeight(height));
+        return self._this();
+    }
+
+    /**
      *  Calls the provided action event handler when the mouse gets pressed and then released.
      *  This delegates to a {@link MouseListener} based mouse click event listener registered in the UI component.
      *  <br><br>
