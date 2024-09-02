@@ -58,11 +58,18 @@ class UI_Scaling_Spec extends Specification
                     .withSize(150, 50)
                 )
                 .add(
+                    UI.toggleButton("Toggle Button")
+                    .withPrefSize(Size.of(111, 52))
+                    .withMinSize(Size.of(86, 23))
+                    .withMaxSize(Size.of(90, 67))
+                    .withSize(Size.of(121, 44))
+                )
+                .add(
                     UI.slider(UI.Align.HORIZONTAL)
                     .withPrefSize(new Dimension(60, 20))
                     .withMinSize(new Dimension(70, 80))
                     .withMaxSize(new Dimension(80, 42))
-                    .withSize(120, 40)
+                    .withSize(new Dimension(120, 40))
                 )
                 .add(
                     UI.label("Label")
@@ -81,16 +88,21 @@ class UI_Scaling_Spec extends Specification
                 .get(JPanel)
 
         and : 'We unpack the tree of components:'
-            var button = panel.components[0]
-            var slider = panel.components[1]
-            var label = panel.components[2]
-            var textField = panel.components[3]
+            var button       = panel.components[0]
+            var toggleButton = panel.components[1]
+            var slider       = panel.components[2]
+            var label        = panel.components[3]
+            var textField    = panel.components[4]
 
         then : 'The specified dimensions of the components will be scaled by the scaling factor'
             button.preferredSize == new Dimension(200, 100)
             button.minimumSize == new Dimension(150, 50)
             button.maximumSize == new Dimension(140, 100)
             button.size == new Dimension(300, 100)
+            toggleButton.preferredSize == new Dimension(222, 104)
+            toggleButton.minimumSize == new Dimension(172, 46)
+            toggleButton.maximumSize == new Dimension(180, 134)
+            toggleButton.size == new Dimension(242, 88)
             slider.preferredSize == new Dimension(120, 40)
             slider.minimumSize == new Dimension(140, 160)
             slider.maximumSize == new Dimension(160, 84)
@@ -192,10 +204,10 @@ class UI_Scaling_Spec extends Specification
         given : 'We set the scaling factor to 2.0'
             SwingTree.get().setUiScaleFactor(2.0f)
         and : 'We create a whole lot of properties:'
-            var prefSize = Var.of(new Dimension(70, 50))
-            var minSize  = Var.of(new Dimension(75, 25))
-            var maxSize  = Var.of(new Dimension(80, 45))
-            var size     = Var.of(new Dimension(20, 22))
+            var prefSize = Var.of(Size.of(70, 50))
+            var minSize  = Var.of(Size.of(75, 25))
+            var maxSize  = Var.of(Size.of(80, 45))
+            var size     = Var.of(Size.of(20, 22))
             var prefWidth  = Var.of(142)
             var minWidth   = Var.of(110)
             var maxWidth   = Var.of(90)
@@ -235,10 +247,10 @@ class UI_Scaling_Spec extends Specification
             button.size == new Dimension(568, 132)
 
         when : 'We change the first set of properties...'
-            prefSize.set(new Dimension(200, 100))
-            minSize.set(new Dimension(150, 50))
-            maxSize.set(new Dimension(140, 100))
-            size.set(new Dimension(300, 100))
+            prefSize.set(Size.of(200, 100))
+            minSize.set(Size.of(150, 50))
+            maxSize.set(Size.of(140, 100))
+            size.set(Size.of(300, 100))
             UI.sync() // We need to wait for the UI thread to update the UI
 
         then : 'The specified dimensions of the components will be scaled by the scaling factor'

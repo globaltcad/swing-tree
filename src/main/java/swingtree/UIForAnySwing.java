@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.*;
-import swingtree.animation.AnimationStatus;
 import swingtree.animation.AnimationDispatcher;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Peeker;
@@ -22,6 +22,7 @@ import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.LayoutConstraint;
+import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -2493,15 +2494,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
      * @param size The minimum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
+     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
+     *             Use {@link #withMinSize(Size)} instead.
      */
+    @Deprecated
     public final I withMinSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> c.setMinimumSize(UI.scale(size)) )._this();
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  Set the minimum {@link Size} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
+     * @param size The minimum {@link Size} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinSize( Size size ) {
+        NullUtil.nullArgCheck(size, "size", Dimension.class);
+        return _with( c -> c.setMinimumSize(UI.scale(size.toDimension())) )._this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to dynamically set the maximum {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMinimumSize(Dimension)} (Dimension)} on the underlying component. <br>
      *  This is a convenience method, which would
      *  be equivalent to:
@@ -2513,18 +2527,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    });
      *  }</pre>
      *
-     * @param size The minimum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @param size The minimum {@link Size} of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinSize( Val<Dimension> size ) {
+    public final I withMinSize( Val<Size> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
         return _withOnShow( size, (c,v) -> {
-                    c.setMinimumSize(UI.scale(v));
+                    c.setMinimumSize(UI.scale(v.toDimension()));
                     _revalidate(c);
                 })
                 ._with( c -> {
-                    c.setMinimumSize( UI.scale(size.get()) );
+                    c.setMinimumSize( UI.scale(size.get().toDimension()) );
                 })
                 ._this();
     }
@@ -2651,28 +2665,42 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
      * @param size The maximum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
+     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
+     *             Use {@link #withMaxSize(Size)} instead.
      */
+    @Deprecated
     public final I withMaxSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> c.setMaximumSize(UI.scale(size)) )._this();
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  Set the maximum {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
-     * @param size The maximum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @param size The maximum {@link Size} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaxSize( Val<Dimension> size ) {
+    public final I withMaxSize( Size size ) {
+        NullUtil.nullArgCheck(size, "size", Size.class);
+        return _with( c -> c.setMaximumSize(UI.scale(size.toDimension())) )._this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Size} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     * @param size The maximum {@link Size} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxSize( Val<Size> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
         return _withOnShow( size, (c,v) -> {
-                    c.setMaximumSize(UI.scale(v));
+                    c.setMaximumSize(UI.scale(v.toDimension()));
                     _revalidate(c); // For some reason this is needed to make the change visible.
                 })
                 ._with( c -> {
-                    c.setMaximumSize( UI.scale(size.get()) );
+                    c.setMaximumSize( UI.scale(size.get().toDimension()) );
                 })
                 ._this();
     }
@@ -2689,8 +2717,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  Bind to a {@link Val} object to dynamically set the maximum size of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
      * @param width The maximum width of the component.
      * @param height The maximum height of the component.
@@ -2798,28 +2825,43 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
      * @param size The preferred {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
+     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
+     *             Please use {@link #withPrefSize(Size)} instead.
      */
+    @Deprecated
     public final I withPrefSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> c.setPreferredSize(UI.scale(size)) )._this();
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. <br>
+     *  Set the preferred {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
-     * @param size The preferred {@link Dimension} of the component wrapped by a {@link Val}.
+     * @param size The preferred {@link Size} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPrefSize( Val<Dimension> size ) {
+    public final I withPrefSize( Size size ) {
+        NullUtil.nullArgCheck(size, "size", Size.class);
+        return _with( c -> c.setPreferredSize(UI.scale(size.toDimension())) )._this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Size} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     *
+     * @param size A property holding the preferred {@link Size} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefSize( Val<Size> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
         return _withOnShow( size, (c,v) -> {
-                    c.setPreferredSize(UI.scale(v));
+                    c.setPreferredSize(UI.scale(v.toDimension()));
                     _revalidate(c);
                 })
                 ._with( c -> {
-                    c.setPreferredSize( UI.scale(size.get()) );
+                    c.setPreferredSize( UI.scale(size.get().toDimension()) );
                 })
                 ._this();
     }
@@ -2945,28 +2987,45 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param size The current {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
+     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
+     *             Please use {@link #withSize(Size)} instead.
      */
+    @Deprecated
     public final I withSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> c.setSize(UI.scale(size)) )._this();
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the current {@link Dimension} of this {@link JComponent}. <br>
+     *  Set the current {@link Size}) (width and height) of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
-     * @param size The current {@link Dimension} of the component wrapped by a {@link Val}.
+     *
+     * @param size The current {@link Size} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withSize( Val<Dimension> size ) {
+    public final I withSize( Size size ) {
+        NullUtil.nullArgCheck(size, "size", Dimension.class);
+        return _with( c -> c.setSize(UI.scale(size.toDimension())) )._this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to dynamically set the current {@link Dimension} of this {@link JComponent}
+     *  using a {@link Size} object. <br>
+     *  The {@link Size} is automatically translated to a call to
+     *  {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     *
+     * @param size The current {@link Size} of the component wrapped by a {@link Val} property.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( Val<Size> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
         return _withOnShow( size, (c,v) -> {
-                    c.setSize(UI.scale(v));
+                    c.setSize(UI.scale(v.toDimension()));
                     _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
                 })
                 ._with( c -> {
-                    c.setSize( UI.scale(size.get()) );
+                    c.setSize( UI.scale(size.get().toDimension()) );
                 })
                 ._this();
     }
