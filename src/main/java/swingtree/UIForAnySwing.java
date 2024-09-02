@@ -2821,8 +2821,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the preferred {@link Dimension} of this {@link JComponent}. <br>
+     *  Set the preferred {@link Dimension} of this {@link JComponent}, which consists
+     *  of a width and a height used as a suggestion to the {@link LayoutManager} of the
+     *  parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     *
      * @param size The preferred {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
@@ -2835,7 +2838,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the preferred {@link Size} of this {@link JComponent}. <br>
+     *  Set the preferred {@link Size} of this {@link JComponent}, which consists
+     *  of a width and a height used as a suggestion to the {@link LayoutManager} of the
+     *  parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
      * @param size The preferred {@link Size} of the component.
      * @return This very builder to allow for method chaining.
@@ -2846,8 +2851,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the preferred {@link Size} of this {@link JComponent}. <br>
+     *  Bind to a {@link Val} object to dynamically set the preferred {@link Size} of this {@link JComponent},
+     *  which consists of a width and a height used as a suggestion
+     *  to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
      *
      * @param size A property holding the preferred {@link Size} of the component.
@@ -2867,7 +2873,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the preferred width and height ({@link Dimension}) of this {@link JComponent}. <br>
+     *  Set the preferred width and height ({@link Dimension}) of this {@link JComponent},
+     *  which consists of a width and a height used as a suggestion
+     *  to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
      * @param width The preferred width of the component.
      * @param height The preferred height of the component.
@@ -2878,8 +2886,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. <br>
+     *  Bind to a {@link Val} object to dynamically set the preferred {@link Dimension} of this {@link JComponent},
+     *  which consists of a width and a height used as a suggestion
+     *  to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
      * @param width The preferred width of the component.
      * @param height The preferred height of the component.
@@ -2905,7 +2914,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to only set the preferred width of this {@link JComponent}. <br>
+     *  Use this to only set the preferred width of this {@link JComponent},
+     *  which serves as a suggestion to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
      * @param width The preferred width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
@@ -2925,7 +2935,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to dynamically set only the preferred width of this {@link JComponent}. <br>
+     *  Use this to dynamically set only the preferred width of this {@link JComponent},
+     *  which serves as a suggestion to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
      * @param width The preferred width which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
@@ -2944,7 +2955,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to only set the preferred height of this {@link JComponent}. <br>
+     *  Use this to only set the preferred height of this {@link JComponent},
+     *  which serves as a suggestion to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
      * @param height The preferred height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
@@ -2964,7 +2976,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to dynamically set only the preferred height of this {@link JComponent}. <br>
+     *  Use this to dynamically set only the preferred height of this {@link JComponent},
+     *  which serves as a suggestion to the {@link LayoutManager} of the parent container. <br>
      *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
      * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
