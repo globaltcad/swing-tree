@@ -2997,7 +2997,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the current {@link Size}) (width and height) of this {@link JComponent}. <br>
+     *  Sets the current {@link Size}) (width and height) of this {@link JComponent}. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the size of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefSize(Size)} method instead. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      *
      * @param size The current {@link Size} of the component.
@@ -3011,6 +3015,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Bind to a {@link Val} object to dynamically set the current {@link Dimension} of this {@link JComponent}
      *  using a {@link Size} object. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the size of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefSize(Val)} method instead. <br>
      *  The {@link Size} is automatically translated to a call to
      *  {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      *
@@ -3031,10 +3039,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the current width and height of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
-     * @param width The current width of the component.
-     * @param height The current height of the component.
+     *  Allows you to directly set the width and height of the current component
+     *  directly instead of through the layout manager. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the size of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefSize(int, int)} method instead. <br>
+     *  Also note that this method translates to invoking
+     *  {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     *
+     * @param width The width of the component.
+     * @param height The height of the component.
      * @return This very builder to allow for method chaining.
      */
     public final I withSize( int width, int height ) {
@@ -3043,6 +3058,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Set the current width of this {@link JComponent}. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the set width of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefWidth(int)} method instead. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param width The current width of the component.
      * @return This very builder to allow for method chaining.
@@ -3055,8 +3074,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the current width of this {@link JComponent}. <br>
+     *  Bind to a {@link Val} object to dynamically set the current width of this {@link JComponent}. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the width of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefWidth(Val)} method instead. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param width The current width of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
@@ -3076,6 +3098,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Set the current height of this {@link JComponent}. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the height of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefHeight(int)} method instead. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param height The current height of the component.
      * @return This very builder to allow for method chaining.
@@ -3088,8 +3114,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Bind to a {@link Val} object to
-     *  dynamically set the current height of this {@link JComponent}. <br>
+     *  Bind to a {@link Val} object to dynamically set the current height of this {@link JComponent}. <br>
+     *  Note however that calling this method, may not necessarily have a visual effect
+     *  on the component, as the layout manager may override the height of the component. <br>
+     *  So in case of the component being part of a layout (which is the case most of the time),
+     *  you may want to use the {@link #withPrefHeight(Val)} method instead. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param height The current height of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
