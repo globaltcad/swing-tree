@@ -7,6 +7,7 @@ import spock.lang.Title
 import sprouts.Val
 import sprouts.Var
 import swingtree.components.JSplitButton
+import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
 import javax.swing.JPanel
@@ -56,7 +57,7 @@ class Property_Binding_Spec extends Specification
             SwingTree.get().setUiScaleFactor(uiScale)
 
         and : 'We create a property representing the size of a component.'
-            Val<Dimension> size = Var.of(new Dimension(100, 100))
+            Val<Size> size = Var.of(Size.of(100, 100))
         and : 'We create a UI to which we want to bind:'
             var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Hello World").withPrefSize(size))
@@ -71,7 +72,7 @@ class Property_Binding_Spec extends Specification
             panel.components[2].maximumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
 
         when : 'We change the value of the property.'
-            size.set(new Dimension(200, 200))
+            size.set(Size.of(200, 200))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
 

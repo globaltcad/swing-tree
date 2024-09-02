@@ -2,6 +2,7 @@ package swingtree
 
 
 import swingtree.api.IconDeclaration
+import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 import sprouts.Val
 import sprouts.Var
@@ -110,9 +111,9 @@ class Label_Binding_Spec extends Specification
         SwingTree.get().setUiScaleFactor(uiScale)
 
         and : 'We create a simple swing-tree property for modelling the size.'
-            Val<Dimension> minSize = Var.of(new Dimension(100, 100))
-            Val<Dimension> maxSize = Var.of(new Dimension(200, 200))
-            Val<Dimension> prefSize = Var.of(new Dimension(150, 150))
+            Val<Size> minSize  = Var.of(Size.of(100, 100))
+            Val<Size> maxSize  = Var.of(Size.of(200, 200))
+            Val<Size> prefSize = Var.of(Size.of(150, 150))
 
         when : 'We create and bind to a label UI node...'
             var ui =
@@ -129,9 +130,9 @@ class Label_Binding_Spec extends Specification
             label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)
 
         when : 'We change the items of the properties...'
-            minSize.set(new Dimension(50, 50))
-            maxSize.set(new Dimension(100, 100))
-            prefSize.set(new Dimension(75, 75))
+            minSize.set(Size.of(50, 50))
+            maxSize.set(Size.of(100, 100))
+            prefSize.set(Size.of(75, 75))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
