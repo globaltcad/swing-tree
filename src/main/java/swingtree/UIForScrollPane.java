@@ -62,7 +62,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
     
     @Override
     protected UIForScrollPane<P> _newBuilderWithState( BuilderState<P> newState ) {
-        return new UIForScrollPane<>(newState);
+        return new UIForScrollPane<>(newState, _configurator);
     }
 
     /**
