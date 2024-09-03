@@ -12,6 +12,7 @@ import examples.games.kanapicker.mvvm.KanaPickerView
 import examples.games.kanapicker.mvvm.KanaPickerViewModel
 import examples.lists.ListTestExample
 import examples.calculator.mvi.CalculatorView
+import examples.scrollpanes.ScrollConfigExample
 import examples.team.mvi.TeamView
 import examples.mvvm.*
 import examples.simple.Form
@@ -536,7 +537,6 @@ class Examples_Spec extends Specification
             Utility.similarityBetween(ui, "views/tables-example-view.png", 96.3) > 96.3
     }
 
-
     def 'The todo app UI defined in the examples has the expected state.'()
     {
         given : 'We get the UI.'
@@ -545,6 +545,14 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JPanel, "task-1").isPresent()
             new Utility.Query(ui).find(JPanel, "task-2").isPresent()
             new Utility.Query(ui).find(JPanel, "task-3").isPresent()
+    }
+
+    def 'The scroll pane UI defined in the examples can be instantiated without errors.'()
+    {
+        given : 'We get the UI.'
+            var ui = new ScrollConfigExample()
+        expect :
+            ui != null
     }
 
 }
