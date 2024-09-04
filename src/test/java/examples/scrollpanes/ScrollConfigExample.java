@@ -4,43 +4,43 @@ import swingtree.UI;
 import static swingtree.UI.*;
 
 import javax.swing.*;
+import java.awt.Rectangle;
+import java.awt.Dimension;
 
 public final class ScrollConfigExample extends JPanel {
 
     private static final String TEXT =
-            "Lorem ipsum odor amet, consectetuer adipiscing elit. Taciti nec curabitur massa fringilla; taciti " +
-            "purus faucibus nulla. Maecenas odio adipiscing viverra nisi nibh pharetra ex. Sit sed dolor fames " +
-            "scelerisque est vel turpis per vehicula. Luctus justo semper maximus proin maecenas; dapibus malesuada " +
-            "tempor. Bibendum dictum euismod nunc condimentum; magna amet. Penatibus pulvinar sapien molestie";
+            "This is a little story about a long sentence which is unfortunately too long to fit horizontally " +
+            "placed on a single line of text in a panel inside a scroll pane.";
+
 
     public ScrollConfigExample() {
-        of(this).withLayout("wrap, fill").withPrefSize(400, 600)
-        .add("grow",label("In a Simple Panel:"))
-        .add("grow",
-            panel().withLayout("ins 0, debug, fill")
-                .add("grow",
-                    panel().withLayout("wrap", "", "[]push[]")
-                    .withBackground(Color.LIGHT_GRAY)
-                    .add(html(TEXT))
-                    .add(html("END"))
-                )
-        )
-        .add("grow",label("In a Scroll Pane:"))
-        .add("grow",
-            scrollPane(config -> config.fitWidth(true))
-            .add(GROW,
-                panel().withLayout("wrap", "", "[]push[]")
+        of(this).withLayout("wrap, fill").withPrefSize(350, 550)
+        .add("shrink",label("Not implementing Scrollable:"))
+        .add("grow, push",
+            scrollPane()
+            .add(
+                panel("wrap", "", "[]push[]")
                 .withBackground(Color.LIGHT_GRAY)
                 .add(html(TEXT))
                 .add(html("END"))
             )
         )
-        .add("grow",label("In a Colored Scroll Pane:"))
-        .add("grow",
-            scrollPane(config -> config.fitWidth(true))
-            .withBackground(Color.ORANGE)
-            .add(GROW,
-                panel().withLayout("wrap", "", "[]push[]")
+        .add("shrink",label("Implementing Scrollable:"))
+        .add("grow, push",
+            scrollPane()
+            .add(
+                of(new BoilerplateScrollablePanel()).withLayout("wrap", "", "[]push[]")
+                .withBackground(Color.LIGHT_GRAY)
+                .add(html(TEXT))
+                .add(html("END"))
+            )
+        )
+        .add("shrink",label("Using Scroll Conf:"))
+        .add("grow, push",
+            scrollPane(it -> it.fitWidth(true))
+            .add(
+                panel("wrap", "", "[]push[]")
                 .withBackground(Color.LIGHT_GRAY)
                 .add(html(TEXT))
                 .add(html("END"))
@@ -48,9 +48,36 @@ public final class ScrollConfigExample extends JPanel {
         );
     }
 
-
     public static void main(String[] args) {
         UI.show(frame -> new ScrollConfigExample());
+    }
+
+
+    final static class BoilerplateScrollablePanel extends JPanel implements Scrollable {
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return null;
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 10;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 10;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 
 }
