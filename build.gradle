@@ -9,7 +9,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
 
     // For static analysis and null checking:
     id "net.ltgt.errorprone" version "3.1.0"
@@ -51,7 +51,7 @@ dependencies {
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M8'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M9'
     api group: 'com.github.weisj',     name: 'jsvg',            version: '1.4.0'
 
     // Logging :

@@ -594,9 +594,9 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         Objects.requireNonNull(propertyRef);
         Objects.requireNonNull(componentRef);
         Objects.requireNonNull(displayAction);
-        Action<Val<T>> action = new Action<Val<T>>() {
+        Action<ValDelegate<T>> action = new Action<ValDelegate<T>>() {
             @Override
-            public void accept( Val<T> value )
+            public void accept( ValDelegate<T> value )
             {
                 C thisComponent = componentRef.get();
                 if ( thisComponent == null ) {
