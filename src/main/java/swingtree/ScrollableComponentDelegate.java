@@ -1,6 +1,7 @@
 package swingtree;
 
 import swingtree.api.Configurator;
+import swingtree.api.FitViewportSupplier;
 import swingtree.api.ScrollIncrementSupplier;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
@@ -49,7 +50,7 @@ public class ScrollableComponentDelegate
         int unitIncrement, int blockIncrement, boolean fitWidth, boolean fitHeight
     ) {
         return new ScrollableComponentDelegate(
-                scrollPane, view, preferredSize, (a,b,c)->unitIncrement, (a,b,c)->blockIncrement, fitWidth, fitHeight
+                scrollPane, view, preferredSize, (a,b,c)->unitIncrement, (a,b,c)->blockIncrement, (v,c)->fitWidth, (v,c)->fitHeight
         );
     }
 
@@ -58,8 +59,8 @@ public class ScrollableComponentDelegate
     private final Size                    _preferredSize;
     private final ScrollIncrementSupplier _unitIncrement;
     private final ScrollIncrementSupplier _blockIncrement;
-    private final boolean                 _fitWidth;
-    private final boolean                 _fitHeight;
+    private final FitViewportSupplier     _fitWidth;
+    private final FitViewportSupplier     _fitHeight;
 
 
     private ScrollableComponentDelegate(
@@ -68,8 +69,8 @@ public class ScrollableComponentDelegate
         Size                    preferredSize,
         ScrollIncrementSupplier unitIncrement,
         ScrollIncrementSupplier blockIncrement,
-        boolean                 fitWidth,
-        boolean                 fitHeight
+        FitViewportSupplier     fitWidth,
+        FitViewportSupplier     fitHeight
     ) {
         _scrollPane     = scrollPane;
         _view           = view;
@@ -237,9 +238,13 @@ public class ScrollableComponentDelegate
      *          if true, makes the viewport force the Scrollables width to match its own.
      */
     public ScrollableComponentDelegate fitWidth( boolean fitWidth ) {
+        return fitWidth((v, c) -> fitWidth);
+    }
+
+    public ScrollableComponentDelegate fitWidth( FitViewportSupplier fitWidthSupplier ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidth, _fitHeight
-            );
+                _scrollPane, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidthSupplier, _fitHeight
+        );
     }
 
     /**
@@ -256,9 +261,13 @@ public class ScrollableComponentDelegate
      *          if true, makes a viewport force the Scrollables height to match its own.
      */
     public ScrollableComponentDelegate fitHeight( boolean fitHeight ) {
+        return fitHeight((v, c) -> fitHeight);
+    }
+
+    public ScrollableComponentDelegate fitHeight( FitViewportSupplier fitHeightSupplier ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeight
-            );
+                _scrollPane, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeightSupplier
+        );
     }
 
     /**
@@ -304,12 +313,12 @@ public class ScrollableComponentDelegate
         return _blockIncrement.get(viewRectangle, orientation, direction);
     }
 
-    boolean fitWidth() {
-        return _fitWidth;
+    boolean fitWidth(JViewport v, JComponent c) {
+        return _fitWidth.get(v, c);
     }
 
-    boolean fitHeight() {
-        return _fitHeight;
+    boolean fitHeight(JViewport v, JComponent c) {
+        return _fitHeight.get(v, c);
     }
 
     @Override
