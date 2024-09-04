@@ -189,7 +189,7 @@ class Scroll_Pane_Spec extends Specification
         and : 'We then build the component:'
             var scrollPane = ui.get(JScrollPane)
         expect : 'The scroll pane has the expected scrollable behavior.'
-            scrollPane.getViewport().getView().getPreferredSize() == new java.awt.Dimension(160, 130)
+            scrollPane.getViewport().getView().getPreferredScrollableViewportSize() == new java.awt.Dimension(160, 130)
             scrollPane.getViewport().getView().getScrollableBlockIncrement(null, 0,0) == 7
             scrollPane.getViewport().getView().getScrollableUnitIncrement(null, 0,0) == 5
             scrollPane.getViewport().getView().getScrollableTracksViewportHeight() == false
