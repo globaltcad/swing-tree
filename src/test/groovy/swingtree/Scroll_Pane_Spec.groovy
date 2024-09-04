@@ -5,7 +5,10 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.threading.EventProcessor
+import utility.Utility
 
+import javax.swing.JFrame
+import javax.swing.JPanel
 import javax.swing.JScrollPane
 
 @Title("The Scroll Pane")
@@ -191,5 +194,64 @@ class Scroll_Pane_Spec extends Specification
             scrollPane.getViewport().getView().getScrollableUnitIncrement(null, 0,0) == 5
             scrollPane.getViewport().getView().getScrollableTracksViewportHeight() == false
             scrollPane.getViewport().getView().getScrollableTracksViewportWidth() == true
+    }
+
+    def 'The scroll configuration API produces a scroll pane whose content layout is calculated correctly.'()
+    {
+        reportInfo """
+            In this little test we check if the layout of the content
+            of a scroll pane is calculated correctly, for both the
+            case where we use the scroll conf API to fit the viewport
+            and for the case where we do not.
+        """
+        given : 'A bit of content for the scroll pane content layout test.'
+            var TEXT =  "This is a little story about a long sentence which is unfortunately too long to fit horizontally " +
+                        "placed on a single line of text in a panel inside a scroll pane.";
+
+        and : 'We create a UI with a scroll pane layout.'
+            var ui =
+                UI.frame("Scroll Pane Layout Test").add(
+                    UI.panel("wrap, fill").withPrefSize(350, 550)
+                    .add("shrink",UI.label("Not implementing Scrollable:"))
+                    .add("grow, push",
+                        UI.scrollPane()
+                        .add(
+                            UI.panel("wrap", "", "[]push[]").id("content-1")
+                            .withBackground(UI.Color.LIGHT_GRAY)
+                            .add(UI.html(TEXT))
+                            .add(UI.html("END"))
+                        )
+                    )
+                    .add("shrink",UI.label("Using Scroll Conf:"))
+                    .add("grow, push",
+                        UI.scrollPane(it -> it.fitWidth(true))
+                        .add(
+                            UI.panel("wrap", "", "[]push[]").id("content-2")
+                            .withBackground(UI.Color.LIGHT_GRAY)
+                            .add(UI.html(TEXT))
+                            .add(UI.html("END"))
+                        )
+                    )
+                );
+        and : 'We build the UI:'
+            var frame = ui.get(JFrame)
+
+        when : 'We do the layout of the component...'
+            frame.pack()
+
+        then : 'The layout is calculated correctly.'
+            frame.getWidth() == 360
+            frame.getHeight() == 580
+
+        when : 'We filter out the content panels...'
+            var content1 = new Utility.Query(frame).find(JPanel, "content-1").orElseThrow(NoSuchElementException::new)
+            var content2 = new Utility.Query(frame).find(JPanel, "content-2").orElseThrow(NoSuchElementException::new)
+
+        then : 'The content panels have the expected size.'
+            content1.getWidth() == 920
+            content1.getHeight() == 225
+            content2.getWidth() == 335
+            content2.getHeight() == 240
+
     }
 }
