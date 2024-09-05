@@ -206,7 +206,8 @@ class Scroll_Pane_Spec extends Specification
         """
         given : 'A bit of content for the scroll pane content layout test.'
             var TEXT =  "This is a little story about a long sentence which is unfortunately too long to fit horizontally " +
-                        "placed on a single line of text in a panel inside a scroll pane.";
+                        "placed on a single line of text in a panel inside a scroll pane. This is why it is a good idea " +
+                        "to place me in a scroll pane.";
 
         and : 'We create a UI with a scroll pane layout.'
             var ui =
@@ -252,6 +253,5 @@ class Scroll_Pane_Spec extends Specification
             content1.getHeight() == 227
             content2.getWidth() == 335
             content2.getHeight() == 242
-
     }
 }
