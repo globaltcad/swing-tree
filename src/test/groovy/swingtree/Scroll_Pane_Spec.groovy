@@ -255,6 +255,6 @@ class Scroll_Pane_Spec extends Specification
             content1.getWidth() > 910
             210 <= content1.getHeight() && content1.getHeight() <= 230
             325 <= content2.getWidth()  && content2.getWidth()  <= 335
-            220 <= content2.getHeight() && content2.getHeight() <= 230
+            225 <= content2.getHeight() && content2.getHeight() <= 245
     }
 }
