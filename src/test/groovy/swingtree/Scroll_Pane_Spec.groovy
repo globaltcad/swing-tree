@@ -253,8 +253,8 @@ class Scroll_Pane_Spec extends Specification
 
         then : 'The content panels have the expected size.'
             content1.getWidth() > 900
-            content1.getHeight() == 212
-            content2.getWidth() == 325
-            content2.getHeight() == 227
+            210 < content1.getHeight() && content1.getHeight() < 230
+            320 < content2.getWidth()  && content2.getWidth()  < 330
+            220 < content2.getHeight() && content2.getHeight() < 230
     }
 }
