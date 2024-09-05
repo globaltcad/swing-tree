@@ -5,28 +5,31 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.*;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
-final class AdvancedSurfaceEventDispatcher {
+final class AdvancedEventDispatcher {
 
-    private static final Logger log = LoggerFactory.getLogger(AdvancedSurfaceEventDispatcher.class);
-    private static final AdvancedSurfaceEventDispatcher eventDispatcher = new AdvancedSurfaceEventDispatcher();
+    private static final Logger log = LoggerFactory.getLogger(AdvancedEventDispatcher.class);
+    private static final AdvancedEventDispatcher eventDispatcher = new AdvancedEventDispatcher();
 
-    static void addMouseEnterListener(Component component, AdvancedSurfaceListener listener) {
-        List<AdvancedSurfaceListener> listeners = eventDispatcher.enterListeners.computeIfAbsent(component, k -> new ArrayList<>());
+    static void addMouseEnterListener(Component component, MouseListener listener) {
+        List<MouseListener> listeners = eventDispatcher.enterListeners.computeIfAbsent(component, k -> new ArrayList<>());
         listeners.add(listener);
     }
 
-    static void addMouseExitListener(Component component, AdvancedSurfaceListener listener) {
-        List<AdvancedSurfaceListener> listeners = eventDispatcher.exitListeners.computeIfAbsent(component, k -> new ArrayList<>());
+    static void addMouseExitListener(Component component, MouseListener listener) {
+        List<MouseListener> listeners = eventDispatcher.exitListeners.computeIfAbsent(component, k -> new ArrayList<>());
         listeners.add(listener);
     }
 
-    private final Map<Component, List<AdvancedSurfaceListener>> enterListeners;
-    private final Map<Component, List<AdvancedSurfaceListener>> exitListeners;
+    private final Map<Component, List<MouseListener>> enterListeners;
+    private final Map<Component, List<MouseListener>> exitListeners;
 
-    private AdvancedSurfaceEventDispatcher() {
+    private AdvancedEventDispatcher() {
         enterListeners = new WeakHashMap<>();
         exitListeners = new WeakHashMap<>();
 
@@ -56,14 +59,13 @@ final class AdvancedSurfaceEventDispatcher {
         Component component = mouseEvent.getComponent().getParent();
 
         while (component != null) {
-            List<AdvancedSurfaceListener> listeners = enterListeners.get(component);
+            List<MouseListener> listeners = enterListeners.get(component);
 
             if (listeners != null) {
-                Object surface = mouseEvent.getSource();
                 MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
-                for (AdvancedSurfaceListener listener : listeners) {
+                for (MouseListener listener : listeners) {
                     try {
-                        listener.mouseEntered(surface, localMouseEvent);
+                        listener.mouseEntered(localMouseEvent);
                     } catch (Exception e) {
                         log.error("Failed to process mouseEntered event {}. Error: {}", localMouseEvent, e.getMessage(), e);
                     }
@@ -81,14 +83,13 @@ final class AdvancedSurfaceEventDispatcher {
         Component component = mouseEvent.getComponent().getParent();
 
         while (component != null) {
-            List<AdvancedSurfaceListener> listeners = exitListeners.get(component);
+            List<MouseListener> listeners = exitListeners.get(component);
 
             if (listeners != null) {
-                Object surface = mouseEvent.getSource();
                 MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
-                for (AdvancedSurfaceListener listener : listeners) {
+                for (MouseListener listener : listeners) {
                     try {
-                        listener.mouseExited(surface, localMouseEvent);
+                        listener.mouseExited(localMouseEvent);
                     } catch (Exception e) {
                         log.error("Failed to process mouseExited event {}. Error: {}", localMouseEvent, e.getMessage(), e);
                     }

@@ -3506,24 +3506,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseEnter( Action<ComponentSurfaceEventDelegate<C>> onEnter ) {
+    public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
         return _with( thisComponent -> {
                     WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
-                    AdvancedSurfaceListener listener = new AdvancedSurfaceListener() {
+                    MouseListener listener = new MouseAdapter() {
                         @Override public void mouseEntered(MouseEvent e) {
                             @Nullable C localComponent = source.get();
                             if ( localComponent != null )
-                                _runInApp(() -> onEnter.accept(new ComponentSurfaceEventDelegate<>( localComponent, e.getSource(), e )));
-                        }
-                        @Override public void mouseEntered(Object surface, MouseEvent e) {
-                            @Nullable C localComponent = source.get();
-                            if ( localComponent != null )
-                                _runInApp(() -> onEnter.accept(new ComponentSurfaceEventDelegate<>( localComponent, surface, e )));
+                                _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
                     thisComponent.addMouseListener(listener);
-                    AdvancedSurfaceEventDispatcher.addMouseEnterListener(thisComponent, listener);
+                    AdvancedEventDispatcher.addMouseEnterListener(thisComponent, listener);
                 })
                 ._this();
     }
@@ -3537,24 +3532,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseExit( Action<ComponentSurfaceEventDelegate<C>> onExit ) {
+    public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
         return _with( thisComponent -> {
                     WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
-                    AdvancedSurfaceListener listener = new AdvancedSurfaceListener() {
+                    MouseListener listener = new MouseAdapter() {
                         @Override public void mouseExited(MouseEvent e) {
                             @Nullable C localComponent = source.get();
                             if ( localComponent != null )
-                                _runInApp(() -> onExit.accept(new ComponentSurfaceEventDelegate<>( localComponent, e.getSource(), e )));
-                        }
-                        @Override public void mouseExited(Object surface, MouseEvent e) {
-                            @Nullable C localComponent = source.get();
-                            if ( localComponent != null )
-                                _runInApp(() -> onExit.accept(new ComponentSurfaceEventDelegate<>( localComponent, surface, e )));
+                                _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
                     thisComponent.addMouseListener(listener);
-                    AdvancedSurfaceEventDispatcher.addMouseExitListener(thisComponent, listener);
+                    AdvancedEventDispatcher.addMouseExitListener(thisComponent, listener);
                 })
                 ._this();
     }
