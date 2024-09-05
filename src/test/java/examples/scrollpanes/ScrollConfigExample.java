@@ -38,10 +38,7 @@ public final class ScrollConfigExample extends JPanel {
         )
         .add("shrink",label("Using Scroll Conf:"))
         .add("grow, push",
-            scrollPane(it -> it
-                    .fitWidth(true)
-                    .fitHeight((v, c) -> v.getHeight() > c.getPreferredSize().height)
-            )
+            scrollPane(it -> it.fitWidth(true) )
             .add(
                 panel("wrap", "", "[]push[]")
                 .withBackground(Color.LIGHT_GRAY)

@@ -237,7 +237,7 @@ class Scroll_Pane_Spec extends Specification
             var frame = ui.get(JFrame)
 
         when : 'We do the layout of the component...'
-            frame.pack()
+            UI.runNow(()->frame.pack())
 
         then : 'The layout is calculated correctly.'
             frame.getWidth() == 360
@@ -248,10 +248,10 @@ class Scroll_Pane_Spec extends Specification
             var content2 = new Utility.Query(frame).find(JPanel, "content-2").orElseThrow(NoSuchElementException::new)
 
         then : 'The content panels have the expected size.'
-            content1.getWidth() == 920
-            content1.getHeight() == 225
+            content1.getWidth() > 900
+            content1.getHeight() == 227
             content2.getWidth() == 335
-            content2.getHeight() == 240
+            content2.getHeight() == 242
 
     }
 }

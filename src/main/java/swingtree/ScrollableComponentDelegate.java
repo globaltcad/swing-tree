@@ -47,11 +47,13 @@ public class ScrollableComponentDelegate
 {
     static ScrollableComponentDelegate of(
         JScrollPane scrollPane, JComponent view, Size preferredSize,
-        int unitIncrement, int blockIncrement, boolean fitWidth, boolean fitHeight
+        int unitIncrement, int blockIncrement
     ) {
         return new ScrollableComponentDelegate(
-                scrollPane, view, preferredSize, (a,b,c)->unitIncrement, (a,b,c)->blockIncrement, (v,c)->fitWidth, (v,c)->fitHeight
-        );
+                scrollPane, view, preferredSize, (a,b,c)->unitIncrement, (a,b,c)->blockIncrement,
+                (v, c) -> v.getWidth() > c.getPreferredSize().width,
+                (v, c) -> v.getHeight() > c.getPreferredSize().height
+            );
     }
 
     private final JScrollPane             _scrollPane;
@@ -314,11 +316,11 @@ public class ScrollableComponentDelegate
     }
 
     boolean fitWidth(JViewport v, JComponent c) {
-        return _fitWidth.get(v, c);
+        return _fitWidth.shouldFit(v, c);
     }
 
     boolean fitHeight(JViewport v, JComponent c) {
-        return _fitHeight.get(v, c);
+        return _fitHeight.shouldFit(v, c);
     }
 
     @Override

@@ -1453,7 +1453,6 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
-        @Override protected JViewport createViewport() { return new JViewport(); }
     }
     /** {inheritDoc} */
     public static class TabbedPane extends JTabbedPane implements StylableComponent {
