@@ -10,6 +10,7 @@ import utility.Utility
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.JScrollPane
+import java.awt.Dimension
 
 @Title("The Scroll Pane")
 @Narrative('''
@@ -211,7 +212,9 @@ class Scroll_Pane_Spec extends Specification
 
         and : 'We create a UI with a scroll pane layout.'
             var ui =
-                UI.frame("Scroll Pane Layout Test").add(
+                UI.frame("Scroll Pane Layout Test")
+                .peek(it->it.setPreferredSize(new Dimension(350, 550)))
+                .add(
                     UI.panel("wrap, fill").withPrefSize(350, 550)
                     .add("shrink",UI.label("Not implementing Scrollable:"))
                     .add("grow, push",
@@ -241,8 +244,8 @@ class Scroll_Pane_Spec extends Specification
             UI.runNow(()->frame.pack())
 
         then : 'The layout is calculated correctly.'
-            frame.getWidth() == 360
-            frame.getHeight() == 580
+            frame.getWidth() == 350
+            frame.getHeight() == 550
 
         when : 'We filter out the content panels...'
             var content1 = new Utility.Query(frame).find(JPanel, "content-1").orElseThrow(NoSuchElementException::new)
@@ -250,8 +253,8 @@ class Scroll_Pane_Spec extends Specification
 
         then : 'The content panels have the expected size.'
             content1.getWidth() > 900
-            content1.getHeight() == 227
-            content2.getWidth() == 335
-            content2.getHeight() == 242
+            content1.getHeight() == 212
+            content2.getWidth() == 325
+            content2.getHeight() == 227
     }
 }
