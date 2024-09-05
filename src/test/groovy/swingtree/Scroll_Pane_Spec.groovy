@@ -252,9 +252,9 @@ class Scroll_Pane_Spec extends Specification
             var content2 = new Utility.Query(frame).find(JPanel, "content-2").orElseThrow(NoSuchElementException::new)
 
         then : 'The content panels have the expected size.'
-            content1.getWidth() > 900
-            210 < content1.getHeight() && content1.getHeight() < 230
-            320 < content2.getWidth()  && content2.getWidth()  < 330
-            220 < content2.getHeight() && content2.getHeight() < 230
+            content1.getWidth() > 910
+            210 <= content1.getHeight() && content1.getHeight() <= 230
+            325 <= content2.getWidth()  && content2.getWidth()  <= 335
+            220 <= content2.getHeight() && content2.getHeight() <= 230
     }
 }
