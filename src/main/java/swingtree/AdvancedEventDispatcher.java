@@ -16,10 +16,12 @@ final class AdvancedEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(AdvancedEventDispatcher.class);
     private static final AdvancedEventDispatcher eventDispatcher = new AdvancedEventDispatcher();
+    private static final MouseListener dispatcherListener = new MouseAdapter() { };
 
     static void addMouseEnterListener(Component component, MouseListener listener) {
         ComponentListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
-            k.addMouseListener(new MouseAdapter() {});
+            // ensures that mouse events are enabled
+            k.addMouseListener(dispatcherListener);
             return new ComponentListeners();
         });
         listeners.addEnterListener(listener);
@@ -27,11 +29,13 @@ final class AdvancedEventDispatcher {
 
     static void addMouseExitListener(Component component, MouseListener listener) {
         ComponentListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
-            k.addMouseListener(new MouseAdapter() {});
+            // ensures that mouse events are enabled
+            k.addMouseListener(dispatcherListener);
             return new ComponentListeners();
         });
         listeners.addExitListener(listener);
     }
+
 
     private final Map<Component, ComponentListeners> listeners;
 
