@@ -270,7 +270,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The soft example UI looks like this:
-            ${Utility.linkSnapshot('views/soft-example-UI.png')}
+            ${Utility.linkSnapshot('views/soft-example-UI_1_.png')}
             
             This is the most advanced example of how to use the SwingTree style API to
             customize the look and feel of your entire application.

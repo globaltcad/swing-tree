@@ -237,7 +237,7 @@ public class Utility
                 if ( delta.matches("_\\d+_") )
                     variants.add(directory + "/" + file.getName());
                 else if ( !delta.equals(FAILURE_POSTFIX) ) // Warn about the file that does not follow the naming convention
-                    System.out.println("File " + currentFileName + " does not follow the naming convention!");
+                    System.err.println("File " + currentFileName + " does not follow the naming convention!");
 
             }
         }
@@ -253,6 +253,7 @@ public class Utility
         try {
             // We load from the test resource folder:
             InputStream resource = Utility.class.getResourceAsStream(imageFile);
+            Objects.requireNonNull(resource);
             imageFromFile = javax.imageio.ImageIO.read(resource);
         } catch (Exception e) {
             e.printStackTrace();
