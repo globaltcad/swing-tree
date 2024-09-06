@@ -5,12 +5,14 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.threading.EventProcessor
+import utility.SwingTreeTestConfigurator
 import utility.Utility
 
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import java.awt.Dimension
+import java.awt.Font
 
 @Title("The Scroll Pane")
 @Narrative('''
@@ -38,6 +40,7 @@ import java.awt.Dimension
 class Scroll_Pane_Spec extends Specification
 {
     def setupSpec() {
+        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
@@ -222,8 +225,8 @@ class Scroll_Pane_Spec extends Specification
                         .add(
                             UI.panel("wrap", "", "[]push[]").id("content-1")
                             .withBackground(UI.Color.LIGHT_GRAY)
-                            .add(UI.html(TEXT))
-                            .add(UI.html("END"))
+                            .add(UI.html(TEXT).withFont(new Font("Ubuntu", Font.BOLD, 12)))
+                            .add(UI.html("END").withFont(new Font("Ubuntu", Font.BOLD, 12)))
                         )
                     )
                     .add("shrink",UI.label("Using Scroll Conf:"))
@@ -233,8 +236,8 @@ class Scroll_Pane_Spec extends Specification
                         .add(
                             UI.panel("wrap", "", "[]push[]").id("content-2")
                             .withBackground(UI.Color.LIGHT_GRAY)
-                            .add(UI.html(TEXT))
-                            .add(UI.html("END"))
+                            .add(UI.html(TEXT).withFont(new Font("Ubuntu", Font.BOLD, 12)))
+                            .add(UI.html("END").withFont(new Font("Ubuntu", Font.BOLD, 12)))
                         )
                     )
                 );
@@ -263,7 +266,7 @@ class Scroll_Pane_Spec extends Specification
         and : 'The content panels have the expected size.'
             content1.getWidth() > 910
             200 <= content1.getHeight() && content1.getHeight() <= 230
-            325 <= content2.getWidth()  && content2.getWidth()  <= 335
+            315 <= content2.getWidth()  && content2.getWidth()  <= 335
             225 <= content2.getHeight() && content2.getHeight() <= 245
     }
 }
