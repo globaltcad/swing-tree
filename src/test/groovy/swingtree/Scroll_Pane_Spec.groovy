@@ -218,7 +218,7 @@ class Scroll_Pane_Spec extends Specification
                     UI.panel("wrap, fill").withPrefSize(350, 550)
                     .add("shrink",UI.label("Not implementing Scrollable:"))
                     .add("grow, push",
-                        UI.scrollPane()
+                        UI.scrollPane().id("scroll-1")
                         .add(
                             UI.panel("wrap", "", "[]push[]").id("content-1")
                             .withBackground(UI.Color.LIGHT_GRAY)
@@ -229,6 +229,7 @@ class Scroll_Pane_Spec extends Specification
                     .add("shrink",UI.label("Using Scroll Conf:"))
                     .add("grow, push",
                         UI.scrollPane(it -> it.fitWidth(true))
+                        .id("scroll-2")
                         .add(
                             UI.panel("wrap", "", "[]push[]").id("content-2")
                             .withBackground(UI.Color.LIGHT_GRAY)
@@ -248,10 +249,18 @@ class Scroll_Pane_Spec extends Specification
             frame.getHeight() == 550
 
         when : 'We filter out the content panels...'
+            var scroll1 = new Utility.Query(frame).find(JScrollPane, "scroll-1").orElseThrow(NoSuchElementException::new)
+            var scroll2 = new Utility.Query(frame).find(JScrollPane, "scroll-2").orElseThrow(NoSuchElementException::new)
             var content1 = new Utility.Query(frame).find(JPanel, "content-1").orElseThrow(NoSuchElementException::new)
             var content2 = new Utility.Query(frame).find(JPanel, "content-2").orElseThrow(NoSuchElementException::new)
 
-        then : 'The content panels have the expected size.'
+        then : 'The content panels have the covariance relative to their viewport.'
+            content1.getSize() != scroll1.getViewport().getSize()
+            content2.getSize() == scroll2.getViewport().getSize()
+        and :
+            content1.getWidth() > scroll1.getViewport().getWidth()
+            content1.getHeight() == scroll1.getViewport().getHeight()
+        and : 'The content panels have the expected size.'
             content1.getWidth() > 910
             210 <= content1.getHeight() && content1.getHeight() <= 230
             325 <= content2.getWidth()  && content2.getWidth()  <= 335
