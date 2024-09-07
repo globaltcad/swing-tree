@@ -82,6 +82,14 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
     @Override
     protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable Object constraints ) {
         if ( _configurator != null ) {
+            if ( addedComponent instanceof Scrollable ) {
+                log.warn(
+                    "Trying to add a 'Scrollable' component to a declarative scroll pane UI which is already " +
+                    "configured with a SwingTree based Scrollable through the 'UI.scrollPane(Configurator)' method. " +
+                    "The provided component of type '"+addedComponent.getClass().getName()+"' is most likely not intended to be used this way.",
+                    new Throwable()
+                );
+            }
             ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);
             if ( constraints != null ) {
                 wrapper.add(addedComponent, constraints);
@@ -109,16 +117,14 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
      *  by a {@link ScrollableComponentDelegate} instance whose configuration is
      *  delivered to the scroll pane through this class implementing the {@link Scrollable} interface.
      */
-    private static class ScrollableBox extends UI.Box implements Scrollable
+    private static class ScrollableBox extends ThinDelegationBox implements Scrollable
     {
         private final JScrollPane _parent;
-        private final JComponent  _child;
         private final Configurator<ScrollableComponentDelegate> _configurator;
 
         ScrollableBox( JScrollPane parent, JComponent child, Configurator<ScrollableComponentDelegate> configurator ) {
-            setLayout(new MigLayout("fill, ins 0, hidemode 2, gap 0"));
+            super(child);
             _parent       = parent;
-            _child        = child;
             _configurator = configurator;
         }
 
@@ -151,36 +157,6 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 log.error("Error while configuring scrollable component.", e);
             }
             return delegate;
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            Dimension childSize = _child.getPreferredSize();
-            Dimension selfSize = this.getSize();
-            if ( !Objects.equals(childSize, selfSize) ) {
-                this.setSize(childSize);
-            }
-            return childSize;
-        }
-
-        @Override
-        public Dimension getMinimumSize() {
-            Dimension childSize = _child.getMinimumSize();
-            Dimension selfSize = this.getSize();
-            if ( !Objects.equals(childSize, selfSize) ) {
-                this.setSize(childSize);
-            }
-            return childSize;
-        }
-
-        @Override
-        public Dimension getMaximumSize() {
-            Dimension childSize = _child.getMaximumSize();
-            Dimension selfSize = this.getSize();
-            if ( !Objects.equals(childSize, selfSize) ) {
-                this.setSize(childSize);
-            }
-            return childSize;
         }
 
         @Override

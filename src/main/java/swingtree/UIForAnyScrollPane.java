@@ -1,11 +1,16 @@
 package swingtree;
 
+import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import sprouts.Val;
+import swingtree.components.JBox;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.Scrollable;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Objects;
 
 public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIForAnySwing<I, P>
@@ -13,15 +18,22 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     @Override
     protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable Object constraints) {
         if ( constraints != null ) {
-            // The user wants to add a component to the scroll pane with a specific constraint.
-            // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
-            addedComponent = UI.panel("fill, ins 0").add(constraints.toString(), addedComponent).getComponent();
-            //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
+            if ( addedComponent instanceof Scrollable ) {
+                ThinScrollableDelegateBox thinDelegationBox = new ThinScrollableDelegateBox((Scrollable) addedComponent);
+                thinDelegationBox.add(constraints.toString(), addedComponent);
+            } else {
+                // The user wants to add a component to the scroll pane with a specific constraint.
+                // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
+                ThinDelegationBox thinDelegationBox = new ThinDelegationBox(addedComponent);
+                thinDelegationBox.add(constraints.toString(), addedComponent);
+                addedComponent = thinDelegationBox;
+                //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
 
-            // Let's strip it of any visible properties, since it should serve merely as a container.
-            addedComponent.setBorder(null);
-            addedComponent.setOpaque(false);
-            addedComponent.setBackground(null);
+                // Let's strip it of any visible properties, since it should serve merely as a container.
+                addedComponent.setBorder(null);
+                addedComponent.setOpaque(false);
+                addedComponent.setBackground(null);
+            }
         }
         thisComponent.setViewportView(addedComponent);
     }
@@ -206,5 +218,82 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
                     thisComponent.getHorizontalScrollBar().setBlockIncrement(increment);
                 })
                 ._this();
+    }
+
+
+    static class ThinDelegationBox extends JBox {
+
+        protected final JComponent _child;
+
+        ThinDelegationBox(JComponent child) {
+            setLayout(new MigLayout("fill, ins 0, hidemode 2, gap 0"));
+            _child = child;
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            Dimension childSize = _child.getPreferredSize();
+            Dimension selfSize = this.getSize();
+            if ( !Objects.equals(childSize, selfSize) ) {
+                this.setSize(childSize);
+            }
+            return childSize;
+        }
+
+        @Override
+        public Dimension getMinimumSize() {
+            Dimension childSize = _child.getMinimumSize();
+            Dimension selfSize = this.getSize();
+            if ( !Objects.equals(childSize, selfSize) ) {
+                this.setSize(childSize);
+            }
+            return childSize;
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            Dimension childSize = _child.getMaximumSize();
+            Dimension selfSize = this.getSize();
+            if ( !Objects.equals(childSize, selfSize) ) {
+                this.setSize(childSize);
+            }
+            return childSize;
+        }
+    }
+
+    private static final class ThinScrollableDelegateBox extends ThinDelegationBox implements Scrollable {
+
+        private final Scrollable _scrollable;
+
+
+        ThinScrollableDelegateBox( Scrollable child ) {
+            super((JComponent) child);
+            _scrollable = child;
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return _scrollable.getPreferredScrollableViewportSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement( Rectangle visibleRect, int orientation, int direction ) {
+            return _scrollable.getScrollableUnitIncrement(visibleRect, orientation, direction);
+        }
+
+        @Override
+        public int getScrollableBlockIncrement( Rectangle visibleRect, int orientation, int direction ) {
+            return _scrollable.getScrollableBlockIncrement(visibleRect, orientation, direction);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return _scrollable.getScrollableTracksViewportWidth();
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return _scrollable.getScrollableTracksViewportHeight();
+        }
     }
 }
