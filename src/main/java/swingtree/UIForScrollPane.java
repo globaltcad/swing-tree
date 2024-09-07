@@ -226,9 +226,9 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public boolean getScrollableTracksViewportWidth() {
-            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
-                return delegate.fitWidth(this._parent.getViewport(), this);
+                ScrollableComponentDelegate delegate = _createNewScrollableConf();
+                return delegate.fitWidth();
             } catch ( Exception e ) {
                 log.error("Error while calculating fit width for scrollable component.", e);
                 return false;
@@ -237,9 +237,9 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public boolean getScrollableTracksViewportHeight() {
-            ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
-                return delegate.fitHeight(this._parent.getViewport(), this);
+                ScrollableComponentDelegate delegate = _createNewScrollableConf();
+                return delegate.fitHeight();
             } catch ( Exception e ) {
                 log.error("Error while calculating fit height for scrollable component.", e);
                 return false;

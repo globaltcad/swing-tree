@@ -1,7 +1,6 @@
 package swingtree;
 
 import swingtree.api.Configurator;
-import swingtree.api.FitViewportSupplier;
 import swingtree.api.ScrollIncrementSupplier;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
@@ -10,6 +9,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
+import java.awt.Component;
 import java.util.Objects;
 
 /**
@@ -38,43 +38,63 @@ import java.util.Objects;
  *     )
  * )
  * }</pre>
+ * <p>
  * Note that the provided {@link Configurator} will be called
  * for every call to a method of the underlying {@link javax.swing.Scrollable}
  * component implementation, so the settings you provide can
- * also change dynamically based on the context captured by the lambda.
+ * also change dynamically based on the context captured by the lambda.<br>
+ * <p>
+ * Also note that this configuration object also exposes some context
+ * information you may find useful when defining its properties like {@link #fitWidth(boolean)},
+ * {@link #fitHeight(boolean)}, {@link #unitIncrement(int)}, and so on...<br>
+ * Like for example the current {@link #view()}, which implements the {@link javax.swing.Scrollable}
+ * and wraps your {@link #content} component. You can also access the {@link #viewport()} as
+ * well as the overarching {@link #scrollPane()} overall!<br>
+ * Again, the configurator you pass to {@link UI#scrollPane(Configurator)} will be
+ * called eagerly, so everything you define in there will be completely dynamic,
+ * which means your scroll behaviour can dynamically react to the involved components.
  */
 public class ScrollableComponentDelegate
 {
     static ScrollableComponentDelegate of(
-        JScrollPane scrollPane, JComponent view, Size preferredSize,
+        JScrollPane scrollPane,
+        JComponent content,
+        Size preferredSize,
         int unitIncrement, int blockIncrement
     ) {
+        Component view     = scrollPane.getViewport().getView();
+        JViewport viewport = scrollPane.getViewport();
+        boolean fitWidth  = viewport.getWidth()  >  view.getPreferredSize().width;
+        boolean fitHeight = viewport.getHeight() > view.getPreferredSize().height;
         return new ScrollableComponentDelegate(
-                scrollPane, view, preferredSize, (a,b,c)->unitIncrement, (a,b,c)->blockIncrement,
-                (v, c) -> v.getWidth() > c.getPreferredSize().width,
-                (v, c) -> v.getHeight() > c.getPreferredSize().height
-            );
+                    scrollPane, content, view, preferredSize,
+                    (a,b,c)->unitIncrement, (a,b,c)->blockIncrement,
+                    fitWidth, fitHeight
+                );
     }
 
     private final JScrollPane             _scrollPane;
-    private final JComponent              _view;
+    private final JComponent              _content;
+    private final Component               _view;
     private final Size                    _preferredSize;
     private final ScrollIncrementSupplier _unitIncrement;
     private final ScrollIncrementSupplier _blockIncrement;
-    private final FitViewportSupplier     _fitWidth;
-    private final FitViewportSupplier     _fitHeight;
+    private final boolean                 _fitWidth;
+    private final boolean                 _fitHeight;
 
 
     private ScrollableComponentDelegate(
         JScrollPane             scrollPane,
-        JComponent              view,
+        JComponent              content,
+        Component               view,
         Size                    preferredSize,
         ScrollIncrementSupplier unitIncrement,
         ScrollIncrementSupplier blockIncrement,
-        FitViewportSupplier     fitWidth,
-        FitViewportSupplier     fitHeight
+        boolean                 fitWidth,
+        boolean                 fitHeight
     ) {
         _scrollPane     = scrollPane;
+        _content        = content;
         _view           = view;
         _preferredSize  = preferredSize;
         _unitIncrement  = unitIncrement;
@@ -102,7 +122,7 @@ public class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate prefSize( int width, int height ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, Size.of(width, height), _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, Size.of(width, height), _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -127,7 +147,7 @@ public class ScrollableComponentDelegate
         if ( preferredSize.equals(Size.unknown()) )
             return this;
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -150,7 +170,7 @@ public class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate unitIncrement( int unitIncrement ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, (a,b,c)->unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, _preferredSize, (a, b, c)->unitIncrement, _blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -175,7 +195,7 @@ public class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate unitIncrement( ScrollIncrementSupplier unitIncrement ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, _preferredSize, unitIncrement, _blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -196,7 +216,7 @@ public class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate blockIncrement( int blockIncrement ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, _unitIncrement, (a,b,c)->blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, (a, b, c)->blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -219,7 +239,7 @@ public class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate blockIncrement( ScrollIncrementSupplier blockIncrement ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, _unitIncrement, blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -240,12 +260,8 @@ public class ScrollableComponentDelegate
      *          if true, makes the viewport force the Scrollables width to match its own.
      */
     public ScrollableComponentDelegate fitWidth( boolean fitWidth ) {
-        return fitWidth((v, c) -> fitWidth);
-    }
-
-    public ScrollableComponentDelegate fitWidth( FitViewportSupplier fitWidthSupplier ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidthSupplier, _fitHeight
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidth, _fitHeight
         );
     }
 
@@ -263,12 +279,8 @@ public class ScrollableComponentDelegate
      *          if true, makes a viewport force the Scrollables height to match its own.
      */
     public ScrollableComponentDelegate fitHeight( boolean fitHeight ) {
-        return fitHeight((v, c) -> fitHeight);
-    }
-
-    public ScrollableComponentDelegate fitHeight( FitViewportSupplier fitHeightSupplier ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeightSupplier
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeight
         );
     }
 
@@ -283,13 +295,40 @@ public class ScrollableComponentDelegate
     }
 
     /**
-     * Returns the view component that is contained within the scroll pane
+     * Returns the viewport of the scroll pane that contains the {@link javax.swing.Scrollable} component
+     * this configuration is for.
+     *
+     * @return The viewport of the scroll pane that contains the scrollable component.
+     */
+    public JViewport viewport() {
+        return _scrollPane.getViewport();
+    }
+
+    /**
+     * Returns the user provided content component that is contained in the scroll pane
      * and which is wrapped by a view component implementing the {@link javax.swing.Scrollable}
      * interface configured by this {@link ScrollableComponentDelegate}.
+     * <b>
+     *     The content component is effectively the component supplied to
+     *     the {@link UIForAnyScrollPane#add(Component[])} method.
+     *     (Please note that a scroll pane can only ever hold a single content component)
+     * </b>
+     *
+     * @return The content component that is contained within the scroll pane
+     *         and wrapped by the {@link #view()} component.
+     */
+    public JComponent content() {
+        return _content;
+    }
+
+    /**
+     * Returns the view component implementing the {@link javax.swing.Scrollable} interface and which
+     * is placed directly in the scroll panes {@link #viewport()} through {@link JViewport#setView(Component)}.<br>
+     * This is the main UI component that is configured by this {@link ScrollableComponentDelegate}.
      *
      * @return The view component that is contained within the scroll pane.
      */
-    public JComponent view() {
+    public Component view() {
         return _view;
     }
 
@@ -315,22 +354,22 @@ public class ScrollableComponentDelegate
         return _blockIncrement.get(viewRectangle, orientation, direction);
     }
 
-    boolean fitWidth(JViewport v, JComponent c) {
-        return _fitWidth.shouldFit(v, c);
+    boolean fitWidth() {
+        return _fitWidth;
     }
 
-    boolean fitHeight(JViewport v, JComponent c) {
-        return _fitHeight.shouldFit(v, c);
+    boolean fitHeight() {
+        return _fitHeight;
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                "preferredSize=" + _preferredSize + ", " +
-                "unitIncrement=" + _unitIncrement + ", " +
+                "preferredSize="  + _preferredSize  + ", " +
+                "unitIncrement="  + _unitIncrement  + ", " +
                 "blockIncrement=" + _blockIncrement + ", " +
-                "fitWidth=" + _fitWidth + ", " +
-                "fitHeight=" + _fitHeight +
+                "fitWidth="       + _fitWidth       + ", " +
+                "fitHeight="      + _fitHeight      +
             "]";
     }
 
@@ -340,10 +379,10 @@ public class ScrollableComponentDelegate
         if ( obj == null || getClass() != obj.getClass() ) return false;
         ScrollableComponentDelegate that = (ScrollableComponentDelegate) obj;
         return _preferredSize.equals(that._preferredSize) &&
-               _unitIncrement == that._unitIncrement &&
-               _blockIncrement == that._blockIncrement &&
-               _fitWidth == that._fitWidth &&
-               _fitHeight == that._fitHeight;
+               _unitIncrement.equals(that._unitIncrement) &&
+               _blockIncrement.equals(that._blockIncrement) &&
+               _fitWidth       == that._fitWidth &&
+               _fitHeight      == that._fitHeight;
     }
 
     @Override

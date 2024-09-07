@@ -2418,10 +2418,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * seamlessly in the scroll pane when added using one of the various {@code add} methods. <br>
      * <b>So you do not have to implement the {@link Scrollable} interface yourself!</b><br>
      * <p>
+     * The {@link ScrollableComponentDelegate} object passed to the configurator exposes some context
+     * information you may find useful when defining its properties. Like for example the current
+     * {@link ScrollableComponentDelegate#view()}, which implements the {@link javax.swing.Scrollable}
+     * and wraps your {@link ScrollableComponentDelegate#content} component.
+     * You can also access the {@link ScrollableComponentDelegate#viewport()} as
+     * well as the current {@link #scrollPane()} component itself!<br>
+     * <p>
      * Note that the provided {@link Configurator} will be called
      * for every call to a method of the underlying {@link javax.swing.Scrollable}
-     * component implementation, so the settings you provide can
-     * also change dynamically based on the context captured by the lambda.
+     * component implementation, so the settings you define in the configurator
+     * are updated dynamically based on the context captured by the lambda
+     * as well as the involved components, like viewport, view, content and the
+     * scroll pane itself.
      *
      * @param configurator A configurator for configuring the scrollable content of the scroll pane.
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
