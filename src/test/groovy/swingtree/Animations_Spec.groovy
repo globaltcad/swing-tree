@@ -167,10 +167,9 @@ class Animations_Spec extends Specification
             var button =
                     UI.button("Click me! Or don't.")
                     .onClick({
-                        it.animateFor(0.2, TimeUnit.SECONDS)
+                        it.animateFor(0.3, TimeUnit.SECONDS)
                             .asLongAs({ it.repeats() < 4 })
                             .go(status -> {
-                                println status
                                 if ( !iterations.contains(status.repeats()) )
                                     iterations << status.repeats()
                                 progresses    << status.progress()

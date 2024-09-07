@@ -84,6 +84,10 @@ public final class Bounds
         return new Bounds(Location.of(x, y), Size.of(width, height));
     }
 
+    public static Bounds of( java.awt.Rectangle rectangle ) {
+        return of(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    }
+
     private Bounds( Location location, Size size ) {
         _location = Objects.requireNonNull(location);
         _size     = Objects.requireNonNull(size);
