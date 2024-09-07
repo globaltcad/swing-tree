@@ -269,4 +269,94 @@ class Scroll_Pane_Spec extends Specification
             315 <= content2.getWidth()  && content2.getWidth()  <= 335
             215 <= content2.getHeight() && content2.getHeight() <= 245
     }
+
+    def 'You can add a custom ´Scrollable´ component to a scroll pane with layout constraints that work.'()
+    {
+        reportInfo """
+            In this little test we check if the usage of layout constraints
+            when adding a custom Scrollable component to a scroll pane works.
+            Note that this is not something supported in regular Swing, 
+            SwingTree however, will wrap and delegate your custom Scrollable
+            component in a JPanel, with a ´MigLayout´ instance that
+            respects the layout constraints you set.
+        """
+        given : """
+            We create a UI with 2 different scroll panes each containing a custom
+            ´Scrollable´ component. The first one however receives no layout constraints,
+            while the second one does.
+        """
+            var ui =
+                UI.frame("Scrollable Pane Layout Test")
+                .peek(it->it.setPreferredSize(new Dimension(500, 300)))
+                .add(
+                    UI.panel("fill", "[grow][grow]").withPrefSize(500, 300)
+                    .add("shrink",UI.label("Without Constraints:"))
+                    .add("grow, push, wrap",
+                        UI.scrollPane().id("scroll-1")
+                        .add(
+                            UI.of(new CustomScrollablePanel()).withLayout("wrap 2").id("content-1")
+                            .add(UI.label("Forename: "))
+                            .add(UI.textField("Joey"))
+                            .add(UI.label("Surname: "))
+                            .add(UI.textField("Carbstrong"))
+                        )
+                    )
+                    .add("shrink",UI.label("With Constraints:"))
+                    .add("grow, push, wrap",
+                        UI.scrollPane().id("scroll-2")
+                        .id("scroll-2")
+                        .add("grow, push",
+                            UI.of(new CustomScrollablePanel()).id("content-2")
+                            .add(UI.label("Forename: "))
+                            .add(UI.textField("Joey"))
+                            .add(UI.label("Surname: "))
+                            .add(UI.textField("Carbstrong"))
+                        )
+                    )
+                );
+        and : 'Then we just build the UI:'
+            var frame = ui.get(JFrame)
+
+        when : 'We do the layout of the component...'
+            UI.runNow( () -> frame.pack() )
+        and : 'We fetch the content panels so we can check their layout.'
+            var scroll1 = new Utility.Query(frame).find(JScrollPane, "scroll-1" ).orElseThrow(NoSuchElementException::new)
+            var scroll2 = new Utility.Query(frame).find(JScrollPane, "scroll-2" ).orElseThrow(NoSuchElementException::new)
+            var content1    = new Utility.Query(frame).find(JPanel,      "content-1").orElseThrow(NoSuchElementException::new)
+            var content2    = new Utility.Query(frame).find(JPanel,      "content-2").orElseThrow(NoSuchElementException::new)
+
+        then : 'The content panels have the covariance relative to their viewport.'
+            content1.getSize().getWidth()  == scroll1.getViewport().getSize().getWidth()
+            content1.getSize().getHeight() <  scroll1.getViewport().getSize().getHeight()
+            content2.getSize().getWidth()  == scroll2.getViewport().getSize().getWidth()
+            content2.getSize().getHeight() <  scroll2.getViewport().getSize().getHeight()
+        and : 'The content components are in fact of the custom scrollable type we use for testing.'
+            content1 instanceof CustomScrollablePanel
+            content2 instanceof CustomScrollablePanel
+    }
+
+
+    static class CustomScrollablePanel extends JPanel implements javax.swing.Scrollable {
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return null;
+        }
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) {
+            return 10;
+        }
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visibleRect, int orientation, int direction) {
+            return 10;
+        }
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
+    }
+
 }
