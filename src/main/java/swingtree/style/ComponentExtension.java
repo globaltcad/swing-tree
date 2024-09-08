@@ -673,6 +673,14 @@ public final class ComponentExtension<C extends JComponent>
      */
     public int viewStateHashCode() {
         int hashCode = _styleEngine.getComponentConf().hashCode();
+        // Common stuff:
+        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );
+        java.awt.Color background = _owner.getBackground();
+        java.awt.Color foreground = _owner.getForeground();
+        hashCode = hashCode * 31 + (background == null ? -1 : background.hashCode());
+        hashCode = hashCode * 31 + (foreground == null ? -1 : foreground.hashCode());
+
+        // Subtype component specific stuff:
         if ( _owner instanceof JSlider ) {
             JSlider slider = (JSlider) _owner;
             hashCode = hashCode * 31 + slider.getValue();
@@ -695,9 +703,41 @@ public final class ComponentExtension<C extends JComponent>
         }
         if ( _owner instanceof AbstractButton ) {
             AbstractButton button = (AbstractButton) _owner;
+            String text = button.getText();
             hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);
+            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());
         }
-        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );
+        if ( _owner instanceof JList ) {
+            JList<?> list = (JList<?>) _owner;
+            hashCode = hashCode * 31 + list.getSelectedIndex();
+        }
+        if ( _owner instanceof JTabbedPane ) {
+            JTabbedPane tabbedPane = (JTabbedPane) _owner;
+            hashCode = hashCode * 31 + tabbedPane.getSelectedIndex();
+        }
+        if ( _owner instanceof JTree ) {
+            JTree tree = (JTree) _owner;
+            hashCode = hashCode * 31 + tree.getSelectionCount();
+        }
+        if ( _owner instanceof JTable ) {
+            JTable table = (JTable) _owner;
+            hashCode = hashCode * 31 + table.getSelectedRow();
+            hashCode = hashCode * 31 + table.getSelectedColumn();
+        }
+        if ( _owner instanceof JSpinner ) {
+            JSpinner spinner = (JSpinner) _owner;
+            hashCode = hashCode * 31 + spinner.getValue().hashCode();
+        }
+        if ( _owner instanceof JComboBox ) {
+            JComboBox<?> comboBox = (JComboBox<?>) _owner;
+            hashCode = hashCode * 31 + comboBox.getSelectedIndex();
+        }
+        if ( _owner instanceof JCheckBox ) {
+            JCheckBox checkBox = (JCheckBox) _owner;
+            hashCode = hashCode * 31 + (checkBox.isSelected() ? 1 : 0);
+        }
+
+        // Hashing the children recursively:
         try {
             for ( Component child : _owner.getComponents() ) {
                 if ( child instanceof JComponent ) {
