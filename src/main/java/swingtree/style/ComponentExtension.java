@@ -678,6 +678,8 @@ public final class ComponentExtension<C extends JComponent>
             hashCode = hashCode * 31 + slider.getValue();
             hashCode = hashCode * 31 + slider.getMinimum();
             hashCode = hashCode * 31 + slider.getMaximum();
+            // alignment:
+            hashCode = hashCode * 31 + (slider.getOrientation() == JSlider.HORIZONTAL ? 0 : 1);
         }
         if ( _owner instanceof JProgressBar ) {
             JProgressBar bar = (JProgressBar) _owner;

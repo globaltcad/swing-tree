@@ -7,11 +7,13 @@ import spock.lang.Title
 import swingtree.api.Configurator
 import swingtree.api.Styler
 import swingtree.components.JBox
+import swingtree.style.ComponentExtension
 import swingtree.style.FontConf
 import utility.Utility
 
 import javax.swing.JLabel
 import java.awt.Color
+import java.util.function.Supplier
 
 @Title('Invariant Styles')
 @Narrative("""
@@ -380,6 +382,30 @@ class Invariant_Styles_Spec extends Specification
                        )
                 }
             ]
+    }
+
+    def 'The view state hash code function on the SingTree internal ComponentExtension hashes view related state.'(
+        boolean isEqual, UIForAnySwing ui1, UIForAnySwing ui2
+    ) {
+        given : 'We build the actual components of the UI declarations:'
+            var comp1 = ui1.get(ui1.getType())
+            var comp2 = ui2.get(ui2.getType())
+        when : 'We calculate the hash codes of the two components.'
+            var hash1 = ComponentExtension.from(comp1).viewStateHashCode()
+            var hash2 = ComponentExtension.from(comp2).viewStateHashCode()
+        then : 'The hash codes are equal or not depending on the expected result.'
+            (hash1 == hash2) == isEqual
+        where : 'We test the following UI declarations:'
+            isEqual  | ui1                                       | ui2
+
+            true     | UI.textField("")                          | UI.textField("")
+            false    | UI.textField("x")                         | UI.textField("y")
+
+            true     | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)  | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)
+            false    | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)  | UI.slider(UI.Align.HORIZONTAL, 0, 20, 3)
+
+            true     | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)   | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)
+            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)   | UI.slider(UI.Align.VERTICAL, 0, 0, 0)
     }
 
 }
