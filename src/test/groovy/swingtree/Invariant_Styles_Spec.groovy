@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.Var
 import swingtree.api.Configurator
 import swingtree.api.Styler
 import swingtree.components.JBox
@@ -11,9 +12,9 @@ import swingtree.style.ComponentExtension
 import swingtree.style.FontConf
 import utility.Utility
 
-import javax.swing.JLabel
-import java.awt.Color
-import java.util.function.Supplier
+import javax.swing.*
+import java.awt.*
+import java.time.DayOfWeek
 
 @Title('Invariant Styles')
 @Narrative("""
@@ -396,16 +397,60 @@ class Invariant_Styles_Spec extends Specification
         then : 'The hash codes are equal or not depending on the expected result.'
             (hash1 == hash2) == isEqual
         where : 'We test the following UI declarations:'
-            isEqual  | ui1                                       | ui2
+            isEqual  | ui1                                                | ui2
 
-            true     | UI.textField("")                          | UI.textField("")
-            false    | UI.textField("x")                         | UI.textField("y")
+            true     | UI.textField("")                                   | UI.textField("")
+            false    | UI.textField("x")                                  | UI.textField("y")
 
-            true     | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)  | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)
-            false    | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)  | UI.slider(UI.Align.HORIZONTAL, 0, 20, 3)
+            true     | UI.toggleButton("◌")                               | UI.toggleButton("◌")
+            false    | UI.toggleButton("◌")                               | UI.toggleButton("⬤")
 
-            true     | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)   | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)
-            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)   | UI.slider(UI.Align.VERTICAL, 0, 0, 0)
+            true     | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)
+            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.VERTICAL,   0, 0, 0)
+            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.HORIZONTAL, -10, 0, 0)
+            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.HORIZONTAL, -10, 0, 10)
+
+            true     | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)           | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)
+            false    | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)           | UI.slider(UI.Align.HORIZONTAL, 0, 20, 3)
+
+            true     | UI.panel().withBackground(UI.Color.RED)            | UI.panel().withBackgroundColor("red")
+            false    | UI.panel().withBackground(UI.Color.RED)            | UI.panel().withBackground(UI.Color.BLUE)
+
+            true     | UI.menu().withBackgroundColor("oak")               | UI.menu().withBackgroundColor("oak")
+            false    | UI.menu().withBackgroundColor("oak")               | UI.menu().withBackgroundColor("tan")
+
+            true     | UI.textArea("Hello").withForeground(UI.Color.PINK) | UI.textArea("Hello").withForegroundColor("pink")
+            false    | UI.textArea("Hello").withForeground(UI.Color.PINK) | UI.textArea("Hello").withForeground(UI.Color.BLUE)
+
+            true     | UI.html("Hello").withForeground(UI.Color.PINK)     | UI.html("Hello").withForeground(UI.Color.PINK)
+            false    | UI.html("Hello").withForeground(UI.Color.PINK)     | UI.html("Hello").withForeground(UI.Color.BLUE)
+
+            true     | UI.button("⬤").withStyle(it->it.border(1, "green")) | UI.button("⬤").withStyle(it->it.border(1, "green"))
+            false    | UI.button("⬤").withStyle(it->it.border(1, "green")) | UI.button("⬤").withStyle(it->it.border(1, "blue"))
+
+            true     | UI.list("A", "B", "C").withSelection(Var.of("A"))  | UI.list("A", "B", "C").withSelection(Var.of("A"))
+            false    | UI.list("A", "B", "C").withSelection(Var.of("A"))  | UI.list("A", "B", "C").withSelection(Var.of("B"))
+
+            true     | UI.comboBox(Var.of(DayOfWeek.FRIDAY))              | UI.comboBox(Var.of(DayOfWeek.FRIDAY))
+            false    | UI.comboBox(Var.of(DayOfWeek.FRIDAY))              | UI.comboBox(Var.of(DayOfWeek.SATURDAY))
+
+            true     | UI.spinner(Var.of(5))                              | UI.spinner(Var.of(5))
+            false    | UI.spinner(Var.of(5))                              | UI.spinner(Var.of(6))
+
+            true     | UI.spinner(2, -10, 10)                             | UI.spinner(2, -10, 10)
+            false    | UI.spinner(2, -10, 10)                             | UI.spinner(3, -10, 10)
+            true     | UI.spinner(2, -10, 10)                             | UI.spinner(2, -15, 10) // they look the same
+            true     | UI.spinner(2, -10, 10)                             | UI.spinner(2, -15, 15) // they look the same
+
+            true     | UI.progressBar(0, 100, 50)                         | UI.progressBar(0, 100, 50)
+            false    | UI.progressBar(0, 100, 50)                         | UI.progressBar(0, 100, 60)
+            false    | UI.progressBar(0, 100, 50)                         | UI.progressBar(0, 90,  50)
+            false    | UI.progressBar(0, 100, 50)                         | UI.progressBar(10, 100, 50)
+
+            true     | UI.checkBox("A").isSelectedIf(true)                | UI.checkBox("A").isSelectedIf(true)
+            false    | UI.checkBox("B").isSelectedIf(true)                | UI.checkBox("B").isSelectedIf(false)
+            false    | UI.checkBox("C").isSelectedIf(true)                | UI.checkBox("").isSelectedIf(true)
+
     }
 
 }
