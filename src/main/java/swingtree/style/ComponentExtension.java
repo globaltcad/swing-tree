@@ -672,6 +672,11 @@ public final class ComponentExtension<C extends JComponent>
      *          SwingTree style information, as well as component specific information.
      */
     public int viewStateHashCode() {
+        if ( _owner.getWidth() <= 0 )
+            return 0;
+        if ( _owner.getHeight() <= 0 )
+            return 0;
+
         int hashCode = _styleEngine.getComponentConf().hashCode();
         // Common stuff:
         hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );

@@ -391,10 +391,27 @@ class Invariant_Styles_Spec extends Specification
         given : 'We build the actual components of the UI declarations:'
             var comp1 = ui1.get(ui1.getType())
             var comp2 = ui2.get(ui2.getType())
-        when : 'We calculate the hash codes of the two components.'
+        expect : 'Initially, the component hashes are 0, because the components have no size!'
+            ComponentExtension.from(comp1).viewStateHashCode() == 0
+            ComponentExtension.from(comp2).viewStateHashCode() == 0
+        when : 'We change one of the size dimensions each...'
+            comp1.setSize(0, 100)
+            comp2.setSize(100, 0)
+        then : 'The hashes are still 0, because the component is not visible.'
+            ComponentExtension.from(comp1).viewStateHashCode() == 0
+            ComponentExtension.from(comp2).viewStateHashCode() == 0
+
+        when : 'We change both size dimensions...'
+            comp1.setSize(200, 100)
+            comp2.setSize(100, 200)
+        and : 'We calculate the hash codes of the two components again:'
             var hash1 = ComponentExtension.from(comp1).viewStateHashCode()
             var hash2 = ComponentExtension.from(comp2).viewStateHashCode()
-        then : 'The hash codes are equal or not depending on the expected result.'
+
+        then : 'The hash codes are no longer 0 (or at least it should be super unlikely).'
+            hash1 != 0
+            hash2 != 0
+        and : 'The hash codes are equal or not depending on the expected result.'
             (hash1 == hash2) == isEqual
         where : 'We test the following UI declarations:'
             isEqual  | ui1                                                | ui2
