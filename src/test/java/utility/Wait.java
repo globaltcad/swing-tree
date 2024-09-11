@@ -15,6 +15,7 @@ public class Wait {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < timeout) {
             if (condition.get()) {
+                UI.sync();
                 return true;
             }
             UI.sync();
