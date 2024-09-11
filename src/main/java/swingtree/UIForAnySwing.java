@@ -2250,7 +2250,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(transitionLifeTime, "transitionLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( c -> {
-                    FlipFlopStyler<C> flipFlopStyler = new FlipFlopStyler<>(c, transitionLifeTime, styler);
+                    FlipFlopStyler<C> flipFlopStyler = new FlipFlopStyler<>(transitionToggle.get(), c, transitionLifeTime, styler);
                     ComponentExtension.from(c).addStyler(flipFlopStyler::style);
                     _onShow( transitionToggle, c, (comp, v) -> flipFlopStyler.set(v) );
                 })
