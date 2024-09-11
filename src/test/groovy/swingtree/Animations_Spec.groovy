@@ -199,9 +199,9 @@ class Animations_Spec extends Specification
             cycles == progresses.collect({ 1 - Math.abs(2 * it - 1) })
             cyclesPlus42 == progresses.collect({ 1 - Math.abs(2 * ((it+0.42d)%1) - 1) })
             cyclesMinus42 == progresses.collect({
-                                    double progress = ( it - 0.42 ) % 1;
-                                    if ( progress < 0 ) progress += 1;
-                                    return 1 - Math.abs(2 * progress - 1);
+                                    double progress = ( it - 0.42 ) % 1
+                                    if ( progress < 0 ) progress += 1
+                                    return 1 - Math.abs(2 * progress - 1)
                                 })
     }
 
@@ -279,9 +279,9 @@ class Animations_Spec extends Specification
                 UI.panel()
                     .withBackground(Color.orange)
                     .withTransitionalStyle(isExpanded, LifeTime.of(0.1, TimeUnit.SECONDS), (status, delegate) -> {
-                        int h = (int) Math.round(200 * status.fadeIn());
+                        int h = (int) Math.round(200 * status.fadeIn())
                         trace << status.progress()
-                        return delegate.prefSize(100, h).prefSize(100, h).prefSize(100, h).prefSize(100, h);
+                        return delegate.prefSize(100, h).prefSize(100, h).prefSize(100, h).prefSize(100, h)
                     })
                     .get(JPanel)
         expect: 'The JPanel is initially expanded.'
