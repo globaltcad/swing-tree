@@ -2034,6 +2034,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    /**
+     *  Use this to set the background color of the UI component
+     *  of this declarative builder using a color String.
+     *  The supplied {@link String} is parsed to a {@link UI.Color}
+     *  through the {@link UI#color(String)} method.<br>
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: <br>
+     *  <pre>{@code
+     *      UI.label("Something")
+     *      .peek( label -> label.setBackground(UI.color("cyan")) );
+     *  }</pre>
+     *
+     * @param color A color string which should be parsed to a {@link UI.Color} instance
+     *              and then set as the background color of the UI component.
+     * @return A new reference to this type of builder, to allow for fluent method chaining.
+     */
+    public final I withBackgroundColor( String color ) {
+        NullUtil.nullArgCheck(color, "color", String.class);
+        return this.withBackground(UI.color(color));
+    }
+
     @SuppressWarnings("ReferenceEquality")
     protected void _setBackground( JComponent thisComponent, Color color ) {
         color = _isUndefinedColor(color) ? null : color;
@@ -2317,6 +2338,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withForeground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
         return _with( c -> c.setForeground( _isUndefinedColor(color) ? null : color ) )._this();
+    }
+
+    /**
+     *  Allows you to define the {@link JComponent#getForeground()} color of
+     *  the underlying {@link JComponent} using a color string.
+     *  The supplied {@link String} is parsed to a {@link UI.Color}
+     *  through the {@link UI#color(String)} method for you. <br>
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: <br>
+     *  <pre>{@code
+     *      UI.label("Something")
+     *      .peek( label -> label.setForeground(UI.color("oak")) );
+     *  }</pre>
+     *
+     * @param color A color string which should be parsed to a {@link UI.Color} instance
+     *              and then set as the foreground color of the UI component.
+     * @return A new reference to this type of builder, to allow for fluent method chaining.
+     */
+    public final I withForegroundColor( String color ) {
+        NullUtil.nullArgCheck(color, "color", String.class);
+        return this.withForeground(UI.color(color));
     }
 
     /**

@@ -651,4 +651,109 @@ public final class ComponentExtension<C extends JComponent>
         }
 
     }
+
+    /**
+     *  This method tries to hash everything relevant in the visual appearance
+     *  of the component and it subcomponents into a single integer value.
+     *  It is based on the current SwingTree style information as
+     *  well as more general component information like the current value of a slider,
+     *  text of a text component, etc. <br>
+     *  <p>
+     *  You may use this for rough cache invalidation purposes.
+     *  So when you want to render the component into a {@link BufferedImage}
+     *  and then only rerender it if the state hash changes, you can use this method.<br>
+     *  <p>
+     *  But keep in mind however, it cannot capture look and feel related changes
+     *  which are not controlled by SwingTree. <br>
+     *  So this hash code is not a perfect solution, but it can be useful in some cases.
+     *  Like visualizing a drag and drop of a component...
+     *
+     * @return The current state hash of the component and all of it subcomponents, which includes
+     *          SwingTree style information, as well as component specific information.
+     */
+    public int viewStateHashCode() {
+        if ( _owner.getWidth() <= 0 )
+            return 0;
+        if ( _owner.getHeight() <= 0 )
+            return 0;
+
+        int hashCode = _styleEngine.getComponentConf().hashCode();
+        // Common stuff:
+        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );
+        java.awt.Color background = _owner.getBackground();
+        java.awt.Color foreground = _owner.getForeground();
+        hashCode = hashCode * 31 + (background == null ? -1 : background.hashCode());
+        hashCode = hashCode * 31 + (foreground == null ? -1 : foreground.hashCode());
+
+        // Subtype component specific stuff:
+        if ( _owner instanceof JSlider ) {
+            JSlider slider = (JSlider) _owner;
+            hashCode = hashCode * 31 + slider.getValue();
+            hashCode = hashCode * 31 + slider.getMinimum();
+            hashCode = hashCode * 31 + slider.getMaximum();
+            // alignment:
+            hashCode = hashCode * 31 + (slider.getOrientation() == JSlider.HORIZONTAL ? 0 : 1);
+        }
+        if ( _owner instanceof JProgressBar ) {
+            JProgressBar bar = (JProgressBar) _owner;
+            hashCode = hashCode * 31 + bar.getValue();
+            hashCode = hashCode * 31 + bar.getMinimum();
+            hashCode = hashCode * 31 + bar.getMaximum();
+        }
+        if ( _owner instanceof JTextComponent ) {
+            JTextComponent textComp = (JTextComponent) _owner;
+            String text = textComp.getText();
+            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());
+            hashCode = hashCode * 31 + textComp.getCaretPosition();
+        }
+        if ( _owner instanceof AbstractButton ) {
+            AbstractButton button = (AbstractButton) _owner;
+            String text = button.getText();
+            hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);
+            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());
+        }
+        if ( _owner instanceof JList ) {
+            JList<?> list = (JList<?>) _owner;
+            hashCode = hashCode * 31 + list.getSelectedIndex();
+        }
+        if ( _owner instanceof JTabbedPane ) {
+            JTabbedPane tabbedPane = (JTabbedPane) _owner;
+            hashCode = hashCode * 31 + tabbedPane.getSelectedIndex();
+        }
+        if ( _owner instanceof JTree ) {
+            JTree tree = (JTree) _owner;
+            hashCode = hashCode * 31 + tree.getSelectionCount();
+        }
+        if ( _owner instanceof JTable ) {
+            JTable table = (JTable) _owner;
+            hashCode = hashCode * 31 + table.getSelectedRow();
+            hashCode = hashCode * 31 + table.getSelectedColumn();
+        }
+        if ( _owner instanceof JSpinner ) {
+            JSpinner spinner = (JSpinner) _owner;
+            hashCode = hashCode * 31 + spinner.getValue().hashCode();
+        }
+        if ( _owner instanceof JComboBox ) {
+            JComboBox<?> comboBox = (JComboBox<?>) _owner;
+            hashCode = hashCode * 31 + comboBox.getSelectedIndex();
+        }
+        if ( _owner instanceof JCheckBox ) {
+            JCheckBox checkBox = (JCheckBox) _owner;
+            hashCode = hashCode * 31 + (checkBox.isSelected() ? 1 : 0);
+        }
+
+        // Hashing the children recursively:
+        try {
+            for ( Component child : _owner.getComponents() ) {
+                if ( child instanceof JComponent ) {
+                    ComponentExtension<?> childExtension = from((JComponent) child);
+                    hashCode = hashCode * 31 + childExtension.viewStateHashCode();
+                }
+            }
+        } catch ( Exception e ) {
+            log.error("Error while hashing children of component '"+_owner+"'.", e);
+        }
+        return hashCode;
+    }
+
 }
