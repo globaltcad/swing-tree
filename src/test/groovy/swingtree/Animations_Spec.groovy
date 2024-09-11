@@ -205,7 +205,6 @@ class Animations_Spec extends Specification
                                 })
     }
 
-
     def 'Implement the "finish" method in your animation to ensure that it is called at least once.'()
     {
         reportInfo """
@@ -267,7 +266,6 @@ class Animations_Spec extends Specification
             label.getForeground().getBlue() < 10
     }
 
-
     def 'Animate the height of a panel based on a Var<Boolean>.'()
     {
         given : 'A simple list used as a trace for the animation runs.'
@@ -276,23 +274,29 @@ class Animations_Spec extends Specification
             var isExpanded = Var.of(true)
         and : 'A JPanel that will expand animated.'
             var panel =
-                UI.panel()
+                    UI.panel()
                     .withBackground(Color.orange)
                     .withTransitionalStyle(isExpanded, LifeTime.of(0.1, TimeUnit.SECONDS), (status, delegate) -> {
                         int h = (int) Math.round(200 * status.fadeIn())
                         trace << status.progress()
-                        return delegate.prefSize(100, h).prefSize(100, h).prefSize(100, h).prefSize(100, h)
+                        return delegate.minSize(50, h).size(90, h).prefSize(100, h).maxSize(200, h)
                     })
                     .get(JPanel)
         expect: 'The JPanel is initially expanded.'
-            panel.getPreferredSize().height == 200
+            panel.getPreferredSize() == new Dimension(100, 200)
+            panel.getMinimumSize()   == new Dimension(50,  200)
+            panel.getMaximumSize()   == new Dimension(200, 200)
+            panel.getSize()          == new Dimension(90,  200)
         when: 'We set the panel to not expanded.'
             trace.clear()
             isExpanded.set(false)
         and: 'We wait for the animation to complete.'
             Wait.until({ trace.contains(0d) },2_500)
         then: 'The JPanel is not expanded.'
-            panel.getPreferredSize().height == 0
+            panel.getPreferredSize() == new Dimension(100, 0)
+            panel.getMinimumSize()   == new Dimension(50,  0)
+            panel.getMaximumSize()   == new Dimension(200, 0)
+            panel.getSize()          == new Dimension(90,  0)
     }
 
 }
