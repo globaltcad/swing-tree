@@ -39,7 +39,7 @@ public final class Tab
     @Nullable private final JComponent   _contents;
     @Nullable private final JComponent   _headerComponent;
     @Nullable private final Val<String>  _title;
-    @Nullable private final Var<Boolean> _isSelected;
+    @Nullable private final Val<Boolean> _isSelected;
     @Nullable private final Val<Boolean> _isEnabled;
     @Nullable private final Val<Icon>    _icon;
     @Nullable private final Val<String>  _tip;
@@ -51,7 +51,7 @@ public final class Tab
         @Nullable JComponent   contents,
         @Nullable JComponent   headerComponent,
         @Nullable Val<String>  title,
-        @Nullable Var<Boolean> isSelected,
+        @Nullable Val<Boolean> isSelected,
         @Nullable Val<Boolean> isEnabled,
         @Nullable Val<Icon>    icon,
         @Nullable Val<String>  tip,
@@ -116,9 +116,7 @@ public final class Tab
         if ( _isSelected != null )
             log.warn("Selection flag already specified!", new Throwable());
 
-        Var<Boolean> isSelectedMut = Var.of(isSelected.get());
-        isSelected.onChange(From.VIEW_MODEL, it -> isSelectedMut.set(it.get()) );
-        return new Tab(_contents, _headerComponent, _title, isSelectedMut, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
+        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
     /**
@@ -137,10 +135,15 @@ public final class Tab
         if ( _isSelected != null )
             log.warn("Selection flag already specified!", new Throwable());
 
-        Var<Boolean> isSelected = Var.of(state == selectedState.get());
-        selectedState.onChange(From.VIEW_MODEL,  it -> isSelected.set(state == it.get()) );
-        isSelected.onChange(From.VIEW_MODEL,  it -> { if ( it.get() ) selectedState.set(state); });
-        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
+        Var<Boolean> isSelectedModel = Var.of(state == selectedState.get());
+        selectedState.onChange(From.ALL,  it -> {
+            isSelectedModel.set(it.channel(), state == it.get());
+        });
+        isSelectedModel.onChange(From.ALL,  it -> {
+            if ( it.get() )
+                selectedState.set(it.channel(), state);
+        });
+        return new Tab(_contents, _headerComponent, _title, isSelectedModel, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
     /**
@@ -179,13 +182,12 @@ public final class Tab
      * @param <E> The type of the state.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final <E extends Enum<E>> Tab isEnabledIf( E state, Var<E> enabledState ) {
+    public final <E extends Enum<E>> Tab isEnabledIf( E state, Val<E> enabledState ) {
         NullUtil.nullArgCheck(state,"state",Enum.class);
-        NullUtil.nullArgCheck(enabledState,"enabledState",Var.class);
+        NullUtil.nullArgCheck(enabledState,"enabledState",Val.class);
         if ( _isEnabled != null )
             log.warn("Enabled flag already specified!", new Throwable());
-        Var<Boolean> isEnabled = Var.of(state == enabledState.get());
-        enabledState.onChange(From.VIEW_MODEL,  it -> isEnabled.set(state == it.get()) );
+        Val<Boolean> isEnabled = enabledState.viewAs(Boolean.class, it -> it == state );
         return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -348,7 +350,7 @@ public final class Tab
 
     final Optional<Val<String>> title() { return Optional.ofNullable(_title); }
 
-    final Optional<Var<Boolean>> isSelected() { return Optional.ofNullable(_isSelected); }
+    final Optional<Val<Boolean>> isSelected() { return Optional.ofNullable(_isSelected); }
 
     final Optional<Val<Boolean>> isEnabled() { return Optional.ofNullable(_isEnabled); }
 
