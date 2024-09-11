@@ -119,10 +119,15 @@ class AnimationRunner
 
         Runnable requestComponentRepaint = () -> {
                                                 if ( component != null ) {
-                                                    if ( component.getParent() == null ) {
+                                                    if ( component.getParent() == null || (component.getWidth() <= 0) || (component.getHeight() <= 0) ) {
                                                         ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);
-                                                        // There will be no repaint if the component is not visible.
-                                                        // So we have to manually apply the style.
+                                                        /*
+                                                            There will be no repaint if the component is not visible.
+                                                            If the paint method encounters a component
+                                                            without size or parent, it will return early,
+                                                            and SwingTree code will not be reached.
+                                                            So we have to regather and apply the style information manually.
+                                                         */
                                                     }
                                                     component.revalidate();
                                                     component.repaint();

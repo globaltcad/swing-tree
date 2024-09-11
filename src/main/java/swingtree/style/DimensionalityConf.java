@@ -60,51 +60,51 @@ final class DimensionalityConf
         _size          = Objects.requireNonNull(size);
     }
 
-    DimensionalityConf _withMinWidth(int minWidth ) {
+    DimensionalityConf _withMinWidth( double minWidth ) {
         return DimensionalityConf.of(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityConf _withMinHeight(int minHeight ) {
+    DimensionalityConf _withMinHeight( double minHeight ) {
         return DimensionalityConf.of(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityConf _withMinSize(Size minSize ) {
+    DimensionalityConf _withMinSize( Size minSize ) {
         return DimensionalityConf.of(minSize, _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityConf _withMaxWidth(int maxWidth ) {
+    DimensionalityConf _withMaxWidth( double maxWidth ) {
         return DimensionalityConf.of(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
     }
 
-    DimensionalityConf _withMaxHeight(int maxHeight ) {
+    DimensionalityConf _withMaxHeight( double maxHeight ) {
         return DimensionalityConf.of(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
     }
 
-    DimensionalityConf _withMaxSize(Size maxSize ) {
+    DimensionalityConf _withMaxSize( Size maxSize ) {
         return DimensionalityConf.of(_minSize, maxSize, _preferredSize, _size);
     }
 
-    DimensionalityConf _withPreferredWidth(int preferredWidth ) {
+    DimensionalityConf _withPreferredWidth( double preferredWidth ) {
         return DimensionalityConf.of(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);
     }
 
-    DimensionalityConf _withPreferredHeight(int preferredHeight ) {
+    DimensionalityConf _withPreferredHeight( double preferredHeight ) {
         return DimensionalityConf.of(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
     }
 
-    DimensionalityConf _withPreferredSize(Size preferredSize ) {
+    DimensionalityConf _withPreferredSize( Size preferredSize ) {
         return DimensionalityConf.of(_minSize, _maxSize, preferredSize, _size);
     }
 
-    DimensionalityConf _withWidth(int width ) {
+    DimensionalityConf _withWidth( double width ) {
         return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
     }
 
-    DimensionalityConf _withHeight(int height ) {
+    DimensionalityConf _withHeight( double height ) {
         return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
     }
 
-    DimensionalityConf _withSize(Size size ) {
+    DimensionalityConf _withSize( Size size ) {
         return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, size);
     }
 
@@ -124,7 +124,7 @@ final class DimensionalityConf
 
     public Optional<Integer> height() { return _size.height().map(Number::intValue); }
 
-    DimensionalityConf _scale(double scale ) {
+    DimensionalityConf _scale( double scale ) {
         return DimensionalityConf.of(
                     _minSize.scale(scale),
                     _maxSize.scale(scale),
@@ -136,17 +136,12 @@ final class DimensionalityConf
     DimensionalityConf simplified() {
         if ( this.equals(_NONE) )
             return _NONE;
-
-        Size simplifiedMinSize       = _minSize.width().orElse(0f) == 0f && _minSize.height().orElse(0f) == 0f ? _NONE._minSize : _minSize;
-        Size simplifiedMaxSize       = _maxSize.width().orElse(0f) == 0f && _maxSize.height().orElse(0f) == 0f ? _NONE._maxSize : _maxSize;
-        Size simplifiedPreferredSize = _preferredSize.width().orElse(0f) == 0 && _preferredSize.height().orElse(0f) == 0 ? _NONE._preferredSize : _preferredSize;
-        Size simplifiedSize          = _size.width().orElse(0f) == 0 && _size.height().orElse(0f) == 0 ? _NONE._size : _size;
-
-        return DimensionalityConf.of(
-                    simplifiedMinSize,
-                    simplifiedMaxSize,
-                    simplifiedPreferredSize,
-                    simplifiedSize
+        else
+            return DimensionalityConf.of(
+                    _minSize.round(),
+                    _maxSize.round(),
+                    _preferredSize.round(),
+                    _size.round()
                 );
     }
 

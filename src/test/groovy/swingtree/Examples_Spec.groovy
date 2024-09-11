@@ -3,6 +3,7 @@ package swingtree
 import examples.Calculator
 import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
+import examples.animated.FoldableExample
 import examples.animated.TransitionalAnimation
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
@@ -551,6 +552,19 @@ class Examples_Spec extends Specification
     {
         given : 'We get the UI.'
             var ui = new ScrollConfigExample()
+        expect :
+            ui != null
+    }
+
+    def 'The ´FoldableExample´ can be created.'()
+    {
+        reportInfo """
+            Check out the ´FoldableExample´ example class if you want
+            to seen an example of how to create a panel with a folding animation
+            based on the ´withTransitionalAnimation(Var,...)´ method.
+        """
+        given : 'We get the UI.'
+            var ui = new FoldableExample()
         expect :
             ui != null
     }

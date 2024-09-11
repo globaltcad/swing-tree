@@ -109,8 +109,8 @@ public final class Size
      * @param width The width of the size to create.
      * @return A new {@link Size} instance with the given width.
      */
-    public Size withWidth( int width ) {
-        return new Size(width, _height);
+    public Size withWidth( double width ) {
+        return new Size((float) width, _height);
     }
 
     /**
@@ -119,8 +119,8 @@ public final class Size
      * @param height The height of the size to create.
      * @return A new {@link Size} instance with the given height.
      */
-    public Size withHeight( int height ) {
-        return new Size(_width, height);
+    public Size withHeight( double height ) {
+        return new Size(_width, (float) height);
     }
 
     public Dimension toDimension() {
@@ -131,6 +131,19 @@ public final class Size
         float width  = _width  < 0 ? -1 : Math.round(_width  * scaleFactor);
         float height = _height < 0 ? -1 : Math.round(_height * scaleFactor);
         return of(width, height);
+    }
+
+    /**
+     *  Rounds the float based width and height of this {@link Size} to
+     *  the nearest integer value and returns these as a new {@link Size}.
+     *
+     * @return A {@link Size} objects whose width and height values does not have fractions.
+     */
+    public Size round() {
+        if ( this.equals(UNKNOWN) )
+            return this;
+        else
+            return Size.of(Math.round(_width), Math.round(_height));
     }
 
     @Override

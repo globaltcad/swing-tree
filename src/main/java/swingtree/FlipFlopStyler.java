@@ -24,12 +24,13 @@ class FlipFlopStyler<C extends JComponent>
     private final WeakReference<C>  _owner;
 
     private @Nullable AnimationStatus _status = null;
-    private boolean _isOn = false;
+    private boolean _isOn;
     private boolean _isCurrentlyRunningAnimation = false;
     private @Nullable DisposableAnimation _animation = null;
 
 
-    FlipFlopStyler( C owner, LifeTime lifetime, AnimatedStyler<C> styler ) {
+    FlipFlopStyler( boolean isOnInitially, C owner, LifeTime lifetime, AnimatedStyler<C> styler ) {
+        _isOn      = isOnInitially;
         _owner     = new WeakReference<>(Objects.requireNonNull(owner));
         _lifetime  = Objects.requireNonNull(lifetime);
         _styler    = Objects.requireNonNull(styler);
@@ -41,7 +42,7 @@ class FlipFlopStyler<C extends JComponent>
         if ( status == null )
             status = AnimationStatus.startOf(
                                 LifeSpan.startingNowWith(_lifetime),
-                                Stride.PROGRESSIVE,
+                                _isOn ? Stride.REGRESSIVE : Stride.PROGRESSIVE,
                                 new ActionEvent(this, 0, null)
                             );
 
