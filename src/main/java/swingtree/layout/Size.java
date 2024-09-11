@@ -133,6 +133,19 @@ public final class Size
         return of(width, height);
     }
 
+    /**
+     *  Rounds the float based width and height of this {@link Size} to
+     *  the nearest integer value and returns these as a new {@link Size}.
+     *
+     * @return A {@link Size} objects whose width and height values does not have fractions.
+     */
+    public Size round() {
+        if ( this.equals(UNKNOWN) )
+            return this;
+        else
+            return Size.of(Math.round(_width), Math.round(_height));
+    }
+
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
