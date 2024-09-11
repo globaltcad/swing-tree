@@ -100,7 +100,7 @@ final class ActiveDrag {
 
         int currentComponentHash = 0;
         if ( component instanceof JComponent ) {
-            currentComponentHash = ComponentExtension.from((JComponent) component).getStateHash();
+            currentComponentHash = ComponentExtension.from((JComponent) component).viewStateHashCode();
             if ( currentComponentHash == this.componentHash && image != null )
                 return this;
         }

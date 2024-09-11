@@ -249,63 +249,6 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  This method tries to hash everything relevant in the visual appearance
-     *  of the component and it subcomponents into a single integer value.
-     *  It is based on the current SwingTree style information as
-     *  well as more general component information like the current value of a slider,
-     *  text of a text component, etc. <br>
-     *  <p>
-     *  You may use this for rough cache invalidation purposes.
-     *  So when you want to render the component into a {@link BufferedImage}
-     *  and then only rerender it if the state hash changes, you can use this method.<br>
-     *  <p>
-     *  But keep in mind however, it cannot capture look and feel related changes
-     *  which are not controlled by SwingTree. <br>
-     *  So this hash code is not a perfect solution, but it can be useful in some cases.
-     *  Like visualizing a drag and drop of a component...
-     *
-     * @return The current state hash of the component and all of it subcomponents, which includes
-     *          SwingTree style information, as well as component specific information.
-     */
-    public int getStateHash() {
-        int hashCode = _styleEngine.getComponentConf().hashCode();
-        if ( _owner instanceof JSlider ) {
-            JSlider slider = (JSlider) _owner;
-            hashCode = hashCode * 31 + slider.getValue();
-            hashCode = hashCode * 31 + slider.getMinimum();
-            hashCode = hashCode * 31 + slider.getMaximum();
-        }
-        if ( _owner instanceof JProgressBar ) {
-            JProgressBar bar = (JProgressBar) _owner;
-            hashCode = hashCode * 31 + bar.getValue();
-            hashCode = hashCode * 31 + bar.getMinimum();
-            hashCode = hashCode * 31 + bar.getMaximum();
-        }
-        if ( _owner instanceof JTextComponent ) {
-            JTextComponent textComp = (JTextComponent) _owner;
-            String text = textComp.getText();
-            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());
-            hashCode = hashCode * 31 + textComp.getCaretPosition();
-        }
-        if ( _owner instanceof AbstractButton ) {
-            AbstractButton button = (AbstractButton) _owner;
-            hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);
-        }
-        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );
-        try {
-            for ( Component child : _owner.getComponents() ) {
-                if ( child instanceof JComponent ) {
-                    ComponentExtension<?> childExtension = from((JComponent) child);
-                    hashCode = hashCode * 31 + childExtension.getStateHash();
-                }
-            }
-        } catch ( Exception e ) {
-            log.error("Error while hashing children of component '"+_owner+"'.", e);
-        }
-        return hashCode;
-    }
-
-    /**
      *  Removes all animations from the component.
      *  This includes both {@link Painter} based animations
      *  as well as {@link Styler} based animations.
