@@ -109,8 +109,8 @@ public final class Size
      * @param width The width of the size to create.
      * @return A new {@link Size} instance with the given width.
      */
-    public Size withWidth( int width ) {
-        return new Size(width, _height);
+    public Size withWidth( double width ) {
+        return new Size((float) width, _height);
     }
 
     /**
@@ -119,8 +119,8 @@ public final class Size
      * @param height The height of the size to create.
      * @return A new {@link Size} instance with the given height.
      */
-    public Size withHeight( int height ) {
-        return new Size(_width, height);
+    public Size withHeight( double height ) {
+        return new Size(_width, (float) height);
     }
 
     public Dimension toDimension() {

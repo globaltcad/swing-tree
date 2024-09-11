@@ -2242,7 +2242,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> minSize( int width, int height ) {
+    public ComponentStyleDelegate<C> minSize( double width, double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withMinWidth(width)._withMinHeight(height)));
     }
 
@@ -2267,7 +2267,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided minimum width set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> minWidth( int minWidth ) {
+    public ComponentStyleDelegate<C> minWidth( double minWidth ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withMinWidth(minWidth)));
     }
 
@@ -2279,7 +2279,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided minimum height set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> minHeight( int minHeight ) {
+    public ComponentStyleDelegate<C> minHeight( double minHeight ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withMinHeight(minHeight)));
     }
 
@@ -2293,7 +2293,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> maxSize( int width, int height ) {
+    public ComponentStyleDelegate<C> maxSize( double width, double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));
     }
 
@@ -2320,7 +2320,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided maximum width set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> maxWidth( int maxWidth ) {
+    public ComponentStyleDelegate<C> maxWidth( double maxWidth ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withMaxWidth(maxWidth)));
     }
 
@@ -2333,7 +2333,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided maximum height set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> maxHeight( int maxHeight ) {
+    public ComponentStyleDelegate<C> maxHeight( double maxHeight ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withMaxHeight(maxHeight)));
     }
 
@@ -2361,7 +2361,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> prefSize( int width, int height ) {
+    public ComponentStyleDelegate<C> prefSize( double width, double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withPreferredWidth(width)._withPreferredHeight(height)));
     }
 
@@ -2374,7 +2374,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided preferred width set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> prefWidth( int preferredWidth ) {
+    public ComponentStyleDelegate<C> prefWidth( double preferredWidth ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withPreferredWidth(preferredWidth)));
     }
 
@@ -2387,7 +2387,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided preferred height set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> prefHeight( int preferredHeight ) {
+    public ComponentStyleDelegate<C> prefHeight( double preferredHeight ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withPreferredHeight(preferredHeight)));
     }
 
@@ -2411,7 +2411,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> size( int width, int height ) {
+    public ComponentStyleDelegate<C> size( double width, double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withWidth(width)._withHeight(height)));
     }
 
@@ -2423,7 +2423,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided width set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> width( int width ) {
+    public ComponentStyleDelegate<C> width( double width ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withWidth(width)));
     }
 
@@ -2434,7 +2434,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided height set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      */
-    public ComponentStyleDelegate<C> height( int height ) {
+    public ComponentStyleDelegate<C> height( double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withHeight(height)));
     }
 
