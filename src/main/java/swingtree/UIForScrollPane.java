@@ -160,6 +160,13 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         }
 
         @Override
+        public void setSize(Dimension d) {
+            super.setSize(d);
+            _child.setPreferredSize(d);
+            _child.setSize(d);
+        }
+
+        @Override
         public Dimension getPreferredScrollableViewportSize() {
             ScrollableComponentDelegate delegate = _createNewScrollableConf();
             try {
