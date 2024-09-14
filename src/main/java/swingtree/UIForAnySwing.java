@@ -3517,7 +3517,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
-                    AdvancedEventDispatcher.addMouseEnterListener(thisComponent, listener);
+                    EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(thisComponent, listener);
                 })
                 ._this();
     }
@@ -3542,7 +3542,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
-                    AdvancedEventDispatcher.addMouseExitListener(thisComponent, listener);
+                    EnterExitComponentBoundsEventDispatcher.addMouseExitListener(thisComponent, listener);
                 })
                 ._this();
     }

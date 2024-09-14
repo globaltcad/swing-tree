@@ -12,10 +12,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-final class AdvancedEventDispatcher {
+/**
+ *  A custom event dispatcher for mouse enter and exit events based on the mouse
+ *  cursor location exiting or entering a component's bounds even if the
+ *  mouse cursor is on a child component.<br>
+ *  This is in essence a fix for the default Swing behavior which also dispatches enter/exit
+ *  events when the mouse cursor enters or exits the bounds of a child component
+ *  which also has a listener for these events. So using this we try to
+ *  make the behavior more predictable, reliable and intuitive.
+ */
+final class EnterExitComponentBoundsEventDispatcher {
 
-    private static final Logger log = LoggerFactory.getLogger(AdvancedEventDispatcher.class);
-    private static final AdvancedEventDispatcher eventDispatcher = new AdvancedEventDispatcher();
+    private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
+    private static final EnterExitComponentBoundsEventDispatcher eventDispatcher = new EnterExitComponentBoundsEventDispatcher();
     private static final MouseListener dispatcherListener = new MouseAdapter() { };
 
     static void addMouseEnterListener(Component component, MouseListener listener) {
@@ -39,7 +48,7 @@ final class AdvancedEventDispatcher {
 
     private final Map<Component, ComponentListeners> listeners;
 
-    private AdvancedEventDispatcher() {
+    private EnterExitComponentBoundsEventDispatcher() {
         listeners = new WeakHashMap<>();
         Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
     }
