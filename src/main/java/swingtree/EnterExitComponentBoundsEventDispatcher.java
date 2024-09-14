@@ -28,25 +28,25 @@ final class EnterExitComponentBoundsEventDispatcher {
     private static final MouseListener dispatcherListener = new MouseAdapter() { };
 
     static void addMouseEnterListener(Component component, MouseListener listener) {
-        ComponentListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
+        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
             // ensures that mouse events are enabled
             k.addMouseListener(dispatcherListener);
-            return new ComponentListeners();
+            return new ComponentEnterExitListeners();
         });
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(Component component, MouseListener listener) {
-        ComponentListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
+        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
             // ensures that mouse events are enabled
             k.addMouseListener(dispatcherListener);
-            return new ComponentListeners();
+            return new ComponentEnterExitListeners();
         });
         listeners.addExitListener(listener);
     }
 
 
-    private final Map<Component, ComponentListeners> listeners;
+    private final Map<Component, ComponentEnterExitListeners> listeners;
 
     private EnterExitComponentBoundsEventDispatcher() {
         listeners = new WeakHashMap<>();
@@ -59,7 +59,7 @@ final class EnterExitComponentBoundsEventDispatcher {
 
             Component c = mouseEvent.getComponent();
             while (c != null) {
-                ComponentListeners componentListenerInfo = listeners.get(c);
+                ComponentEnterExitListeners componentListenerInfo = listeners.get(c);
 
                 if (componentListenerInfo != null)
                     componentListenerInfo.dispatch(c, mouseEvent);
@@ -69,12 +69,17 @@ final class EnterExitComponentBoundsEventDispatcher {
         }
     }
 
-    private static class ComponentListeners {
+    /**
+     *  Contains the enter and exit listeners for a component as well as
+     *  a flag indicating whether the mouse cursor is currently within the
+     *  bounds of the component or not.
+     */
+    private static class ComponentEnterExitListeners {
         private boolean isEntered;
         private final List<MouseListener> enterListeners;
         private final List<MouseListener> exitListeners;
 
-        public ComponentListeners() {
+        public ComponentEnterExitListeners() {
             isEntered = false;
             enterListeners = new ArrayList<>();
             exitListeners = new ArrayList<>();
