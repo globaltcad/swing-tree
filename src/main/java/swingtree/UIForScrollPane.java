@@ -1,6 +1,5 @@
 package swingtree;
 
-import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.api.Configurator;
@@ -9,11 +8,8 @@ import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
-import javax.swing.JComponent;
-import javax.swing.JScrollPane;
-import javax.swing.Scrollable;
-import javax.swing.SwingConstants;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.util.Objects;
 
 /**
@@ -157,13 +153,6 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 log.error("Error while configuring scrollable component.", e);
             }
             return delegate;
-        }
-
-        @Override
-        public void setSize(Dimension d) {
-            super.setSize(d);
-            _child.setPreferredSize(d);
-            _child.setSize(d);
         }
 
         @Override
