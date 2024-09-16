@@ -231,33 +231,39 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
         }
 
         @Override
+        public void setSize(Dimension d) {
+            super.setSize(d);
+            _child.setSize(d);
+        }
+
+        @Override
         public Dimension getPreferredSize() {
-            Dimension childSize = _child.getPreferredSize();
-            Dimension selfSize = this.getSize();
-            if ( !Objects.equals(childSize, selfSize) ) {
-                this.setSize(childSize);
+            Dimension prefChildSize = _child.getPreferredSize();
+            Dimension prefSelfSize  = super.getPreferredSize();
+            if ( !Objects.equals(prefChildSize, prefSelfSize) ) {
+                this.setPreferredSize(prefChildSize);
             }
-            return childSize;
+            return prefChildSize;
         }
 
         @Override
         public Dimension getMinimumSize() {
-            Dimension childSize = _child.getMinimumSize();
-            Dimension selfSize = this.getSize();
-            if ( !Objects.equals(childSize, selfSize) ) {
-                this.setSize(childSize);
+            Dimension minChildSize = _child.getMinimumSize();
+            Dimension minSelfSize  = super.getMinimumSize();
+            if ( !Objects.equals(minChildSize, minSelfSize) ) {
+                this.setMinimumSize(minChildSize);
             }
-            return childSize;
+            return minChildSize;
         }
 
         @Override
         public Dimension getMaximumSize() {
-            Dimension childSize = _child.getMaximumSize();
-            Dimension selfSize = this.getSize();
-            if ( !Objects.equals(childSize, selfSize) ) {
-                this.setSize(childSize);
+            Dimension maxChildSize = _child.getMaximumSize();
+            Dimension maxSelfSize  = super.getMaximumSize();
+            if ( !Objects.equals(maxChildSize, maxSelfSize) ) {
+                this.setMinimumSize(maxChildSize);
             }
-            return childSize;
+            return maxChildSize;
         }
     }
 
