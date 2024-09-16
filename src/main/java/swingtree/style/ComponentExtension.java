@@ -2,14 +2,19 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.DragAwayComponentConf;
+import swingtree.DragDropComponentConf;
+import swingtree.DragOverComponentConf;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
+import swingtree.api.Configurator;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
@@ -72,9 +77,12 @@ public final class ComponentExtension<C extends JComponent>
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
     private @Nullable BufferedImage _bufferedImage = null;
 
+    private ComponentDragEvents<C> _dragEvents = (ComponentDragEvents<C>) ComponentDragEvents.BLANK;
 
-    private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
 
+    private ComponentExtension( C owner ) {
+        _owner = Objects.requireNonNull(owner);
+    }
 
     C getOwner() { return _owner; }
 
@@ -84,6 +92,30 @@ public final class ComponentExtension<C extends JComponent>
 
     Optional<BufferedImage> getBufferedImage() {
         return Optional.ofNullable(_bufferedImage);
+    }
+
+    public void addDragAwayConf( Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
+        _dragEvents = _dragEvents.withDragAwayConf(configurator);
+    }
+
+    public DragAwayComponentConf<C, MouseEvent> getDragAwayConf( MouseEvent event ) {
+        return _dragEvents.getDragAwayConf(_owner, event);
+    }
+
+    public void addDragOverConf( Configurator<DragOverComponentConf<C, MouseEvent>> configurator ) {
+        _dragEvents = _dragEvents.withDragOverConf(configurator);
+    }
+
+    public DragOverComponentConf<C, MouseEvent> getDragOverConf( MouseEvent event, JComponent hoveringComponent ) {
+        return _dragEvents.getDragOverConf(_owner, event, hoveringComponent);
+    }
+
+    public void addDragDropConf( Configurator<DragDropComponentConf<C, MouseEvent>> configurator ) {
+        _dragEvents = _dragEvents.withDragDropConf(configurator);
+    }
+
+    public DragDropComponentConf<C, MouseEvent> getDragDropConf( MouseEvent event, JComponent hoveringComponent ) {
+        return _dragEvents.getDragDropConf(_owner, event, hoveringComponent );
     }
 
     /**

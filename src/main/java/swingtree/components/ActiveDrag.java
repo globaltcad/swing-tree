@@ -1,6 +1,8 @@
 package swingtree.components;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.DragAwayComponentConf;
 import swingtree.layout.Bounds;
 import swingtree.layout.Location;
 import swingtree.layout.Size;
@@ -10,12 +12,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.util.Objects;
 
 import static javax.swing.SwingUtilities.convertPoint;
 import static javax.swing.SwingUtilities.getDeepestComponentAt;
 
 final class ActiveDrag {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ActiveDrag.class);
 
     private static final ActiveDrag NO_DRAG = new ActiveDrag(
                                                         null, null, 0,
@@ -84,6 +89,22 @@ final class ActiveDrag {
         if ( component == null )
             return this;
 
+        if ( !(component instanceof JComponent) )
+            return this; // We only support JComponents for dragging
+
+        DragAwayComponentConf<?, MouseEvent> dragConf;
+        do {
+            dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(e);
+            if ( !dragConf.enabled() ) {
+                Component parent = component.getParent();
+                if ( parent instanceof JComponent )
+                    component = parent;
+                else
+                    return this;
+            }
+        }
+        while ( !dragConf.enabled() );
+
         Location mousePosition = Location.of(e.getPoint());
         Location absoluteComponentPosition = Location.of(convertPoint(component, 0,0, rootPane.getContentPane()));
 
@@ -94,7 +115,7 @@ final class ActiveDrag {
     }
 
 
-    public ActiveDrag renderComponentIntoImage(Component component) {
+    public ActiveDrag renderComponentIntoImage( Component component, MouseEvent event ) {
 
         BufferedImage image = this.currentDragImage;
 
@@ -104,6 +125,11 @@ final class ActiveDrag {
             if ( currentComponentHash == this.componentHash && image != null )
                 return this;
         }
+        else return this;
+
+        DragAwayComponentConf<?, MouseEvent> dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(event);
+        if ( dragConf.opacity() <= 0.0 )
+            return this;
 
         boolean weNeedClearing = image != null;
 
@@ -123,6 +149,18 @@ final class ActiveDrag {
             g.setComposite(oldComp);
         }
         component.paint(g);
+
+        try {
+            if ( dragConf.opacity() < 1.0 && dragConf.opacity() > 0.0 ) {
+                RescaleOp makeTransparent = new RescaleOp(
+                                                new float[]{1.0f, 1.0f, 1.0f, /* alpha scaleFactor */ (float) dragConf.opacity()},
+                                                new float[]{0f, 0f, 0f, /* alpha offset */ 0f}, null
+                                            );
+                image = makeTransparent.filter(image, null);
+            }
+        } catch (Exception e) {
+            log.error("Failed to make the rendering of dragged component transparent.", e);
+        }
         g.dispose();
 
         return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset);
@@ -133,7 +171,7 @@ final class ActiveDrag {
         if ( draggedComponent != null ) {
             Point point = e.getPoint();
             ActiveDrag updatedDrag = this.withOffset(Location.of(point.x - start.x(), point.y - start.y()))
-                                         .renderComponentIntoImage(draggedComponent);
+                                         .renderComponentIntoImage(draggedComponent, e);
             if ( rootPane != null ) {
                 Location previousWhereToRender = getRenderPosition();
                 Location whereToRenderNext     = updatedDrag.getRenderPosition();

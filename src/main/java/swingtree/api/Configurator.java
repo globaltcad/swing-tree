@@ -23,6 +23,10 @@ package swingtree.api;
 @FunctionalInterface
 public interface Configurator<T>
 {
+    static <T> Configurator<T> none() {
+        return (Configurator<T>) Constants.CONFIGURATOR_NONE;
+    }
+
     /**
      *  Configures the given configuration object and returns the transformed configuration object.
      *
@@ -32,4 +36,17 @@ public interface Configurator<T>
      * @return The fully transformed/updated configuration object.
      */
     T configure( T config );
+
+    /**
+     *  Returns a new configurator that first configures the given configuration object
+     *  and then configures the result of this configuration through the provided configurator.
+     *
+     * @param after The configurator that should be applied after this configurator.
+     *
+     * @return A new configurator that first configures the given configuration object
+     *         and then configures the result of this configuration.
+     */
+    default Configurator<T> andThen( Configurator<T> after ) {
+        return config -> after.configure( configure( config ) );
+    }
 }

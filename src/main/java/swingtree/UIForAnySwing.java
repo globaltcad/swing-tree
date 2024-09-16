@@ -14,10 +14,7 @@ import sprouts.*;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
-import swingtree.api.AnimatedStyler;
-import swingtree.api.Peeker;
-import swingtree.api.Styler;
-import swingtree.api.UIVerifier;
+import swingtree.api.*;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
@@ -3981,6 +3978,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
     }
 
+    public final I onDragAway( Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
+        NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
+        return _with( thisComponent -> {
+                    ComponentExtension.from(thisComponent).addDragAwayConf(configurator);
+               })
+               ._this();
+    }
+
+    public final I onDragOver( Configurator<DragOverComponentConf<C, MouseEvent>> configurator ) {
+        NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
+        return _with( thisComponent -> {
+                    ComponentExtension.from(thisComponent).addDragOverConf(configurator);
+               })
+               ._this();
+    }
+
+    public final I onDragDrop( Configurator<DragDropComponentConf<C, MouseEvent>> configurator ) {
+        NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
+        return _with( thisComponent -> {
+                    ComponentExtension.from(thisComponent).addDragDropConf(configurator);
+                })
+                ._this();
+    }
+
     /**
      *  Allows you to cause an effect inside your UI when an observable event is fired.
      *  The provided {@link Action} event handler will be called
@@ -4018,7 +4039,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                        _runInUI(() -> action.accept(new ComponentDelegate<>(thisComponent, observableEvent )));
                    });
                })
-               ._this();    }
+               ._this();
+    }
 
     /**
      *  Use this to attach a component {@link Action} event handler to a functionally supplied

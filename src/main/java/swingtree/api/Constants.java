@@ -11,7 +11,7 @@ class Constants
     static final AnimatedStyler<?> ANIMATED_STYLER_NONE = (state, delegate) -> delegate;
     static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();
     static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
-
+    static final Configurator<?> CONFIGURATOR_NONE = delegate -> delegate;
     static final ScrollIncrementSupplier SCROLLABLE_INCREMENT_SUPPLIER_NONE = (viewRectangle, orientation, direction) -> 0;
     static final Painter PAINTER_NONE = new Painter() {
                                             @Override
