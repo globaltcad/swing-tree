@@ -25,7 +25,12 @@ public class ScrollableTest extends JPanel {
 
         of(this).withLayout("fill").withPrefSize(300, 400)
             .add("grow",
-                scrollPane(config -> config.fitWidth(false).fitHeight(true))
+                scrollPane(config -> config
+                    .fitWidth(true)
+                    //.fitHeight(config.viewport().getPreferredSize() != null)                             // <--- InvocationTargetException
+                    .fitHeight(config.viewport().getHeight() > config.view().getHeight())                  // <--- flickers
+                    //.fitHeight(config.viewport().getHeight() > config.view().getPreferredSize().height)) // <--- works
+                )
                     .add(panel().withLayout("fill, wrap", "", "[shrink][grow]")
                         .add(toggleButton("show", show))
                         .add("growx",
