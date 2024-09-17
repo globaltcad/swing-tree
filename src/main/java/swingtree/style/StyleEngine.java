@@ -52,11 +52,20 @@ final class StyleEngine
 
     BoxModelConf getBoxModelConf() { return _boxModelConf; }
 
-    Optional<Shape> componentArea() {
+    Optional<Shape> componentBodyAreaForClipping() {
         Shape contentClip = null;
         ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
-        if ( _areas.bodyAreaExists() || _componentConf.style().margin().isPositive() )
+        if ( _areas.areaExists(UI.ComponentArea.BODY) || _componentConf.style().margin().isPositive() )
             contentClip = _areas.get(UI.ComponentArea.BODY);
+
+        return Optional.ofNullable(contentClip);
+    }
+
+    Optional<Shape> componentArea( UI.ComponentArea area ) {
+        Shape contentClip = null;
+        ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
+        if ( _areas.areaExists(area) )
+            contentClip = _areas.get(area);
 
         return Optional.ofNullable(contentClip);
     }

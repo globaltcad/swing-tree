@@ -316,6 +316,40 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Allows for the retrieval of a specific {@link Shape} which represents
+     *  a specific area of the component identified by the given {@link UI.ComponentArea}.
+     *  The following areas are available:
+     *  <ul>
+     *      <li>{@link swingtree.UI.ComponentArea#ALL} -
+     *      The entire component, which is the union of all other clip
+     *      areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
+     *      The inner component area, which is defined as {@code ALL - EXTERIOR - BORDER}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#EXTERIOR} -
+     *      The outer component area, which can be expressed as {@code ALL - INTERIOR - BORDER},
+     *      or {@code ALL - CONTENT}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#BORDER} -
+     *      The border of the component, which is the area between the inner and outer component area
+     *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#BODY} -
+     *      The body of the component is the inner component area including the border area.
+     *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
+     *      </li>
+     *  </ul>
+     * @param area The area of the component to retrieve.
+     * @return An optional {@link Shape} which represents the given area of the component or an empty optional.
+     *         If the area is not available, then this means that the style of the component
+     *         did not lead to the calculation of the given area.
+     */
+    public Optional<Shape> getComponentArea(UI.ComponentArea area) {
+        return _styleEngine.componentArea(area);
+    }
+
+    /**
      *  Removes all animations from the component.
      *  This includes both {@link Painter} based animations
      *  as well as {@link Styler} based animations.
@@ -588,7 +622,7 @@ public final class ComponentExtension<C extends JComponent>
             _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());
 
             if ( lookAndFeelPainting != null ) {
-                Shape contentClip = _styleEngine.componentArea().orElse(null);
+                Shape contentClip = _styleEngine.componentBodyAreaForClipping().orElse(null);
 
                 contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
@@ -650,7 +684,7 @@ public final class ComponentExtension<C extends JComponent>
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea().orElse(formerClip), formerClip );
+                Shape localClip = StyleUtil.intersect( _styleEngine.componentBodyAreaForClipping().orElse(formerClip), formerClip );
                 paintWithClip(internalGraphics, localClip, ()->{
                     superPaint.accept(internalGraphics);
                 });

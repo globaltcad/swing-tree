@@ -28,7 +28,7 @@ final class ComponentAreas
     private final LazyRef<Area>   _borderArea      = new LazyRef<>(ComponentAreas::_produceBorderArea);
     private final LazyRef<Area>   _interiorArea    = new LazyRef<>(ComponentAreas::_produceInteriorArea);
     private final LazyRef<Area>   _exteriorArea    = new LazyRef<>(ComponentAreas::_produceExteriorArea);
-    private final LazyRef<Area>   _bodyArea        = new LazyRef<>(ComponentAreas::_produceBdyArea);
+    private final LazyRef<Area>   _bodyArea        = new LazyRef<>(ComponentAreas::_produceBodyArea);
     private final LazyRef<Area[]> _borderEdgeAreas = new LazyRef<>((currentState, currentAreas) -> calculateEdgeBorderAreas(currentState));
 
     private final WeakReference<BoxModelConf> _key;
@@ -80,8 +80,20 @@ final class ComponentAreas
         return _borderEdgeAreas.getFor(boxModel, this);
     }
 
-    public boolean bodyAreaExists() {
-        return _bodyArea.exists();
+    public boolean areaExists(UI.ComponentArea area) {
+        switch ( area ) {
+            case BODY:
+                return _bodyArea.exists();
+            case INTERIOR:
+                return _interiorArea.exists();
+            case BORDER:
+                return _borderArea.exists();
+            case EXTERIOR:
+                return _exteriorArea.exists();
+            case ALL:
+            default:
+                return true;
+        }
     }
 
     static Area calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight )
@@ -126,7 +138,7 @@ final class ComponentAreas
         return exteriorComponentArea;
     }
 
-    private static Area _produceBdyArea(BoxModelConf currentState, ComponentAreas currentAreas) {
+    private static Area _produceBodyArea(BoxModelConf currentState, ComponentAreas currentAreas) {
         return calculateComponentBodyArea(currentState, 0, 0, 0, 0);
     }
 
