@@ -3508,6 +3508,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
+        return onMouseEnter(UI.ComponentArea.ALL, onEnter);
+    }
+
+    public final I onMouseEnter( UI.ComponentArea area, Action<ComponentMouseEventDelegate<C>> onEnter ) {
+        NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
         return _with( thisComponent -> {
                     WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
                     MouseListener listener = new MouseAdapter() {
@@ -3517,7 +3522,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
-                    EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(thisComponent, listener);
+                    EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(area, thisComponent, listener);
                 })
                 ._this();
     }
@@ -3533,6 +3538,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
+        return onMouseExit(UI.ComponentArea.ALL, onExit);
+    }
+
+    public final I onMouseExit( UI.ComponentArea area, Action<ComponentMouseEventDelegate<C>> onExit ) {
+        NullUtil.nullArgCheck(onExit, "onExit", Action.class);
         return _with( thisComponent -> {
                     WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
                     MouseListener listener = new MouseAdapter() {
@@ -3542,7 +3552,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
                         }
                     };
-                    EnterExitComponentBoundsEventDispatcher.addMouseExitListener(thisComponent, listener);
+                    EnterExitComponentBoundsEventDispatcher.addMouseExitListener(area, thisComponent, listener);
                 })
                 ._this();
     }

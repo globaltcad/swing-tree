@@ -2,15 +2,16 @@ package swingtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.style.ComponentExtension;
 
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  *  A custom event dispatcher for mouse enter and exit events based on the mouse
@@ -27,30 +28,35 @@ final class EnterExitComponentBoundsEventDispatcher {
     private static final EnterExitComponentBoundsEventDispatcher eventDispatcher = new EnterExitComponentBoundsEventDispatcher();
     private static final MouseListener dispatcherListener = new MouseAdapter() { };
 
-    static void addMouseEnterListener(Component component, MouseListener listener) {
-        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
+    static void addMouseEnterListener(UI.ComponentArea area, Component component, MouseListener listener) {
+        Map<Component, ComponentEnterExitListeners> allListeners = eventDispatcher.listeners[area.ordinal()];
+        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, k -> {
             // ensures that mouse events are enabled
             k.addMouseListener(dispatcherListener);
-            return new ComponentEnterExitListeners();
+            return new ComponentEnterExitListeners(area, component);
         });
         listeners.addEnterListener(listener);
     }
 
-    static void addMouseExitListener(Component component, MouseListener listener) {
-        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, k -> {
+    static void addMouseExitListener(UI.ComponentArea area, Component component, MouseListener listener) {
+        Map<Component, ComponentEnterExitListeners> allListeners = eventDispatcher.listeners[area.ordinal()];
+        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, k -> {
             // ensures that mouse events are enabled
             k.addMouseListener(dispatcherListener);
-            return new ComponentEnterExitListeners();
+            return new ComponentEnterExitListeners(area, component);
         });
         listeners.addExitListener(listener);
     }
 
 
-    private final Map<Component, ComponentEnterExitListeners> listeners;
+    private final Map<Component, ComponentEnterExitListeners>[] listeners;
 
     private EnterExitComponentBoundsEventDispatcher() {
-        listeners = new WeakHashMap<>();
+        listeners = new Map[UI.ComponentArea.values().length];
+        for (int i = 0; i < listeners.length; i++)
+            listeners[i] = new WeakHashMap<>();
         Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
+        Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     public void onMouseEvent(AWTEvent event) {
@@ -59,11 +65,12 @@ final class EnterExitComponentBoundsEventDispatcher {
 
             Component c = mouseEvent.getComponent();
             while (c != null) {
-                ComponentEnterExitListeners componentListenerInfo = listeners.get(c);
+                for ( Map<Component, ComponentEnterExitListeners> listeners : this.listeners ) {
+                    ComponentEnterExitListeners componentListenerInfo = listeners.get(c);
 
-                if (componentListenerInfo != null)
-                    componentListenerInfo.dispatch(c, mouseEvent);
-
+                    if (componentListenerInfo != null)
+                        componentListenerInfo.dispatch(c, mouseEvent);
+                }
                 c = c.getParent();
             }
         }
@@ -75,14 +82,16 @@ final class EnterExitComponentBoundsEventDispatcher {
      *  bounds of the component or not.
      */
     private static class ComponentEnterExitListeners {
+        private final UI.ComponentArea area;
         private boolean isEntered;
         private final List<MouseListener> enterListeners;
         private final List<MouseListener> exitListeners;
 
-        public ComponentEnterExitListeners() {
-            isEntered = false;
-            enterListeners = new ArrayList<>();
-            exitListeners = new ArrayList<>();
+        public ComponentEnterExitListeners( UI.ComponentArea area, Component component ) {
+            this.area = area;
+            this.isEntered = false;
+            this.enterListeners = new ArrayList<>();
+            this.exitListeners  = new ArrayList<>();
         }
 
         public void addEnterListener(MouseListener listener) {
@@ -101,9 +110,9 @@ final class EnterExitComponentBoundsEventDispatcher {
                     if (isEntered)
                         return;
 
-                    onMouseEnter(component, event);
+                    boolean isInside = onMouseEnter(component, event);
 
-                    isEntered = true;
+                    isEntered = isInside;
                     break;
                 case MouseEvent.MOUSE_EXITED:
                     if (!isEntered)
@@ -112,38 +121,92 @@ final class EnterExitComponentBoundsEventDispatcher {
                     if (containsScreenLocation(component, event.getLocationOnScreen()))
                         return;
 
-                    onMouseExit(component, event);
+                    boolean isOutside = onMouseExit(component, event);
 
-                    isEntered = false;
+                    isEntered = !isOutside;
                     break;
+                case MouseEvent.MOUSE_MOVED:
+                    if ( this.area != UI.ComponentArea.ALL )
+                        mouseMoved(component, event);
+                break;
             }
         }
 
-        private void onMouseEnter(Component component, MouseEvent mouseEvent) {
+        private boolean onMouseEnter(Component component, MouseEvent mouseEvent) {
             if (enterListeners.isEmpty())
-                return;
+                return true;
 
-            MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
+            mouseEvent = withNewSource(mouseEvent, component);
+
+            if ( this.area == UI.ComponentArea.ALL ) {
+                dispatchEnterToAllListeners(mouseEvent);
+            } else {
+                Optional<Shape> componentArea = ComponentExtension.from((JComponent) component).getComponentArea(area);
+                if ( !componentArea.isPresent() ) {
+                    if ( this.area == UI.ComponentArea.BORDER )
+                        return true; // no border means nothing to enter or exit on
+                    else
+                        dispatchEnterToAllListeners(mouseEvent);
+                } else if ( componentArea.get().contains(mouseEvent.getPoint()) )
+                    dispatchEnterToAllListeners(mouseEvent);
+                else
+                    return false;
+            }
+            return true;
+        }
+
+        private void dispatchEnterToAllListeners(MouseEvent mouseEvent) {
             for (MouseListener listener : enterListeners) {
                 try {
-                    listener.mouseEntered(localMouseEvent);
+                    listener.mouseEntered(mouseEvent);
                 } catch (Exception e) {
-                    log.error("Failed to process mouseEntered event {}. Error: {}", localMouseEvent, e.getMessage(), e);
+                    log.error("Failed to process mouseEntered event {}. Error: {}", mouseEvent, e.getMessage(), e);
                 }
             }
         }
 
-        private void onMouseExit(Component component, MouseEvent mouseEvent) {
+        private boolean onMouseExit(Component component, MouseEvent mouseEvent) {
             if (exitListeners.isEmpty())
-                return;
+                return true;
 
-            MouseEvent localMouseEvent = withNewSource(mouseEvent, component);
+            mouseEvent = withNewSource(mouseEvent, component);
+
+            if ( this.area == UI.ComponentArea.ALL ) {
+                dispatchExitToAllListeners(mouseEvent);
+            } else {
+                Optional<Shape> componentArea = ComponentExtension.from((JComponent) component).getComponentArea(area);
+                if ( !componentArea.isPresent() ) {
+                    if ( this.area == UI.ComponentArea.BORDER )
+                        return true; // no border means nothing to enter or exit on
+                    else
+                        dispatchExitToAllListeners(mouseEvent);
+                } else if ( !componentArea.get().contains(mouseEvent.getPoint()) )
+                    dispatchExitToAllListeners(mouseEvent);
+                else
+                    return false;
+            }
+            return true;
+        }
+
+        private void dispatchExitToAllListeners(MouseEvent mouseEvent) {
             for (MouseListener listener : exitListeners) {
                 try {
-                    listener.mouseExited(localMouseEvent);
+                    listener.mouseExited(mouseEvent);
                 } catch (Exception e) {
-                    log.error("Failed to process mouseExited event {}. Error: {}", localMouseEvent, e.getMessage(), e);
+                    log.error("Failed to process mouseExited event {}. Error: {}", mouseEvent, e.getMessage(), e);
                 }
+            }
+        }
+
+        public void mouseMoved(Component component, MouseEvent e) {
+            if ( isEntered ) {
+                boolean isOutside = onMouseExit(component, e);
+                if (isOutside)
+                    isEntered = false;
+            } {
+                boolean isInside = onMouseEnter(component, e);
+                if (isInside)
+                    isEntered = true;
             }
         }
     }
@@ -167,13 +230,20 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     private static MouseEvent withNewSource(MouseEvent event, Component newSource) {
+        if ( event.getSource() == newSource )
+            return event;
+
+        // We need to convert the mouse position to the new source's coordinate system
+        Point mousePositionRelativeToNewComponent = event.getPoint();
+        SwingUtilities.convertPointToScreen(mousePositionRelativeToNewComponent, (Component) event.getSource());
+        SwingUtilities.convertPointFromScreen(mousePositionRelativeToNewComponent, newSource);
         return new MouseEvent(
             newSource,
             event.getID(),
             event.getWhen(),
             event.getModifiersEx(),
-            event.getX(),
-            event.getY(),
+            mousePositionRelativeToNewComponent.x,
+            mousePositionRelativeToNewComponent.y,
             event.getClickCount(),
             event.isPopupTrigger(),
             event.getButton()
