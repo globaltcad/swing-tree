@@ -10,14 +10,14 @@ public final class DragDropComponentConf<C extends JComponent, E> {
 
     private final C          _component;
     private final E          _event;
-    private final JComponent _hoveringComponent;
-    private final boolean    _allowDrop;
+    private final JComponent _droppingComponent;
+    private final boolean    _isConsumed;
 
-    private DragDropComponentConf( C component, E event, JComponent hoveringComponent, boolean allowDrop ) {
+    private DragDropComponentConf( C component, E event, JComponent hoveringComponent, boolean isConsumed ) {
         _component         = component;
         _event             = event;
-        _hoveringComponent = hoveringComponent;
-        _allowDrop         = allowDrop;
+        _droppingComponent = hoveringComponent;
+        _isConsumed        = isConsumed;
     }
 
     public C component() {
@@ -28,16 +28,16 @@ public final class DragDropComponentConf<C extends JComponent, E> {
         return _event;
     }
 
-    public JComponent hoveringComponent() {
-        return _hoveringComponent;
+    public JComponent droppingComponent() {
+        return _droppingComponent;
     }
 
-    public boolean allowDrop() {
-        return _allowDrop;
+    public boolean isConsumed() {
+        return _isConsumed;
     }
 
-    public DragDropComponentConf<C, E> allowDrop( boolean allowDrop ) {
-        return new DragDropComponentConf<>( _component, _event, _hoveringComponent, allowDrop );
+    public DragDropComponentConf<C, E> consumeEvent() {
+        return new DragDropComponentConf<>( _component, _event, _droppingComponent, true );
     }
 
 }

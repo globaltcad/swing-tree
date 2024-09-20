@@ -57,6 +57,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                activeDrag.tryDropping(e, rootPane);
                 activeDrag = ActiveDrag.none();
                 if ( rootPane != null ) {
                     rootPane.repaint();

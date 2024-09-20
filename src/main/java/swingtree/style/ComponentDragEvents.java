@@ -7,6 +7,7 @@ import swingtree.api.Configurator;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 class ComponentDragEvents<C extends JComponent>
 {
@@ -64,15 +65,15 @@ class ComponentDragEvents<C extends JComponent>
         }
     }
 
-    DragOverComponentConf<C, MouseEvent> getDragOverConf( C owner, MouseEvent event, JComponent hoveringComponent ) {
+    Optional<DragOverComponentConf<C, MouseEvent>> getDragOverConf(C owner, MouseEvent event, JComponent hoveringComponent ) {
         if ( Configurator.none().equals(_dragOverConfigurator) )
-            return DragOverComponentConf.of(owner, event, hoveringComponent);
+            return Optional.empty();
 
         try {
-            return _dragOverConfigurator.configure(DragOverComponentConf.of(owner, event, hoveringComponent));
+            return Optional.of(_dragOverConfigurator.configure(DragOverComponentConf.of(owner, event, hoveringComponent)));
         } catch ( Exception e ) {
             log.error("Error while configuring drag over component!", e);
-            return DragOverComponentConf.of(owner, event, hoveringComponent);
+            return Optional.of(DragOverComponentConf.of(owner, event, hoveringComponent));
         }
     }
 
