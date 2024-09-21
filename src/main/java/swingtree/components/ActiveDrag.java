@@ -28,25 +28,28 @@ final class ActiveDrag {
 
     private static final ActiveDrag NO_DRAG = new ActiveDrag(
                                                         null, null, 0,
-                                                        Location.origin(), Location.origin(), Location.origin()
+                                                        Location.origin(), Location.origin(), Location.origin(),
+                                                        null
                                                     );
 
     public static ActiveDrag none() { return NO_DRAG; }
 
-    private final @Nullable Component     draggedComponent;
-    private final @Nullable BufferedImage currentDragImage;
-    private final int                     componentHash;
-    private final Location                start;
-    private final Location                offset;
-    private final Location                localOffset;
+    private final @Nullable Component                            draggedComponent;
+    private final @Nullable BufferedImage                        currentDragImage;
+    private final int                                            componentHash;
+    private final Location                                       start;
+    private final Location                                       offset;
+    private final Location                                       localOffset;
+    private final @Nullable DragAwayComponentConf<?, MouseEvent> dragConf;
 
     private ActiveDrag(
-        @Nullable Component     draggedComponent,
-        @Nullable BufferedImage currentDragImage,
-        int                     componentHash,
-        Location                start,
-        Location                offset,
-        Location                localOffset
+        @Nullable Component                            draggedComponent,
+        @Nullable BufferedImage                        currentDragImage,
+        int                                            componentHash,
+        Location                                       start,
+        Location                                       offset,
+        Location                                       localOffset,
+        @Nullable DragAwayComponentConf<?, MouseEvent> dragConf
     ) {
         this.draggedComponent  = draggedComponent;
         this.currentDragImage  = currentDragImage;
@@ -54,26 +57,15 @@ final class ActiveDrag {
         this.start             = Objects.requireNonNull(start);
         this.offset            = Objects.requireNonNull(offset);
         this.localOffset       = Objects.requireNonNull(localOffset);
-    }
-
-    public @Nullable Component draggedComponent() {
-        return draggedComponent;
+        this.dragConf          = dragConf;
     }
 
     public @Nullable BufferedImage currentDragImage() {
         return currentDragImage;
     }
 
-    public Location start() {
-        return start;
-    }
-
-    public Location offset() {
-        return offset;
-    }
-
-    public Location localOffset() {
-        return localOffset;
+    public Optional<DragAwayComponentConf<?, MouseEvent>> dragConf() {
+        return Optional.ofNullable(dragConf);
     }
 
     public ActiveDrag begin(MouseEvent e, @Nullable JRootPane rootPane)
@@ -110,7 +102,8 @@ final class ActiveDrag {
         Location mousePosition = Location.of(e.getPoint());
         Location absoluteComponentPosition = Location.of(convertPoint(component, 0,0, rootPane.getContentPane()));
 
-        return this.withDraggedComponent(component)
+        return this.withDragConf(dragConf)
+                    .withDraggedComponent(component)
                      .withStart(mousePosition)
                      .withOffset(Location.origin())
                      .withLocalOffset(mousePosition.minus(absoluteComponentPosition));
@@ -129,7 +122,8 @@ final class ActiveDrag {
         }
         else return this;
 
-        DragAwayComponentConf<?, MouseEvent> dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(event);
+        Objects.requireNonNull(dragConf);
+
         if ( dragConf.opacity() <= 0.0 )
             return this;
 
@@ -165,7 +159,7 @@ final class ActiveDrag {
         }
         g.dispose();
 
-        return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset);
+        return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset, dragConf);
     }
 
     public ActiveDrag dragged(MouseEvent e, @Nullable JRootPane rootPane)
@@ -285,19 +279,23 @@ final class ActiveDrag {
     }
 
     public ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
-        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset);
+        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
     public ActiveDrag withStart(Location start) {
-        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset);
+        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
     public ActiveDrag withOffset(Location offset) {
-        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset);
+        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
     public ActiveDrag withLocalOffset(Location localOffset) {
-        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset);
+        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
+    }
+
+    public ActiveDrag withDragConf(DragAwayComponentConf<?, MouseEvent> dragConf) {
+        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
 }

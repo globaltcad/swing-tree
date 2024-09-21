@@ -55,7 +55,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
         DragSource dragSource = DragSource.getDefaultDragSource();
         dragSource.addDragSourceMotionListener(dsde -> {
-            System.out.println("Dragged!");
             if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
                 int relativeX = 0;
                 int relativeY = 0;
@@ -77,6 +76,16 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     }
                 }
                 MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, relativeX, relativeY, 1, false);
+                try {
+                    activeDrag.dragConf().ifPresent(conf -> {
+                        conf.onDragMove().accept(dsde);
+                    });
+                } catch (Exception ex) {
+                    log.error(
+                            "Error while executing drag movement event handlers.",
+                            ex
+                        );
+                }
                 activeDrag = activeDrag.dragged(e, rootPane);
             }
         });
@@ -100,29 +109,74 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     new DragSourceListener() {
                         @Override
                         public void dragEnter(DragSourceDragEvent dsde) {
-                            System.out.println("Drag Enter: " + dsde);
+                            try {
+                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                    conf.onDragEnter().accept(dsde);
+                                });
+                            } catch (Exception ex) {
+                                log.error(
+                                        "Error while executing drag enter event handlers.",
+                                        ex
+                                    );
+                            }
                         }
 
                         @Override
                         public void dragOver(DragSourceDragEvent dsde) {
-                            System.out.println("Drag Over: " + dsde);
+                            try {
+                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                    conf.onDragOver().accept(dsde);
+                                });
+                            } catch (Exception ex) {
+                                log.error(
+                                        "Error while executing drag over event handlers.",
+                                        ex
+                                    );
+                            }
                         }
 
                         @Override
                         public void dropActionChanged(DragSourceDragEvent dsde) {
-                            System.out.println("Drop Action Changed: " + dsde);
+                            try {
+                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                    conf.onDropActionChanged().accept(dsde);
+                                });
+                            } catch (Exception ex) {
+                                log.error(
+                                        "Error while executing drop action changed event handlers.",
+                                        ex
+                                    );
+                            }
                         }
 
                         @Override
                         public void dragExit(DragSourceEvent dse) {
-                            System.out.println("Drag Exit: " + dse);
+                            try {
+                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                    conf.onDragExit().accept(dse);
+                                });
+                            } catch (Exception ex) {
+                                log.error(
+                                        "Error while executing drag exit event handlers.",
+                                        ex
+                                    );
+                            }
                         }
 
                         @Override
                         public void dragDropEnd(DragSourceDropEvent dsde) {
-                            System.out.println("Drag Drop End: Hello, World!" + dsde);
                             if ( activeDrag.equals(ActiveDrag.none()) )
                                 return;
+                            try {
+                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                    conf.onDragDropEnd().accept(dsde);
+                                });
+                            } catch (Exception ex) {
+                                log.error(
+                                        "Error while executing drag drop end event handlers.",
+                                        ex
+                                    );
+                            }
                             activeDrag.tryDropping(e, rootPane);
                             activeDrag = ActiveDrag.none();
                             if ( rootPane != null ) {
