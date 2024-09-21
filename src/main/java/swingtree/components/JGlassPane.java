@@ -3,14 +3,22 @@ package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.dnd.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.Objects;
 
 import static java.awt.AWTEvent.*;
@@ -29,6 +37,7 @@ import static javax.swing.SwingUtilities.*;
 public class JGlassPane extends JPanel implements AWTEventListener, StylableComponent
 {
     private static final long serialVersionUID = 1L;
+    private static final Logger log = LoggerFactory.getLogger(JGlassPane.class);
 
     private final EventListenerList listeners = new EventListenerList();
 
@@ -43,26 +52,85 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     this,
                     MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
                 );
-        this.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
+
+        DragSource dragSource = DragSource.getDefaultDragSource();
+        dragSource.addDragSourceMotionListener(dsde -> {
+            System.out.println("Dragged!");
+            if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
+                int relativeX = 0;
+                int relativeY = 0;
+                // First we try something reliable:
+                Point mousePositionInFrame = getMousePosition();
+                if ( mousePositionInFrame != null ) {
+                    relativeX = mousePositionInFrame.x;
+                    relativeY = mousePositionInFrame.y;
+                } else {
+                    // We calculate the mouse position in the frame using the drag event
+                    try {
+                        Point globalDragPositionOnDesktop = dsde.getLocation();
+                        Point rootPaneLocationOnDesktop = rootPane.getLocationOnScreen();
+                        relativeX = globalDragPositionOnDesktop.x - rootPaneLocationOnDesktop.x;
+                        relativeY = globalDragPositionOnDesktop.y - rootPaneLocationOnDesktop.y;
+                        System.out.println(globalDragPositionOnDesktop);
+                    } catch (Exception e) {
+                        log.debug("Error while calculating the relative position of a drag.", e);
+                    }
+                }
+                MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, relativeX, relativeY, 1, false);
                 activeDrag = activeDrag.dragged(e, rootPane);
             }
         });
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                activeDrag = activeDrag.begin(e, rootPane);
-            }
+        dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
+            Point dragStart = dragTrigger.getDragOrigin();
+            MouseEvent e = new MouseEvent(this, MOUSE_PRESSED, System.currentTimeMillis(), 0, dragStart.x, dragStart.y, 1, false);
+            activeDrag = activeDrag.begin(e, rootPane);
+            if ( activeDrag.equals(ActiveDrag.none()) )
+                return;
+            BufferedImage bufferedImage = activeDrag.currentDragImage();
+            boolean isDragSupported = DragSource.isDragImageSupported();
+            if ( !isDragSupported )
+                bufferedImage = null;
+            int offsetX = bufferedImage == null ? 0 : -bufferedImage.getWidth(null) / 2;
+            int offsetY = bufferedImage == null ? 0 : -bufferedImage.getHeight(null) / 2;
+            dragTrigger.startDrag(
+                    Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR),
+                    bufferedImage,
+                    new Point(offsetX, offsetY),
+                    new StringSelection("Hello, World!"),
+                    new DragSourceListener() {
+                        @Override
+                        public void dragEnter(DragSourceDragEvent dsde) {
+                            System.out.println("Drag Enter: " + dsde);
+                        }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                activeDrag.tryDropping(e, rootPane);
-                activeDrag = ActiveDrag.none();
-                if ( rootPane != null ) {
-                    rootPane.repaint();
-                }
-            }
+                        @Override
+                        public void dragOver(DragSourceDragEvent dsde) {
+                            System.out.println("Drag Over: " + dsde);
+                        }
+
+                        @Override
+                        public void dropActionChanged(DragSourceDragEvent dsde) {
+                            System.out.println("Drop Action Changed: " + dsde);
+                        }
+
+                        @Override
+                        public void dragExit(DragSourceEvent dse) {
+                            System.out.println("Drag Exit: " + dse);
+                        }
+
+                        @Override
+                        public void dragDropEnd(DragSourceDropEvent dsde) {
+                            System.out.println("Drag Drop End: Hello, World!" + dsde);
+                            if ( activeDrag.equals(ActiveDrag.none()) )
+                                return;
+                            activeDrag.tryDropping(e, rootPane);
+                            activeDrag = ActiveDrag.none();
+                            if ( rootPane != null ) {
+                                rootPane.repaint();
+                            }
+                        }
+                    }
+            );
         });
     }
 
