@@ -12,6 +12,7 @@ import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
@@ -173,7 +174,15 @@ final class ActiveDrag {
             Point point = e.getPoint();
             ActiveDrag updatedDrag = this.withOffset(Location.of(point.x - start.x(), point.y - start.y()))
                                          .renderComponentIntoImage(draggedComponent, e);
-            if ( rootPane != null ) {
+
+            if ( rootPane != null && !DragSource.isDragImageSupported() ) {
+                /*
+                    If the drag image is not supported by the platform, we
+                    do the image rendering ourselves directly on the Graphics object
+                    of the glass pane of the root pane.
+                    But for this to work we need to repaint the area where the drag image was
+                    previously rendered and the area where it will be rendered next.
+                */
                 Location previousWhereToRender = getRenderPosition();
                 Location whereToRenderNext     = updatedDrag.getRenderPosition();
                 Size size = Size.of(draggedComponent.getSize());
@@ -255,9 +264,16 @@ final class ActiveDrag {
     }
 
     public void paint(Graphics g){
-        if ( draggedComponent != null && currentDragImage != null ) {
-            Location whereToRender = getRenderPosition();
-            g.drawImage(currentDragImage, (int)whereToRender.x(), (int)whereToRender.y(), null);
+        if ( !DragSource.isDragImageSupported() ) {
+            /*
+                If the drag image is not supported by the platform, we
+                do the image rendering ourselves directly on the Graphics object
+                of the glass pane of the root pane.
+            */
+            if (draggedComponent != null && currentDragImage != null) {
+                Location whereToRender = getRenderPosition();
+                g.drawImage(currentDragImage, (int) whereToRender.x(), (int) whereToRender.y(), null);
+            }
         }
     }
 
