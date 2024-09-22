@@ -204,13 +204,13 @@ final class ActiveDrag {
         if ( component instanceof JComponent ) {
             JComponent jComponent = (JComponent) component;
             JComponent draggedJComponent = (JComponent) this.draggedComponent;
-            Optional<DragOverComponentConf<JComponent, MouseEvent>> dragConf = ComponentExtension.from(jComponent).getDragOverConf(e, draggedJComponent);
+            Optional<DragOverComponentConf<JComponent, MouseEvent>> dragConf;
             do {
-                dragConf = ComponentExtension.from((JComponent) component).getDragOverConf(e, draggedJComponent);
+                dragConf = ComponentExtension.from(jComponent).getDragOverConf(e, draggedJComponent);
                 if ( !dragConf.isPresent() ) {
-                    Component parent = component.getParent();
+                    Component parent = jComponent.getParent();
                     if ( parent instanceof JComponent && parent != this.draggedComponent )
-                        component = parent;
+                        jComponent = (JComponent) parent;
                     else
                         return true;
                 }
@@ -239,17 +239,18 @@ final class ActiveDrag {
                     // We go up the component tree and call all the dragDrop listeners
                     JComponent jComponent = (JComponent) component;
                     JComponent draggedJComponent = (JComponent) this.draggedComponent;
-                    DragDropComponentConf<JComponent, MouseEvent> dragConf;
+                    Optional<DragDropComponentConf<JComponent, MouseEvent>> dragConf;
                     do {
                         dragConf = ComponentExtension.from(jComponent).getDragDropConf(e, draggedJComponent);
-                        if ( !dragConf.isConsumed() ) {
+                        if ( !dragConf.isPresent() ) {
                             Component parent = jComponent.getParent();
                             if ( parent instanceof JComponent && parent != this.draggedComponent )
                                 jComponent = (JComponent) parent;
                             else
-                                return;
+                                break;
                         }
-                    } while ( !dragConf.isConsumed() );
+                    }
+                    while ( !dragConf.isPresent() );
                 }
             }
         } catch (Exception ex) {

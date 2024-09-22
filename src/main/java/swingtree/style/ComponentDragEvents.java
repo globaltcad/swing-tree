@@ -73,19 +73,19 @@ class ComponentDragEvents<C extends JComponent>
             return Optional.of(_dragOverConfigurator.configure(DragOverComponentConf.of(owner, event, hoveringComponent)));
         } catch ( Exception e ) {
             log.error("Error while configuring drag over component!", e);
-            return Optional.of(DragOverComponentConf.of(owner, event, hoveringComponent));
+            return Optional.empty();
         }
     }
 
-    DragDropComponentConf<C, MouseEvent> getDragDropConf( C owner, MouseEvent event, JComponent hoveringComponent ) {
+    Optional<DragDropComponentConf<C, MouseEvent>> getDragDropConf( C owner, MouseEvent event, JComponent hoveringComponent ) {
         if ( Configurator.none().equals(_dragDropConfigurator) )
-            return DragDropComponentConf.of(owner, event, hoveringComponent);
+            return Optional.empty();
 
         try {
-            return _dragDropConfigurator.configure(DragDropComponentConf.of(owner, event, hoveringComponent));
+            return Optional.of(_dragDropConfigurator.configure(DragDropComponentConf.of(owner, event, hoveringComponent)));
         } catch ( Exception e ) {
             log.error("Error while configuring drag drop component!", e);
-            return DragDropComponentConf.of(owner, event, hoveringComponent);
+            return Optional.empty();
         }
     }
 

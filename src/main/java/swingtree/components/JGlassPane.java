@@ -56,26 +56,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         DragSource dragSource = DragSource.getDefaultDragSource();
         dragSource.addDragSourceMotionListener(dsde -> {
             if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
-                int relativeX = 0;
-                int relativeY = 0;
-                // First we try something reliable:
-                Point mousePositionInFrame = getMousePosition();
-                if ( mousePositionInFrame != null ) {
-                    relativeX = mousePositionInFrame.x;
-                    relativeY = mousePositionInFrame.y;
-                } else {
-                    // We calculate the mouse position in the frame using the drag event
-                    try {
-                        Point globalDragPositionOnDesktop = dsde.getLocation();
-                        Point rootPaneLocationOnDesktop = rootPane.getLocationOnScreen();
-                        relativeX = globalDragPositionOnDesktop.x - rootPaneLocationOnDesktop.x;
-                        relativeY = globalDragPositionOnDesktop.y - rootPaneLocationOnDesktop.y;
-                        System.out.println(globalDragPositionOnDesktop);
-                    } catch (Exception e) {
-                        log.debug("Error while calculating the relative position of a drag.", e);
-                    }
-                }
-                MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, relativeX, relativeY, 1, false);
+                Point dragStartPoint = determineCurrentDragDropLocationInWindow(dsde.getLocation());
+                MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
                 try {
                     activeDrag.dragConf().ifPresent(conf -> {
                         conf.onDragMove().accept(dsde);
@@ -102,7 +84,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             int offsetX = bufferedImage == null ? 0 : -bufferedImage.getWidth(null) / 2;
             int offsetY = bufferedImage == null ? 0 : -bufferedImage.getHeight(null) / 2;
             dragTrigger.startDrag(
-                    Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR),
+                    activeDrag.dragConf().get().cursor().toAWTCursor(),
                     bufferedImage,
                     new Point(offsetX, offsetY),
                     new StringSelection("Hello, World!"),
@@ -177,6 +159,9 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                         ex
                                     );
                             }
+                            // We need to calculate where the drop event happened
+                            Point dragStartPoint = determineCurrentDragDropLocationInWindow(dsde.getLocation());
+                            MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_RELEASED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
                             activeDrag.tryDropping(e, rootPane);
                             activeDrag = ActiveDrag.none();
                             if ( rootPane != null ) {
@@ -192,6 +177,27 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         this();
         Objects.requireNonNull(rootPane);
         attachToRootPane(rootPane);
+    }
+
+    private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop ) {
+        int relativeX = 0;
+        int relativeY = 0;
+        // First we try something reliable:
+        Point mousePositionInFrame = getMousePosition();
+        if ( mousePositionInFrame != null ) {
+            relativeX = mousePositionInFrame.x;
+            relativeY = mousePositionInFrame.y;
+        } else {
+            // We calculate the mouse position in the frame using the drag event
+            try {
+                Point rootPaneLocationOnDesktop = rootPane.getLocationOnScreen();
+                relativeX = locationOnDesktop.x - rootPaneLocationOnDesktop.x;
+                relativeY = locationOnDesktop.y - rootPaneLocationOnDesktop.y;
+            } catch (Exception e) {
+                log.debug("Error while calculating the relative position of a drag.", e);
+            }
+        }
+        return new Point(relativeX, relativeY);
     }
 
     /** {@inheritDoc} */

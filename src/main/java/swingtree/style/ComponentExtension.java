@@ -114,7 +114,7 @@ public final class ComponentExtension<C extends JComponent>
         _dragEvents = _dragEvents.withDragDropConf(configurator);
     }
 
-    public DragDropComponentConf<C, MouseEvent> getDragDropConf( MouseEvent event, JComponent hoveringComponent ) {
+    public Optional<DragDropComponentConf<C, MouseEvent>> getDragDropConf( MouseEvent event, JComponent hoveringComponent ) {
         return _dragEvents.getDragDropConf(_owner, event, hoveringComponent );
     }
 

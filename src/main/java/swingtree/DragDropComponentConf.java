@@ -5,7 +5,7 @@ import javax.swing.*;
 public final class DragDropComponentConf<C extends JComponent, E> {
 
     public static <C extends JComponent, E> DragDropComponentConf<C, E> of(C component, E event, JComponent hoveringComponent ) {
-        return new DragDropComponentConf<>( component, event, hoveringComponent, false );
+        return new DragDropComponentConf<>( component, event, hoveringComponent, true );
     }
 
     private final C          _component;
