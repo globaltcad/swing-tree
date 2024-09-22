@@ -3969,7 +3969,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    private void _onCharTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
+    private void _onCharTyped( C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
         component.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -3978,7 +3978,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
     }
 
-    public final I wthDragAway( Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
+    public final I withDragAway( Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
                     ComponentExtension.from(thisComponent).addDragAwayConf(configurator);
@@ -3986,7 +3986,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    public final I onDragOver( Action<DragOverEventComponentDelegate<C, MouseEvent>> configurator ) {
+    public final I onDragOver( Action<DragOverEventComponentDelegate<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
                     ComponentExtension.from(thisComponent).addDragOverConf(configurator);
@@ -3994,7 +3994,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    public final I onDragDrop( Action<DragDropEventComponentDelegate<C, MouseEvent>> configurator ) {
+    public final I onDragDrop( Action<DragDropEventComponentDelegate<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
                     ComponentExtension.from(thisComponent).addDragDropEventAction(configurator);

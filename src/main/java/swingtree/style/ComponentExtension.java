@@ -103,7 +103,7 @@ public final class ComponentExtension<C extends JComponent>
         return _dragEvents.getDragAwayConf(_owner, event);
     }
 
-    public void addDragOverConf( Action<DragOverEventComponentDelegate<C, MouseEvent>> configurator ) {
+    public void addDragOverConf( Action<DragOverEventComponentDelegate<C>> configurator ) {
         _dragEvents = _dragEvents.withDragOverConf(configurator);
     }
 
@@ -111,7 +111,7 @@ public final class ComponentExtension<C extends JComponent>
         return _dragEvents.dispatchDragOverEvent(_owner, event, hoveringComponent);
     }
 
-    public void addDragDropEventAction( Action<DragDropEventComponentDelegate<C, MouseEvent>> configurator ) {
+    public void addDragDropEventAction( Action<DragDropEventComponentDelegate<C>> configurator ) {
         _dragEvents = _dragEvents.withDragDropConf(configurator);
     }
 
