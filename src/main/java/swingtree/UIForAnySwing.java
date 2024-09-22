@@ -3986,7 +3986,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    public final I onDragOver( Configurator<DragOverComponentConf<C, MouseEvent>> configurator ) {
+    public final I onDragOver( Action<DragOverEventComponentDelegate<C, MouseEvent>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
                     ComponentExtension.from(thisComponent).addDragOverConf(configurator);
@@ -3994,10 +3994,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    public final I onDragDrop( Configurator<DragDropComponentConf<C, MouseEvent>> configurator ) {
+    public final I onDragDrop( Action<DragDropEventComponentDelegate<C, MouseEvent>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
-                    ComponentExtension.from(thisComponent).addDragDropConf(configurator);
+                    ComponentExtension.from(thisComponent).addDragDropEventAction(configurator);
                 })
                 ._this();
     }

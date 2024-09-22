@@ -1,57 +1,56 @@
 package swingtree.style;
 
+import sprouts.Action;
 import swingtree.DragAwayComponentConf;
-import swingtree.DragDropComponentConf;
-import swingtree.DragOverComponentConf;
+import swingtree.DragDropEventComponentDelegate;
+import swingtree.DragOverEventComponentDelegate;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
 
 class ComponentDragEvents<C extends JComponent>
 {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ComponentDragEvents.class);
+    private static final Action NO_ACTION = it -> {};
 
-    static final ComponentDragEvents<?> BLANK = new ComponentDragEvents<>(Configurator.none(), Configurator.none(), Configurator.none());
+    static final ComponentDragEvents<?> BLANK = new ComponentDragEvents<>(Configurator.none(), NO_ACTION, NO_ACTION);
 
     private final Configurator<DragAwayComponentConf<C, MouseEvent>> _dragAwayConfigurator;
-    private final Configurator<DragOverComponentConf<C, MouseEvent>> _dragOverConfigurator;
-    private final Configurator<DragDropComponentConf<C, MouseEvent>> _dragDropConfigurator;
+    private final Action<DragOverEventComponentDelegate<C, MouseEvent>> _dragOverEventAction;
+    private final Action<DragDropEventComponentDelegate<C, MouseEvent>> _dragDropEventAction;
 
     ComponentDragEvents(
         Configurator<DragAwayComponentConf<C, MouseEvent>> dragAwayConfigurator,
-        Configurator<DragOverComponentConf<C, MouseEvent>> dragOverConfigurator,
-        Configurator<DragDropComponentConf<C, MouseEvent>> dragDropConfigurator
+        Action<DragOverEventComponentDelegate<C, MouseEvent>> dragOverConfigurator,
+        Action<DragDropEventComponentDelegate<C, MouseEvent>> dragDropConfigurator
     ) {
         _dragAwayConfigurator = dragAwayConfigurator;
-        _dragOverConfigurator = dragOverConfigurator;
-        _dragDropConfigurator = dragDropConfigurator;
+        _dragOverEventAction = dragOverConfigurator;
+        _dragDropEventAction = dragDropConfigurator;
     }
 
 
     public ComponentDragEvents<C> withDragAwayConf(Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
         if ( Configurator.none().equals(_dragAwayConfigurator) )
-            return new ComponentDragEvents<>(configurator, _dragOverConfigurator, _dragDropConfigurator);
+            return new ComponentDragEvents<>(configurator, _dragOverEventAction, _dragDropEventAction);
         else
-            return new ComponentDragEvents<>(_dragAwayConfigurator.andThen(configurator), _dragOverConfigurator, _dragDropConfigurator);
+            return new ComponentDragEvents<>(_dragAwayConfigurator.andThen(configurator), _dragOverEventAction, _dragDropEventAction);
     }
 
-
-    ComponentDragEvents<C> withDragOverConf(Configurator<DragOverComponentConf<C, MouseEvent>> configurator ) {
-        if ( Configurator.none().equals(_dragOverConfigurator) )
-            return new ComponentDragEvents<>(_dragAwayConfigurator, configurator, _dragDropConfigurator);
+    ComponentDragEvents<C> withDragOverConf(Action<DragOverEventComponentDelegate<C, MouseEvent>> configurator ) {
+        if ( Configurator.none().equals(_dragOverEventAction) )
+            return new ComponentDragEvents<>(_dragAwayConfigurator, configurator, _dragDropEventAction);
         else
-            return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverConfigurator.andThen(configurator), _dragDropConfigurator);
+            return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverEventAction.andThen(configurator), _dragDropEventAction);
     }
 
-    ComponentDragEvents<C> withDragDropConf(Configurator<DragDropComponentConf<C, MouseEvent>> configurator ) {
-        if ( Configurator.none().equals(_dragDropConfigurator) )
-            return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverConfigurator, configurator);
+    ComponentDragEvents<C> withDragDropConf(Action<DragDropEventComponentDelegate<C, MouseEvent>> configurator ) {
+        if ( Configurator.none().equals(_dragDropEventAction) )
+            return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverEventAction, configurator);
         else
-            return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverConfigurator, _dragDropConfigurator.andThen(configurator));
+            return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverEventAction, _dragDropEventAction.andThen(configurator));
     }
-
 
     DragAwayComponentConf<C, MouseEvent> getDragAwayConf( C owner, MouseEvent event ) {
         if ( Configurator.none().equals(_dragAwayConfigurator) )
@@ -65,28 +64,28 @@ class ComponentDragEvents<C extends JComponent>
         }
     }
 
-    Optional<DragOverComponentConf<C, MouseEvent>> getDragOverConf(C owner, MouseEvent event, JComponent hoveringComponent ) {
-        if ( Configurator.none().equals(_dragOverConfigurator) )
-            return Optional.empty();
+    boolean dispatchDragOverEvent(C owner, MouseEvent event, JComponent hoveringComponent ) {
+        if (  NO_ACTION == _dragOverEventAction )
+            return false;
 
         try {
-            return Optional.of(_dragOverConfigurator.configure(DragOverComponentConf.of(owner, event, hoveringComponent)));
+            _dragOverEventAction.accept(DragOverEventComponentDelegate.of(owner, event, hoveringComponent));
         } catch ( Exception e ) {
             log.error("Error while configuring drag over component!", e);
-            return Optional.empty();
         }
+        return true;
     }
 
-    Optional<DragDropComponentConf<C, MouseEvent>> getDragDropConf( C owner, MouseEvent event, JComponent hoveringComponent ) {
-        if ( Configurator.none().equals(_dragDropConfigurator) )
-            return Optional.empty();
+    boolean dispatchDragDropEvent( C owner, MouseEvent event, JComponent hoveringComponent ) {
+        if ( NO_ACTION == _dragDropEventAction )
+            return false;
 
         try {
-            return Optional.of(_dragDropConfigurator.configure(DragDropComponentConf.of(owner, event, hoveringComponent)));
+            _dragDropEventAction.accept(DragDropEventComponentDelegate.of(owner, event, hoveringComponent));
         } catch ( Exception e ) {
             log.error("Error while configuring drag drop component!", e);
-            return Optional.empty();
         }
+        return true;
     }
 
 }

@@ -3,8 +3,8 @@ package swingtree.components;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.DragAwayComponentConf;
-import swingtree.DragDropComponentConf;
-import swingtree.DragOverComponentConf;
+import swingtree.DragDropEventComponentDelegate;
+import swingtree.DragOverEventComponentDelegate;
 import swingtree.layout.Bounds;
 import swingtree.layout.Location;
 import swingtree.layout.Size;
@@ -195,7 +195,7 @@ final class ActiveDrag {
         return this;
     }
 
-    private boolean dispatchDragOver(MouseEvent e, JRootPane rootPane) {
+    private void dispatchDragOver(MouseEvent e, JRootPane rootPane) {
         // Find the new component under the mouse
         java.awt.Component component = getDeepestComponentAt(
                 rootPane.getContentPane(),
@@ -204,23 +204,21 @@ final class ActiveDrag {
         if ( component instanceof JComponent ) {
             JComponent jComponent = (JComponent) component;
             JComponent draggedJComponent = (JComponent) this.draggedComponent;
-            Optional<DragOverComponentConf<JComponent, MouseEvent>> dragConf;
+            boolean eventConsumed;
             do {
-                dragConf = ComponentExtension.from(jComponent).getDragOverConf(e, draggedJComponent);
-                if ( !dragConf.isPresent() ) {
+                eventConsumed = ComponentExtension.from(jComponent).dispatchDragOverEvent(e, draggedJComponent);
+                if ( !eventConsumed ) {
                     Component parent = jComponent.getParent();
                     if ( parent instanceof JComponent && parent != this.draggedComponent )
                         jComponent = (JComponent) parent;
                     else
-                        return true;
+                        return;
                 }
             }
-            while ( !dragConf.isPresent() );
+            while ( !eventConsumed );
 
-            return dragConf.map(DragOverComponentConf::allowDrop)
-                    .orElse(true);
+            return;
         }
-        return true;
     }
 
     public void tryDropping(MouseEvent e, @Nullable JRootPane rootPane)
@@ -228,30 +226,28 @@ final class ActiveDrag {
         if ( rootPane == null )
             return;
         try {
-            boolean allowDrop = dispatchDragOver(e, rootPane);
-            if ( allowDrop ) {
-                // Find the new component under the mouse
-                java.awt.Component component = getDeepestComponentAt(
-                                                    rootPane.getContentPane(),
-                                                    e.getX(), e.getY()
-                                                );
-                if ( component instanceof JComponent ) {
-                    // We go up the component tree and call all the dragDrop listeners
-                    JComponent jComponent = (JComponent) component;
-                    JComponent draggedJComponent = (JComponent) this.draggedComponent;
-                    Optional<DragDropComponentConf<JComponent, MouseEvent>> dragConf;
-                    do {
-                        dragConf = ComponentExtension.from(jComponent).getDragDropConf(e, draggedJComponent);
-                        if ( !dragConf.isPresent() ) {
-                            Component parent = jComponent.getParent();
-                            if ( parent instanceof JComponent && parent != this.draggedComponent )
-                                jComponent = (JComponent) parent;
-                            else
-                                break;
-                        }
+            dispatchDragOver(e, rootPane);
+            // Find the new component under the mouse
+            java.awt.Component component = getDeepestComponentAt(
+                                                rootPane.getContentPane(),
+                                                e.getX(), e.getY()
+                                            );
+            if ( component instanceof JComponent ) {
+                // We go up the component tree and call all the dragDrop listeners
+                JComponent jComponent = (JComponent) component;
+                JComponent draggedJComponent = (JComponent) this.draggedComponent;
+                boolean eventConsumed;
+                do {
+                    eventConsumed = ComponentExtension.from(jComponent).dispatchDragDropEvent(e, draggedJComponent);
+                    if ( !eventConsumed ) {
+                        Component parent = jComponent.getParent();
+                        if ( parent instanceof JComponent && parent != this.draggedComponent )
+                            jComponent = (JComponent) parent;
+                        else
+                            break;
                     }
-                    while ( !dragConf.isPresent() );
                 }
+                while ( !eventConsumed );
             }
         } catch (Exception ex) {
             log.error("Error while dispatching drag over event.", ex);

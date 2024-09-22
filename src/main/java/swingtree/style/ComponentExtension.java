@@ -2,9 +2,10 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Action;
 import swingtree.DragAwayComponentConf;
-import swingtree.DragDropComponentConf;
-import swingtree.DragOverComponentConf;
+import swingtree.DragDropEventComponentDelegate;
+import swingtree.DragOverEventComponentDelegate;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
 import swingtree.api.Configurator;
@@ -102,20 +103,20 @@ public final class ComponentExtension<C extends JComponent>
         return _dragEvents.getDragAwayConf(_owner, event);
     }
 
-    public void addDragOverConf( Configurator<DragOverComponentConf<C, MouseEvent>> configurator ) {
+    public void addDragOverConf( Action<DragOverEventComponentDelegate<C, MouseEvent>> configurator ) {
         _dragEvents = _dragEvents.withDragOverConf(configurator);
     }
 
-    public Optional<DragOverComponentConf<C, MouseEvent>> getDragOverConf( MouseEvent event, JComponent hoveringComponent ) {
-        return _dragEvents.getDragOverConf(_owner, event, hoveringComponent);
+    public boolean dispatchDragOverEvent( MouseEvent event, JComponent hoveringComponent ) {
+        return _dragEvents.dispatchDragOverEvent(_owner, event, hoveringComponent);
     }
 
-    public void addDragDropConf( Configurator<DragDropComponentConf<C, MouseEvent>> configurator ) {
+    public void addDragDropEventAction( Action<DragDropEventComponentDelegate<C, MouseEvent>> configurator ) {
         _dragEvents = _dragEvents.withDragDropConf(configurator);
     }
 
-    public Optional<DragDropComponentConf<C, MouseEvent>> getDragDropConf( MouseEvent event, JComponent hoveringComponent ) {
-        return _dragEvents.getDragDropConf(_owner, event, hoveringComponent );
+    public boolean dispatchDragDropEvent( MouseEvent event, JComponent hoveringComponent ) {
+        return _dragEvents.dispatchDragDropEvent( _owner, event, hoveringComponent );
     }
 
     /**

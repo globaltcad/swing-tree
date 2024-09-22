@@ -2,10 +2,10 @@ package swingtree;
 
 import javax.swing.*;
 
-public final class DragOverComponentConf<C extends JComponent, E>
+public final class DragOverEventComponentDelegate<C extends JComponent, E>
 {
-    public static <C extends JComponent, E> DragOverComponentConf<C, E> of( C component, E event, JComponent hoveringComponent ) {
-        return new DragOverComponentConf<>( component, event, hoveringComponent, true );
+    public static <C extends JComponent, E> DragOverEventComponentDelegate<C, E> of(C component, E event, JComponent hoveringComponent ) {
+        return new DragOverEventComponentDelegate<>( component, event, hoveringComponent, true );
     }
 
     private final C          _component;
@@ -13,7 +13,7 @@ public final class DragOverComponentConf<C extends JComponent, E>
     private final JComponent _hoveringComponent;
     private final boolean    _allowDrop;
 
-    private DragOverComponentConf( C component, E event, JComponent hoveringComponent, boolean allowDrop ) {
+    private DragOverEventComponentDelegate(C component, E event, JComponent hoveringComponent, boolean allowDrop ) {
         _component         = component;
         _event             = event;
         _hoveringComponent = hoveringComponent;
@@ -36,8 +36,8 @@ public final class DragOverComponentConf<C extends JComponent, E>
         return _allowDrop;
     }
 
-    public DragOverComponentConf<C, E> allowDrop( boolean allowDrop ) {
-        return new DragOverComponentConf<>( _component, _event, _hoveringComponent, allowDrop );
+    public DragOverEventComponentDelegate<C, E> allowDrop(boolean allowDrop ) {
+        return new DragOverEventComponentDelegate<>( _component, _event, _hoveringComponent, allowDrop );
     }
 
 }
