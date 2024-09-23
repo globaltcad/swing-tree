@@ -78,8 +78,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             if ( activeDrag.equals(ActiveDrag.none()) )
                 return;
             BufferedImage bufferedImage = activeDrag.currentDragImage();
-            boolean isDragSupported = DragSource.isDragImageSupported();
-            if ( !isDragSupported )
+            if ( !DragSource.isDragImageSupported() )
                 bufferedImage = null;
             int offsetX = bufferedImage == null ? 0 : -bufferedImage.getWidth(null) / 2;
             int offsetY = bufferedImage == null ? 0 : -bufferedImage.getHeight(null) / 2;

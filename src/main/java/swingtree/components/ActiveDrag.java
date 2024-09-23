@@ -106,13 +106,16 @@ final class ActiveDrag {
                     .withDraggedComponent(component)
                      .withStart(mousePosition)
                      .withOffset(Location.origin())
-                     .withLocalOffset(mousePosition.minus(absoluteComponentPosition));
+                     .withLocalOffset(mousePosition.minus(absoluteComponentPosition))
+                     .renderComponentIntoImage(component, e);
     }
 
 
-    public ActiveDrag renderComponentIntoImage( Component component, MouseEvent event ) {
+    public ActiveDrag renderComponentIntoImage( Component component, MouseEvent event )
+    {
+        Objects.requireNonNull(dragConf);
 
-        BufferedImage image = this.currentDragImage;
+        BufferedImage image = dragConf.customDragImage().map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
 
         int currentComponentHash = 0;
         if ( component instanceof JComponent ) {
@@ -121,8 +124,6 @@ final class ActiveDrag {
                 return this;
         }
         else return this;
-
-        Objects.requireNonNull(dragConf);
 
         if ( dragConf.opacity() <= 0.0 )
             return this;
@@ -295,4 +296,28 @@ final class ActiveDrag {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
+    /**
+     * Converts a given Image into a BufferedImage
+     *
+     * @param img The Image to be converted
+     * @return The converted BufferedImage
+     */
+    private static BufferedImage toBufferedImage(Image img)
+    {
+        if (img instanceof BufferedImage)
+        {
+            return (BufferedImage) img;
+        }
+
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+        // Return the buffered image
+        return bimage;
+    }
 }
