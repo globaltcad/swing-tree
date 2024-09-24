@@ -8,6 +8,8 @@ import swingtree.api.IconDeclaration;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import java.awt.Image;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
@@ -112,7 +114,7 @@ public final class DragAwayComponentConf<C extends JComponent>
         MouseEvent event
     ) {
         return new DragAwayComponentConf<>(
-                component, event, false, 1, UI.Cursor.DEFAULT, null,
+                component, event, false, 1, UI.Cursor.DEFAULT, null, null,
                 NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION
         );
     }
@@ -123,6 +125,7 @@ public final class DragAwayComponentConf<C extends JComponent>
     private final double          _opacity;
     private final UI.Cursor       _cursor;
     private final @Nullable Image _customDragImage;
+    private final @Nullable Transferable _payload;
     private final Action<DragSourceDragEvent> _onDragEnter;
     private final Action<DragSourceDragEvent> _onDragMove;
     private final Action<DragSourceDragEvent> _onDragOver;
@@ -138,6 +141,7 @@ public final class DragAwayComponentConf<C extends JComponent>
         double          opacity,
         UI.Cursor       cursor,
         @Nullable Image customDragImage,
+        @Nullable Transferable payload,
         Action<DragSourceDragEvent> onDragEnter,
         Action<DragSourceDragEvent> onDragMove,
         Action<DragSourceDragEvent> onDragOver,
@@ -151,6 +155,7 @@ public final class DragAwayComponentConf<C extends JComponent>
         _opacity             = opacity;
         _cursor              = Objects.requireNonNull(cursor);
         _customDragImage     = customDragImage;
+        _payload             = payload;
         _onDragEnter         = Objects.requireNonNull(onDragEnter);
         _onDragMove          = Objects.requireNonNull(onDragMove);
         _onDragOver          = Objects.requireNonNull(onDragOver);
@@ -235,6 +240,20 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public Optional<Image> customDragImage() {
         return Optional.ofNullable(_customDragImage);
+    }
+
+    /**
+     *  Returns an {@link Optional} of the current {@link Transferable} object
+     *  that is used to transfer the data during the drag operation.
+     *  If no custom {@link Transferable} object is set, the default
+     *  {@link Transferable} object will be used to transfer the data.
+     *
+     * @return The {@link Transferable} object that is used to transfer the data
+     *         during the drag operation or <code>Optional.empty()</code> if no
+     *         custom {@link Transferable} object is set.
+     */
+    public Optional<Transferable> payload() {
+        return Optional.ofNullable(_payload);
     }
 
     /**
@@ -391,7 +410,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> enabled( boolean enabled ) {
         return new DragAwayComponentConf<>(
-                _component, _event, enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
             );
     }
@@ -415,7 +434,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> opacity( double opacity ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -431,7 +450,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> cursor( UI.Cursor cursor ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -451,7 +470,7 @@ public final class DragAwayComponentConf<C extends JComponent>
     public DragAwayComponentConf<C> customDragImage( Image customDragImage ) {
         Objects.requireNonNull(customDragImage);
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -491,6 +510,42 @@ public final class DragAwayComponentConf<C extends JComponent>
     }
 
     /**
+     *  Use this to specify the payload of this drag away operation
+     *  in the form of a {@link Transferable} object.
+     *  The {@link Transferable} object is used to transfer data in various
+     *  data formats during the drag operation so that it may eventually be
+     *  dropped at a drop site, like for example {@link UIForAnySwing#onDragDrop(Action)}. <br>
+     *  If no custom {@link Transferable} object is set,
+     *  {@link java.awt.datatransfer.StringSelection} with an
+     *  empty string is used as the default payload.
+     *
+     * @param payload The {@link Transferable} object that is used to transfer the data
+     *                     during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Transferable} object.
+     */
+    public DragAwayComponentConf<C> payload( Transferable payload ) {
+        return new DragAwayComponentConf<>(
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, payload,
+                _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Allows you to specify the payload of this drag away operation
+     *  in the form of a {@link String} object to be transferred during the
+     *  drag away operation. <br>
+     *  If no payload object is specified an empty string will be used as the default payload.
+     *
+     * @param payload The {@link String} object that is used to transfer the data
+     *                during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Transferable}
+     *         of the {@link StringSelection} subtype.
+     */
+    public DragAwayComponentConf<C> payload( String payload ) {
+        return payload(new StringSelection(payload));
+    }
+
+    /**
      *  Use this to specify an {@link Action} that is invoked when the cursor's hotspot enters
      *  a platform-dependent drop site.
      *  This method is invoked when all the following conditions are true:
@@ -515,7 +570,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragEnter( Action<DragSourceDragEvent> onDragEnter ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -536,7 +591,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragMove( Action<DragSourceDragEvent> onDragMove ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -565,7 +620,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragOver( Action<DragSourceDragEvent> onDragOver ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -589,7 +644,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDropActionChanged( Action<DragSourceDragEvent> onDropActionChanged ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -629,7 +684,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragExit( Action<DragSourceEvent> onDragExit ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, onDragExit, _onDragDropEnd
         );
     }
@@ -655,7 +710,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragDropEnd( Action<DragSourceDropEvent> onDragDropEnd ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage,
+                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, onDragDropEnd
         );
     }

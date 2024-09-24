@@ -5,6 +5,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.DragAwayComponentConf;
+import swingtree.UI;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
@@ -83,16 +85,16 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             int offsetX = bufferedImage == null ? 0 : -bufferedImage.getWidth(null) / 2;
             int offsetY = bufferedImage == null ? 0 : -bufferedImage.getHeight(null) / 2;
             dragTrigger.startDrag(
-                    activeDrag.dragConf().get().cursor().toAWTCursor(),
+                    activeDrag.dragConf().map(DragAwayComponentConf::cursor).map(UI.Cursor::toAWTCursor).orElse(Cursor.getDefaultCursor()),
                     bufferedImage,
                     new Point(offsetX, offsetY),
-                    new StringSelection("Hello, World!"),
+                    activeDrag.dragConf().flatMap(DragAwayComponentConf::payload).orElse(new StringSelection("")),
                     new DragSourceListener() {
                         @Override
-                        public void dragEnter(DragSourceDragEvent dsde) {
+                        public void dragEnter(DragSourceDragEvent dragEvent) {
                             try {
                                 JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDragEnter().accept(dsde);
+                                    conf.onDragEnter().accept(dragEvent);
                                 });
                             } catch (Exception ex) {
                                 log.error(
@@ -101,7 +103,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                     );
                             }
                         }
-
                         @Override
                         public void dragOver(DragSourceDragEvent dsde) {
                             try {
@@ -115,7 +116,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                     );
                             }
                         }
-
                         @Override
                         public void dropActionChanged(DragSourceDragEvent dsde) {
                             try {
@@ -129,7 +129,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                     );
                             }
                         }
-
                         @Override
                         public void dragExit(DragSourceEvent dse) {
                             try {
