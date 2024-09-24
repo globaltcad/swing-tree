@@ -217,8 +217,6 @@ final class ActiveDrag {
                 }
             }
             while ( !eventConsumed );
-
-            return;
         }
     }
 
@@ -227,7 +225,6 @@ final class ActiveDrag {
         if ( rootPane == null )
             return;
         try {
-            dispatchDragOver(e, rootPane);
             // Find the new component under the mouse
             java.awt.Component component = getDeepestComponentAt(
                                                 rootPane.getContentPane(),
