@@ -95,11 +95,11 @@ public final class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_bufferedImage);
     }
 
-    public void addDragAwayConf( Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
+    public void addDragAwayConf( Configurator<DragAwayComponentConf<C>> configurator ) {
         _dragEvents = _dragEvents.withDragAwayConf(configurator);
     }
 
-    public DragAwayComponentConf<C, MouseEvent> getDragAwayConf( MouseEvent event ) {
+    public DragAwayComponentConf<C> getDragAwayConf( MouseEvent event ) {
         return _dragEvents.getDragAwayConf(_owner, event);
     }
 

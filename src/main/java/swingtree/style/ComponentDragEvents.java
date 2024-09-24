@@ -6,22 +6,22 @@ import swingtree.DragDropEventComponentDelegate;
 import swingtree.DragOverEventComponentDelegate;
 import swingtree.api.Configurator;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.awt.event.MouseEvent;
 
-class ComponentDragEvents<C extends JComponent>
+final class ComponentDragEvents<C extends JComponent>
 {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ComponentDragEvents.class);
     private static final Action NO_ACTION = it -> {};
 
     static final ComponentDragEvents<?> BLANK = new ComponentDragEvents<>(Configurator.none(), NO_ACTION, NO_ACTION);
 
-    private final Configurator<DragAwayComponentConf<C, MouseEvent>> _dragAwayConfigurator;
-    private final Action<DragOverEventComponentDelegate<C>>          _dragOverEventAction;
-    private final Action<DragDropEventComponentDelegate<C>>          _dragDropEventAction;
+    private final Configurator<DragAwayComponentConf<C>>    _dragAwayConfigurator;
+    private final Action<DragOverEventComponentDelegate<C>> _dragOverEventAction;
+    private final Action<DragDropEventComponentDelegate<C>> _dragDropEventAction;
 
     ComponentDragEvents(
-        Configurator<DragAwayComponentConf<C, MouseEvent>> dragAwayConfigurator,
+        Configurator<DragAwayComponentConf<C>>    dragAwayConfigurator,
         Action<DragOverEventComponentDelegate<C>> dragOverConfigurator,
         Action<DragDropEventComponentDelegate<C>> dragDropConfigurator
     ) {
@@ -31,7 +31,7 @@ class ComponentDragEvents<C extends JComponent>
     }
 
 
-    public ComponentDragEvents<C> withDragAwayConf(Configurator<DragAwayComponentConf<C, MouseEvent>> configurator ) {
+    public ComponentDragEvents<C> withDragAwayConf(Configurator<DragAwayComponentConf<C>> configurator ) {
         if ( Configurator.none().equals(_dragAwayConfigurator) )
             return new ComponentDragEvents<>(configurator, _dragOverEventAction, _dragDropEventAction);
         else
@@ -52,7 +52,7 @@ class ComponentDragEvents<C extends JComponent>
             return new ComponentDragEvents<>(_dragAwayConfigurator, _dragOverEventAction, _dragDropEventAction.andThen(configurator));
     }
 
-    DragAwayComponentConf<C, MouseEvent> getDragAwayConf( C owner, MouseEvent event ) {
+    DragAwayComponentConf<C> getDragAwayConf( C owner, MouseEvent event ) {
         if ( Configurator.none().equals(_dragAwayConfigurator) )
             return DragAwayComponentConf.of(owner, event);
 
