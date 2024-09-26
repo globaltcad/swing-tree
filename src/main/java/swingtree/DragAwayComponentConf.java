@@ -126,12 +126,12 @@ public final class DragAwayComponentConf<C extends JComponent>
     private final UI.Cursor       _cursor;
     private final @Nullable Image _customDragImage;
     private final @Nullable Transferable _payload;
-    private final Action<DragSourceDragEvent> _onDragEnter;
-    private final Action<DragSourceDragEvent> _onDragMove;
-    private final Action<DragSourceDragEvent> _onDragOver;
-    private final Action<DragSourceDragEvent> _onDropActionChanged;
-    private final Action<DragSourceEvent>     _onDragExit;
-    private final Action<DragSourceDropEvent> _onDragDropEnd;
+    private final Action<ComponentDelegate<C, DragSourceDragEvent>> _onDragEnter;
+    private final Action<ComponentDelegate<C, DragSourceDragEvent>> _onDragMove;
+    private final Action<ComponentDelegate<C, DragSourceDragEvent>> _onDragOver;
+    private final Action<ComponentDelegate<C, DragSourceDragEvent>> _onDropActionChanged;
+    private final Action<ComponentDelegate<C, DragSourceEvent    >> _onDragExit;
+    private final Action<ComponentDelegate<C, DragSourceDropEvent>> _onDragDropEnd;
 
 
     private DragAwayComponentConf(
@@ -142,12 +142,12 @@ public final class DragAwayComponentConf<C extends JComponent>
         UI.Cursor       cursor,
         @Nullable Image customDragImage,
         @Nullable Transferable payload,
-        Action<DragSourceDragEvent> onDragEnter,
-        Action<DragSourceDragEvent> onDragMove,
-        Action<DragSourceDragEvent> onDragOver,
-        Action<DragSourceDragEvent> onDropActionChanged,
-        Action<DragSourceEvent>     onDragExit,
-        Action<DragSourceDropEvent> onDragDropEnd
+        Action<ComponentDelegate<C, DragSourceDragEvent>> onDragEnter,
+        Action<ComponentDelegate<C, DragSourceDragEvent>> onDragMove,
+        Action<ComponentDelegate<C, DragSourceDragEvent>> onDragOver,
+        Action<ComponentDelegate<C, DragSourceDragEvent>> onDropActionChanged,
+        Action<ComponentDelegate<C, DragSourceEvent>>     onDragExit,
+        Action<ComponentDelegate<C, DragSourceDropEvent>> onDragDropEnd
     ) {
         _component           = Objects.requireNonNull(component);
         _event               = Objects.requireNonNull(event);
@@ -278,7 +278,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      * @return The {@link Action} that is invoked when the cursor's hotspot enters
      *         a platform-dependent drop site.
      */
-    public Action<DragSourceDragEvent> onDragEnter() {
+    public Action<ComponentDelegate<C, DragSourceDragEvent>> onDragEnter() {
         return _onDragEnter;
     }
 
@@ -295,7 +295,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *
      * @return The {@link Action} that is invoked whenever the mouse is moved during a drag operation.
      */
-    public Action<DragSourceDragEvent> onDragMove() {
+    public Action<ComponentDelegate<C, DragSourceDragEvent>> onDragMove() {
         return _onDragMove;
     }
 
@@ -320,7 +320,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *
      * @return The {@link Action} that is invoked as the cursor's hotspot moves over a platform-dependent drop site.
      */
-    public Action<DragSourceDragEvent> onDragOver() {
+    public Action<ComponentDelegate<C, DragSourceDragEvent>> onDragOver() {
         return _onDragOver;
     }
 
@@ -340,7 +340,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *
      * @return The {@link Action} that is invoked when the user has modified the drop gesture.
      */
-    public Action<DragSourceDragEvent> onDropActionChanged() {
+    public Action<ComponentDelegate<C, DragSourceDragEvent>> onDropActionChanged() {
         return _onDropActionChanged;
     }
 
@@ -376,7 +376,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *
      * @return The {@link Action} that is invoked as the cursor's hotspot exits a platform-dependent drop site.
      */
-    public Action<DragSourceEvent> onDragExit() {
+    public Action<ComponentDelegate<C, DragSourceEvent>> onDragExit() {
         return _onDragExit;
     }
 
@@ -398,7 +398,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      * @return The {@link Action} that is invoked to signify that the Drag and Drop
      *         operation is complete.
      */
-    public Action<DragSourceDropEvent> onDragDropEnd() {
+    public Action<ComponentDelegate<C, DragSourceDropEvent>> onDragDropEnd() {
         return _onDragDropEnd;
     }
 
@@ -568,7 +568,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *                    a platform-dependent drop site.
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragEnter.
      */
-    public DragAwayComponentConf<C> onDragEnter( Action<DragSourceDragEvent> onDragEnter ) {
+    public DragAwayComponentConf<C> onDragEnter( Action<ComponentDelegate<C, DragSourceDragEvent>> onDragEnter ) {
         return new DragAwayComponentConf<>(
                 _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
@@ -589,7 +589,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      * @param onDragMove The {@link Action} to be invoked whenever the mouse is moved during a drag operation.
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragMove.
      */
-    public DragAwayComponentConf<C> onDragMove( Action<DragSourceDragEvent> onDragMove ) {
+    public DragAwayComponentConf<C> onDragMove( Action<ComponentDelegate<C, DragSourceDragEvent>> onDragMove ) {
         return new DragAwayComponentConf<>(
                 _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
@@ -618,7 +618,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      * @param onDragOver The {@link Action} to be invoked as the cursor's hotspot moves over a platform-dependent drop site.
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragOver.
      */
-    public DragAwayComponentConf<C> onDragOver( Action<DragSourceDragEvent> onDragOver ) {
+    public DragAwayComponentConf<C> onDragOver( Action<ComponentDelegate<C, DragSourceDragEvent>> onDragOver ) {
         return new DragAwayComponentConf<>(
                 _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
@@ -642,7 +642,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      * @param onDropActionChanged The {@link Action} to be invoked when the user has modified the drop gesture.
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDropActionChanged.
      */
-    public DragAwayComponentConf<C> onDropActionChanged( Action<DragSourceDragEvent> onDropActionChanged ) {
+    public DragAwayComponentConf<C> onDropActionChanged( Action<ComponentDelegate<C, DragSourceDragEvent>> onDropActionChanged ) {
         return new DragAwayComponentConf<>(
                 _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, onDropActionChanged, _onDragExit, _onDragDropEnd
@@ -682,7 +682,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      * @param onDragExit The {@link Action} to be invoked as the cursor's hotspot exits a platform-dependent drop site.
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragExit.
      */
-    public DragAwayComponentConf<C> onDragExit( Action<DragSourceEvent> onDragExit ) {
+    public DragAwayComponentConf<C> onDragExit( Action<ComponentDelegate<C, DragSourceEvent>> onDragExit ) {
         return new DragAwayComponentConf<>(
                 _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, onDragExit, _onDragDropEnd
@@ -708,7 +708,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *                      operation is complete.
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragDropEnd.
      */
-    public DragAwayComponentConf<C> onDragDropEnd( Action<DragSourceDropEvent> onDragDropEnd ) {
+    public DragAwayComponentConf<C> onDragDropEnd( Action<ComponentDelegate<C, DragSourceDropEvent>> onDragDropEnd ) {
         return new DragAwayComponentConf<>(
                 _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, onDragDropEnd

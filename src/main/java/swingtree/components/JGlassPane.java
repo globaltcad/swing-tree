@@ -5,6 +5,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
 import swingtree.style.ComponentExtension;
@@ -56,13 +57,13 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 );
 
         DragSource dragSource = DragSource.getDefaultDragSource();
-        dragSource.addDragSourceMotionListener(dsde -> {
+        dragSource.addDragSourceMotionListener(event -> {
             if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
-                Point dragStartPoint = determineCurrentDragDropLocationInWindow(dsde.getLocation());
+                Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
                 MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
                 try {
                     activeDrag.dragConf().ifPresent(conf -> {
-                        conf.onDragMove().accept(dsde);
+                        conf.onDragMove().accept(new ComponentDelegate(conf.component(), event));
                     });
                 } catch (Exception ex) {
                     log.error(
@@ -75,8 +76,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         });
         dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
             Point dragStart = dragTrigger.getDragOrigin();
-            MouseEvent e = new MouseEvent(this, MOUSE_PRESSED, System.currentTimeMillis(), 0, dragStart.x, dragStart.y, 1, false);
-            activeDrag = activeDrag.begin(e, rootPane);
+            MouseEvent startMouseEvent = new MouseEvent(this, MOUSE_PRESSED, System.currentTimeMillis(), 0, dragStart.x, dragStart.y, 1, false);
+            activeDrag = activeDrag.begin(startMouseEvent, rootPane);
             if ( activeDrag.equals(ActiveDrag.none()) )
                 return;
             BufferedImage bufferedImage = activeDrag.currentDragImage();
@@ -91,10 +92,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     activeDrag.dragConf().flatMap(DragAwayComponentConf::payload).orElse(new StringSelection("")),
                     new DragSourceListener() {
                         @Override
-                        public void dragEnter(DragSourceDragEvent dragEvent) {
+                        public void dragEnter(DragSourceDragEvent event) {
                             try {
                                 JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDragEnter().accept(dragEvent);
+                                    conf.onDragEnter().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
                                 log.error(
@@ -104,10 +105,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                             }
                         }
                         @Override
-                        public void dragOver(DragSourceDragEvent dsde) {
+                        public void dragOver(DragSourceDragEvent event) {
                             try {
                                 JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDragOver().accept(dsde);
+                                    conf.onDragOver().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
                                 log.error(
@@ -117,10 +118,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                             }
                         }
                         @Override
-                        public void dropActionChanged(DragSourceDragEvent dsde) {
+                        public void dropActionChanged(DragSourceDragEvent event) {
                             try {
                                 JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDropActionChanged().accept(dsde);
+                                    conf.onDropActionChanged().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
                                 log.error(
@@ -130,10 +131,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                             }
                         }
                         @Override
-                        public void dragExit(DragSourceEvent dse) {
+                        public void dragExit(DragSourceEvent event) {
                             try {
                                 JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDragExit().accept(dse);
+                                    conf.onDragExit().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
                                 log.error(
@@ -144,12 +145,12 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         }
 
                         @Override
-                        public void dragDropEnd(DragSourceDropEvent dsde) {
+                        public void dragDropEnd(DragSourceDropEvent event) {
                             if ( activeDrag.equals(ActiveDrag.none()) )
                                 return;
                             try {
                                 JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDragDropEnd().accept(dsde);
+                                    conf.onDragDropEnd().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
                                 log.error(
@@ -158,9 +159,9 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                     );
                             }
                             // We need to calculate where the drop event happened
-                            Point dragStartPoint = determineCurrentDragDropLocationInWindow(dsde.getLocation());
-                            MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_RELEASED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
-                            activeDrag.tryDropping(e, rootPane);
+                            Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
+                            MouseEvent mouseEvent = new MouseEvent(JGlassPane.this, MOUSE_RELEASED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
+                            activeDrag.tryDropping(mouseEvent, rootPane);
                             activeDrag = ActiveDrag.none();
                             if ( rootPane != null ) {
                                 rootPane.repaint();
