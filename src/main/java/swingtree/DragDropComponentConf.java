@@ -6,7 +6,7 @@ import javax.swing.JComponent;
 import java.awt.dnd.*;
 import java.util.Objects;
 
-public class DragDropComponentConf<C extends JComponent>
+public final class DragDropComponentConf<C extends JComponent>
 {
     private static final Action NO_ACTION = e -> {};
 

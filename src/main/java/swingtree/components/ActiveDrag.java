@@ -85,10 +85,10 @@ final class ActiveDrag {
         if ( !(component instanceof JComponent) )
             return this; // We only support JComponents for dragging
 
-        DragAwayComponentConf<?> dragConf;
+        Optional<DragAwayComponentConf<JComponent>> dragConf;
         do {
             dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(e);
-            if ( !dragConf.enabled() ) {
+            if ( !dragConf.isPresent() || dragConf.map(it->!it.enabled()).orElse(false) ) {
                 Component parent = component.getParent();
                 if ( parent instanceof JComponent )
                     component = parent;
@@ -96,12 +96,12 @@ final class ActiveDrag {
                     return this;
             }
         }
-        while ( !dragConf.enabled() );
+        while ( !dragConf.isPresent() || dragConf.map(it->!it.enabled()).orElse(false) );
 
         Location mousePosition = Location.of(e.getPoint());
         Location absoluteComponentPosition = Location.of(convertPoint(component, 0,0, rootPane.getContentPane()));
 
-        return this.withDragConf(dragConf)
+        return this.withDragConf(dragConf.get())
                     .withDraggedComponent(component)
                      .withStart(mousePosition)
                      .withOffset(Location.origin())

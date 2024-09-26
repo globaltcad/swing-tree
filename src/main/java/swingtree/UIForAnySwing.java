@@ -3982,7 +3982,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withDragAway( Configurator<DragAwayComponentConf<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
-                    ComponentExtension.from(thisComponent).addDragAwayConf(configurator);
+                    ComponentExtension.from(thisComponent).addDragAwayConf(mouseEvent -> {
+                        DragAwayComponentConf<C> conf = DragAwayComponentConf.of(thisComponent, mouseEvent);
+                        return configurator.configure(conf);
+                    });
                })
                ._this();
     }

@@ -2,13 +2,9 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
-import sprouts.Action;
 import swingtree.DragAwayComponentConf;
-import swingtree.DragDropEventComponentDelegate;
-import swingtree.DragOverEventComponentDelegate;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
-import swingtree.api.Configurator;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 
@@ -20,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -78,7 +75,7 @@ public final class ComponentExtension<C extends JComponent>
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
     private @Nullable BufferedImage _bufferedImage = null;
 
-    private ComponentDragEvents<C> _dragEvents = (ComponentDragEvents<C>) ComponentDragEvents.BLANK;
+    private @Nullable Function<MouseEvent, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
 
 
     private ComponentExtension( C owner ) {
@@ -95,12 +92,24 @@ public final class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_bufferedImage);
     }
 
-    public void addDragAwayConf( Configurator<DragAwayComponentConf<C>> configurator ) {
-        _dragEvents = _dragEvents.withDragAwayConf(configurator);
+    public void addDragAwayConf( Function<MouseEvent, DragAwayComponentConf<C>> supplier ) {
+        if ( _dragAwayConfigurator == null )
+            _dragAwayConfigurator = supplier;
+        else {
+            throw new IllegalStateException("Drag away configurator already set!");
+        }
     }
 
-    public DragAwayComponentConf<C> getDragAwayConf( MouseEvent event ) {
-        return _dragEvents.getDragAwayConf(_owner, event);
+    public Optional<DragAwayComponentConf<C>> getDragAwayConf( MouseEvent event ) {
+        if ( _dragAwayConfigurator == null )
+            return Optional.empty();
+
+        try {
+            return Optional.of(_dragAwayConfigurator.apply(event));
+        } catch ( Exception e ) {
+            log.error("Error while configuring drag away component!", e);
+            return Optional.empty();
+        }
     }
 
     /**
