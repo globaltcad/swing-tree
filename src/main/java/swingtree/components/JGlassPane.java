@@ -160,8 +160,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                             }
                             // We need to calculate where the drop event happened
                             Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
-                            MouseEvent mouseEvent = new MouseEvent(JGlassPane.this, MOUSE_RELEASED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
-                            activeDrag.tryDropping(mouseEvent, rootPane);
                             activeDrag = ActiveDrag.none();
                             if ( rootPane != null ) {
                                 rootPane.repaint();

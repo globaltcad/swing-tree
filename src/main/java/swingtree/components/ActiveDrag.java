@@ -3,14 +3,13 @@ package swingtree.components;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.DragAwayComponentConf;
-import swingtree.DragDropEventComponentDelegate;
-import swingtree.DragOverEventComponentDelegate;
 import swingtree.layout.Bounds;
 import swingtree.layout.Location;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JRootPane;
 import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
@@ -185,71 +184,10 @@ final class ActiveDrag {
                 Bounds nextArea     = Bounds.of(whereToRenderNext, size);
                 Bounds mergedArea   = previousArea.merge(nextArea);
                 rootPane.repaint(mergedArea.toRectangle());
-                try {
-                    dispatchDragOver(e, rootPane);
-                } catch (Exception ex) {
-                    log.error("Error while dispatching drag over event.", ex);
-                }
             }
             return updatedDrag;
         }
         return this;
-    }
-
-    private void dispatchDragOver(MouseEvent e, JRootPane rootPane) {
-        // Find the new component under the mouse
-        java.awt.Component component = getDeepestComponentAt(
-                rootPane.getContentPane(),
-                e.getX(), e.getY()
-        );
-        if ( component instanceof JComponent ) {
-            JComponent jComponent = (JComponent) component;
-            JComponent draggedJComponent = (JComponent) this.draggedComponent;
-            boolean eventConsumed;
-            do {
-                eventConsumed = ComponentExtension.from(jComponent).dispatchDragOverEvent(e, draggedJComponent);
-                if ( !eventConsumed ) {
-                    Component parent = jComponent.getParent();
-                    if ( parent instanceof JComponent && parent != this.draggedComponent )
-                        jComponent = (JComponent) parent;
-                    else
-                        return;
-                }
-            }
-            while ( !eventConsumed );
-        }
-    }
-
-    public void tryDropping(MouseEvent e, @Nullable JRootPane rootPane)
-    {
-        if ( rootPane == null )
-            return;
-        try {
-            // Find the new component under the mouse
-            java.awt.Component component = getDeepestComponentAt(
-                                                rootPane.getContentPane(),
-                                                e.getX(), e.getY()
-                                            );
-            if ( component instanceof JComponent ) {
-                // We go up the component tree and call all the dragDrop listeners
-                JComponent jComponent = (JComponent) component;
-                JComponent draggedJComponent = (JComponent) this.draggedComponent;
-                boolean eventConsumed;
-                do {
-                    eventConsumed = ComponentExtension.from(jComponent).dispatchDragDropEvent(e, draggedJComponent);
-                    if ( !eventConsumed ) {
-                        Component parent = jComponent.getParent();
-                        if ( parent instanceof JComponent && parent != this.draggedComponent )
-                            jComponent = (JComponent) parent;
-                        else
-                            break;
-                    }
-                }
-                while ( !eventConsumed );
-            }
-        } catch (Exception ex) {
-            log.error("Error while dispatching drag over event.", ex);
-        }
     }
 
     public void paint(Graphics g){

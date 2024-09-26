@@ -103,22 +103,6 @@ public final class ComponentExtension<C extends JComponent>
         return _dragEvents.getDragAwayConf(_owner, event);
     }
 
-    public void addDragOverConf( Action<DragOverEventComponentDelegate<C>> configurator ) {
-        _dragEvents = _dragEvents.withDragOverConf(configurator);
-    }
-
-    public boolean dispatchDragOverEvent( MouseEvent event, JComponent hoveringComponent ) {
-        return _dragEvents.dispatchDragOverEvent(_owner, event, hoveringComponent);
-    }
-
-    public void addDragDropEventAction( Action<DragDropEventComponentDelegate<C>> configurator ) {
-        _dragEvents = _dragEvents.withDragDropConf(configurator);
-    }
-
-    public boolean dispatchDragDropEvent( MouseEvent event, JComponent hoveringComponent ) {
-        return _dragEvents.dispatchDragDropEvent( _owner, event, hoveringComponent );
-    }
-
     /**
      *  Allows for extra state to be attached to the component extension.
      *  (Conceptually similar to how Swing components can have client properties.)<br>

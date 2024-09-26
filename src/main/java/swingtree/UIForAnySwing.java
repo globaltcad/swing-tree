@@ -26,6 +26,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.dnd.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -1147,7 +1148,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Creates a titled rounded line {@link Border} with the provided
      *  color and insets for this {@link JComponent} and binds the border to the provided
      *  title and color properties.
-     *  When the title or color properties change, 
+     *  When the title or color properties change,
      *  then the border will be updated with the new values.
      *
      * @param title The title property of the border which will update the border when the value changes.
@@ -1270,7 +1271,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Creates a titled rounded black line {@link Border} with
-     *  a thickness of {@code 1} to the {@link JComponent} and binds it to the provided 
+     *  a thickness of {@code 1} to the {@link JComponent} and binds it to the provided
      *  title property.
      *  When the property changes, the border will be updated.
      *
@@ -2389,7 +2390,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._this();
     }
-    
+
     /**
      *  Use this to bind to a foreground color
      *  which will be set dynamically based on a boolean property.
@@ -2416,7 +2417,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._this();
     }
-    
+
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
@@ -3986,20 +3987,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    public final I onDragOver( Action<DragOverEventComponentDelegate<C>> configurator ) {
+    public final I withDropSite( Configurator<DragDropComponentConf<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
-                    ComponentExtension.from(thisComponent).addDragOverConf(configurator);
+                    _runInApp(() -> {
+                        try {
+                            DragDropComponentConf<C> conf = configurator.configure(DragDropComponentConf.of(thisComponent));
+                            DropTarget target = conf.toNewDropTarget();
+                            thisComponent.setDropTarget(target);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Failed to configure drop site!", e);
+                        }
+                    });
                })
                ._this();
-    }
-
-    public final I onDragDrop( Action<DragDropEventComponentDelegate<C>> configurator ) {
-        NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
-        return _with( thisComponent -> {
-                    ComponentExtension.from(thisComponent).addDragDropEventAction(configurator);
-                })
-                ._this();
     }
 
     /**
