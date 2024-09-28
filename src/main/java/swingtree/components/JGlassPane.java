@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
-import swingtree.layout.Location;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
@@ -158,8 +157,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                         ex
                                     );
                             }
-                            // We need to calculate where the drop event happened
-                            Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
                             activeDrag = ActiveDrag.none();
                             if ( rootPane != null ) {
                                 rootPane.repaint();
