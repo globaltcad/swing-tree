@@ -22,7 +22,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.WeakHashMap;
 
 import static java.awt.AWTEvent.*;
 import static java.awt.event.MouseEvent.*;
@@ -45,7 +48,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
     private final EventListenerList listeners = new EventListenerList();
 
     protected @Nullable JRootPane rootPane;
-    private ActiveDrag activeDrag = ActiveDrag.none();
+    private static final Map<JGlassPane, ActiveDrag> activeDrags = new WeakHashMap<>();
 
 
     public JGlassPane() {
@@ -58,6 +61,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
         DragSource dragSource = DragSource.getDefaultDragSource();
         dragSource.addDragSourceMotionListener(event -> {
+            ActiveDrag activeDrag = getActiveDrag();
+
             if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
                 Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
                 MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
@@ -72,13 +77,17 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         );
                 }
                 activeDrag = activeDrag.dragged(e, rootPane);
+                setActiveDrag(activeDrag);
             }
         });
         dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
+            ActiveDrag activeDrag = getActiveDrag();
             Point dragStart = dragTrigger.getDragOrigin();
             activeDrag = activeDrag.begin(dragStart, rootPane);
             if ( activeDrag.equals(ActiveDrag.none()) )
                 return;
+            else
+                setActiveDrag(activeDrag);
             BufferedImage bufferedImage = activeDrag.currentDragImage();
             if ( !DragSource.isDragImageSupported() )
                 bufferedImage = null;
@@ -93,7 +102,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         @Override
                         public void dragEnter(DragSourceDragEvent event) {
                             try {
-                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                getActiveDrag().dragConf().ifPresent(conf -> {
                                     conf.onDragEnter().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
@@ -106,7 +115,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         @Override
                         public void dragOver(DragSourceDragEvent event) {
                             try {
-                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                getActiveDrag().dragConf().ifPresent(conf -> {
                                     conf.onDragOver().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
@@ -119,7 +128,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         @Override
                         public void dropActionChanged(DragSourceDragEvent event) {
                             try {
-                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                getActiveDrag().dragConf().ifPresent(conf -> {
                                     conf.onDropActionChanged().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
@@ -132,7 +141,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         @Override
                         public void dragExit(DragSourceEvent event) {
                             try {
-                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                getActiveDrag().dragConf().ifPresent(conf -> {
                                     conf.onDragExit().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
@@ -145,10 +154,11 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
                         @Override
                         public void dragDropEnd(DragSourceDropEvent event) {
+                            ActiveDrag activeDrag = getActiveDrag();
                             if ( activeDrag.equals(ActiveDrag.none()) )
                                 return;
                             try {
-                                JGlassPane.this.activeDrag.dragConf().ifPresent(conf -> {
+                                activeDrag.dragConf().ifPresent(conf -> {
                                     conf.onDragDropEnd().accept(new ComponentDelegate(conf.component(), event));
                                 });
                             } catch (Exception ex) {
@@ -157,7 +167,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                                         ex
                                     );
                             }
-                            activeDrag = ActiveDrag.none();
+                            setActiveDrag(ActiveDrag.none());
                             if ( rootPane != null ) {
                                 rootPane.repaint();
                             }
@@ -171,6 +181,14 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         this();
         Objects.requireNonNull(rootPane);
         attachToRootPane(rootPane);
+    }
+
+    private ActiveDrag getActiveDrag() {
+        return Optional.ofNullable(activeDrags.get(this)).orElse(ActiveDrag.none());
+    }
+
+    private void setActiveDrag(ActiveDrag activeDrag) {
+        activeDrags.put(this, activeDrag);
     }
 
     private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop ) {
@@ -202,7 +220,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
-        activeDrag.paint(g);
+        getActiveDrag().paint(g);
     }
 
     @Override public void setUISilently( ComponentUI ui ) {
