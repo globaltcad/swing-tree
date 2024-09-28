@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  A value based configuration object for configuring drag away events of a component
+ *  A value based builder object for configuring drag away events of a component
  *  using the {@link UIForAnySwing#withDragAway(Configurator)} method, where an instance of this
  *  class is passed to the {@link Configurator} lambda defining how
  *  the component should behave and look when dragged away. <br>
@@ -102,6 +102,7 @@ import java.util.Optional;
  *          the <code>DragSourceDropEvent</code> can be used to
  *          determine the termination state. The getDropAction() method
  *      </li>
+ *  </ul>
  *          
  * @param <C> The type of the component to be dragged away.
  */
@@ -514,7 +515,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *  in the form of a {@link Transferable} object.
      *  The {@link Transferable} object is used to transfer data in various
      *  data formats during the drag operation so that it may eventually be
-     *  dropped at a drop site, like for example {@link UIForAnySwing#onDragDrop(Action)}. <br>
+     *  dropped at a drop site, like for example {@link UIForAnySwing#withDropSite(Configurator)}. <br>
      *  If no custom {@link Transferable} object is set,
      *  {@link java.awt.datatransfer.StringSelection} with an
      *  empty string is used as the default payload.
