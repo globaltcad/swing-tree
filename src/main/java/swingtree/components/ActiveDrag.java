@@ -67,7 +67,7 @@ final class ActiveDrag {
         return Optional.ofNullable(dragConf);
     }
 
-    public ActiveDrag begin(MouseEvent e, @Nullable JRootPane rootPane)
+    public ActiveDrag begin(Point dragStart, @Nullable JRootPane rootPane)
     {
         if ( rootPane == null )
             return this;
@@ -79,15 +79,17 @@ final class ActiveDrag {
          */
         java.awt.Component component = getDeepestComponentAt(
                                                 rootPane.getContentPane(),
-                                                e.getX(), e.getY()
+                                                dragStart.x, dragStart.y
                                             );
 
         if ( !(component instanceof JComponent) )
             return this; // We only support JComponents for dragging
 
+        Location mousePosition = Location.of(dragStart);
+
         Optional<DragAwayComponentConf<JComponent>> dragConf;
         do {
-            dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(e);
+            dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(mousePosition);
             if ( !dragConf.isPresent() || dragConf.map(it->!it.enabled()).orElse(false) ) {
                 Component parent = component.getParent();
                 if ( parent instanceof JComponent )
@@ -98,7 +100,6 @@ final class ActiveDrag {
         }
         while ( !dragConf.isPresent() || dragConf.map(it->!it.enabled()).orElse(false) );
 
-        Location mousePosition = Location.of(e.getPoint());
         Location absoluteComponentPosition = Location.of(convertPoint(component, 0,0, rootPane.getContentPane()));
 
         return this.withDragConf(dragConf.get())
@@ -106,15 +107,15 @@ final class ActiveDrag {
                      .withStart(mousePosition)
                      .withOffset(Location.origin())
                      .withLocalOffset(mousePosition.minus(absoluteComponentPosition))
-                     .renderComponentIntoImage(component, e);
+                     .renderComponentIntoImage();
     }
 
 
-    public ActiveDrag renderComponentIntoImage( Component component, MouseEvent event )
+    public ActiveDrag renderComponentIntoImage()
     {
         Objects.requireNonNull(dragConf);
-
         BufferedImage image = dragConf.customDragImage().map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
+        Component component = Objects.requireNonNull(draggedComponent);
 
         int currentComponentHash = 0;
         if ( component instanceof JComponent ) {
@@ -167,7 +168,7 @@ final class ActiveDrag {
         if ( draggedComponent != null ) {
             Point point = e.getPoint();
             ActiveDrag updatedDrag = this.withOffset(Location.of(point.x - start.x(), point.y - start.y()))
-                                         .renderComponentIntoImage(draggedComponent, e);
+                                         .renderComponentIntoImage();
 
             if ( rootPane != null && !DragSource.isDragImageSupported() ) {
                 /*

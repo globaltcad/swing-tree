@@ -7,6 +7,7 @@ import swingtree.UI;
 import swingtree.animation.AnimationStatus;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.layout.Location;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -75,7 +76,7 @@ public final class ComponentExtension<C extends JComponent>
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
     private @Nullable BufferedImage _bufferedImage = null;
 
-    private @Nullable Function<MouseEvent, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
+    private @Nullable Function<Location, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
 
 
     private ComponentExtension( C owner ) {
@@ -92,7 +93,7 @@ public final class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_bufferedImage);
     }
 
-    public void addDragAwayConf( Function<MouseEvent, DragAwayComponentConf<C>> supplier ) {
+    public void addDragAwayConf( Function<Location, DragAwayComponentConf<C>> supplier ) {
         if ( _dragAwayConfigurator == null )
             _dragAwayConfigurator = supplier;
         else {
@@ -100,12 +101,12 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-    public Optional<DragAwayComponentConf<C>> getDragAwayConf( MouseEvent event ) {
+    public Optional<DragAwayComponentConf<C>> getDragAwayConf( Location mousePosition ) {
         if ( _dragAwayConfigurator == null )
             return Optional.empty();
 
         try {
-            return Optional.of(_dragAwayConfigurator.apply(event));
+            return Optional.of(_dragAwayConfigurator.apply(mousePosition));
         } catch ( Exception e ) {
             log.error("Error while configuring drag away component!", e);
             return Optional.empty();

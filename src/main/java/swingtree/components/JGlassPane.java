@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
+import swingtree.layout.Location;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
@@ -76,8 +77,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         });
         dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
             Point dragStart = dragTrigger.getDragOrigin();
-            MouseEvent startMouseEvent = new MouseEvent(this, MOUSE_PRESSED, System.currentTimeMillis(), 0, dragStart.x, dragStart.y, 1, false);
-            activeDrag = activeDrag.begin(startMouseEvent, rootPane);
+            activeDrag = activeDrag.begin(dragStart, rootPane);
             if ( activeDrag.equals(ActiveDrag.none()) )
                 return;
             BufferedImage bufferedImage = activeDrag.currentDragImage();

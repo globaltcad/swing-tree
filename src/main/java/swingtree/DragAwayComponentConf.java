@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
+import swingtree.layout.Location;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -14,7 +15,6 @@ import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceEvent;
-import java.awt.event.MouseEvent;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -112,16 +112,16 @@ public final class DragAwayComponentConf<C extends JComponent>
 
     public static <C extends JComponent> DragAwayComponentConf<C> of(
         C component,
-        MouseEvent event
+        Location mousePosition
     ) {
         return new DragAwayComponentConf<>(
-                component, event, false, 1, UI.Cursor.DEFAULT, null, null,
+                component, mousePosition, false, 1, UI.Cursor.DEFAULT, null, null,
                 NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION
         );
     }
 
     private final C               _component;
-    private final MouseEvent      _event;
+    private final Location        _mousePosition;
     private final boolean         _enabled;
     private final double          _opacity;
     private final UI.Cursor       _cursor;
@@ -137,7 +137,7 @@ public final class DragAwayComponentConf<C extends JComponent>
 
     private DragAwayComponentConf(
         C               component,
-        MouseEvent      event,
+        Location        mousePosition,
         boolean         enabled,
         double          opacity,
         UI.Cursor       cursor,
@@ -151,7 +151,7 @@ public final class DragAwayComponentConf<C extends JComponent>
         Action<ComponentDelegate<C, DragSourceDropEvent>> onDragDropEnd
     ) {
         _component           = Objects.requireNonNull(component);
-        _event               = Objects.requireNonNull(event);
+        _mousePosition       = Objects.requireNonNull(mousePosition);
         _enabled             = enabled;
         _opacity             = opacity;
         _cursor              = Objects.requireNonNull(cursor);
@@ -177,18 +177,36 @@ public final class DragAwayComponentConf<C extends JComponent>
     }
 
     /**
-     *  Exposes the {@link MouseEvent} that triggered the drag away operation.
-     *  You may use the properties of the mouse event to configure the drag away operation
-     *  to your needs. You may for example only want to allow the drag away operation
-     *  through the {@link #enabled(boolean)} method,
-     *  if the user has started the drag at a particular location on the component, by
-     *  checking {@link MouseEvent#getX()} and {@link MouseEvent#getY()}.
+     *  Exposes the current mouse position of the drag operation.
+     *  The mouse position is the location of the mouse cursor when the drag operation
+     *  was initiated.
      *
-     * @return The mouse event describing the start of the drag away operation
-     *         initiated by the user.
+     * @return The mouse position of the drag operation.
      */
-    public MouseEvent event() {
-        return _event;
+    public Location mousePosition() {
+        return _mousePosition;
+    }
+
+    /**
+     *  Exposes the current x-coordinate of the mouse position of the drag operation.
+     *  The x-coordinate is the horizontal position of the mouse cursor when the drag operation
+     *  was initiated.
+     *
+     * @return The x-coordinate of the mouse position of the drag operation.
+     */
+    public double mouseX() {
+        return _mousePosition.x();
+    }
+
+    /**
+     *  Exposes the current y-coordinate of the mouse position of the drag operation.
+     *  The y-coordinate is the vertical position of the mouse cursor when the drag operation
+     *  was initiated.
+     *
+     * @return The y-coordinate of the mouse position of the drag operation.
+     */
+    public double mouseY() {
+        return _mousePosition.y();
     }
 
     /**
@@ -411,7 +429,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> enabled( boolean enabled ) {
         return new DragAwayComponentConf<>(
-                _component, _event, enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
             );
     }
@@ -435,7 +453,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> opacity( double opacity ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -451,7 +469,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> cursor( UI.Cursor cursor ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -471,7 +489,7 @@ public final class DragAwayComponentConf<C extends JComponent>
     public DragAwayComponentConf<C> customDragImage( Image customDragImage ) {
         Objects.requireNonNull(customDragImage);
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -526,7 +544,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> payload( Transferable payload ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -571,7 +589,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragEnter( Action<ComponentDelegate<C, DragSourceDragEvent>> onDragEnter ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -592,7 +610,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragMove( Action<ComponentDelegate<C, DragSourceDragEvent>> onDragMove ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -621,7 +639,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragOver( Action<ComponentDelegate<C, DragSourceDragEvent>> onDragOver ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -645,7 +663,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDropActionChanged( Action<ComponentDelegate<C, DragSourceDragEvent>> onDropActionChanged ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, onDropActionChanged, _onDragExit, _onDragDropEnd
         );
     }
@@ -685,7 +703,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragExit( Action<ComponentDelegate<C, DragSourceEvent>> onDragExit ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, onDragExit, _onDragDropEnd
         );
     }
@@ -711,7 +729,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      */
     public DragAwayComponentConf<C> onDragDropEnd( Action<ComponentDelegate<C, DragSourceDropEvent>> onDragDropEnd ) {
         return new DragAwayComponentConf<>(
-                _component, _event, _enabled, _opacity, _cursor, _customDragImage, _payload,
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload,
                 _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, onDragDropEnd
         );
     }
