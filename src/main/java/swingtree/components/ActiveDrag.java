@@ -169,26 +169,20 @@ final class ActiveDrag {
             Point point = e.getPoint();
             ActiveDrag updatedDrag = this.withOffset(Location.of(point.x - start.x(), point.y - start.y()))
                                          .renderComponentIntoImage();
-
-            if ( rootPane != null && !DragSource.isDragImageSupported() ) {
-                /*
-                    If the drag image is not supported by the platform, we
-                    do the image rendering ourselves directly on the Graphics object
-                    of the glass pane of the root pane.
-                    But for this to work we need to repaint the area where the drag image was
-                    previously rendered and the area where it will be rendered next.
-                */
-                Location previousWhereToRender = getRenderPosition();
-                Location whereToRenderNext     = updatedDrag.getRenderPosition();
-                Size size = Size.of(draggedComponent.getSize());
-                Bounds previousArea = Bounds.of(previousWhereToRender, size);
-                Bounds nextArea     = Bounds.of(whereToRenderNext, size);
-                Bounds mergedArea   = previousArea.merge(nextArea);
-                rootPane.repaint(mergedArea.toRectangle());
-            }
             return updatedDrag;
         }
         return this;
+    }
+
+    public boolean hasDraggedComponent() {
+        return draggedComponent != null;
+    }
+
+    Size draggedComponentSize() {
+        if ( draggedComponent != null ) {
+            return Size.of(draggedComponent.getSize());
+        }
+        return Size.unknown();
     }
 
     public void paint(Graphics g){
@@ -205,7 +199,7 @@ final class ActiveDrag {
         }
     }
 
-    private Location getRenderPosition() {
+    Location getRenderPosition() {
         return Location.of(
                 (start.x() + offset.x() - localOffset.x()),
                 (start.y() + offset.y() - localOffset.y())
@@ -256,4 +250,5 @@ final class ActiveDrag {
         // Return the buffered image
         return bimage;
     }
+
 }

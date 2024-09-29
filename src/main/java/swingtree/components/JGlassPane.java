@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
+import swingtree.layout.Bounds;
+import swingtree.layout.Location;
+import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
@@ -60,26 +63,6 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 );
 
         DragSource dragSource = DragSource.getDefaultDragSource();
-        dragSource.addDragSourceMotionListener(event -> {
-            ActiveDrag activeDrag = getActiveDrag();
-
-            if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
-                Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
-                MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
-                try {
-                    activeDrag.dragConf().ifPresent(conf -> {
-                        conf.onDragMove().accept(new ComponentDelegate(conf.component(), event));
-                    });
-                } catch (Exception ex) {
-                    log.error(
-                            "Error while executing drag movement event handlers.",
-                            ex
-                        );
-                }
-                activeDrag = activeDrag.dragged(e, rootPane);
-                setActiveDrag(activeDrag);
-            }
-        });
         dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
             ActiveDrag activeDrag = getActiveDrag();
             Point dragStart = dragTrigger.getDragOrigin();
@@ -98,82 +81,37 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     bufferedImage,
                     new Point(offsetX, offsetY),
                     activeDrag.dragConf().flatMap(DragAwayComponentConf::payload).orElse(new StringSelection("")),
-                    new DragSourceListener() {
-                        @Override
-                        public void dragEnter(DragSourceDragEvent event) {
-                            try {
-                                getActiveDrag().dragConf().ifPresent(conf -> {
-                                    conf.onDragEnter().accept(new ComponentDelegate(conf.component(), event));
-                                });
-                            } catch (Exception ex) {
-                                log.error(
-                                        "Error while executing drag enter event handlers.",
-                                        ex
-                                    );
-                            }
-                        }
-                        @Override
-                        public void dragOver(DragSourceDragEvent event) {
-                            try {
-                                getActiveDrag().dragConf().ifPresent(conf -> {
-                                    conf.onDragOver().accept(new ComponentDelegate(conf.component(), event));
-                                });
-                            } catch (Exception ex) {
-                                log.error(
-                                        "Error while executing drag over event handlers.",
-                                        ex
-                                    );
-                            }
-                        }
-                        @Override
-                        public void dropActionChanged(DragSourceDragEvent event) {
-                            try {
-                                getActiveDrag().dragConf().ifPresent(conf -> {
-                                    conf.onDropActionChanged().accept(new ComponentDelegate(conf.component(), event));
-                                });
-                            } catch (Exception ex) {
-                                log.error(
-                                        "Error while executing drop action changed event handlers.",
-                                        ex
-                                    );
-                            }
-                        }
-                        @Override
-                        public void dragExit(DragSourceEvent event) {
-                            try {
-                                getActiveDrag().dragConf().ifPresent(conf -> {
-                                    conf.onDragExit().accept(new ComponentDelegate(conf.component(), event));
-                                });
-                            } catch (Exception ex) {
-                                log.error(
-                                        "Error while executing drag exit event handlers.",
-                                        ex
-                                    );
-                            }
-                        }
-
-                        @Override
-                        public void dragDropEnd(DragSourceDropEvent event) {
-                            ActiveDrag activeDrag = getActiveDrag();
-                            if ( activeDrag.equals(ActiveDrag.none()) )
-                                return;
-                            try {
-                                activeDrag.dragConf().ifPresent(conf -> {
-                                    conf.onDragDropEnd().accept(new ComponentDelegate(conf.component(), event));
-                                });
-                            } catch (Exception ex) {
-                                log.error(
-                                        "Error while executing drag drop end event handlers.",
-                                        ex
-                                    );
-                            }
-                            setActiveDrag(ActiveDrag.none());
-                            if ( rootPane != null ) {
-                                rootPane.repaint();
-                            }
-                        }
-                    }
+                    new GlassPaneDragSourceListener()
             );
+        });
+        dragSource.addDragSourceMotionListener(event -> {
+            ActiveDrag activeDrag = getActiveDrag();
+
+            if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
+                Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
+                MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
+                try {
+                    activeDrag.dragConf().ifPresent(conf -> {
+                        conf.onDragMove().accept(new ComponentDelegate(conf.component(), event));
+                    });
+                } catch (Exception ex) {
+                    log.error(
+                            "Error while executing drag movement event handlers.",
+                            ex
+                        );
+                }
+                ActiveDrag previousActiveDrag = activeDrag;
+                activeDrag = activeDrag.dragged(e, rootPane);
+                setActiveDrag(activeDrag);
+                /*
+                    Note that if the drag image is not supported by the platform, we
+                    do the image rendering ourselves directly on the Graphics object
+                    of the glass pane of the root pane.
+                    But for this to work we need to repaint the area where the drag image was
+                    previously rendered and the area where it will be rendered next.
+                */
+                repaintRootPaneFor(previousActiveDrag, activeDrag);
+            }
         });
     }
 
@@ -189,6 +127,32 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
     private void setActiveDrag(ActiveDrag activeDrag) {
         activeDrags.put(this, activeDrag);
+    }
+
+    private void repaintRootPaneFor(ActiveDrag previousActiveDrag, ActiveDrag currentActiveDrag) {
+        if ( rootPane == null )
+            return;
+
+        if ( !currentActiveDrag.hasDraggedComponent() )
+            return;
+
+        if ( !DragSource.isDragImageSupported() ) {
+            /*
+                If the drag image is not supported by the platform, we
+                do the image rendering ourselves directly on the Graphics object
+                of the glass pane of the root pane.
+                But for this to work we need to repaint the area where the drag image was
+                previously rendered and the area where it will be rendered next.
+            */
+            Location previousWhereToRender = previousActiveDrag.getRenderPosition();
+            Location whereToRenderNext = currentActiveDrag.getRenderPosition();
+            Size size = currentActiveDrag.draggedComponentSize();
+            Bounds previousArea = Bounds.of(previousWhereToRender, size);
+            Bounds nextArea     = Bounds.of(whereToRenderNext, size);
+            Bounds mergedArea   = previousArea.merge(nextArea);
+            rootPane.repaint(mergedArea.toRectangle());
+        }
+
     }
 
     private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop ) {
@@ -374,5 +338,81 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             return component == null || component.getCursor() == Cursor.getDefaultCursor();
         }
         else return true;
+    }
+
+    class GlassPaneDragSourceListener implements DragSourceListener {
+        @Override
+        public void dragEnter(DragSourceDragEvent event) {
+            try {
+                getActiveDrag().dragConf().ifPresent(conf -> {
+                    conf.onDragEnter().accept(new ComponentDelegate(conf.component(), event));
+                });
+            } catch (Exception ex) {
+                log.error(
+                        "Error while executing drag enter event handlers.",
+                        ex
+                );
+            }
+        }
+        @Override
+        public void dragOver(DragSourceDragEvent event) {
+            try {
+                getActiveDrag().dragConf().ifPresent(conf -> {
+                    conf.onDragOver().accept(new ComponentDelegate(conf.component(), event));
+                });
+            } catch (Exception ex) {
+                log.error(
+                        "Error while executing drag over event handlers.",
+                        ex
+                );
+            }
+        }
+        @Override
+        public void dropActionChanged(DragSourceDragEvent event) {
+            try {
+                getActiveDrag().dragConf().ifPresent(conf -> {
+                    conf.onDropActionChanged().accept(new ComponentDelegate(conf.component(), event));
+                });
+            } catch (Exception ex) {
+                log.error(
+                        "Error while executing drop action changed event handlers.",
+                        ex
+                );
+            }
+        }
+        @Override
+        public void dragExit(DragSourceEvent event) {
+            try {
+                getActiveDrag().dragConf().ifPresent(conf -> {
+                    conf.onDragExit().accept(new ComponentDelegate(conf.component(), event));
+                });
+            } catch (Exception ex) {
+                log.error(
+                        "Error while executing drag exit event handlers.",
+                        ex
+                );
+            }
+        }
+
+        @Override
+        public void dragDropEnd(DragSourceDropEvent event) {
+            ActiveDrag activeDrag = getActiveDrag();
+            if ( activeDrag.equals(ActiveDrag.none()) )
+                return;
+            try {
+                activeDrag.dragConf().ifPresent(conf -> {
+                    conf.onDragDropEnd().accept(new ComponentDelegate(conf.component(), event));
+                });
+            } catch (Exception ex) {
+                log.error(
+                        "Error while executing drag drop end event handlers.",
+                        ex
+                );
+            }
+            setActiveDrag(ActiveDrag.none());
+            if ( rootPane != null ) {
+                rootPane.repaint();
+            }
+        }
     }
 }
