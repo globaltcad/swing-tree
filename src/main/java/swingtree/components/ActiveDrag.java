@@ -206,6 +206,14 @@ final class ActiveDrag {
             );
     }
 
+    Location getStart() {
+        return start;
+    }
+
+    Bounds getBounds() {
+        return Bounds.of(getRenderPosition(), draggedComponentSize());
+    }
+
     public ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }

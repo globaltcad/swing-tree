@@ -113,6 +113,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 repaintRootPaneFor(previousActiveDrag, activeDrag);
             }
         });
+        setActiveDrag(ActiveDrag.none());
     }
 
     public JGlassPane(JRootPane rootPane) {
@@ -151,8 +152,27 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             Bounds nextArea     = Bounds.of(whereToRenderNext, size);
             Bounds mergedArea   = previousArea.merge(nextArea);
             rootPane.repaint(mergedArea.toRectangle());
-        }
+            /*
+                Maybe the local drag operation is currently hovering over another window.
+                Let's check that and then repaint the other window's glass pane.
+            */
+            for (JGlassPane otherWindowGlassPane : activeDrags.keySet()) {
+                if ( otherWindowGlassPane != this && otherWindowGlassPane.rootPane != this.rootPane ) {
+                    if ( otherWindowGlassPane.rootPane == null )
+                        continue;
 
+                    ActiveDrag convertedPreviousActiveDrag = convertActiveDragToOtherGlassPane(this, previousActiveDrag, otherWindowGlassPane);
+                    ActiveDrag convertedCurrentActiveDrag = convertActiveDragToOtherGlassPane(this, currentActiveDrag, otherWindowGlassPane);
+                    Bounds otherPreviousArea = convertedPreviousActiveDrag.getBounds();
+                    Bounds otherNextArea = convertedCurrentActiveDrag.getBounds();
+                    Bounds otherMergedArea = otherPreviousArea.merge(otherNextArea);
+                    // Let's check if the drag image is in the bounds of this glass pane
+                    if ( otherWindowGlassPane.getBounds().intersects(otherMergedArea.toRectangle()) ) {
+                        otherWindowGlassPane.rootPane.repaint(otherMergedArea.toRectangle());
+                    }
+                }
+            }
+        }
     }
 
     private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop ) {
@@ -185,6 +205,51 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
     @Override public void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
         getActiveDrag().paint(g);
+        /*
+            Maybe another window has a glass pane with an ongoing drag operation
+            which is currently hovering over our window.
+            Let's check that and then paint this other drag image
+            on our glass pane.
+        */
+        for (JGlassPane otherWindowGlassPane : activeDrags.keySet()) {
+            if ( otherWindowGlassPane != this && otherWindowGlassPane.rootPane != this.rootPane ) {
+                ActiveDrag foreignDrag = otherWindowGlassPane.getActiveDrag();
+                if ( foreignDrag.equals(ActiveDrag.none()) )
+                    continue;
+                ActiveDrag foreignDragInLocalCoordinates = convertActiveDragToOtherGlassPane(otherWindowGlassPane, foreignDrag, this);
+                Bounds otherBounds = foreignDragInLocalCoordinates.getBounds();
+                // Let's check if the drag image is in the bounds of this glass pane
+                if ( this.getBounds().intersects(otherBounds.toRectangle()) ) {
+                    foreignDragInLocalCoordinates.paint(g);
+                }
+            }
+        }
+    }
+
+    private ActiveDrag convertActiveDragToOtherGlassPane(
+        JGlassPane sourceGlassPane,
+        ActiveDrag sourceDrag,
+        JGlassPane targetGlassPane
+    ) {
+        /*
+            We want to convert the other active drag position,
+            which is relative to the glass pane, to a position
+            relative to this glass pane.
+        */
+        Point sourcePositionOnDesktop = sourceGlassPane.getLocationOnScreen();
+        Point targetPositionOnDesktop = targetGlassPane.getLocationOnScreen();
+        Point sourceActiveDragRelativePosition = sourceDrag.getStart().toPoint();
+        Point targetActiveDragRelativePosition = new Point(
+                sourceActiveDragRelativePosition.x - (targetPositionOnDesktop.x - sourcePositionOnDesktop.x),
+                sourceActiveDragRelativePosition.y - (targetPositionOnDesktop.y - sourcePositionOnDesktop.y)
+        );
+        // Is the other active drag image currently hovering over this glass pane?
+        return sourceDrag.withStart(
+                        Location.of(
+                                targetActiveDragRelativePosition.x,
+                                targetActiveDragRelativePosition.y
+                        )
+                    );
     }
 
     @Override public void setUISilently( ComponentUI ui ) {
