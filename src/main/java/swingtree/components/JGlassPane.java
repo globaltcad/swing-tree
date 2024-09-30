@@ -88,7 +88,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             ActiveDrag activeDrag = getActiveDrag();
 
             if ( !activeDrag.equals(ActiveDrag.none()) && rootPane != null ) {
-                Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation());
+                Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation(), rootPane);
                 MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);
                 try {
                     activeDrag.dragConf().ifPresent(conf -> {
@@ -175,7 +175,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         }
     }
 
-    private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop ) {
+    private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop, JRootPane rootPane ) {
         int relativeX = 0;
         int relativeY = 0;
         // First we try something reliable:
