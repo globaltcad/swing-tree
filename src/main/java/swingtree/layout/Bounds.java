@@ -77,6 +77,20 @@ public final class Bounds
         return new Bounds(Location.of(x, y), Size.of(width, height));
     }
 
+    /**
+     *  Returns a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     *  <p>
+     *  If the width or height is less than zero then the {@link #none()}
+     *  object is returned.
+     *
+     *  @param x the x coordinate of the location of the bounds object.
+     *  @param y the y coordinate of the location of the bounds object.
+     *  @param width the width of the bounds object.
+     *  @param height the height of the bounds object.
+     *  @return a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     */
     public static Bounds of( float x, float y, float width, float height ) {
         if ( width < 0 || height < 0 )
             return EMPTY;
@@ -84,6 +98,15 @@ public final class Bounds
         return new Bounds(Location.of(x, y), Size.of(width, height));
     }
 
+    /**
+     *  Creates a bounds object from an AWT {@link Rectangle} object.
+     *  <p>
+     *  If the width or height is less than zero then the {@link #none()}
+     *  object is returned.
+     *
+     *  @param rectangle an AWT rectangle object to create a bounds object from.
+     *  @return a bounds object with the location and size of the AWT rectangle object.
+     */
     public static Bounds of( java.awt.Rectangle rectangle ) {
         return of(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }

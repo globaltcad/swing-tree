@@ -39,11 +39,12 @@ import java.util.Optional;
  *          Sets the cursor to be used during the drag operation.
  *          The default cursor is {@link UI.Cursor#DEFAULT}.
  *      </li>
- *      li>{@link #customDragImage(Image)} -
+ *      <li>{@link #customDragImage(Image)} -
  *          Sets a custom drag image to be used during the drag operation.
  *          If no custom drag image is set, the component will be rendered int
  *          a drag image during the drag operation.
  *      </li>
+ *  </ul>
  *  <br>
  *  <b>For listening to drag away events, the following methods are available:</b>
  *  <ul>
