@@ -3979,6 +3979,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
     }
 
+    /**
+     *  Exposes a functional {@link Configurator} API for turning the component into a drag source site
+     *  with the given configuration. This method is a convenience method which internally
+     *  creates and configures an AWT native {@link DragSource} instance for the component.
+     *  <br><br>
+     *  Here an example:
+     *  <pre>{@code
+     *      UI.label("Drag me!")
+     *      .withDragAway( conf -> conf
+     *          .enabled(true)
+     *          .opacity(0.25)
+     *          .payload("IT WORKS")
+     *          .onDragMove( it -> {...})
+     *      )
+     *  }</pre>
+     *  The example above creates a draggable label which will be dragged with an opacity of 0.25
+     *  and carries the payload "IT WORKS" when dragged. The drag move event handler
+     *  is attached to the drag source site and will be called when the label is dragged.<br>
+     *  <p>
+     *  If you want to create a drop site instead of a drag source site, use {@link #withDropSite(Configurator)}.
+     *
+     * @param configurator The {@link Configurator} which allows you to configure the drag source site
+     *                     by receiving a {@link DragAwayComponentConf} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withDragAway( Configurator<DragAwayComponentConf<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
@@ -3990,6 +4015,50 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
+    /**
+     *  Exposes a functional {@link Configurator} API for turning the component into a drag drop
+     *  receiver site with the given configuration.
+     *  This method is a convenience method which internally
+     *  creates and configures an AWT native {@link DropTarget} instance for the component.
+     *  <br><br>
+     *  Here an example:
+     *  <pre>{@code
+     *      UI.label("Drop here!")
+     *      .withDropSite( conf -> conf
+     *          .onDragOver( it -> {
+     *              it.animateFor(1, TimeUnit.SECONDS, status -> {
+     *                  double r = 30 * status.fadeIn() * it.getScale();
+     *                  double x = it.getEvent().getLocation().x - r / 2.0;
+     *                  double y = it.getEvent().getLocation().y - r / 2.0;
+     *                  it.paint(status, g -> {
+     *                      g.setColor(new Color(0f, 1f, 1f, (float) status.fadeOut()));
+     *                      g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *                  });
+     *              });
+     *          })
+     *          .onDrop(it -> {
+     *              it.animateFor(2, TimeUnit.SECONDS, status -> {
+     *                  double r = 480 * status.fadeIn() * it.getScale();
+     *                  double x = it.getEvent().getLocation().x - r / 2.0;
+     *                  double y = it.getEvent().getLocation().y - r / 2.0;
+     *                  it.paint(status, g -> {
+     *                      g.setColor(UI.color(0.5+status.fadeOut()/2, status.fadeOut(), status.fadeIn(), status.fadeOut()));
+     *                      g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *                  });
+     *              });
+     *          })
+     *      )
+     *  }</pre>
+     *  The example above creates a drop site label which will animate an expanding circle when a drag is over it
+     *  and another circle when a drop is performed on it. The drag over event handler
+     *  is attached to the drop site and will be called when the label is dragged over it.
+     *  <p>
+     *  If you want to create a drag source site instead of a drop site, use {@link #withDragAway(Configurator)}.
+     *
+     * @param configurator The {@link Configurator} which allows you to configure the drop site
+     *                     by receiving a {@link DragDropComponentConf} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withDropSite( Configurator<DragDropComponentConf<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
