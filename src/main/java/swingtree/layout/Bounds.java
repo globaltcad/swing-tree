@@ -191,7 +191,7 @@ public final class Bounds
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified width and the same x and y coordinates as well as height as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}, and {@link #withSize(int, int)}.
      *
      * @param width A new width for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width.
@@ -203,13 +203,26 @@ public final class Bounds
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified height and the same x and y coordinates as well as width as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}, and {@link #withSize(int, int)}.
      *
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified height.
      */
     public Bounds withHeight( int height ) {
         return new Bounds(_location, _size.withHeight(height));
+    }
+
+    /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified width and height and the same x and y coordinates as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *
+     * @param width A new width for the size of this bounds object.
+     * @param height A new height for the size of this bounds object.
+     * @return A new bounds object with a new size that has the specified width and height.
+     */
+    public Bounds withSize( int width, int height ) {
+        return new Bounds(_location, Size.of(width, height));
     }
 
     /**
