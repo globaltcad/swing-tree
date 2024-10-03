@@ -62,8 +62,9 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
                 );
 
-        DragSource dragSource = DragSource.getDefaultDragSource();
-        dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
+        final DragSource dragSource = DragSource.getDefaultDragSource();
+        DragGestureRecognizer[] gestureRecognizer = {null};
+        gestureRecognizer[0] = dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -> {
             ActiveDrag activeDrag = getActiveDrag();
             Point dragStart = dragTrigger.getDragOrigin();
             activeDrag = activeDrag.begin(dragStart, rootPane);
@@ -76,6 +77,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 bufferedImage = null;
             int offsetX = bufferedImage == null ? 0 : -bufferedImage.getWidth(null) / 2;
             int offsetY = bufferedImage == null ? 0 : -bufferedImage.getHeight(null) / 2;
+
+            UI.DragAction dragAction = activeDrag.dragConf().map(DragAwayComponentConf::dragAction).orElse(UI.DragAction.NONE);
+
+            gestureRecognizer[0].setSourceActions(dragAction.toIntCode());
             dragTrigger.startDrag(
                     activeDrag.dragConf().map(DragAwayComponentConf::cursor).map(UI.Cursor::toAWTCursor).orElse(Cursor.getDefaultCursor()),
                     bufferedImage,

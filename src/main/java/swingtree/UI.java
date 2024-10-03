@@ -750,6 +750,66 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
+     * This enum contains constant values representing
+     * the type of action(s) to be performed by a Drag and Drop operation.
+     * These constants are a direct mapping to the constants defined in the {@link TransferHandler} class
+     * as well as the {@link java.awt.dnd.DnDConstants} class.
+     */
+    @Immutable
+    public enum DragAction implements UIEnum<DragAction>
+    {
+        /**
+         * An <code>int</code> representing no transfer action.
+         */
+        NONE,
+        /**
+         * An <code>int</code> representing a &quot;copy&quot; transfer action.
+         * This value is used when data is copied to a clipboard
+         * or copied elsewhere in a drag and drop operation.
+         */
+        COPY,
+        /**
+         * An <code>int</code> representing a &quot;move&quot; transfer action.
+         * This value is used when data is moved to a clipboard (i.e. a cut)
+         * or moved elsewhere in a drag and drop operation.
+         */
+        MOVE,
+        /**
+         * An <code>int</code> representing a source action capability of either
+         * &quot;copy&quot; or &quot;move&quot;.
+         */
+        COPY_OR_MOVE,
+        /**
+         * An <code>int</code> representing a &quot;link&quot; transfer action.
+         * This value is used to specify that data should be linked in a drag
+         * and drop operation.
+         *
+         * @see java.awt.dnd.DnDConstants#ACTION_LINK
+         */
+        LINK;
+
+        public int toIntCode() {
+            switch ( this ) {
+                case NONE:        return TransferHandler.NONE;
+                case COPY:        return TransferHandler.COPY;
+                case MOVE:        return TransferHandler.MOVE;
+                case COPY_OR_MOVE:return TransferHandler.COPY_OR_MOVE;
+                case LINK:        return TransferHandler.LINK;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Use this to check if this enum action is a particular {@link java.awt.dnd.DnDConstants} action.
+         *  @param action The action to check against.
+         *  @return {@code true} if this enum action is the same as the given {@code action}, {@code false} otherwise.
+         */
+        public boolean is( int action ) {
+            return (action & toIntCode()) != 0;
+        }
+    }
+
+    /**
      *  Set of enum instances defining common types of Swing look and feels.
      *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
      */
