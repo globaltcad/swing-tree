@@ -212,21 +212,34 @@ public final class Bounds
         return new Bounds(_location, _size.withHeight(height));
     }
 
+    /**
+     *  Creates a new bounds object which tightly fits around this bounds object
+     *  and the specified bounds object, effectively merging the two bounds objects.
+     *  This is done by finding the minimum x and y coordinates and
+     *  the maximum width and height of the two bounds objects.
+     *
+     * @param other The bounds object to merge with this bounds object.
+     * @return A new bounds object that tightly fits around this bounds object and the specified bounds object.
+     */
     public Bounds merge( Bounds other ) {
-        float thisLeft   = _location.x();
-        float thisTop    = _location.y();
-        float thisRight  = thisLeft + _size._width;
-        float thisBottom = thisTop + _size._height;
+        Objects.requireNonNull(other);
+        if ( this.equals(other) )
+            return this;
 
-        float otherLeft   = other._location.x();
-        float otherTop    = other._location.y();
-        float otherRight  = otherLeft + other._size._width;
-        float otherBottom = otherTop + other._size._height;
+        final float thisLeft   = _location.x();
+        final float thisTop    = _location.y();
+        final float thisRight  = thisLeft + _size._width;
+        final float thisBottom = thisTop  + _size._height;
 
-        float left   = Math.min(thisLeft, otherLeft);
-        float top    = Math.min(thisTop, otherTop);
-        float right  = Math.max(thisRight, otherRight);
-        float bottom = Math.max(thisBottom, otherBottom);
+        final float otherLeft   = other._location.x();
+        final float otherTop    = other._location.y();
+        final float otherRight  = otherLeft + other._size._width;
+        final float otherBottom = otherTop  + other._size._height;
+
+        final float left   = Math.min( thisLeft,   otherLeft   );
+        final float top    = Math.min( thisTop,    otherTop    );
+        final float right  = Math.max( thisRight,  otherRight  );
+        final float bottom = Math.max( thisBottom, otherBottom );
 
         return Bounds.of(left, top, right - left, bottom - top);
     }
