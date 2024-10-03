@@ -5519,6 +5519,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
         Objects.requireNonNull(frame);
+        if ( !(frame.getGlassPane() instanceof JGlassPane) )
+            log.debug(
+                    "Encountered a JFrame instance which does not have a JGlassPane as its glass pane. " +
+                    "SwingTree based drag and drop functionality will not work as expected for this frame.",
+                    new Throwable()
+                );
         return new UIForJFrame<>(new BuilderState<>(frame));
     }
 
@@ -5556,6 +5562,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <D> The concrete type of this new dialog.
      */
     public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
+        if ( !(dialog.getGlassPane() instanceof JGlassPane) )
+            log.debug(
+                    "Encountered a JDialog instance which does not have a JGlassPane as its glass pane. " +
+                    "SwingTree based drag and drop functionality will not work as expected for this dialog.",
+                    new Throwable()
+                );
         return new UIForJDialog<>(new BuilderState<>(dialog));
     }
 
