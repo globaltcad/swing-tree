@@ -5522,6 +5522,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         return new UIForJFrame<>(new BuilderState<>(frame));
     }
 
+    private static JFrame _withGlassPane( JFrame frame ) {
+        JGlassPane glassPane = new JGlassPane();
+        frame.setGlassPane(new JGlassPane());
+        glassPane.toRootPane(frame.getRootPane());
+        return frame;
+    }
+
     /**
      *  Use this to create a builder for the supplied {@link JFrame}. <br>
      *  This is in essence a convenience method for {@code UI.of(new JFrame()) )}.
@@ -5529,7 +5536,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame() {
-        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->new JFrame()));
+        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->_withGlassPane(new JFrame())));
     }
 
     /**
@@ -5538,7 +5545,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame( String title ) {
-        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->new JFrame()))
+        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->_withGlassPane(new JFrame())))
                 .withTitle(title);
     }
 
@@ -5552,6 +5559,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         return new UIForJDialog<>(new BuilderState<>(dialog));
     }
 
+    private static JDialog _withGlassPane( JDialog dialog ) {
+        JGlassPane glassPane = new JGlassPane();
+        dialog.setGlassPane(new JGlassPane());
+        glassPane.toRootPane(dialog.getRootPane());
+        return dialog;
+    }
+
     /**
      *  Use this to create a builder for the supplied {@link JDialog}. <br>
      *  This is in essence a convenience method for {@code UI.of(new JDialog()) )}.
@@ -5559,7 +5573,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog() {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog()));
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->_withGlassPane(new JDialog())));
     }
 
     /**
@@ -5568,7 +5582,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner ) {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog(owner)));
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->_withGlassPane(new JDialog(owner)) ));
     }
 
     /**
@@ -5577,7 +5591,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( String title ) {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog())).withTitle(title);
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()-> _withGlassPane(new JDialog())))
+                .withTitle(title);
     }
 
     /**
@@ -5587,7 +5602,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog(owner)))
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()-> _withGlassPane(new JDialog(owner))))
                 .withTitle(title);
     }
 
