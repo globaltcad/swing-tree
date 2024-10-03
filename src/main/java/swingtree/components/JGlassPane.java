@@ -479,10 +479,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                         ex
                 );
             }
+            repaintRootPaneFor(activeDrag, activeDrag);
             setActiveDrag(ActiveDrag.none());
-            if ( rootPane != null ) {
-                rootPane.repaint();
-            }
         }
     }
 }
