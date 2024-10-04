@@ -3884,7 +3884,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <I> The type of the {@link swingtree.components.JIcon} instance.
      * @return A builder instance for the provided {@link swingtree.components.JIcon}, which enables fluent method chaining.
      */
-    public static <I extends JIcon> UIForIcon<I> of(I icon ) {
+    public static <I extends JIcon> UIForIcon<I> of( I icon ) {
         NullUtil.nullArgCheck(icon, "icon", JIcon.class);
         return new UIForIcon<>(new BuilderState<>(icon));
     }
@@ -3913,6 +3913,21 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static UIForIcon<JIcon> icon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(icon)));
+    }
+
+    /**
+     *  Creates a UI declaration for a {@link JIcon} which is dynamically bound to the provided
+     *  {@link Val} property containing an {@link IconDeclaration}. When the {@link IconDeclaration}
+     *  of the property changes, the icon displayed on the {@link JIcon} will be updated accordingly.
+     *
+     * @param icon The property containing the {@link IconDeclaration} whose
+     *             {@link Icon} should be displayed on the {@link JIcon}.
+     * @return A declarative builder for the {@link JIcon} type, to allow for fluent method chaining.
+     */
+    public static UIForIcon<JIcon> icon( Val<IconDeclaration> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Var.class);
+        NullUtil.nullPropertyCheck(icon, "icon", "Please use an empty string instead of null!");
         return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(icon)));
     }
 

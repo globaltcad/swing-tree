@@ -1,6 +1,10 @@
 package swingtree.components;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Val;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
@@ -22,38 +26,66 @@ import java.util.Map;
  */
 public class JIcon extends JLabel implements StylableComponent
 {
+    private static final Logger log = LoggerFactory.getLogger(JIcon.class);
+
+    @SuppressWarnings("UnusedVariable")
+    private final @Nullable Val<IconDeclaration> dynamicIcon;
+    /*                                                ^
+        We need to keep a strong reference to the dynamic icon, otherwise
+        it will be garbage collected and the change listener will not update
+        the icon when it changes.
+    */
+
     public JIcon(String path) {
         super(_getFromCacheOrLoadFrom(IconDeclaration.of(path)));
         updateUI();
+        dynamicIcon = null;
     }
 
     public JIcon(IconDeclaration declaration) {
         super(_getFromCacheOrLoadFrom(declaration));
+        dynamicIcon = null;
     }
 
     public JIcon(Icon icon) {
         super(icon);
         updateUI();
+        dynamicIcon = null;
     }
 
     public JIcon(Icon icon, String text, int horizontalAlignment) {
         super(text, icon, horizontalAlignment);
         updateUI();
+        dynamicIcon = null;
     }
 
     public JIcon(String text, int horizontalAlignment) {
         super(text, horizontalAlignment);
         updateUI();
+        dynamicIcon = null;
     }
 
     public JIcon(String path, String text) {
         super(text, _getFromCacheOrLoadFrom(IconDeclaration.of(path)), CENTER);
         updateUI();
+        dynamicIcon = null;
+    }
+
+    public JIcon(Val<IconDeclaration> declaration) {
+        declaration.onChange(From.ALL, it -> {
+            UI.run(()->{
+                setIcon(_getFromCacheOrLoadFrom(it.get()));
+            });
+        });
+        declaration.ifPresent( it -> setIcon(_getFromCacheOrLoadFrom(it)) );
+        updateUI();
+        dynamicIcon = declaration;
     }
 
     public JIcon() {
         super();
         updateUI();
+        dynamicIcon = null;
     }
 
     /** {@inheritDoc} */
@@ -66,7 +98,9 @@ public class JIcon extends JLabel implements StylableComponent
         paintForeground(g, super::paintChildren);
     }
 
-    @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+    @Override public void setUISilently( ComponentUI ui ) {
+        this.ui = ui;
+    }
 
     @Override
     public void updateUI() {
@@ -77,14 +111,23 @@ public class JIcon extends JLabel implements StylableComponent
         */
     }
 
-    private static @Nullable ImageIcon _getFromCacheOrLoadFrom(IconDeclaration declaration ) {
-        Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
-        ImageIcon icon = cache.get(declaration);
-        if ( icon == null ) {
-            icon = UI.findIcon(declaration).orElse(null);
-            if ( icon != null )
-                cache.put(declaration, icon);
-        }
-        return icon;
+    private static @Nullable ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
+        if ( !UI.thisIsUIThread() )
+            log.warn(
+                "Loading an icon off the UI thread. " +
+                "This may lead to unexpected behavior and should be avoided.",
+                new Throwable() // Log the stack trace for debugging purposes.
+            );
+
+        return UI.runAndGet(()-> {
+            Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
+            ImageIcon icon = cache.get(declaration);
+            if ( icon == null ) {
+                icon = UI.findIcon(declaration).orElse(null);
+                if ( icon != null )
+                    cache.put(declaration, icon);
+            }
+            return icon;
+        });
     }
 }
