@@ -11,7 +11,12 @@ import java.util.Objects;
  *  and a width and height modeled by a {@link Size} object.
  *  Note the rectangular bounds object is positioned in a coordinate system
  *  where the y-axis is growing positively downwards and the x-axis is growing
- *  positively to the right.
+ *  positively to the right. <br>
+ *  The bounds object may also be incomplete in the sense that the width and height
+ *  may not be defined, in which case the {@link Size#unknown()} object is used.
+ *  A bounds object with an unknown size located at the origin is considered
+ *  the null object for this class and can be accessed using the {@link #none()} method.
+ *  You may use this object instead of {@code null} to represent a missing bounds object.
  *  <p>
  *  Also note that the {@link #equals(Object)} and {@link #hashCode()} methods
  *  are implemented to compare the {@link Location} and {@link Size} objects
