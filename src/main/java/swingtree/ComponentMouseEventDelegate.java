@@ -1,9 +1,8 @@
 package swingtree;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  *  A {@link JComponent} as well as {@link MouseEvent} delegate

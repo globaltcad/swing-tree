@@ -17,10 +17,7 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import swingtree.components.JBox;
-import swingtree.components.JIcon;
-import swingtree.components.JScrollPanels;
-import swingtree.components.JSplitButton;
+import swingtree.components.*;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialog;
 import swingtree.dialogs.MessageDialog;
@@ -5522,7 +5519,20 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
         Objects.requireNonNull(frame);
+        if ( !(frame.getGlassPane() instanceof JGlassPane) )
+            log.debug(
+                    "Encountered a JFrame instance which does not have a JGlassPane as its glass pane. " +
+                    "SwingTree based drag and drop functionality will not work as expected for this frame.",
+                    new Throwable()
+                );
         return new UIForJFrame<>(new BuilderState<>(frame));
+    }
+
+    private static JFrame _withGlassPane( JFrame frame ) {
+        JGlassPane glassPane = new JGlassPane();
+        frame.setGlassPane(new JGlassPane());
+        glassPane.toRootPane(frame.getRootPane());
+        return frame;
     }
 
     /**
@@ -5532,7 +5542,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame() {
-        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->new JFrame()));
+        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->_withGlassPane(new JFrame())));
     }
 
     /**
@@ -5541,7 +5551,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame( String title ) {
-        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->new JFrame()))
+        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->_withGlassPane(new JFrame())))
                 .withTitle(title);
     }
 
@@ -5552,7 +5562,20 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <D> The concrete type of this new dialog.
      */
     public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
+        if ( !(dialog.getGlassPane() instanceof JGlassPane) )
+            log.debug(
+                    "Encountered a JDialog instance which does not have a JGlassPane as its glass pane. " +
+                    "SwingTree based drag and drop functionality will not work as expected for this dialog.",
+                    new Throwable()
+                );
         return new UIForJDialog<>(new BuilderState<>(dialog));
+    }
+
+    private static JDialog _withGlassPane( JDialog dialog ) {
+        JGlassPane glassPane = new JGlassPane();
+        dialog.setGlassPane(new JGlassPane());
+        glassPane.toRootPane(dialog.getRootPane());
+        return dialog;
     }
 
     /**
@@ -5562,7 +5585,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog() {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog()));
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->_withGlassPane(new JDialog())));
     }
 
     /**
@@ -5571,7 +5594,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner ) {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog(owner)));
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->_withGlassPane(new JDialog(owner)) ));
     }
 
     /**
@@ -5580,7 +5603,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( String title ) {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog())).withTitle(title);
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()-> _withGlassPane(new JDialog())))
+                .withTitle(title);
     }
 
     /**
@@ -5590,7 +5614,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
-        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog(owner)))
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()-> _withGlassPane(new JDialog(owner))))
                 .withTitle(title);
     }
 
@@ -6249,6 +6273,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 frame.setLocationRelativeTo(null);
                 // We set the size to fit the component:
                 _determineSize();
+                JGlassPane glassPane = new JGlassPane();
+                frame.setGlassPane(new JGlassPane());
+                glassPane.toRootPane(frame.getRootPane());
                 frame.setVisible(true);
             });
         }

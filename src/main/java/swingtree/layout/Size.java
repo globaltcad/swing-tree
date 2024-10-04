@@ -9,16 +9,16 @@ import swingtree.style.ImageConf;
 import java.awt.Dimension;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 
 /**
- *  An immutable value object that represents a size
- *  in the form of a width and height or lack thereof.
- *  This is used to represent the size of icons
- *  as part of {@link swingtree.api.IconDeclaration}s
- *  and the SwingTree style API, see {@link swingtree.UIForAnySwing#withStyle(Styler)},
+ *  An immutable value object that represents a size in the form of a width and height or lack thereof.
+ *  This is used to represent the size and layout dimensions of components in the SwingTree style API,
+ *  as well as the size of icons as part of {@link swingtree.api.IconDeclaration}s.
+ *  See {@link swingtree.UIForAnySwing#withStyle(Styler)},
  *  {@link ComponentStyleDelegate#image(swingtree.api.Configurator)} and
- *  {@link ImageConf#size(int, int)}.
+ *  {@link ImageConf#size(int, int)} for examples of where and how this class is used.
  */
 @Immutable
 public final class Size
@@ -95,10 +95,22 @@ public final class Size
         return ( _height < 0 ? Optional.empty() : Optional.of(_height) );
     }
 
+    /**
+     *  Allows you to check if the width value of this {@link Size} instance
+     *  is both specified (non-negative) and also positive.
+     *
+     * @return True if the width is both specified and positive, false otherwise.
+     */
     public boolean hasPositiveWidth() {
         return _width > 0;
     }
 
+    /**
+     *  Allows you to check if the height value of this {@link Size} instance
+     *  is both specified (non-negative) and also positive.
+     *
+     * @return True if the height is both specified and positive, false otherwise.
+     */
     public boolean hasPositiveHeight() {
         return _height > 0;
     }
@@ -127,7 +139,21 @@ public final class Size
         return new Dimension((int) _width, (int) _height);
     }
 
+    /**
+     *  Scales the width and height of this {@link Size} instance by the given factor.
+     *  If the width or height not specified (i.e. negative), they will remain negative.
+     *  A negative scale factor will result in a negative width and height.
+     *
+     * @param scaleFactor The factor to scale the width and height by.
+     * @return A new {@link Size} instance with the scaled width and height.
+     */
     public Size scale( double scaleFactor ) {
+        if ( this.equals(UNKNOWN) )
+            return this;
+
+        if ( scaleFactor < 0 )
+            return UNKNOWN;
+
         float width  = _width  < 0 ? -1 : Math.round(_width  * scaleFactor);
         float height = _height < 0 ? -1 : Math.round(_height * scaleFactor);
         return of(width, height);

@@ -11,7 +11,12 @@ import java.util.Objects;
  *  and a width and height modeled by a {@link Size} object.
  *  Note the rectangular bounds object is positioned in a coordinate system
  *  where the y-axis is growing positively downwards and the x-axis is growing
- *  positively to the right.
+ *  positively to the right. <br>
+ *  The bounds object may also be incomplete in the sense that the width and height
+ *  may not be defined, in which case the {@link Size#unknown()} object is used.
+ *  A bounds object with an unknown size located at the origin is considered
+ *  the null object for this class and can be accessed using the {@link #none()} method.
+ *  You may use this object instead of {@code null} to represent a missing bounds object.
  *  <p>
  *  Also note that the {@link #equals(Object)} and {@link #hashCode()} methods
  *  are implemented to compare the {@link Location} and {@link Size} objects
@@ -77,6 +82,20 @@ public final class Bounds
         return new Bounds(Location.of(x, y), Size.of(width, height));
     }
 
+    /**
+     *  Returns a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     *  <p>
+     *  If the width or height is less than zero then the {@link #none()}
+     *  object is returned.
+     *
+     *  @param x the x coordinate of the location of the bounds object.
+     *  @param y the y coordinate of the location of the bounds object.
+     *  @param width the width of the bounds object.
+     *  @param height the height of the bounds object.
+     *  @return a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     */
     public static Bounds of( float x, float y, float width, float height ) {
         if ( width < 0 || height < 0 )
             return EMPTY;
@@ -84,6 +103,15 @@ public final class Bounds
         return new Bounds(Location.of(x, y), Size.of(width, height));
     }
 
+    /**
+     *  Creates a bounds object from an AWT {@link Rectangle} object.
+     *  <p>
+     *  If the width or height is less than zero then the {@link #none()}
+     *  object is returned.
+     *
+     *  @param rectangle an AWT rectangle object to create a bounds object from.
+     *  @return a bounds object with the location and size of the AWT rectangle object.
+     */
     public static Bounds of( java.awt.Rectangle rectangle ) {
         return of(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
@@ -168,7 +196,7 @@ public final class Bounds
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified width and the same x and y coordinates as well as height as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}, and {@link #withSize(int, int)}.
      *
      * @param width A new width for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width.
@@ -180,13 +208,58 @@ public final class Bounds
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified height and the same x and y coordinates as well as width as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}, and {@link #withSize(int, int)}.
      *
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified height.
      */
     public Bounds withHeight( int height ) {
         return new Bounds(_location, _size.withHeight(height));
+    }
+
+    /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified width and height and the same x and y coordinates as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *
+     * @param width A new width for the size of this bounds object.
+     * @param height A new height for the size of this bounds object.
+     * @return A new bounds object with a new size that has the specified width and height.
+     */
+    public Bounds withSize( int width, int height ) {
+        return new Bounds(_location, Size.of(width, height));
+    }
+
+    /**
+     *  Creates a new bounds object which tightly fits around this bounds object
+     *  and the specified bounds object, effectively merging the two bounds objects.
+     *  This is done by finding the minimum x and y coordinates and
+     *  the maximum width and height of the two bounds objects.
+     *
+     * @param other The bounds object to merge with this bounds object.
+     * @return A new bounds object that tightly fits around this bounds object and the specified bounds object.
+     */
+    public Bounds merge( Bounds other ) {
+        Objects.requireNonNull(other);
+        if ( this.equals(other) )
+            return this;
+
+        final float thisLeft   = _location.x();
+        final float thisTop    = _location.y();
+        final float thisRight  = thisLeft + _size._width;
+        final float thisBottom = thisTop  + _size._height;
+
+        final float otherLeft   = other._location.x();
+        final float otherTop    = other._location.y();
+        final float otherRight  = otherLeft + other._size._width;
+        final float otherBottom = otherTop  + other._size._height;
+
+        final float left   = Math.min( thisLeft,   otherLeft   );
+        final float top    = Math.min( thisTop,    otherTop    );
+        final float right  = Math.max( thisRight,  otherRight  );
+        final float bottom = Math.max( thisBottom, otherBottom );
+
+        return Bounds.of(left, top, right - left, bottom - top);
     }
 
     /**

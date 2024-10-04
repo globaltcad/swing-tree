@@ -14,10 +14,7 @@ import sprouts.*;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
-import swingtree.api.AnimatedStyler;
-import swingtree.api.Peeker;
-import swingtree.api.Styler;
-import swingtree.api.UIVerifier;
+import swingtree.api.*;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
@@ -29,6 +26,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.dnd.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -1150,7 +1148,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Creates a titled rounded line {@link Border} with the provided
      *  color and insets for this {@link JComponent} and binds the border to the provided
      *  title and color properties.
-     *  When the title or color properties change, 
+     *  When the title or color properties change,
      *  then the border will be updated with the new values.
      *
      * @param title The title property of the border which will update the border when the value changes.
@@ -1273,7 +1271,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Creates a titled rounded black line {@link Border} with
-     *  a thickness of {@code 1} to the {@link JComponent} and binds it to the provided 
+     *  a thickness of {@code 1} to the {@link JComponent} and binds it to the provided
      *  title property.
      *  When the property changes, the border will be updated.
      *
@@ -2392,7 +2390,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._this();
     }
-    
+
     /**
      *  Use this to bind to a foreground color
      *  which will be set dynamically based on a boolean property.
@@ -2419,7 +2417,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._this();
     }
-    
+
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
@@ -3972,13 +3970,109 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    private void _onCharTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
+    private void _onCharTyped( C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
         component.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
                 action.accept(e, this);
             }
         });
+    }
+
+    /**
+     *  Exposes a functional {@link Configurator} API for turning the component into a drag source site
+     *  with the given configuration. This method is a convenience method which internally
+     *  creates and configures an AWT native {@link DragSource} instance for the component.
+     *  <br><br>
+     *  Here an example:
+     *  <pre>{@code
+     *      UI.label("Drag me!")
+     *      .withDragAway( conf -> conf
+     *          .enabled(true)
+     *          .opacity(0.25)
+     *          .payload("IT WORKS")
+     *          .onDragMove( it -> {...})
+     *      )
+     *  }</pre>
+     *  The example above creates a draggable label which will be dragged with an opacity of 0.25
+     *  and carries the payload "IT WORKS" when dragged. The drag move event handler
+     *  is attached to the drag source site and will be called when the label is dragged.<br>
+     *  <p>
+     *  If you want to create a drop site instead of a drag source site, use {@link #withDropSite(Configurator)}.
+     *
+     * @param configurator The {@link Configurator} which allows you to configure the drag source site
+     *                     by receiving a {@link DragAwayComponentConf} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withDragAway( Configurator<DragAwayComponentConf<C>> configurator ) {
+        NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
+        return _with( thisComponent -> {
+                    ComponentExtension.from(thisComponent).addDragAwayConf(mousePosition -> {
+                        DragAwayComponentConf<C> conf = DragAwayComponentConf.of(thisComponent, mousePosition);
+                        return configurator.configure(conf);
+                    });
+               })
+               ._this();
+    }
+
+    /**
+     *  Exposes a functional {@link Configurator} API for turning the component into a drag drop
+     *  receiver site with the given configuration.
+     *  This method is a convenience method which internally
+     *  creates and configures an AWT native {@link DropTarget} instance for the component.
+     *  <br><br>
+     *  Here an example:
+     *  <pre>{@code
+     *      UI.label("Drop here!")
+     *      .withDropSite( conf -> conf
+     *          .onDragOver( it -> {
+     *              it.animateFor(1, TimeUnit.SECONDS, status -> {
+     *                  double r = 30 * status.fadeIn() * it.getScale();
+     *                  double x = it.getEvent().getLocation().x - r / 2.0;
+     *                  double y = it.getEvent().getLocation().y - r / 2.0;
+     *                  it.paint(status, g -> {
+     *                      g.setColor(new Color(0f, 1f, 1f, (float) status.fadeOut()));
+     *                      g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *                  });
+     *              });
+     *          })
+     *          .onDrop(it -> {
+     *              it.animateFor(2, TimeUnit.SECONDS, status -> {
+     *                  double r = 480 * status.fadeIn() * it.getScale();
+     *                  double x = it.getEvent().getLocation().x - r / 2.0;
+     *                  double y = it.getEvent().getLocation().y - r / 2.0;
+     *                  it.paint(status, g -> {
+     *                      g.setColor(UI.color(0.5+status.fadeOut()/2, status.fadeOut(), status.fadeIn(), status.fadeOut()));
+     *                      g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *                  });
+     *              });
+     *          })
+     *      )
+     *  }</pre>
+     *  The example above creates a drop site label which will animate an expanding circle when a drag is over it
+     *  and another circle when a drop is performed on it. The drag over event handler
+     *  is attached to the drop site and will be called when the label is dragged over it.
+     *  <p>
+     *  If you want to create a drag source site instead of a drop site, use {@link #withDragAway(Configurator)}.
+     *
+     * @param configurator The {@link Configurator} which allows you to configure the drop site
+     *                     by receiving a {@link DragDropComponentConf} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withDropSite( Configurator<DragDropComponentConf<C>> configurator ) {
+        NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
+        return _with( thisComponent -> {
+                    _runInApp(() -> {
+                        try {
+                            DragDropComponentConf<C> conf = configurator.configure(DragDropComponentConf.of(thisComponent));
+                            DropTarget target = conf.toNewDropTarget();
+                            thisComponent.setDropTarget(target);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Failed to configure drop site!", e);
+                        }
+                    });
+               })
+               ._this();
     }
 
     /**
@@ -4018,7 +4112,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                        _runInUI(() -> action.accept(new ComponentDelegate<>(thisComponent, observableEvent )));
                    });
                })
-               ._this();    }
+               ._this();
+    }
 
     /**
      *  Use this to attach a component {@link Action} event handler to a functionally supplied
