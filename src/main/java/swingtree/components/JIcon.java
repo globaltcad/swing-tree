@@ -73,7 +73,7 @@ public class JIcon extends JLabel implements StylableComponent
 
     public JIcon(Val<IconDeclaration> declaration) {
         declaration.onChange(From.ALL, it -> {
-            UI.run(()->{
+            UI.runNow(()->{
                 setIcon(_getFromCacheOrLoadFrom(it.get()));
             });
         });
