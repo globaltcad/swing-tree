@@ -147,6 +147,14 @@ public class JIcon extends JLabel implements StylableComponent
         int height = size.height().map(Float::intValue).orElse(0);
         float scale = UI.scale();
 
+        if ( width < 1 || height < 1 || scale <= 0 || icon == null ) {
+            log.warn(
+                    "Encountered an invalid icon size '" + size + "' or scale '" + scale + "' " +
+                    "while scaling an icon for the JIcon component.", new Throwable()
+                );
+            return icon;
+        }
+
         int scaleHint = Image.SCALE_SMOOTH;
         if ( scale != 1f && icon != null) {
             if (scale > 1.5f)
