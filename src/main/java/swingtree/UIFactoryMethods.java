@@ -900,7 +900,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <T extends JComponent> UIForSwing<T> of( SwingBuilder<T> builder )
     {
         NullUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
-        return new UIForSwing<>(new BuilderState<>((Class<T>) JComponent.class, ()->builder.build()));
+        return new UIForSwing<>(new BuilderState<>((Class<T>) JComponent.class, ()->{
+            try {
+                return builder.build();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
     /**

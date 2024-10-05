@@ -1,6 +1,8 @@
 package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Styler;
@@ -91,6 +93,7 @@ import java.util.function.Function;
 @Immutable
 public final class TextConf implements Simplifiable<TextConf>
 {
+    private static final Logger log = LoggerFactory.getLogger(TextConf.class);
     public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
     private static final TextConf _NONE = new TextConf(
                                                 "",
@@ -198,7 +201,12 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given font configuration.
      */
     public TextConf font( Configurator<FontConf> fontConfFunction ) {
-        return _fontConf(fontConfFunction.configure(_fontConf));
+        try {
+            return _fontConf(fontConfFunction.configure(_fontConf));
+        } catch ( Exception e ) {
+            log.error("Error configuring font style.", e);
+            return this;
+        }
     }
 
     /**

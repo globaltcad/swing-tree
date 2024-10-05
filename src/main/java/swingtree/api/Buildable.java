@@ -12,7 +12,11 @@ public interface Buildable<T>
     /**
      *  Builds the object that this builder is responsible for
      *  and returns it. This method is intended to be called by the
-     *  internals of the SwingTree API.
+     *  internals of the SwingTree API. <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @return The object that this builder is responsible for.
      */

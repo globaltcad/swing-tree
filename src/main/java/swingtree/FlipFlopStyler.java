@@ -41,7 +41,7 @@ class FlipFlopStyler<C extends JComponent>
     }
 
 
-    ComponentStyleDelegate<C> style( ComponentStyleDelegate<C> delegate ) {
+    ComponentStyleDelegate<C> style( ComponentStyleDelegate<C> delegate ) throws Exception {
         AnimationStatus status = _status;
         if ( status == null )
             status = AnimationStatus.startOf(

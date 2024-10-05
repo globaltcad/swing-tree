@@ -41,13 +41,18 @@ public interface AnimatedStyler<C extends JComponent>
 
     /**
      * Applies some style to the given {@link ComponentStyleDelegate} and returns a new {@link ComponentStyleDelegate}
-     * that has the style applied (if any).
+     * that has the style applied (if any). <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
+     *
      * @param status The {@link AnimationStatus} which is used to configure the style
      *              (usually based on the {@link AnimationStatus#progress()}).
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
      */
-    ComponentStyleDelegate<C> style(AnimationStatus status, ComponentStyleDelegate<C> delegate );
+    ComponentStyleDelegate<C> style( AnimationStatus status, ComponentStyleDelegate<C> delegate ) throws Exception;
 
     /**
      * Returns a new {@link AnimatedStyler} that applies the style of this {@link AnimatedStyler} and then applies the style

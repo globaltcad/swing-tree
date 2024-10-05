@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
 import swingtree.UI;
+import swingtree.UIForAnySwing;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 
@@ -463,7 +464,15 @@ public class JScrollPanels extends UI.ScrollPane
 			_provider = isSelected -> {
 								provider.position().set(From.VIEW, position);
 								provider.isSelected().set(From.VIEW, isSelected);
-								return (JComponent) viewSupplier.createViewFor(provider).getComponent();
+								UIForAnySwing<?,?> view = null;
+								try {
+									view = viewSupplier.createViewFor(provider);
+								} catch (Exception e) {
+									log.error("Failed to create view for entry: " + this, e);
+								}
+								if ( view == null )
+									view = UI.box(); // We return an empty box if the view is null.
+								return (JComponent) view.get((Class) view.getType());
 							};
 			_lastState = _provider.apply(false);
 			this.add(_lastState, constraints != null ? constraints : "grow" );

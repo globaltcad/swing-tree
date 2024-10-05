@@ -339,7 +339,12 @@ public final class CellConf<C extends JComponent, V>
      *        of the cell will be reset to null.
      */
     public CellConf<C,V> view( Configurator<OptionalUI<Component>> configurator ) {
-        OptionalUI<Component> newRenderer = configurator.configure(view());
+        OptionalUI<Component> newRenderer = OptionalUI.empty();
+        try {
+            newRenderer = configurator.configure(view());
+        } catch (Exception e) {
+            log.error("Failed to configure view!", e);
+        }
         return _withRenderer(newRenderer.orElseNullable(null));
     }
 

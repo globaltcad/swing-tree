@@ -369,8 +369,22 @@ public abstract class StyleSheet
             StyleTrait<?> trait = subToSuper.get(i);
             ComponentStyleDelegate delegate = new ComponentStyleDelegate<>(toBeStyled, startingStyle);
             Styler<?> styler = _styleDeclarations.get(trait);
-            if ( styler != null )
-                startingStyle = styler.style(delegate).style();
+            if ( styler != null ) {
+                try {
+                    startingStyle = styler.style(delegate).style();
+                } catch ( Exception e ) {
+                    log.error(
+                        "An exception occurred while applying the style for trait '" + trait + "' " +
+                        "to component '" + toBeStyled + "' using styler '" + styler + "'!",
+                        e
+                    );
+                    /*
+                        Exceptions inside a style sheet should not be fatal.
+                        We just log the stack trace for debugging purposes
+                        and then continue to prevent the GUI from breaking.
+                     */
+                }
+            }
         }
 
         return startingStyle;

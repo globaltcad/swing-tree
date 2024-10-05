@@ -24,20 +24,36 @@ public interface Animation
         return new Animation() {
             @Override
             public void run( AnimationStatus status ) {
-                T newValue = animator.run(status, target.get());
-                target.set( newValue );
+                T newValue = target.get();
+                try {
+                    newValue = animator.run(status, newValue);
+                } catch ( Exception e ) {
+                    throw new RuntimeException(e);
+                } finally {
+                    target.set( newValue );
+                }
             }
             @Override
             public void finish( AnimationStatus status ) {
-                T newValue = animator.finish(status, target.get());
-                target.set( newValue );
+                T newValue = target.get();
+                try {
+                    newValue = animator.finish(status, newValue);
+                } catch ( Exception e ) {
+                    throw new RuntimeException(e);
+                } finally {
+                    target.set( newValue );
+                }
             }
         };
     }
 
     /**
      *  This method is called repeatedly during the lifetime of the animation.
-     *  The {@link AnimationStatus} contains information about the current state of the animation.
+     *  The {@link AnimationStatus} contains information about the current state of the animation. <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param status The current state of the animation.
      */
@@ -47,7 +63,11 @@ public interface Animation
      *  This method is called after the animation has finished.
      *  The default implementation does nothing.
      *  Use this to clean up the state of your components
-     *  any used resources after the animation has finished.
+     *  any used resources after the animation has finished. <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param status The current state of the animation.
      */

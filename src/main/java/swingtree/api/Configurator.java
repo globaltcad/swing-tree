@@ -28,14 +28,18 @@ public interface Configurator<T>
     }
 
     /**
-     *  Configures the given configuration object and returns the transformed configuration object.
+     *  Configures the given configuration object and returns the transformed configuration object. <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param config The configuration object, typically an immutable builder type
      *               which uses method chaining to for defining its properties.
      *
      * @return The fully transformed/updated configuration object.
      */
-    T configure( T config );
+    T configure( T config ) throws Exception;
 
     /**
      *  Returns a new configurator that first configures the given configuration object
