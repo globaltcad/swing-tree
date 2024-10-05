@@ -2790,7 +2790,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * But note that the property is of the read only {@link Val} type,
      * which means that when the user moves the slider, the property will not be updated.
      * <br>
-     * If you want bidirectional binding, use {@link #slider(UI.Align, N, N, Var)}
+     * If you want bidirectional binding, use {@link #slider(UI.Align, Number, Number, Var)}
      * instead of this method.
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
@@ -5740,11 +5740,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
      *  Here how this method may be used as part of a UI declaration: <br>
-     *  <pred>{@code
+     *  <pre>{@code
      *    UI.button("Login").onClick( it -> {
      *      UI.animate(vm, vm.get().withLoginAnimation());
      *    })
-     *  }</pred>
+     *  }</pre>
      *
      * @param state A mutable property or property lens holding an immutable item which should
      *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
@@ -5771,11 +5771,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
      *  Here how this method is may be used as part of a UI declaration: <br>
-     *  <pred>{@code
+     *  <pre>{@code
      *    UI.button("Login").onClick( it -> {
      *      UI.animate(vm, LoginViewModel::withLoginAnimation);
      *    })
-     *  }</pred>
+     *  }</pre>
      *
      * @param state A mutable property or property lens holding an immutable item which should
      *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
