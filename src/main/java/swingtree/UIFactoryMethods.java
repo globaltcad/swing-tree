@@ -938,7 +938,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
     public static UIForPopup<JPopupMenu> popupMenu() {
-        return new UIForPopup<>(new BuilderState<>(UI.PopupMenu.class, ()->new UI.PopupMenu()));
+        return new UIForPopup<>(new BuilderState<>(UI.PopupMenu.class, UI.PopupMenu::new));
     }
 
     /**
@@ -963,7 +963,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
     public static UIForSeparator<JSeparator> separator() {
-        return new UIForSeparator<>(new BuilderState<>(JSeparator.class, ()->new JSeparator()));
+        return new UIForSeparator<>(new BuilderState<>(JSeparator.class, UI.Separator::new));
     }
 
     /**
@@ -1011,7 +1011,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button() {
-        return new UIForButton<>(new BuilderState<>(UI.Button.class, ()->new UI.Button()));
+        return new UIForButton<>(new BuilderState<>(UI.Button.class, UI.Button::new));
     }
 
     /**
@@ -1435,7 +1435,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static SplitItem<JRadioButtonMenuItem> splitRadioItem( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return SplitItem.of(new JRadioButtonMenuItem(text));
+        JRadioButtonMenuItem item = new UI.RadioButtonMenuItem();
+        item.setText(text);
+        return SplitItem.of(item);
     }
 
     /**
@@ -3586,7 +3588,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
      */
     public static UIForSpinner<JSpinner> spinner() {
-        return new UIForSpinner<>(new BuilderState<>(UI.Spinner.class, ()->new UI.Spinner()));
+        return new UIForSpinner<>(new BuilderState<>(UI.Spinner.class, UI.Spinner::new));
     }
 
     /**
@@ -3992,8 +3994,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForIcon<JIcon> icon( Size size, IconDeclaration icon ) {
         Objects.requireNonNull(size, "size");
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
-        int width = size.width().map( it -> it.intValue() ).orElse(0);
-        int height = size.height().map( it -> it.intValue() ).orElse(0);
+        int width = size.width().map(Float::intValue).orElse(0);
+        int height = size.height().map(Float::intValue).orElse(0);
         return icon.find().map( i -> icon(width, height, i) ).orElseGet( () -> icon("") );
     }
 
@@ -4302,7 +4304,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
     public static UIForToggleButton<JToggleButton> toggleButton() {
-        return new UIForToggleButton<>(new BuilderState<JToggleButton>(UI.ToggleButton.class, UI.ToggleButton::new));
+        return new UIForToggleButton<>(new BuilderState<>(UI.ToggleButton.class, UI.ToggleButton::new));
     }
 
     /**
@@ -4512,7 +4514,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
-        return new UIForToggleButton<>(new BuilderState<>(UI.ToggleButton.class, ()->new JToggleButton()))
+        return new UIForToggleButton<>(new BuilderState<>(JToggleButton.class, UI.ToggleButton::new))
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
                 .withIcon(icon);
     }
@@ -4546,7 +4548,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
-        return new UIForToggleButton<>(new BuilderState<>(UI.ToggleButton.class, ()->new JToggleButton()))
+        return new UIForToggleButton<>(new BuilderState<>(JToggleButton.class, UI.ToggleButton::new))
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .withIcon(icon)
@@ -4630,7 +4632,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
     public static UIForTextField<JTextField> textField() {
-        return new UIForTextField<>(new BuilderState<JTextField>(UI.TextField.class, UI.TextField::new));
+        return new UIForTextField<>(new BuilderState<>(UI.TextField.class, UI.TextField::new));
     }
 
     /**
@@ -5013,7 +5015,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
      */
     public static UIForPasswordField<JPasswordField> passwordField() {
-        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, ()->new UI.PasswordField()));
+        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, UI.PasswordField::new));
     }
 
     /**
@@ -5035,7 +5037,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
     public static UIForProgressBar<JProgressBar> progressBar() {
-        return new UIForProgressBar<>(new BuilderState<>(UI.ProgressBar.class, ()->new UI.ProgressBar()));
+        return new UIForProgressBar<>(new BuilderState<>(UI.ProgressBar.class, UI.ProgressBar::new));
     }
 
     /**
@@ -5309,7 +5311,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
                 .withEntries( elements );
     }
 
@@ -5362,7 +5364,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
                 .withEntries( elements ).withSelection( selection );
     }
 
@@ -5388,7 +5390,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JList} with the provided {@link UI.List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
                 .withEntries( entries );
     }
 
@@ -5423,7 +5425,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A fluent builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table() {
-        return new UIForTable<>(new BuilderState<>(UI.Table.class, ()->new UI.Table()));
+        return new UIForTable<>(new BuilderState<>(UI.Table.class, UI.Table::new));
     }
 
     /**

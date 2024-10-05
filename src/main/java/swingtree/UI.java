@@ -1468,6 +1468,12 @@ public final class UI extends UIFactoryMethods
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
+    public static class Separator extends JSeparator implements StylableComponent {
+        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
+        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+    }
+    /** {inheritDoc} */
     public static class PopupMenu extends JPopupMenu implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
