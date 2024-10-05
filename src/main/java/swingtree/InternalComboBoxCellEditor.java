@@ -14,8 +14,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
 import java.security.SecureClassLoader;
 import java.util.List;
 import java.util.Objects;
@@ -202,22 +200,16 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
 
         private static Method getTrampoline() {
             try {
-                return AccessController.doPrivileged(
-                        new PrivilegedExceptionAction<Method>() {
-                            @Override
-                            public Method run() throws Exception {
-                                Class<?> t = getTrampolineClass();
-                                Class<?>[] types = {
-                                        Method.class, Object.class, Object[].class
-                                };
-                                Objects.requireNonNull(t, "Trampoline must be found");
-                                Method b = t.getDeclaredMethod("invoke", types);
-                                b.setAccessible(true);
-                                return b;
-                            }
-                        });
+                Class<?> t = getTrampolineClass();
+                Class<?>[] types = {
+                        Method.class, Object.class, Object[].class
+                };
+                Objects.requireNonNull(t, "Trampoline must be found");
+                Method b = t.getDeclaredMethod("invoke", types);
+                b.setAccessible(true);
+                return b;
             } catch (Exception e) {
-                throw new InternalError("bouncer cannot be found", e);
+                throw new RuntimeException("Trampoline not found", e);
             }
         }
 
