@@ -162,7 +162,6 @@ public class JIcon extends JLabel implements StylableComponent
 
             width  = Math.round(width * scale);
             height = Math.round(height * scale);
-
         }
         if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
