@@ -521,7 +521,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withModel( Buildable<BasicTableModel> dataModelBuilder ) {
         Objects.requireNonNull(dataModelBuilder);
-        return this.withModel(dataModelBuilder.build());
+        try {
+            return this.withModel(dataModelBuilder.build());
+        } catch (Exception e) {
+            log.error("Error while building a table model.", e);
+            return this;
+        }
     }
 
     /**

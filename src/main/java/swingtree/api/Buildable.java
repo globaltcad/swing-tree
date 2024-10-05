@@ -9,5 +9,12 @@ package swingtree.api;
  */
 public interface Buildable<T>
 {
-    T build();
+    /**
+     *  Builds the object that this builder is responsible for
+     *  and returns it. This method is intended to be called by the
+     *  internals of the SwingTree API.
+     *
+     * @return The object that this builder is responsible for.
+     */
+    T build() throws Exception;
 }

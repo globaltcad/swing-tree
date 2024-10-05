@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.animation.*;
 import swingtree.api.AnimatedStyler;
 import swingtree.style.ComponentStyleDelegate;
@@ -19,6 +21,8 @@ import java.util.concurrent.TimeUnit;
  */
 class FlipFlopStyler<C extends JComponent>
 {
+    private static final Logger log = LoggerFactory.getLogger(FlipFlopStyler.class);
+
     private final LifeTime          _lifetime;
     private final AnimatedStyler<C> _styler;
     private final WeakReference<C>  _owner;
@@ -107,16 +111,24 @@ class FlipFlopStyler<C extends JComponent>
 
         @Override
         public void run( AnimationStatus status ) {
-            if ( _animation != null )
-                _animation.run(status);
+            try {
+                if ( _animation != null )
+                    _animation.run(status);
+            } catch ( Exception e ) {
+                log.error("Error while running animation.", e);
+            }
         }
 
         @Override
         public void finish( AnimationStatus status ) {
-            if ( _animation != null )
-                _animation.finish(status);
-
-            dispose();
+            try {
+                if (_animation != null)
+                    _animation.finish(status);
+            } catch (Exception e) {
+                log.error("Error while finishing animation.", e);
+            } finally {
+                dispose();
+            }
         }
 
         public void dispose() {

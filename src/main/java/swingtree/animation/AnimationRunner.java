@@ -140,8 +140,20 @@ class AnimationRunner
                 runningAnimation.animation().run(status); // We run the animation one last time to make sure the component is in its final state.
                 AnimationStatus finishingStatus = status;
                 _toBeFinished.add(()->{
-                    runningAnimation.animation().finish(finishingStatus); // This method may or may not be overridden by the user.
-                    // An animation may want to do something when it is finished (e.g. reset the component to its original state).
+                    try {
+                        runningAnimation.animation().finish(finishingStatus); // This method may or may not be overridden by the user.
+                        // An animation may want to do something when it is finished (e.g. reset the component to its original state).
+                    } catch ( Exception e ) {
+                        log.error("An exception occurred while finishing an animation!", e);
+                        /*
+                             If exceptions happen in the finishing procedure of animations provided by the user,
+                             then we don't want to mess up the execution of the rest of the animations,
+                             so we catch any exceptions right here!
+
+                             We log as warning because exceptions during rendering are not considered
+                             as harmful as elsewhere!
+                        */
+                    }
                     requestComponentRepaint.run();
                 });
             } catch ( Exception e ) {

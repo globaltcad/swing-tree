@@ -41,7 +41,7 @@ public interface Animation
      *
      * @param status The current state of the animation.
      */
-    void run( AnimationStatus status );
+    void run( AnimationStatus status ) throws Exception;
 
     /**
      *  This method is called after the animation has finished.
@@ -51,7 +51,7 @@ public interface Animation
      *
      * @param status The current state of the animation.
      */
-    default void finish( AnimationStatus status ) {
+    default void finish( AnimationStatus status ) throws Exception {
         /* Override this method to perform cleanup after the animation has finished */
     }
 }
