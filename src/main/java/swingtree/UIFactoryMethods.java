@@ -1333,10 +1333,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * <b>Tip:</b><i>
      *      For the text displayed on the split button, the selected enum state
      *      will be converted to strings based on the {@link Object#toString()}
-     *      method. If you want to customize how they are displayed
-     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
-     *      simply override the {@link Object#toString()} method in your enum. </i>
-     *
+     *      method. If you want to customize how they are displayed (e.g.
+     *      so that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      it is recommended to use {@link #splitButton(Var, Event, Function)} instead.
+     *      But you can also override the {@link Object#toString()} method in your enum. </i><br>
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -1346,6 +1346,39 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
         return splitButton("").withSelection(selection, clickEvent);
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type, and the click event is
+     *  handles by an {@link Event} instance. <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *      private Event clickEvent = Event.of(()->{ ... }
+     *
+     *      public Var<Size> selection() { return selection; }
+     *      public Event clickEvent() { return clickEvent; }
+     *
+     *      // In your view:
+     *      UI.splitButton(vm.selection(), vm.clickEvent(), it -> it.toString().toLowerCase())
+     * }</pre>
+     * <p>
+     * Note that the text displayed on the split button is based on the
+     * supplied {@link Function} which converts the enum instances to strings.
+     * In this function you may for example convert 'Size.LARGE' to 'Large' instead of 'LARGE'.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
+     * @param labelProvider A function which converts the enum instances to strings.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
+     */
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent, Function<E, String> labelProvider ) {
+        return splitButton("").withSelection(selection, clickEvent, labelProvider);
     }
 
     /**
@@ -1366,8 +1399,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * <b>Tip:</b><i>
      *      The text displayed on the button is based on the {@link Object#toString()}
      *      method of the enum instances. If you want to customize how they are displayed
-     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
-     *      simply override the {@link Object#toString()} method in your enum. </i>
+     *      (i.e. so that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      it is recommended to use {@link #splitButton(Var, Function)} instead. But you can
+     *      also choose to override the {@link Object#toString()} method in your enum
+     *      to achieve the same effect. </i><br>
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -1376,6 +1411,37 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection ) {
         return splitButton("").withSelection(selection);
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type. <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *
+     *      public Var<Size> selection() { return selection; }
+     *
+     *      // In your view:
+     *      UI.splitButton(vm.selection(), it -> it.toString().toLowerCase())
+     * }</pre>
+     * <p>
+     * Note that the text displayed on the split button is based on the
+     * supplied {@link Function} which converts the enum instances to strings.
+     * In this function you may for example convert 'Size.LARGE' to 'Large' instead of 'LARGE'.
+     * In the above example we simply convert the enum instances to lower case strings,
+     * but you can customize this function to your liking.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param labelProvider A function which converts the enum instances to strings.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
+     */
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Function<E, String> labelProvider ) {
+        return splitButton("").withSelection(selection, labelProvider);
     }
 
     /**
@@ -1480,7 +1546,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  like so:
      *
      *  <pre>{@code
-     *      UI.tabbedPane(Position.RIGHT)
+     *      UI.tabbedPane(UI.Side.RIGHT)
      *      .add(UI.tab("first").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
@@ -1502,7 +1568,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *  <pre>{@code
-     *      UI.tabbedPane(Position.LEFT, OverflowPolicy.WRAP)
+     *      UI.tabbedPane(UI.Side.LEFT, UI.OverflowPolicy.WRAP)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
@@ -1513,7 +1579,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane(UI.Side tabsSide, UI.OverflowPolicy tabsPolicy ) {
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( UI.Side tabsSide, UI.OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsSide, "tabsPosition", UI.Side.class);
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", UI.OverflowPolicy.class);
         return tabbedPane().withTabPlacementAt(tabsSide).withOverflowPolicy(tabsPolicy);
@@ -1525,7 +1591,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *  <pre>{@code
-     *      UI.tabbedPane(OverflowPolicy.SCROLL)
+     *      UI.tabbedPane(UI.OverflowPolicy.SCROLL)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))

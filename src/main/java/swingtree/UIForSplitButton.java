@@ -16,6 +16,7 @@ import javax.swing.event.PopupMenuListener;
 import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -91,15 +92,47 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Event clickEvent ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
+        return withSelection(selection, clickEvent, Enum::toString);
+    }
+
+    /**
+     *  Allows you to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type, and the click event is
+     *  handled by an {@link Event} instance as well as a "text provider",
+     *  which is a function that maps an enum value to a string to be
+     *  used as the button text displayed to the user.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param clickEvent The {@link sprouts.Event} which will be fired when the user clicks on the button.
+     * @param textProvider A function which provides the text representation of an enum value.
+     *                     If this function throws an exception, the enum value's {@link Enum#toString()}
+     *                     method will be used as a fallback.
+     *                     Exceptions are logged as errors.
+     * @return The next declarative UI builder for the {@link JSplitButton} type.
+     * @param <E> The {@link Enum} type defining the selectable options.
+     */
+    public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Event clickEvent, Function<E, String> textProvider ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
+        Objects.requireNonNull(textProvider, "textProvider");
+        Function<E, String> exceptionSafeTextProvider = e -> {
+            try {
+                return textProvider.apply(e);
+            } catch (Exception ex) {
+                log.error("Error while providing split button text for enum value.", ex);
+                return e.toString();
+            }
+        };
         return withText(selection.viewAsString())
                 ._with( thisComponent -> {
                     for ( E e : selection.type().getEnumConstants() )
                         _addSplitItem(
-                            UI.splitItem(e.toString())
+                            UI.splitItem(exceptionSafeTextProvider.apply(e))
                             .onButtonClick( it -> clickEvent.fire() )
                             .onSelection( it -> {
                                 it.selectOnlyCurrentItem();
-                                it.setButtonText(e.toString());
+                                it.setButtonText(exceptionSafeTextProvider.apply(e));
                                 selection.set(From.VIEW, e);
                             }),
                             thisComponent
@@ -110,7 +143,9 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
 
     /**
      *  Use this to build {@link JSplitButton}s where the selectable options
-     *  are represented by an {@link Enum} type.
+     *  are represented by an {@link Enum} type. Changes to the selected value are
+     *  propagated to the provided {@link Var} instance, and the text representation
+     *  of the selected value is determined using the {@link Enum#toString()} method.
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -119,14 +154,43 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
      */
     public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
+        return withSelection(selection, Enum::toString);
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type. Changes to the selected value are
+     *  propagated to the provided {@link Var} instance, and the text representation
+     *  of the selected value is dynamically determined through the supplied text provider function.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param textProvider A function which provides the text representation of an enum value.
+     *                     If this function throws an exception, the enum value's {@link Enum#toString()}
+     *                     method will be used as a fallback.
+     *                     Exceptions are logged as errors.
+     * @param <E> The {@link Enum} type defining the selectable options.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     */
+    public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Function<E, String> textProvider ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        Objects.requireNonNull(textProvider, "textProvider");
+        Function<E, String> exceptionSafeTextProvider = e -> {
+            try {
+                return textProvider.apply(e);
+            } catch (Exception ex) {
+                log.error("Error while providing split button text for enum value.", ex);
+                return e.toString();
+            }
+        };
         return withText(selection.viewAsString())
                 ._with( thisComponent -> {
                     for ( E e : selection.type().getEnumConstants() )
                         _addSplitItem(
-                            UI.splitItem(e.toString())
+                            UI.splitItem(exceptionSafeTextProvider.apply(e))
                             .onSelection( it -> {
                                 it.selectOnlyCurrentItem();
-                                it.setButtonText(e.toString());
+                                it.setButtonText(exceptionSafeTextProvider.apply(e));
                                 selection.set(From.VIEW, e);
                             }),
                             thisComponent
