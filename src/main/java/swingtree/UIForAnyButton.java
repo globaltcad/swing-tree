@@ -30,6 +30,7 @@ import java.util.function.Consumer;
  *  <br><br>
  *
  * @param <B> The type parameter for the component wrapped by an instance of this class.
+ * @param <I> The type parameter for the instance type of this concrete class itself.
  */
 public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForAnySwing<I, B>
 {

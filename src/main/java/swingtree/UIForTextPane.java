@@ -4,7 +4,9 @@ import javax.swing.*;
 import java.util.Objects;
 
 /**
- *  A SwingTree builder node designed for configuring {@link UIForTextPane} instances.
+ *  A declarative SwingTree builder designed for configuring {@link UIForTextPane} instances.
+ *
+ * @param <P> The type of {@link JTextPane} that this {@link UIForTextPane} configures.
  */
 public final class UIForTextPane<P extends JTextPane> extends UIForAnyEditorPane<UIForTextPane<P>, P>
 {

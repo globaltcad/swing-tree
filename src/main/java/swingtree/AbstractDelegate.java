@@ -51,11 +51,29 @@ abstract class AbstractDelegate<C extends JComponent>
         _component    = nullable ? component : Objects.requireNonNull(component);
     }
 
+    /**
+     *  Checks if the given font is the undefined font constant
+     *  with respect to regular object identity instead of value equality.
+     *  This is a deliberate design choice to allow the user to use the
+     *  {@link UI.Font#UNDEFINED} constant instead of {@code null}
+     *  as a placeholder for the absence of a font.
+     * @param font The font to check.
+     * @return {@code true} if the font is the undefined font constant, {@code false} otherwise.
+     */
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
         return font == UI.Font.UNDEFINED;
     }
 
+    /**
+     *  Checks if the given color is the undefined color constant
+     *  with respect to regular object identity instead of value equality.
+     *  This is a deliberate design choice to allow the user to use the
+     *  {@link UI.Color#UNDEFINED} constant instead of {@code null}
+     *  as a placeholder for the absence of a color.
+     * @param color The color to check.
+     * @return {@code true} if the color is the undefined color constant, {@code false} otherwise.
+     */
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedColor( Color color ) {
         return color == UI.Color.UNDEFINED;

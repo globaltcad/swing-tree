@@ -26,10 +26,13 @@ import java.util.function.Supplier;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JTabbedPane} instances.
+ *
+ * @param <P> The type of the {@link JTabbedPane} instance that this builder node configures.
  */
 public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
-    private static Logger log = LoggerFactory.getLogger(UIForTabbedPane.class);
+    private static final Logger log = LoggerFactory.getLogger(UIForTabbedPane.class);
+
 
     private final BuilderState<P> _state;
 
