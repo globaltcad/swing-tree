@@ -23,6 +23,7 @@ import swingtree.dialogs.ConfirmDialog;
 import swingtree.dialogs.MessageDialog;
 import swingtree.dialogs.OptionsDialog;
 import swingtree.layout.LayoutConstraint;
+import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StyleSheet;
 import swingtree.style.SvgIcon;
@@ -3884,7 +3885,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <I> The type of the {@link swingtree.components.JIcon} instance.
      * @return A builder instance for the provided {@link swingtree.components.JIcon}, which enables fluent method chaining.
      */
-    public static <I extends JIcon> UIForIcon<I> of(I icon ) {
+    public static <I extends JIcon> UIForIcon<I> of( I icon ) {
         NullUtil.nullArgCheck(icon, "icon", JIcon.class);
         return new UIForIcon<>(new BuilderState<>(icon));
     }
@@ -3917,6 +3918,21 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a UI declaration for a {@link JIcon} which is dynamically bound to the provided
+     *  {@link Val} property containing an {@link IconDeclaration}. When the {@link IconDeclaration}
+     *  of the property changes, the icon displayed on the {@link JIcon} will be updated accordingly.
+     *
+     * @param icon The property containing the {@link IconDeclaration} whose
+     *             {@link Icon} should be displayed on the {@link JIcon}.
+     * @return A declarative builder for the {@link JIcon} type, to allow for fluent method chaining.
+     */
+    public static UIForIcon<JIcon> icon( Val<IconDeclaration> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Var.class);
+        NullUtil.nullPropertyCheck(icon, "icon", "Please use an empty string instead of null!");
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(icon)));
+    }
+
+    /**
      *  Creates a builder node wrapping a new {@link JIcon} instance with the
      *  provided icon scaled to the provided width and height.
      *
@@ -3927,24 +3943,23 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @throws IllegalArgumentException If the provided icon is null.
      */
     public static UIForIcon<JIcon> icon( int width, int height, Icon icon ) {
+        return icon(Size.of(width, height), icon);
+    }
+
+    /**
+     *  Creates a declarative builder for the {@link JIcon} component with the
+     *  supplied icon scaled to fit the specified {@link Size},
+     *  which consists of a width and height.
+     *
+     * @param size The size of the icon when displayed on the {@link JIcon}.
+     * @param icon The icon which should be placed into a {@link JIcon} for display.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon is null.
+     */
+    public static UIForIcon<JIcon> icon( Size size, Icon icon ) {
+        Objects.requireNonNull(size, "size");
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        float scale = UI.scale();
-
-        int scaleHint = Image.SCALE_SMOOTH;
-        if ( scale > 1.5f )
-            scaleHint = Image.SCALE_FAST;
-
-        width  = (int) (width * scale);
-        height = (int) (height * scale);
-
-        if ( icon instanceof SvgIcon) {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconSize(width, height);
-            return UI.icon(svgIcon);
-        } else {
-            Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
-            return UI.icon(new ImageIcon(scaled));
-        }
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(size, icon)));
     }
 
     /**
@@ -3960,7 +3975,25 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @throws IllegalArgumentException If the provided icon is null.
      */
     public static UIForIcon<JIcon> icon( int width, int height, IconDeclaration icon ) {
+        return icon(Size.of(width, height), icon);
+    }
+
+    /**
+     *  Creates a declarative builder for the {@link JIcon} component with the
+     *  icon found at the path defined by the supplied {@link IconDeclaration} displayed on it
+     *  and scaled to fit the provided {@link Size}, consisting of a width and height.
+     *  Note that the icon will be cached by the {@link JIcon} instance, so that it will not be reloaded.
+     *
+     * @param size The size of the icon when displayed on the {@link JIcon}.
+     * @param icon The icon which should be placed into a {@link JIcon} for display.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon is null.
+     */
+    public static UIForIcon<JIcon> icon( Size size, IconDeclaration icon ) {
+        Objects.requireNonNull(size, "size");
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        int width = size.width().map( it -> it.intValue() ).orElse(0);
+        int height = size.height().map( it -> it.intValue() ).orElse(0);
         return icon.find().map( i -> icon(width, height, i) ).orElseGet( () -> icon("") );
     }
 
@@ -3977,7 +4010,23 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static UIForIcon<JIcon> icon( int width, int height, String iconPath ) {
         NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
-        return icon(width, height, UI.findIcon(iconPath).orElse(new ImageIcon()));
+        return icon(Size.of(width, height), UI.findIcon(iconPath).orElse(new ImageIcon()));
+    }
+
+    /**
+     *  Creates a declarative builder for the {@link JIcon} component with the
+     *  icon found at the path defined by the supplied {@link IconDeclaration} displayed on it
+     *  and scaled to fit the provided {@link Size}, consisting of a width and height.
+     *  Note that the icon will be cached by the {@link JIcon} instance, so that it will not be reloaded.
+     *
+     * @param size The size of the icon when displayed on the {@link JIcon}.
+     * @param iconPath The path to the icon which should be displayed on the {@link JIcon}.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon path is null.
+     */
+    public static UIForIcon<JIcon> icon( Size size, String iconPath ) {
+        NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
+        return icon(size, UI.findIcon(iconPath).orElse(new ImageIcon()));
     }
 
     /**
