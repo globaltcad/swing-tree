@@ -569,6 +569,14 @@ public final class CellBuilder<C extends JComponent, E> {
     static <C extends JComponent, V> Configurator<CellConf<C, V>> _createDefaultTextRenderer(
             Function<CellConf<C, V>, String> renderer
     ) {
+        Function<CellConf<C, V>, String> exceptionSafeRenderer = cell -> {
+            try {
+                return renderer.apply(cell);
+            } catch (Exception e) {
+                log.error("Failed to convert cell to displayable String!", e);
+                return "";
+            }
+        };
         return cell -> {
             if ( cell.isEditing() )
                 return cell;
@@ -579,9 +587,9 @@ public final class CellBuilder<C extends JComponent, E> {
                 return cell; // The user has defined a custom renderer, so we don't touch it.
 
             if ( l == null )
-                l = new InternalLabelForRendering(renderer.apply(cell));
+                l = new InternalLabelForRendering(exceptionSafeRenderer.apply(cell));
             else
-                l.setText(renderer.apply(cell));
+                l.setText(exceptionSafeRenderer.apply(cell));
 
             Color bg = null;
             Color fg = null;
@@ -606,9 +614,9 @@ public final class CellBuilder<C extends JComponent, E> {
                     fg = UIManager.getColor("Table.selectionForeground");
             }
 
-            if ( bg == null && cell.getHost() != null )
+            if ( bg == null )
                 bg = cell.getHost().getBackground();
-            if ( fg == null && cell.getHost() != null )
+            if ( fg == null )
                 fg = cell.getHost().getForeground();
 
             if ( bg == null )
@@ -637,9 +645,7 @@ public final class CellBuilder<C extends JComponent, E> {
                 if ( fg != null ) _setForegroundColor(l, fg);
             }
             else {
-                Color normalBg = Color.WHITE;
-                if (  cell.getHost() != null )
-                    normalBg = cell.getHost().getBackground();
+                Color normalBg = cell.getHost().getBackground();
 
                 // We need to make sure the color is a user color, not a LaF color:
                 if ( normalBg != null )
@@ -656,7 +662,7 @@ public final class CellBuilder<C extends JComponent, E> {
                 }
                 if ( bg != null )
                     _setBackgroundColor( l, normalBg );
-                if ( fg != null && cell.getHost() != null )
+                if ( fg != null )
                     _setForegroundColor( l, cell.getHost().getForeground() );
             }
 
