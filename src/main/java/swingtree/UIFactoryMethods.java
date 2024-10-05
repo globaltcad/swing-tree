@@ -938,7 +938,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
     public static UIForPopup<JPopupMenu> popupMenu() {
-        return new UIForPopup<>(new BuilderState<>(UI.PopupMenu.class, ()->new UI.PopupMenu()));
+        return new UIForPopup<>(new BuilderState<>(UI.PopupMenu.class, UI.PopupMenu::new));
     }
 
     /**
@@ -963,7 +963,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
     public static UIForSeparator<JSeparator> separator() {
-        return new UIForSeparator<>(new BuilderState<>(JSeparator.class, ()->new JSeparator()));
+        return new UIForSeparator<>(new BuilderState<>(JSeparator.class, UI.Separator::new));
     }
 
     /**
@@ -1011,7 +1011,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button() {
-        return new UIForButton<>(new BuilderState<>(UI.Button.class, ()->new UI.Button()));
+        return new UIForButton<>(new BuilderState<>(UI.Button.class, UI.Button::new));
     }
 
     /**
@@ -1333,10 +1333,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * <b>Tip:</b><i>
      *      For the text displayed on the split button, the selected enum state
      *      will be converted to strings based on the {@link Object#toString()}
-     *      method. If you want to customize how they are displayed
-     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
-     *      simply override the {@link Object#toString()} method in your enum. </i>
-     *
+     *      method. If you want to customize how they are displayed (e.g.
+     *      so that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      it is recommended to use {@link #splitButton(Var, Event, Function)} instead.
+     *      But you can also override the {@link Object#toString()} method in your enum. </i><br>
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -1346,6 +1346,39 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
         return splitButton("").withSelection(selection, clickEvent);
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type, and the click event is
+     *  handles by an {@link Event} instance. <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *      private Event clickEvent = Event.of(()->{ ... }
+     *
+     *      public Var<Size> selection() { return selection; }
+     *      public Event clickEvent() { return clickEvent; }
+     *
+     *      // In your view:
+     *      UI.splitButton(vm.selection(), vm.clickEvent(), it -> it.toString().toLowerCase())
+     * }</pre>
+     * <p>
+     * Note that the text displayed on the split button is based on the
+     * supplied {@link Function} which converts the enum instances to strings.
+     * In this function you may for example convert 'Size.LARGE' to 'Large' instead of 'LARGE'.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
+     * @param labelProvider A function which converts the enum instances to strings.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
+     */
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent, Function<E, String> labelProvider ) {
+        return splitButton("").withSelection(selection, clickEvent, labelProvider);
     }
 
     /**
@@ -1366,8 +1399,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * <b>Tip:</b><i>
      *      The text displayed on the button is based on the {@link Object#toString()}
      *      method of the enum instances. If you want to customize how they are displayed
-     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
-     *      simply override the {@link Object#toString()} method in your enum. </i>
+     *      (i.e. so that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      it is recommended to use {@link #splitButton(Var, Function)} instead. But you can
+     *      also choose to override the {@link Object#toString()} method in your enum
+     *      to achieve the same effect. </i><br>
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -1376,6 +1411,37 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection ) {
         return splitButton("").withSelection(selection);
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type. <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *
+     *      public Var<Size> selection() { return selection; }
+     *
+     *      // In your view:
+     *      UI.splitButton(vm.selection(), it -> it.toString().toLowerCase())
+     * }</pre>
+     * <p>
+     * Note that the text displayed on the split button is based on the
+     * supplied {@link Function} which converts the enum instances to strings.
+     * In this function you may for example convert 'Size.LARGE' to 'Large' instead of 'LARGE'.
+     * In the above example we simply convert the enum instances to lower case strings,
+     * but you can customize this function to your liking.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param labelProvider A function which converts the enum instances to strings.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
+     */
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Function<E, String> labelProvider ) {
+        return splitButton("").withSelection(selection, labelProvider);
     }
 
     /**
@@ -1435,7 +1501,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static SplitItem<JRadioButtonMenuItem> splitRadioItem( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return SplitItem.of(new JRadioButtonMenuItem(text));
+        JRadioButtonMenuItem item = new UI.RadioButtonMenuItem();
+        item.setText(text);
+        return SplitItem.of(item);
     }
 
     /**
@@ -1478,7 +1546,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  like so:
      *
      *  <pre>{@code
-     *      UI.tabbedPane(Position.RIGHT)
+     *      UI.tabbedPane(UI.Side.RIGHT)
      *      .add(UI.tab("first").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
@@ -1488,7 +1556,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} is {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane( UI.Side tabsSide) {
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( UI.Side tabsSide ) {
         NullUtil.nullArgCheck(tabsSide, "tabsPosition", UI.Side.class);
         return tabbedPane().withTabPlacementAt(tabsSide);
     }
@@ -1500,7 +1568,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *  <pre>{@code
-     *      UI.tabbedPane(Position.LEFT, OverflowPolicy.WRAP)
+     *      UI.tabbedPane(UI.Side.LEFT, UI.OverflowPolicy.WRAP)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
@@ -1511,7 +1579,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane(UI.Side tabsSide, UI.OverflowPolicy tabsPolicy ) {
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( UI.Side tabsSide, UI.OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsSide, "tabsPosition", UI.Side.class);
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", UI.OverflowPolicy.class);
         return tabbedPane().withTabPlacementAt(tabsSide).withOverflowPolicy(tabsPolicy);
@@ -1523,7 +1591,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *  <pre>{@code
-     *      UI.tabbedPane(OverflowPolicy.SCROLL)
+     *      UI.tabbedPane(UI.OverflowPolicy.SCROLL)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
@@ -1659,7 +1727,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Tab tab( UIForAnySwing<?, ?> builder ) {
         NullUtil.nullArgCheck(builder, "builder", UIForAnySwing.class);
-        return new Tab(null, builder.getComponent(), null, null, null, null, null, null, null);
+        return new Tab(null, builder.get((Class) builder.getType()), null, null, null, null, null, null, null);
     }
 
     /**
@@ -2475,7 +2543,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
      *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
-     *      UI.scrollPanels(Align.HORIZONTAL)
+     *      UI.scrollPanels(UI.Align.HORIZONTAL)
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
      *      .add(UI.textArea("I am a text area with this text inside."))
      *      .add(UI.label("I am a label!"))
@@ -2485,7 +2553,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param align The alignment of the scroll panels.
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
-    public static UIForScrollPanels<JScrollPanels> scrollPanels(UI.Align align) {
+    public static UIForScrollPanels<JScrollPanels> scrollPanels( UI.Align align ) {
         return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, null)));
     }
 
@@ -2494,7 +2562,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
      *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
-     *      UI.scrollPanels(Align.HORIZONTAL, new Dimension(100,100))
+     *      UI.scrollPanels(UI.Align.HORIZONTAL, new Dimension(100,100))
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
      *      .add(UI.textArea("I am a text area with this text inside."))
      *      .add(UI.label("I am a label!"))
@@ -3586,7 +3654,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
      */
     public static UIForSpinner<JSpinner> spinner() {
-        return new UIForSpinner<>(new BuilderState<>(UI.Spinner.class, ()->new UI.Spinner()));
+        return new UIForSpinner<>(new BuilderState<>(UI.Spinner.class, UI.Spinner::new));
     }
 
     /**
@@ -3992,8 +4060,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForIcon<JIcon> icon( Size size, IconDeclaration icon ) {
         Objects.requireNonNull(size, "size");
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
-        int width = size.width().map( it -> it.intValue() ).orElse(0);
-        int height = size.height().map( it -> it.intValue() ).orElse(0);
+        int width = size.width().map(Float::intValue).orElse(0);
+        int height = size.height().map(Float::intValue).orElse(0);
         return icon.find().map( i -> icon(width, height, i) ).orElseGet( () -> icon("") );
     }
 
@@ -4302,7 +4370,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
     public static UIForToggleButton<JToggleButton> toggleButton() {
-        return new UIForToggleButton<>(new BuilderState<JToggleButton>(UI.ToggleButton.class, UI.ToggleButton::new));
+        return new UIForToggleButton<>(new BuilderState<>(UI.ToggleButton.class, UI.ToggleButton::new));
     }
 
     /**
@@ -4512,7 +4580,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
-        return new UIForToggleButton<>(new BuilderState<>(UI.ToggleButton.class, ()->new JToggleButton()))
+        return new UIForToggleButton<>(new BuilderState<>(JToggleButton.class, UI.ToggleButton::new))
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
                 .withIcon(icon);
     }
@@ -4546,7 +4614,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
-        return new UIForToggleButton<>(new BuilderState<>(UI.ToggleButton.class, ()->new JToggleButton()))
+        return new UIForToggleButton<>(new BuilderState<>(JToggleButton.class, UI.ToggleButton::new))
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .withIcon(icon)
@@ -4630,7 +4698,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
     public static UIForTextField<JTextField> textField() {
-        return new UIForTextField<>(new BuilderState<JTextField>(UI.TextField.class, UI.TextField::new));
+        return new UIForTextField<>(new BuilderState<>(UI.TextField.class, UI.TextField::new));
     }
 
     /**
@@ -5013,7 +5081,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
      */
     public static UIForPasswordField<JPasswordField> passwordField() {
-        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, ()->new UI.PasswordField()));
+        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, UI.PasswordField::new));
     }
 
     /**
@@ -5035,7 +5103,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
     public static UIForProgressBar<JProgressBar> progressBar() {
-        return new UIForProgressBar<>(new BuilderState<>(UI.ProgressBar.class, ()->new UI.ProgressBar()));
+        return new UIForProgressBar<>(new BuilderState<>(UI.ProgressBar.class, UI.ProgressBar::new));
     }
 
     /**
@@ -5309,7 +5377,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
                 .withEntries( elements );
     }
 
@@ -5362,7 +5430,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
                 .withEntries( elements ).withSelection( selection );
     }
 
@@ -5388,7 +5456,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JList} with the provided {@link UI.List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
                 .withEntries( entries );
     }
 
@@ -5423,7 +5491,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A fluent builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table() {
-        return new UIForTable<>(new BuilderState<>(UI.Table.class, ()->new UI.Table()));
+        return new UIForTable<>(new BuilderState<>(UI.Table.class, UI.Table::new));
     }
 
     /**
