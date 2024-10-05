@@ -1490,7 +1490,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} is {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane( UI.Side tabsSide) {
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( UI.Side tabsSide ) {
         NullUtil.nullArgCheck(tabsSide, "tabsPosition", UI.Side.class);
         return tabbedPane().withTabPlacementAt(tabsSide);
     }
@@ -1661,7 +1661,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Tab tab( UIForAnySwing<?, ?> builder ) {
         NullUtil.nullArgCheck(builder, "builder", UIForAnySwing.class);
-        return new Tab(null, builder.getComponent(), null, null, null, null, null, null, null);
+        return new Tab(null, builder.get((Class) builder.getType()), null, null, null, null, null, null, null);
     }
 
     /**
@@ -2477,7 +2477,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
      *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
-     *      UI.scrollPanels(Align.HORIZONTAL)
+     *      UI.scrollPanels(UI.Align.HORIZONTAL)
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
      *      .add(UI.textArea("I am a text area with this text inside."))
      *      .add(UI.label("I am a label!"))
@@ -2487,7 +2487,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param align The alignment of the scroll panels.
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
-    public static UIForScrollPanels<JScrollPanels> scrollPanels(UI.Align align) {
+    public static UIForScrollPanels<JScrollPanels> scrollPanels( UI.Align align ) {
         return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, null)));
     }
 
@@ -2496,7 +2496,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
      *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
-     *      UI.scrollPanels(Align.HORIZONTAL, new Dimension(100,100))
+     *      UI.scrollPanels(UI.Align.HORIZONTAL, new Dimension(100,100))
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
      *      .add(UI.textArea("I am a text area with this text inside."))
      *      .add(UI.label("I am a label!"))
