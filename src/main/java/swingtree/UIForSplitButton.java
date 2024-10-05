@@ -95,6 +95,27 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         return withSelection(selection, clickEvent, Enum::toString);
     }
 
+    private static <E extends Enum<E>> Function<E, String> _exceptionSafeTextProvider( Function<E, String> textProvider ) {
+        return e -> {
+            try {
+                return textProvider.apply(e);
+            } catch (Exception ex) {
+                log.error("Error while providing split button text for enum value.", ex);
+            }
+            try {
+                return e.toString();
+            } catch (Exception ex) {
+                log.error("Error while providing split button text for enum value using 'toString()'.", ex);
+            }
+            try {
+                return e.name();
+            } catch (Exception ex) {
+                log.error("Error while providing split button text for enum value using 'name()'.", ex);
+            }
+            return "";
+        };
+    }
+
     /**
      *  Allows you to build {@link JSplitButton}s where the selectable options
      *  are represented by an {@link Enum} type, and the click event is
@@ -116,14 +137,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
         Objects.requireNonNull(textProvider, "textProvider");
-        Function<E, String> exceptionSafeTextProvider = e -> {
-            try {
-                return textProvider.apply(e);
-            } catch (Exception ex) {
-                log.error("Error while providing split button text for enum value.", ex);
-                return e.toString();
-            }
-        };
+        Function<E, String> exceptionSafeTextProvider = _exceptionSafeTextProvider(textProvider);
         return withText(selection.viewAsString())
                 ._with( thisComponent -> {
                     for ( E e : selection.type().getEnumConstants() )
@@ -175,14 +189,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Function<E, String> textProvider ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         Objects.requireNonNull(textProvider, "textProvider");
-        Function<E, String> exceptionSafeTextProvider = e -> {
-            try {
-                return textProvider.apply(e);
-            } catch (Exception ex) {
-                log.error("Error while providing split button text for enum value.", ex);
-                return e.toString();
-            }
-        };
+        Function<E, String> exceptionSafeTextProvider = _exceptionSafeTextProvider(textProvider);
         return withText(selection.viewAsString())
                 ._with( thisComponent -> {
                     for ( E e : selection.type().getEnumConstants() )
