@@ -3959,25 +3959,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForIcon<JIcon> icon( Size size, Icon icon ) {
         Objects.requireNonNull(size, "size");
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        int width = size.width().map( it -> it.intValue() ).orElse(0);
-        int height = size.height().map( it -> it.intValue() ).orElse(0);
-        float scale = UI.scale();
-
-        int scaleHint = Image.SCALE_SMOOTH;
-        if ( scale > 1.5f )
-            scaleHint = Image.SCALE_FAST;
-
-        width  = (int) (width * scale);
-        height = (int) (height * scale);
-
-        if ( icon instanceof SvgIcon) {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconSize(width, height);
-            return UI.icon(svgIcon);
-        } else {
-            Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
-            return UI.icon(new ImageIcon(scaled));
-        }
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(size, icon)));
     }
 
     /**

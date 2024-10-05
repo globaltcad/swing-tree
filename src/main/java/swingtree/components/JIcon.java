@@ -8,14 +8,17 @@ import sprouts.Val;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
+import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
+import swingtree.style.SvgIcon;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.plaf.ComponentUI;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.util.Map;
 
 /**
@@ -49,6 +52,12 @@ public class JIcon extends JLabel implements StylableComponent
 
     public JIcon(Icon icon) {
         super(icon);
+        updateUI();
+        dynamicIcon = null;
+    }
+
+    public JIcon(Size size, Icon icon) {
+        super(_scale(size, icon));
         updateUI();
         dynamicIcon = null;
     }
@@ -127,7 +136,34 @@ public class JIcon extends JLabel implements StylableComponent
                 if ( icon != null )
                     cache.put(declaration, icon);
             }
-            return icon;
+
+            Size size = declaration.size();
+            return (ImageIcon) _scale(size, icon);
         });
+    }
+
+    private static @Nullable Icon _scale(Size size, @Nullable Icon icon) {
+        int width = size.width().map(Float::intValue).orElse(0);
+        int height = size.height().map(Float::intValue).orElse(0);
+        float scale = UI.scale();
+
+        int scaleHint = Image.SCALE_SMOOTH;
+        if ( scale != 1f && icon != null) {
+            if (scale > 1.5f)
+                scaleHint = Image.SCALE_FAST; // High DPI is smooth enough.
+
+            width  = Math.round(width * scale);
+            height = Math.round(height * scale);
+
+        }
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconSize(width, height);
+            return svgIcon;
+        } else if ( icon instanceof ImageIcon ) {
+            Image scaled = ((ImageIcon)icon).getImage().getScaledInstance(width, height, scaleHint);
+            return new ImageIcon(scaled);
+        }
+        return icon;
     }
 }
