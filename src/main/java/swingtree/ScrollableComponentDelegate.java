@@ -375,8 +375,10 @@ public class ScrollableComponentDelegate
 
     @Override
     public boolean equals( Object obj ) {
-        if ( this == obj ) return true;
-        if ( obj == null || getClass() != obj.getClass() ) return false;
+        if ( this == obj )
+            return true;
+        if ( !(obj instanceof ScrollableComponentDelegate) )
+            return false;
         ScrollableComponentDelegate that = (ScrollableComponentDelegate) obj;
         return _preferredSize.equals(that._preferredSize) &&
                _unitIncrement.equals(that._unitIncrement) &&
