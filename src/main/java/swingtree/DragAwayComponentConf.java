@@ -4,7 +4,7 @@ import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
-import swingtree.layout.Location;
+import swingtree.layout.Position;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -112,8 +112,8 @@ public final class DragAwayComponentConf<C extends JComponent>
     private static final Action NO_ACTION = e -> {};
 
     public static <C extends JComponent> DragAwayComponentConf<C> of(
-        C component,
-        Location mousePosition
+        C        component,
+        Position mousePosition
     ) {
         return new DragAwayComponentConf<>(
                 component, mousePosition, true, 1, UI.Cursor.DEFAULT, null, null,
@@ -122,7 +122,7 @@ public final class DragAwayComponentConf<C extends JComponent>
     }
 
     private final C                      _component;
-    private final Location               _mousePosition;
+    private final Position               _mousePosition;
     private final boolean                _enabled;
     private final double                 _opacity;
     private final UI.Cursor              _cursor;
@@ -139,7 +139,7 @@ public final class DragAwayComponentConf<C extends JComponent>
 
     private DragAwayComponentConf(
         C                      component,
-        Location               mousePosition,
+        Position               mousePosition,
         boolean                enabled,
         double                 opacity,
         UI.Cursor              cursor,
@@ -187,7 +187,7 @@ public final class DragAwayComponentConf<C extends JComponent>
      *
      * @return The mouse position of the drag operation.
      */
-    public Location mousePosition() {
+    public Position mousePosition() {
         return _mousePosition;
     }
 

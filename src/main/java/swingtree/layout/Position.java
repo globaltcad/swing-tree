@@ -17,9 +17,9 @@ import java.util.Objects;
  *  with a modified value.
  */
 @Immutable
-public final class Location
+public final class Position
 {
-    private final static Location ORIGIN = new Location( 0, 0 );
+    private final static Position ORIGIN = new Position( 0, 0 );
 
     /**
      *  A factory method that creates a new location with the specified x- and y-coordinates
@@ -30,11 +30,11 @@ public final class Location
      * @return A new location with the specified x- and y-coordinates.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Location of( float x, float y ) {
+    public static Position of( float x, float y ) {
         if ( x == 0 && y == 0 )
             return ORIGIN;
 
-        return new Location(x, y);
+        return new Position(x, y);
     }
 
     /**
@@ -45,12 +45,12 @@ public final class Location
      * @return A new location with the x- and y-coordinates of the specified point.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Location of( Point p ) {
+    public static Position of(Point p ) {
         Objects.requireNonNull(p);
         return of( p.x, p.y );
     }
 
-    public static Location origin() {
+    public static Position origin() {
         return ORIGIN;
     }
 
@@ -58,7 +58,7 @@ public final class Location
     final float _y;
 
 
-    private Location( float x, float y ) {
+    private Position( float x, float y ) {
         _x = x;
         _y = y;
     }
@@ -94,7 +94,7 @@ public final class Location
      * @return A new location with the same x-coordinate as this location
      *         and the specified y-coordinate.
      */
-    public Location withY( int y ) {
+    public Position withY(int y ) {
         return of( _x, y );
     }
 
@@ -107,7 +107,7 @@ public final class Location
      * @return A new location with the same y-coordinate as this location
      *         and the specified x-coordinate.
      */
-    public Location withX( int x ) {
+    public Position withX(int x ) {
         return of( x, _y );
     }
 
@@ -120,19 +120,19 @@ public final class Location
      * @return A new location with the x- and y-coordinates of this location
      *         increased by the specified values.
      */
-    public Location plus( float dx, float dy ) {
+    public Position plus(float dx, float dy ) {
         return of( _x + dx, _y + dy );
     }
 
     /**
      *  Creates a new location where the x- and y-coordinates of the specified
-     *  {@link Location} are added to the x- and y-coordinates of this location.
+     *  {@link Position} are added to the x- and y-coordinates of this location.
      *
      * @param other The location to add to this location.
      * @return A new location with the x- and y-coordinates of this location
      *         increased by the x- and y-coordinates of the specified location.
      */
-    public Location plus( Location other ) {
+    public Position plus(Position other ) {
         return of( _x + other._x, _y + other._y );
     }
 
@@ -145,26 +145,26 @@ public final class Location
      * @return A new location with the x- and y-coordinates of this location
      *         decreased by the specified values.
      */
-    public Location minus( float dx, float dy ) {
+    public Position minus(float dx, float dy ) {
         return of( _x - dx, _y - dy );
     }
 
     /**
      *  Creates a new location where the x- and y-coordinates of the specified
-     *  {@link Location} are subtracted from the x- and y-coordinates of this location.
+     *  {@link Position} are subtracted from the x- and y-coordinates of this location.
      *
      * @param other The location to subtract from this location.
      * @return A new location with the x- and y-coordinates of this location
      *         decreased by the x- and y-coordinates of the specified location.
      */
-    public Location minus( Location other ) {
+    public Position minus(Position other ) {
         return of( _x - other._x, _y - other._y );
     }
 
     /**
-     *  A {@link Location} consists of two x and y coordinates in 2D space, which is
+     *  A {@link Position} consists of two x and y coordinates in 2D space, which is
      *  why this convenience method allows you to transform this
-     *  {@link Location} object to an AWT {@link Point}.
+     *  {@link Position} object to an AWT {@link Point}.
      *
      * @return A new AWT {@link Point} with the same x- and y-coordinates as this location.
      */
@@ -186,7 +186,7 @@ public final class Location
         if ( o == this ) return true;
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
-        Location other = (Location) o;
+        Position other = (Position) o;
         return _x == other._x && _y == other._y;
     }
 

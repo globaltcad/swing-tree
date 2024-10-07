@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.layout.Bounds
-import swingtree.layout.Location
+import swingtree.layout.Position
 import swingtree.layout.Size
 
 @Title("Utility Primitives")
@@ -20,7 +20,7 @@ import swingtree.layout.Size
     and ensure that they behave as expected.
 
 ''')
-@Subject([Bounds, Size, Location])
+@Subject([Bounds, Size, Position])
 class Primitives_Spec extends Specification
 {
     def 'You can merge two bounds together to form one encompassing bounds.'()
@@ -182,7 +182,7 @@ class Primitives_Spec extends Specification
     def 'A `Location` object can be created with an x and y coordinate.'()
     {
         given:
-            var location = Location.of(128, 62)
+            var location = Position.of(128, 62)
         expect:
             location.x() == 128
             location.y() == 62
@@ -191,7 +191,7 @@ class Primitives_Spec extends Specification
     def 'A `Location` can have negative x and y coordinates.'()
     {
         given:
-            var location = Location.of(-1, -7)
+            var location = Position.of(-1, -7)
         expect:
             location.x() == -1
             location.y() == -7

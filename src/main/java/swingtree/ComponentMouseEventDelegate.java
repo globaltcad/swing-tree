@@ -1,5 +1,7 @@
 package swingtree;
 
+import swingtree.layout.Position;
+
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
@@ -47,49 +49,63 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      *
      * @return true if the left mouse button was active
      */
-    public boolean isLeftMouseButton() { return SwingUtilities.isLeftMouseButton(getEvent()); }
+    public final boolean isLeftMouseButton() {
+        return SwingUtilities.isLeftMouseButton(getEvent());
+    }
 
     /**
      * Returns true if the mouse event of this delegate is the right mouse button.
      *
      * @return true if the right mouse button was active
      */
-    public boolean isRightMouseButton() { return SwingUtilities.isRightMouseButton(getEvent()); }
+    public final boolean isRightMouseButton() {
+        return SwingUtilities.isRightMouseButton(getEvent());
+    }
 
     /**
      * Returns true if the mouse event of this delegate is the middle mouse button.
      *
      * @return true if the middle mouse button was active
      */
-    public boolean isMiddleMouseButton() { return SwingUtilities.isMiddleMouseButton(getEvent()); }
+    public final boolean isMiddleMouseButton() {
+        return SwingUtilities.isMiddleMouseButton(getEvent());
+    }
 
     /**
      * Returns whether the Alt modifier is down on the event of this delegate.
      *
      * @return true if the alt modifier is down
      */
-    public boolean isAltDown() { return getEvent().isAltDown(); }
+    public final boolean isAltDown() {
+        return getEvent().isAltDown();
+    }
 
     /**
      * Returns whether the Control modifier is down on the event of this delegate.
      *
      * @return true if the control modifier is down
      */
-    public boolean isCtrlDown() { return getEvent().isControlDown(); }
+    public final boolean isCtrlDown() {
+        return getEvent().isControlDown();
+    }
 
     /**
      * Returns whether the Shift modifier is down on the event of this delegate.
      *
      * @return true if the shift modifier is down
      */
-    public boolean isShiftDown() { return getEvent().isShiftDown(); }
+    public final boolean isShiftDown() {
+        return getEvent().isShiftDown();
+    }
 
     /**
      * Returns whether the Meta modifier is down on the event of this delegate.
      *
      * @return true if the meta modifier is down
      */
-    public boolean isMetaDown() { return getEvent().isMetaDown(); }
+    public final boolean isMetaDown() {
+        return getEvent().isMetaDown();
+    }
 
     /**
      * Returns the number of mouse clicks associated with the event of this delegate.
@@ -97,21 +113,39 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      *
      * @return An integer indicating the number of mouse clicks associated with the mouse event.
      */
-    public int clickCount() { return getEvent().getClickCount(); }
+    public final int clickCount() {
+        return getEvent().getClickCount();
+    }
 
     /**
      * Returns the x coordinate of the mouse event of this delegate.
      *
      * @return integer value for the x coordinate
      */
-    public int mouseX() { return getEvent().getX(); }
+    public final int mouseX() {
+        return getEvent().getX();
+    }
 
     /**
      * Returns the y coordinate of the mouse event of this delegate.
      *
      * @return integer value for the y coordinate
      */
-    public int mouseY() { return getEvent().getY(); }
+    public final int mouseY() {
+        return getEvent().getY();
+    }
+
+    /**
+     * Returns the position of the mouse event of this delegate
+     * in the form of an immutable {@link Position} value object.
+     * So you may safely share this object without
+     * having to worry about side effects.
+     *
+     * @return the position of the mouse event
+     */
+    public final Position mousePosition() {
+        return Position.of(getEvent().getPoint());
+    }
 
     /**
      * Returns the absolute horizontal x position of the event of this delegate.
@@ -123,7 +157,9 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      *
      * @return x  an integer indicating absolute horizontal position.
      */
-    public int mouseXOnScreen() { return getEvent().getXOnScreen(); }
+    public final int mouseXOnScreen() {
+        return getEvent().getXOnScreen();
+    }
 
     /**
      * Returns the absolute vertical y position of the event of this delegate.
@@ -135,6 +171,20 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      *
      * @return y  an integer indicating absolute vertical position.
      */
-    public int mouseYOnScreen() { return getEvent().getYOnScreen(); }
+    public final int mouseYOnScreen() {
+        return getEvent().getYOnScreen();
+    }
+
+    /**
+     * Returns the absolute x and y position of the event of this delegate
+     * in the form of an immutable {@link Position} value object.
+     * So you may safely share this object without
+     * having to worry about side effects.
+     *
+     * @return the absolute position of the mouse event
+     */
+    public final Position mousePositionOnScreen() {
+        return Position.of(getEvent().getLocationOnScreen());
+    }
 
 }

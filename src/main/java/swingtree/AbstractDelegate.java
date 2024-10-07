@@ -3,13 +3,14 @@ package swingtree;
 import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
-import swingtree.animation.AnimationStatus;
 import swingtree.animation.AnimationDispatcher;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 import swingtree.layout.Bounds;
+import swingtree.layout.Position;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
@@ -137,13 +138,15 @@ abstract class AbstractDelegate<C extends JComponent>
     /**
      *  As a delegate to the underlying component, you can use this method to
      *  conveniently access the location of the component relative to its parent
-     *  in the form of a {@link Point} object.
-     *  The value returned by this method is equal to the value returned by
-     *  {@link #getX()} and {@link #getY()}.
+     *  in the form of an immutable {@link Position} value object.
+     *  The value returned by this method is equal to the coordinate
+     *  values returned by {@link #getX()} and {@link #getY()}.
      *
      * @return The location of the component relative to its parent.
      */
-    public final Point getLocation() { return _component().getLocation(); }
+    public final Position getLocation() {
+        return Position.of(_component().getLocation());
+    }
 
     /**
      *  This is class a delegate API, which means that it represents
@@ -515,7 +518,8 @@ abstract class AbstractDelegate<C extends JComponent>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the bounds of the component.
+     *  conveniently get the bounds of the component in the form of an immutable {@link Bounds} value object.
+     *  The bounds consist of a location and a size which are relative to the component's parent.
      *  <p>
      *  See {@link Component#getBounds()} for more information.
      *  </p>
@@ -523,8 +527,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return The bounds of the component.
      *          This is relative to the component's parent.
      */
-    public final Rectangle getBounds() {
-        return _component().getBounds();
+    public final Bounds getBounds() {
+        return Bounds.of(_component().getBounds());
     }
 
     /**
