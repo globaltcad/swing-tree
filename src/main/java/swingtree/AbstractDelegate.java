@@ -3,8 +3,8 @@ package swingtree;
 import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
-import swingtree.animation.AnimationStatus;
 import swingtree.animation.AnimationDispatcher;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Painter;
@@ -518,7 +518,8 @@ abstract class AbstractDelegate<C extends JComponent>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the bounds of the component.
+     *  conveniently get the bounds of the component in the form of an immutable {@link Bounds} value object.
+     *  The bounds consist of a location and a size which are relative to the component's parent.
      *  <p>
      *  See {@link Component#getBounds()} for more information.
      *  </p>
@@ -526,8 +527,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return The bounds of the component.
      *          This is relative to the component's parent.
      */
-    public final Rectangle getBounds() {
-        return _component().getBounds();
+    public final Bounds getBounds() {
+        return Bounds.of(_component().getBounds());
     }
 
     /**
