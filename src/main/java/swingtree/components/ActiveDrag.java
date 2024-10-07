@@ -4,7 +4,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.DragAwayComponentConf;
 import swingtree.layout.Bounds;
-import swingtree.layout.Location;
+import swingtree.layout.Position;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
@@ -27,7 +27,7 @@ final class ActiveDrag {
 
     private static final ActiveDrag NO_DRAG = new ActiveDrag(
                                                         null, null, 0,
-                                                        Location.origin(), Location.origin(), Location.origin(),
+                                                        Position.origin(), Position.origin(), Position.origin(),
                                                         null
                                                     );
 
@@ -36,18 +36,18 @@ final class ActiveDrag {
     private final @Nullable Component                draggedComponent;
     private final @Nullable BufferedImage            currentDragImage;
     private final int                                componentHash;
-    private final Location                           start;
-    private final Location                           offset;
-    private final Location                           localOffset;
+    private final Position start;
+    private final Position offset;
+    private final Position localOffset;
     private final @Nullable DragAwayComponentConf<?> dragConf;
 
     private ActiveDrag(
         @Nullable Component                draggedComponent,
         @Nullable BufferedImage            currentDragImage,
         int                                componentHash,
-        Location                           start,
-        Location                           offset,
-        Location                           localOffset,
+        Position                           start,
+        Position                           offset,
+        Position                           localOffset,
         @Nullable DragAwayComponentConf<?> dragConf
     ) {
         this.draggedComponent  = draggedComponent;
@@ -85,7 +85,7 @@ final class ActiveDrag {
         if ( !(component instanceof JComponent) )
             return this; // We only support JComponents for dragging
 
-        Location mousePosition = Location.of(dragStart);
+        Position mousePosition = Position.of(dragStart);
 
         Optional<DragAwayComponentConf<JComponent>> dragConf;
         do {
@@ -100,12 +100,12 @@ final class ActiveDrag {
         }
         while ( !dragConf.isPresent() || dragConf.map(it->!it.enabled()).orElse(false) );
 
-        Location absoluteComponentPosition = Location.of(convertPoint(component, 0,0, rootPane.getContentPane()));
+        Position absoluteComponentPosition = Position.of(convertPoint(component, 0,0, rootPane.getContentPane()));
 
         return this.withDragConf(dragConf.get())
                     .withDraggedComponent(component)
                      .withStart(mousePosition)
-                     .withOffset(Location.origin())
+                     .withOffset(Position.origin())
                      .withLocalOffset(mousePosition.minus(absoluteComponentPosition))
                      .renderComponentIntoImage();
     }
@@ -167,7 +167,7 @@ final class ActiveDrag {
     {
         if ( draggedComponent != null ) {
             Point point = e.getPoint();
-            ActiveDrag updatedDrag = this.withOffset(Location.of(point.x - start.x(), point.y - start.y()))
+            ActiveDrag updatedDrag = this.withOffset(Position.of(point.x - start.x(), point.y - start.y()))
                                          .renderComponentIntoImage();
             return updatedDrag;
         }
@@ -193,20 +193,20 @@ final class ActiveDrag {
                 of the glass pane of the root pane.
             */
             if (draggedComponent != null && currentDragImage != null) {
-                Location whereToRender = getRenderPosition();
+                Position whereToRender = getRenderPosition();
                 g.drawImage(currentDragImage, (int) whereToRender.x(), (int) whereToRender.y(), null);
             }
         }
     }
 
-    Location getRenderPosition() {
-        return Location.of(
+    Position getRenderPosition() {
+        return Position.of(
                 (start.x() + offset.x() - localOffset.x()),
                 (start.y() + offset.y() - localOffset.y())
             );
     }
 
-    Location getStart() {
+    Position getStart() {
         return start;
     }
 
@@ -218,15 +218,15 @@ final class ActiveDrag {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withStart(Location start) {
+    public ActiveDrag withStart(Position start) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withOffset(Location offset) {
+    public ActiveDrag withOffset(Position offset) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withLocalOffset(Location localOffset) {
+    public ActiveDrag withLocalOffset(Position localOffset) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 

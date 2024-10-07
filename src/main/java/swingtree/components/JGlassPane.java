@@ -9,7 +9,7 @@ import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
 import swingtree.layout.Bounds;
-import swingtree.layout.Location;
+import swingtree.layout.Position;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
@@ -150,8 +150,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 But for this to work we need to repaint the area where the drag image was
                 previously rendered and the area where it will be rendered next.
             */
-            Location previousWhereToRender = previousActiveDrag.getRenderPosition();
-            Location whereToRenderNext = currentActiveDrag.getRenderPosition();
+            Position previousWhereToRender = previousActiveDrag.getRenderPosition();
+            Position whereToRenderNext = currentActiveDrag.getRenderPosition();
             Size size = currentActiveDrag.draggedComponentSize();
             Bounds previousArea = Bounds.of(previousWhereToRender, size);
             Bounds nextArea     = Bounds.of(whereToRenderNext, size);
@@ -250,7 +250,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         );
         // Is the other active drag image currently hovering over this glass pane?
         return sourceDrag.withStart(
-                        Location.of(
+                        Position.of(
                                 targetActiveDragRelativePosition.x,
                                 targetActiveDragRelativePosition.y
                         )

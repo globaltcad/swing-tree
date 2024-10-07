@@ -7,12 +7,11 @@ import swingtree.UI;
 import swingtree.animation.AnimationStatus;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
-import swingtree.layout.Location;
+import swingtree.layout.Position;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
@@ -76,7 +75,7 @@ public final class ComponentExtension<C extends JComponent>
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
     private @Nullable BufferedImage _bufferedImage = null;
 
-    private @Nullable Function<Location, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
+    private @Nullable Function<Position, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
 
 
     private ComponentExtension( C owner ) {
@@ -93,7 +92,7 @@ public final class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_bufferedImage);
     }
 
-    public void addDragAwayConf( Function<Location, DragAwayComponentConf<C>> supplier ) {
+    public void addDragAwayConf( Function<Position, DragAwayComponentConf<C>> supplier ) {
         if ( _dragAwayConfigurator == null )
             _dragAwayConfigurator = supplier;
         else {
@@ -110,7 +109,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param mousePosition The current mouse position.
      * @return An optional of the resulting {@link DragAwayComponentConf} object.
      */
-    public Optional<DragAwayComponentConf<C>> getDragAwayConf( Location mousePosition ) {
+    public Optional<DragAwayComponentConf<C>> getDragAwayConf( Position mousePosition ) {
         if ( _dragAwayConfigurator == null )
             return Optional.empty();
 

@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  *  An immutable value object that represents the position and size of a component
- *  in the form of an x and y coordinate modeled by a {@link Location} object
+ *  in the form of an x and y coordinate modeled by a {@link Position} object
  *  and a width and height modeled by a {@link Size} object.
  *  Note the rectangular bounds object is positioned in a coordinate system
  *  where the y-axis is growing positively downwards and the x-axis is growing
@@ -19,18 +19,18 @@ import java.util.Objects;
  *  You may use this object instead of {@code null} to represent a missing bounds object.
  *  <p>
  *  Also note that the {@link #equals(Object)} and {@link #hashCode()} methods
- *  are implemented to compare the {@link Location} and {@link Size} objects
+ *  are implemented to compare the {@link Position} and {@link Size} objects
  *  for value based equality instead of reference based equality.
  */
 @Immutable
 public final class Bounds
 {
-    private final static Bounds EMPTY = new Bounds(Location.origin(), Size.unknown());
+    private final static Bounds EMPTY = new Bounds(Position.origin(), Size.unknown());
 
     /**
      *  Returns an empty bounds object, which is the null object for this class.
      *  <p>
-     *  The returned bounds object has a location of {@link Location#origin()}
+     *  The returned bounds object has a location of {@link Position#origin()}
      *  and a size of {@link Size#unknown()}.
      *
      *  @return an empty bounds object that is the null object for this class.
@@ -39,26 +39,26 @@ public final class Bounds
         return EMPTY;
     }
 
-    private final Location _location;
+    private final Position _position;
     private final Size     _size;
 
     /**
      *  Returns a bounds object with the specified location and size.
      *  <p>
-     *  If the location is {@link Location#origin()} and the size is
+     *  If the location is {@link Position#origin()} and the size is
      *  {@link Size#unknown()} then the {@link #none()} object is returned.
      *
-     *  @param location the location of the bounds object.
+     *  @param position the location of the bounds object.
      *  @param size the size of the bounds object.
      *  @return a bounds object with the specified location and size.
      */
-    public static Bounds of( Location location, Size size ) {
-        Objects.requireNonNull(location);
+    public static Bounds of(Position position, Size size ) {
+        Objects.requireNonNull(position);
         Objects.requireNonNull(size);
-        if ( location.equals(Location.origin()) && size.equals(Size.unknown()) )
+        if ( position.equals(Position.origin()) && size.equals(Size.unknown()) )
             return EMPTY;
 
-        return new Bounds(location, size);
+        return new Bounds(position, size);
     }
 
     /**
@@ -79,7 +79,7 @@ public final class Bounds
         if ( width < 0 || height < 0 )
             return EMPTY;
 
-        return new Bounds(Location.of(x, y), Size.of(width, height));
+        return new Bounds(Position.of(x, y), Size.of(width, height));
     }
 
     /**
@@ -100,7 +100,7 @@ public final class Bounds
         if ( width < 0 || height < 0 )
             return EMPTY;
 
-        return new Bounds(Location.of(x, y), Size.of(width, height));
+        return new Bounds(Position.of(x, y), Size.of(width, height));
     }
 
     /**
@@ -116,23 +116,23 @@ public final class Bounds
         return of(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
 
-    private Bounds( Location location, Size size ) {
-        _location = Objects.requireNonNull(location);
+    private Bounds(Position position, Size size ) {
+        _position = Objects.requireNonNull(position);
         _size     = Objects.requireNonNull(size);
     }
 
     /**
      *  If you think of the bounds object as a rectangle, then the
-     *  {@link Location} defines the top left corner and the {@link Size}
+     *  {@link Position} defines the top left corner and the {@link Size}
      *  defines the width and height of the rectangle.
      *  Note that the y-axis is growing positively downwards and the x-axis
      *  is growing positively to the right.
      *
-     * @return The {@link Location} of this bounds object,
+     * @return The {@link Position} of this bounds object,
      *         which contains the x and y coordinates.
      */
-    public Location location() {
-        return _location;
+    public Position location() {
+        return _position;
     }
 
     /**
@@ -157,8 +157,8 @@ public final class Bounds
 
     /**
      *  The {@link Size} of define the width and height of the bounds
-     *  starting from the x and y coordinates of the {@link Location}.
-     *  Note that the {@link Location} is always the top left corner
+     *  starting from the x and y coordinates of the {@link Position}.
+     *  Note that the {@link Position} is always the top left corner
      *  of the bounds object where the y-axis is growing positively downwards
      *  and the x-axis is growing positively to the right.
      *
@@ -178,7 +178,7 @@ public final class Bounds
      * @return A new bounds object with a new location that has the specified x coordinate.
      */
     public Bounds withX( int x ) {
-        return new Bounds(_location.withX(x), _size);
+        return new Bounds(_position.withX(x), _size);
     }
 
     /**
@@ -190,7 +190,7 @@ public final class Bounds
      * @return A new bounds object with a new location that has the specified y coordinate.
      */
     public Bounds withY( int y ) {
-        return new Bounds(_location.withY(y), _size);
+        return new Bounds(_position.withY(y), _size);
     }
 
     /**
@@ -202,7 +202,7 @@ public final class Bounds
      * @return A new bounds object with a new size that has the specified width.
      */
     public Bounds withWidth( int width ) {
-        return new Bounds(_location, _size.withWidth(width));
+        return new Bounds(_position, _size.withWidth(width));
     }
 
     /**
@@ -214,7 +214,7 @@ public final class Bounds
      * @return A new bounds object with a new size that has the specified height.
      */
     public Bounds withHeight( int height ) {
-        return new Bounds(_location, _size.withHeight(height));
+        return new Bounds(_position, _size.withHeight(height));
     }
 
     /**
@@ -227,7 +227,7 @@ public final class Bounds
      * @return A new bounds object with a new size that has the specified width and height.
      */
     public Bounds withSize( int width, int height ) {
-        return new Bounds(_location, Size.of(width, height));
+        return new Bounds(_position, Size.of(width, height));
     }
 
     /**
@@ -244,13 +244,13 @@ public final class Bounds
         if ( this.equals(other) )
             return this;
 
-        final float thisLeft   = _location.x();
-        final float thisTop    = _location.y();
+        final float thisLeft   = _position.x();
+        final float thisTop    = _position.y();
         final float thisRight  = thisLeft + _size._width;
         final float thisBottom = thisTop  + _size._height;
 
-        final float otherLeft   = other._location.x();
-        final float otherTop    = other._location.y();
+        final float otherLeft   = other._position.x();
+        final float otherTop    = other._position.y();
         final float otherRight  = otherLeft + other._size._width;
         final float otherBottom = otherTop  + other._size._height;
 
@@ -317,13 +317,13 @@ public final class Bounds
      * @return A {@link Rectangle} object with the same location and size as this bounds object.
      */
     public Rectangle toRectangle() {
-        return new Rectangle((int) _location.x(), (int) _location.y(), (int) _size._width, (int) _size._height);
+        return new Rectangle((int) _position.x(), (int) _position.y(), (int) _size._width, (int) _size._height);
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "location=" + _location + ", "+
+                    "location=" + _position + ", "+
                     "size="     + _size     +
                 "]";
     }
@@ -343,7 +343,7 @@ public final class Bounds
      *        are equal to the location and size of this bounds object.
      */
     public boolean equals( int x, int y, int width, int height ) {
-        return _location.x() == x && _location.y() == y && _size._width == width && _size._height == height;
+        return _position.x() == x && _position.y() == y && _size._width == width && _size._height == height;
     }
 
     @Override
@@ -352,12 +352,12 @@ public final class Bounds
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
         Bounds that = (Bounds)o;
-        return Objects.equals(this._location, that._location) &&
+        return Objects.equals(this._position, that._position) &&
                Objects.equals(this._size,     that._size);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_location, _size);
+        return Objects.hash(_position, _size);
     }
 }
