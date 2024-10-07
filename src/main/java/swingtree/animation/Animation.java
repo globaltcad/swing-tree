@@ -56,6 +56,10 @@ public interface Animation
      *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param status The current state of the animation.
+     * @throws Exception If during the execution of this method an error is raised.
+     *                   <b>Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.</b>
      */
     void run( AnimationStatus status ) throws Exception;
 
@@ -70,6 +74,10 @@ public interface Animation
      *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param status The current state of the animation.
+     * @throws Exception If during the execution of this method an error is raised.
+     *                   <b>Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.</b>
      */
     default void finish( AnimationStatus status ) throws Exception {
         /* Override this method to perform cleanup after the animation has finished */

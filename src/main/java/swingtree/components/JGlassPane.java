@@ -291,6 +291,15 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         }
     }
 
+    /**
+     *  Marries this glass pane to a {@link JRootPane} object.
+     *  Note that it is expected that the supplied {@link JRootPane}
+     *  is the same root pane that this current glass pane is attached to.
+     *  If the supplied {@link JRootPane} is {@code null}, then this glass pane
+     *  is detached from the current root pane.
+     *
+     * @param pane The {@link JRootPane} object to which this glass pane should be attached.
+     */
     public void toRootPane(@Nullable JRootPane pane) {
         if( pane != null )
             attachToRootPane(pane);

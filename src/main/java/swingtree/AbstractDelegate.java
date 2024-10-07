@@ -80,9 +80,14 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
 
-    protected C _component() { return _component; }
+    protected final C _component() { return _component; }
 
-    protected List<JComponent> _siblingsSource() {
+    /**
+     *  A library internal utility method that exposes the sibling components
+     *  of the delegated component.
+     * @return A list of sibling components.
+     */
+    protected final List<JComponent> _siblingsSource() {
         return Optional.ofNullable(_component.getParent())
                 .map(Container::getComponents)
                 .map(Arrays::stream)
@@ -265,10 +270,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final Color getBackground() {
         Color backgroundColor = _component().getBackground();
-        if ( backgroundColor == null )
-            return UI.Color.UNDEFINED;
-        else
-            return backgroundColor;
+        return Objects.requireNonNullElse(backgroundColor, UI.Color.UNDEFINED);
     }
 
     /**
@@ -306,10 +308,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final Color getForeground() {
         Color foregroundColor = _component().getForeground();
-        if ( foregroundColor == null )
-            return UI.Color.UNDEFINED;
-        else
-            return foregroundColor;
+        return Objects.requireNonNullElse(foregroundColor, UI.Color.UNDEFINED);
     }
 
     /**

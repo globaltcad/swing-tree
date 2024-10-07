@@ -1563,6 +1563,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * }</pre>
      *
      * @param layer The layer on which the noise should be rendered.
+     * @param noiseName The name of the noise which is used to create,
+     *                  identify and possibly override a noise with the same name.
      * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
@@ -1731,6 +1733,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  by using different names. <br>
      *  Two sub-styles with the same name will override each other. <br>
      *
+     * @param textName The name of the text style that you want to define.
      * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
      *               The configurator function is called with the default text style of the component.
      * @return A new {@link ComponentStyleDelegate} with the provided text style.

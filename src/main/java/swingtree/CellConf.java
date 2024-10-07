@@ -59,7 +59,7 @@ public final class CellConf<C extends JComponent, V>
 {
     private static final Logger log = LoggerFactory.getLogger(CellConf.class);
 
-    public static <C extends JComponent, V> CellConf<C, V> of(
+    static <C extends JComponent, V> CellConf<C, V> of(
         @Nullable Component lastRenderer,
         C                   owner,
         @Nullable V         entry,

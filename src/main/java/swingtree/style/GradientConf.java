@@ -375,7 +375,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *  Define the offset of the gradient which is the start position of the gradient
      *  on the x and y-axis. <br>
      *  Note that the offset is relative to the component that the gradient is applied to.
-     *  <p>
+     *
      * @param x The gradient start offset on the x-axis.
      * @param y The gradient start offset on the y-axis.
      * @return A new gradient style with the specified offset.

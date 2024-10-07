@@ -23,6 +23,16 @@ package swingtree.api;
 @FunctionalInterface
 public interface Configurator<T>
 {
+    /**
+     *  Returns a configurator that does nothing, i.e. it returns the
+     *  "null" object or "no-op" object for this interface.
+     *  It is recommended to use the returned instance
+     *  instead of null to avoid null pointer exceptions.
+     *
+     * @param <T> The type of the configuration object.
+     *
+     * @return A configurator that does nothing.
+     */
     static <T> Configurator<T> none() {
         return (Configurator<T>) Constants.CONFIGURATOR_NONE;
     }
@@ -38,6 +48,7 @@ public interface Configurator<T>
      *               which uses method chaining to for defining its properties.
      *
      * @return The fully transformed/updated configuration object.
+     * @throws Exception If the configuration encounters errors in the execution of its implementations.
      */
     T configure( T config ) throws Exception;
 

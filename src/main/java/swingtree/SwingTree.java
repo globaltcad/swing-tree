@@ -20,13 +20,15 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  *  A {@link SwingTree} is a singleton that holds global configuration context for the SwingTree library.
@@ -1274,7 +1276,7 @@ public final class SwingTree
 
             // read config file
             ArrayList<String> lines = new ArrayList<>( 200 );
-            try( BufferedReader reader = new BufferedReader( new FileReader( file ) ) ) {
+            try( BufferedReader reader = Files.newBufferedReader(file.toPath(), UTF_8) ) {
                 String line;
                 while( (line = reader.readLine()) != null )
                     lines.add( line );

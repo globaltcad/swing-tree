@@ -101,6 +101,15 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
+    /**
+     *  If it exists, this method invokes the user internal configurator function previously
+     *  set by the {@link #addDragAwayConf(Function)} method and returns an optional
+     *  of the resulting {@link DragAwayComponentConf} object, which holds the configuration
+     *  for starting a drag away operation using the AWT native {@link java.awt.dnd.DragSource}.
+     *
+     * @param mousePosition The current mouse position.
+     * @return An optional of the resulting {@link DragAwayComponentConf} object.
+     */
     public Optional<DragAwayComponentConf<C>> getDragAwayConf( Location mousePosition ) {
         if ( _dragAwayConfigurator == null )
             return Optional.empty();

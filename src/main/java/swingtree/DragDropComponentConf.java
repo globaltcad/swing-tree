@@ -100,6 +100,7 @@ public final class DragDropComponentConf<C extends JComponent>
      *
      * @param action An {@link Action} with a <code>DropTargetDragEvent</code>
      *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
      */
     public DragDropComponentConf<C> onDragEnter(Action<ComponentDelegate<C,DropTargetDragEvent>> action) {
         return new DragDropComponentConf<>(
@@ -119,6 +120,7 @@ public final class DragDropComponentConf<C extends JComponent>
      *
      * @param action An {@link Action} with a <code>DropTargetDragEvent</code>
      *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
      */
     public DragDropComponentConf<C> onDragOver(Action<ComponentDelegate<C,DropTargetDragEvent>> action) {
         return new DragDropComponentConf<>(
@@ -137,6 +139,7 @@ public final class DragDropComponentConf<C extends JComponent>
      *
      * @param action An {@link Action} with a <code>DropTargetDragEvent</code>
      *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
      */
     public DragDropComponentConf<C> onDropActionChanged(Action<ComponentDelegate<C,DropTargetDragEvent>> action) {
         return new DragDropComponentConf<>(
@@ -152,10 +155,11 @@ public final class DragDropComponentConf<C extends JComponent>
     /**
      * The supplied action is called while a drag operation is ongoing, when the mouse pointer has
      * exited the operable part of the drop site for the
-     * <code>DropTarget</code> registered with this listener.
+     * {@link DropTarget} registered with this listener.
      *
      * @param action An {@link Action} with a <code>DropTargetEvent</code>
      *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
      */
     public DragDropComponentConf<C> onDragExit(Action<ComponentDelegate<C,DropTargetEvent>> action) {
         return new DragDropComponentConf<>(
@@ -209,6 +213,7 @@ public final class DragDropComponentConf<C extends JComponent>
      * <P>
      * @param action An {@link Action} with a {@link DropTargetDropEvent}
      *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
      */
     public DragDropComponentConf<C> onDrop( Action<ComponentDelegate<C,DropTargetDropEvent>> action ) {
         return new DragDropComponentConf<>(

@@ -19,6 +19,10 @@ public interface Buildable<T>
      *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @return The object that this builder is responsible for.
+     * @throws Exception If during the execution of this method an error occurs.
+     *                   Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.
      */
     T build() throws Exception;
 }

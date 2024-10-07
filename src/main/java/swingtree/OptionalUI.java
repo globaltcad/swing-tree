@@ -453,6 +453,8 @@ public final class OptionalUI<C extends Component> {
      * inside the supplying function.
      * Use this to provide alternative UI components.
      *
+     * @param <A> The type of the component to be built.
+     * @param <B> The base type of the component to be built.
      * @param supplier the supplying function that produces a UI declaration
      *                 to be used if no component is present.
      * @return returns an {@code OptionalUI} describing the component of this
@@ -486,6 +488,8 @@ public final class OptionalUI<C extends Component> {
      * Otherwise, returns the current {@code OptionalUI} and the supplying function is not called.
      * Use this to define alternative UI declaration if a condition is met.
      *
+     * @param <A> The type of the component to be built.
+     * @param <B> The base type of the component to be built.
      * @param condition The boolean condition to check before calling the supplying function.
      *                  If false, the supplying function is simply ignored.
      * @param supplier the supplying function that produces a UI declaration

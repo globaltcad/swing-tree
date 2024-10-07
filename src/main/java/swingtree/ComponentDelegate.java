@@ -47,10 +47,13 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
 {
     private final E _event;
 
-
-    public ComponentDelegate(
-            C component, E event
-    ) {
+    /**
+     *  Creates a new delegate for the specified component and event.
+     *
+     * @param component The component for which the delegate is created.
+     * @param event The event that represents the action that was triggered either by the user or by the system.
+     */
+    public ComponentDelegate( C component, E event ) {
         super(false, component, component);
         _event = Objects.requireNonNull(event);
     }
@@ -89,6 +92,12 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
             UI.run( () -> action.accept(_component()) );
     }
 
+    /**
+     *  Exposes the event that represents the action that was triggered
+     *  either by the user or by the system.
+     *
+     * @return An object holding relevant information about an event that was triggered.
+     */
     public final E getEvent() { return _event; }
 
     /**
