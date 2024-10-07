@@ -270,7 +270,10 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final Color getBackground() {
         Color backgroundColor = _component().getBackground();
-        return Objects.requireNonNullElse(backgroundColor, UI.Color.UNDEFINED);
+        if ( backgroundColor == null )
+            return UI.Color.UNDEFINED;
+        else
+            return backgroundColor;
     }
 
     /**
@@ -308,7 +311,10 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final Color getForeground() {
         Color foregroundColor = _component().getForeground();
-        return Objects.requireNonNullElse(foregroundColor, UI.Color.UNDEFINED);
+        if ( foregroundColor == null )
+            return UI.Color.UNDEFINED;
+        else
+            return foregroundColor;
     }
 
     /**
