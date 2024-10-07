@@ -35,7 +35,7 @@ import java.awt.event.MouseEvent;
  */
 public class ComponentMouseEventDelegate<C extends JComponent> extends ComponentDelegate<C, MouseEvent>
 {
-    public ComponentMouseEventDelegate(
+    ComponentMouseEventDelegate(
         C component,
         MouseEvent event
     ) {

@@ -132,7 +132,12 @@ final class StyleConfLayers
     }
 
     StyleConfLayers map( Configurator<StyleConfLayer> f ) {
-        return of(_filter, f.configure(_background), f.configure(_content), f.configure(_border), f.configure(_foreground), _any == null ? null : f.configure(_any));
+        try {
+            return of(_filter, f.configure(_background), f.configure(_content), f.configure(_border), f.configure(_foreground), _any == null ? null : f.configure(_any));
+        } catch (Exception e) {
+            log.error("Error configuring style settings for component background.", e);
+            return this;
+        }
     }
 
     StyleConfLayers _scale( double factor ) {

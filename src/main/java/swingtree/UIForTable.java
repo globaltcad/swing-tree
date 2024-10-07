@@ -521,7 +521,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withModel( Buildable<BasicTableModel> dataModelBuilder ) {
         Objects.requireNonNull(dataModelBuilder);
-        return this.withModel(dataModelBuilder.build());
+        try {
+            return this.withModel(dataModelBuilder.build());
+        } catch (Exception e) {
+            log.error("Error while building a table model.", e);
+            return this;
+        }
     }
 
     /**
@@ -578,6 +583,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  You can also use the {@link UI#table(Configurator)} factory method to directly create a table
      *  with a custom table model. <br>
      *
+     * @param <E> The type of the table entry {@link Object}s.
      * @param itemType The type of the table entry {@link Object}s.
      * @param dataModelBuilder A lambda function which receives a builder API for a table model
      * @return This builder instance, to allow for further method chaining.

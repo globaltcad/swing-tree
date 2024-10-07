@@ -42,15 +42,23 @@ public interface AnimationTransformation<T>
      * @param value The current value of the animated item.
      * @return The updated value of the animated item based on the current status,
      *          typically the {@link AnimationStatus#progress()} number.
+     * @throws Exception If the method call encounters errors in the execution of its implementations.
+     *                   Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.
      */
-    T run( AnimationStatus status, T value );
+    T run( AnimationStatus status, T value ) throws Exception;
 
     /**
      *  This method is called after the animation has finished.
      *  The default implementation does nothing but returns the
      *  supplied value. <br>
      *  Implement this to create a cleaned up final version
-     *  of the item after the animation has finished.
+     *  of the item after the animation has finished. <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param status The current progress status of the animation, which
      *               is used to determine the intermediate values of
@@ -60,8 +68,12 @@ public interface AnimationTransformation<T>
      * @param value The final value of the animated item, which is
      *              expected to be an immutable object.
      * @return The final value of the animated item after the animation has finished.
+     * @throws Exception If the method call encounters errors in the execution of its implementations.
+     *                   Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.
      */
-    default T finish( AnimationStatus status, T value ) {
+    default T finish( AnimationStatus status, T value ) throws Exception {
         return value;
     }
 }

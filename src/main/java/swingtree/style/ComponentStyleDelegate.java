@@ -1392,8 +1392,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(shadowName);
         Objects.requireNonNull(styler);
         ShadowConf shadow = Optional.ofNullable(_styleConf.shadow(layer, shadowName)).orElse(ShadowConf.none());
+        try {
+            shadow = styler.configure(shadow);
+        } catch ( Exception e ) {
+            log.error("Failed to configure shadow '"+shadowName+"' for layer '"+layer+"' using styler: "+styler, e);
+        }
         // We clone the shadow map:
-        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.configure(shadow));
+        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, shadow);
         return _withStyle(_styleConf._withShadow(layer, newShadows));
     }
 
@@ -1558,6 +1563,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * }</pre>
      *
      * @param layer The layer on which the noise should be rendered.
+     * @param noiseName The name of the noise which is used to create,
+     *                  identify and possibly override a noise with the same name.
      * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
@@ -1726,6 +1733,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  by using different names. <br>
      *  Two sub-styles with the same name will override each other. <br>
      *
+     * @param textName The name of the text style that you want to define.
      * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
      *               The configurator function is called with the default text style of the component.
      * @return A new {@link ComponentStyleDelegate} with the provided text style.
@@ -1818,7 +1826,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     private ComponentStyleDelegate<C> _withFont( Configurator<FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
-        StyleConf updatedStyle = _styleConf._withFont(fontStyler.configure(_styleConf.font()));
+        FontConf fontConf = _styleConf.font();
+        try {
+            fontConf = fontStyler.configure(fontConf);
+        } catch ( Exception e ) {
+            log.error("Failed to configure font using styler: "+fontStyler, e);
+        }
+        StyleConf updatedStyle = _styleConf._withFont(fontConf);
         // We also update the text style, if it exists:
         updatedStyle = updatedStyle.text( text -> text.font(fontStyler) );
         return _withStyle(updatedStyle);
@@ -1841,7 +1855,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public final ComponentStyleDelegate<C> componentFont( Configurator<FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
-        StyleConf updatedStyle = _styleConf._withFont(fontStyler.configure(_styleConf.font()));
+        FontConf fontConf = _styleConf.font();
+        try {
+            fontConf = fontStyler.configure(fontConf);
+        } catch ( Exception e ) {
+            log.error("Failed to configure font using styler: "+fontStyler, e);
+        }
+        StyleConf updatedStyle = _styleConf._withFont(fontConf);
         return _withStyle(updatedStyle);
     }
 

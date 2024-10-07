@@ -160,7 +160,16 @@ public final class CellBuilder<C extends JComponent, E> {
                 return defaultRenderer.apply(value);
             else {
                 for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
-                    CellConf newCell = configurator.configure((CellConf)cell);
+                    CellConf newCell = cell;
+                    try {
+                        newCell = configurator.configure(newCell);
+                    } catch (Exception e) {
+                        log.error(
+                                "Failed to configure cell renderer for " +
+                                "component '"+cell.getHost().getClass().getSimpleName()+"'.",
+                                e
+                            );
+                    }
                     if ( newCell != null )
                         cell = newCell;
                 }
@@ -406,7 +415,16 @@ public final class CellBuilder<C extends JComponent, E> {
                                                     );
 
                 for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
-                    CellConf newCell = configurator.configure((CellConf)cell);
+                    CellConf newCell = cell;
+                    try {
+                        newCell = configurator.configure(newCell);
+                    } catch (Exception e) {
+                        log.error(
+                                "Failed to configure cell renderer for " +
+                                "component '"+_component.getClass().getSimpleName()+"'.",
+                                e
+                            );
+                    }
                     if ( newCell != null )
                         cell = newCell;
                 }
@@ -442,7 +460,16 @@ public final class CellBuilder<C extends JComponent, E> {
                 return Optional.empty();
             else {
                 for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
-                    CellConf<JComboBox<?>,Object> newCell = configurator.configure((CellConf)cell);
+                    CellConf<JComboBox<?>,Object> newCell = cell;
+                    try {
+                        newCell = configurator.configure((CellConf)newCell);
+                    } catch (Exception e) {
+                        log.error(
+                                "Failed to establish cell editor through cell configurator " +
+                                "for component '"+_component.getClass().getSimpleName()+"'.",
+                                e
+                            );
+                    }
                     try {
                         if ( newCell != null )
                             cell = newCell.view( v -> v.update( c -> c instanceof JTextField ? c : null ) );

@@ -12,9 +12,21 @@ import javax.swing.JOptionPane;
  */
 public enum ConfirmAnswer
 {
+    /**
+     *  The user selected the "yes" option in the dialog.
+     */
     YES,
+    /**
+     *  The user selected the "no" option in the dialog.
+     */
     NO,
+    /**
+     *  The user selected the "cancel" option in the dialog.
+     */
     CANCEL,
+    /**
+     *  The user closed the dialog without selecting any option.
+     */
     CLOSE;
 
     /**

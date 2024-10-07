@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -4009,7 +4010,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                     ComponentExtension.from(thisComponent).addDragAwayConf(mousePosition -> {
                         DragAwayComponentConf<C> conf = DragAwayComponentConf.of(thisComponent, mousePosition);
-                        return configurator.configure(conf);
+                        try {
+                            return configurator.configure(conf);
+                        } catch (Exception e) {
+                            log.error("Failed to configure drag away!", e);
+                        }
+                        return conf;
                     });
                })
                ._this();
@@ -4612,10 +4618,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     );
         });
         models.forEach( v -> {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(v);
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+v+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
             if ( attr == null )
-                _addBuildersTo( thisComponent, viewSupplier.createViewFor(v) );
+                _addBuildersTo( thisComponent, view );
             else
-                _addBuildersTo( thisComponent, attr, viewSupplier.createViewFor(v) );
+                _addBuildersTo( thisComponent, attr, view );
         });
     }
 
@@ -4626,14 +4641,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         final int index = thisComponent.getComponentCount();
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
-            if ( viewable.isPresent() )
-                _addBuildersTo(thisComponent, viewSupplier.createViewFor(viewable.get()));
-            else
+            if ( viewable.isPresent() ) {
+                UIForAnySwing<?, ?> view = null;
+                try {
+                    view = viewSupplier.createViewFor(viewable.get());
+                } catch ( Exception e ) {
+                    log.error("Error while creating view for '"+viewable.get()+"'.", e);
+                }
+                if ( view == null )
+                    view = UI.box(); // We add a dummy component to the list of children.
+
+                _addBuildersTo(thisComponent, view);
+            } else
                 _addComponentsTo(thisComponent, new JPanel()); // We add a dummy component to the list of children.
         } else {
-            if ( viewable.isPresent() )
-                _addBuildersTo(thisComponent, attr, viewSupplier.createViewFor(viewable.get()));
-            else
+            if ( viewable.isPresent() ) {
+                UIForAnySwing<?, ?> view = null;
+                try {
+                    view = viewSupplier.createViewFor(viewable.get());
+                } catch ( Exception e ) {
+                    log.error("Error while creating view for '"+viewable.get()+"'.", e);
+                }
+                if ( view == null )
+                    view = UI.box(); // We add a dummy component to the list of children.
+                _addBuildersTo(thisComponent, attr, view);
+            } else
                 _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
@@ -4643,7 +4675,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M> void _updateComponentAt(
         int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable String attr, C c
     ) {
-        JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent() );
+        JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -> {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(v);
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+v+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            return view.get((Class)view.getType());
+        });
         // We remove the old component.
         c.remove(c.getComponent(index));
         // We add the new component.
@@ -4659,11 +4702,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M> void _addComponentAt(
         int index, M v, ViewSupplier<M> viewSupplier, @Nullable String attr, C thisComponent
     ) {
+        Supplier<JComponent> componentSupplier = () -> {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(v);
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+v+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            return view.get((Class)view.getType());
+        };
         // We add the new component.
         if ( attr == null )
-            thisComponent.add(UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent()), index);
+            thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), index);
         else
-            thisComponent.add(UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
+            thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), attr, index);
         // We update the layout.
         thisComponent.revalidate();
         thisComponent.repaint();

@@ -18,13 +18,16 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- *  A SwingTree builder node designed for configuring various kinds of {@link JTextComponent} instances
+ *  A SwingTree builder designed for configuring various kinds of {@link JTextComponent} instances
  *  in a fluent and declarative way. It also allows for the binding of text properties to the text component
  *  so that the text of the text component is dynamically updated whenever the value of the property changes
  *  and conversely, the value of the property is dynamically updated whenever the text of the text component changes.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ *  @param <C> The type parameter for the text component type which is being built by this builder.
+ *  @param <I> The type parameter for the instance type of this concrete class itself.
  */
 public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends UIForAnySwing<I, C>
 {

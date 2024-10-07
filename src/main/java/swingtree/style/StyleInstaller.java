@@ -138,7 +138,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean        force
     ) {
         Runnable backgroundSetter = ()->{
-            if ( owner.getBackground() == UI.Color.UNDEFINED )
+            if ( StyleUtil.isUndefinedColor(owner.getBackground()) )
                 _establishDefaultBackgroundColorFor(owner);
             /*
                 The default background setter ensures that the background
@@ -791,7 +791,7 @@ final class StyleInstaller<C extends JComponent>
         Class<?> type = owner.getClass();
         JComponent other = null;
         try {
-            other = (JComponent) type.newInstance();
+            other = (JComponent) type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.debug(
                     "Failed to instantiate component '"+type.getName()+"' as part " +

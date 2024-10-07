@@ -42,7 +42,7 @@ final class LayerCache
     private static int DYNAMIC_CACHE_AGGRESSIVENESS() {
         if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
             return CACHE_AGGRESSIVENESS_OVERRIDE;
-        double availableGiB = ( Runtime.getRuntime().maxMemory() * 1000 >> 30 ) / 1e3;
+        double availableGiB = ( ( Runtime.getRuntime().maxMemory() * 1000 ) >> 30 ) / 1e3;
         return (int) Math.round( 4 * Math.log(Math.max(1, availableGiB-1)) );
     }
     private static int DYNAMIC_CACHE_CAP() {

@@ -114,7 +114,14 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker<C> action ) {
-        return _with(action::accept)._this();
+        return _with( thisComponent -> {
+                    try {
+                        action.accept(thisComponent);
+                    } catch ( Exception e ) {
+                        log.error("Error trying to run 'Peeker' '"+action+"' on component '"+thisComponent+"'.", e);
+                    }
+                })
+                ._this();
     }
 
     /**

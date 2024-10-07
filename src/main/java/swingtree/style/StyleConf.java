@@ -1,6 +1,8 @@
 package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
@@ -59,6 +61,7 @@ public final class StyleConf
                                             StyleConfLayers.empty(),
                                             NamedConfigs.empty()
                                         );
+    private static final Logger log = LoggerFactory.getLogger(StyleConf.class);
 
     /**
      *  Exposes the "null object" pattern for {@link StyleConf} instances.
@@ -417,7 +420,12 @@ public final class StyleConf
         Objects.requireNonNull(styler);
         GradientConf gradConf = _layers.get(layer).gradients().find(shadeName).orElse(GradientConf.none());
         // We clone the shadow map:
-        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.configure(gradConf));
+        try {
+            gradConf = styler.configure(gradConf);
+        } catch (Exception e) {
+            log.error("Failed to configure gradient '{}' for layer '{}'", shadeName, layer, e);
+        }
+        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, gradConf);
         return _withGradients(layer, newShadows);
     }
 
@@ -433,8 +441,13 @@ public final class StyleConf
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
         NoiseConf noise = _layers.get(layer).noises().find(noiseName).orElse(NoiseConf.none());
+        try {
+            noise = styler.configure(noise);
+        } catch (Exception e) {
+            log.error("Failed to configure noise '{}' for layer '{}'", noiseName, layer, e);
+        }
         // We clone the noise map:
-        NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, styler.configure(noise));
+        NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, noise);
         return _withNoises(layer, newNoises);
     }
 
@@ -442,8 +455,13 @@ public final class StyleConf
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         ImageConf ground = _layers.get(layer).images().find(imageName).orElse(ImageConf.none());
+        try {
+            ground = styler.configure(ground);
+        } catch (Exception e) {
+            log.error("Failed to configure image '{}' for layer '{}'", imageName, layer, e);
+        }
         // We clone the ground map:
-        NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.configure(ground));
+        NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, ground);
         return _withImages( layer, newImages );
     }
 
@@ -455,8 +473,13 @@ public final class StyleConf
         Objects.requireNonNull(textName);
         Objects.requireNonNull(styler);
         TextConf text = _layers.get(layer).texts().find(textName).orElse(TextConf.none());
+        try {
+            text = styler.configure(text);
+        } catch (Exception e) {
+            log.error("Failed to configure text '{}' for layer '{}'", textName, layer, e);
+        }
         // We clone the text map:
-        NamedConfigs<TextConf> newTexts = _layers.get(layer).texts().withNamedStyle(textName, styler.configure(text));
+        NamedConfigs<TextConf> newTexts = _layers.get(layer).texts().withNamedStyle(textName, text);
         return _withTexts( layer, newTexts );
     }
 

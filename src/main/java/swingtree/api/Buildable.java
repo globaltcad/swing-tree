@@ -9,5 +9,20 @@ package swingtree.api;
  */
 public interface Buildable<T>
 {
-    T build();
+    /**
+     *  Builds the object that this builder is responsible for
+     *  and returns it. This method is intended to be called by the
+     *  internals of the SwingTree API. <br>
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
+     *
+     * @return The object that this builder is responsible for.
+     * @throws Exception If during the execution of this method an error occurs.
+     *                   Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.
+     */
+    T build() throws Exception;
 }

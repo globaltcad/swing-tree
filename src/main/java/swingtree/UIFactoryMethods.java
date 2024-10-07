@@ -668,7 +668,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
@@ -900,7 +900,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <T extends JComponent> UIForSwing<T> of( SwingBuilder<T> builder )
     {
         NullUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
-        return new UIForSwing<>(new BuilderState<>((Class<T>) JComponent.class, ()->builder.build()));
+        return new UIForSwing<>(new BuilderState<>((Class<T>) JComponent.class, ()->{
+            try {
+                return builder.build();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
     /**
@@ -2790,7 +2796,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * But note that the property is of the read only {@link Val} type,
      * which means that when the user moves the slider, the property will not be updated.
      * <br>
-     * If you want bidirectional binding, use {@link #slider(UI.Align, N, N, Var)}
+     * If you want bidirectional binding, use {@link #slider(UI.Align, Number, Number, Var)}
      * instead of this method.
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
@@ -2824,6 +2830,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * moves the slider and the slider will be updated whenever
      * the property changes in your code (see {@link Var#set(Object)}).
      *
+     * @param <N> The type of the number used for the slider values.
+     *            This may be {@link Integer}, {@link Double}, {@link Float}, {@link Long} or any other number type.
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
@@ -2856,6 +2864,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * whenever the user moves the slider due to the
      * usage of the read only {@link Val} type.
      *
+     * @param <N> The type of the number used for the slider values.
+     *            This may be {@link Integer}, {@link Double}, {@link Float}, {@link Long} or any other number type.
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider, which
      *            may be updated dynamically when the property changes.
@@ -2893,6 +2903,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * usage of the read-write {@link Var} type
      * here in contrast to {@link #slider(UI.Align, Val, Val, Val)}.
      *
+     * @param <N> The type of the number used for the slider values.
+     *            This may be {@link Integer}, {@link Double}, {@link Float}, {@link Long} or any other number type.
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider, which
      *            may be updated dynamically when the property changes.
@@ -3014,8 +3026,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  and a lambda function converting each item into a
      *  user-friendly {@link String} representation. <br>
      *
-     * @param items The unmodifiable array of elements to be selectable in the drop down list of the combo box.
      * @param <E> The type of the elements in the {@link JComboBox}.
+     * @param items The unmodifiable array of elements to be selectable in the drop down list of the combo box.
+     * @param renderer A lambda function which is used for mapping each entry to a
+     *                 user-friendly {@link String} representation shown in the combo box drop down list.
      * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -5586,6 +5600,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * Instead, you can configure a model step by step through a {@link Configurator} function
      * receiving the fluent builder API provided by the {@link BasicTableModel.Builder}.
      *
+     * @param itemType The type of the items in the entries of the table model.
      * @param tableModelBuildable A lambda function which takes in model builder
      *                            and then returns a fully configured model builder
      *                            used as a basis for the table model.
@@ -5740,11 +5755,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
      *  Here how this method may be used as part of a UI declaration: <br>
-     *  <pred>{@code
+     *  <pre>{@code
      *    UI.button("Login").onClick( it -> {
      *      UI.animate(vm, vm.get().withLoginAnimation());
      *    })
-     *  }</pred>
+     *  }</pre>
      *
      * @param state A mutable property or property lens holding an immutable item which should
      *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.
@@ -5771,11 +5786,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
      *  Here how this method is may be used as part of a UI declaration: <br>
-     *  <pred>{@code
+     *  <pre>{@code
      *    UI.button("Login").onClick( it -> {
      *      UI.animate(vm, LoginViewModel::withLoginAnimation);
      *    })
-     *  }</pred>
+     *  }</pre>
      *
      * @param state A mutable property or property lens holding an immutable item which should
      *              be updated repeatedly by the {@link AnimationTransformation} inside the {@link Animatable}.

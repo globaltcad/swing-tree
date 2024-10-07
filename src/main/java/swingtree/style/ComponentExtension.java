@@ -101,6 +101,15 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
+    /**
+     *  If it exists, this method invokes the user internal configurator function previously
+     *  set by the {@link #addDragAwayConf(Function)} method and returns an optional
+     *  of the resulting {@link DragAwayComponentConf} object, which holds the configuration
+     *  for starting a drag away operation using the AWT native {@link java.awt.dnd.DragSource}.
+     *
+     * @param mousePosition The current mouse position.
+     * @return An optional of the resulting {@link DragAwayComponentConf} object.
+     */
     public Optional<DragAwayComponentConf<C>> getDragAwayConf( Location mousePosition ) {
         if ( _dragAwayConfigurator == null )
             return Optional.empty();
@@ -184,18 +193,50 @@ public final class ComponentExtension<C extends JComponent>
         setStyleGroups(stringTags);
     }
 
+    /**
+     *  Sets the id of the component.
+     *  The id is used by the SwingTree style engine to apply styles
+     *  to components with the same id, which is conceptually similar to CSS ids.<br>
+     *  The preferred way to set the id is by using an enum
+     *  to avoid typos and to get better compile time type safety.
+     *
+     * @param id The id to set.
+     */
     public final void setId( String id ) {
         _owner.setName(id);
     }
 
+    /**
+     *  Sets the id of the component based on an enum.
+     *  The id is used by the SwingTree style engine to apply styles
+     *  to components with the same id, which is conceptually similar to CSS ids.<br>
+     *  This is the preferred way to set the id, as it offers better compile time type safety.
+     *  Also check out the {@link swingtree.UIForAnySwing#id(Enum)} to set
+     *  the id as part of a UI declaration.
+     *
+     * @param id The id to set.
+     * @param <E> The type of the enum.
+     */
     public final <E extends Enum<E>> void setId( E id ) {
         this.setId(StyleUtil.toString(id));
     }
 
+    /**
+     *  Checks if the component has the given id.
+     *
+     * @param id The id to check.
+     * @return {@code true} if the component has the given id.
+     */
     public final boolean hasId( String id ) {
         return Objects.equals(_owner.getName(), id);
     }
 
+    /**
+     *  Checks if the component has the given id.
+     *
+     * @param id The id to check.
+     * @return {@code true} if the component has the given id.
+     */
     public final boolean hasId( Enum<?> id ) {
         return hasId(StyleUtil.toString(id));
     }
