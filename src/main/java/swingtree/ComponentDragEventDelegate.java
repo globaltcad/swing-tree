@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
+import swingtree.layout.Position;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,14 +44,22 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
 
     /**
      *  SwingTree keeps track of the most recent mouse drag events of a continuous drag.
-     *  This method returns a list of all mouse position {@link Point}s of a continuous mouse drag
-     *  performed on the component.
+     *  This method returns a list of all mouse {@link Position}s of a continuous mouse drag
+     *  performed on the component. <br>
+     *  Note that this mehod returns an unmodifiable list consisting
+     *  of immutable {@link Position} objects instead of mutable {@link Point} objects,
+     *  to protect the client from side effects.
      *
-     * @return A list of all mouse position {@link Point}s of a continuous mouse drag performed on the component.
+     * @return A list of all mouse {@link Position}s of a continuous mouse drag performed on the component.
      *         The points of this list represent the mouse movement track since the start of a continuous drag.
      */
-    public List<Point> dragPositions() {
-        return Collections.unmodifiableList(_dragEventHistory.stream().map(MouseEvent::getPoint).collect(Collectors.toList()));
+    public List<Position> dragPositions() {
+        return Collections.unmodifiableList(
+                _dragEventHistory.stream()
+                                .map(MouseEvent::getPoint)
+                                .map(Position::of)
+                                .collect(Collectors.toList())
+                            );
     }
 
 }
