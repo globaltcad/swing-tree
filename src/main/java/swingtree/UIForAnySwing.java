@@ -3508,7 +3508,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
-        return onMouseEnter(UI.ComponentArea.ALL, onEnter);
+        return onMouseEnter(UI.ComponentArea.BODY, onEnter);
     }
 
     public final I onMouseEnter( UI.ComponentArea area, Action<ComponentMouseEventDelegate<C>> onEnter ) {
@@ -3538,7 +3538,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
-        return onMouseExit(UI.ComponentArea.ALL, onExit);
+        return onMouseExit(UI.ComponentArea.BODY, onExit);
     }
 
     public final I onMouseExit( UI.ComponentArea area, Action<ComponentMouseEventDelegate<C>> onExit ) {
