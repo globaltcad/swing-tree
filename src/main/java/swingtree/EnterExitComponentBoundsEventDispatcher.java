@@ -76,6 +76,10 @@ final class EnterExitComponentBoundsEventDispatcher {
         }
     }
 
+    enum Location {
+        INSIDE, OUTSIDE
+    }
+
     /**
      *  Contains the enter and exit listeners for a component as well as
      *  a flag indicating whether the mouse cursor is currently within the
@@ -83,13 +87,13 @@ final class EnterExitComponentBoundsEventDispatcher {
      */
     private static class ComponentEnterExitListeners {
         private final UI.ComponentArea area;
-        private boolean isEntered;
+        private Location location;
         private final List<MouseListener> enterListeners;
         private final List<MouseListener> exitListeners;
 
         public ComponentEnterExitListeners( UI.ComponentArea area, Component component ) {
             this.area = area;
-            this.isEntered = false;
+            this.location = Location.OUTSIDE;
             this.enterListeners = new ArrayList<>();
             this.exitListeners  = new ArrayList<>();
         }
@@ -107,15 +111,15 @@ final class EnterExitComponentBoundsEventDispatcher {
 
             switch (event.getID()) {
                 case MouseEvent.MOUSE_ENTERED:
-                    if (isEntered)
+                    if (location == Location.INSIDE)
                         return;
 
                     boolean isInside = onMouseEnter(component, event);
 
-                    isEntered = isInside;
+                    location = isInside ? Location.INSIDE : Location.OUTSIDE;
                     break;
                 case MouseEvent.MOUSE_EXITED:
-                    if (!isEntered)
+                    if (location == Location.OUTSIDE)
                         return;
 
                     if (containsScreenLocation(component, event.getLocationOnScreen()))
@@ -123,7 +127,7 @@ final class EnterExitComponentBoundsEventDispatcher {
 
                     boolean isOutside = onMouseExit(component, event);
 
-                    isEntered = !isOutside;
+                    location = isOutside ? Location.OUTSIDE : Location.INSIDE;
                     break;
                 case MouseEvent.MOUSE_MOVED:
                     if ( this.area != UI.ComponentArea.ALL )
@@ -199,14 +203,12 @@ final class EnterExitComponentBoundsEventDispatcher {
         }
 
         public void mouseMoved(Component component, MouseEvent e) {
-            if ( isEntered ) {
+            if ( location == Location.INSIDE ) {
                 boolean isOutside = onMouseExit(component, e);
-                if (isOutside)
-                    isEntered = false;
-            } {
+                location = isOutside ? Location.OUTSIDE : Location.INSIDE;
+            } else if ( location == Location.OUTSIDE ) {
                 boolean isInside = onMouseEnter(component, e);
-                if (isInside)
-                    isEntered = true;
+                location = isInside ? Location.INSIDE : Location.OUTSIDE;
             }
         }
     }
