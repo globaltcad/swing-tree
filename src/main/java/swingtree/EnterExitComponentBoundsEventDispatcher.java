@@ -114,9 +114,7 @@ final class EnterExitComponentBoundsEventDispatcher {
                     if (location == Location.INSIDE)
                         return;
 
-                    boolean isInside = onMouseEnter(component, event);
-
-                    location = isInside ? Location.INSIDE : Location.OUTSIDE;
+                    location = onMouseEnter(component, event);
                     break;
                 case MouseEvent.MOUSE_EXITED:
                     if (location == Location.OUTSIDE)
@@ -125,20 +123,23 @@ final class EnterExitComponentBoundsEventDispatcher {
                     if (containsScreenLocation(component, event.getLocationOnScreen()))
                         return;
 
-                    boolean isOutside = onMouseExit(component, event);
-
-                    location = isOutside ? Location.OUTSIDE : Location.INSIDE;
+                    location = onMouseExit(component, event);
                     break;
                 case MouseEvent.MOUSE_MOVED:
-                    if ( this.area != UI.ComponentArea.ALL )
-                        mouseMoved(component, event);
+                    if ( this.area != UI.ComponentArea.ALL ) {
+                        if ( location == Location.INSIDE ) {
+                            location = onMouseExit(component, event);
+                        } else if ( location == Location.OUTSIDE ) {
+                            location = onMouseEnter(component, event);
+                        }
+                    }
                 break;
             }
         }
 
-        private boolean onMouseEnter(Component component, MouseEvent mouseEvent) {
+        private Location onMouseEnter(Component component, MouseEvent mouseEvent) {
             if (enterListeners.isEmpty())
-                return true;
+                return Location.INSIDE;
 
             mouseEvent = withNewSource(mouseEvent, component);
 
@@ -148,15 +149,15 @@ final class EnterExitComponentBoundsEventDispatcher {
                 Optional<Shape> componentArea = ComponentExtension.from((JComponent) component).getComponentArea(area);
                 if ( !componentArea.isPresent() ) {
                     if ( this.area == UI.ComponentArea.BORDER )
-                        return true; // no border means nothing to enter or exit on
+                        return Location.INSIDE; // no border means nothing to enter or exit on
                     else
                         dispatchEnterToAllListeners(mouseEvent);
                 } else if ( componentArea.get().contains(mouseEvent.getPoint()) )
                     dispatchEnterToAllListeners(mouseEvent);
                 else
-                    return false;
+                    return Location.OUTSIDE;
             }
-            return true;
+            return Location.INSIDE;
         }
 
         private void dispatchEnterToAllListeners(MouseEvent mouseEvent) {
@@ -169,9 +170,9 @@ final class EnterExitComponentBoundsEventDispatcher {
             }
         }
 
-        private boolean onMouseExit(Component component, MouseEvent mouseEvent) {
+        private Location onMouseExit(Component component, MouseEvent mouseEvent) {
             if (exitListeners.isEmpty())
-                return true;
+                return Location.OUTSIDE;
 
             mouseEvent = withNewSource(mouseEvent, component);
 
@@ -181,15 +182,15 @@ final class EnterExitComponentBoundsEventDispatcher {
                 Optional<Shape> componentArea = ComponentExtension.from((JComponent) component).getComponentArea(area);
                 if ( !componentArea.isPresent() ) {
                     if ( this.area == UI.ComponentArea.BORDER )
-                        return true; // no border means nothing to enter or exit on
+                        return Location.OUTSIDE; // no border means nothing to enter or exit on
                     else
                         dispatchExitToAllListeners(mouseEvent);
                 } else if ( !componentArea.get().contains(mouseEvent.getPoint()) )
                     dispatchExitToAllListeners(mouseEvent);
                 else
-                    return false;
+                    return Location.INSIDE;
             }
-            return true;
+            return Location.OUTSIDE;
         }
 
         private void dispatchExitToAllListeners(MouseEvent mouseEvent) {
@@ -199,16 +200,6 @@ final class EnterExitComponentBoundsEventDispatcher {
                 } catch (Exception e) {
                     log.error("Failed to process mouseExited event {}. Error: {}", mouseEvent, e.getMessage(), e);
                 }
-            }
-        }
-
-        public void mouseMoved(Component component, MouseEvent e) {
-            if ( location == Location.INSIDE ) {
-                boolean isOutside = onMouseExit(component, e);
-                location = isOutside ? Location.OUTSIDE : Location.INSIDE;
-            } else if ( location == Location.OUTSIDE ) {
-                boolean isInside = onMouseEnter(component, e);
-                location = isInside ? Location.INSIDE : Location.OUTSIDE;
             }
         }
     }
