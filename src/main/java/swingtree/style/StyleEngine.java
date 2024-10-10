@@ -4,7 +4,10 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,19 +55,10 @@ final class StyleEngine
 
     BoxModelConf getBoxModelConf() { return _boxModelConf; }
 
-    Optional<Shape> componentBodyAreaForClipping() {
-        Shape contentClip = null;
-        ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
-        if ( _areas.areaExists(UI.ComponentArea.BODY) || _componentConf.style().margin().isPositive() )
-            contentClip = _areas.get(UI.ComponentArea.BODY);
-
-        return Optional.ofNullable(contentClip);
-    }
-
     Optional<Shape> componentArea( UI.ComponentArea area ) {
         Shape contentClip = null;
         ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
-        if ( _areas.areaExists(area) )
+        if ( _areas.areaExists(area) || (area == UI.ComponentArea.BODY && _componentConf.style().margin().isPositive()) )
             contentClip = _areas.get(area);
 
         return Optional.ofNullable(contentClip);

@@ -7,13 +7,8 @@ import sprouts.Event
 import sprouts.Var
 import swingtree.threading.EventProcessor
 
-import javax.swing.JButton
-import javax.swing.JComboBox
-import javax.swing.JFormattedTextField
-import javax.swing.JPanel
-import javax.swing.JRadioButton
-import javax.swing.JTextArea
-import javax.swing.JTextField
+import javax.swing.*
+import java.awt.event.MouseEvent
 
 @Title("Registering Event Handlers")
 @Narrative('''
@@ -483,7 +478,7 @@ class Event_Handling_Spec extends Specification
             A common use case for this concerns are the `Val` and `Var` property types
             which also implement the `Observable` interface, making them suitable
             for use as custom component events in your view.
-            Properties are designed to be used for modelling the state of your view model
+            Properties are designed to be used for modelling or delegating the state of your view model
             and when they change, your view is supposed to produce some kind of effect,
             like an animation or a sound effect or something similar.
         """
@@ -509,6 +504,43 @@ class Event_Handling_Spec extends Specification
 
         then : 'The handler is triggered and the trace contains the new value.'
             trace == ["I am a different text field"]
+    }
+
+    def 'The "onMouseEnter" event handler receives an enter event when the mouse enters the component body.'()
+    {
+        reportInfo """
+            This type of event occurs when the mouse enters the component body.
+            Internally this is based on a `MouseListener` which will forward the `mouseEntered` event
+            to your `onMouseEnter` handler.
+        """
+        given : 'A simple list where handlers are going to leave a trace.'
+            var trace = []
+
+        and : 'A simple text field UI.'
+            var ui =
+                    UI.panel("fill").withSize(100, 100)
+                    .withStyle(it->it.margin(20))
+                    .onMouseEnter( it -> trace.add("!") )
+        and : 'We actually build the component:'
+            var panel = ui.get(JPanel)
+
+        when : 'We dispatch various fake global mouse events which land on the margin area of the component,'
+            UI.runNow {
+                panel.dispatchEvent(new MouseEvent(panel, MouseEvent.MOUSE_ENTERED, 0, 0, 10, 5, 0, false))
+                panel.dispatchEvent(new MouseEvent(panel, MouseEvent.MOUSE_ENTERED, 1, 0, 95, 3, 0, false))
+                panel.dispatchEvent(new MouseEvent(panel, MouseEvent.MOUSE_ENTERED, 2, 0, 19, 83, 0, false))
+            }
+
+        then : 'The handler is not triggered, because the mouse is not inside the component body.'
+            trace == []
+
+        when : 'We dispatch a fake global mouse event which lands inside the component.'
+            UI.runNow {
+                panel.dispatchEvent(new MouseEvent(panel, MouseEvent.MOUSE_ENTERED, 3, 0, 50, 50, 0, false))
+            }
+
+        then : 'The handler is triggered.'
+            trace == ["!"]
     }
 
 }

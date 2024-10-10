@@ -622,7 +622,7 @@ public final class ComponentExtension<C extends JComponent>
             _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());
 
             if ( lookAndFeelPainting != null ) {
-                Shape contentClip = _styleEngine.componentBodyAreaForClipping().orElse(null);
+                Shape contentClip = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(null);
 
                 contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
@@ -684,7 +684,7 @@ public final class ComponentExtension<C extends JComponent>
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-                Shape localClip = StyleUtil.intersect( _styleEngine.componentBodyAreaForClipping().orElse(formerClip), formerClip );
+                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip), formerClip );
                 paintWithClip(internalGraphics, localClip, ()->{
                     superPaint.accept(internalGraphics);
                 });
