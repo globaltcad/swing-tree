@@ -55,13 +55,13 @@ final class StyleEngine
 
     BoxModelConf getBoxModelConf() { return _boxModelConf; }
 
-    Optional<Shape> componentArea( UI.ComponentArea area ) {
-        Shape contentClip = null;
+    Optional<Shape> componentAreaIfCalculated( UI.ComponentArea area ) {
+        Shape areaShape = null;
         ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
         if ( _areas.areaExists(area) || (area == UI.ComponentArea.BODY && _componentConf.style().margin().isPositive()) )
-            contentClip = _areas.get(area);
+            areaShape = _areas.get(area);
 
-        return Optional.ofNullable(contentClip);
+        return Optional.ofNullable(areaShape);
     }
 
     StyleEngine with( BoxModelConf boxModelConf, ComponentConf componentConf ) {
