@@ -343,10 +343,20 @@ public final class ComponentExtension<C extends JComponent>
      * @param area The area of the component to retrieve.
      * @return An optional {@link Shape} which represents the given area of the component or an empty optional.
      *         If the area is not available, then this means that the style of the component
-     *         did not lead to the calculation of the given area.
+     *         did not lead to the calculation of the given area. This may happen for the {@code EXTERIOR}
+     *         in case of there being no margin or corner radius, and the {@code BORDER} in case of there being
+     *         no border width.
      */
-    public Optional<Shape> getComponentArea(UI.ComponentArea area) {
-        return _styleEngine.componentArea(area);
+    public Optional<Shape> getComponentArea( UI.ComponentArea area ) {
+        Optional<Shape> areaShape = _styleEngine.componentArea(area);
+        if ( !areaShape.isPresent() ) {
+            if ( area.isOneOf( UI.ComponentArea.BODY, UI.ComponentArea.ALL, UI.ComponentArea.INTERIOR) ) {
+                return Optional.of(_owner.getBounds());
+            } else if ( area.isOneOf(UI.ComponentArea.EXTERIOR, UI.ComponentArea.BORDER) ) {
+                return Optional.empty();
+            }
+        }
+        return areaShape;
     }
 
     /**
