@@ -31,12 +31,14 @@ final class EnterExitComponentBoundsEventDispatcher {
     private static final MouseListener dispatcherListener = new MouseAdapter() { };
 
     static void addMouseEnterListener(UI.ComponentArea area, Component component, MouseListener listener) {
-        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
+        Map<Component, ComponentEnterExitListeners[]> allListeners = eventDispatcher.listeners;
+        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, Component component, MouseListener listener) {
-        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
+        Map<Component, ComponentEnterExitListeners[]> allListeners = eventDispatcher.listeners;
+        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
         listeners.addExitListener(listener);
     }
 
