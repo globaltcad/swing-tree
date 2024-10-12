@@ -3527,8 +3527,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  boundaries of the specified area, irrespective of the existence of child components.
      *  <br><br>
      *  Note that this mouse enter event is different from the native Swing mouse enter event,
-     *  which also considers child components with mouse listeners as enter/exit boundaries.
-     *  If you want to rely on the native Swing behavior, use {@link #onMouseEnterGreedy(Action)} instead.
+     *  which also considers child components with mouse listeners as enter/exit boundaries.<br>
+     *  If you want to rely on this the Swing behavior, use {@link #onMouseEnterGreedy(Action)} instead.<br>
+     *  <b>
+     *      We do however recommended to rely on this method, to avoid bugs due to the unexpected side effect
+     *      of enter events being fired at the boundary to child components.
+     *  </b>
      *
      * @param area The specific area of the component where the mouse enter event should be caught.
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
@@ -3559,7 +3563,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  will be considered an exit from the parent component and an enter into this component. <br>
      *  If you want to catch mouse enter events strictly in terms of the cursor being inside
      *  the component boundaries, or one of its areas, use {@link #onMouseEnter(Action)}, or
-     *  {@link #onMouseEnter(UI.ComponentArea, Action)} instead.
+     *  {@link #onMouseEnter(UI.ComponentArea, Action)} instead.<br>
+     *  <p><b>
+     *      To avoid bugs due to the unexpected side effect of enter events being fired at the surface
+     *      boundaries to child components, we recommend to use {@link #onMouseEnter(Action)} instead of this method!<br>
+     *      Also note that this method is different from {@link #onMouseEnter(Action)}, in that it reports enter events at
+     *      the boundaries of {@link swingtree.UI.ComponentArea#ALL} instead of {@link swingtree.UI.ComponentArea#BODY}.
+     *  </b>
      *
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
@@ -3588,6 +3598,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  which ensures that the mouse exit event is only triggered when the mouse exits the
      *  boundaries of the specified area, irrespective of the existence of child components.
      *  <br><br>
+     *  Note that this mouse enter event is different from the native Swing mouse enter event,
+     *  which also considers child components with mouse listeners as enter/exit event boundaries.<br>
+     *  If you want to rely on this the Swing behavior, use {@link #onMouseExitGreedy(Action)} instead.<br>
+     *  <b>
+     *      We do however recommended to rely on this method, to avoid bugs due to the unexpected side effect
+     *      of exit events being fired at the boundary to child components.
+     *  </b>
      *
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
@@ -3641,7 +3658,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  will be considered an exit from the parent components and an enter into this component. <br>
      *  If you want to catch mouse exit events strictly in terms of the cursor being inside
      *  the component boundaries, or one of its areas, use {@link #onMouseExit(Action)}, or
-     *  {@link #onMouseExit(UI.ComponentArea, Action)} instead.
+     *  {@link #onMouseExit(UI.ComponentArea, Action)} instead.<br>
+     *  <p><b>
+     *      To avoid bugs due to the unexpected side effect of exit events being fired at the surface
+     *      boundaries to child components, we recommend to use {@link #onMouseExit(Action)} instead of this method!<br>
+     *      Also note that this method is different from {@link #onMouseExit(Action)}, in that it reports exit events at
+     *      the boundaries of {@link swingtree.UI.ComponentArea#ALL} instead of {@link swingtree.UI.ComponentArea#BODY}.
+     *  </b>
      *
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
