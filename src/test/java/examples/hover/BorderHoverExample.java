@@ -28,7 +28,20 @@ public class BorderHoverExample extends JPanel {
     private static final Color COLOR_3_HOVER = new Color(215, 253, 100);
     private static final Color COLOR_4_HOVER = new Color(253, 182, 100);
 
-
+    private static void printAndDispatchIndicationAnimation( ComponentMouseEventDelegate<?> delegate, String info ) {
+        System.out.println(info);
+        delegate.animateFor(0.25, java.util.concurrent.TimeUnit.SECONDS, status -> {
+            double r = 35 * status.fadeIn() * delegate.getScale();
+            double x = delegate.mouseX() - r / 2.0;
+            double y = delegate.mouseY() - r / 2.0;
+            delegate.paint(ComponentArea.BORDER, status, g -> {
+                g.setColor(new Color(0f, 1f, 1f, (float) status.fadeOut()));
+                g.fillOval((int) x, (int) y, (int) r, (int) r);
+            });
+        });
+        
+    }
+    
     public BorderHoverExample() {
         of(this).withLayout("wrap 2, fill", "[]40[]", "[]40[]")
             .add(
@@ -38,16 +51,16 @@ public class BorderHoverExample extends JPanel {
                     panel().withStyle(it->it.border(12, "black"))
                     .withLayout("wrap 2, fill", "0[100]0[100]20", "20[100]20[100]20")
                     .withBackground(COLOR_1)
-                    .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("root -> enter"))
-                    .onMouseExit(ComponentArea.BORDER, a -> System.out.println("root -> exit "))
+                    .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "root -> enter"))
+                    .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "root -> exit "))
                     .onMouseEnter(ComponentArea.BORDER, changeBackground(COLOR_1_HOVER))
                     .onMouseExit(ComponentArea.BORDER, changeBackground(COLOR_1))
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 1<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("  child 1 -> enter"))
-                        .onMouseExit(ComponentArea.BORDER, a -> System.out.println("  child 1 -> exit"))
+                        .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 1 -> enter"))
+                        .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 1 -> exit"))
                         .onMouseEnter(ComponentArea.BORDER, changeBackground(COLOR_2_HOVER))
                         .onMouseExit(ComponentArea.BORDER, changeBackground(COLOR_2))
                     )
@@ -55,8 +68,8 @@ public class BorderHoverExample extends JPanel {
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 2<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("  child 2 -> enter"))
-                        .onMouseExit(ComponentArea.BORDER, a -> System.out.println("  child 2 -> exit"))
+                        .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 2 -> enter"))
+                        .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 2 -> exit"))
                         .onMouseEnter(ComponentArea.BORDER, changeBackground(COLOR_4_HOVER))
                         .onMouseExit(ComponentArea.BORDER, changeBackground(COLOR_2))
                     )
@@ -69,8 +82,8 @@ public class BorderHoverExample extends JPanel {
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 4<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("  child 4 -> enter"))
-                        .onMouseExit(ComponentArea.BORDER, a -> System.out.println("  child 4 -> exit"))
+                        .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 4 -> enter"))
+                        .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 4 -> exit"))
                         .onMouseEnter(ComponentArea.BORDER, changeBackground(COLOR_3_HOVER))
                         .onMouseExit(ComponentArea.BORDER, changeBackground(COLOR_2))
                     )
@@ -115,18 +128,18 @@ public class BorderHoverExample extends JPanel {
                     panel().withStyle(it->it.border(12, "black"))
                     .withLayout("wrap 2, fill", "0[100]0[100]20", "20[100]20[100]20")
                     .withBackground(COLOR_1)
-                    .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("root -> enter"))
+                    .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "root -> enter"))
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 1<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("  child 1 -> enter"))
+                        .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 1 -> enter"))
                     )
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 2<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("  child 2 -> enter"))
+                        .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 2 -> enter"))
                     )
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "white"))
@@ -137,7 +150,7 @@ public class BorderHoverExample extends JPanel {
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 4<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseEnter(ComponentArea.BORDER, a -> System.out.println("  child 4 -> enter"))
+                        .onMouseEnter(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 4 -> enter"))
                     )
                 )
             )
@@ -147,18 +160,18 @@ public class BorderHoverExample extends JPanel {
                     panel().withStyle(it->it.border(12, "black"))
                     .withLayout("wrap 2, fill", "0[100]0[100]20", "20[100]20[100]20")
                     .withBackground(COLOR_1)
-                    .onMouseExit(ComponentArea.BORDER, a -> System.out.println("root -> exit"))
+                    .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "root -> exit"))
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 1<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseExit(ComponentArea.BORDER, a -> System.out.println("  child 1 -> exit"))
+                        .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 1 -> exit"))
                     )
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 2<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseExit(ComponentArea.BORDER, a -> System.out.println("  child 2 -> exit"))
+                        .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 2 -> exit"))
                     )
                     .add(GROW,
                         panel().withStyle(it->it.border(12, "white"))
@@ -169,7 +182,7 @@ public class BorderHoverExample extends JPanel {
                         panel().withStyle(it->it.border(12, "black"))
                         .add(html("child 4<br>with listener"))
                         .withBackground(COLOR_2)
-                        .onMouseExit(ComponentArea.BORDER, a -> System.out.println("  child 4 -> exit"))
+                        .onMouseExit(ComponentArea.BORDER, it -> printAndDispatchIndicationAnimation(it, "  child 4 -> exit"))
                     )
                 )
             );

@@ -137,31 +137,35 @@ final class EnterExitComponentBoundsEventDispatcher {
             }
         }
 
-        private Location onMouseEnter(Component component, MouseEvent mouseEvent) {
-            if (enterListeners.isEmpty())
-                return Location.INSIDE;
+        private Location determineCurrentLocationOf(MouseEvent event) {
+            return ComponentExtension.from((JComponent) event.getComponent())
+                    .getComponentArea(area)
+                    .filter( shape -> shape.contains(event.getPoint()) )
+                    .map( isInsideShape -> Location.INSIDE )
+                    .orElse(Location.OUTSIDE);
+        }
 
+        private Location onMouseEnter(Component component, MouseEvent mouseEvent)
+        {
             mouseEvent = withNewSource(mouseEvent, component);
+
+            if (enterListeners.isEmpty())
+                return determineCurrentLocationOf(mouseEvent);
 
             if ( this.area == UI.ComponentArea.ALL ) {
                 dispatchEnterToAllListeners(mouseEvent);
+                return Location.INSIDE;
             } else {
-                Optional<Shape> componentArea = ComponentExtension.from((JComponent) component).getComponentArea(area);
-                if ( !componentArea.isPresent() ) {
-                    if ( this.area == UI.ComponentArea.BORDER )
-                        return Location.INSIDE; // no border means nothing to enter or exit on
-                    else
-                        dispatchEnterToAllListeners(mouseEvent);
-                } else if ( componentArea.get().contains(mouseEvent.getPoint()) )
+                Location nextLocation = determineCurrentLocationOf(mouseEvent);
+                if ( nextLocation == Location.INSIDE && this.location == Location.OUTSIDE )
                     dispatchEnterToAllListeners(mouseEvent);
-                else
-                    return Location.OUTSIDE;
+
+                return nextLocation;
             }
-            return Location.INSIDE;
         }
 
         private void dispatchEnterToAllListeners(MouseEvent mouseEvent) {
-            for (MouseListener listener : enterListeners) {
+            for ( MouseListener listener : enterListeners ) {
                 try {
                     listener.mouseEntered(mouseEvent);
                 } catch (Exception e) {
@@ -170,31 +174,27 @@ final class EnterExitComponentBoundsEventDispatcher {
             }
         }
 
-        private Location onMouseExit(Component component, MouseEvent mouseEvent) {
-            if (exitListeners.isEmpty())
-                return Location.OUTSIDE;
-
+        private Location onMouseExit(Component component, MouseEvent mouseEvent)
+        {
             mouseEvent = withNewSource(mouseEvent, component);
+
+            if (exitListeners.isEmpty())
+                return determineCurrentLocationOf(mouseEvent);
 
             if ( this.area == UI.ComponentArea.ALL ) {
                 dispatchExitToAllListeners(mouseEvent);
+                return Location.OUTSIDE;
             } else {
-                Optional<Shape> componentArea = ComponentExtension.from((JComponent) component).getComponentArea(area);
-                if ( !componentArea.isPresent() ) {
-                    if ( this.area == UI.ComponentArea.BORDER )
-                        return Location.OUTSIDE; // no border means nothing to enter or exit on
-                    else
-                        dispatchExitToAllListeners(mouseEvent);
-                } else if ( !componentArea.get().contains(mouseEvent.getPoint()) )
+                Location nextLocation = determineCurrentLocationOf(mouseEvent);
+                if ( nextLocation == Location.OUTSIDE && this.location == Location.INSIDE )
                     dispatchExitToAllListeners(mouseEvent);
-                else
-                    return Location.INSIDE;
+
+                return nextLocation;
             }
-            return Location.OUTSIDE;
         }
 
         private void dispatchExitToAllListeners(MouseEvent mouseEvent) {
-            for (MouseListener listener : exitListeners) {
+            for ( MouseListener listener : exitListeners ) {
                 try {
                     listener.mouseExited(mouseEvent);
                 } catch (Exception e) {
