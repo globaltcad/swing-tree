@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @param <C> The type of the component which this flip-flop animation is applied to.
  * @author Daniel Nepp
  */
-class FlipFlopStyler<C extends JComponent>
+final class FlipFlopStyler<C extends JComponent>
 {
     private static final Logger log = LoggerFactory.getLogger(FlipFlopStyler.class);
 

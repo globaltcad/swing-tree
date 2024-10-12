@@ -10,7 +10,7 @@ import java.util.Objects;
  * A SwingTree builder node designed for configuring {@link AbstractButton} sub-type instances,
  * usually the {@link JButton} type.
  */
-public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForButton<B>, B>
+public final class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForButton<B>, B>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForButton.class);
 

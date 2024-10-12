@@ -36,7 +36,7 @@ import java.util.function.Predicate;
  *       })
  *   }</pre>
  */
-public class AnimationDispatcher
+public final class AnimationDispatcher
 {
     private final LifeTime                _lifeTime;
     private final Stride                  _stride;

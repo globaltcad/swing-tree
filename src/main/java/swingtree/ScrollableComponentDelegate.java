@@ -54,7 +54,7 @@ import java.util.Objects;
  * called eagerly, so everything you define in there will be completely dynamic,
  * which means your scroll behaviour can dynamically react to the involved components.
  */
-public class ScrollableComponentDelegate
+public final class ScrollableComponentDelegate
 {
     static ScrollableComponentDelegate of(
         JScrollPane scrollPane,

@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  *  A SwingTree builder node designed for configuring {@link swingtree.components.JBox} instances.
  */
-public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
+public final class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
 {
     private final BuilderState<B> _state;
 
