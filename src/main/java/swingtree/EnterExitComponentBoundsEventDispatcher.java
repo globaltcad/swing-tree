@@ -101,6 +101,14 @@ final class EnterExitComponentBoundsEventDispatcher {
             this.exitListeners  = new ArrayList<>();
         }
 
+        private final boolean areaIsEqualToBounds(Component component) {
+            if ( this.area == UI.ComponentArea.ALL ) {
+                return true;
+            }
+            Shape shape = ComponentExtension.from((JComponent) component).getComponentArea(area).orElse(null);
+            return shape != null && shape.equals(component.getBounds());
+        }
+
         public void addEnterListener(MouseListener listener) {
             enterListeners.add(listener);
         }
@@ -129,7 +137,7 @@ final class EnterExitComponentBoundsEventDispatcher {
                     location = onMouseExit(component, event);
                     break;
                 case MouseEvent.MOUSE_MOVED:
-                    if ( this.area != UI.ComponentArea.ALL ) {
+                    if ( !areaIsEqualToBounds(component) ) {
                         if ( location == Location.INSIDE ) {
                             location = onMouseExit(component, event);
                         } else if ( location == Location.OUTSIDE ) {
@@ -155,7 +163,7 @@ final class EnterExitComponentBoundsEventDispatcher {
             if (enterListeners.isEmpty())
                 return determineCurrentLocationOf(mouseEvent);
 
-            if ( this.area == UI.ComponentArea.ALL ) {
+            if ( areaIsEqualToBounds(component) ) {
                 dispatchEnterToAllListeners(mouseEvent);
                 return Location.INSIDE;
             } else {
@@ -184,7 +192,7 @@ final class EnterExitComponentBoundsEventDispatcher {
             if (exitListeners.isEmpty())
                 return determineCurrentLocationOf(mouseEvent);
 
-            if ( this.area == UI.ComponentArea.ALL ) {
+            if ( areaIsEqualToBounds(component) ) {
                 dispatchExitToAllListeners(mouseEvent);
                 return Location.OUTSIDE;
             } else {
