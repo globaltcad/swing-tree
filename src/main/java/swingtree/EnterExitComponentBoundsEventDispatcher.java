@@ -10,8 +10,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  *  A custom event dispatcher for mouse enter and exit events based on the mouse
@@ -29,32 +31,30 @@ final class EnterExitComponentBoundsEventDispatcher {
     private static final MouseListener dispatcherListener = new MouseAdapter() { };
 
     static void addMouseEnterListener(UI.ComponentArea area, Component component, MouseListener listener) {
-        Map<Component, ComponentEnterExitListeners> allListeners = eventDispatcher.listeners[area.ordinal()];
-        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, k -> {
-            // ensures that mouse events are enabled
-            k.addMouseListener(dispatcherListener);
-            return new ComponentEnterExitListeners(area, component);
-        });
+        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, Component component, MouseListener listener) {
-        Map<Component, ComponentEnterExitListeners> allListeners = eventDispatcher.listeners[area.ordinal()];
-        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, k -> {
-            // ensures that mouse events are enabled
-            k.addMouseListener(dispatcherListener);
-            return new ComponentEnterExitListeners(area, component);
-        });
+        ComponentEnterExitListeners listeners = eventDispatcher.listeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
         listeners.addExitListener(listener);
     }
 
+    private static ComponentEnterExitListeners[] iniListeners(Component component) {
+        // ensures that mouse events are enabled
+        component.addMouseListener(dispatcherListener);
+        ComponentEnterExitListeners[] listenerArray = new ComponentEnterExitListeners[UI.ComponentArea.values().length];
+        for (UI.ComponentArea a : UI.ComponentArea.values()) {
+            listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a, component);
+        }
+        return listenerArray;
+    }
 
-    private final Map<Component, ComponentEnterExitListeners>[] listeners;
+
+    private final Map<Component, ComponentEnterExitListeners[]> listeners;
 
     private EnterExitComponentBoundsEventDispatcher() {
-        listeners = new Map[UI.ComponentArea.values().length];
-        for (int i = 0; i < listeners.length; i++)
-            listeners[i] = new WeakHashMap<>();
+        listeners = new WeakHashMap<>();
         Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
         Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
@@ -65,11 +65,12 @@ final class EnterExitComponentBoundsEventDispatcher {
 
             Component c = mouseEvent.getComponent();
             while (c != null) {
-                for ( Map<Component, ComponentEnterExitListeners> listeners : this.listeners ) {
-                    ComponentEnterExitListeners componentListenerInfo = listeners.get(c);
-
-                    if (componentListenerInfo != null)
-                        componentListenerInfo.dispatch(c, mouseEvent);
+                ComponentEnterExitListeners[] componentListenerInfo = listeners.get(c);
+                if (componentListenerInfo != null) {
+                    for (UI.ComponentArea area : UI.ComponentArea.values()) {
+                        ComponentEnterExitListeners currentListeners = componentListenerInfo[area.ordinal()];
+                        currentListeners.dispatch(c, mouseEvent);
+                    }
                 }
                 c = c.getParent();
             }
