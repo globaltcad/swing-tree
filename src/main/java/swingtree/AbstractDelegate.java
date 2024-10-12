@@ -81,7 +81,9 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
 
-    protected final C _component() { return _component; }
+    protected final C _component() {
+        return _component;
+    }
 
     /**
      *  A library internal utility method that exposes the sibling components
@@ -529,6 +531,24 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final Bounds getBounds() {
         return Bounds.of(_component().getBounds());
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  access a specific {@link UI.ComponentArea} of the component.
+     *  This method returns an {@link Optional} value, which means that the
+     *  component area may not be present.
+     *  The {@link swingtree.UI.ComponentArea#BORDER} for example, may not be present
+     *  in case of there not being a border width defined through {@link UIForAnySwing#withStyle(Styler)}.
+     *  <p>
+     *  See {@link ComponentExtension#getComponentArea(UI.ComponentArea)} for more information.
+     *  </p>
+     *
+     * @param area The component area to access.
+     * @return An optional value that contains the component area if it is present.
+     */
+    public Optional<Shape> shapeOf( UI.ComponentArea area ) {
+        return ComponentExtension.from(_component()).getComponentArea(area);
     }
 
     /**
