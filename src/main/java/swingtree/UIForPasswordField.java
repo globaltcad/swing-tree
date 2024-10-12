@@ -8,11 +8,11 @@ import java.util.Objects;
 /**
  *  A SwingTree builder node designed for configuring {@link JPasswordField} instances.
  */
-public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
+public final class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {
     private final BuilderState<F> _state;
 
-    protected UIForPasswordField( BuilderState<F> state ) {
+    UIForPasswordField(BuilderState<F> state) {
         Objects.requireNonNull(state);
         _state = state;
     }

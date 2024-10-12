@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  *  in a regular interval based on a Swing {@link Timer}.
  *  The timer is started when the first animation is scheduled and stopped when the last animation is finished.
  */
-class AnimationRunner
+final class AnimationRunner
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(AnimationRunner.class);
 

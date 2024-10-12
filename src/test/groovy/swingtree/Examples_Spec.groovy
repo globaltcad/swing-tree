@@ -11,6 +11,8 @@ import examples.games.notepicker.mvvm.NoteGuesserView
 import examples.games.notepicker.mvvm.NoteGuesserViewModel
 import examples.games.kanapicker.mvvm.KanaPickerView
 import examples.games.kanapicker.mvvm.KanaPickerViewModel
+import examples.hover.BorderHoverExample
+import examples.hover.HoverExample
 import examples.lists.ListTestExample
 import examples.calculator.mvi.CalculatorView
 import examples.scrollpanes.ScrollConfigExample
@@ -552,6 +554,22 @@ class Examples_Spec extends Specification
     {
         given : 'We get the UI.'
             var ui = new ScrollConfigExample()
+        expect :
+            ui != null
+    }
+
+    def 'The basic hover example UI defined in the examples can be instantiated without errors.'()
+    {
+        given : 'We get the UI.'
+            var ui = new HoverExample()
+        expect :
+            ui != null
+    }
+
+    def 'The basic border hover example UI defined in the examples can be instantiated without errors.'()
+    {
+        given : 'We get the UI.'
+            var ui = new BorderHoverExample()
         expect :
             ui != null
     }

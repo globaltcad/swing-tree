@@ -7,17 +7,14 @@ import swingtree.components.JBox;
 import swingtree.components.JIcon;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  *   This class is responsible for installing and uninstalling custom look and feel
@@ -303,8 +300,6 @@ final class DynamicLaF
             ComponentExtension.from(c).paintBackground(g, true, null);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
     }
 
     static class ButtonStyler extends BasicButtonUI
@@ -323,8 +318,6 @@ final class DynamicLaF
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
     }
 
     static class LabelStyler extends BasicLabelUI
@@ -344,8 +337,6 @@ final class DynamicLaF
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
     }
 
     static class TextFieldStyler extends BasicTextFieldUI
@@ -389,8 +380,6 @@ final class DynamicLaF
         }
 
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
     }
 
     private static void _paintComponentThroughFormerUI(
@@ -414,52 +403,4 @@ final class DynamicLaF
             ex.printStackTrace();
         }
     }
-
-    /**
-     *  Determines whether the given point, in the parent's coordinate space, is within this component.
-     *  This method accounts for the current SwingTree border and style insets (padding, border widths and margin)
-     *  as well as subcomponents outside the inner component area.
-     * @param c the component
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param superContains the super.contains() method
-     * @return true if the point is within the component
-     */
-    private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains)
-    {
-        Border border = c.getBorder();
-        if ( border instanceof StyleAndAnimationBorder ) {
-            StyleAndAnimationBorder<?> b = (StyleAndAnimationBorder<?>) border;
-            Insets margins = b.getMarginInsets();
-            int width  = c.getWidth();
-            int height = c.getHeight();
-            boolean isInside = (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
-
-            if ( isInside )
-                return true;
-            else
-            {/*
-                You might be thinking that we should return false here, but that would be wrong in certain cases!
-                A child component might be outside the border, but still be a subcomponent of the parent component.
-                This is the case for example, when the padding is negative, and the child component is inside the border.
-                So, if there are negative paddings, we loop through the subcomponents and see if any of
-                them contains the point.                                                                               */
-
-                Insets padding = b.getPaddingInsets();
-
-                if ( padding.top < 0 || padding.left < 0 || padding.bottom < 0 || padding.right < 0 )
-                    for ( Component child : c.getComponents() ) {
-                        if ( child instanceof JComponent ) {
-                            JComponent jc = (JComponent) child;
-                            if ( jc.contains(x, y) )
-                                return true;
-                        }
-                    }
-                else
-                    return false;
-            }
-        }
-        return superContains.get();
-    }
-
 }

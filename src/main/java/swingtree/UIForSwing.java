@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  *  A SwingTree builder node designed for configuring {@link JComponent} types.
  */
-public class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForSwing<C>, C>
+public final class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForSwing<C>, C>
 {
     private final BuilderState<C> _state;
 

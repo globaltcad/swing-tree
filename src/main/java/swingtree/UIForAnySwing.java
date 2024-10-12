@@ -28,6 +28,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
@@ -3497,9 +3498,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to register and catch generic {@link MouseListener} based mouse enter events on this UI component.
-     *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  Use this to register and catch mouse enter events on
+     *  the {@link UI.ComponentArea#BODY} of this UI component, <br>
+     *  which consists of the full component boundaries except for the surrounding
+     *  margins and corner rounding areas. <br>
+     *  <p>
+     *  If you want to catch mouse enter events on a different area of the component, use
+     *  {@link #onMouseEnter(UI.ComponentArea, Action)} instead.
+     *  Internally, this method adds the supplied {@link Action} lambda to a custom event dispatcher
+     *  which ensures that the mouse enter event is only triggered when the mouse enters the
+     *  boundaries of the specified area, irrespective of the existence of child components.
      *  <br><br>
      *
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
@@ -3507,10 +3515,71 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
-        return _with( c -> {
-                    c.addMouseListener(new MouseAdapter() {
+        return onMouseEnter(UI.ComponentArea.BODY, onEnter);
+    }
+
+    /**
+     *  Use this to register and catch mouse enter events on a specific area of this UI component,
+     *  defined by the first argument, a {@link UI.ComponentArea} enum value, and the second argument,
+     *  a lambda instance which will be invoked when the mouse enters the specified area.
+     *  Internally, the provided {@link Action} lambda is handled by a custom event dispatcher
+     *  which ensures that the mouse enter event is only triggered when the mouse enters the
+     *  boundaries of the specified area, irrespective of the existence of child components.
+     *  <br><br>
+     *  Note that this mouse enter event is different from the native Swing mouse enter event,
+     *  which also considers child components with mouse listeners as enter/exit boundaries.<br>
+     *  If you want to rely on this the Swing behavior, use {@link #onMouseEnterGreedy(Action)} instead.<br>
+     *  <b>
+     *      We do however recommended to rely on this method, to avoid bugs due to the unexpected side effect
+     *      of enter events being fired at the boundary to child components.
+     *  </b>
+     *
+     * @param area The specific area of the component where the mouse enter event should be caught.
+     * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseEnter( UI.ComponentArea area, Action<ComponentMouseEventDelegate<C>> onEnter ) {
+        NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
+        return _with( thisComponent -> {
+                    WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
+                    MouseListener listener = new MouseAdapter() {
                         @Override public void mouseEntered(MouseEvent e) {
-                            _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(c, e )));
+                            @Nullable C localComponent = source.get();
+                            if ( localComponent != null )
+                                _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
+                        }
+                    };
+                    EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(area, thisComponent, listener);
+                })
+                ._this();
+    }
+
+    /**
+     *  Use this to register and catch simple {@link MouseListener} based mouse enter events on this UI component.
+     *  This method adds the supplied {@link Action} lambda in a {@link MouseListener} instance to the component.
+     *  <br><br>
+     *  This method is greedy in the sense that in case of the parent of this component
+     *  also having a mouse listener, then a mouse cursor transition on top of this component
+     *  will be considered an exit from the parent component and an enter into this component. <br>
+     *  If you want to catch mouse enter events strictly in terms of the cursor being inside
+     *  the component boundaries, or one of its areas, use {@link #onMouseEnter(Action)}, or
+     *  {@link #onMouseEnter(UI.ComponentArea, Action)} instead.<br>
+     *  <p><b>
+     *      To avoid bugs due to the unexpected side effect of enter events being fired at the surface
+     *      boundaries to child components, we recommend to use {@link #onMouseEnter(Action)} instead of this method!<br>
+     *      Also note that this method is different from {@link #onMouseEnter(Action)}, in that it reports enter events at
+     *      the boundaries of {@link swingtree.UI.ComponentArea#ALL} instead of {@link swingtree.UI.ComponentArea#BODY}.
+     *  </b>
+     *
+     * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseEnterGreedy( Action<ComponentMouseEventDelegate<C>> onEnter ) {
+        NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseEntered(MouseEvent e) {
+                            _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( thisComponent, e )));
                         }
                     });
                 })
@@ -3518,20 +3587,94 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to register and catch generic {@link MouseListener} based mouse exit events on this UI component.
-     *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  Use this to register and catch mouse exit events on
+     *  the {@link UI.ComponentArea#BODY} of this UI component, <br>
+     *  which consists of the full component boundaries except for the surrounding
+     *  margins and corner rounding areas. <br>
+     *  <p>
+     *  If you want to catch mouse exit events on a different area than the body of the component, use
+     *  {@link #onMouseExit(UI.ComponentArea, Action)} instead.
+     *  Internally, this method adds the supplied {@link Action} lambda to a custom event dispatcher
+     *  which ensures that the mouse exit event is only triggered when the mouse exits the
+     *  boundaries of the specified area, irrespective of the existence of child components.
      *  <br><br>
+     *  Note that this mouse enter event is different from the native Swing mouse enter event,
+     *  which also considers child components with mouse listeners as enter/exit event boundaries.<br>
+     *  If you want to rely on this the Swing behavior, use {@link #onMouseExitGreedy(Action)} instead.<br>
+     *  <b>
+     *      We do however recommended to rely on this method, to avoid bugs due to the unexpected side effect
+     *      of exit events being fired at the boundary to child components.
+     *  </b>
      *
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
-        return _with( c -> {
-                    c.addMouseListener(new MouseAdapter() {
+        return onMouseExit(UI.ComponentArea.BODY, onExit);
+    }
+
+    /**
+     *  Use this to register and catch mouse exit events on a specific area of this UI component,
+     *  by supplying a {@link UI.ComponentArea} enum value to define the area, and a {@link Action}
+     *  lambda which will be invoked when the mouse exits the specified area, so that you can
+     *  react to the event accordingly.<br>
+     *  <p>
+     *  Internally, the provided {@link Action} lambda is handled by a custom event dispatcher
+     *  which ensures that the mouse exit event is only triggered when the mouse exits the
+     *  boundaries of the specified area, irrespective of the existence of child components.
+     *  <br><br>
+     *  Note that this mouse exit event is different from the native Swing mouse exit event,
+     *  which also considers child components with mouse listeners as enter/exit boundaries.
+     *  If you want to rely on the native Swing behavior, use {@link #onMouseExitGreedy(Action)}
+     *  instead of this method.
+     *
+     * @param area The specific area of the component where the mouse exit event should be caught.
+     * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseExit( UI.ComponentArea area, Action<ComponentMouseEventDelegate<C>> onExit ) {
+        NullUtil.nullArgCheck(onExit, "onExit", Action.class);
+        return _with( thisComponent -> {
+                    WeakReference<@Nullable C> source = new WeakReference<>(thisComponent);
+                    MouseListener listener = new MouseAdapter() {
                         @Override public void mouseExited(MouseEvent e) {
-                            _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(c, e )));
+                            @Nullable C localComponent = source.get();
+                            if ( localComponent != null )
+                                _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
+                        }
+                    };
+                    EnterExitComponentBoundsEventDispatcher.addMouseExitListener(area, thisComponent, listener);
+                })
+                ._this();
+    }
+
+    /**
+     *  Use this to register and catch simple {@link MouseListener} based mouse exit events on this UI component.
+     *  This method adds the supplied {@link Action} lambda in a {@link MouseListener} instance to the component.
+     *  <br><br>
+     *  The method is considered greedy in the sense that in case of the parent of this component
+     *  also having a mouse listener, then a mouse cursor transition over to be on top of this component
+     *  will be considered an exit from the parent components and an enter into this component. <br>
+     *  If you want to catch mouse exit events strictly in terms of the cursor being inside
+     *  the component boundaries, or one of its areas, use {@link #onMouseExit(Action)}, or
+     *  {@link #onMouseExit(UI.ComponentArea, Action)} instead.<br>
+     *  <p><b>
+     *      To avoid bugs due to the unexpected side effect of exit events being fired at the surface
+     *      boundaries to child components, we recommend to use {@link #onMouseExit(Action)} instead of this method!<br>
+     *      Also note that this method is different from {@link #onMouseExit(Action)}, in that it reports exit events at
+     *      the boundaries of {@link swingtree.UI.ComponentArea#ALL} instead of {@link swingtree.UI.ComponentArea#BODY}.
+     *  </b>
+     *
+     * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseExitGreedy( Action<ComponentMouseEventDelegate<C>> onExit ) {
+        NullUtil.nullArgCheck(onExit, "onExit", Action.class);
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseExited(MouseEvent e) {
+                            _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( thisComponent, e )));
                         }
                     });
                 })

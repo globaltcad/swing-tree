@@ -11,9 +11,9 @@ import java.util.Objects;
  *  <b>It is not a keyboard shortcut implementation</b> but merely a fast API to check if
  *  a certain key on the keyboard has been pressed...
  *  The keyboard class <b>can not be used to hook up lambda callbacks</b>, but merely ought
- *  to serve as <b>a common way to query the current state of the keyboard</b>!
+ *  to serve as <b>a convenient way to query the current state of the keyboard</b>!
  */
-public class Keyboard
+public final class Keyboard
 {
     private final static Keyboard INSTANCE = new Keyboard();
 

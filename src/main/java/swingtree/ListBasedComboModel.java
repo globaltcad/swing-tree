@@ -6,7 +6,7 @@ import sprouts.Var;
 import java.util.List;
 import java.util.Objects;
 
-class ListBasedComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
+final class ListBasedComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
 	private final List<E> _items;
 
