@@ -26,7 +26,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.dnd.*;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -264,7 +265,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setVisible(v);
                 })
                 ._with( c -> {
-                    c.setVisible( isVisible.orElseThrow() );
+                    c.setVisible( isVisible.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -293,7 +294,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setVisible(!v);
                 })
                 ._with( c -> {
-                    c.setVisible( !isVisible.orElseThrow() );
+                    c.setVisible( !isVisible.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -324,7 +325,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setVisible( v == enumValue );
                 })
                 ._with( c -> {
-                    c.setVisible( enumValue == enumProperty.orElseThrow() );
+                    c.setVisible( enumValue == enumProperty.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -354,7 +355,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setVisible( v != enumValue );
                 })
                 ._with( c -> {
-                    c.setVisible( enumValue != enumProperty.orElseThrow() );
+                    c.setVisible( enumValue != enumProperty.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -393,7 +394,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setEnabled(v);
                 })
                 ._with( c -> {
-                    _setEnabled(c,  isEnabled.orElseThrow() );
+                    _setEnabled(c,  isEnabled.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -412,7 +413,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _setEnabled(c, !v);
                 })
                 ._with( c -> {
-                    _setEnabled(c,  !isEnabled.orElseThrow() );
+                    _setEnabled(c,  !isEnabled.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -435,7 +436,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _setEnabled( c,  v == enumValue );
                 })
                 ._with( c -> {
-                    _setEnabled(c,  enumValue == enumProperty.orElseThrow() );
+                    _setEnabled(c,  enumValue == enumProperty.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -459,12 +460,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _setEnabled( c,  v != enumValue );
                 })
                 ._with( c -> {
-                    _setEnabled(c,  enumValue != enumProperty.orElseThrow() );
+                    _setEnabled(c,  enumValue != enumProperty.orElseThrowUnchecked() );
                 })
                 ._this();
     }
 
-    protected void _setEnabled(C c, boolean isEnabled ) { c.setEnabled( isEnabled ); }
+    protected void _setEnabled( C c, boolean isEnabled ) { 
+        c.setEnabled( isEnabled ); 
+    }
 
     /**
      *  Use this to make the wrapped UI component grab the input focus.
@@ -506,7 +509,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setFocusable(v);
                 })
                 ._with( c -> {
-                    c.setFocusable( isFocusable.orElseThrow() );
+                    c.setFocusable( isFocusable.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -538,7 +541,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setFocusable( !v );
                 })
                 ._with( c -> {
-                    c.setFocusable( !isFocusable.orElseThrow() );
+                    c.setFocusable( !isFocusable.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -562,7 +565,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setFocusable( v == enumValue );
                 })
                 ._with( c -> {
-                    c.setFocusable( enumValue == enumProperty.orElseThrow() );
+                    c.setFocusable( enumValue == enumProperty.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -587,7 +590,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setFocusable( v != enumValue );
                 })
                 ._with( c -> {
-                    c.setFocusable( enumValue != enumProperty.orElseThrow() );
+                    c.setFocusable( enumValue != enumProperty.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -708,7 +711,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(v);
                 })
                 ._with( c -> {
-                    c.setBorder( border.orElseThrow() );
+                    c.setBorder( border.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -776,7 +779,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                             BorderFactory.createTitledBorder(
                                     BorderFactory.createEmptyBorder(top, left, bottom, right),
-                                    title.orElseThrow()
+                                    title.orElseThrowUnchecked()
                             )
                     );
                 })
@@ -831,7 +834,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                             BorderFactory.createTitledBorder(
                                     BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight),
-                                    title.orElseThrow()
+                                    title.orElseThrowUnchecked()
                             )
                     );
                 })
@@ -863,7 +866,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(BorderFactory.createEmptyBorder(v, v, v, v));
                 })
                 ._with( c -> {
-                    c.setBorder(BorderFactory.createEmptyBorder(all.orElseThrow(), all.orElseThrow(), all.orElseThrow(), all.orElseThrow()));
+                    c.setBorder(BorderFactory.createEmptyBorder(all.orElseThrowUnchecked(), all.orElseThrowUnchecked(), all.orElseThrowUnchecked(), all.orElseThrowUnchecked()));
                 })
                 ._this();
     }
@@ -901,7 +904,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                             BorderFactory.createTitledBorder(
                                     BorderFactory.createEmptyBorder(all, all, all, all),
-                                    title.orElseThrow()
+                                    title.orElseThrowUnchecked()
                             )
                     );
                 })
@@ -957,7 +960,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(BorderFactory.createLineBorder(v, thickness));
                 })
                 ._with( c -> {
-                    c.setBorder(BorderFactory.createLineBorder(color.orElseThrow(), thickness));
+                    c.setBorder(BorderFactory.createLineBorder(color.orElseThrowUnchecked(), thickness));
                 })
                 ._this();
     }
@@ -1005,7 +1008,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                             BorderFactory.createTitledBorder(
                                     BorderFactory.createLineBorder(color, thickness),
-                                    title.orElseThrow()
+                                    title.orElseThrowUnchecked()
                             )
                     );
                 })
@@ -1030,7 +1033,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _withOnShow( title, (c,v) -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(color.orElseThrow(), thickness),
+                            BorderFactory.createLineBorder(color.orElseThrowUnchecked(), thickness),
                             v
                         )
                     );
@@ -1039,15 +1042,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                         BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(v, thickness),
-                            title.orElseThrow()
+                            title.orElseThrowUnchecked()
                         )
                     );
                 })
                 ._with( c -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(color.orElseThrow(), thickness),
-                            title.orElseThrow()
+                            BorderFactory.createLineBorder(color.orElseThrowUnchecked(), thickness),
+                            title.orElseThrowUnchecked()
                         )
                     );
                 })
@@ -1139,7 +1142,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                         BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(color, thickness, true),
-                            title.orElseThrow()
+                            title.orElseThrowUnchecked()
                         )
                     );
                 })
@@ -1166,7 +1169,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _withOnShow( title, (c,v) -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
+                            BorderFactory.createLineBorder(color.orElseThrowUnchecked(), thickness, true),
                             v
                         )
                     );
@@ -1175,15 +1178,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(
                         BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(v, thickness, true),
-                            title.orElseThrow()
+                            title.orElseThrowUnchecked()
                         )
                     );
                 })
                 ._with( c -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
-                            title.orElseThrow()
+                            BorderFactory.createLineBorder(color.orElseThrowUnchecked(), thickness, true),
+                            title.orElseThrowUnchecked()
                         )
                     );
                 })
@@ -1217,7 +1220,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(BorderFactory.createLineBorder(v, thickness, true));
                 })
                 ._with( c -> {
-                    c.setBorder(BorderFactory.createLineBorder(color.orElseThrow(), thickness, true));
+                    c.setBorder(BorderFactory.createLineBorder(color.orElseThrowUnchecked(), thickness, true));
                 })
                 ._this();
     }
@@ -1447,7 +1450,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         c.setBorder(BorderFactory.createTitledBorder(t));
                 })
                 ._with( c -> {
-                    c.setBorder(BorderFactory.createTitledBorder(title.orElseThrow()));
+                    c.setBorder(BorderFactory.createTitledBorder(title.orElseThrowUnchecked()));
                 })
                 ._this();
     }
@@ -1484,7 +1487,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setCursor( new java.awt.Cursor( t.type ) );
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( type.orElseThrow().type ) );
+                    c.setCursor( new java.awt.Cursor( type.orElseThrowUnchecked().type ) );
                 })
                 ._this();
     }
@@ -1507,7 +1510,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setCursor( new java.awt.Cursor( v ? type.type : UI.Cursor.DEFAULT.type ) );
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? type.type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? type.type : UI.Cursor.DEFAULT.type ) );
                 })
                 ._this();
     }
@@ -1532,11 +1535,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _onShow( condition, thisComponent, (c,v) -> type.fireChange(From.VIEW_MODEL) );
                     _onShow( type, thisComponent, (c,v) -> {
                         if ( baseCursor[0] == null ) baseCursor[0] = c.getCursor();
-                        c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? v.type : baseCursor[0].getType() ) );
+                        c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? v.type : baseCursor[0].getType() ) );
                     });
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? type.orElseThrow().type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? type.orElseThrowUnchecked().type : UI.Cursor.DEFAULT.type ) );
                 })
                 ._this();
     }
@@ -3448,7 +3451,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( c -> {
                     c.addMouseListener(new MouseAdapter() {
                         @Override public void mouseClicked(MouseEvent e) {
-                            _runInApp(() -> onClick.accept(new ComponentMouseEventDelegate<>( c, e )));
+                            _runInApp(() -> {
+                                try {
+                                    onClick.accept(new ComponentMouseEventDelegate<>(c, e));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in mouse click event action handler!", ex);
+                                }
+                            });
                         }
                     });
                 })
@@ -3466,10 +3475,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMouseRelease( Action<ComponentMouseEventDelegate<C>> onRelease ) {
         NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
-        return _with( c -> {
-                    c.addMouseListener(new MouseAdapter() {
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseReleased(MouseEvent e) {
-                            _runInApp(() -> onRelease.accept(new ComponentMouseEventDelegate<>(c, e )));
+                            _runInApp(() -> {
+                                try {
+                                    onRelease.accept(new ComponentMouseEventDelegate<>( thisComponent, e ));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in mouse release event action handler!", ex);
+                                }
+                            });
                         }
                     });
                 })
@@ -3487,10 +3502,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I onMousePress( Action<ComponentMouseEventDelegate<C>> onPress ) {
         NullUtil.nullArgCheck(onPress, "onPress", Action.class);
-        return _with( c -> {
-                    c.addMouseListener(new MouseAdapter() {
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mousePressed(MouseEvent e) {
-                            _runInApp(() -> onPress.accept(new ComponentMouseEventDelegate<>(c, e )));
+                            _runInApp(() -> {
+                                try {
+                                    onPress.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in mouse press event action handler!", ex);
+                                }
+                            });
                         }
                     });
                 })
@@ -3546,7 +3567,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         @Override public void mouseEntered(MouseEvent e) {
                             @Nullable C localComponent = source.get();
                             if ( localComponent != null )
-                                _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
+                                _runInApp(() -> {
+                                    try {
+                                        onEnter.accept(new ComponentMouseEventDelegate<>(localComponent, e));
+                                    } catch ( Exception ex ) {
+                                        log.error("Error in mouse enter event action handler!", ex);
+                                    }
+                                });
                         }
                     };
                     EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(area, thisComponent, listener);
@@ -3579,7 +3606,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseEntered(MouseEvent e) {
-                            _runInApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>( thisComponent, e )));
+                            _runInApp(() -> {
+                                try {
+                                    onEnter.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in greedy mouse enter event action handler!", ex);
+                                }
+                            });
                         }
                     });
                 })
@@ -3641,7 +3674,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         @Override public void mouseExited(MouseEvent e) {
                             @Nullable C localComponent = source.get();
                             if ( localComponent != null )
-                                _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( localComponent, e )));
+                                _runInApp(() -> {
+                                    try {
+                                        onExit.accept(new ComponentMouseEventDelegate<>(localComponent, e));
+                                    } catch ( Exception ex ) {
+                                        log.error("Error in mouse exit event action handler!", ex);
+                                    }
+                                });
                         }
                     };
                     EnterExitComponentBoundsEventDispatcher.addMouseExitListener(area, thisComponent, listener);
@@ -3674,7 +3713,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseExited(MouseEvent e) {
-                            _runInApp(() -> onExit.accept(new ComponentMouseEventDelegate<>( thisComponent, e )));
+                            _runInApp(() -> {
+                                try {
+                                onExit.accept(new ComponentMouseEventDelegate<>( thisComponent, e ));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in greedy mouse exit event action handler!", ex);
+                                }
+                            });
                         }
                     });
                 })
@@ -3708,7 +3753,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                        }
                        @Override public void mouseDragged(MouseEvent e) {
                            dragEventHistory.add(e);
-                           _runInApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(thisComponent, e, dragEventHistory)));
+                           _runInApp(() -> {
+                               try {
+                                   onDrag.accept(new ComponentDragEventDelegate<>(thisComponent, e, dragEventHistory));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in mouse drag event action handler!", ex);
+                               }
+                           });
                        }
                    };
                    thisComponent.addMouseListener(listener);
@@ -3731,12 +3782,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addMouseListener(new MouseAdapter() {
                        @Override public void mouseMoved(MouseEvent e) {
-                           _runInApp(() -> onMove.accept(new ComponentMouseEventDelegate<>( thisComponent, e )));
+                           _runInApp(() -> {
+                               try {
+                                   onMove.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in mouse move event action handler!", ex);
+                               }
+                           });
                        }
                    });
                    thisComponent.addMouseMotionListener(new MouseMotionAdapter() {
                        @Override public void mouseMoved(MouseEvent e) {
-                           _runInApp(() -> onMove.accept(new ComponentMouseEventDelegate<>( thisComponent, e )));
+                           _runInApp(() -> {
+                               try {
+                                   onMove.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in mouse move event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3756,7 +3819,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(onWheel, "onWheel", Action.class);
         return _with( thisComponent -> {
                    thisComponent.addMouseWheelListener( e -> {
-                       _runInApp(() -> onWheel.accept(new ComponentDelegate<>(thisComponent, e )));
+                       _runInApp(() -> {
+                           try {
+                               onWheel.accept(new ComponentDelegate<>(thisComponent, e));
+                           } catch ( Exception ex ) {
+                               log.error("Error in mouse wheel event action handler!", ex);
+                           }
+                       });
                    });
                })
                ._this();
@@ -3775,7 +3844,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addMouseWheelListener( e -> {
                        if ( e.getWheelRotation() < 0 )
-                           _runInApp(() -> onWheelUp.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(() -> {
+                               try {
+                                   onWheelUp.accept(new ComponentDelegate<>(thisComponent, e ));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in mouse wheel up event action handler!", ex);
+                               }
+                           });
                    });
                })
                ._this();
@@ -3794,7 +3869,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addMouseWheelListener( e -> {
                        if ( e.getWheelRotation() > 0 )
-                               _runInApp(() -> onWheelDown.accept(new ComponentDelegate<>(thisComponent, e )));
+                               _runInApp(() -> {
+                                   try {
+                                       onWheelDown.accept(new ComponentDelegate<>(thisComponent, e));
+                                   } catch ( Exception ex ) {
+                                       log.error("Error in mouse wheel down event action handler!", ex);
+                                   }
+                               });
                    });
                })
                ._this();
@@ -3813,7 +3894,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addComponentListener(new ComponentAdapter() {
                        @Override public void componentResized(ComponentEvent e) {
-                           _runInApp(()->onResize.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onResize.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in resize event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3832,8 +3919,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addComponentListener(new ComponentAdapter() {
                        @Override public void componentMoved(ComponentEvent e) {
-
-                           _runInApp(()->onMoved.accept(new ComponentDelegate<>( thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onMoved.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in move event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3852,7 +3944,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addComponentListener(new ComponentAdapter() {
                        @Override public void componentShown(ComponentEvent e) {
-                           _runInApp(()->onShown.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onShown.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in show event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3871,7 +3969,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addComponentListener(new ComponentAdapter() {
                        @Override public void componentHidden(ComponentEvent e) {
-                           _runInApp(()->onHidden.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onHidden.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in hide event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3890,7 +3994,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addFocusListener(new FocusAdapter() {
                        @Override public void focusGained(FocusEvent e) {
-                           _runInApp(()->onFocus.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onFocus.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in focus gain event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3909,7 +4019,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addFocusListener(new FocusAdapter() {
                        @Override public void focusLost(FocusEvent e) {
-                           _runInApp(()->onFocus.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onFocus.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in focus loss event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3928,7 +4044,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addKeyListener(new KeyAdapter() {
                        @Override public void keyPressed(KeyEvent e) {
-                           _runInApp(()->onKeyPressed.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onKeyPressed.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in key press event action handler!", ex);
+                               }
+                           });
                        }
                    });
                })
@@ -3951,7 +4073,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                    thisComponent.addKeyListener(new KeyAdapter() {
                        @Override public void keyPressed( KeyEvent e ) {
                            if ( e.getKeyCode() == key.code )
-                               _runInApp(()->onKeyPressed.accept(new ComponentDelegate<>(thisComponent, e )));
+                               _runInApp(()->{
+                                   try {
+                                       onKeyPressed.accept(new ComponentDelegate<>(thisComponent, e));
+                                   } catch ( Exception ex ) {
+                                       log.error("Error in key press event action handler!", ex);
+                                   }
+                               });
                        }
                    });
                })
@@ -3971,7 +4099,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    thisComponent.addKeyListener(new KeyAdapter() {
                        @Override public void keyReleased(KeyEvent e) {
-                           _runInApp(()->onKeyReleased.accept(new ComponentDelegate<>(thisComponent, e ))); }
+                           _runInApp(()->{
+                               try {
+                                   onKeyReleased.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in key release event action handler!", ex);
+                               }
+                           });
+                       }
                    });
                })
                ._this();
@@ -3995,7 +4130,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                    thisComponent.addKeyListener(new KeyAdapter() {
                        @Override public void keyReleased( KeyEvent e ) {
                            if ( e.getKeyCode() == key.code )
-                               _runInApp(()->onKeyReleased.accept(new ComponentDelegate<>(thisComponent, e )));
+                               _runInApp(()->{
+                                   try {
+                                       onKeyReleased.accept(new ComponentDelegate<>(thisComponent, e));
+                                   } catch ( Exception ex ) {
+                                       log.error("Error in key release event action handler!", ex);
+                                   }
+                               });
                        }
                    });
                })
@@ -4015,7 +4156,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         return _with( thisComponent -> {
                    _onKeyTyped(thisComponent, (e, kl) -> {
-                       _runInApp(() -> onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e )));
+                       _runInApp(() -> {
+                           try {
+                               onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
+                           } catch ( Exception ex ) {
+                               log.error("Error in key typed event action handler!", ex);
+                           }
+                       });
                    });
                })
                ._this();
@@ -4039,7 +4186,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    _onKeyTyped(thisComponent, (e, kl) -> {
                        if ( e.getKeyCode() == key.code )
-                           _runInApp(()->onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in key typed event action handler!", ex);
+                               }
+                           });
                    });
                })
                ._this();
@@ -4083,7 +4236,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    _onCharTyped(thisComponent, (e, kl) -> {
                        if ( e.getKeyChar() == character )
-                           _runInApp(()->onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e )));
+                           _runInApp(()->{
+                               try {
+                                   onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in key typed event action handler!", ex);
+                               }
+                           });
                    });
                })
                ._this();
@@ -4108,7 +4267,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         return _with( thisComponent -> {
                    _onCharTyped(thisComponent, (e, kl) -> {
-                       _runInApp(()->onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e )));
+                       _runInApp(()->{
+                           try {
+                               onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
+                           } catch ( Exception ex ) {
+                               log.error("Error in key typed event action handler!", ex);
+                           }
+                       });
                    });
                })
                ._this();
@@ -4258,7 +4423,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    observableEvent.subscribe(() -> {
-                       _runInUI(() -> action.accept(new ComponentDelegate<>(thisComponent, observableEvent )));
+                       _runInUI(() -> {
+                           try {
+                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                           } catch ( Exception ex ) {
+                               log.error("Error in view event action handler!", ex);
+                           }
+                       });
                    });
                })
                ._this();
@@ -4300,7 +4471,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    observableEvent.subscribe(() -> {
-                       _runInApp(() -> action.accept(new ComponentDelegate<>(thisComponent, observableEvent )));
+                       _runInApp(() -> {
+                           try {
+                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                           } catch ( Exception ex ) {
+                               log.error("Error in custom event action handler!", ex);
+                           }
+                       });
                    });
                })
                ._this();
@@ -4350,7 +4527,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    E observableEvent = eventSource.apply(thisComponent);
                    observableEvent.subscribe(() -> {
-                       _runInApp(() -> action.accept(new ComponentDelegate<>( thisComponent, observableEvent )));
+                       _runInApp(() -> {
+                           try {
+                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                           } catch ( Exception ex ) {
+                               log.error("Error in custom event action handler!", ex);
+                           }
+                       });
                    });
                })
                ._this();
@@ -4372,7 +4555,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I doUpdates( int delay, Action<ComponentDelegate<C, ActionEvent>> onUpdate ) {
         NullUtil.nullArgCheck(onUpdate, "onUpdate", Action.class);
         return _with( thisComponent -> {
-                   Timer timer = new Timer(delay, e -> onUpdate.accept(new ComponentDelegate<>(thisComponent, e )));
+                   Timer timer = new Timer(delay, e -> {
+                       try {
+                           onUpdate.accept(new ComponentDelegate<>(thisComponent, e));
+                       } catch ( Exception ex ) {
+                           log.error("Error in update action handler!", ex);
+                       }
+                   });
                    {
                        java.util.List<Timer> timers = (java.util.List<Timer>) thisComponent.getClientProperty(_TIMERS_KEY);
                        if ( timers == null ) {

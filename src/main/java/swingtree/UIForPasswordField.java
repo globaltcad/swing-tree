@@ -63,7 +63,7 @@ public final class UIForPasswordField<F extends JPasswordField> extends UIForAny
                     thisComponent.setEchoChar( it );
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setEchoChar( echoChar.orElseThrow() );
+                    thisComponent.setEchoChar( echoChar.orElseThrowUnchecked() );
                 })
                 ._this();
     }

@@ -98,31 +98,46 @@ class Thread_Mode_Spec extends Specification
                 The event delegate (which is passed to things like `onClick` actions) 
                 throws an exception if you try to access the UI from a background thread.
                 This is because SwingTree can not guarantee that the UI is thread safe.
-                However, the delegate provides a `safe` method which will execute the
+                However, the delegate provides safe method which will execute the
                 passed lambda on the event dispatch thread.
             """
-        given: '2 UIs built with the decoupled thread mode, one error prone and the other one safe.'
+        given: 'Two custom exception tracer lists:'
+            var trace1 = []
+            var trace2 = []
+        and : '2 UIs built with the decoupled thread mode, one error prone and the other one safe.'
             var ui1 =
                     UI.use(EventProcessor.DECOUPLED, ()->
-                        UI.button("X").onClick(unsafeAccess)
+                        UI.button("X").onClick(it -> {
+                            try {
+                                unsafeAccess.accept(it)
+                            } catch (Exception e) {
+                                trace1 << e
+                            }
+                        })
                     )
             var ui2 =
                     UI.use(EventProcessor.DECOUPLED, ()->
-                        UI.button("X").onClick(safeAccess)
+                        UI.button("X").onClick({
+                            try {
+                                safeAccess.accept(it)
+                            } catch (Exception e) {
+                                trace2 << e
+                            }
+                        })
                     )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui1.get(JButton).doClick() )
             EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
 
         then: 'The delegate throws an exception!'
-            var e = thrown(Exception)
-            e.message.contains(problem)
+            trace1.size() == 1
+            trace1[0].message.contains(problem)
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui2.get(JButton).doClick() )
             EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
-            noExceptionThrown()
+            trace2.isEmpty()
 
         where : 'We can use safe, as well as unsafe, ways to access the UI.'
             problem                                    | unsafeAccess                         | safeAccess

@@ -64,7 +64,7 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
                     c.setOrientation(v.forToolBar());
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());
+                    thisComponent.setOrientation(alignment.orElseThrowUnchecked().forToolBar());
                 })
                 ._this();
     }

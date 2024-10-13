@@ -2,6 +2,8 @@ package swingtree;
 
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -31,6 +33,8 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends UIForAnySwing<I, C>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForAnyTextComponent.class);
+
     /**
      * Sets the text of the wrapped <code>{@link TextComponent}</code>
      * to the specified text. If the text is <code>null</code>
@@ -75,7 +79,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                     _setTextSilently( c, t );
                 })
                 ._with( thisComponent -> {
-                    _setTextSilently( thisComponent, text.orElseThrow() );
+                    _setTextSilently( thisComponent, text.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -129,7 +133,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                             throw new RuntimeException(ex);
                         }
                     });
-                    _setTextSilently( thisComponent, text.orElseThrow() );
+                    _setTextSilently( thisComponent, text.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -193,7 +197,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                         c.setFont(v);
                 })
                 ._with( thisComponent -> {
-                    Font newFont = font.orElseThrow();
+                    Font newFont = font.orElseThrowUnchecked();
                     if ( _isUndefinedFont(newFont) )
                         thisComponent.setFont( null );
                     else
@@ -229,11 +233,32 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         return _with( thisComponent -> {
                     thisComponent.getDocument().addDocumentListener(new DocumentListener() {
                         @Override public void insertUpdate(DocumentEvent e)  {
-                            _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
+                            _runInApp(()->{
+                                try {
+                                    action.accept(new ComponentDelegate<>(thisComponent, e));
+                                } catch (Exception ex) {
+                                    log.error("Error while executing action on text component content change!", ex);
+                                }
+                            });
+                        }
                         @Override public void removeUpdate(DocumentEvent e)  {
-                            _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
+                            _runInApp(()->{
+                                try {
+                                    action.accept(new ComponentDelegate<>(thisComponent, e));
+                                } catch (Exception ex) {
+                                    log.error("Error while executing action on text component content change!", ex);
+                                }
+                            });
+                        }
                         @Override public void changedUpdate(DocumentEvent e) {
-                            _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
+                            _runInApp(()->{
+                                try {
+                                    action.accept(new ComponentDelegate<>(thisComponent, e));
+                                } catch (Exception ex) {
+                                    log.error("Error while executing action on text component content change!", ex);
+                                }
+                            });
+                        }
                     });
                 })
                 ._this();
@@ -249,7 +274,13 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I onTextChange( Action<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _onTextChange(thisComponent, e -> _runInApp( () -> action.accept(new ComponentDelegate<>(thisComponent, e ))) );
+                    _onTextChange(thisComponent, e -> _runInApp( () -> {
+                        try {
+                            action.accept(new ComponentDelegate<>(thisComponent, e));
+                        } catch (Exception ex) {
+                            log.error("Error while executing action on text change!", ex);
+                        }
+                    }));
                 })
                 ._this();
     }
@@ -278,7 +309,13 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                  */
                 @Override
                 public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-                    state.removes.forEach(action -> action.accept( new TextRemoveDelegate(thisComponent, fb, offset, length) ) );
+                    state.removes.forEach(action -> {
+                        try {
+                            action.accept(new TextRemoveDelegate(thisComponent, fb, offset, length));
+                        } catch (Exception e) {
+                            log.error("Error while executing action on text remove!", e);
+                        }
+                    });
                     if ( state.removes.isEmpty() ) fb.remove(offset, length);
                 }
                 /**
@@ -286,7 +323,13 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                  */
                 @Override
                 public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                    state.inserts.forEach(action -> action.accept( new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
+                    state.inserts.forEach(action -> {
+                        try {
+                            action.accept(new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr));
+                        } catch (Exception e) {
+                            log.error("Error while executing action on text insert!", e);
+                        }
+                    });
                     if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);
                 }
                 /**
@@ -294,7 +337,13 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                  */
                 @Override
                 public void replace(FilterBypass fb, int offset, int length, @Nullable String text, AttributeSet attrs) throws BadLocationException {
-                    state.replaces.forEach(action -> action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
+                    state.replaces.forEach(action -> {
+                        try {
+                            action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs));
+                        } catch (Exception e) {
+                            log.error("Error while executing action on text replace!", e);
+                        }
+                    });
                     if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
                 }
             });

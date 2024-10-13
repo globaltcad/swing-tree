@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -36,6 +38,8 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForAnySwing<I, B>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForAnyButton.class);
+
     /**
      * Defines the single line of text the wrapped button type will display.
      * If the value of text is null or empty string, nothing is displayed.
@@ -60,7 +64,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
         return _withOnShow( text, AbstractButton::setText )
-               ._with( c -> c.setText(text.orElseThrow()) )
+               ._with( c -> c.setText(text.orElseThrowUnchecked()) )
                ._this();
     }
 
@@ -228,7 +232,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow( icon, (c, v) -> v.find().ifPresent(c::setIcon) )
-               ._with( c -> icon.orElseThrow().find().ifPresent(c::setIcon) )
+               ._with( c -> icon.orElseThrowUnchecked().find().ifPresent(c::setIcon) )
                ._this();
     }
 
@@ -262,7 +266,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     c.setFont(c.getFont().deriveFont(UI.scale((float)v)));
                 })
                 ._with( c -> {
-                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrow())));
+                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrowUnchecked())));
                 })
                 ._this();
     }
@@ -304,7 +308,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                         c.setFont(v);
                 })
                ._with( thisComponent -> {
-                   Font newFont = font.orElseThrow();
+                   Font newFont = font.orElseThrowUnchecked();
                    if ( _isUndefinedFont(newFont) )
                        thisComponent.setFont( null );
                    else
@@ -459,7 +463,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         return _withOnShow( selection, (c,v) -> _setSelectedSilently(c, state.equals(v)) )
                 ._with( button ->
-                     _setSelectedSilently(button, state.equals(selection.orElseThrow()))
+                     _setSelectedSilently(button, state.equals(selection.orElseThrowUnchecked()))
                 )
                 ._this();
     }
@@ -492,7 +496,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         return _withOnShow( selection, (c, v) -> _setSelectedSilently(c, !state.equals(v)) )
                 ._with( button ->
-                     _setSelectedSilently(button, !state.equals(selection.orElseThrow()))
+                     _setSelectedSilently(button, !state.equals(selection.orElseThrowUnchecked()))
                 )
                 ._this();
     }
@@ -521,7 +525,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 })
                 // on change is not needed because the pressed state is only changed by the user.
                 ._with( button ->
-                    button.setSelected(var.orElseThrow())
+                    button.setSelected(var.orElseThrowUnchecked())
                 )
                 ._this();
     }
@@ -585,7 +589,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(val, "val", Val.class);
         NullUtil.nullPropertyCheck(val, "val", "Null is not a valid value for the border painted property.");
         return _withOnShow( val, AbstractButton::setBorderPainted )
-               ._with( button -> button.setBorderPainted(val.orElseThrow()) )
+               ._with( button -> button.setBorderPainted(val.orElseThrowUnchecked()) )
                ._this();
     }
 
@@ -620,7 +624,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( button -> {
                     _onChange(button, e ->
-                        _runInApp(()->action.accept(new ComponentDelegate<>(button, e)))
+                        _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(button, e));
+                            } catch ( Exception ex ) {
+                                log.error("Failed to execute action on button change event.", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -673,9 +683,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( button -> {
                     _onClick(button, e ->
-                        _runInApp(() ->
-                            action.accept(new ComponentDelegate<>(button, e))
-                        )
+                        _runInApp(() -> {
+                            try {
+                                action.accept(new ComponentDelegate<>(button, e));
+                            } catch ( Exception ex ) {
+                                log.error("Failed to execute action on button click event.", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -747,7 +761,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     align.forSwing().ifPresent(c::setHorizontalAlignment);
                 })
                 ._with( c ->
-                    horizontalAlign.orElseThrow().forSwing().ifPresent(c::setHorizontalAlignment)
+                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalAlignment)
                 )
                 ._this();
     }
@@ -796,7 +810,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     align.forSwing().ifPresent(c::setVerticalAlignment);
                 })
                 ._with( c ->
-                    verticalAlign.orElseThrow().forSwing().ifPresent(c::setVerticalAlignment)
+                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalAlignment)
                 )
                 ._this();
     }
@@ -844,7 +858,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     align.forSwing().ifPresent(c::setHorizontalTextPosition);
                 })
                 ._with( c ->
-                    horizontalAlign.orElseThrow().forSwing().ifPresent(c::setHorizontalTextPosition)
+                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalTextPosition)
                 )
                 ._this();
     }
@@ -892,7 +906,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     align.forSwing().ifPresent(c::setVerticalTextPosition);
                 })
                 ._with( c ->
-                    verticalAlign.orElseThrow().forSwing().ifPresent(c::setVerticalTextPosition)
+                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalTextPosition)
                 )
                 ._this();
     }

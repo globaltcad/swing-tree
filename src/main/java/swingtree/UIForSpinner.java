@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -22,6 +24,7 @@ import java.util.function.Consumer;
  */
 public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForSpinner.class);
     private final BuilderState<S> _state;
 
     /**
@@ -156,7 +159,13 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent ->
                     _onChange(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on spinner change!", ex);
+                            }
+                        })
                     )
                 )
                 ._this();

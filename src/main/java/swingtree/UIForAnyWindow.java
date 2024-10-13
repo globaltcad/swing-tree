@@ -5,7 +5,8 @@ import sprouts.Val;
 import swingtree.input.Keyboard;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.*;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -52,7 +53,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 			       _setTitleOf(thisWindow, v);
 		       })
 			   ._with( thisWindow -> {
-			       _setTitleOf( thisWindow, title.orElseThrow() );
+			       _setTitleOf( thisWindow, title.orElseThrowUnchecked() );
 			   })
 			   ._this();
 	}
@@ -113,7 +114,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
 		NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", sprouts.Action.class);
 		return _with( thisWindow -> {
-					_onKeyStroke( key.code, e -> onKeyPressed.accept(_createDelegate(thisWindow, null)), thisWindow );
+					_onKeyStroke( key.code, e -> {
+						try {
+							onKeyPressed.accept(_createDelegate(thisWindow, null));
+						} catch (Exception ex) {
+							log.error("Error occurred while processing key press event.", ex);
+						}
+					}, thisWindow );
 		       })
 			   ._this();
 	}
@@ -130,7 +137,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addFocusListener(new FocusAdapter() {
 						@Override public void focusGained(FocusEvent e) {
-							_runInApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onFocus.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing focus gain event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -149,7 +162,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addFocusListener(new FocusAdapter() {
 						@Override public void focusLost(FocusEvent e) {
-							_runInApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onFocus.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing focus loss event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -172,7 +191,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowClosing( WindowEvent e ) {
-							_runInApp(()->onClose.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onClose.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window closing event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -194,7 +219,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowClosed( WindowEvent e ) {
-							_runInApp(()->onClose.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onClose.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window closed event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -216,7 +247,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowOpened( WindowEvent e ) {
-							_runInApp(()->onOpen.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onOpen.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window opened event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -241,7 +278,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowIconified( WindowEvent e ) {
-							_runInApp(()->onIconify.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onIconify.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window iconified event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -262,7 +305,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowDeiconified( WindowEvent e ) {
-							_runInApp(()->onDeiconify.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onDeiconify.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window deiconified event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -289,7 +338,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowActivated( WindowEvent e ) {
-							_runInApp(()->onActivate.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onActivate.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window activated event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -316,7 +371,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowDeactivated( WindowEvent e ) {
-							_runInApp(()->onDeactivate.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onDeactivate.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window deactivated event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -338,7 +399,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowStateChanged( WindowEvent e ) {
-							_runInApp(()->onStateChanged.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onStateChanged.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing window state changed event.", ex);
+								}
+							});
 						}
 					});
 		       })
@@ -361,7 +428,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowFocusListener(new WindowFocusListener() {
 						@Override public void windowGainedFocus( WindowEvent e ) {
-							_runInApp(()->onFocusGained.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onFocusGained.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing focus gain event.", ex);
+								}
+							});
 						}
 						@Override public void windowLostFocus( WindowEvent e ) {}
 					});
@@ -386,7 +459,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 					thisWindow.addWindowFocusListener(new WindowFocusListener() {
 						@Override public void windowGainedFocus( WindowEvent e ) {}
 						@Override public void windowLostFocus( WindowEvent e ) {
-							_runInApp(()->onFocusLost.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->{
+								try {
+									onFocusLost.accept(_createDelegate(thisWindow, e));
+								} catch (Exception ex) {
+									log.error("Error occurred while processing focus loss event.", ex);
+								}
+							});
 						}
 					});
 		       })
