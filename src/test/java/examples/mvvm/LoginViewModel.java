@@ -30,7 +30,7 @@ public class LoginViewModel
     public Val<Color> validityColor()   { return validityColor; }
 
     public void validate() {
-        if ( username.orElseThrow().isEmpty() || password.orElseThrow().isEmpty() ) {
+        if ( username.orElseThrowUnchecked().isEmpty() || password.orElseThrowUnchecked().isEmpty() ) {
             feedbackColor.set( Color.RED );
             // A slight red tint:
             validityColor.set( new Color( 255, 200, 200 ) );
@@ -42,7 +42,7 @@ public class LoginViewModel
             validityColor.set( Color.WHITE );
             feedback.set( "" );
             buttonEnabled.set( true );
-            finalForm = new Form( username.orElseThrow(), password.orElseThrow() );
+            finalForm = new Form( username.orElseThrowUnchecked(), password.orElseThrowUnchecked() );
         }
     }
 

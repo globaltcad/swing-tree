@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -25,6 +27,7 @@ import java.util.function.Function;
  */
 public final class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<UIForTextField<F>, F>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForTextField.class);
     private final BuilderState<F> _state;
 
 
@@ -53,7 +56,13 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    _onEnter(thisComponent,
-                       e -> _runInApp( () -> action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                       e -> _runInApp( () -> {
+                           try {
+                               action.accept(new ComponentDelegate<>(thisComponent, e));
+                           } catch (Exception ex) {
+                               log.error("An error occurred while executing on enter action.", ex);
+                           }
+                       })
                    );
                })
                ._this();

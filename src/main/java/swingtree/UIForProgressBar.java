@@ -60,7 +60,7 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
                    thisComponent.setOrientation(v.forProgressBar());
                })
                ._with( thisComponent -> {
-                   thisComponent.setOrientation(align.orElseThrow().forProgressBar());
+                   thisComponent.setOrientation(align.orElseThrowUnchecked().forProgressBar());
                })
                ._this();
     }
@@ -95,7 +95,7 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
                     c.setMinimum( v );
                })
                ._with( thisComponent -> {
-                    thisComponent.setMinimum( min.orElseThrow() );
+                    thisComponent.setMinimum( min.orElseThrowUnchecked() );
                })
                ._this();
     }
@@ -130,7 +130,7 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
                     thisComponent.setMaximum( v );
                })
                ._with( thisComponent -> {
-                   thisComponent.setMaximum( max.orElseThrow() );
+                   thisComponent.setMaximum( max.orElseThrowUnchecked() );
                })
                ._this();
     }
@@ -193,7 +193,7 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
                     thisComponent.setValue( v );
                })
                ._with( thisComponent -> {
-                   thisComponent.setValue( val.orElseThrow() );
+                   thisComponent.setValue( val.orElseThrowUnchecked() );
                })
                ._this();
     }
@@ -215,7 +215,7 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
                     _setProgress( thisComponent, v );
                })
                ._with( thisComponent -> {
-                   _setProgress( thisComponent, progress.orElseThrow() );
+                   _setProgress( thisComponent, progress.orElseThrowUnchecked() );
                })
                ._this();
     }

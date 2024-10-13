@@ -1,12 +1,17 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.Val;
 
-import javax.swing.*;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import java.awt.*;
+import java.awt.Component;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -18,6 +23,7 @@ import java.util.function.Consumer;
  */
 public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P>, P>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForPopup.class);
     private final BuilderState<P> _state;
 
     UIForPopup( BuilderState<P> state ) {
@@ -77,7 +83,13 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupOpen(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup open!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -108,7 +120,13 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( (P) thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>((P) thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup close!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -138,7 +156,13 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup cancel!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();

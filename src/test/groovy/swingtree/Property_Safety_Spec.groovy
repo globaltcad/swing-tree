@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.MissingItemException
 import swingtree.threading.EventProcessor
 import sprouts.Val
 import sprouts.Vals
@@ -118,7 +119,7 @@ class Property_Safety_Spec extends Specification
         when : 'We try to access the value of the property.'
             property.orElseThrow()
         then : 'The property will throw an exception.'
-            thrown(NoSuchElementException)
+            thrown(MissingItemException)
     }
 
     def 'The "orElseNull" method should be used instead of "orElseThrow" if you are fine with null items.'()
@@ -138,7 +139,7 @@ class Property_Safety_Spec extends Specification
         when : 'We try to access the value of the property through "orElseThroe".'
             property.orElseThrow()
         then : 'The property will throw an exception.'
-            thrown(NoSuchElementException)
+            thrown(MissingItemException)
     }
 
     def '"Vals", a list of properties, is immutable.'( Consumer<Vals<Integer>> code )

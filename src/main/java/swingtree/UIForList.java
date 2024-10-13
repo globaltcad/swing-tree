@@ -237,7 +237,13 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     thisComponent.addListSelectionListener(
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e)))
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error occurred while processing list selection event.", ex);
+                            }
+                        })
                     );
                 })
                 ._this();

@@ -77,7 +77,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _runInApp(() -> onClick.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> {
+                                    try {
+                                        onClick.accept(new TabDelegate(thisComponent, e));
+                                    } catch (Exception ex) {
+                                        log.error("Error while executing action on tab click!", ex);
+                                    }
+                                });
                         }
                     });
                })
@@ -102,7 +108,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _runInApp(() -> onPress.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> {
+                                    try {
+                                        onPress.accept(new TabDelegate(thisComponent, e));
+                                    } catch (Exception ex) {
+                                        log.error("Error while executing action on tab press!", ex);
+                                    }
+                                });
                         }
                     });
                })
@@ -127,7 +139,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _runInApp(() -> onRelease.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> {
+                                    try {
+                                        onRelease.accept(new TabDelegate(thisComponent, e));
+                                    } catch (Exception ex) {
+                                        log.error("Error while executing action on tab release!", ex);
+                                    }
+                                });
                         }
                     });
                })
@@ -152,7 +170,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _runInApp(() -> onEnter.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> {
+                                    try {
+                                        onEnter.accept(new TabDelegate(thisComponent, e));
+                                    } catch (Exception ex) {
+                                        log.error("Error while executing action on tab enter!", ex);
+                                    }
+                                });
                         }
                     });
                })
@@ -177,7 +201,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _runInApp(() -> onExit.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> {
+                                    try {
+                                        onExit.accept(new TabDelegate(thisComponent, e));
+                                    } catch (Exception ex) {
+                                        log.error("Error while executing action on tab exit!", ex);
+                                    }
+                                });
                         }
                     });
                })
@@ -324,7 +354,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     thisComponent.setTabLayoutPolicy(v.forTabbedPane());
                })
                 ._with( thisComponent -> {
-                    thisComponent.setTabLayoutPolicy(policy.orElseThrow().forTabbedPane());
+                    thisComponent.setTabLayoutPolicy(policy.orElseThrowUnchecked().forTabbedPane());
                 })
                ._this();
     }
@@ -359,7 +389,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
                        if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
-                           _runInApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e )));
+                           _runInApp(()->{
+                               try {
+                                   onSelection.accept(new ComponentDelegate<>(tabbedPane, e));
+                               } catch (Exception ex) {
+                                   log.error("Error while executing action on tab selection!", ex);
+                               }
+                           });
                    })
                );
 
@@ -481,7 +517,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                         int indexClicked = pane.indexAtLocation(e.getX(), e.getY());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _runInApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e )));
+                            _runInApp(()-> {
+                                try {
+                                    mouseClickAction.accept(new ComponentDelegate<>(pane, e));
+                                } catch (Exception ex) {
+                                    log.error("Error while executing action on tab click!", ex);
+                                }
+                            });
                     }
                 });
             }
@@ -498,7 +540,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             int indexClicked = pane.indexAtLocation(p.x, p.y);
             if ( indexClicked < 0 ) return;
             if ( indexOfThis == indexClicked && mouseClickAction != null )
-                _runInApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e)); });
+                _runInApp(()-> {
+                    try {
+                        mouseClickAction.accept(new ComponentDelegate<>(pane, e));
+                    } catch (Exception ex) {
+                        log.error("Error while executing action on tab click!", ex);
+                    }
+                });
             if ( indexOfThis < pane.getTabCount() )
                 pane.setSelectedIndex(indexOfThis);
         }
@@ -552,7 +600,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     public final UIForTabbedPane<P> onChange( Action<ComponentDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", Action.class);
         return _with( thisComponent -> {
-                    _onChange(thisComponent, e -> _runInApp(()->onChange.accept(new ComponentDelegate<>(thisComponent, e))));
+                    _onChange(thisComponent, e -> _runInApp(()->{
+                        try {
+                            onChange.accept(new ComponentDelegate<>(thisComponent, e));
+                        } catch (Exception ex) {
+                            log.error("Error while executing action on tab change!", ex);
+                        }
+                    }));
                 })
                 ._this();
     }

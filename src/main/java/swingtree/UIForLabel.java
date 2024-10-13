@@ -95,12 +95,12 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             try {
-                                String ref = href.orElseThrow().trim();
+                                String ref = href.orElseThrowUnchecked().trim();
                                 if ( ref.isEmpty() ) return;
                                 if ( !ref.startsWith("http") ) ref = "https://" + ref;
                                 Desktop.getDesktop().browse(new URI(ref));
                             } catch (IOException | URISyntaxException e1) {
-                                log.error("Failed to open link: " + href.orElseThrow(), e1);
+                                log.error("Failed to open link: " + href.orElseThrowUnchecked(), e1);
                             }
                         }
                         @Override  public void mouseExited(MouseEvent e) { thisComponent.setText(text.get()); }
@@ -172,7 +172,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                         _makePlain(thisComponent);
                 })
                 ._with( thisComponent -> {
-                    if ( isBold.orElseThrow() )
+                    if ( isBold.orElseThrowUnchecked() )
                         _makeBold(thisComponent);
                     else
                         _makePlain(thisComponent);
@@ -216,7 +216,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     thisComponent.setText(v);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setText( text.orElseThrow() );
+                    thisComponent.setText( text.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -258,7 +258,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     v.forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                 })
                 ._with( thisComponent -> {
-                    horizontalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                 })
                 ._this();
     }
@@ -299,7 +299,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     v.forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._with( thisComponent -> {
-                    verticalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -342,7 +342,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     v.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._with( thisComponent -> {
-                    UI.Alignment a = alignment.orElseThrow();
+                    UI.Alignment a = alignment.orElseThrowUnchecked();
                     a.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                     a.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
@@ -386,7 +386,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     v.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
                 })
                 ._with( thisComponent -> {
-                    horizontalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
+                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
                 })
                 ._this();
     }
@@ -427,7 +427,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     v.forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._with( thisComponent -> {
-                    verticalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
+                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._this();
     }
@@ -523,7 +523,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     v.find().ifPresent(thisComponent::setIcon);
                 })
                 ._with( thisComponent -> {
-                    icon.orElseThrow().find().ifPresent(thisComponent::setIcon);
+                    icon.orElseThrowUnchecked().find().ifPresent(thisComponent::setIcon);
                 })
                 ._this();
     }
@@ -560,7 +560,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                 })
                 ._with( thisComponent -> {
                     Font f = thisComponent.getFont();
-                    thisComponent.setFont(f.deriveFont((float)size.orElseThrow()));
+                    thisComponent.setFont(f.deriveFont((float)size.orElseThrowUnchecked()));
                 })
                 ._this();
     }
@@ -603,7 +603,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                         thisComponent.setFont(v);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setFont(font.orElseThrow());
+                    thisComponent.setFont(font.orElseThrowUnchecked());
                 })
                 ._this();
     }

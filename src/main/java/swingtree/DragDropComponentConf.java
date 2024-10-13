@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import swingtree.api.Configurator;
 
@@ -48,6 +50,7 @@ import java.util.Objects;
 public final class DragDropComponentConf<C extends JComponent>
 {
     private static final Action NO_ACTION = e -> {};
+    private static final Logger log = LoggerFactory.getLogger(DragDropComponentConf.class);
 
     public static <C extends JComponent> DragDropComponentConf<C> of(
         C component
@@ -233,27 +236,47 @@ public final class DragDropComponentConf<C extends JComponent>
             new DropTargetListener() {
                 @Override
                 public void dragEnter(DropTargetDragEvent event) {
-                    _onDragEnter.accept(new ComponentDelegate<>(_component, event));
+                    try {
+                        _onDragEnter.accept(new ComponentDelegate<>(_component, event));
+                    } catch (Exception e) {
+                        log.error("Error occurred while processing drag enter event.", e);
+                    }
                 }
 
                 @Override
                 public void dragOver(DropTargetDragEvent event) {
-                    _onDragOver.accept(new ComponentDelegate<>(_component, event));
+                    try {
+                        _onDragOver.accept(new ComponentDelegate<>(_component, event));
+                    } catch (Exception e) {
+                        log.error("Error occurred while processing drag over event.", e);
+                    }
                 }
 
                 @Override
                 public void dropActionChanged(DropTargetDragEvent event) {
-                    _onDropActionChanged.accept(new ComponentDelegate<>(_component, event));
+                    try {
+                        _onDropActionChanged.accept(new ComponentDelegate<>(_component, event));
+                    } catch (Exception e) {
+                        log.error("Error occurred while processing drop action changed event.", e);
+                    }
                 }
 
                 @Override
                 public void dragExit(DropTargetEvent event) {
-                    _onDragExit.accept(new ComponentDelegate<>(_component, event));
+                    try {
+                        _onDragExit.accept(new ComponentDelegate<>(_component, event));
+                    } catch (Exception e) {
+                        log.error("Error occurred while processing drag exit event.", e);
+                    }
                 }
 
                 @Override
                 public void drop(DropTargetDropEvent event) {
-                    _onDragDropEnd.accept(new ComponentDelegate<>(_component, event));
+                    try {
+                        _onDragDropEnd.accept(new ComponentDelegate<>(_component, event));
+                    } catch (Exception e) {
+                        log.error("Error occurred while processing drop event.", e);
+                    }
                 }
             }
         );

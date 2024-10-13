@@ -1,8 +1,10 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 
-import javax.swing.*;
+import javax.swing.JFormattedTextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -10,6 +12,7 @@ import java.util.function.Consumer;
 
 public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormattedTextField, JFormattedTextField>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForFormattedTextField.class);
     private final BuilderState<JFormattedTextField> _state;
 
     UIForFormattedTextField( BuilderState<JFormattedTextField> state ) {
@@ -31,7 +34,13 @@ public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFo
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onEnter(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error occurred while processing enter action event.", ex);
+                            }
+                        } )
                     );
                 })
                 ._this();

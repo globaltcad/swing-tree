@@ -45,15 +45,19 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                 List<JMenuItem> selected = _getSelected(thisComponent);
                 for ( JMenuItem item : selected ) {
                     Action<SplitItemDelegate<JMenuItem>> action = extraState.options.get(item);
-                    if ( action != null )
-                        action.accept(
-                            new SplitItemDelegate<>(
-                                e,
-                                thisComponent,
-                                ()-> new ArrayList<>(extraState.options.keySet()),
-                                item
-                            )
-                        );
+                    try {
+                        if (action != null)
+                            action.accept(
+                                    new SplitItemDelegate<>(
+                                            e,
+                                            thisComponent,
+                                            () -> new ArrayList<>(extraState.options.keySet()),
+                                            item
+                                    )
+                            );
+                    } catch (Exception exception) {
+                        log.error("Error while executing split button action listener.", exception);
+                    }
                 }
             }));
         });
@@ -226,18 +230,22 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.addSplitButtonClickedActionListener(
-                        e -> _runInApp(()->action.accept(
-                                new SplitButtonDelegate<>(
-                                     thisComponent,
-                                     new SplitItemDelegate<>(
-                                         e,
-                                         thisComponent,
-                                         () -> new ArrayList<>(state.options.keySet()),
-                                         state.lastSelected[0]
-                                     )
-                                )
-                            )
-                        )
+                        e -> _runInApp(()->{
+                                    try {
+                                        action.accept(
+                                                new SplitButtonDelegate<>(
+                                                        thisComponent,
+                                                        new SplitItemDelegate<>(
+                                                                e, thisComponent,
+                                                                () -> new ArrayList<>(state.options.keySet()),
+                                                                state.lastSelected[0]
+                                                        )
+                                                )
+                                        );
+                                    } catch (Exception exception) {
+                                        log.error("Error while executing split button action listener.", exception);
+                                    }
+                                })
                     );
                 })
                 ._this();
@@ -288,14 +296,20 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.addButtonClickedActionListener(
-                        e -> _runInApp(()->action.accept(
-                                new SplitItemDelegate<>(
-                                   e,
-                                   thisComponent,
-                                   () -> new ArrayList<>(state.options.keySet()),
-                                   state.lastSelected[0]
-                                )
-                            ))
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(
+                                        new SplitItemDelegate<>(
+                                                e,
+                                                thisComponent,
+                                                () -> new ArrayList<>(state.options.keySet()),
+                                                state.lastSelected[0]
+                                        )
+                                );
+                            } catch (Exception exception) {
+                                log.error("Error while executing split button action listener.", exception);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -315,9 +329,15 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent ->
                     thisComponent.addButtonClickedActionListener(
-                        e -> _runInApp(()->action.accept(
-                             new ComponentDelegate<>( thisComponent, e )
-                        ))
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(
+                                        new ComponentDelegate<>(thisComponent, e)
+                                );
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on button click!", ex);
+                            }
+                        })
                     )
                 )
                 ._this();
@@ -335,7 +355,13 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupOpen(thisComponent, e ->
-                        _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup open!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -370,7 +396,13 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup close!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -404,7 +436,13 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup cancel!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -495,7 +533,11 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                         log.error("Error while executing selection action listener.", exception);
                     }
                 });
-                splitItem.getOnSelected().accept(delegate);
+                try {
+                    splitItem.getOnSelected().accept(delegate);
+                } catch (Exception exception) {
+                    log.error("Error while executing split item selection action.", exception);
+                }
             })
         );
     }
