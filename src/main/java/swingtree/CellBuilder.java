@@ -11,6 +11,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
@@ -159,6 +160,13 @@ public final class CellBuilder<C extends JComponent, E> {
             if ( interpreter.isEmpty() )
                 return defaultRenderer.apply(value);
             else {
+                /*
+                    If a view is persisted from previous rendering, initialize with what is most
+                    like what the user would expect. This is however mainly to avoid
+                    rendering state left over from previous rendering.
+                 */
+                cell = _initializeViewIfPresent(cell);
+
                 for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
                     CellConf newCell = cell;
                     try {
@@ -190,6 +198,38 @@ public final class CellBuilder<C extends JComponent, E> {
 
                 return choice;
             }
+        }
+
+        private CellConf _initializeViewIfPresent(CellConf<?, Object> cell) {
+            if ( cell.view().isPresent() ) {
+                Component view = cell.view().orElseThrow();
+                @Nullable Object value = cell.presentationEntry().orElse(cell.entry().orElse(null));
+                view.setEnabled(true);
+                view.setVisible(true);
+                if ( view instanceof AbstractButton ) {
+                    AbstractButton button = (AbstractButton) view;
+                    button.setSelected(false);
+                    if ( value instanceof Boolean )
+                        button.setSelected((Boolean) value);
+                    else if ( value instanceof String )
+                        button.setText((String) value);
+                    else if ( value instanceof Icon )
+                        button.setIcon((Icon) value);
+                } else if ( view instanceof JComboBox ) {
+                    JComboBox<?> comboBox = (JComboBox<?>) view;
+                    if ( value != null )
+                        comboBox.setSelectedItem(value);
+                } else if ( view instanceof JTextComponent) {
+                    JTextComponent textField = (JTextComponent) view;
+                    if ( value != null )
+                        textField.setText(value.toString());
+                } else if ( view instanceof JLabel ) {
+                    JLabel label = (JLabel) view;
+                    if ( value != null )
+                        label.setText(value.toString());
+                }
+            }
+            return cell;
         }
 
         public @Nullable Component getEditorComponent() {
