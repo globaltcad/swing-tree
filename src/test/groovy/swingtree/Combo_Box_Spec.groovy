@@ -585,7 +585,7 @@ class Combo_Box_Spec extends Specification
                         UI.comboBox(DayOfWeek.values())
                         .withCells(it -> it
                             .when(DayOfWeek.class).as( cell -> cell
-                                .view( comp -> comp
+                                .updateView( comp -> comp
                                     .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
                                     .orGetUiIf(!cell.isEditing(), {UI.label("")})
                                     .updateIf(JLabel.class, label -> {
@@ -661,7 +661,7 @@ class Combo_Box_Spec extends Specification
             var ui =
                         UI.comboBox(DayOfWeek.values())
                         .withCell(cell -> cell
-                            .view( comp -> comp
+                            .updateView( comp -> comp
                                 .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
                                 .orGetUiIf(!cell.isEditing(), {UI.label("")})
                                 .updateIf(JLabel.class, label -> {

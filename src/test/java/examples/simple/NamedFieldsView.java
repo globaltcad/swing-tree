@@ -144,7 +144,7 @@ public class NamedFieldsView extends JPanel {
                 })
                 .withCells( it -> it
                     .when(Object.class).as( cell -> cell
-                        .view( comp -> comp
+                        .updateView( comp -> comp
                         .updateIf(JLabel.class, r -> null )
                         .updateIf(JTextField.class, tf -> {
                             tf.setText(cell.entryAsString() );
@@ -181,7 +181,7 @@ public class NamedFieldsView extends JPanel {
         .add(
             UI.comboBox(DayOfWeek.values()).isEditableIf(true)
             .withCells( it -> it.when(DayOfWeek.class).as(cell -> cell
-                    .view( comp -> comp
+                    .updateView( comp -> comp
                         .orGet(JTextField::new)
                         .updateIf(cell.isEditing(), v -> {
                             JTextField tf = new JTextField();

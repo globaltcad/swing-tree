@@ -320,7 +320,7 @@ public final class CellConf<C extends JComponent, V>
      *  <pre>{@code
      *      UI.table()
      *      .withCell(cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              .update( r -> { r.setText(cell.entryAsString()); return r; } )
      *              .orGetUi( () -> UI.textField().withBackground(Color.CYAN) )
      *          )
@@ -338,7 +338,7 @@ public final class CellConf<C extends JComponent, V>
      *        If the configurator returns an empty optional, then the view
      *        of the cell will be reset to null.
      */
-    public CellConf<C,V> view( Configurator<OptionalUI<Component>> configurator ) {
+    public CellConf<C,V> updateView(Configurator<OptionalUI<Component>> configurator ) {
         OptionalUI<Component> newRenderer = OptionalUI.empty();
         try {
             newRenderer = configurator.configure(view());
@@ -371,7 +371,7 @@ public final class CellConf<C extends JComponent, V>
      *  }</pre>
      *  But keep in mind that in this example the label will be recreated
      *  on every refresh call, which is not very efficient. It is better
-     *  to use the {@link CellConf#view(Configurator)} method to
+     *  to use the {@link CellConf#updateView(Configurator)} method to
      *  initialize the view once and then update it in every refresh call.
      *
      * @param component The component to be used as the view of the cell.

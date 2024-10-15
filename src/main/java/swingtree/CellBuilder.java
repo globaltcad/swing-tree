@@ -512,7 +512,7 @@ public final class CellBuilder<C extends JComponent, E> {
                     }
                     try {
                         if ( newCell != null )
-                            cell = newCell.view( v -> v.update( c -> c instanceof JTextField ? c : null ) );
+                            cell = newCell.updateView(v -> v.update(c -> c instanceof JTextField ? c : null ) );
                     } catch (Exception e) {
                         log.error(
                                 "Failed to establish cell editor through cell configurator " +

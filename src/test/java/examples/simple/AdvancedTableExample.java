@@ -33,7 +33,7 @@ public class AdvancedTableExample extends JPanel {
                 })
                 .withCells( it -> it
                     .when(String.class).as( cell -> cell
-                        .view( comp -> comp
+                        .updateView( comp -> comp
                             .updateIf(JLabel.class, r -> null )
                             .updateIf(JTextField.class, tf -> {
                                 tf.setText(cell.entryAsString());
