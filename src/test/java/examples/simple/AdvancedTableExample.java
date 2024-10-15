@@ -23,6 +23,7 @@ public class AdvancedTableExample extends JPanel {
         data.put("A", Stream.of("A1", "A2", "A3").collect(Collectors.toList()));
         data.put("B", Stream.of('X', 'Y', 'Z').collect(Collectors.toList()));
         data.put("C", Stream.of(3_000, 42.73, 0.000987124).collect(Collectors.toList()));
+        data.put("D", Stream.of(1, 2, 3).collect(Collectors.toList()));
 
         UI.of(this).withLayout("fill, wrap 2", "[grow][grow]")
         .add("grow, push",
@@ -36,7 +37,7 @@ public class AdvancedTableExample extends JPanel {
                         .updateView( comp -> comp
                             .updateIf(JLabel.class, r -> null )
                             .updateIf(JTextField.class, tf -> {
-                                tf.setText(cell.entryAsString());
+                                tf.setText(cell.entryAsString()+"O");
                                 return tf;
                             })
                             .update( r -> {
@@ -49,7 +50,7 @@ public class AdvancedTableExample extends JPanel {
                             )
                         )
                     )
-                    .when(Number.class).as( cell -> {
+                    .when(Double.class).as( cell -> {
                         // We format the number to scientific notation.
                         String formatted = String.format("%.2e", cell.entry().map(Number::doubleValue).orElse(0.0));
                         return cell.presentationEntry(formatted);

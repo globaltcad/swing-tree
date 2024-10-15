@@ -238,34 +238,55 @@ public final class CellBuilder<C extends JComponent, E> {
         }
 
         private void _setEditor(@Nullable Component choice, CellConf<?,?> currentCell) {
-            if ( _basicEditor.getComponent() == choice )
-                return;
-            boolean success = false;
-            if (choice instanceof JCheckBox) {
-                _basicEditor.setEditor((JCheckBox) choice);
-                success = true;
-            } else if (choice instanceof JComboBox) {
-                _basicEditor.setEditor((JComboBox<?>) choice);
-                success = true;
-            } else if (choice instanceof JTextField) {
-                _basicEditor.setEditor((JTextField) choice);
-                success = true;
-            }
-            if ( success ) {
-                try {
-                    Optional<Object> presentationEntry = currentCell.presentationEntry();
-                    if ( presentationEntry.isPresent() )
-                        _basicEditor.setValue(presentationEntry.orElse(null));
-                    else
-                        _basicEditor.setValue(currentCell.entry().orElse(null));
-                } catch (Exception e) {
-                    log.error("Failed to populate cell editor!", e);
+            if ( _basicEditor.getComponent() != choice ) {
+                if (choice instanceof JCheckBox) {
+                    _basicEditor.setEditor((JCheckBox) choice);
+                } else if (choice instanceof JComboBox) {
+                    _basicEditor.setEditor((JComboBox<?>) choice);
+                } else if (choice instanceof JTextField) {
+                    _basicEditor.setEditor((JTextField) choice);
                 }
+            }
+            try {
+                Optional<Object> presentationEntry = currentCell.presentationEntry();
+                if ( presentationEntry.isPresent() )
+                    _basicEditor.setValue(presentationEntry.orElse(null));
+                else if ( currentCell.view().isEmpty() )
+                    _basicEditor.setValue(currentCell.entry().orElse(null));
+            } catch (Exception e) {
+                log.error("Failed to populate cell editor!", e);
             }
         }
 
         private void _setRenderer(@Nullable Component choice, CellConf<?,?> currentCell) {
             _lastCustomRenderer = choice;
+            try {
+                Optional<Object> presentationEntry = currentCell.presentationEntry();
+
+                if ( presentationEntry.isPresent() || currentCell.view().isEmpty() ) {
+                    @Nullable Object value = presentationEntry.orElse(currentCell.entry().orElse(null));
+                    if ( choice instanceof AbstractButton ) {
+                        AbstractButton button = (AbstractButton) choice;
+                        if ( value instanceof Boolean )
+                            button.setSelected((Boolean) value);
+                        else if ( value instanceof String )
+                            button.setText((String) value);
+                        else if ( value instanceof Icon )
+                            button.setIcon((Icon) value);
+                    } else if ( choice instanceof JComboBox ) {
+                        JComboBox<?> comboBox = (JComboBox<?>) choice;
+                        comboBox.setSelectedItem(value);
+                    } else if ( choice instanceof JTextComponent ) {
+                        JTextComponent textField = (JTextComponent) choice;
+                        textField.setText(value == null ? "" : value.toString());
+                    } else if ( choice instanceof JLabel ) {
+                        JLabel label = (JLabel) choice;
+                        label.setText(value == null ? "" : value.toString());
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to populate cell editor!", e);
+            }
         }
 
         private Component _fit( JTable table, int row, int column, Component view ) {
