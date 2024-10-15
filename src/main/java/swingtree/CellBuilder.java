@@ -182,11 +182,12 @@ public final class CellBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
+                Optional<Object> presentationEntry = cell.presentationEntry();
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
                     saveComponent.accept(choice, cell);
-                } else if (cell.presentationEntry().isPresent()) {
-                    choice = defaultRenderer.apply(cell.presentationEntry().get());
+                } else if (presentationEntry.isPresent()) {
+                    choice = defaultRenderer.apply(presentationEntry.get());
                     saveComponent.accept(null, cell);
                 } else {
                     choice = defaultRenderer.apply(value);
@@ -203,7 +204,7 @@ public final class CellBuilder<C extends JComponent, E> {
         private CellConf _initializeViewIfPresent(CellConf<?, Object> cell) {
             if ( cell.view().isPresent() ) {
                 Component view = cell.view().orElseThrow();
-                @Nullable Object value = cell.presentationEntry().orElse(cell.entry().orElse(null));
+                @Nullable Object value = cell.entry().orElse(null);
                 view.setEnabled(true);
                 view.setVisible(true);
                 if ( view instanceof AbstractButton ) {
@@ -252,8 +253,9 @@ public final class CellBuilder<C extends JComponent, E> {
             }
             if ( success ) {
                 try {
-                    if ( currentCell.presentationEntry().isPresent() )
-                        _basicEditor.setValue(currentCell.presentationEntry().orElse(null));
+                    Optional<Object> presentationEntry = currentCell.presentationEntry();
+                    if ( presentationEntry.isPresent() )
+                        _basicEditor.setValue(presentationEntry.orElse(null));
                     else
                         _basicEditor.setValue(currentCell.entry().orElse(null));
                 } catch (Exception e) {
@@ -469,11 +471,12 @@ public final class CellBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
+                Optional<Object> presentationEntry = cell.presentationEntry();
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
                     _lastCustomRenderer = choice;
-                } else if (cell.presentationEntry().isPresent()) {
-                    choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationEntry().get(), row, isSelected, hasFocus);
+                } else if (presentationEntry.isPresent()) {
+                    choice = _defaultRenderer.getListCellRendererComponent(list, presentationEntry.get(), row, isSelected, hasFocus);
                     _lastCustomRenderer = null;
                 } else {
                     choice = _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
