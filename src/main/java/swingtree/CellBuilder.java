@@ -261,23 +261,36 @@ public final class CellBuilder<C extends JComponent, E> {
             return _basicEditor.getComponent();
         }
 
-        private void _setEditor(@Nullable Component choice, @Nullable Object value, CellConf<?,?> currentCell) {
-            safeEditor(value, choice);
-            if ( _basicEditor.getComponent() != choice ) {
-                if (choice instanceof JCheckBox) {
-                    _basicEditor.setEditor((JCheckBox) choice);
-                } else if (choice instanceof JComboBox) {
-                    _basicEditor.setEditor((JComboBox<?>) choice);
-                } else if (choice instanceof JTextField) {
-                    _basicEditor.setEditor((JTextField) choice);
+        private @Nullable Component _loadEditor(@Nullable Object value) {
+            @Nullable Component editor = findEditor(value);
+            if ( editor != null )
+                editor = _setEditorComponent(editor);
+            return editor;
+        }
+
+        private @Nullable Component _setEditorComponent(@Nullable Component editor) {
+            if ( _basicEditor.getComponent() != editor ) {
+                if (editor instanceof JCheckBox) {
+                    _basicEditor.setEditor((JCheckBox) editor);
+                } else if (editor instanceof JComboBox) {
+                    _basicEditor.setEditor((JComboBox<?>) editor);
+                } else if (editor instanceof JTextField) {
+                    _basicEditor.setEditor((JTextField) editor);
                 }
             }
+            return _basicEditor.getComponent();
+        }
+
+        private void _setEditor(@Nullable Component choice, @Nullable Object value, CellConf<?,?> currentCell) {
+            choice = _setEditorComponent(choice);
+            safeEditor(value, choice);
             try {
+                // Apply user values to editor:
                 Optional<Object> presentationEntry = currentCell.presentationEntry();
                 if ( presentationEntry.isPresent() )
-                    _basicEditor.setValue(presentationEntry.orElse(null));
+                    _basicEditor.setValue(presentationEntry.orElse(null), value == null ? Object.class : value.getClass());
                 else if ( currentCell.view().isEmpty() )
-                    _basicEditor.setValue(currentCell.entry().orElse(null));
+                    _basicEditor.setValue(currentCell.entry().orElse(null), value == null ? Object.class : value.getClass());
             } catch (Exception e) {
                 log.error("Failed to populate cell editor!", e);
             }
@@ -374,13 +387,13 @@ public final class CellBuilder<C extends JComponent, E> {
             _checkTypeValidity(value);
             _basicEditor.ini(table, row, column);
             _basicEditor.updateForTable(table, column);
-            _basicEditor.setValue(value);
+            _basicEditor.setValue(value, value == null ? Object.class : value.getClass());
             return _fit(table, row, column,
                         _updateAndGetComponent(
                              localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
                              (choice, newEditor) -> _setEditor(choice, value, newEditor),
                              CellConf.of(
-                                 findEditor(value),
+                                 _loadEditor(value),
                                  table, value, isSelected, true, true, false, false, row, column,
                                  () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
                              )
@@ -401,7 +414,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _checkTypeValidity(value);
             String stringValue = tree.convertValueToText(value, selected, expanded, leaf, row, false);
             _basicEditor.ini(tree, row, 0);
-            _basicEditor.setValue(stringValue);
+            _basicEditor.setValue(stringValue, value == null ? Object.class : value.getClass());
             return _updateAndGetComponent(
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          (choice, newRenderer) -> _setRenderer(choice, value, newRenderer),
@@ -428,7 +441,7 @@ public final class CellBuilder<C extends JComponent, E> {
                          localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
                         (choice, newEditor) -> _setEditor(choice, value, newEditor),
                          CellConf.of(
-                             findEditor(value),
+                             _loadEditor(value),
                              tree, value, isSelected,
                              true, true, expanded, leaf, row, 0,
                              () -> _basicEditor.getTreeCellEditorComponent(tree, value, isSelected, expanded, leaf, row)
