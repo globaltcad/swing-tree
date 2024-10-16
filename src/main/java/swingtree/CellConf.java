@@ -286,7 +286,7 @@ public final class CellConf<C extends JComponent, V>
      *  It is wrapped in an {@link Optional} to clearly indicate
      *  that it may be null.<br>
      *  Note that in case of the {@link CellConf#isEditing()} method
-     *  returning true, the component stored in this optional is used as an editor.
+     *  returning true, the view component stored in this cell is used as an editor.
      *  If the cell is not being edited, then the component is used as a renderer.<br>
      *  Two components are persisted across multiple calls to the
      *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method, one
@@ -322,7 +322,7 @@ public final class CellConf<C extends JComponent, V>
      *      .withCell(cell -> cell
      *          .updateView( comp -> comp
      *              .update( r -> { r.setText(cell.entryAsString()); return r; } )
-     *              .orGetUi( () -> UI.textField().withBackground(Color.CYAN) )
+     *              .orGetUi( () -> UI.textField(cell.entryAsString()).withBackground(Color.CYAN) )
      *          )
      *      )
      *      // ...
@@ -536,8 +536,9 @@ public final class CellConf<C extends JComponent, V>
      *  By default, this entry is null,
      *  in which case it does not exist the regular
      *  cell entry is used for rendering by the default view.
-     *  Note that if you supply your own custom view/renderer component,
-     *  then the presentation entry is ignored.
+     *  Note that if you supply a presentation value, then SwingTree
+     *  will try to apply this value to the view component.
+     *  (Which includes the editor and renderer components)
      *
      * @param toBeShown The object which should be used by the renderer
      *                  to present to the user, typically a String.
@@ -569,8 +570,9 @@ public final class CellConf<C extends JComponent, V>
      *  This method allows you to convert the cell entry to a presentation
      *  entry by applying a function to it. The function takes the cell entry
      *  as an argument and returns the presentation entry.
-     *  Note that if you supply your own custom view/renderer component,
-     *  then the presentation entry is ignored.
+     *  Note that if you supply a presentation value, then SwingTree
+     *  will try to apply this value to the view component.
+     *  (Which includes the editor and renderer components)
      *
      * @param presenter The function that converts the cell entry to a presentation entry.
      * @return An updated cell delegate object with the new presentation entry.

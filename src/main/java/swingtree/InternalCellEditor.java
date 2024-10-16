@@ -160,7 +160,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             public void setValue(@Nullable Object value) {
                 boolean selected = false;
                 if (value instanceof Boolean) {
-                    selected = ((Boolean)value).booleanValue();
+                    selected = (Boolean) value;
                 }
                 else if (value instanceof String) {
                     selected = value.equals("true");
@@ -170,7 +170,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
             @Override
             public Object getCellEditorValue() {
-                return Boolean.valueOf(checkBox.isSelected());
+                return checkBox.isSelected();
             }
         };
         checkBox.addActionListener(delegate);
@@ -188,7 +188,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             }
 
             @Override
-            public Object getCellEditorValue() {
+            public @Nullable Object getCellEditorValue() {
                 return comboBox.getSelectedItem();
             }
 

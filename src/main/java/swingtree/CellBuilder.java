@@ -174,11 +174,11 @@ public final class CellBuilder<C extends JComponent, E> {
         if ( interpreter.isEmpty() )
             return defaultRenderer.apply(value);
         else {
-                /*
-                    If a view is persisted from previous rendering, initialize with what is most
-                    like what the user would expect. This is however mainly to avoid
-                    rendering state left over from previous rendering.
-                 */
+           /*
+               If a view is persisted from previous rendering, initialize with what is most
+               like what the user would expect. This is however mainly to avoid
+               rendering state left over from previous rendering.
+            */
             cell = _initializeViewIfPresent(cell);
 
             for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
