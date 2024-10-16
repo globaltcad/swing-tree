@@ -443,57 +443,38 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             if ( targetType.isAssignableFrom(value.getClass()) )
                 return Result.of(value);
             try {
-                if (value instanceof String) {
-                    if (targetType == String.class)
-                        return Result.of(value);
-                    if (targetType == Boolean.class)
-                        return Result.of(Boolean.valueOf((String) value));
-                    if (targetType == Integer.class)
-                        return Result.of(Integer.valueOf((String) value));
-                    if (targetType == Long.class)
-                        return Result.of(Long.valueOf((String) value));
-                    if (targetType == Float.class)
-                        return Result.of(Float.valueOf((String) value));
-                    if (targetType == Double.class)
-                        return Result.of(Double.valueOf((String) value));
-                    if (targetType == Byte.class)
-                        return Result.of(Byte.valueOf((String) value));
-                    if (targetType == Short.class)
-                        return Result.of(Short.valueOf((String) value));
-                    if (targetType == Character.class)
-                        return Result.of(((String) value).charAt(0));
-                } else if (value instanceof Number) {
-                    if (targetType == String.class)
-                        return Result.of(value.toString());
-                    if (targetType == Boolean.class)
-                        return Result.of(((Number) value).intValue() != 0);
-                    if (targetType == Integer.class)
-                        return Result.of(((Number) value).intValue());
-                    if (targetType == Long.class)
-                        return Result.of(((Number) value).longValue());
-                    if (targetType == Float.class)
-                        return Result.of(((Number) value).floatValue());
-                    if (targetType == Double.class)
-                        return Result.of(((Number) value).doubleValue());
-                    if (targetType == Byte.class)
-                        return Result.of(((Number) value).byteValue());
-                    if (targetType == Short.class)
-                        return Result.of(((Number) value).shortValue());
-                    if (targetType == Character.class)
-                        return Result.of((char) ((Number) value).intValue());
-                }
+                return _tryConvert(value, targetType);
             } catch (Exception e) {
-                log.debug("Failed to convert internal cell editor value for host type '"+hostType.getName()+"'", e);
+                log.debug(
+                        "Failed to convert internal cell editor value " +
+                        "from '"+value+"' to target type '"+targetType.getName()+"' " +
+                        "for host component type '"+hostType.getName()+"'",
+                        e
+                    );
             }
 
             List<Problem> problems = new ArrayList<>();
             problems.add(Problem.of(
-                    "Failed to convert internal cell editor " +
-                    "value for host type '"+hostType.getName()+"'"
-                ));
+                    "Failed to convert internal cell editor value " +
+                        "from '"+value+"' to target type '"+targetType.getName()+"' " +
+                        "for host component type '"+hostType.getName()+"'"
+                    ));
+            Object restoredValue = this.originalValue;
+            try {
+                if ( restoredValue != null )
+                    restoredValue = _tryConvert(restoredValue, targetType).orElseNullable(value);
+            } catch (Exception e) {
+                problems.add(Problem.of(e));
+                log.debug(
+                        "Failed to convert internal cell editor value received before editing " +
+                        "from '"+this.originalValue+"' to target type '"+targetType.getName()+"' " +
+                        "for host component type '"+hostType.getName()+"'",
+                        e
+                    );
+            }
             return Result.of(
                     Object.class,
-                    this.originalValue,
+                    restoredValue,
                     problems
                 );
         }
@@ -554,6 +535,85 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         public void itemStateChanged(ItemEvent e) {
             InternalCellEditor.this.stopCellEditing();
         }
+
+        private Result<@Nullable Object> _tryConvert(Object value, Class<?> targetType) throws Exception {
+            if ( targetType == String.class ) {
+                if ( value instanceof String )
+                    return Result.of(value);
+                else if ( value instanceof Number )
+                    return Result.of(value.toString());
+                else if ( value instanceof Boolean )
+                    return Result.of(value.toString());
+                else if ( value instanceof Character )
+                    return Result.of(value.toString());
+                else
+                    return Result.of(value.toString());
+            } else if ( targetType == Character.class ) {
+                if ( value instanceof Character )
+                    return Result.of(value);
+                else if ( value instanceof String ) {
+                    String str = (String) value;
+                    if ( str.length() == 1 )
+                        return Result.of(str.charAt(0));
+                }
+            } else if ( targetType == Boolean.class ) {
+                if ( value instanceof Boolean )
+                    return Result.of(value);
+                else if ( value instanceof String ) {
+                    String str = (String) value;
+                    if ( str.equalsIgnoreCase("true") )
+                        return Result.of(true);
+                    if ( str.equalsIgnoreCase("false") )
+                        return Result.of(false);
+                }
+            } else if ( Number.class.isAssignableFrom(targetType) ) {
+                if ( value instanceof Number ) {
+                    if ( targetType == Integer.class )
+                        return Result.of(((Number) value).intValue());
+                    if ( targetType == Long.class )
+                        return Result.of(((Number) value).longValue());
+                    if ( targetType == Float.class )
+                        return Result.of(((Number) value).floatValue());
+                    if ( targetType == Double.class )
+                        return Result.of(((Number) value).doubleValue());
+                    if ( targetType == Byte.class )
+                        return Result.of(((Number) value).byteValue());
+                    if ( targetType == Short.class )
+                        return Result.of(((Number) value).shortValue());
+                } else if ( value instanceof String ) {
+                    String str = (String) value;
+                    if ( targetType == Integer.class )
+                        return Result.of(Integer.parseInt(str));
+                    if ( targetType == Long.class )
+                        return Result.of(Long.parseLong(str));
+                    if ( targetType == Float.class )
+                        return Result.of(Float.parseFloat(str));
+                    if ( targetType == Double.class )
+                        return Result.of(Double.parseDouble(str));
+                    if ( targetType == Byte.class )
+                        return Result.of(Byte.parseByte(str));
+                    if ( targetType == Short.class )
+                        return Result.of(Short.parseShort(str));
+                } else if ( value instanceof Boolean ) {
+                    if ( targetType == Integer.class )
+                        return Result.of(((Boolean) value) ? 1 : 0);
+                    if ( targetType == Long.class )
+                        return Result.of(((Boolean) value) ? 1L : 0L);
+                    if ( targetType == Float.class )
+                        return Result.of(((Boolean) value) ? 1.0f : 0.0f);
+                    if ( targetType == Double.class )
+                        return Result.of(((Boolean) value) ? 1.0 : 0.0);
+                    if ( targetType == Byte.class )
+                        return Result.of(((Boolean) value) ? (byte) 1 : (byte) 0);
+                    if ( targetType == Short.class )
+                        return Result.of(((Boolean) value) ? (short) 1 : (short) 0);
+                }
+            }
+            throw new IllegalArgumentException(
+                    "Cannot convert value '"+value+"' to target type '"+targetType.getName()+"'."
+            );
+        }
+
     }
 
 }
