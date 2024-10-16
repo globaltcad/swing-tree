@@ -141,10 +141,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         hasDefaultComponent = false;
     }
 
-    public void setValue(@Nullable Object value, Class<?> targetType) {
+    public void setValue(
+        @Nullable Object presentationValue,
+        @Nullable Object originalValue,
+        Class<?> targetType
+    ) {
         try {
             Objects.requireNonNull(delegate);
-            delegate.setValueAndTarget(value, targetType);
+            delegate.setValueAndTarget(presentationValue, originalValue, targetType);
         } catch (Exception e) {
             log.debug("Failed to internal cell editor value for host type '"+hostType.getName()+"'", e);
         }
@@ -338,7 +342,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
         String stringValue = tree.convertValueToText(value, isSelected, expanded, leaf, row, false);
-        delegate.setValueAndTarget(stringValue, value == null ? Object.class : value.getClass());
+        delegate.setValueAndTarget(stringValue, value, value == null ? Object.class : value.getClass());
         return editorComponent;
     }
 
@@ -352,7 +356,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                                                  int row, int column) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
-        delegate.setValueAndTarget(value, value == null ? Object.class : value.getClass());
+        delegate.setValueAndTarget(value, value, value == null ? Object.class : value.getClass());
         if (editorComponent instanceof JCheckBox) {
             //in order to avoid a "flashing" effect when clicking a checkbox
             //in a table, it is important for the editor to have as a border
@@ -418,10 +422,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         private Class<?> targetType = Object.class;
         private @Nullable Object originalValue;
 
-        public final void setValueAndTarget(@Nullable Object value, Class<?> targetType) {
+        public final void setValueAndTarget(
+            @Nullable Object presentationValue,
+            @Nullable Object originalValue,
+            Class<?> targetType
+        ) {
             this.targetType = targetType;
-            this.originalValue = value;
-            this.setValue(value);
+            this.originalValue = originalValue;
+            this.setValue(presentationValue);
         }
 
         /**

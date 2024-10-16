@@ -288,9 +288,9 @@ public final class CellBuilder<C extends JComponent, E> {
                 // Apply user values to editor:
                 Optional<Object> presentationEntry = currentCell.presentationEntry();
                 if ( presentationEntry.isPresent() )
-                    _basicEditor.setValue(presentationEntry.orElse(null), value == null ? Object.class : value.getClass());
+                    _basicEditor.setValue(presentationEntry.orElse(null), value, value == null ? Object.class : value.getClass());
                 else if ( currentCell.view().isEmpty() )
-                    _basicEditor.setValue(currentCell.entry().orElse(null), value == null ? Object.class : value.getClass());
+                    _basicEditor.setValue(currentCell.entry().orElse(null), value, value == null ? Object.class : value.getClass());
             } catch (Exception e) {
                 log.error("Failed to populate cell editor!", e);
             }
@@ -387,7 +387,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _checkTypeValidity(value);
             _basicEditor.ini(table, row, column);
             _basicEditor.updateForTable(table, column);
-            _basicEditor.setValue(value, value == null ? Object.class : value.getClass());
+            _basicEditor.setValue(value, value, value == null ? Object.class : value.getClass());
             return _fit(table, row, column,
                         _updateAndGetComponent(
                              localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
@@ -414,7 +414,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _checkTypeValidity(value);
             String stringValue = tree.convertValueToText(value, selected, expanded, leaf, row, false);
             _basicEditor.ini(tree, row, 0);
-            _basicEditor.setValue(stringValue, value == null ? Object.class : value.getClass());
+            _basicEditor.setValue(stringValue, value, value == null ? Object.class : value.getClass());
             return _updateAndGetComponent(
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          (choice, newRenderer) -> _setRenderer(choice, value, newRenderer),
