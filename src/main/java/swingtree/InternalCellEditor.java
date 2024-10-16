@@ -123,12 +123,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         this.clickCountToStart = 2;
         delegate = new EditorDelegate() {
             @Override
-            public void setValue(@Nullable Object value) {
+            public void setPresentationEntry(@Nullable Object value) {
                 textField.setText((value != null) ? value.toString() : "");
             }
 
             @Override
-            public Object getCellEditorValue() {
+            public Object getCurrentCellEditorEntry() {
                 return textField.getText();
             }
         };
@@ -141,14 +141,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         hasDefaultComponent = false;
     }
 
-    public void setValue(
-        @Nullable Object presentationValue,
-        @Nullable Object originalValue,
-        Class<?> targetType
+    public void setEntry(
+        @Nullable Object presentationEntry, // Typically a nicely formatted string
+        @Nullable Object originalEntryFromModel, // The original value from the model
+        Class<?> targetedEntryType
     ) {
         try {
             Objects.requireNonNull(delegate);
-            delegate.setValueAndTarget(presentationValue, originalValue, targetType);
+            delegate.setValueAndTarget(presentationEntry, originalEntryFromModel, targetedEntryType);
         } catch (Exception e) {
             log.debug("Failed to internal cell editor value for host type '"+hostType.getName()+"'", e);
         }
@@ -168,7 +168,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         editorComponent = checkBox;
         delegate = new EditorDelegate() {
             @Override
-            public void setValue(@Nullable Object value) {
+            public void setPresentationEntry(@Nullable Object value) {
                 boolean selected = false;
                 if (value instanceof Boolean) {
                     selected = (Boolean) value;
@@ -180,7 +180,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             }
 
             @Override
-            public Object getCellEditorValue() {
+            public Object getCurrentCellEditorEntry() {
                 return checkBox.isSelected();
             }
         };
@@ -194,12 +194,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         editorComponent = comboBox;
         delegate = new EditorDelegate() {
             @Override
-            public void setValue(@Nullable Object value) {
+            public void setPresentationEntry(@Nullable Object value) {
                 comboBox.setSelectedItem(value);
             }
 
             @Override
-            public @Nullable Object getCellEditorValue() {
+            public @Nullable Object getCurrentCellEditorEntry() {
                 return comboBox.getSelectedItem();
             }
 
@@ -247,14 +247,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     /**
      * Forwards the message from the <code>CellEditor</code> to
      * the <code>delegate</code>.
-     * @see EditorDelegate#getCellEditorValueAsTarget
+     * @see EditorDelegate#getCellEditorEntryAsTargetType
      */
     @Override
     public @Nullable Object getCellEditorValue() {
         if ( JTable.class.isAssignableFrom(hostType) )
             return this.editorOutputValue.orElseNull();
         Objects.requireNonNull(delegate);
-        return delegate.getCellEditorValueAsTarget().orElseNull();
+        return delegate.getCellEditorEntryAsTargetType().orElseNull();
     }
 
     /**
@@ -296,7 +296,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     public boolean stopCellEditing() {
         Objects.requireNonNull(delegate);
         if ( JTable.class.isAssignableFrom(hostType) ) {
-            Result<Object> newValueResult = delegate.getCellEditorValueAsTarget();
+            Result<Object> newValueResult = delegate.getCellEditorEntryAsTargetType();
             @Nullable Object newValue = newValueResult.orElseNull();
             this.editorOutputValue = newValueResult;
             if ( constructor == null ) {
@@ -335,14 +335,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
     /** Implements the <code>TreeCellEditor</code> interface. */
     @Override
-    public Component getTreeCellEditorComponent(JTree tree, @Nullable Object value,
+    public Component getTreeCellEditorComponent(JTree tree, @Nullable Object entryFromModel,
                                                 boolean isSelected,
                                                 boolean expanded,
                                                 boolean leaf, int row) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
-        String stringValue = tree.convertValueToText(value, isSelected, expanded, leaf, row, false);
-        delegate.setValueAndTarget(stringValue, value, value == null ? Object.class : value.getClass());
+        String entryAsString = tree.convertValueToText(entryFromModel, isSelected, expanded, leaf, row, false);
+        delegate.setValueAndTarget(entryAsString, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
         return editorComponent;
     }
 
@@ -351,12 +351,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 //
     /** Implements the <code>TableCellEditor</code> interface. */
     @Override
-    public Component getTableCellEditorComponent(JTable table, @Nullable Object value,
+    public Component getTableCellEditorComponent(JTable table, @Nullable Object entryFromModel,
                                                  boolean isSelected,
                                                  int row, int column) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
-        delegate.setValueAndTarget(value, value, value == null ? Object.class : value.getClass());
+        delegate.setValueAndTarget(entryFromModel, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
         if (editorComponent instanceof JCheckBox) {
             //in order to avoid a "flashing" effect when clicking a checkbox
             //in a table, it is important for the editor to have as a border
@@ -365,8 +365,8 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             //needed for JCheckBox since this editor doesn't fill all the
             //visual space of the table cell, unlike a text field.
             TableCellRenderer renderer = table.getCellRenderer(row, column);
-            Component c = renderer.getTableCellRendererComponent(table, value,
-                    isSelected, true, row, column);
+            Component c = renderer.getTableCellRendererComponent(table, entryFromModel,
+                                                                  isSelected, true, row, column);
             if (c != null) {
                 editorComponent.setOpaque(true);
                 editorComponent.setBackground(c.getBackground());
@@ -423,27 +423,27 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         private @Nullable Object originalValue;
 
         public final void setValueAndTarget(
-            @Nullable Object presentationValue,
-            @Nullable Object originalValue,
+            @Nullable Object entryToBePresentedAndEdited,
+            @Nullable Object originalEntryFromModel,
             Class<?> targetType
         ) {
             this.targetType = targetType;
-            this.originalValue = originalValue;
-            this.setValue(presentationValue);
+            this.originalValue = originalEntryFromModel;
+            this.setPresentationEntry(entryToBePresentedAndEdited);
         }
 
         /**
          * Returns the value of this cell directly from the editor component.
          * @return the value of this cell
          */
-        protected abstract @Nullable Object getCellEditorValue();
+        protected abstract @Nullable Object getCurrentCellEditorEntry();
 
         /**
          * @return the value of this cell as the target type if possible
          *         or the raw value if conversion is not possible.
          */
-        public final Result<@Nullable Object> getCellEditorValueAsTarget() {
-            Object value = getCellEditorValue();
+        public final Result<@Nullable Object> getCellEditorEntryAsTargetType() {
+            Object value = getCurrentCellEditorEntry();
             if ( value == null )
                 return Result.of(Object.class);
             if ( targetType == Object.class )
@@ -491,7 +491,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
          * Sets the value of this cell.
          * @param value the new value of this cell
          */
-        protected abstract void setValue(@Nullable Object value);
+        protected abstract void setPresentationEntry(@Nullable Object value);
 
         /**
          * Returns true to indicate that the editing cell may
