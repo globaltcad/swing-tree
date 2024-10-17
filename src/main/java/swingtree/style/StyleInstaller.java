@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import swingtree.UI;
+import swingtree.api.Configurator;
 import swingtree.api.Painter;
 import swingtree.components.JIcon;
 import swingtree.layout.Bounds;
@@ -56,6 +57,13 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Boolean _initialIsOpaque           = null;
     private @Nullable Boolean _initialContentAreaFilled  = null;
 
+    void updateDynamicLookAndFeel(Configurator<DynamicLaF> updater) {
+        try {
+            _dynamicLaF = updater.configure(_dynamicLaF);
+        } catch (Exception e) {
+            log.error("Failed to update dynamic look and feel!", e);
+        }
+    }
 
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
         Border currentBorder = owner.getBorder();
