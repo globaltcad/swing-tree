@@ -384,7 +384,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  <pre>{@code
      *      UI.comboBox(TimeUnit.values())
      *      .withCell( cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              .orGet(JLabel::new)
      *              .updateIf(JLabel.class, label -> {
      *                  label.setText(cell.valueAsString().orElse(""));

@@ -239,7 +239,7 @@ class Declarative_Tables_Spec extends Specification
                         .isEditableIf((r, c) -> true)
                     )
                     .withCell(cell -> cell
-                        .view( comp -> comp
+                        .updateView( comp -> comp
                             .orGetUi({UI.textField().withBackground(Color.MAGENTA)})
                             .updateIf(JTextField.class, tf -> {
                                 tf.text = cell.entryAsString()

@@ -319,14 +319,14 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  The {@link Configurator} lambda function passed to this method receives a {@link CellConf}
      *  exposing the current item value and the current selection state of the cell.
      *  You may update return an updated cell with a desired view component
-     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  <p>
      *  Here code snippet demonstrating how this method may be used
      *  as part of a UI declaration:
      *  <pre>{@code
      *      UI.list(new Month[]{Month.JANUARY, Month.FEBRUARY, Month.MARCH})
      *      .withCell( cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
      *              .updateIf(JLabel.class, tf -> {
      *                  tf.setText(cell.valueAsString().orElse(""));

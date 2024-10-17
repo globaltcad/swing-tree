@@ -3,6 +3,8 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Problem;
+import sprouts.Result;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -10,17 +12,21 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.*;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 import java.util.Objects;
 
 final class InternalCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
 
     private final static Class<?>[] argTypes = new Class<?>[]{String.class};
     private static final Logger log = LoggerFactory.getLogger(InternalCellEditor.class);
-    private java.lang.reflect.@Nullable Constructor<?> constructor;
-    private @Nullable Object value;
+    private @Nullable Constructor<?> constructor;
+    private Result<Object> editorOutputValue;
 
     /** The Swing component being edited. */
     private @Nullable JComponent editorComponent;
@@ -45,6 +51,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
     public InternalCellEditor(Class<? extends JComponent> hostType) {
         this.hostType = hostType;
+        this.editorOutputValue = Result.of(Object.class);
     }
 
     public void ini(JComponent host, int row, int col) {
@@ -116,12 +123,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         this.clickCountToStart = 2;
         delegate = new EditorDelegate() {
             @Override
-            public void setValue(@Nullable Object value) {
+            public void setPresentationEntry(@Nullable Object value) {
                 textField.setText((value != null) ? value.toString() : "");
             }
 
             @Override
-            public Object getCellEditorValue() {
+            public Object getCurrentCellEditorEntry() {
                 return textField.getText();
             }
         };
@@ -134,10 +141,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         hasDefaultComponent = false;
     }
 
-    public void setValue(@Nullable Object value) {
+    public void setEntry(
+        @Nullable Object presentationEntry, // Typically a nicely formatted string
+        @Nullable Object originalEntryFromModel, // The original value from the model
+        Class<?> targetedEntryType
+    ) {
         try {
             Objects.requireNonNull(delegate);
-            delegate.setValue(value);
+            delegate.setValueAndTarget(presentationEntry, originalEntryFromModel, targetedEntryType);
         } catch (Exception e) {
             log.debug("Failed to internal cell editor value for host type '"+hostType.getName()+"'", e);
         }
@@ -157,10 +168,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         editorComponent = checkBox;
         delegate = new EditorDelegate() {
             @Override
-            public void setValue(@Nullable Object value) {
+            public void setPresentationEntry(@Nullable Object value) {
                 boolean selected = false;
                 if (value instanceof Boolean) {
-                    selected = ((Boolean)value).booleanValue();
+                    selected = (Boolean) value;
                 }
                 else if (value instanceof String) {
                     selected = value.equals("true");
@@ -169,8 +180,8 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             }
 
             @Override
-            public Object getCellEditorValue() {
-                return Boolean.valueOf(checkBox.isSelected());
+            public Object getCurrentCellEditorEntry() {
+                return checkBox.isSelected();
             }
         };
         checkBox.addActionListener(delegate);
@@ -183,12 +194,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         editorComponent = comboBox;
         delegate = new EditorDelegate() {
             @Override
-            public void setValue(@Nullable Object value) {
+            public void setPresentationEntry(@Nullable Object value) {
                 comboBox.setSelectedItem(value);
             }
 
             @Override
-            public Object getCellEditorValue() {
+            public @Nullable Object getCurrentCellEditorEntry() {
                 return comboBox.getSelectedItem();
             }
 
@@ -236,14 +247,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     /**
      * Forwards the message from the <code>CellEditor</code> to
      * the <code>delegate</code>.
-     * @see EditorDelegate#getCellEditorValue
+     * @see EditorDelegate#getCellEditorEntryAsTargetType
      */
     @Override
     public @Nullable Object getCellEditorValue() {
         if ( JTable.class.isAssignableFrom(hostType) )
-            return this.value;
+            return this.editorOutputValue.orElseNull();
         Objects.requireNonNull(delegate);
-        return delegate.getCellEditorValue();
+        return delegate.getCellEditorEntryAsTargetType().orElseNull();
     }
 
     /**
@@ -284,26 +295,28 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     @Override
     public boolean stopCellEditing() {
         Objects.requireNonNull(delegate);
-        if ( JTable.class.isAssignableFrom(hostType) && constructor != null ) {
-            @Nullable Object o = delegate.getCellEditorValue();
-            try {
-                if ("".equals(o)) {
-                    if (constructor.getDeclaringClass() == String.class) {
-                        value = o;
-                    }
-                    return super.stopCellEditing();
-                } else if ( o != null ) {
-                    if ( constructor.getDeclaringClass().isAssignableFrom(o.getClass()) ) {
-                        value = o;
+        if ( JTable.class.isAssignableFrom(hostType) ) {
+            Result<Object> newValueResult = delegate.getCellEditorEntryAsTargetType();
+            @Nullable Object newValue = newValueResult.orElseNull();
+            this.editorOutputValue = newValueResult;
+            if ( constructor == null ) {
+                return super.stopCellEditing();
+            } else {
+                try {
+                    if ("".equals(newValue)) {
                         return super.stopCellEditing();
+                    } else if (newValue != null) {
+                        if (constructor.getDeclaringClass().isAssignableFrom(newValue.getClass())) {
+                            return super.stopCellEditing();
+                        }
                     }
+
+                    this.editorOutputValue = Result.of(constructor.newInstance(new Object[]{newValue}));
+                } catch (Exception e) {
+                    if (editorComponent != null)
+                        editorComponent.setBorder(new LineBorder(Color.red));
+                    return false;
                 }
-                value = constructor.newInstance(new Object[]{o});
-            }
-            catch (Exception e) {
-                if ( editorComponent != null )
-                    editorComponent.setBorder(new LineBorder(Color.red));
-                return false;
             }
         }
         return delegate.stopCellEditing();
@@ -322,14 +335,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
     /** Implements the <code>TreeCellEditor</code> interface. */
     @Override
-    public Component getTreeCellEditorComponent(JTree tree, @Nullable Object value,
+    public Component getTreeCellEditorComponent(JTree tree, @Nullable Object entryFromModel,
                                                 boolean isSelected,
                                                 boolean expanded,
                                                 boolean leaf, int row) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
-        String stringValue = tree.convertValueToText(value, isSelected, expanded, leaf, row, false);
-        delegate.setValue(stringValue);
+        String entryAsString = tree.convertValueToText(entryFromModel, isSelected, expanded, leaf, row, false);
+        delegate.setValueAndTarget(entryAsString, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
         return editorComponent;
     }
 
@@ -338,12 +351,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 //
     /** Implements the <code>TableCellEditor</code> interface. */
     @Override
-    public Component getTableCellEditorComponent(JTable table, @Nullable Object value,
+    public Component getTableCellEditorComponent(JTable table, @Nullable Object entryFromModel,
                                                  boolean isSelected,
                                                  int row, int column) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
-        delegate.setValue(value);
+        delegate.setValueAndTarget(entryFromModel, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
         if (editorComponent instanceof JCheckBox) {
             //in order to avoid a "flashing" effect when clicking a checkbox
             //in a table, it is important for the editor to have as a border
@@ -352,8 +365,8 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             //needed for JCheckBox since this editor doesn't fill all the
             //visual space of the table cell, unlike a text field.
             TableCellRenderer renderer = table.getCellRenderer(row, column);
-            Component c = renderer.getTableCellRendererComponent(table, value,
-                    isSelected, true, row, column);
+            Component c = renderer.getTableCellRendererComponent(table, entryFromModel,
+                                                                  isSelected, true, row, column);
             if (c != null) {
                 editorComponent.setOpaque(true);
                 editorComponent.setBackground(c.getBackground());
@@ -369,7 +382,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
     public void updateForTable(JTable table, int column) {
         if ( JTable.class.isAssignableFrom(hostType) ) {
-            this.value = null;
+            this.editorOutputValue = Result.of(Object.class);
             try {
                 Class<?> type = table.getColumnClass(column);
                 if ( editorComponent instanceof JTextField ) {
@@ -390,14 +403,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                             cb.setHorizontalAlignment(JCheckBox.CENTER);
                     }
                 }
-                // Since our obligation is to produce a value which is
-                // assignable for the required type it is OK to use the
-                // String constructor for columns which are declared
-                // to contain Objects. A String is an Object.
-                if (type == Object.class) {
-                    type = String.class;
+
+                if (type != Object.class) {
+                    constructor = type.getConstructor(argTypes);
                 }
-                constructor = type.getConstructor(argTypes);
             }
             catch (Exception e) {
                 log.debug("Failed to update internal cell editor for host type '"+hostType.getName()+"'", e);
@@ -408,26 +417,81 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     /**
      * The protected <code>EditorDelegate</code> class.
      */
-    protected class EditorDelegate implements ActionListener, ItemListener {
+    protected abstract class EditorDelegate implements ActionListener, ItemListener {
 
-        /**  The value of this cell. */
-        protected @Nullable Object value;
+        private Class<?> targetType = Object.class;
+        private @Nullable Object originalValue;
+
+        public final void setValueAndTarget(
+            @Nullable Object entryToBePresentedAndEdited,
+            @Nullable Object originalEntryFromModel,
+            Class<?> targetType
+        ) {
+            this.targetType = targetType;
+            this.originalValue = originalEntryFromModel;
+            this.setPresentationEntry(entryToBePresentedAndEdited);
+        }
 
         /**
-         * Returns the value of this cell.
+         * Returns the value of this cell directly from the editor component.
          * @return the value of this cell
          */
-        public @Nullable Object getCellEditorValue() {
-            return value;
+        protected abstract @Nullable Object getCurrentCellEditorEntry();
+
+        /**
+         * @return the value of this cell as the target type if possible
+         *         or the raw value if conversion is not possible.
+         */
+        public final Result<@Nullable Object> getCellEditorEntryAsTargetType() {
+            Object value = getCurrentCellEditorEntry();
+            if ( value == null )
+                return Result.of(Object.class);
+            if ( targetType == Object.class )
+                return Result.of(value);
+            if ( targetType.isAssignableFrom(value.getClass()) )
+                return Result.of(value);
+            try {
+                return _tryConvert(value, targetType);
+            } catch (Exception e) {
+                log.debug(
+                        "Failed to convert internal cell editor value " +
+                        "from '"+value+"' to target type '"+targetType.getName()+"' " +
+                        "for host component type '"+hostType.getName()+"'",
+                        e
+                    );
+            }
+
+            List<Problem> problems = new ArrayList<>();
+            problems.add(Problem.of(
+                    "Failed to convert internal cell editor value " +
+                        "from '"+value+"' to target type '"+targetType.getName()+"' " +
+                        "for host component type '"+hostType.getName()+"'"
+                    ));
+            Object restoredValue = this.originalValue;
+            try {
+                if ( restoredValue != null )
+                    restoredValue = _tryConvert(restoredValue, targetType).orElseNullable(value);
+            } catch (Exception e) {
+                problems.add(Problem.of(e));
+                log.debug(
+                        "Failed to convert internal cell editor value received before editing " +
+                        "from '"+this.originalValue+"' to target type '"+targetType.getName()+"' " +
+                        "for host component type '"+hostType.getName()+"'",
+                        e
+                    );
+            }
+            return Result.of(
+                    Object.class,
+                    restoredValue,
+                    problems
+                );
         }
 
         /**
          * Sets the value of this cell.
          * @param value the new value of this cell
          */
-        public void setValue(@Nullable Object value) {
-            this.value = value;
-        }
+        protected abstract void setPresentationEntry(@Nullable Object value);
 
         /**
          * Returns true to indicate that the editing cell may
@@ -438,16 +502,6 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
          * @see #isCellEditable
          */
         public boolean shouldSelectCell(EventObject anEvent) {
-            return true;
-        }
-
-        /**
-         * Returns true to indicate that editing has begun.
-         *
-         * @param anEvent          the event
-         * @return true to indicate editing has begun
-         */
-        public boolean startCellEditing(EventObject anEvent) {
             return true;
         }
 
@@ -489,6 +543,85 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         public void itemStateChanged(ItemEvent e) {
             InternalCellEditor.this.stopCellEditing();
         }
+
+        private Result<@Nullable Object> _tryConvert(Object value, Class<?> targetType) throws Exception {
+            if ( targetType == String.class ) {
+                if ( value instanceof String )
+                    return Result.of(value);
+                else if ( value instanceof Number )
+                    return Result.of(value.toString());
+                else if ( value instanceof Boolean )
+                    return Result.of(value.toString());
+                else if ( value instanceof Character )
+                    return Result.of(value.toString());
+                else
+                    return Result.of(value.toString());
+            } else if ( targetType == Character.class ) {
+                if ( value instanceof Character )
+                    return Result.of(value);
+                else if ( value instanceof String ) {
+                    String str = (String) value;
+                    if ( str.length() == 1 )
+                        return Result.of(str.charAt(0));
+                }
+            } else if ( targetType == Boolean.class ) {
+                if ( value instanceof Boolean )
+                    return Result.of(value);
+                else if ( value instanceof String ) {
+                    String str = (String) value;
+                    if ( str.equalsIgnoreCase("true") )
+                        return Result.of(true);
+                    if ( str.equalsIgnoreCase("false") )
+                        return Result.of(false);
+                }
+            } else if ( Number.class.isAssignableFrom(targetType) ) {
+                if ( value instanceof Number ) {
+                    if ( targetType == Integer.class )
+                        return Result.of(((Number) value).intValue());
+                    if ( targetType == Long.class )
+                        return Result.of(((Number) value).longValue());
+                    if ( targetType == Float.class )
+                        return Result.of(((Number) value).floatValue());
+                    if ( targetType == Double.class )
+                        return Result.of(((Number) value).doubleValue());
+                    if ( targetType == Byte.class )
+                        return Result.of(((Number) value).byteValue());
+                    if ( targetType == Short.class )
+                        return Result.of(((Number) value).shortValue());
+                } else if ( value instanceof String ) {
+                    String str = (String) value;
+                    if ( targetType == Integer.class )
+                        return Result.of(Integer.parseInt(str));
+                    if ( targetType == Long.class )
+                        return Result.of(Long.parseLong(str));
+                    if ( targetType == Float.class )
+                        return Result.of(Float.parseFloat(str));
+                    if ( targetType == Double.class )
+                        return Result.of(Double.parseDouble(str));
+                    if ( targetType == Byte.class )
+                        return Result.of(Byte.parseByte(str));
+                    if ( targetType == Short.class )
+                        return Result.of(Short.parseShort(str));
+                } else if ( value instanceof Boolean ) {
+                    if ( targetType == Integer.class )
+                        return Result.of(((Boolean) value) ? 1 : 0);
+                    if ( targetType == Long.class )
+                        return Result.of(((Boolean) value) ? 1L : 0L);
+                    if ( targetType == Float.class )
+                        return Result.of(((Boolean) value) ? 1.0f : 0.0f);
+                    if ( targetType == Double.class )
+                        return Result.of(((Boolean) value) ? 1.0 : 0.0);
+                    if ( targetType == Byte.class )
+                        return Result.of(((Boolean) value) ? (byte) 1 : (byte) 0);
+                    if ( targetType == Short.class )
+                        return Result.of(((Boolean) value) ? (short) 1 : (short) 0);
+                }
+            }
+            throw new IllegalArgumentException(
+                    "Cannot convert value '"+value+"' to target type '"+targetType.getName()+"'."
+            );
+        }
+
     }
 
 }

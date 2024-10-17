@@ -133,12 +133,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  The second argument passed to this method is a lambda function
      *  which accepts a {@link CellConf} representing the cell to be rendered.
      *  You may then return an updated cell with a desired view component
-     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  Here an example of how this method may be used:
      * <pre>{@code
      *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
      *     .withCellForColumn(0, cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
      *              .updateIf(JLabel.class, l -> {
      *                  l.setText(cell.valueAsString().orElse(""));
@@ -149,7 +149,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *          )
      *     )
      *     .withCellForColumn(1, cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              //...
      *          )
      *     );
@@ -238,12 +238,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  The second argument passed to this method is a lambda function
      *  which accepts a {@link CellConf} representing the cell to be rendered and possibly even edited.
      *  You may then return an updated cell with a desired view component
-     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  Here an example of how this method may be used:
      * <pre>{@code
      *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
      *     .withCellForColumn(0, cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
      *              .updateIf(JLabel.class, l -> {
      *                  l.setText(cell.valueAsString().orElse(""));
@@ -254,7 +254,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *          )
      *     )
      *     .withCellForColumn(1, cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              //...
      *          )
      *     );
@@ -423,7 +423,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  exposing a wide range of properties describing the state of the cell, like
      *  its current item, its index, its selection state, etc.
      *  You may update return an updated cell with a desired view component
-     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  <p>
      *  Here code snippet demonstrating how this method may be used
      *  as part of a UI declaration:
@@ -436,7 +436,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *          return data;
      *      })
      *      .withCell( cell -> cell
-     *          .view( comp -> comp
+     *          .updateView( comp -> comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
      *              .updateIf(JLabel.class, tf -> {
      *                  tf.setText(cell.valueAsString().orElse(""));
