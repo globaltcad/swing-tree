@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
+import swingtree.api.Configurator;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 import swingtree.layout.Position;
@@ -86,6 +87,10 @@ public final class ComponentExtension<C extends JComponent>
 
     BoxModelConf getBoxModelConf() {
         return _styleEngine.getBoxModelConf();
+    }
+
+    void updateDynamicLookAndFeel( Configurator<DynamicLaF> updater ) {
+        _styleInstaller.updateDynamicLookAndFeel(updater);
     }
 
     Optional<BufferedImage> getBufferedImage() {

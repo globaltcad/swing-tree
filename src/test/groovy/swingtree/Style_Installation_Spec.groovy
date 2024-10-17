@@ -62,6 +62,13 @@ class Style_Installation_Spec extends Specification
             var button = ui.get(JButton)
         then: 'The custom UI may or may not be installed:'
             !(button.getUI() instanceof MetalButtonUI) == isCustom
+        when : """
+            We re-install the component UI, to check that if 
+            SwingTree style is robust enough to survive look and feel switches.
+        """
+            button.updateUI()
+        then : 'The condition remains unchanged, the style survived:'
+            !(button.getUI() instanceof MetalButtonUI) == isCustom
 
         when : """
             The style is deactivated and updated, then we expect the

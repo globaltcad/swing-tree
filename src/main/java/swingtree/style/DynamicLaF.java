@@ -14,6 +14,8 @@ import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Optional;
 
 /**
@@ -25,6 +27,7 @@ final class DynamicLaF
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(DynamicLaF.class);
 
     private static final DynamicLaF _NONE = new DynamicLaF(null, null, false);
+    private static final UIUpdateListenerAndSwingTreeLookAndFeelRestorer _UI_UPDATE_LISTENER = new UIUpdateListenerAndSwingTreeLookAndFeelRestorer();
 
     static DynamicLaF none() { return _NONE; }
 
@@ -102,7 +105,7 @@ final class DynamicLaF
                 to make the component non-opaque so that the previous rendering get's flushed out!
              */
             try {
-                result = _installCustomLaF(owner);
+                result = _installCustomLaF(owner, false);
             } catch ( Exception e ) {
                 log.error("Failed to install custom LaF for component '"+owner+"'!", e);
             }
@@ -121,12 +124,15 @@ final class DynamicLaF
     }
 
 
-    private DynamicLaF _installCustomLaF( JComponent owner ) {
+    private DynamicLaF _installCustomLaF( JComponent owner, boolean isUpdate ) {
         // First we check if we already have a custom LaF installed:
         ComponentUI formerLaF = _formerLaF;
         ComponentUI styleLaF  = _styleLaF;
 
-        if ( !customLookAndFeelIsInstalled() ) {
+        if ( !customLookAndFeelIsInstalled() || isUpdate ) {
+            if ( !isUpdate )
+                owner.addPropertyChangeListener("UI", _UI_UPDATE_LISTENER);
+
             if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.
                 JBox p = (JBox) owner;
                 formerLaF = p.getUI();
@@ -202,6 +208,7 @@ final class DynamicLaF
         ComponentUI styleLaF = _styleLaF;
 
         if ( customLookAndFeelIsInstalled() ) {
+            _owner.removePropertyChangeListener(_UI_UPDATE_LISTENER);
             if ( _owner instanceof JPanel ) {
                 JPanel p = (JPanel) _owner;
                 boolean success = _tryInstallingUISilently(p, _formerLaF);
@@ -401,6 +408,68 @@ final class DynamicLaF
         } catch ( Exception ex ) {
             log.error("Failed to paint component through former UI", ex);
             ex.printStackTrace();
+        }
+    }
+
+    /**
+     *  If the user installs another look and feel, we use this property change listener to
+     *  capture this update and then ensure that the SwingTree look and feel delegate wraps
+     *  the newly installed {@link ComponentUI} instead of it being replaced and forgotten...<br>
+     *  You can test if this works through the following Code:
+     *  <pre>{@code
+     *    for ( Window w : Window.getWindows() ) {
+     *        SwingUtilities.updateComponentTreeUI(w);
+     *        if ( !w.isDisplayable() )
+     *            continue;
+     *        if ( w instanceof Frame
+     *            ? !((Frame)w).isResizable()
+     *            : !(w instanceof Dialog) || !((Dialog) w).isResizable()
+     *        ) w.pack();
+     *    }
+     *  }</pre>
+     */
+    private static final class UIUpdateListenerAndSwingTreeLookAndFeelRestorer implements PropertyChangeListener {
+        @Override
+        public void propertyChange(PropertyChangeEvent event) {
+            Object oldValue = event.getOldValue();
+            Object newValue = event.getNewValue();
+            Object source   = event.getSource();
+            if ( !(source instanceof JComponent) ) {
+                String sourceTypeAsString = Optional.ofNullable(source).map(Object::getClass).map(Class::getSimpleName).orElse("null");
+                log.error(
+                        "Invalid UI update event source detected! " +
+                        "Source object is expected to be a 'JComponent'.\n" +
+                        "Received unknown object of type '" + sourceTypeAsString + "' instead.",
+                        new Throwable()
+                    );
+                return;
+            }
+            if ( !(oldValue instanceof ComponentUI) ) {
+                String oldValueTypeAsString = Optional.ofNullable(oldValue).map(Object::getClass).map(Class::getSimpleName).orElse("null");
+                log.error(
+                        "Detected invalid 'oldValue'  object in UI update event! " +
+                        "Old value is expected to be a 'ComponentUI'.\n" +
+                        "Received unknown object of type '" + oldValueTypeAsString + "' instead.",
+                        new Throwable()
+                    );
+                return;
+            }
+            if ( !(newValue instanceof ComponentUI) ) {
+                String newValueTypeAsString = Optional.ofNullable(newValue).map(Object::getClass).map(Class::getSimpleName).orElse("null");
+                log.error(
+                        "Detected invalid 'newValue'  object in UI update event! " +
+                        "New value is expected to be a 'ComponentUI'.\n" +
+                        "Received unknown object of type '" + newValueTypeAsString + "' instead.",
+                        new Throwable()
+                    );
+                return;
+            }
+            JComponent owner = (JComponent) source;
+            ComponentExtension.from(owner).updateDynamicLookAndFeel( oldLaf -> {
+                if (  oldLaf.customLookAndFeelIsInstalled() )
+                    oldLaf = oldLaf._installCustomLaF(owner, true);
+                return oldLaf;
+            });
         }
     }
 }
