@@ -170,7 +170,7 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconWidth() {
-        return _width;
+        return UI.scale(_width);
     }
 
     /**
@@ -199,7 +199,7 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconHeight() {
-        return _height;
+        return UI.scale(_height);
     }
 
     /**
@@ -461,9 +461,9 @@ public final class SvgIcon extends ImageIcon
 
         if ( _svgDocument != null ) {
             if (width < 0)
-                width = (int) _svgDocument.size().width;
+                width = (int) UI.scale(_svgDocument.size().width);
             if (height < 0)
-                height = (int) _svgDocument.size().height;
+                height = (int) UI.scale(_svgDocument.size().height);
         }
 
         // We create a new buffered image, render into it, and then return it.
@@ -499,6 +499,9 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
+        int scaledWidth  = getIconWidth();
+        int scaledHeight = getIconHeight();
+
         UI.Placement preferredPlacement = _preferredPlacement;
 
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
@@ -522,18 +525,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( _width < 0 )
+            if ( scaledWidth < 0 )
                 x = insets.left;
 
-            if ( _height < 0 )
+            if ( scaledHeight < 0 )
                 y = insets.top;
         }
 
-        int width  = Math.max( _width,  c == null ? NO_SIZE : c.getWidth()  );
-        int height = Math.max( _height, c == null ? NO_SIZE : c.getHeight() );
+        int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );
+        int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );
 
-        width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left;
-        height = _height >= 0 ? _height : height - insets.bottom - insets.top ;
+        width  = scaledWidth  >= 0 ? scaledWidth  : width  - insets.right  - insets.left;
+        height = scaledHeight >= 0 ? scaledHeight : height - insets.bottom - insets.top ;
 
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
@@ -548,7 +551,7 @@ public final class SvgIcon extends ImageIcon
             height = ( larger - smaller );
         }
 
-        if ( _width > 0 && _height > 0 ) {
+        if ( scaledWidth > 0 && scaledHeight > 0 ) {
             if ( _cache != null && _cache.getWidth() == width && _cache.getHeight() == height )
                 g.drawImage(_cache, x, y, width, height, null);
             else {
@@ -606,8 +609,11 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        width  = ( width  < 0 ? _width  : width  );
-        height = ( height < 0 ? _height : height );
+        int scaledWidth  = getIconWidth();
+        int scaledHeight = getIconHeight();
+
+        width  = ( width  < 0 ? scaledWidth  : width  );
+        height = ( height < 0 ? scaledHeight : height );
 
         Graphics2D g2d = (Graphics2D) g.create();
 
@@ -664,8 +670,8 @@ public final class SvgIcon extends ImageIcon
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
         if ( _fitComponent == UI.FitComponent.NO ) {
-            width   = _width  >= 0 ? _width  : (int) svgSize.width;
-            height  = _height >= 0 ? _height : (int) svgSize.height;
+            width   = scaledWidth  >= 0 ? scaledWidth  : (int) svgSize.width;
+            height  = scaledHeight >= 0 ? scaledHeight : (int) svgSize.height;
             viewBox = new ViewBox( x, y, width, height );
         }
 

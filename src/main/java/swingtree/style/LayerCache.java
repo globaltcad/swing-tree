@@ -224,7 +224,7 @@ final class LayerCache
         for ( ImageConf imageConf : state.layer().images().sortedByNames() )
             if ( !imageConf.equals(ImageConf.none()) && imageConf.image().isPresent() ) {
                 ImageIcon icon = imageConf.image().get();
-                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );
+                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class && icon.getClass() != ScalableImageIcon.class );
                 boolean hasSize = ( icon.getIconHeight() > 0 || icon.getIconWidth() > 0 );
                 if ( isSpecialIcon || hasSize )
                     heavyStyleCount++;

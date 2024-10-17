@@ -5,6 +5,8 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.api.IconDeclaration;
+import swingtree.layout.Size;
+import swingtree.style.ScalableImageIcon;
 import swingtree.style.SvgIcon;
 
 import javax.swing.*;
@@ -96,24 +98,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
-        if ( icon instanceof SvgIcon)
+        if ( icon instanceof SvgIcon )
         {
             SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconWidth(UI.scale(width));
-            icon    = svgIcon.withIconHeight(UI.scale(height));
+            svgIcon = svgIcon.withIconWidth(width);
+            icon    = svgIcon.withIconHeight(height);
         }
         else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
         {
-            float scale = UI.scale();
-
-            int scaleHint = Image.SCALE_SMOOTH;
-            if (scale > 1.5f)
-                scaleHint = Image.SCALE_FAST;
-
-            width = (int) (width * scale);
-            height = (int) (height * scale);
-
-            icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
+            if ( !(icon instanceof ScalableImageIcon) )
+                icon = new ScalableImageIcon(Size.of(width, height), icon);
         }
         return icon;
     }
@@ -162,7 +156,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public I withIcon( ImageIcon icon, UI.FitComponent fitComponent ) {
-        NullUtil.nullArgCheck(icon,"svgIcon", ImageIcon.class);
+        NullUtil.nullArgCheck(icon,"icon", ImageIcon.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
         if ( icon instanceof SvgIcon)
         {

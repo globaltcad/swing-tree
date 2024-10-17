@@ -10,6 +10,7 @@ import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
+import swingtree.style.ScalableImageIcon;
 import swingtree.style.StylableComponent;
 import swingtree.style.SvgIcon;
 
@@ -153,6 +154,12 @@ public class JIcon extends JLabel implements StylableComponent
                     "while scaling an icon for the JIcon component.", new Throwable()
                 );
             return icon;
+        }
+
+        if ( icon instanceof ScalableImageIcon ) {
+            ScalableImageIcon scalable = (ScalableImageIcon) icon;
+            scalable = scalable.withSize(size);
+            return scalable;
         }
 
         int scaleHint = Image.SCALE_SMOOTH;

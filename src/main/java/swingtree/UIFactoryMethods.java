@@ -25,6 +25,7 @@ import swingtree.dialogs.OptionsDialog;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
+import swingtree.style.ScalableImageIcon;
 import swingtree.style.StyleSheet;
 import swingtree.style.SvgIcon;
 import swingtree.threading.EventProcessor;
@@ -1204,19 +1205,27 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         NullUtil.nullArgCheck(onHover, "onHover", ImageIcon.class);
-        float scale = UI.scale();
-
-        int scaleHint = Image.SCALE_SMOOTH;
-        if ( scale > 1.5f )
-            scaleHint = Image.SCALE_FAST;
-
-        width  = (int) (width * scale);
-        height = (int) (height * scale);
-
-        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, scaleHint));
-        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
+        icon    = _fitTo(width, height, icon);
+        onHover = _fitTo(width, height, onHover);
         return button(icon, onHover, onHover);
     }
+
+
+    private static ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
+        if ( icon instanceof SvgIcon )
+        {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconWidth(width);
+            icon    = svgIcon.withIconHeight(height);
+        }
+        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
+        {
+            if ( !(icon instanceof ScalableImageIcon) )
+                icon = new ScalableImageIcon(Size.of(width, height), icon);
+        }
+        return icon;
+    }
+
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
@@ -6593,14 +6602,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             which is why we use our own cache.)
         */
             ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
-            double ratio = (double) icon.getIconWidth() / (double) icon.getIconHeight();
-            if ( width.isPresent() && height.isPresent() )
-                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));
-            if ( width.isPresent() )
-                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), (int) (width.get() / ratio), Image.SCALE_SMOOTH));
-            if ( height.isPresent() )
-                return new ImageIcon(icon.getImage().getScaledInstance((int) (height.get() * ratio), height.get(), Image.SCALE_SMOOTH));
-            return icon;
+            return new ScalableImageIcon(declaration.size(), icon);
+            //double ratio = (double) icon.getIconWidth() / (double) icon.getIconHeight();
+            //if ( width.isPresent() && height.isPresent() )
+            //    return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));
+            //if ( width.isPresent() )
+            //    return new ImageIcon(icon.getImage().getScaledInstance(width.get(), (int) (width.get() / ratio), Image.SCALE_SMOOTH));
+            //if ( height.isPresent() )
+            //    return new ImageIcon(icon.getImage().getScaledInstance((int) (height.get() * ratio), height.get(), Image.SCALE_SMOOTH));
+            //return icon;
         }
     }
 
