@@ -55,27 +55,22 @@ public final class SvgIcon extends ImageIcon
 
 
     private final @Nullable SVGDocument _svgDocument;
-
-    private final int _width;
-    private final int _height;
-
-    private final UI.FitComponent _fitComponent;
-    private final UI.Placement    _preferredPlacement;
+    private final Size                  _size;
+    private final UI.FitComponent       _fitComponent;
+    private final UI.Placement          _preferredPlacement;
 
     private @Nullable BufferedImage _cache = null;
 
 
     private SvgIcon(
         @Nullable SVGDocument svgDocument, // nullable
-        int                   width,
-        int                   height,
+        Size                  size,
         UI.FitComponent       fitComponent,
         UI.Placement          preferredPlacement
     ) {
         super();
         _svgDocument        = svgDocument;
-        _width              = width;
-        _height             = height;
+        _size               = Objects.requireNonNull(size);
         _fitComponent       = Objects.requireNonNull(fitComponent);
         _preferredPlacement = Objects.requireNonNull(preferredPlacement);
     }
@@ -84,28 +79,28 @@ public final class SvgIcon extends ImageIcon
      * @param path The path to the SVG document.
      */
     public SvgIcon( String path ) {
-        this(_loadSvgDocument(SvgIcon.class.getResource(path)), NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param svgUrl The URL to the SVG document.
      */
     public SvgIcon( URL svgUrl ) {
-        this(_loadSvgDocument(svgUrl), NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(_loadSvgDocument(svgUrl), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param stream The input stream supplying the text data of the SVG document.
      */
     public SvgIcon( InputStream stream ) {
-        this(_loadSvgDocument(stream), NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(_loadSvgDocument(stream), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      */
     public SvgIcon( SVGDocument svgDocument ) {
-        this(svgDocument, NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(svgDocument, Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -113,7 +108,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Dimension}.
      */
     public SvgIcon( String path, Dimension size ) {
-        this(_loadSvgDocument(SvgIcon.class.getResource(path)), size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -121,7 +116,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Dimension}.
      */
     public SvgIcon( URL svgUrl, Dimension size ) {
-        this(_loadSvgDocument(svgUrl), size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(_loadSvgDocument(svgUrl), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -129,7 +124,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Dimension}.
      */
     public SvgIcon( InputStream stream, Dimension size ) {
-        this(_loadSvgDocument(stream), size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(_loadSvgDocument(stream), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -137,7 +132,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Dimension}.
      */
     public SvgIcon( SVGDocument svgDocument, Dimension size ) {
-        this(svgDocument, size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        this(svgDocument, Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
 
@@ -179,22 +174,23 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconWidth() {
-        return UI.scale(_width);
+        return _size.width().map(UI::scale).map(Math::round).orElse(NO_SIZE);
     }
 
     /**
      *  Creates an updated {@link SvgIcon} with the given width returned by {@link #getIconWidth()}.
      *
-     * @param width The width of the icon, or -1 if the icon should be rendered according
+     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width.
      *        If the width is -1, the icon will be rendered according to the width of a given component
      *        or the width of the SVG document itself.
      */
-    public SvgIcon withIconWidth( int width ) {
-        if ( width == _width )
+    public SvgIcon withIconWidth( int newWidth ) {
+        int width = _size.width().map(Math::round).orElse(NO_SIZE);
+        if ( newWidth == width )
             return this;
-        return new SvgIcon(_svgDocument, width, _height, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, _size.withWidth(newWidth), _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -215,7 +211,7 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconHeight() {
-        return UI.scale(_height);
+        return _size.height().map(UI::scale).map(Math::round).orElse(NO_SIZE);
     }
 
     /**
@@ -231,7 +227,7 @@ public final class SvgIcon extends ImageIcon
      * @return The width of the icon without scaling.
      */
     public int getBaseWidth() {
-        return _width;
+        return _size.width().map(Math::round).orElse(NO_SIZE);
     }
 
     /**
@@ -247,7 +243,7 @@ public final class SvgIcon extends ImageIcon
      * @return The height of the icon without scaling.
      */
     public int getBaseHeight() {
-        return _height;
+        return _size.height().map(Math::round).orElse(NO_SIZE);
     }
 
     /**
@@ -264,9 +260,10 @@ public final class SvgIcon extends ImageIcon
      *        or the height of the SVG document itself.
      */
     public SvgIcon withIconHeight( int height ) {
-        if ( height == _height )
+        int currentHeight = _size.height().map(Math::round).orElse(NO_SIZE);
+        if ( height == currentHeight )
             return this;
-        return new SvgIcon(_svgDocument, _width, height, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, _size.withHeight(height), _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -276,20 +273,22 @@ public final class SvgIcon extends ImageIcon
      *  aspect ratio of the SVG document, the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement}
      *  policies or the size of the component the SVG is rendered into.
      *
-     * @param width The width of the icon, or -1 if the icon should be rendered according
+     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
-     * @param height The height of the icon, or -1 if the icon should be rendered according
+     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
      *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
      *        or the width or height of the SVG document itself.
      */
-    public SvgIcon withIconSize( int width, int height ) {
-        width  = width  < 0 ? NO_SIZE : width;
-        height = height < 0 ? NO_SIZE : height;
-        if ( width == _width && height == _height )
+    public SvgIcon withIconSize( int newWidth, int newHeight ) {
+        newWidth  = newWidth  < 0 ? NO_SIZE : newWidth;
+        newHeight = newHeight < 0 ? NO_SIZE : newHeight;
+        int width  = _size.width().map(Math::round).orElse(NO_SIZE);
+        int height = _size.height().map(Math::round).orElse(NO_SIZE);
+        if ( newWidth == width && newHeight == height )
             return this;
-        return new SvgIcon(_svgDocument, width, height, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, Size.of(newWidth, newHeight), _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -304,8 +303,8 @@ public final class SvgIcon extends ImageIcon
      */
     public SvgIcon withIconSize( Size size ) {
         return withIconSize(
-                    size.width().map(Number::intValue).orElse(NO_SIZE),
-                    size.height().map(Number::intValue).orElse(NO_SIZE)
+                    size.width().map(Math::round).orElse(NO_SIZE),
+                    size.height().map(Math::round).orElse(NO_SIZE)
                 );
     }
 
@@ -320,13 +319,13 @@ public final class SvgIcon extends ImageIcon
      *  <p>
      *  Also see {@link #withIconSizeFromHeight(int)}.
      *
-     * @param width The width of the icon, or -1 if the icon should be rendered according
+     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width and a logical height that is
      *         determined by the aspect ratio of the SVG document.
      */
-    public SvgIcon withIconSizeFromWidth( int width ) {
-        if ( width < 0 )
+    public SvgIcon withIconSizeFromWidth( int newWidth ) {
+        if ( newWidth < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
         double ratio = 1d;
@@ -334,12 +333,14 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument != null )
             ratio = (double) _svgDocument.size().height / (double) _svgDocument.size().width;
 
-        int logicalHeight = (int) Math.ceil( width * ratio );
+        int logicalHeight = (int) Math.ceil( newWidth * ratio );
 
-        if ( width == _width && logicalHeight == _height )
+        int width  = _size.width().map(Math::round).orElse(NO_SIZE);
+        int height = _size.height().map(Math::round).orElse(NO_SIZE);
+        if ( newWidth == width && logicalHeight == height )
             return this;
 
-        return new SvgIcon(_svgDocument, width, logicalHeight, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, Size.of(newWidth, logicalHeight), _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -353,13 +354,13 @@ public final class SvgIcon extends ImageIcon
      *  <p>
      *  Also see {@link #withIconSizeFromWidth(int)}.
      *
-     * @param height The height of the icon, or -1 if the icon should be rendered according
+     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
      *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given height and a logical width that is
      *         determined by the aspect ratio of the SVG document.
      */
-    public SvgIcon withIconSizeFromHeight( int height ) {
-        if ( height < 0 )
+    public SvgIcon withIconSizeFromHeight( int newHeight ) {
+        if ( newHeight < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
         double ratio = 1d;
@@ -367,12 +368,14 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument != null )
             ratio = (double) _svgDocument.size().width / (double) _svgDocument.size().height;
 
-        int logicalWidth = (int) Math.ceil( height * ratio );
+        int logicalWidth = (int) Math.ceil( newHeight * ratio );
 
-        if ( logicalWidth == _width && height == _height )
+        int width  = _size.width().map(Math::round).orElse(NO_SIZE);
+        int height = _size.height().map(Math::round).orElse(NO_SIZE);
+        if ( logicalWidth == width && newHeight == height )
             return this;
 
-        return new SvgIcon(_svgDocument, logicalWidth, height, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, Size.of(logicalWidth, newHeight), _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -465,7 +468,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
-        return new SvgIcon(_svgDocument, _width, _height, fit, _preferredPlacement);
+        return new SvgIcon(_svgDocument, _size, fit, _preferredPlacement);
     }
 
     /**
@@ -491,7 +494,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(placement);
         if ( placement == _preferredPlacement )
             return this;
-        return new SvgIcon(_svgDocument, _width, _height, _fitComponent, placement);
+        return new SvgIcon(_svgDocument, _size, _fitComponent, placement);
     }
 
     /**
@@ -822,7 +825,7 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public int hashCode() {
-        return Objects.hash(_svgDocument, _width, _height, _fitComponent, _preferredPlacement);
+        return Objects.hash(_svgDocument, _size, _fitComponent, _preferredPlacement);
     }
 
     @Override
@@ -831,8 +834,7 @@ public final class SvgIcon extends ImageIcon
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         SvgIcon rhs = (SvgIcon) obj;
-        return _width  == rhs._width  &&
-               _height == rhs._height &&
+        return Objects.equals(_size,               rhs._size)        &&
                Objects.equals(_svgDocument,        rhs._svgDocument)  &&
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
                Objects.equals(_preferredPlacement, rhs._preferredPlacement);
@@ -840,9 +842,11 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public String toString() {
+        int width  = _size.width().map(Math::round).orElse(NO_SIZE);
+        int height = _size.height().map(Math::round).orElse(NO_SIZE);
         String typeName           = getClass().getSimpleName();
-        String width              = _width  < 0 ? "?" : String.valueOf(_width);
-        String height             = _height < 0 ? "?" : String.valueOf(_height);
+        String widthAsStr              = width  < 0 ? "?" : String.valueOf(width);
+        String heightAsStr             = height < 0 ? "?" : String.valueOf(height);
         String fitComponent       = _fitComponent.toString();
         String preferredPlacement = _preferredPlacement.toString();
         String svgDocument        = Optional.ofNullable(_svgDocument)
@@ -853,8 +857,8 @@ public final class SvgIcon extends ImageIcon
                                             })
                                             .orElse("?");
         return typeName + "[" +
-                    "width=" + width + ", " +
-                    "height=" + height + ", " +
+                    "width=" + widthAsStr + ", " +
+                    "height=" + heightAsStr + ", " +
                     "fitComponent=" + fitComponent + ", " +
                     "preferredPlacement=" + preferredPlacement + ", " +
                     "doc=" + svgDocument +
