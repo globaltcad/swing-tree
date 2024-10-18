@@ -25,6 +25,7 @@ import swingtree.dialogs.OptionsDialog;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
+import swingtree.style.ScalableImageIcon;
 import swingtree.style.StyleSheet;
 import swingtree.style.SvgIcon;
 import swingtree.threading.EventProcessor;
@@ -1204,19 +1205,27 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         NullUtil.nullArgCheck(onHover, "onHover", ImageIcon.class);
-        float scale = UI.scale();
-
-        int scaleHint = Image.SCALE_SMOOTH;
-        if ( scale > 1.5f )
-            scaleHint = Image.SCALE_FAST;
-
-        width  = (int) (width * scale);
-        height = (int) (height * scale);
-
-        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, scaleHint));
-        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
+        icon    = _fitTo(width, height, icon);
+        onHover = _fitTo(width, height, onHover);
         return button(icon, onHover, onHover);
     }
+
+
+    private static ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconWidth(width);
+            return svgIcon.withIconHeight(height);
+        }
+        else if ( icon instanceof ScalableImageIcon ) {
+            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
+        }
+        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
+            return ScalableImageIcon.of(Size.of(width, height), icon);
+        }
+        return icon;
+    }
+
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
@@ -6464,10 +6473,82 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
             icon = _tryLoadIcon(declaration);
+            if ( icon == null )
+                icon = _tryLoadIcon(IconDeclaration.of(declaration.path()));
+            icon = (ImageIcon) scaleIconTo(declaration.size(), icon);
             if ( icon != null )
                 cache.put(declaration, icon);
         }
         return Optional.ofNullable(icon);
+    }
+
+    public static @Nullable Icon scaleIconTo( Size size, @Nullable final Icon icon ) {
+        if ( icon == null )
+            return null;
+
+        final double actualWidth  = _getBaseWidth(icon);
+        final double actualHeight = _getBaseHeight(icon);
+        if ( actualWidth <= 0 || actualHeight <= 0 ){
+            log.debug(
+                    "Encountered an invalid icon width '" + actualWidth + "' or height '" + actualHeight + "'.",
+                    new Throwable()
+                );
+            return icon;
+        }
+
+        if ( size.equals(Size.of(actualWidth, actualHeight)) )
+            return icon;
+
+        if ( !size.hasPositiveWidth() && !size.hasPositiveHeight() )
+            size = Size.of(actualWidth, actualHeight);
+        if  ( !size.hasPositiveWidth() )
+            size = size.withWidth((float) (size.height().orElse(1f) * actualWidth / actualHeight));
+        if ( !size.hasPositiveHeight() )
+            size = size.withHeight((float) (size.width().orElse(1f) * actualHeight / actualWidth));
+
+        int width  = size.width().map(Float::intValue).orElse(0);
+        int height = size.height().map(Float::intValue).orElse(0);
+
+        if ( width < 1 || height < 1 ) {
+            log.warn(
+                    "Encountered an invalid icon size '" + size + "' " +
+                    "while scaling an icon for the '"+JIcon.class.getSimpleName()+"' component.",
+                    new Throwable()
+                );
+            return icon;
+        }
+
+        if ( icon instanceof ScalableImageIcon ) {
+            ScalableImageIcon scalable = (ScalableImageIcon) icon;
+            scalable = scalable.withSize(size);
+            return scalable;
+        }
+
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconSize(width, height);
+            return svgIcon;
+        } else if ( icon instanceof ImageIcon ) {
+            Image scaled = ((ImageIcon)icon).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        }
+        return icon;
+    }
+
+    private static int _getBaseWidth(Icon icon) {
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).getBaseWidth();
+        if ( icon instanceof SvgIcon )
+            return ((SvgIcon) icon).getBaseWidth();
+        return icon.getIconWidth();
+    }
+
+    private static int _getBaseHeight(Icon icon) {
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).getBaseHeight();
+        if ( icon instanceof SvgIcon )
+            return ((SvgIcon) icon).getBaseHeight();
+        return icon.getIconHeight();
     }
 
     /**
@@ -6585,22 +6666,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 return icon.withIconSizeFromHeight(height.get());
             return icon;
         } else {
-        /*
-            Not that we explicitly use the "createImage" method of the toolkit here.
-            This is because otherwise the image might get cached inside the toolkit,
-            which is in the way of our own caching mechanism.
-            (The internal caching of the toolkit is somewhat limited and we have no control over it,
-            which is why we use our own cache.)
-        */
+            /*
+                Not that we explicitly use the "createImage" method of the toolkit here.
+                This is because otherwise the image might get cached inside the toolkit,
+                which is in the way of our own caching mechanism.
+                (The internal caching of the toolkit is somewhat limited and we have no control over it,
+                which is why we use our own cache.)
+            */
             ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
-            double ratio = (double) icon.getIconWidth() / (double) icon.getIconHeight();
-            if ( width.isPresent() && height.isPresent() )
-                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));
-            if ( width.isPresent() )
-                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), (int) (width.get() / ratio), Image.SCALE_SMOOTH));
-            if ( height.isPresent() )
-                return new ImageIcon(icon.getImage().getScaledInstance((int) (height.get() * ratio), height.get(), Image.SCALE_SMOOTH));
-            return icon;
+            return ScalableImageIcon.of(declaration.size(), icon);
         }
     }
 

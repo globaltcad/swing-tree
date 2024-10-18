@@ -10,6 +10,7 @@ import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
+import swingtree.style.ScalableImageIcon;
 import swingtree.style.StylableComponent;
 import swingtree.style.SvgIcon;
 
@@ -56,8 +57,8 @@ public class JIcon extends JLabel implements StylableComponent
         dynamicIcon = null;
     }
 
-    public JIcon(Size size, Icon icon) {
-        super(_scale(size, icon));
+    public JIcon( Size size, Icon icon ) {
+        super(UI.scaleIconTo(size, icon));
         updateUI();
         dynamicIcon = null;
     }
@@ -120,57 +121,17 @@ public class JIcon extends JLabel implements StylableComponent
         */
     }
 
+    @SuppressWarnings("NullAway")
     private static @Nullable ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
-        if ( !UI.thisIsUIThread() )
+        if ( !UI.thisIsUIThread() ) {
             log.warn(
                 "Loading an icon off the UI thread. " +
                 "This may lead to unexpected behavior and should be avoided.",
                 new Throwable() // Log the stack trace for debugging purposes.
             );
-
-        return UI.runAndGet(()-> {
-            Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
-            ImageIcon icon = cache.get(declaration);
-            if ( icon == null ) {
-                icon = UI.findIcon(declaration).orElse(null);
-                if ( icon != null )
-                    cache.put(declaration, icon);
-            }
-
-            Size size = declaration.size();
-            return (ImageIcon) _scale(size, icon);
-        });
-    }
-
-    private static @Nullable Icon _scale(Size size, @Nullable Icon icon) {
-        int width = size.width().map(Float::intValue).orElse(0);
-        int height = size.height().map(Float::intValue).orElse(0);
-        float scale = UI.scale();
-
-        if ( width < 1 || height < 1 || scale <= 0 || icon == null ) {
-            log.warn(
-                    "Encountered an invalid icon size '" + size + "' or scale '" + scale + "' " +
-                    "while scaling an icon for the JIcon component.", new Throwable()
-                );
-            return icon;
+            return UI.runAndGet(()->_getFromCacheOrLoadFrom(declaration));
         }
 
-        int scaleHint = Image.SCALE_SMOOTH;
-        if ( scale != 1f && icon != null) {
-            if (scale > 1.5f)
-                scaleHint = Image.SCALE_FAST; // High DPI is smooth enough.
-
-            width  = Math.round(width * scale);
-            height = Math.round(height * scale);
-        }
-        if ( icon instanceof SvgIcon ) {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconSize(width, height);
-            return svgIcon;
-        } else if ( icon instanceof ImageIcon ) {
-            Image scaled = ((ImageIcon)icon).getImage().getScaledInstance(width, height, scaleHint);
-            return new ImageIcon(scaled);
-        }
-        return icon;
+        return UI.findIcon(declaration).orElse(null);
     }
 }

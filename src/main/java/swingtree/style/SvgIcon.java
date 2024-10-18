@@ -163,14 +163,23 @@ public final class SvgIcon extends ImageIcon
         return tempSVGDocument;
     }
 
-
     /**
+     *  Exposes the width of the icon, or -1 if the icon should be rendered according
+     *  to the width of a given component or the width of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).<br>
+     *  <b>
+     *      Note that the returned width is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled width, use {@link #getBaseWidth()}.
+     *  </b>
      * @return The width of the icon, or -1 if the icon should be rendered according
      *         to the width of a given component or the width of the SVG document itself.
      */
     @Override
     public int getIconWidth() {
-        return _width;
+        return UI.scale(_width);
     }
 
     /**
@@ -191,7 +200,14 @@ public final class SvgIcon extends ImageIcon
     /**
      *  Exposes the height of the icon, or -1 if the icon should be rendered according
      *  to the height of a given component or the height of the SVG document itself.
-     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).<br>
+     *  <b>
+     *      Note that the returned height is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled height, use {@link #getBaseHeight()}.
+     *  </b>
      *
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
@@ -199,6 +215,38 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconHeight() {
+        return UI.scale(_height);
+    }
+
+    /**
+     *  Exposes the fixed width defined for the icon, which is the width
+     *  that was set when the icon was created or updated using the
+     *  {@link #withIconWidth(int)} method.<br>
+     *  <b>
+     *      Note that this width is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      If you want a scaled width, that is more suitable for rendering the icon,
+     *      use the {@link #getIconWidth()} method.
+     *  </b>
+     *
+     * @return The width of the icon without scaling.
+     */
+    public int getBaseWidth() {
+        return _width;
+    }
+
+    /**
+     *  Exposes the fixed height defined for the icon, which is the height
+     *  that was set when the icon was created or updated using the
+     *  {@link #withIconHeight(int)} method.<br>
+     *  <b>
+     *      Note that this height is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      If you want a scaled height, that is more suitable for rendering the icon,
+     *      use the {@link #getIconHeight()} method.
+     *  </b>
+     *
+     * @return The height of the icon without scaling.
+     */
+    public int getBaseHeight() {
         return _height;
     }
 
@@ -461,9 +509,9 @@ public final class SvgIcon extends ImageIcon
 
         if ( _svgDocument != null ) {
             if (width < 0)
-                width = (int) _svgDocument.size().width;
+                width = (int) UI.scale(_svgDocument.size().width);
             if (height < 0)
-                height = (int) _svgDocument.size().height;
+                height = (int) UI.scale(_svgDocument.size().height);
         }
 
         // We create a new buffered image, render into it, and then return it.
@@ -499,6 +547,9 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
+        int scaledWidth  = getIconWidth();
+        int scaledHeight = getIconHeight();
+
         UI.Placement preferredPlacement = _preferredPlacement;
 
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
@@ -522,18 +573,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( _width < 0 )
+            if ( scaledWidth < 0 )
                 x = insets.left;
 
-            if ( _height < 0 )
+            if ( scaledHeight < 0 )
                 y = insets.top;
         }
 
-        int width  = Math.max( _width,  c == null ? NO_SIZE : c.getWidth()  );
-        int height = Math.max( _height, c == null ? NO_SIZE : c.getHeight() );
+        int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );
+        int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );
 
-        width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left;
-        height = _height >= 0 ? _height : height - insets.bottom - insets.top ;
+        width  = scaledWidth  >= 0 ? scaledWidth  : width  - insets.right  - insets.left;
+        height = scaledHeight >= 0 ? scaledHeight : height - insets.bottom - insets.top ;
 
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
@@ -548,7 +599,7 @@ public final class SvgIcon extends ImageIcon
             height = ( larger - smaller );
         }
 
-        if ( _width > 0 && _height > 0 ) {
+        if ( scaledWidth > 0 && scaledHeight > 0 ) {
             if ( _cache != null && _cache.getWidth() == width && _cache.getHeight() == height )
                 g.drawImage(_cache, x, y, width, height, null);
             else {
@@ -606,8 +657,11 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        width  = ( width  < 0 ? _width  : width  );
-        height = ( height < 0 ? _height : height );
+        int scaledWidth  = getIconWidth();
+        int scaledHeight = getIconHeight();
+
+        width  = ( width  < 0 ? scaledWidth  : width  );
+        height = ( height < 0 ? scaledHeight : height );
 
         Graphics2D g2d = (Graphics2D) g.create();
 
@@ -664,8 +718,8 @@ public final class SvgIcon extends ImageIcon
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
         if ( _fitComponent == UI.FitComponent.NO ) {
-            width   = _width  >= 0 ? _width  : (int) svgSize.width;
-            height  = _height >= 0 ? _height : (int) svgSize.height;
+            width   = scaledWidth  >= 0 ? scaledWidth  : (int) svgSize.width;
+            height  = scaledHeight >= 0 ? scaledHeight : (int) svgSize.height;
             viewBox = new ViewBox( x, y, width, height );
         }
 

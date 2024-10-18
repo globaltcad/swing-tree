@@ -38,17 +38,32 @@ public final class Size
 
     /**
      *  A factory method that creates a {@link Size} instance from a width and height.
-     *  If the width or height is negative, the returned size will have be the {@link #UNKNOWN} size with
-     *  a width or height of -1.
+     *  If the width or height is negative, the returned size will be the {@link #UNKNOWN} size
+     *  constant with a width or height of -1.
      *
-     * @param width The width of the size.
-     * @param height The height of the size.
+     * @param width The width of the size in the form of a float.
+     * @param height The height of the size in the form of a float.
      * @return A {@link Size} instance that represents the given width and height.
      */
     public static Size of( float width, float height ) {
         if ( width < 0 && height < 0 )
             return UNKNOWN;
         return new Size( width, height );
+    }
+
+    /**
+     *  A factory method that creates a {@link Size} instance from a width and height.
+     *  If the width or height is negative, the returned size will be the {@link #UNKNOWN} size
+     *  constant with a width or height of -1.
+     *
+     * @param width The width of the size in the form of a double.
+     * @param height The height of the size in the form of a double.
+     * @return A {@link Size} instance that represents the given width and height.
+     */
+    public static Size of( double width, double height ) {
+        if ( width < 0 && height < 0 )
+            return UNKNOWN;
+        return new Size((float) width, (float) height);
     }
 
     /**
