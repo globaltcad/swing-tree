@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.api.IconDeclaration
+import swingtree.layout.Size
 import swingtree.style.SvgIcon
 
 @Title("SVG Support through SvgIcon")
@@ -46,22 +47,36 @@ class SvgIcon_Spec extends Specification
         given : 'We create a basic `SvgIcon` of a funnel.'
             var icon = new SvgIcon("/img/funnel.svg")
         when : 'We use the various wither methods to create differently sized icons.'
-        var icon2 = icon.withIconWidth(12)
+            var icon2 = icon.withIconWidth(12)
             var icon1 = icon.withIconHeight(13)
             var icon3 = icon.withIconSize(27, 16)
             var icon5 = icon.withIconSizeFromWidth(31)
             var icon4 = icon.withIconSizeFromHeight(24)
         then : 'These icons have different sizes.'
-            icon1.getIconWidth()  == -1
+            icon1.getIconWidth()  == 13
             icon1.getIconHeight() == 13
+            icon1.getBaseWidth()  == -1
+            icon1.getBaseHeight() == 13
+
             icon2.getIconWidth()  == 12
-            icon2.getIconHeight() == -1
+            icon2.getIconHeight() == 12
+            icon2.getBaseWidth()  == 12
+            icon2.getBaseHeight() == -1
+
             icon3.getIconWidth()  == 27
             icon3.getIconHeight() == 16
+            icon3.getBaseWidth()  == 27
+            icon3.getBaseHeight() == 16
+
             icon4.getIconWidth()  == 24
             icon4.getIconHeight() == 24
+            icon4.getBaseWidth()  == 24
+            icon4.getBaseHeight() == 24
+
             icon5.getIconWidth()  == 31
             icon5.getIconHeight() == 31
+            icon5.getBaseWidth()  == 31
+            icon5.getBaseHeight() == 31
     }
 
     def 'The `String` representation of the `SvgIcon` shows its properties.'()
@@ -146,5 +161,41 @@ class SvgIcon_Spec extends Specification
             var icon = UI.findIcon(declaration)
         expect : 'The icon is not loaded.'
             !icon.isPresent()
+    }
+
+    def 'The `SvgIcon` will determine missing image size dimensions through the aspect ratio of the SVG document.'()
+    {
+        reportInfo """
+            The `SvgIcon` is a special type of icon that can load SVG documents
+            and then render them as icons in the UI.
+            When loading such an icon using a `Size` object with 
+            one of the dimensions set to -1, the icon will determine the missing
+            dimension through the aspect ratio of the SVG document.
+            
+            But note that this is calculated dynamically
+            for the `getIconWidth()` and `getIconHeight()` methods.
+            If you want the actual size of the icon, you 
+            can call `getBaseWidth()` and `getBaseHeight()`.
+        """
+        given : 'We start with an initial scale of 1.'
+            SwingTree.initialiseUsing(it -> it.uiScaleFactor(1f) )
+        and : 'Then we load two SVG icons with different `Size` objects.'
+            var icon1 = UI.findIcon(IconDeclaration.of(Size.of(-1, 17), "img/dandelion.svg"))
+            var icon2 = UI.findIcon(IconDeclaration.of(Size.of(17, -1), "img/dandelion.svg"))
+        expect : 'The icons should have been loaded.'
+            icon1.isPresent() && icon2.isPresent()
+        and : 'They are both instances of `SvgIcon`.'
+            icon1.get() instanceof SvgIcon
+            icon2.get() instanceof SvgIcon
+        and : 'The icons should have the correct size.'
+            icon1.get().getIconWidth() == 17
+            icon1.get().getIconHeight() == 17
+            icon2.get().getIconWidth() == 17
+            icon2.get().getIconHeight() == 17
+        and : 'Their base size is what we specified.'
+            icon1.get().getBaseWidth() == -1
+            icon1.get().getBaseHeight() == 17
+            icon2.get().getBaseWidth() == 17
+            icon2.get().getBaseHeight() == -1
     }
 }

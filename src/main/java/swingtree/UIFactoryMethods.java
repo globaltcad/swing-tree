@@ -6646,8 +6646,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                     throw new RuntimeException(e);
                 }
         }
-        Optional<Integer> width  = declaration.size().width().map(Number::intValue);
-        Optional<Integer> height = declaration.size().height().map(Number::intValue);
         if ( path.endsWith(".svg") ) {
             SVGDocument tempSVGDocument = null;
             try {
@@ -6657,14 +6655,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 log.error("Failed to load SVG document from URL: " + url, e);
                 return null;
             }
-            SvgIcon icon = new SvgIcon(tempSVGDocument).withIconSize(declaration.size());
-            if ( width.isPresent() && height.isPresent() )
-                return icon.withIconSize(width.get(), height.get());
-            if ( width.isPresent() )
-                return icon.withIconSizeFromWidth(width.get());
-            if ( height.isPresent() )
-                return icon.withIconSizeFromHeight(height.get());
-            return icon;
+            return new SvgIcon(tempSVGDocument).withIconSize(declaration.size());
         } else {
             /*
                 Not that we explicitly use the "createImage" method of the toolkit here.
