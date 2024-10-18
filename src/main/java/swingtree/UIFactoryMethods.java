@@ -6473,10 +6473,82 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
             icon = _tryLoadIcon(declaration);
+            if ( icon == null )
+                icon = _tryLoadIcon(IconDeclaration.of(declaration.path()));
+            icon = (ImageIcon) scaleIconTo(declaration.size(), icon);
             if ( icon != null )
                 cache.put(declaration, icon);
         }
         return Optional.ofNullable(icon);
+    }
+
+    public static @Nullable Icon scaleIconTo( Size size, @Nullable final Icon icon ) {
+        if ( icon == null )
+            return null;
+
+        final double actualWidth  = _getBaseWidth(icon);
+        final double actualHeight = _getBaseHeight(icon);
+        if ( actualWidth <= 0 || actualHeight <= 0 ){
+            log.debug(
+                    "Encountered an invalid icon width '" + actualWidth + "' or height '" + actualHeight + "'.",
+                    new Throwable()
+                );
+            return icon;
+        }
+
+        if ( size.equals(Size.of(actualWidth, actualHeight)) )
+            return icon;
+
+        if ( !size.hasPositiveWidth() && !size.hasPositiveHeight() )
+            size = Size.of(actualWidth, actualHeight);
+        if  ( !size.hasPositiveWidth() )
+            size = size.withWidth((float) (size.height().orElse(1f) * actualWidth / actualHeight));
+        if ( !size.hasPositiveHeight() )
+            size = size.withHeight((float) (size.width().orElse(1f) * actualHeight / actualWidth));
+
+        int width  = size.width().map(Float::intValue).orElse(0);
+        int height = size.height().map(Float::intValue).orElse(0);
+
+        if ( width < 1 || height < 1 ) {
+            log.warn(
+                    "Encountered an invalid icon size '" + size + "' " +
+                    "while scaling an icon for the '"+JIcon.class.getSimpleName()+"' component.",
+                    new Throwable()
+                );
+            return icon;
+        }
+
+        if ( icon instanceof ScalableImageIcon ) {
+            ScalableImageIcon scalable = (ScalableImageIcon) icon;
+            scalable = scalable.withSize(size);
+            return scalable;
+        }
+
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconSize(width, height);
+            return svgIcon;
+        } else if ( icon instanceof ImageIcon ) {
+            Image scaled = ((ImageIcon)icon).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        }
+        return icon;
+    }
+
+    private static int _getBaseWidth(Icon icon) {
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).getBaseWidth();
+        if ( icon instanceof SvgIcon )
+            return ((SvgIcon) icon).getBaseWidth();
+        return icon.getIconWidth();
+    }
+
+    private static int _getBaseHeight(Icon icon) {
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).getBaseHeight();
+        if ( icon instanceof SvgIcon )
+            return ((SvgIcon) icon).getBaseHeight();
+        return icon.getIconHeight();
     }
 
     /**
