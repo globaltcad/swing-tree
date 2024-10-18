@@ -68,7 +68,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                     thisComponent.setOrientation( it.forSplitPane() );
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setOrientation( align.orElseThrow().forSplitPane() );
+                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSplitPane() );
                 })
                 ._this();
     }
@@ -114,7 +114,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                     thisComponent.setDividerLocation(it);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setDividerLocation( location.orElseThrow() );
+                    thisComponent.setDividerLocation( location.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -147,7 +147,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                     thisComponent.setDividerSize(UI.scale(it));
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setDividerSize( UI.scale(size.orElseThrow()) );
+                    thisComponent.setDividerSize( UI.scale(size.orElseThrowUnchecked()) );
                 })
                 ._this();
     }
@@ -253,10 +253,10 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                     thisComponent.addComponentListener(new ComponentAdapter() {
                         @Override
                         public void componentResized( ComponentEvent e ) {
-                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
                         }
                     });
-                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
                 })
                 ._this();
     }
@@ -294,13 +294,13 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                     _calculateDividerLocationFrom(thisComponent, v);
                })
                 ._with( thisComponent -> {
-                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
                     // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
                     // when the split pane is resized:
                     thisComponent.addComponentListener(new ComponentAdapter() {
                         @Override
                         public void componentResized( ComponentEvent e ) {
-                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
                         }
                     });
                     // We listen for slider movement as well, so that we can recalculate the divider location

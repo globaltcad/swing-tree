@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -23,6 +25,7 @@ import java.util.function.Function;
 public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>, S>
 {
     private static final int PREFERRED_STEPS = 256;
+    private static final Logger log = LoggerFactory.getLogger(UIForSlider.class);
 
     private final BuilderState<S> _state;
 
@@ -69,10 +72,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
         return _withOnShow( align, (thisComponent,v) -> {
-                    _setOrientation(thisComponent, align.orElseThrow());
+                    _setOrientation(thisComponent, align.orElseThrowUnchecked());
                })
                 ._with( thisComponent -> {
-                    _setOrientation(thisComponent, align.orElseThrow());
+                    _setOrientation(thisComponent, align.orElseThrowUnchecked());
                 })
                ._this();
     }
@@ -91,7 +94,13 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         NullUtil.nullArgCheck( action, "action", Action.class );
         return _with( thisComponent -> {
                     _onChange(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on slider change!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -131,10 +140,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     public final UIForSlider<S> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
         return _withOnShow( min, (thisComponent,v) -> {
-                    _setMin(thisComponent, min.orElseThrow());
+                    _setMin(thisComponent, min.orElseThrowUnchecked());
                 })
                 ._with( thisComponent -> {
-                    _setMin(thisComponent, min.orElseThrow());
+                    _setMin(thisComponent, min.orElseThrowUnchecked());
                 })
                 ._this();
     }
@@ -169,10 +178,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     public final UIForSlider<S> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
         return _withOnShow( max, (thisComponent,v) -> {
-                    _setMax(thisComponent, max.orElseThrow());
+                    _setMax(thisComponent, max.orElseThrowUnchecked());
                 })
                 ._with( thisComponent -> {
-                    _setMax(thisComponent, max.orElseThrow());
+                    _setMax(thisComponent, max.orElseThrowUnchecked());
                 })
                 ._this();
     }
@@ -210,10 +219,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
         return _withOnShow( val, (thisComponent,v) -> {
-                    _setValue(thisComponent, val.orElseThrow());
+                    _setValue(thisComponent, val.orElseThrowUnchecked());
                 })
                 ._with( thisComponent -> {
-                    _setValue(thisComponent, val.orElseThrow());
+                    _setValue(thisComponent, val.orElseThrowUnchecked());
                 })
                 ._this();
     }
@@ -233,7 +242,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         Class<N> userType = userMin.type();
         boolean isWholeNumber = userType == Integer.class || userType == Long.class || userType == Short.class || userType == Byte.class;
         if ( !isWholeNumber ) {
-            Function<N,Integer> scaleToSliderInt = n -> _scale(Integer.class, n, userMin.orElseThrow(), userMax.orElseThrow(), false);
+            Function<N,Integer> scaleToSliderInt = n -> _scale(Integer.class, n, userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), false);
             Val<Integer> sliderMin     = userMin.viewAsInt( scaleToSliderInt );
             Val<Integer> sliderMax     = userMax.viewAsInt( scaleToSliderInt );
             Val<Integer> sliderCurrent = userCurrent.viewAsInt( scaleToSliderInt );
@@ -241,10 +250,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                         sliderMin, sliderMax, sliderCurrent, biDirectional ? (Var) userCurrent : null,
                         n -> {
                             if ( sliderMin.is(n) )
-                                return userMin.orElseThrow();
+                                return userMin.orElseThrowUnchecked();
                             if ( sliderMax.is(n) )
-                                return userMax.orElseThrow();
-                            return _scale(userType, n, userMin.orElseThrow(), userMax.orElseThrow(), true);
+                                return userMax.orElseThrowUnchecked();
+                            return _scale(userType, n, userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), true);
                         }
                     );
         }
@@ -270,18 +279,18 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         Val<N> min, Val<N> max, Val<N> current, @Nullable Var<T> target, Function<Integer,T> scaling
     ) {
         return _withOnShow( min, (thisComponent,v) -> {
-                    _setMin(thisComponent, min.orElseThrow().intValue());
+                    _setMin(thisComponent, min.orElseThrowUnchecked().intValue());
                 })
                 ._withOnShow( max, (thisComponent,v) -> {
-                    _setMax(thisComponent, max.orElseThrow().intValue());
+                    _setMax(thisComponent, max.orElseThrowUnchecked().intValue());
                 })
                 ._withOnShow( current, (thisComponent,v) -> {
-                    _setValue(thisComponent, current.orElseThrow().intValue());
+                    _setValue(thisComponent, current.orElseThrowUnchecked().intValue());
                 })
                 ._with( thisComponent -> {
-                    _setMin(thisComponent, min.orElseThrow().intValue());
-                    _setMax(thisComponent, max.orElseThrow().intValue());
-                    _setValue(thisComponent, current.orElseThrow().intValue());
+                    _setMin(thisComponent, min.orElseThrowUnchecked().intValue());
+                    _setMax(thisComponent, max.orElseThrowUnchecked().intValue());
+                    _setValue(thisComponent, current.orElseThrowUnchecked().intValue());
                     if ( target != null ) {
                         _onChange(thisComponent,
                             e -> _runInApp(thisComponent.getValue(), newItem -> {
@@ -347,7 +356,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                     _onChange(thisComponent,
                         e -> _runInApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) )
                     );
-                    _setValue(thisComponent, var.orElseThrow());
+                    _setValue(thisComponent, var.orElseThrowUnchecked());
                 })
                 ._this();
     }
@@ -394,7 +403,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                     thisComponent.setMajorTickSpacing(v);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setMajorTickSpacing( spacing.orElseThrow() );
+                    thisComponent.setMajorTickSpacing( spacing.orElseThrowUnchecked() );
                 })
                 ._this();
     }
@@ -413,7 +422,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                     thisComponent.setMinorTickSpacing(v);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setMinorTickSpacing( spacing.orElseThrow() );
+                    thisComponent.setMinorTickSpacing( spacing.orElseThrowUnchecked() );
                 })
                 ._this();
     }

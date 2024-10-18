@@ -70,7 +70,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
                     c.setOrientation( v.forSeparator() );
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setOrientation( align.orElseThrow().forSeparator() );
+                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSeparator() );
                 })
                 ._this();
     }
@@ -114,7 +114,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
                     _setLength( thisComponent, it );
                 })
                 ._with( thisComponent -> {
-                    _setLength( thisComponent, separatorLength.orElseThrow() );
+                    _setLength( thisComponent, separatorLength.orElseThrowUnchecked() );
                 })
                 ._this();
     }

@@ -12,7 +12,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
@@ -107,7 +107,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     public UIForCombo<E,C> onOpen( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _onPopupOpen(thisComponent, e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) ) );
+                    _onPopupOpen(thisComponent, e -> _runInApp(()->{
+                        try {
+                            action.accept(new ComponentDelegate<>((C) thisComponent, e));
+                        } catch (Exception ex) {
+                            log.error("Error while executing action on popup open!", ex);
+                        }
+                    }));
                 })
                 ._this();
     }
@@ -137,7 +143,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>((C) thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup close!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -168,7 +180,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
+                        e -> _runInApp(()->{
+                            try {
+                                action.accept(new ComponentDelegate<>((C) thisComponent, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on popup cancel!", ex);
+                            }
+                        })
                     );
                 })
                 ._this();
@@ -202,7 +220,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    _onSelection(thisComponent,
-                       e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )))
+                       e -> _runInApp(()->{
+                           try {
+                               action.accept(new ComponentDelegate<>(thisComponent, e));
+                           } catch (Exception ex) {
+                               log.error("Error while executing action on selection!", ex);
+                           }
+                       })
                    );
                })
                ._this();
@@ -275,7 +299,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     public UIForCombo<E,C> onEnter( Action<ComponentDelegate<C, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   _onEnter(thisComponent, e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e ))) );
+                   _onEnter(thisComponent, e -> _runInApp(()->{
+                       try {
+                           action.accept(new ComponentDelegate<>((C) thisComponent, e));
+                       } catch (Exception ex) {
+                           log.error("Error while executing action on enter!", ex);
+                       }
+                   }));
                })
                ._this();
     }
