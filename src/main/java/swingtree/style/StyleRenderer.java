@@ -8,6 +8,7 @@ import swingtree.api.Painter;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
+import javax.swing.ImageIcon;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.AffineTransformOp;
@@ -1100,9 +1101,11 @@ final class StyleRenderer
             final Outline      padding         = style.padding();
             final int          componentWidth  = componentSize.width().orElse(0f).intValue();
             final int          componentHeight = componentSize.height().orElse(0f).intValue();
+            final int          iconBaseWidth   = _getBaseWidth(imageIcon); // = unaffected by UI.scale()
+            final int          iconBaseHeight  = _getBaseHeight(imageIcon);
 
-            int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
-            int imgHeight = style.height().orElse(imageIcon.getIconHeight());
+            int imgWidth  = style.width().orElse(iconBaseWidth);
+            int imgHeight = style.height().orElse(iconBaseHeight);
 
             if ( fit != UI.FitComponent.NO ) {
                 if ( imageIcon instanceof SvgIcon) {
@@ -1120,7 +1123,7 @@ final class StyleRenderer
                         (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
                     ) {
                         imgWidth = style.width().orElse(componentWidth);
-                        double aspectRatio = (double) imageIcon.getIconHeight() / (double) imageIcon.getIconWidth();
+                        double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;
                         // We preserve the aspect ratio:
                         imgHeight = (int) (imgWidth * aspectRatio);
                     } if (
@@ -1129,7 +1132,7 @@ final class StyleRenderer
                         (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
                     ) {
                         imgHeight = style.height().orElse(componentHeight);
-                        double aspectRatio = (double) imageIcon.getIconWidth() / (double) imageIcon.getIconHeight();
+                        double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;
                         // We preserve the aspect ratio:
                         imgWidth = (int) (imgHeight * aspectRatio);
                     }
@@ -1187,9 +1190,9 @@ final class StyleRenderer
             imgHeight -= padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue();
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = (SvgIcon) imageIcon;
-                if ( imgWidth > -1 && svgIcon.getIconWidth() < 0 )
+                if ( imgWidth > -1 && iconBaseWidth < 0 )
                     svgIcon = svgIcon.withIconWidth(imgWidth);
-                if ( imgHeight > -1 && svgIcon.getIconHeight() < 0 )
+                if ( imgHeight > -1 && iconBaseHeight < 0 )
                     svgIcon = svgIcon.withIconHeight(imgHeight);
                 imageIcon = svgIcon;
             }
@@ -1245,6 +1248,22 @@ final class StyleRenderer
             }
             g2d.setClip(oldClip);
         });
+    }
+
+    private static int _getBaseWidth(ImageIcon icon) {
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).getBaseWidth();
+        if ( icon instanceof SvgIcon )
+            return ((SvgIcon) icon).getBaseWidth();
+        return icon.getIconWidth();
+    }
+
+    private static int _getBaseHeight(ImageIcon icon) {
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).getBaseHeight();
+        if ( icon instanceof SvgIcon )
+            return ((SvgIcon) icon).getBaseHeight();
+        return icon.getIconHeight();
     }
 
     private static void _renderText(

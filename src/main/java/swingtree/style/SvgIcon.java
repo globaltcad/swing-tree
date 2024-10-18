@@ -163,8 +163,17 @@ public final class SvgIcon extends ImageIcon
         return tempSVGDocument;
     }
 
-
     /**
+     *  Exposes the width of the icon, or -1 if the icon should be rendered according
+     *  to the width of a given component or the width of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).<br>
+     *  <b>
+     *      Note that the returned width is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled width, use {@link #getBaseWidth()}.
+     *  </b>
      * @return The width of the icon, or -1 if the icon should be rendered according
      *         to the width of a given component or the width of the SVG document itself.
      */
@@ -191,7 +200,14 @@ public final class SvgIcon extends ImageIcon
     /**
      *  Exposes the height of the icon, or -1 if the icon should be rendered according
      *  to the height of a given component or the height of the SVG document itself.
-     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).<br>
+     *  <b>
+     *      Note that the returned height is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled height, use {@link #getBaseHeight()}.
+     *  </b>
      *
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
@@ -200,6 +216,38 @@ public final class SvgIcon extends ImageIcon
     @Override
     public int getIconHeight() {
         return UI.scale(_height);
+    }
+
+    /**
+     *  Exposes the fixed width defined for the icon, which is the width
+     *  that was set when the icon was created or updated using the
+     *  {@link #withIconWidth(int)} method.<br>
+     *  <b>
+     *      Note that this width is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      If you want a scaled width, that is more suitable for rendering the icon,
+     *      use the {@link #getIconWidth()} method.
+     *  </b>
+     *
+     * @return The width of the icon without scaling.
+     */
+    public int getBaseWidth() {
+        return _width;
+    }
+
+    /**
+     *  Exposes the fixed height defined for the icon, which is the height
+     *  that was set when the icon was created or updated using the
+     *  {@link #withIconHeight(int)} method.<br>
+     *  <b>
+     *      Note that this height is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      If you want a scaled height, that is more suitable for rendering the icon,
+     *      use the {@link #getIconHeight()} method.
+     *  </b>
+     *
+     * @return The height of the icon without scaling.
+     */
+    public int getBaseHeight() {
+        return _height;
     }
 
     /**

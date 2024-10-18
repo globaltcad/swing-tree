@@ -1212,16 +1212,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
 
     private static ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
-        if ( icon instanceof SvgIcon )
-        {
+        if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
             svgIcon = svgIcon.withIconWidth(width);
-            icon    = svgIcon.withIconHeight(height);
+            return svgIcon.withIconHeight(height);
         }
-        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
-        {
-            if ( !(icon instanceof ScalableImageIcon) )
-                icon = new ScalableImageIcon(Size.of(width, height), icon);
+        else if ( icon instanceof ScalableImageIcon ) {
+            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
+        }
+        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
+            return ScalableImageIcon.of(Size.of(width, height), icon);
         }
         return icon;
     }
@@ -6594,23 +6594,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 return icon.withIconSizeFromHeight(height.get());
             return icon;
         } else {
-        /*
-            Not that we explicitly use the "createImage" method of the toolkit here.
-            This is because otherwise the image might get cached inside the toolkit,
-            which is in the way of our own caching mechanism.
-            (The internal caching of the toolkit is somewhat limited and we have no control over it,
-            which is why we use our own cache.)
-        */
+            /*
+                Not that we explicitly use the "createImage" method of the toolkit here.
+                This is because otherwise the image might get cached inside the toolkit,
+                which is in the way of our own caching mechanism.
+                (The internal caching of the toolkit is somewhat limited and we have no control over it,
+                which is why we use our own cache.)
+            */
             ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
-            return new ScalableImageIcon(declaration.size(), icon);
-            //double ratio = (double) icon.getIconWidth() / (double) icon.getIconHeight();
-            //if ( width.isPresent() && height.isPresent() )
-            //    return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));
-            //if ( width.isPresent() )
-            //    return new ImageIcon(icon.getImage().getScaledInstance(width.get(), (int) (width.get() / ratio), Image.SCALE_SMOOTH));
-            //if ( height.isPresent() )
-            //    return new ImageIcon(icon.getImage().getScaledInstance((int) (height.get() * ratio), height.get(), Image.SCALE_SMOOTH));
-            //return icon;
+            return ScalableImageIcon.of(declaration.size(), icon);
         }
     }
 

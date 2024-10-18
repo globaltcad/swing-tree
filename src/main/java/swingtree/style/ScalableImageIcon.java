@@ -19,22 +19,44 @@ public final class ScalableImageIcon extends ImageIcon
 {
     private static final Logger log = LoggerFactory.getLogger(ScalableImageIcon.class);
 
-    private final ImageIcon _original;
+    /**
+     *  A factory method that creates a new {@link ScalableImageIcon} that will render
+     *  the supplied {@link ImageIcon} using the given base size scaled according to the current DPI settings.
+     *  <p>
+     *      If the given {@link ImageIcon} is already a {@link ScalableImageIcon},
+     *      a new instance will be created from the existing one
+     *      using {@link ScalableImageIcon#withSize(Size)}.
+     *  </p>
+     * @param size The size to render the icon at.
+     * @param icon The icon to render.
+     * @return A new {@link ScalableImageIcon} that will render the image
+     *          scaled according to the current DPI settings.
+     */
+    public static ScalableImageIcon of( Size size, ImageIcon icon ) {
+        Objects.requireNonNull(size);
+        Objects.requireNonNull(icon);
+        if ( icon instanceof ScalableImageIcon )
+            return ((ScalableImageIcon) icon).withSize(size);
+        return new ScalableImageIcon(size, icon);
+    }
+
+    private final ImageIcon _sourceIcon;
     private final Size      _relativeScale;
+    private final Size      _baseSize;
 
     private ImageIcon _scaled;
     private float     _currentScale;
 
-    public ScalableImageIcon( Size size, ImageIcon original ) {
+    private ScalableImageIcon( Size size, ImageIcon original ) {
         Objects.requireNonNull(size);
         Objects.requireNonNull(original);
         Size relativeScale = Size.unknown();
+        double targetWidth = -1;
+        double targetHeight = -1;
         try {
             double originalIconWidth = original.getIconWidth();
             double originalIconHeight = original.getIconHeight();
             double ratio = originalIconWidth / originalIconHeight;
-            double targetWidth;
-            double targetHeight;
             if (size.hasPositiveWidth() && size.hasPositiveHeight()) {
                 targetWidth = size.width().orElse(0.0f);
                 targetHeight = size.height().orElse(0.0f);
@@ -52,7 +74,8 @@ public final class ScalableImageIcon extends ImageIcon
         } catch ( Exception e ) {
             log.error("An error occurred while calculating the size of a ScalableImageIcon.", e);
         }
-        _original      = original;
+        _baseSize      = Size.of((int) targetWidth, (int) targetHeight);
+        _sourceIcon = original;
         _relativeScale = relativeScale;
         _currentScale  = UI.scale();
         _scaled        = _scaleTo(_currentScale, _relativeScale, original);
@@ -81,25 +104,88 @@ public final class ScalableImageIcon extends ImageIcon
     private void _updateScale() {
         float newScale = UI.scale();
         if ( newScale != _currentScale ) {
-            _scaled = _scaleTo(newScale, _relativeScale, _original);
+            _scaled = _scaleTo(newScale, _relativeScale, _sourceIcon);
             _currentScale = newScale;
         }
     }
 
+    /**
+     *  Returns a new {@link ScalableImageIcon} that will render the image
+     *  at the given size.<br>
+     *  <p>
+     *      Note that the returned icon will be a new instance and will not
+     *      affect the current icon.
+     *  </p>
+     * @param size The size to render the icon at.
+     * @return A new {@link ScalableImageIcon} that will render the image
+     *  at the given size.
+     */
     public ScalableImageIcon withSize( Size size ) {
-        return new ScalableImageIcon(size, _original);
+        return new ScalableImageIcon(size, _sourceIcon);
     }
 
+    /**
+     *  Exposes the width of the icon, or -1 if the icon does not have a fixed width.<br>
+     *  <b>
+     *      Note that the returned width is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled width, use {@link #getBaseWidth()}.
+     *  </b>
+     * @return The width of the icon, or -1 if the icon does not have a width.
+     */
     @Override
     public int getIconWidth() {
         _updateScale();
         return _scaled.getIconWidth();
     }
 
+    /**
+     *  Exposes the height of the icon, or -1 if the icon does not have a fixed height.<br>
+     *  <b>
+     *      Note that the returned height is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled height, use {@link #getBaseHeight()}.
+     *  </b>
+     * @return The height of the icon, or -1 if the icon does not have a height.
+     */
     @Override
     public int getIconHeight() {
         _updateScale();
         return _scaled.getIconHeight();
+    }
+
+    /**
+     *  Returns the unscaled width of the icon.
+     *  This is the width of the icon as it was originally loaded
+     *  and is not affected by the current {@link swingtree.UI#scale()} value.<br>
+     *  <p>
+     *      If you want a width that is more suited for rendering
+     *      according to the current DPI settings, use {@link #getIconWidth()}.
+     *  </p>
+     *
+     * @return The unscaled width of the icon.
+     */
+    public int getBaseWidth() {
+        return _baseSize.width().map(Math::round).orElse(0);
+    }
+
+    /**
+     *  Returns the unscaled height of the icon.
+     *  This is the height of the icon as it was originally loaded
+     *  and is not affected by the current {@link swingtree.UI#scale()} value.<br>
+     *  <p>
+     *      If you want a height that is more suited for rendering
+     *      according to the current DPI settings, use {@link #getIconHeight()}.
+     *  </p>
+     *
+     * @return The unscaled height of the icon.
+     */
+    public int getBaseHeight() {
+        return _baseSize.height().map(Math::round).orElse(0);
     }
 
     @Override
@@ -116,16 +202,16 @@ public final class ScalableImageIcon extends ImageIcon
 
     @Override
     public void setImage( Image image ) {
-        log.warn("Setting the image of a ScalableImageIcon is not supported.");
+        log.warn("Setting the image of a "+this.getClass().getSimpleName()+" is not supported.", new Throwable());
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "width=" + getIconWidth() + ", " +
-                    "height=" + getIconHeight() + ", " +
+                    "baseSize=" + _baseSize + ", " +
+                    "displaySize=" + Size.of(getIconWidth(), getIconHeight()) + ", " +
                     "scale=" + _currentScale + ", " +
-                    "original=" + _original + "" +
+                    "sourceSize=" + Size.of(_sourceIcon.getIconWidth(), _sourceIcon.getIconHeight()) +
                 "]";
     }
 
@@ -136,12 +222,14 @@ public final class ScalableImageIcon extends ImageIcon
         if ( obj == null || obj.getClass() != this.getClass() )
             return false;
         ScalableImageIcon other = (ScalableImageIcon) obj;
-        return _original.equals(other._original) && _relativeScale.equals(other._relativeScale);
+        return _sourceIcon.equals(other._sourceIcon) &&
+               _relativeScale.equals(other._relativeScale) &&
+               _baseSize.equals(other._baseSize);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_original, _relativeScale);
+        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);
     }
 
 }

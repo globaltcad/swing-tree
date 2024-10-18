@@ -98,16 +98,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
-        if ( icon instanceof SvgIcon )
-        {
+        if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
             svgIcon = svgIcon.withIconWidth(width);
-            icon    = svgIcon.withIconHeight(height);
+            return svgIcon.withIconHeight(height);
         }
-        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
-        {
-            if ( !(icon instanceof ScalableImageIcon) )
-                icon = new ScalableImageIcon(Size.of(width, height), icon);
+        else if ( icon instanceof ScalableImageIcon ) {
+            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
+        }
+        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
+            return ScalableImageIcon.of(Size.of(width, height), icon);
         }
         return icon;
     }
