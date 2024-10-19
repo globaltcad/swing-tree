@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import swingtree.api.Configurator;
 import swingtree.components.JScrollPanels;
 import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
+import swingtree.layout.AddConstraint;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
@@ -76,7 +77,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
      * @param constraints    The layout constraint which ought to be used to add the component to the wrapped component type.
      */
     @Override
-    protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable Object constraints ) {
+    protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints ) {
         if ( _configurator != null ) {
             if ( addedComponent instanceof Scrollable ) {
                 log.warn(

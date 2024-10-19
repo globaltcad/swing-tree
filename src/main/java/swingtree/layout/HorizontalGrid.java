@@ -9,7 +9,7 @@ import java.awt.*;
 import java.util.Optional;
 
 @Immutable
-public final class HorizontalGrid
+public final class HorizontalGrid implements AddConstraint
 {
     @SuppressWarnings("Immutable")
     private final AutoCellSpanPolicy[] _autoSpans;
@@ -107,4 +107,8 @@ public final class HorizontalGrid
     }
 
 
+    @Override
+    public Object toConstraintForLayoutManager() {
+        return this;
+    }
 }

@@ -4577,15 +4577,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     @Override
     protected void _addComponentTo(
-        C                thisComponent,
-        JComponent       addedComponent,
-        @Nullable Object constraints
+        C                       thisComponent,
+        JComponent              addedComponent,
+        @Nullable AddConstraint constraints
     ) {
         NullUtil.nullArgCheck(addedComponent, "component", JComponent.class);
         if ( constraints == null )
             thisComponent.add( addedComponent );
         else
-            thisComponent.add( addedComponent, constraints );
+            thisComponent.add( addedComponent, constraints.toConstraintForLayoutManager() );
     }
 
     /**
@@ -4618,8 +4618,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add( AddConstraint attr, UIForAnySwing<?, T> builder ) {
-        return this.add(attr.toString(), new UIForAnySwing[]{builder});
+    public final <T extends JComponent> I add(AddConstraint attr, UIForAnySwing<?, T> builder ) {
+        return this.add(attr, new UIForAnySwing[]{builder});
     }
 
     /**
@@ -4649,20 +4649,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     @SafeVarargs
     public final <B extends UIForAnySwing<?, ?>> I add( String attr, B... builders ) {
         return _with( thisComponent -> {
-                   _addBuildersTo(thisComponent, attr, builders);
+                   _addBuildersTo(thisComponent, ()->attr, builders);
                })
                ._this();
     }
 
-    private void _addBuildersTo( C thisComponent, String attr, UIForAnySwing<?, ?>... builders ) {
+    private void _addBuildersTo(C thisComponent, AddConstraint attr, UIForAnySwing<?, ?>... builders ) {
         LayoutManager layout = thisComponent.getLayout();
-        if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
+        Object constraints = attr.toConstraintForLayoutManager();
+        if ( _isBorderLayout(constraints) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
                 log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             thisComponent.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
         for ( UIForAnySwing<?, ?> b : builders )
-            _addBuilderTo(thisComponent, b, attr);
+            _addBuilderTo(thisComponent, b, ()->constraints);
     }
 
     /**
@@ -4680,10 +4681,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add( AddConstraint attr, B... builders ) {
+    public final <B extends UIForAnySwing<?, ?>> I add(AddConstraint attr, B... builders ) {
         Objects.requireNonNull(attr, "attr");
         Objects.requireNonNull(builders, "builders");
-        return this.add( attr.toString(), builders );
+        return _with( thisComponent -> {
+                    _addBuildersTo(thisComponent, attr, builders);
+                })
+                ._this();
     }
 
     /**
@@ -4711,7 +4715,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                        log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
 
                    for ( UIForAnySwing<?, ?> b : builders )
-                       _addBuilderTo(thisComponent, b, attr);
+                       _addBuilderTo(thisComponent, b, ()->attr);
                })
                ._this();
     }
@@ -4751,7 +4755,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private final <E extends JComponent> void _addComponentsTo( C thisComponent, String attr, E... components ) {
         for ( E component : components ) {
             NullUtil.nullArgCheck(component, "component", JComponent.class);
-            _addBuildersTo( thisComponent, attr, new UIForSwing[]{UI.of(component)} );
+            _addBuildersTo( thisComponent, ()->attr, new UIForSwing[]{UI.of(component)} );
         }
     }
 
@@ -4769,7 +4773,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     @SafeVarargs
     public final <E extends JComponent> I add( AddConstraint attr, E... components ) {
-        return this.add(attr.toString(), components);
+        return _with( thisComponent -> {
+                    _addComponentsTo( thisComponent, attr, components );
+                })
+                ._this();
+    }
+
+    @SafeVarargs
+    private final <E extends JComponent> void _addComponentsTo( C thisComponent, AddConstraint attr, E... components ) {
+        for ( E component : components ) {
+            NullUtil.nullArgCheck(component, "component", JComponent.class);
+            _addBuildersTo( thisComponent, ()->attr, new UIForSwing[]{UI.of(component)} );
+        }
     }
 
     /**
@@ -4833,7 +4848,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
         return _with( thisComponent -> {
-                   _addViewablePropTo(thisComponent, viewable, attr, viewSupplier);
+                   _addViewablePropTo(thisComponent, viewable, ()->attr, viewSupplier);
                })
                ._this();
     }
@@ -4857,7 +4872,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, attr, viewSupplier, thisComponent );
+                    _addViewableProps( viewables, ()->attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -4877,7 +4892,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param <M> The type of the value held by the {@link Val} property.
      */
     public final <M> I add( AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        return this.add(attr.toString(), viewable, viewSupplier);
+        return  _with( thisComponent -> {
+                    _addViewablePropTo(thisComponent, viewable, attr, viewSupplier);
+                })
+                ._this();
     }
 
     /**
@@ -4896,10 +4914,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param <M> The type of the items in the {@link Vals} list.
      */
     public final <M> I add( AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
-        return this.add(attr.toString(), viewables, viewSupplier);
+        return _with( thisComponent -> {
+                    _addViewableProps( viewables, attr, viewSupplier, thisComponent );
+                })
+                ._this();
     }
 
-    protected <M> void _addViewableProps( Vals<M> models, @Nullable String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+    protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _onShow( models, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
             Vals<M> newValues = delegate.newValues();
@@ -4967,7 +4988,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _addViewablePropTo(
-        C thisComponent, Val<M> viewable, @Nullable String attr, ViewSupplier<M> viewSupplier
+        C thisComponent, Val<M> viewable, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
         final int index = thisComponent.getComponentCount();
@@ -5005,7 +5026,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateComponentAt(
-        int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable String attr, C c
+        int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C c
     ) {
         JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -> {
             UIForAnySwing<?, ?> view = null;
@@ -5025,14 +5046,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         if ( attr == null )
             c.add(newComponent, index);
         else
-            c.add(newComponent, attr, index);
+            c.add(newComponent, attr.toConstraintForLayoutManager(), index);
         // We update the layout.
         c.revalidate();
         c.repaint();
     }
 
     private <M> void _addComponentAt(
-        int index, M v, ViewSupplier<M> viewSupplier, @Nullable String attr, C thisComponent
+        int index, M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C thisComponent
     ) {
         Supplier<JComponent> componentSupplier = () -> {
             UIForAnySwing<?, ?> view = null;
@@ -5050,7 +5071,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         if ( attr == null )
             thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), index);
         else
-            thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), attr, index);
+            thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), attr.toConstraintForLayoutManager(), index);
         // We update the layout.
         thisComponent.revalidate();
         thisComponent.repaint();

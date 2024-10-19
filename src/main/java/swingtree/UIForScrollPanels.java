@@ -7,6 +7,7 @@ import sprouts.Var;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
+import swingtree.layout.AddConstraint;
 
 import javax.swing.*;
 import java.util.List;
@@ -48,14 +49,14 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 	}
 
 	@Override
-	protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable Object constraints) {
+	protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints) {
 		Objects.requireNonNull(addedComponent);
 
 		EntryViewModel entry = _entryModel();
 		if ( constraints == null )
 			thisComponent.addEntry( entry, m -> UI.of(addedComponent) );
 		else
-			thisComponent.addEntry( constraints.toString(), entry, m -> UI.of(addedComponent) );
+			thisComponent.addEntry( constraints, entry, m -> UI.of(addedComponent) );
 	}
 
 	private EntryViewModel _entryModel() {
@@ -69,7 +70,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 
 	@Override
 	protected <M> void _addViewableProps(
-			Vals<M> models, @Nullable String attr, ViewSupplier<M> viewSupplier, P thisComponent
+			Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, P thisComponent
 	) {
 		BiFunction<Integer, Vals<M>, @Nullable M> modelFetcher = (i, vals) -> {
 			M v = vals.at(i).get();
