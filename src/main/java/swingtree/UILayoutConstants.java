@@ -164,6 +164,6 @@ public abstract class UILayoutConstants
     public static CC CC() { return new CC(); }
 
     public static FlowCell GRID(AutoCellSpanPolicy... autoSpans ) {
-        return new FlowCell(12, autoSpans);
+        return new FlowCell(autoSpans);
     }
 }
