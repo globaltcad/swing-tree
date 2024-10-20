@@ -474,17 +474,10 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                 Component m = toBeMoved[i].component();
                 if (m.isVisible()) {
                     Dimension d = m.getPreferredSize();
-                    if (m instanceof JComponent) {
-                        JComponent jComponent = (JComponent) m;
-                        AddConstraint addConstraint = (AddConstraint) jComponent.getClientProperty(AddConstraint.class);
-                        if (addConstraint instanceof FlowCell) {
-                            FlowCell cell = (FlowCell) addConstraint;
-                            try {
-                                d = applyCellConf(cell, target, toBeMoved[i]).orElse(d);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
+                    try {
+                        d = applyCellConf(target, toBeMoved[i]).orElse(d);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     m.setSize(d.width, d.height);
 
@@ -661,7 +654,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         }
     }
 
-    public Optional<Dimension> applyCellConf( FlowCell cell, Container parent, ToBeMoved toBeMoved ) {
+    public Optional<Dimension> applyCellConf( Container parent, ToBeMoved toBeMoved ) {
 
         Insets insets = parent.getInsets();
         int unusableWidth = insets.left + insets.right;
