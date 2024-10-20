@@ -1,7 +1,6 @@
 package swingtree.layout;
 
 import com.google.errorprone.annotations.Immutable;
-import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
 
 import javax.swing.JComponent;
@@ -20,21 +19,17 @@ public final class HorizontalGrid implements AddConstraint
         _numberOfColumns = numberOfColumns;
     }
 
-    public void style(Container parent, JComponent child) throws Exception {
+    public void applyTo( Container parent, JComponent child ) throws Exception {
 
         LayoutManager layout = parent.getLayout();
         Insets insets = parent.getInsets();
         int unusableWidth = insets.left + insets.right;
         if ( layout instanceof ResponsiveGridFlowLayout) {
             ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) layout;
-            unusableWidth += flowLayout.getHgap() * (parent.getComponentCount() - 1);
+            unusableWidth += flowLayout.getHgap();
         } else if ( layout instanceof FlowLayout ) {
             FlowLayout flowLayout = (FlowLayout) layout;
-            unusableWidth += flowLayout.getHgap() * (parent.getComponentCount() - 1);
-        } else if ( layout instanceof MigLayout ) {
-            MigLayout migLayout = (MigLayout) layout;
-            Object rowConstr = migLayout.getRowConstraints();
-            System.out.println(rowConstr);
+            unusableWidth += flowLayout.getHgap();
         }
         int parentPrefWidth = parent.getPreferredSize().width - unusableWidth;
         int parentWidth = parent.getWidth() - unusableWidth;
@@ -77,7 +72,7 @@ public final class HorizontalGrid implements AddConstraint
         child.setPreferredSize( newSize );
     }
 
-    private Optional<AutoCellSpanPolicy> _findNextBestAutoSpan(UI.ParentSize targetSize ) {
+    private Optional<AutoCellSpanPolicy> _findNextBestAutoSpan( UI.ParentSize targetSize ) {
         for ( AutoCellSpanPolicy autoSpan : _autoSpans ) {
             if ( autoSpan.parentSize() == targetSize ) {
                 return Optional.of(autoSpan);

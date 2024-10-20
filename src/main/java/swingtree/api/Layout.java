@@ -3,6 +3,7 @@ package swingtree.api;
 import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
+import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
@@ -460,13 +461,13 @@ public interface Layout
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
-            if ( !( currentLayout instanceof FlowLayout ) ) {
+            if ( !( currentLayout instanceof ResponsiveGridFlowLayout) ) {
                 // We need to replace the current layout with a FlowLayout:
-                FlowLayout newLayout = new FlowLayout(_align, _hgap, _vgap);
+                ResponsiveGridFlowLayout newLayout = new ResponsiveGridFlowLayout(_align, _hgap, _vgap);
                 component.setLayout(newLayout);
                 return;
             }
-            FlowLayout flowLayout = (FlowLayout) currentLayout;
+            ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;
             int alignment     = _align;
             int horizontalGap = _hgap;
             int verticalGap   = _vgap;

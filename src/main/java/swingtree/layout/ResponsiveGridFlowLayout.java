@@ -3,7 +3,6 @@ package swingtree.layout;
 
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
-import swingtree.style.ComponentExtension;
 
 import javax.swing.JComponent;
 import java.awt.*;
@@ -13,7 +12,7 @@ import java.util.Objects;
  * A flow layout arranges components in a directional flow, much
  * like lines of text in a paragraph.
  */
-public class ResponsiveGridFlowLayout implements LayoutManager {
+public class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     int newAlign;
 
@@ -334,8 +333,6 @@ public class ResponsiveGridFlowLayout implements LayoutManager {
             dim.width += insets.left + insets.right + hgap * 2;
             dim.height += insets.top + insets.bottom + vgap * 2;
             return dim;
-
-
         }
     }
 
@@ -524,17 +521,54 @@ public class ResponsiveGridFlowLayout implements LayoutManager {
 
     static void refreshChildStylesOf(Container parent) {
         if (parent instanceof JComponent) {
-            // loop through children and set the preferred size of each child
             for (Component c : parent.getComponents()) {
                 if (c instanceof JComponent) {
                     JComponent jc = (JComponent) c;
                     try {
-                        ComponentExtension.from(jc).gatherApplyAndInstallStyle(false);
+                        // Getting component constraints for the child component:
+                        AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
+                        if (addConstraint != null) {
+                            Object constraint = addConstraint.toConstraintForLayoutManager();
+                            if (constraint instanceof HorizontalGrid) {
+                                HorizontalGrid grid = (HorizontalGrid) constraint;
+                                grid.applyTo(parent, jc);
+                            }
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public void addLayoutComponent(Component comp, Object constraints) {
+        if (constraints instanceof AddConstraint) {
+            if (comp instanceof JComponent) {
+                JComponent jc = (JComponent) comp;
+                jc.putClientProperty(AddConstraint.class, constraints);
+            }
+        }
+    }
+
+    @Override
+    public Dimension maximumLayoutSize(Container target) {
+        return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+    }
+
+    @Override
+    public float getLayoutAlignmentX(Container target) {
+        return 0;
+    }
+
+    @Override
+    public float getLayoutAlignmentY(Container target) {
+        return 0;
+    }
+
+    @Override
+    public void invalidateLayout(Container target) {
+
     }
 }

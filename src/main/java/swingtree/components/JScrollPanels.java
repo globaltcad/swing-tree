@@ -9,6 +9,7 @@ import swingtree.UIForAnySwing;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.layout.AddConstraint;
+import swingtree.layout.ResponsiveGridFlowLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -354,7 +355,7 @@ public class JScrollPanels extends UI.ScrollPane
 			_type = type;
 			LayoutManager layout;
 			if ( type == UI.Align.HORIZONTAL ) {
-				FlowLayout flow = new FlowLayout();
+				ResponsiveGridFlowLayout flow = new ResponsiveGridFlowLayout();
 				_horizontalGap = flow.getHgap();
 				_verticalGap = flow.getVgap();
 				layout = flow;

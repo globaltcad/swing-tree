@@ -19,6 +19,7 @@ import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.LayoutConstraint;
+import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
@@ -1571,7 +1572,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withFlowLayout() { return this.withLayout(new FlowLayout()); }
+    public final I withFlowLayout() { return this.withLayout(new ResponsiveGridFlowLayout()); }
 
     /**
      *  Use this to set a {@link FlowLayout} for the component wrapped by this builder. <br>
@@ -1588,7 +1589,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withFlowLayout( UI.HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
         return this.withLayout(
-                    alignment.forFlowLayout().map( FlowLayout::new ).orElse(new FlowLayout())
+                    alignment.forFlowLayout()
+                            .map( ResponsiveGridFlowLayout::new )
+                            .orElse(new ResponsiveGridFlowLayout())
                 );
     }
 
@@ -1610,8 +1613,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
         return this.withLayout(
                     alignment.forFlowLayout()
-                                .map( a -> new FlowLayout(a, hgap, vgap) )
-                                .orElse(new FlowLayout(FlowLayout.CENTER, hgap, vgap))
+                                .map( a -> new ResponsiveGridFlowLayout(a, hgap, vgap) )
+                                .orElse(new ResponsiveGridFlowLayout(FlowLayout.CENTER, hgap, vgap))
                 );
     }
 
