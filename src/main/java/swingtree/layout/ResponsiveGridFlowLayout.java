@@ -7,6 +7,7 @@ import swingtree.UI;
 import javax.swing.JComponent;
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A flow layout arranges components in a directional flow, much
@@ -429,7 +430,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     public void layoutContainer(Container target) {
         synchronized (target.getTreeLock()) {
-            refreshChildStylesOf(target);
+            //refreshChildStylesOf(target);
             int hgap = UI.scale(this.hgap);
             int vgap = UI.scale(this.vgap);
             Insets insets = target.getInsets();
@@ -453,6 +454,18 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                 Component m = target.getComponent(i);
                 if (m.isVisible()) {
                     Dimension d = m.getPreferredSize();
+                    if (m instanceof JComponent) {
+                        JComponent jComponent = (JComponent) m;
+                        AddConstraint addConstraint = (AddConstraint) jComponent.getClientProperty(AddConstraint.class);
+                        if (addConstraint instanceof FlowCell) {
+                            FlowCell cell = (FlowCell) addConstraint;
+                            try {
+                                d = applyCellConf(cell, target, jComponent).orElse(d);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                     m.setSize(d.width, d.height);
 
                     if (useBaseline ) {
@@ -529,9 +542,9 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                         AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
                         if (addConstraint != null) {
                             Object constraint = addConstraint.toConstraintForLayoutManager();
-                            if (constraint instanceof HorizontalGrid) {
-                                HorizontalGrid grid = (HorizontalGrid) constraint;
-                                grid.applyTo(parent, jc);
+                            if (constraint instanceof FlowCell) {
+                                FlowCell grid = (FlowCell) constraint;
+                                //grid.applyTo(parent, jc);
                             }
                         }
                     } catch (Exception e) {
@@ -571,4 +584,80 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
     public void invalidateLayout(Container target) {
 
     }
+
+    public Optional<Dimension> applyCellConf( FlowCell cell, Container parent, JComponent child ) {
+
+        Insets insets = parent.getInsets();
+        int unusableWidth = insets.left + insets.right;
+        unusableWidth += this.getHgap() * (cell.numberOfColumns() - 1);
+
+        int parentPrefWidth = parent.getPreferredSize().width - unusableWidth;
+        int parentWidth = parent.getWidth() - unusableWidth;
+
+        if ( parentPrefWidth <= 0 ) {
+            return Optional.empty();
+            // The responsive layout is based on the preferred width of the parent. So it has to be known.
+        }
+        // How much preferred width the parent actually fills:
+        double howFull = parentWidth / (double) parentPrefWidth;
+        howFull = Math.max(0, howFull);
+
+        UI.ParentSize currentParentSizeCategory = UI.ParentSize.NONE;
+        if ( howFull <= 0 ) {
+            currentParentSizeCategory = UI.ParentSize.NONE;
+        } else if (howFull < 1/5d) {
+            currentParentSizeCategory = UI.ParentSize.VERY_SMALL;
+        } else if (howFull < 2/5d) {
+            currentParentSizeCategory = UI.ParentSize.SMALL;
+        } else if (howFull < 3/5d) {
+            currentParentSizeCategory = UI.ParentSize.MEDIUM;
+        } else if (howFull < 4/5d) {
+            currentParentSizeCategory = UI.ParentSize.LARGE;
+        } else if (howFull <= 1) {
+            currentParentSizeCategory = UI.ParentSize.VERY_LARGE;
+        } else {
+            currentParentSizeCategory = UI.ParentSize.OVERSIZE;
+        }
+
+        Optional<AutoCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cell, currentParentSizeCategory);
+        if (!autoSpan.isPresent()) {
+            return Optional.empty();
+        }
+
+        int cellsToFill = autoSpan.get().cellsToFill();
+        int width = (parentWidth * cellsToFill) / cell.numberOfColumns();
+
+        Dimension newSize = new Dimension(width, child.getPreferredSize().height);
+        return Optional.of(newSize);
+    }
+
+    private static Optional<AutoCellSpanPolicy> _findNextBestAutoSpan(FlowCell cell, UI.ParentSize targetSize ) {
+        for ( AutoCellSpanPolicy autoSpan : cell.autoSpans() ) {
+            if ( autoSpan.parentSize() == targetSize ) {
+                return Optional.of(autoSpan);
+            }
+        }
+        // We did not find the exact match. Let's try to find the closest match.
+
+        UI.ParentSize[] values = UI.ParentSize.values();
+        int targetOrdinal = targetSize.ordinal();
+        /*
+            We want to find the enum value which is closed to the target ordinal.
+         */
+        int sign = ( targetSize.ordinal() > values.length/2 ? -1 : 1 );
+        for ( int offset = 1; offset < values.length; offset++ ) {
+            int nextOrdinal = targetOrdinal + offset * sign;
+            if ( nextOrdinal > 0 && nextOrdinal < values.length ) {
+                UI.ParentSize next = values[nextOrdinal];
+                for ( AutoCellSpanPolicy autoSpan : cell.autoSpans() ) {
+                    if ( autoSpan.parentSize() == next ) {
+                        return Optional.of(autoSpan);
+                    }
+                }
+            }
+            sign = -sign;
+        }
+        return Optional.empty();
+    }
+
 }

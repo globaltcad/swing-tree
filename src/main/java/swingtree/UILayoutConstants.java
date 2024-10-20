@@ -3,9 +3,9 @@ package swingtree;
 import net.miginfocom.layout.AC;
 import net.miginfocom.layout.CC;
 import net.miginfocom.layout.LC;
+import swingtree.layout.FlowCell;
 import swingtree.layout.MigAddConstraint;
 import swingtree.layout.AutoCellSpanPolicy;
-import swingtree.layout.HorizontalGrid;
 import swingtree.layout.LayoutConstraint;
 
 /**
@@ -163,7 +163,7 @@ public abstract class UILayoutConstants
     public static AC AC() { return new AC(); }
     public static CC CC() { return new CC(); }
 
-    public static HorizontalGrid GRID(AutoCellSpanPolicy... autoSpans ) {
-        return new HorizontalGrid(12, autoSpans);
+    public static FlowCell GRID(AutoCellSpanPolicy... autoSpans ) {
+        return new FlowCell(12, autoSpans);
     }
 }
