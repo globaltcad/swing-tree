@@ -7,6 +7,7 @@ import swingtree.api.Configurator;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.CellEditorListener;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -15,9 +16,8 @@ import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -376,7 +376,7 @@ public final class CellBuilder<C extends JComponent, E> {
                              localEntry -> _defaultRenderer.getTableCellRendererComponent(table, localEntry, isSelected, hasFocus, row, column),
                              (choice, newRenderer) -> _setRenderer(choice, entryFromModel, newRenderer),
                              CellConf.of(
-                                 findRenderer(entryFromModel),
+                                 null, findRenderer(entryFromModel),
                                  table, entryFromModel, isSelected, hasFocus, false, false, false, row, column,
                                  () -> _defaultRenderer.getTableCellRendererComponent(table, entryFromModel, isSelected, hasFocus, row, column)
                              )
@@ -401,7 +401,7 @@ public final class CellBuilder<C extends JComponent, E> {
                              localEntry -> _basicEditor.getTableCellEditorComponent(table, localEntry, isSelected, row, column),
                              (choice, newEditor) -> _setEditor(choice, entryFromModel, newEditor),
                              CellConf.of(
-                                 _loadEditor(entryFromModel),
+                                 null, _loadEditor(entryFromModel),
                                  table, entryFromModel, isSelected, true, true, false, false, row, column,
                                  () -> _basicEditor.getTableCellEditorComponent(table, entryFromModel, isSelected, row, column)
                              )
@@ -427,7 +427,7 @@ public final class CellBuilder<C extends JComponent, E> {
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          (choice, newRenderer) -> _setRenderer(choice, entryFromModel, newRenderer),
                          CellConf.of(
-                             findRenderer(entryFromModel),
+                             null, findRenderer(entryFromModel),
                              tree, entryFromModel, selected, hasFocus, false, expanded, leaf, row, 0,
                              () -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, entryFromModel, selected, expanded, leaf, row, hasFocus)
                          )
@@ -449,7 +449,7 @@ public final class CellBuilder<C extends JComponent, E> {
                          localEntry -> _basicEditor.getTreeCellEditorComponent(tree, localEntry, isSelected, expanded, leaf, row),
                         (choice, newEditor) -> _setEditor(choice, entryFromModel, newEditor),
                          CellConf.of(
-                             _loadEditor(entryFromModel),
+                             null, _loadEditor(entryFromModel),
                              tree, entryFromModel, isSelected,
                              true, true, expanded, leaf, row, 0,
                              () -> _basicEditor.getTreeCellEditorComponent(tree, entryFromModel, isSelected, expanded, leaf, row)
@@ -496,11 +496,15 @@ public final class CellBuilder<C extends JComponent, E> {
     private class SimpleListCellRenderer<O extends C> implements ListCellRenderer<Object>
     {
         private final O _component;
-        private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
+        private final ListCellRenderer<Object> _defaultRenderer;
 
 
         private SimpleListCellRenderer(O component) {
             _component = Objects.requireNonNull(component);
+            if ( component instanceof JComboBox )
+                _defaultRenderer = new BasicComboBoxRenderer.UIResource();
+            else
+                _defaultRenderer = new DefaultListCellRenderer.UIResource();
         }
 
         @Override
@@ -517,6 +521,7 @@ public final class CellBuilder<C extends JComponent, E> {
                 return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
                 CellConf<O, Object> cell = CellConf.of(
+                                                        list,
                                                         findRenderer(value),
                                                         _component, value, isSelected,
                                                         hasFocus, false, false, false, row, 0,
@@ -563,7 +568,7 @@ public final class CellBuilder<C extends JComponent, E> {
             JComboBox<?> comboBox = (JComboBox<?>) _component;
 
             CellConf<JComboBox<?>, Object> cell = CellConf.of(
-                null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
+                null, null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
             );
             List<Configurator<CellConf<C, ?>>> interpreter = _findAll(_rendererLookup);
             if (interpreter.isEmpty())
@@ -731,7 +736,17 @@ public final class CellBuilder<C extends JComponent, E> {
             Color bg = null;
             Color fg = null;
 
-            if ( cell.getHost() instanceof JList ) {
+            if ( cell.getHost() instanceof JComboBox && cell.getListView().isPresent() ) {
+                JList<?> list = cell.getListView().get();
+                if (cell.isSelected()) {
+                    bg = list.getSelectionBackground();
+                    fg = list.getSelectionForeground();
+                }
+                else {
+                    bg = list.getBackground();
+                    fg = list.getForeground();
+                }
+            } else if ( cell.getHost() instanceof JList ) {
                 JList<?> jList = (JList<?>) cell.getHost();
                 bg = jList.getSelectionBackground();
                 fg = jList.getSelectionForeground();
@@ -739,9 +754,7 @@ public final class CellBuilder<C extends JComponent, E> {
                     bg = UIManager.getColor("List.selectionBackground");
                 if ( fg == null )
                     fg = UIManager.getColor("List.selectionForeground");
-            }
-
-            if ( cell.getHost() instanceof JTable ) {
+            } else if ( cell.getHost() instanceof JTable ) {
                 JTable jTable = (JTable) cell.getHost();
                 bg = jTable.getSelectionBackground();
                 fg = jTable.getSelectionForeground();
