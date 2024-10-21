@@ -165,22 +165,8 @@ public abstract class UILayoutConstants
     public static AC AC() { return new AC(); }
     public static CC CC() { return new CC(); }
 
-    public static FlowCellConf AUTO_SPAN(AutoCellSpanPolicy... autoSpans ) {
-        return new FlowCellConf(autoSpans);
-    }
-
-    public static FlowCellConf AUTO_SPAN(Configurator<FlowCellConf> configurator) {
-        FlowCellConf flowCellConf = new FlowCellConf(new AutoCellSpanPolicy[0]);
-        try {
-            return configurator.configure(flowCellConf);
-        } catch (Exception e) {
-            log.error(
-                    "Error configuring '"+ FlowCellConf.class.getSimpleName()+"' instance " +
-                    "for '"+ ResponsiveGridFlowLayout.class.getSimpleName() + "' layout.",
-                    e
-            );
-        }
-        return flowCellConf;
+    public static FlowCell AUTO_SPAN(Configurator<FlowCellConf> configurator) {
+        return new FlowCell(configurator);
     }
 
 }

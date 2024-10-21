@@ -4,13 +4,13 @@ import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 
 @Immutable
-public final class AutoCellSpanPolicy {
+public final class FlowCellSpanPolicy {
 
-    public static AutoCellSpanPolicy of(
+    public static FlowCellSpanPolicy of(
         UI.ParentSize parentSize,
         int cellsToFill
     ) {
-        return new AutoCellSpanPolicy(parentSize, cellsToFill);
+        return new FlowCellSpanPolicy(parentSize, cellsToFill);
     }
 
 
@@ -18,7 +18,7 @@ public final class AutoCellSpanPolicy {
     private final int _cellsToFill;
 
 
-    public AutoCellSpanPolicy(
+    public FlowCellSpanPolicy(
         UI.ParentSize parentSize,
         int cellsToFill
     ) {

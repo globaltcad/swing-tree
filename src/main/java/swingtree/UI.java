@@ -14,7 +14,7 @@ import swingtree.api.model.TableMapDataSource;
 import swingtree.components.JBox;
 import swingtree.components.JSplitButton;
 import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
-import swingtree.layout.AutoCellSpanPolicy;
+import swingtree.layout.FlowCellSpanPolicy;
 import swingtree.style.*;
 
 import javax.swing.*;
@@ -1339,12 +1339,12 @@ public final class UI extends UIFactoryMethods
     public enum ParentSize {
         NONE, VERY_SMALL, SMALL, MEDIUM, LARGE, VERY_LARGE, OVERSIZE;
 
-        public AutoCellSpanPolicy span(int cellsToSpan ) {
+        public FlowCellSpanPolicy span(int cellsToSpan ) {
             if ( cellsToSpan < 1 ) {
                 log.warn("Invalid number of cells to span: " + cellsToSpan);
                 cellsToSpan = 1;
             }
-            return AutoCellSpanPolicy.of(this, cellsToSpan);
+            return FlowCellSpanPolicy.of(this, cellsToSpan);
         }
     }
 

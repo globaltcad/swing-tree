@@ -486,11 +486,11 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             if (m instanceof JComponent) {
                 JComponent jc = (JComponent) m;
                 AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
-                if (addConstraint instanceof FlowCellConf) {
-                    FlowCellConf cellConf = (FlowCellConf) addConstraint;
-                    optionalCell = cellFromCellConf(cellConf, jc, componentsInRow, maxwidth, generalMaxWidth);
+                if (addConstraint instanceof FlowCell) {
+                    FlowCell cell = (FlowCell) addConstraint;
+                    optionalCell = cellFromCellConf(cell, jc, componentsInRow, maxwidth, generalMaxWidth);
                     rowSizeIncrease += optionalCell.flatMap(Cell::autoSpan)
-                                                    .map(AutoCellSpanPolicy::cellsToFill)
+                                                    .map(FlowCellSpanPolicy::cellsToFill)
                                                     .orElse(0);
                 }
             }
@@ -584,7 +584,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
     }
 
     public Optional<Cell> cellFromCellConf(
-            FlowCellConf cell,
+            FlowCell flowCell,
             Component child,
             AtomicInteger componentCounter,
             int maxWidth,
@@ -614,7 +614,8 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             currentParentSizeCategory = UI.ParentSize.OVERSIZE;
         }
 
-        Optional<AutoCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cell, currentParentSizeCategory);
+        FlowCellConf cell = flowCell.fetchConfig(currentParentSizeCategory);
+        Optional<FlowCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cell, currentParentSizeCategory);
         return autoSpan.map(autoCellSpanPolicy -> new Cell(child, componentCounter, autoCellSpanPolicy));
     }
 
@@ -624,7 +625,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             return Optional.empty();
         }
 
-        Optional<AutoCellSpanPolicy> autoSpan = cell.autoSpan();
+        Optional<FlowCellSpanPolicy> autoSpan = cell.autoSpan();
         if (!autoSpan.isPresent()) {
             return Optional.empty();
         }
@@ -636,8 +637,8 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         return Optional.of(newSize);
     }
 
-    private static Optional<AutoCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, UI.ParentSize targetSize ) {
-        for ( AutoCellSpanPolicy autoSpan : cell.autoSpans() ) {
+    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, UI.ParentSize targetSize ) {
+        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
             if ( autoSpan.parentSize() == targetSize ) {
                 return Optional.of(autoSpan);
             }
@@ -654,7 +655,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             int nextOrdinal = targetOrdinal + offset * sign;
             if ( nextOrdinal > 0 && nextOrdinal < values.length ) {
                 UI.ParentSize next = values[nextOrdinal];
-                for ( AutoCellSpanPolicy autoSpan : cell.autoSpans() ) {
+                for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
                     if ( autoSpan.parentSize() == next ) {
                         return Optional.of(autoSpan);
                     }
@@ -668,12 +669,12 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
     private static final class Cell {
 
         final Component component;
-        final @Nullable AutoCellSpanPolicy autoSpan;
+        final @Nullable FlowCellSpanPolicy autoSpan;
 
         private AtomicInteger numberOfComponents;
 
 
-        Cell(Component component, AtomicInteger componentCounter, @Nullable AutoCellSpanPolicy autoSpan) {
+        Cell(Component component, AtomicInteger componentCounter, @Nullable FlowCellSpanPolicy autoSpan) {
             this.component          = component;
             this.numberOfComponents = componentCounter;
             this.autoSpan           = autoSpan;
@@ -683,7 +684,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             return component;
         }
 
-        public Optional<AutoCellSpanPolicy> autoSpan() {
+        public Optional<FlowCellSpanPolicy> autoSpan() {
             return Optional.ofNullable(autoSpan);
         }
 
