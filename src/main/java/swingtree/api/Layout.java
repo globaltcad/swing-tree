@@ -473,13 +473,13 @@ public interface Layout
             int verticalGap   = _vgap;
 
             boolean alignmentChanged     = alignment != flowLayout.getAlignment();
-            boolean horizontalGapChanged = horizontalGap != flowLayout.getHgap();
-            boolean verticalGapChanged   = verticalGap   != flowLayout.getVgap();
+            boolean horizontalGapChanged = horizontalGap != flowLayout.horizontalGap();
+            boolean verticalGapChanged   = verticalGap   != flowLayout.verticalGapSize();
 
             if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {
                 flowLayout.setAlignment(alignment);
-                flowLayout.setHgap(horizontalGap);
-                flowLayout.setVgap(verticalGap);
+                flowLayout.setHorizontalGapSize(horizontalGap);
+                flowLayout.setVerticalGapSize(verticalGap);
                 component.revalidate();
             }
         }
