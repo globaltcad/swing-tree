@@ -1588,11 +1588,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFlowLayout( UI.HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
-        return this.withLayout(
-                    alignment.forFlowLayout()
-                            .map( ResponsiveGridFlowLayout::new )
-                            .orElse(new ResponsiveGridFlowLayout())
-                );
+        return this.withLayout(new ResponsiveGridFlowLayout(alignment));
     }
 
     /**
@@ -1611,11 +1607,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFlowLayout( UI.HorizontalAlignment alignment, int hgap, int vgap ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
-        return this.withLayout(
-                    alignment.forFlowLayout()
-                                .map( a -> new ResponsiveGridFlowLayout(a, hgap, vgap) )
-                                .orElse(new ResponsiveGridFlowLayout(FlowLayout.CENTER, hgap, vgap))
-                );
+        return this.withLayout(new ResponsiveGridFlowLayout(alignment, hgap, vgap));
     }
 
     /**

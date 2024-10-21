@@ -3,10 +3,10 @@ package swingtree;
 import net.miginfocom.layout.AC;
 import net.miginfocom.layout.CC;
 import net.miginfocom.layout.LC;
-import swingtree.layout.FlowCell;
-import swingtree.layout.MigAddConstraint;
-import swingtree.layout.AutoCellSpanPolicy;
-import swingtree.layout.LayoutConstraint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
+import swingtree.layout.*;
 
 /**
  *  Essentially just a namespace for static layout constants for
@@ -77,6 +77,8 @@ import swingtree.layout.LayoutConstraint;
  */
 public abstract class UILayoutConstants
 {
+    private static final Logger log = LoggerFactory.getLogger(UILayoutConstants.class);
+
     UILayoutConstants() { throw new UnsupportedOperationException(); }
 
     // Common Mig layout constants:
@@ -163,7 +165,22 @@ public abstract class UILayoutConstants
     public static AC AC() { return new AC(); }
     public static CC CC() { return new CC(); }
 
-    public static FlowCell GRID(AutoCellSpanPolicy... autoSpans ) {
-        return new FlowCell(autoSpans);
+    public static FlowCellConf AUTO_SPAN(AutoCellSpanPolicy... autoSpans ) {
+        return new FlowCellConf(autoSpans);
     }
+
+    public static FlowCellConf AUTO_SPAN(Configurator<FlowCellConf> configurator) {
+        FlowCellConf flowCellConf = new FlowCellConf(new AutoCellSpanPolicy[0]);
+        try {
+            return configurator.configure(flowCellConf);
+        } catch (Exception e) {
+            log.error(
+                    "Error configuring '"+ FlowCellConf.class.getSimpleName()+"' instance " +
+                    "for '"+ ResponsiveGridFlowLayout.class.getSimpleName() + "' layout.",
+                    e
+            );
+        }
+        return flowCellConf;
+    }
+
 }

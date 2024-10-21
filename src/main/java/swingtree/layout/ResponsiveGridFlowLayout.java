@@ -21,17 +21,17 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
     private static final int NUMBER_OF_COLUMNS = 12;
     private static final Logger log = LoggerFactory.getLogger(ResponsiveGridFlowLayout.class);
 
-    private int     _alignmentCode;
-    private int     _horizontalGapSize;
-    private int     _verticalGapSize;
-    private boolean _alignOnBaseline;
+    private UI.HorizontalAlignment _alignmentCode;
+    private int                    _horizontalGapSize;
+    private int                    _verticalGapSize;
+    private boolean                _alignOnBaseline;
 
     /**
      * Constructs a new {@code FlowLayout} with a centered alignment and a
      * default 5-unit horizontal and vertical gap.
      */
     public ResponsiveGridFlowLayout() {
-        this(FlowLayout.CENTER, 5, 5);
+        this(UI.HorizontalAlignment.CENTER, 5, 5);
     }
 
     /**
@@ -44,7 +44,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      *
      * @param align the alignment value
      */
-    public ResponsiveGridFlowLayout(int align) {
+    public ResponsiveGridFlowLayout(UI.HorizontalAlignment align) {
         this(align, 5, 5);
     }
 
@@ -66,13 +66,13 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      *              borders of the {@code Container}
      */
     public ResponsiveGridFlowLayout(
-        int align,
+        UI.HorizontalAlignment align,
         int horizontalGapSize,
         int verticalGapSize
     ) {
+        _alignmentCode     = align;
         _horizontalGapSize = horizontalGapSize;
-        _verticalGapSize = verticalGapSize;
-        setAlignment(align);
+        _verticalGapSize   = verticalGapSize;
     }
 
     /**
@@ -85,7 +85,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @return the alignment value for this layout
      * @see #setAlignment
      */
-    public int getAlignment() {
+    public UI.HorizontalAlignment getAlignment() {
         return _alignmentCode;
     }
 
@@ -103,7 +103,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param align one of the alignment values shown above
      * @see #getAlignment()
      */
-    public void setAlignment(int align) {
+    public void setAlignment(UI.HorizontalAlignment align) {
         _alignmentCode = align;
     }
 
@@ -132,7 +132,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @see ResponsiveGridFlowLayout#horizontalGap()
      */
     public void setHorizontalGapSize(int size) {
-        this._horizontalGapSize = size;
+        _horizontalGapSize = size;
     }
 
     /**
@@ -335,18 +335,18 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                                @Nullable int[] descent) {
         int hgap = UI.scale(_horizontalGapSize);
         switch (_alignmentCode) {
-            case FlowLayout.LEFT:
+            case LEFT:
                 x += ltr ? 0 : width;
                 break;
-            case FlowLayout.CENTER:
+            case CENTER:
                 x += width / 2;
                 break;
-            case FlowLayout.RIGHT:
+            case RIGHT:
                 x += ltr ? width : 0;
                 break;
-            case FlowLayout.LEADING:
+            case LEADING:
                 break;
-            case FlowLayout.TRAILING:
+            case TRAILING:
                 x += width;
                 break;
         }
@@ -405,7 +405,6 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     public void layoutContainer(Container target) {
         synchronized (target.getTreeLock()) {
-            //refreshChildStylesOf(target);
             final int hgap = UI.scale(_horizontalGapSize);
             final int vgap = UI.scale(_verticalGapSize);
             final Insets insets = target.getInsets();
@@ -432,7 +431,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                 if (m.isVisible()) {
                     Dimension d = m.getPreferredSize();
                     try {
-                        d = _applyCellConf(cells[i], maxwidth).orElse(d);
+                        d = _dimensionsFromCellConf(cells[i], maxwidth).orElse(d);
                     } catch (Exception e) {
                         log.error("Error applying cell configuration", e);
                     }
@@ -487,9 +486,9 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             if (m instanceof JComponent) {
                 JComponent jc = (JComponent) m;
                 AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
-                if (addConstraint instanceof FlowCell) {
-                    FlowCell cellConf = (FlowCell) addConstraint;
-                    optionalCell = autoSpanFromCellConf(cellConf, jc, componentsInRow, maxwidth, generalMaxWidth);
+                if (addConstraint instanceof FlowCellConf) {
+                    FlowCellConf cellConf = (FlowCellConf) addConstraint;
+                    optionalCell = cellFromCellConf(cellConf, jc, componentsInRow, maxwidth, generalMaxWidth);
                     rowSizeIncrease += optionalCell.flatMap(Cell::autoSpan)
                                                     .map(AutoCellSpanPolicy::cellsToFill)
                                                     .orElse(0);
@@ -535,19 +534,19 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         int hgap = UI.scale(_horizontalGapSize);
         int vgap = UI.scale(_verticalGapSize);
         switch (_alignmentCode) {
-            case FlowLayout.LEFT:
+            case LEFT:
                 str = ",align=left";
                 break;
-            case FlowLayout.CENTER:
+            case CENTER:
                 str = ",align=center";
                 break;
-            case FlowLayout.RIGHT:
+            case RIGHT:
                 str = ",align=right";
                 break;
-            case FlowLayout.LEADING:
+            case LEADING:
                 str = ",align=leading";
                 break;
-            case FlowLayout.TRAILING:
+            case TRAILING:
                 str = ",align=trailing";
                 break;
         }
@@ -584,8 +583,8 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     }
 
-    public Optional<Cell> autoSpanFromCellConf(
-            FlowCell cell,
+    public Optional<Cell> cellFromCellConf(
+            FlowCellConf cell,
             Component child,
             AtomicInteger componentCounter,
             int maxWidth,
@@ -619,7 +618,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         return autoSpan.map(autoCellSpanPolicy -> new Cell(child, componentCounter, autoCellSpanPolicy));
     }
 
-    private Optional<Dimension> _applyCellConf( Cell cell, int maxWidth ) {
+    private Optional<Dimension> _dimensionsFromCellConf( Cell cell, int maxWidth ) {
 
         if ( maxWidth <= 0 ) {
             return Optional.empty();
@@ -637,7 +636,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         return Optional.of(newSize);
     }
 
-    private static Optional<AutoCellSpanPolicy> _findNextBestAutoSpan(FlowCell cell, UI.ParentSize targetSize ) {
+    private static Optional<AutoCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, UI.ParentSize targetSize ) {
         for ( AutoCellSpanPolicy autoSpan : cell.autoSpans() ) {
             if ( autoSpan.parentSize() == targetSize ) {
                 return Optional.of(autoSpan);
