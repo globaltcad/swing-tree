@@ -2,12 +2,15 @@
 package swingtree.layout;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.UI;
 
 import javax.swing.JComponent;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A flow layout arranges components in a directional flow, much
@@ -16,6 +19,7 @@ import java.util.Optional;
 public class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     private static final int NUMBER_OF_COLUMNS = 12;
+    private static final Logger log = LoggerFactory.getLogger(ResponsiveGridFlowLayout.class);
 
     int newAlign;
 
@@ -433,16 +437,17 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
     public void layoutContainer(Container target) {
         synchronized (target.getTreeLock()) {
             //refreshChildStylesOf(target);
-            int hgap = UI.scale(this.hgap);
-            int vgap = UI.scale(this.vgap);
-            Insets insets = target.getInsets();
-            int maxwidth = target.getWidth() - (insets.left + insets.right + hgap * 2);
-            int nmembers = target.getComponentCount();
+            final int hgap = UI.scale(this.hgap);
+            final int vgap = UI.scale(this.vgap);
+            final Insets insets = target.getInsets();
+            final int maxwidth = target.getWidth() - (insets.left + insets.right + hgap * 2);
+            final int nmembers = target.getComponentCount();
             int x = 0, y = insets.top + vgap;
             int rowh = 0, start = 0;
 
-            boolean ltr = target.getComponentOrientation().isLeftToRight();
+            Cell[] cells = _createCells(target, nmembers, maxwidth);
 
+            boolean ltr = target.getComponentOrientation().isLeftToRight();
             boolean useBaseline = getAlignOnBaseline();
             int[] ascent = null;
             int[] descent = null;
@@ -452,32 +457,14 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                 descent = new int[nmembers];
             }
 
-            ToBeMoved[] toBeMoved = new ToBeMoved[nmembers];
             for (int i = 0; i < nmembers; i++) {
-                Component m = target.getComponent(i);
-                if (m instanceof JComponent) {
-                    JComponent jc = (JComponent) m;
-                    AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
-                    if (addConstraint instanceof FlowCell) {
-                        FlowCell cell = (FlowCell) addConstraint;
-                        toBeMoved[i] = autoSpanFromCellConf(cell, target, jc);
-                    }
-                    else {
-                        toBeMoved[i] = new ToBeMoved(m, null);
-                    }
-                }
-                else
-                    toBeMoved[i] = new ToBeMoved(m, null);
-            }
-
-            for (int i = 0; i < nmembers; i++) {
-                Component m = toBeMoved[i].component();
+                Component m = cells[i].component();
                 if (m.isVisible()) {
                     Dimension d = m.getPreferredSize();
                     try {
-                        d = applyCellConf(target, toBeMoved[i]).orElse(d);
+                        d = _applyCellConf(cells[i], maxwidth).orElse(d);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error applying cell configuration", e);
                     }
                     m.setSize(d.width, d.height);
 
@@ -512,6 +499,58 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             moveComponents(target, insets.left + hgap, y, maxwidth - x, rowh,
                     start, nmembers, ltr, useBaseline, ascent, descent);
         }
+    }
+
+    private Cell[] _createCells(
+            Container target,
+            int nmembers,
+            int maxwidth
+    ) {
+        Cell[] cells = new Cell[nmembers];
+        AtomicInteger componentsInRow = new AtomicInteger(0);
+        double currentRowSize = 0;
+        for (int i = 0; i < nmembers; i++) {
+            Component m = target.getComponent(i);
+            Optional<Cell> optionalCell = Optional.empty();
+            double rowSizeIncrease = 0;
+            if (m instanceof JComponent) {
+                JComponent jc = (JComponent) m;
+                AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
+                if (addConstraint instanceof FlowCell) {
+                    FlowCell cellConf = (FlowCell) addConstraint;
+                    optionalCell = autoSpanFromCellConf(cellConf, target, jc, componentsInRow);
+                    rowSizeIncrease += optionalCell.flatMap(Cell::autoSpan)
+                            .map(AutoCellSpanPolicy::cellsToFill)
+                            .orElse(0);
+                }
+            }
+            if ( !optionalCell.isPresent() ) {
+                double prefComponentWidth = m.getPreferredSize().getWidth();
+                if ( maxwidth > 0 && prefComponentWidth > 0 ) {
+                    rowSizeIncrease += NUMBER_OF_COLUMNS * prefComponentWidth / maxwidth;
+                }
+            }
+
+            cells[i] = optionalCell.orElse(new Cell(m, componentsInRow, null));
+
+            double newRowSize = currentRowSize + rowSizeIncrease;
+            if ( newRowSize < NUMBER_OF_COLUMNS ) {
+                // Still room in the row for new components...
+                componentsInRow.set(componentsInRow.get() + 1);
+                currentRowSize += rowSizeIncrease;
+            } else if ( Math.round(newRowSize) == NUMBER_OF_COLUMNS ) {
+                // We have a new row with no leftovers.
+                componentsInRow.set(componentsInRow.get() + 1);
+                componentsInRow = new AtomicInteger(0);
+                currentRowSize = 0;
+            } else if ( newRowSize > NUMBER_OF_COLUMNS ) {
+                // The row does not fit the new component. We need to start a new row.
+                componentsInRow = new AtomicInteger(1);
+                cells[i].setNumberOfComponents(componentsInRow);
+                currentRowSize = rowSizeIncrease; // We have a new row with the current component.
+            }
+        }
+        return cells;
     }
 
     /**
@@ -598,13 +637,18 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     }
 
-    private static final class ToBeMoved {
+    private static final class Cell {
+
         final Component component;
         final @Nullable AutoCellSpanPolicy autoSpan;
 
-        ToBeMoved(Component component, @Nullable AutoCellSpanPolicy autoSpan) {
-            this.component = component;
-            this.autoSpan = autoSpan;
+        private AtomicInteger numberOfComponents;
+
+
+        Cell(Component component, AtomicInteger componentCounter, @Nullable AutoCellSpanPolicy autoSpan) {
+            this.component          = component;
+            this.numberOfComponents = componentCounter;
+            this.autoSpan           = autoSpan;
         }
 
         public Component component() {
@@ -614,15 +658,28 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         public Optional<AutoCellSpanPolicy> autoSpan() {
             return Optional.ofNullable(autoSpan);
         }
+
+        public int numberOfComponentsInRow() {
+            return numberOfComponents.get();
+        }
+
+        public void setNumberOfComponents(AtomicInteger numberOfComponents) {
+            this.numberOfComponents = numberOfComponents;
+        }
     }
 
-    public ToBeMoved autoSpanFromCellConf( FlowCell cell, Container parent, Component child ) {
+    public Optional<Cell> autoSpanFromCellConf(
+            FlowCell cell,
+            Container parent,
+            Component child,
+            AtomicInteger componentCounter
+    ) {
 
         int parentPrefWidth = parent.getPreferredSize().width;
         int parentWidth = parent.getWidth();
 
         if ( parentPrefWidth <= 0 ) {
-            return new ToBeMoved(child, null);
+            return Optional.empty();
         }
         // How much preferred width the parent actually fills:
         double howFull = parentWidth / (double) parentPrefWidth;
@@ -646,36 +703,24 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
         }
 
         Optional<AutoCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cell, currentParentSizeCategory);
-        if (!autoSpan.isPresent()) {
-            return new ToBeMoved(child, null);
-        }
-        else {
-            return new ToBeMoved(child, autoSpan.get());
-        }
+        return autoSpan.map(autoCellSpanPolicy -> new Cell(child, componentCounter, autoCellSpanPolicy));
     }
 
-    public Optional<Dimension> applyCellConf( Container parent, ToBeMoved toBeMoved ) {
+    private Optional<Dimension> _applyCellConf(Cell cell, int maxWidth ) {
 
-        Insets insets = parent.getInsets();
-        int unusableWidth = insets.left + insets.right;
-        unusableWidth += this.getHgap() * (NUMBER_OF_COLUMNS - 1);
-
-        int parentPrefWidth = parent.getPreferredSize().width - unusableWidth;
-        int parentWidth = parent.getWidth() - unusableWidth;
-
-        if ( parentPrefWidth <= 0 ) {
+        if ( maxWidth <= 0 ) {
             return Optional.empty();
         }
 
-        Optional<AutoCellSpanPolicy> autoSpan = toBeMoved.autoSpan();
+        Optional<AutoCellSpanPolicy> autoSpan = cell.autoSpan();
         if (!autoSpan.isPresent()) {
             return Optional.empty();
         }
 
         int cellsToFill = autoSpan.get().cellsToFill();
-        int width = (parentWidth * cellsToFill) / NUMBER_OF_COLUMNS;
+        int width = (maxWidth * cellsToFill) / NUMBER_OF_COLUMNS;
 
-        Dimension newSize = new Dimension(width, toBeMoved.component().getPreferredSize().height);
+        Dimension newSize = new Dimension(width, cell.component().getPreferredSize().height);
         return Optional.of(newSize);
     }
 
