@@ -6,11 +6,9 @@ import org.slf4j.LoggerFactory;
 import swingtree.api.Configurator;
 import swingtree.layout.Size;
 
-import javax.swing.JComponent;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -60,6 +58,7 @@ public final class CellConf<C extends JComponent, V>
     private static final Logger log = LoggerFactory.getLogger(CellConf.class);
 
     static <C extends JComponent, V> CellConf<C, V> of(
+        @Nullable JList     jListIfInvolved,
         @Nullable Component lastRenderer,
         C                   owner,
         @Nullable V         entry,
@@ -74,6 +73,7 @@ public final class CellConf<C extends JComponent, V>
     ) {
         List<String> toolTips = new ArrayList<>();
         return new CellConf<>(
+            jListIfInvolved,
             owner,
             entry,
             isSelected,
@@ -90,6 +90,7 @@ public final class CellConf<C extends JComponent, V>
         );
     }
 
+    private final @Nullable JList<?>  jListIfInvolved;
     private final C                   parent;
     private final @Nullable V         entry;
     private final boolean             isSelected;
@@ -106,20 +107,22 @@ public final class CellConf<C extends JComponent, V>
 
 
     private CellConf(
-        C                   host,
-        @Nullable V         entry,
-        boolean             isSelected,
-        boolean             hasFocus,
-        boolean             isEditing,
-        boolean             isExpanded,
-        boolean             isLeaf,
-        int                 row,
-        int                 column,
-        @Nullable Component view,
-        List<String>        toolTips,
-        @Nullable Object    presentationEntry,
-        Supplier<Component> defaultRenderSource
+            @Nullable JList     jListIfInvolved,
+            C                   host,
+            @Nullable V         entry,
+            boolean             isSelected,
+            boolean             hasFocus,
+            boolean             isEditing,
+            boolean             isExpanded,
+            boolean             isLeaf,
+            int                 row,
+            int                 column,
+            @Nullable Component view,
+            List<String>        toolTips,
+            @Nullable Object    presentationEntry,
+            Supplier<Component> defaultRenderSource
     ) {
+        this.jListIfInvolved     = jListIfInvolved;
         this.parent              = Objects.requireNonNull(host);
         this.entry               = entry;
         this.isSelected          = isSelected;
@@ -137,12 +140,37 @@ public final class CellConf<C extends JComponent, V>
 
     /**
      *  Returns the parent/host of this cell, i.e. the component
-     *  which contains this cell, like a table, list or drop down.
+     *  which contains this cell,
+     *  like a {@link JComboBox}, {@link JTable} or {@link JList}
      *
-     * @return The owner of this cell, typically a table, list or drop down.
+     * @return The owner of this cell, typically a table, list or combo box.
      */
     public C getHost() {
         return parent;
+    }
+
+    /**
+     *  Some host components (see {@link #getHost()}, use a
+     *  {@link JList} in their look and feel to render cells.
+     *  This is the case for the {@link JComboBox} component, which
+     *  has a drop-down popup that is rendered through an internal
+     *  {@link JList} which you can access through this method.<br>
+     *  <p>
+     *      But note that this {@link JList} is returned through an {@link Optional}
+     *      because it may not exist for other host components like a {@link JTable} or {@link JTree}.
+     *      In case of this cell being directly used for a {@link JList}, through
+     *      {@link UIForList#withCell(Configurator)} or {@link UIForList#withCells(Configurator)},
+     *      then both {@link #getHost()} and this return the same {@link JList} instance.
+     *  </p>
+     *
+     * @return An optional containing a {@link JList} used for rendering this cell
+     *          if this is called by a {@link ListCellRenderer}, and an {@link Optional#empty()} otherwise.
+     */
+    public Optional<JList<?>> getListView() {
+        if ( parent instanceof JList )
+            return Optional.of((JList<?>)parent);
+        else
+            return Optional.ofNullable(jListIfInvolved);
     }
 
     /**
@@ -470,6 +498,7 @@ public final class CellConf<C extends JComponent, V>
 
     public CellConf<C, V> _withRenderer(@Nullable Component component ) {
         return new CellConf<>(
+            jListIfInvolved,
             parent,
             entry,
             isSelected,
@@ -498,6 +527,7 @@ public final class CellConf<C extends JComponent, V>
         ArrayList<String> newToolTips = new ArrayList<>(toolTips);
         newToolTips.add(toolTip);
         return new CellConf<>(
+           jListIfInvolved,
             parent,
             entry,
             isSelected,
@@ -546,6 +576,7 @@ public final class CellConf<C extends JComponent, V>
      */
     public CellConf<C, V> presentationEntry( @Nullable Object toBeShown ) {
         return new CellConf<>(
+           jListIfInvolved,
             parent,
             entry,
             isSelected,
