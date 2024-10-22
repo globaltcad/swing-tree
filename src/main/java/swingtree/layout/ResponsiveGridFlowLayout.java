@@ -77,10 +77,10 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     /**
      * Gets the alignment for this layout.
-     * Possible values are {@code FlowLayout.LEFT},
-     * {@code FlowLayout.RIGHT}, {@code FlowLayout.CENTER},
-     * {@code FlowLayout.LEADING},
-     * or {@code FlowLayout.TRAILING}.
+     * Possible values are {@code UI.HorizontalAlignment.LEFT},
+     * {@code UI.HorizontalAlignment.RIGHT}, {@code UI.HorizontalAlignment.CENTER},
+     * {@code UI.HorizontalAlignment.LEADING},
+     * or {@code UI.HorizontalAlignment.TRAILING}.
      *
      * @return the alignment value for this layout
      * @see #setAlignment
@@ -93,11 +93,11 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * Sets the alignment for this layout.
      * Possible values are
      * <ul>
-     * <li>{@code FlowLayout.LEFT}
-     * <li>{@code FlowLayout.RIGHT}
-     * <li>{@code FlowLayout.CENTER}
-     * <li>{@code FlowLayout.LEADING}
-     * <li>{@code FlowLayout.TRAILING}
+     * <li>{@code UI.HorizontalAlignment.LEFT}
+     * <li>{@code UI.HorizontalAlignment.RIGHT}
+     * <li>{@code UI.HorizontalAlignment.CENTER}
+     * <li>{@code UI.HorizontalAlignment.LEADING}
+     * <li>{@code UI.HorizontalAlignment.TRAILING}
      * </ul>
      *
      * @param align one of the alignment values shown above
@@ -192,7 +192,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param name the name of the component
      * @param comp the component to be added
      */
-    public void addLayoutComponent(String name, Component comp) {
+    public void addLayoutComponent( String name, Component comp ) {
     }
 
     /**
@@ -202,7 +202,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param comp the component to remove
      * @see java.awt.Container#removeAll
      */
-    public void removeLayoutComponent(Component comp) {
+    public void removeLayoutComponent( Component comp ) {
     }
 
     /**
@@ -216,7 +216,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @see #minimumLayoutSize
      * @see java.awt.Container#getPreferredSize
      */
-    public Dimension preferredLayoutSize(Container target) {
+    public Dimension preferredLayoutSize( Container target ) {
         synchronized (target.getTreeLock()) {
             Dimension dim = new Dimension(0, 0);
             int nmembers = target.getComponentCount();
@@ -268,7 +268,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @see java.awt.Container
      * @see java.awt.Container#doLayout
      */
-    public Dimension minimumLayoutSize(Container target) {
+    public Dimension minimumLayoutSize( Container target ) {
         synchronized (target.getTreeLock()) {
             boolean useBaseline = getAlignOnBaseline();
             Dimension dim = new Dimension(0, 0);
@@ -397,7 +397,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * <i>visible</i> component take
      * its preferred size by reshaping the components in the
      * target container in order to satisfy the alignment of
-     * this {@code FlowLayout} object.
+     * this layout manager.
      *
      * @param target the specified component being laid out
      * @see Container
@@ -550,7 +550,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                 str = ",align=trailing";
                 break;
         }
-        return getClass().getName() + "[hgap=" + hgap + ",vgap=" + vgap + str + "]";
+        return getClass().getName() + "[horizontalGap=" + hgap + ",verticalGap=" + vgap + str + "]";
     }
 
     @Override
@@ -598,7 +598,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         double howFull = maxWidth / (double) generalMaxWidth;
         howFull = Math.max(0, howFull);
 
-        UI.ParentSize currentParentSizeCategory = UI.ParentSize.NONE;
+        UI.ParentSize currentParentSizeCategory;
         if ( howFull <= 0 ) {
             currentParentSizeCategory = UI.ParentSize.NONE;
         } else if (howFull < 1/5d) {

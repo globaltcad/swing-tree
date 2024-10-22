@@ -165,7 +165,53 @@ public abstract class UILayoutConstants
     public static AC AC() { return new AC(); }
     public static CC CC() { return new CC(); }
 
-    public static FlowCell AUTO_SPAN(Configurator<FlowCellConf> configurator) {
+    /**
+     *  A factory method for creating an {@link swingtree.layout.AddConstraint} of the
+     *  {@link swingtree.layout.FlowCell} type, that is used to define at which parent size category
+     *  how many cells the component should span as part of a {@link swingtree.layout.ResponsiveGridFlowLayout}
+     *  layout configuration.<br>
+     *  <p>
+     *  Here is an example of how this factory method might be used
+     *  as part of a larger UI declaration:
+     *  <pre>{@code
+     *    UI.panel().withPrefSize(400, 300)
+     *    .withFlowLayout()
+     *    .add(UI.AUTO_SPAN( it->it.small(12).medium(6).large(8) ),
+     *         html("A red cell").withStyle(it->it
+     *             .backgroundColor(UI.Color.RED)
+     *         )
+     *    )
+     *    .add(UI.AUTO_SPAN( it->it.small(12).medium(6).large(4) ),
+     *         html("a green cell").withStyle(it->it
+     *             .backgroundColor(Color.GREEN)
+     *         )
+     *    )
+     *  }</pre>
+     *  In the above example, the {@code it} parameter of the {@code Configurator}
+     *  is an instance of the {@link FlowCellConf} class, which defines cell span sizes
+     *  for different parent size categories.<br>
+     *  These parent size categories are determined by the width of the parent container
+     *  compared to its preferred width.<br>
+     *  So a parent is considered larger if its width is closer to its preferred width
+     *  and smaller if its width is closer to 0.<br>
+     *  <p>
+     *  The {@link Configurator} passed to this method is called every time the {@link ResponsiveGridFlowLayout}
+     *  updates the layout of the parent container.
+     *  This allows it to determine the number of cells a component should span dynamically.<br>
+     *  <p>
+     *  The {@link swingtree.UIForAnySwing#withFlowLayout()} creates the necessary {@link ResponsiveGridFlowLayout}
+     *  and attaches it to the panel.<br>
+     *  <p><b>
+     *      Note that a {@link ResponsiveGridFlowLayout} is required for the {@link FlowCell} configuration
+     *      to have any effect. The {@link FlowCell} configuration is not compatible with other layout managers
+     *      like the {@link net.miginfocom.swing.MigLayout}.
+     *  </b>
+     * @param configurator A {@link swingtree.api.Configurator} that configures a {@link swingtree.layout.FlowCellConf} instance.
+     * @return An {@link swingtree.layout.FlowCell} instance containing the responsive cell span
+     *         configuration for a component that is part of a parent component with
+     *         a {@link swingtree.layout.ResponsiveGridFlowLayout} layout manager.
+     */
+    public static FlowCell AUTO_SPAN( Configurator<FlowCellConf> configurator ) {
         return new FlowCell(configurator);
     }
 
