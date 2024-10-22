@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A flow layout arranges components in a directional flow, much
  * like lines of text in a paragraph.
  */
-public class ResponsiveGridFlowLayout implements LayoutManager2 {
+public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     private static final int NUMBER_OF_COLUMNS = 12;
     private static final Logger log = LoggerFactory.getLogger(ResponsiveGridFlowLayout.class);
@@ -488,7 +488,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
                 AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);
                 if (addConstraint instanceof FlowCell) {
                     FlowCell cell = (FlowCell) addConstraint;
-                    optionalCell = cellFromCellConf(cell, jc, componentsInRow, maxwidth, generalMaxWidth);
+                    optionalCell = cellFromCellConf(target, cell, jc, componentsInRow, maxwidth, generalMaxWidth);
                     rowSizeIncrease += optionalCell.flatMap(Cell::autoSpan)
                                                     .map(FlowCellSpanPolicy::cellsToFill)
                                                     .orElse(0);
@@ -584,6 +584,7 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
     }
 
     public Optional<Cell> cellFromCellConf(
+            Component parent,
             FlowCell flowCell,
             Component child,
             AtomicInteger componentCounter,
@@ -614,7 +615,8 @@ public class ResponsiveGridFlowLayout implements LayoutManager2 {
             currentParentSizeCategory = UI.ParentSize.OVERSIZE;
         }
 
-        FlowCellConf cell = flowCell.fetchConfig(currentParentSizeCategory);
+        Size parentSize = Size.of(parent.getWidth(), parent.getHeight());
+        FlowCellConf cell = flowCell.fetchConfig(NUMBER_OF_COLUMNS, parentSize, currentParentSizeCategory);
         Optional<FlowCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cell, currentParentSizeCategory);
         return autoSpan.map(autoCellSpanPolicy -> new Cell(child, componentCounter, autoCellSpanPolicy));
     }
