@@ -86,8 +86,9 @@ class Layout_Spec extends Specification
             uiScaleFactor << [1.0f, 1.25f, 1.5f, 2.0f]
     }
 
-    def 'The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`.'()
-    {
+    def 'The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`.'(
+        UI.HorizontalAlignment alignment, int horizontalGap, int verticalGap
+    ) {
         reportInfo """
             Without any additional configuration, the `ResponsiveGridFlowLayout` should
             behave exactly like the regular `FlowLayout` layout manager.
@@ -98,7 +99,7 @@ class Layout_Spec extends Specification
         """
         given : 'Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.'
             var ourFlowPanel =
-                        UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 12, 16)
+                        UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)
                         .withPrefSize(100, 200)
                         .add(UI.box().withPrefSize(10, 20))
                         .add(UI.box().withPrefSize(20, 20))
@@ -107,7 +108,7 @@ class Layout_Spec extends Specification
                         .add(UI.box().withPrefSize(50, 20))
                         .get(JPanel)
             var regularFlowPanel =
-                        UI.panel().withLayout(new FlowLayout(FlowLayout.CENTER, 12, 16))
+                        UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))
                         .withPrefSize(100, 200)
                         .add(UI.box().withPrefSize(10, 20))
                         .add(UI.box().withPrefSize(20, 20))
@@ -131,6 +132,20 @@ class Layout_Spec extends Specification
             ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()
             ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()
             ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()
+        where :
+            alignment                      | horizontalGap | verticalGap
+            UI.HorizontalAlignment.LEFT    | 0             | 0
+            UI.HorizontalAlignment.LEFT    | 0             | 5
+            UI.HorizontalAlignment.LEFT    | 5             | 0
+            UI.HorizontalAlignment.LEFT    | 5             | 5
+            UI.HorizontalAlignment.CENTER  | 0             | 0
+            UI.HorizontalAlignment.CENTER  | 0             | 5
+            UI.HorizontalAlignment.CENTER  | 5             | 0
+            UI.HorizontalAlignment.CENTER  | 5             | 5
+            UI.HorizontalAlignment.RIGHT   | 0             | 0
+            UI.HorizontalAlignment.RIGHT   | 0             | 5
+            UI.HorizontalAlignment.RIGHT   | 5             | 0
+            UI.HorizontalAlignment.RIGHT   | 5             | 5
     }
 
     def 'Use the `UI.AUTO_SPAN(..)` factory method to define responsive component constraints.'()
