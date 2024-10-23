@@ -117,7 +117,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * of the {@code Container}
      * @see ResponsiveGridFlowLayout#setHorizontalGapSize(int)
      */
-    public int horizontalGap() {
+    public int horizontalGapSize() {
         return UI.scale(_horizontalGapSize);
     }
 
@@ -129,7 +129,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param size the horizontal gap between components
      *             and between the components and the borders
      *             of the {@code Container}
-     * @see ResponsiveGridFlowLayout#horizontalGap()
+     * @see ResponsiveGridFlowLayout#horizontalGapSize()
      */
     public void setHorizontalGapSize(int size) {
         _horizontalGapSize = size;

@@ -356,7 +356,7 @@ public class JScrollPanels extends UI.ScrollPane
 			LayoutManager layout;
 			if ( type == UI.Align.HORIZONTAL ) {
 				ResponsiveGridFlowLayout flow = new ResponsiveGridFlowLayout();
-				_horizontalGap = flow.horizontalGap();
+				_horizontalGap = flow.horizontalGapSize();
 				_verticalGap = flow.verticalGapSize();
 				layout = flow;
 			} else {

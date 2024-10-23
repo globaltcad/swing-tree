@@ -474,7 +474,7 @@ public interface Layout
             int verticalGap                  = _verticalGapSize;
 
             boolean alignmentChanged     = alignment != flowLayout.getAlignment();
-            boolean horizontalGapChanged = horizontalGap != flowLayout.horizontalGap();
+            boolean horizontalGapChanged = horizontalGap != flowLayout.horizontalGapSize();
             boolean verticalGapChanged   = verticalGap   != flowLayout.verticalGapSize();
 
             if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {
