@@ -7,37 +7,40 @@ import static swingtree.UI.*;
 
 public class ResponsiveLayout extends Panel
 {
-    ResponsiveLayout() {
-        UI.of(this).withPrefSize(400, 300)
-        .withFlowLayout(HorizontalAlignment.CENTER, 7,7)
-        .add(AUTO_SPAN(it->it.small(12).medium(4).large(3).veryLarge(1)),
-             html("Cell 1").withStyle(it->it
-                 .backgroundColor(Color.RED)
+    ResponsiveLayout(HorizontalAlignment align) {
+        UI.of(this).withPrefSize(500, 400)
+        .withFlowLayout(align, 7,7)
+        .withBackground(Color.LIGHTGRAY)
+        .add(AUTO_SPAN(it->it.small(12).medium(4).large(3).veryLarge(3)),
+             box().withPrefSize(100,100).withStyle(it->it
+                 .backgroundColor(Color.RED).borderRadius(24)
              )
         )
-        .add(AUTO_SPAN( it -> it.small(8).medium(4).large(3).veryLarge(3).oversize(12)),
-             html("Cell 2").withStyle(it->it
-                 .backgroundColor(Color.GREEN)
+        .add(AUTO_SPAN( it -> it.small(3).medium(4).large(3).veryLarge(3).oversize(12)),
+             box().withPrefSize(100,100).withStyle(it->it
+                 .backgroundColor(Color.GREEN).borderRadius(24)
              )
         )
-        .add(AUTO_SPAN(it->it.small(6).medium(4).large(3)),
-             html("Cell 3").withStyle(it->it
-                 .backgroundColor(Color.BLUE)
+        .add(AUTO_SPAN(it->it.small(3).medium(4).large(3)),
+             box().withPrefSize(100,100).withStyle(it->it
+                 .backgroundColor(Color.BLUE).borderRadius(24)
              )
         )
-        .add(AUTO_SPAN(it->it.small(6).medium(4).large(3)),
-             html("Cell 4").withStyle(it->it
-                 .backgroundColor(Color.CYAN)
+        .add(AUTO_SPAN(it->it.small(3).medium(4).large(3)),
+             box().withPrefSize(100,100).withStyle(it->it
+                 .backgroundColor(Color.CYAN).borderRadius(24)
              )
         )
-        .add(AUTO_SPAN(it->it.small(6).medium(4).large(3)),
-             html("Cell 5").withStyle(it->it
-                 .backgroundColor(Color.OAK)
+        .add(AUTO_SPAN(it->it.small(12).medium(4).large(6)),
+             box().withPrefSize(100,100).withStyle(it->it
+                 .backgroundColor(Color.OAK).borderRadius(24)
              )
         );
     }
 
     public static void main(String[] args) {
-        UI.show(f->new ResponsiveLayout());
+        UI.show("Align Center", f->new ResponsiveLayout(HorizontalAlignment.CENTER));
+        UI.show("Align Left", f->new ResponsiveLayout(HorizontalAlignment.LEFT));
+        UI.show("Align Right", f->new ResponsiveLayout(HorizontalAlignment.RIGHT));
     }
 }
