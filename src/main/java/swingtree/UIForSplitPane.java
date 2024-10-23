@@ -1,5 +1,6 @@
 package swingtree;
 
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
@@ -281,7 +282,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * via {@link JSplitPane#setLastDividerLocation(int)}.
      * <p>
      *     Note that the percentage is calculated based on the split pane's
-     *     current size, so if the split pane is resized, the divider location
+     *     current size, so if the split pane changes its size, the divider location
      *     will be recalculated.
      * <p>
      * @param percentage A property dynamically determining a double value between 0 and 1, representing the percentage of the split pane's
@@ -307,7 +308,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                     thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -> {
                         if ( evt.getNewValue() != null ) {
                             double newPercentage = _calculatePercentageFrom(thisComponent);
-                            percentage.set(newPercentage);
+                            percentage.set(From.VIEW, newPercentage);
                         }
                     });
                 })
