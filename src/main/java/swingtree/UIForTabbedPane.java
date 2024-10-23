@@ -446,6 +446,20 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         ._this();
     }
 
+    /**
+     * Dynamically generates tabs for items in a {@link Vals} list and automatically updates them
+     * when the items change. The items are typically view model instances, but can be any type.
+     * <p>
+     * The provided {@link TabSupplier} lambda is invoked with each item from the list,
+     * returning a {@link Tab} to be added to the {@link JTabbedPane} wrapped by this builder.
+     *
+     * <p><b>Note:</b> Binding tabs to a {@link Vals} list assumes no other tabs are present.
+     *
+     * @param <M>         The type of items in the {@link Vals} list.
+     * @param tabModels   A list of items, typically view model instances.
+     * @param tabSupplier A lambda to generate a {@link Tab} for each item.
+     * @return This instance, allowing for builder-style method chaining.
+     */
     public <M> UIForTabbedPane<P> add(Vals<M> tabModels, TabSupplier<M> tabSupplier) {
         return _with(thisComponent -> {
             _onShow(tabModels, thisComponent, (p, delegate) -> {
