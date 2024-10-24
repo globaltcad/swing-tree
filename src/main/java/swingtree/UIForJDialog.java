@@ -1,9 +1,13 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import swingtree.layout.AddConstraint;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JDialog;
+import javax.swing.JRootPane;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Window;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,7 +16,7 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 	private final BuilderState<D> _state;
 
 	/**
-	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
+	 * Instances of the {@link UIForAnyWindow} as well as its subtypes always wrap
 	 * a single component for which they are responsible.
 	 *
 	 * @param state The state object modelling how the component should be built.
@@ -34,8 +38,8 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 
 
 	@Override
-	protected void _addComponentTo(D thisComponent, Component addedComponent, @Nullable Object constraints) {
-		thisComponent.add( constraints == null ? null : constraints.toString(), addedComponent);
+	protected void _addComponentTo(D thisComponent, Component addedComponent, @Nullable AddConstraint constraints) {
+		thisComponent.add(addedComponent, constraints == null ? null : constraints.toConstraintForLayoutManager());
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import sprouts.Val;
 import swingtree.components.JBox;
+import swingtree.layout.AddConstraint;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -16,16 +17,16 @@ import java.util.Objects;
 public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIForAnySwing<I, P>
 {
     @Override
-    protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable Object constraints) {
+    protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints) {
         if ( constraints != null ) {
             if ( addedComponent instanceof Scrollable ) {
                 ThinScrollableDelegateBox thinDelegationBox = new ThinScrollableDelegateBox((Scrollable) addedComponent);
-                thinDelegationBox.add(constraints.toString(), addedComponent);
+                thinDelegationBox.add(addedComponent, constraints.toConstraintForLayoutManager());
             } else {
                 // The user wants to add a component to the scroll pane with a specific constraint.
                 // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
                 ThinDelegationBox thinDelegationBox = new ThinDelegationBox(addedComponent);
-                thinDelegationBox.add(constraints.toString(), addedComponent);
+                thinDelegationBox.add(addedComponent, constraints.toConstraintForLayoutManager());
                 addedComponent = thinDelegationBox;
                 //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
 

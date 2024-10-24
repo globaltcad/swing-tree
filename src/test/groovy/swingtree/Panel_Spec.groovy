@@ -55,7 +55,7 @@ class Panel_Spec extends Specification
             panel != null
         and : 'The UI node wraps a JPanel.'
             panel instanceof JPanel
-        and : 'The panel has a FlowLayout.'
+        and : 'The panel has a `FlowLayout`.'
             panel.layout instanceof FlowLayout
     }
 

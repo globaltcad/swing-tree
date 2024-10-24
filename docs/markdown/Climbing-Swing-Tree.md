@@ -212,6 +212,9 @@ any other layout manager you want.
 You can specify the layout manager for a component by using
 the `withLayout` method.
 
+You may also want to [check out this guide](./Responsive-Layouts.md)
+if you are interested in building responsive layouts with Swing-Tree.
+
 ## Growing Sprouts ##
 
 Now that we have learned how to build Swing UIs with Swing-Tree
