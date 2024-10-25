@@ -1,7 +1,8 @@
 package swingtree
 
-
+import sprouts.Vars
 import swingtree.api.IconDeclaration
+import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
 import sprouts.Var
 import spock.lang.Narrative
@@ -214,5 +215,77 @@ class Tab_Binding_Spec extends Specification
         then : 'The tooltip of the tab is updated.'
             tabbedPane.getToolTipTextAt(0) == "I am a new tooltip!"
     }
+
+    def 'You can bind a property list and a tab supplier to dynamically add or remove tabs.'() {
+        reportInfo """
+            You can bind a string property list and a tab supplier to dynamically add or remove tabs.
+        """
+        given: 'A string property list, a tab supplier and a tabbed pane UI node.'
+        Vars<String> tabs = Vars.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+        TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        def tabbedPane =
+                UI.tabbedPane(UI.Side.TOP)
+                        .add(tabs, supplier)
+                        .get(JTabbedPane)
+
+        when: 'We remove the tab at index 1.'
+        tabs.removeAt(1);
+        UI.sync()
+        then: 'The tabbed pane is updated and the tab removed.'
+        tabbedPane.getTabCount() == tabs.size()
+        tabbedPane.getTitleAt(0) == "Tab 1"
+        tabbedPane.getTitleAt(1) == "Tab 3"
+        tabbedPane.getTitleAt(2) == "Tab 4"
+        tabbedPane.getTitleAt(3) == "Tab 5"
+
+        when: 'We remove 2 tabs starting from index 1.'
+        tabs.removeAt(1, 2);
+        UI.sync()
+        then: 'The tabbed pane is updated and the tabs removed.'
+        tabbedPane.getTabCount() == tabs.size()
+        tabbedPane.getTitleAt(0) == "Tab 1"
+        tabbedPane.getTitleAt(1) == "Tab 5"
+
+        when: 'We update the tab at index 1.'
+        tabs.setAt(1, "Tab 2");
+        UI.sync()
+        then: 'The tabbed pane is updated and the tab updated.'
+        tabbedPane.getTabCount() == tabs.size()
+        tabbedPane.getTitleAt(0) == "Tab 1"
+        tabbedPane.getTitleAt(1) == "Tab 2"
+
+        when: 'We add a tab.'
+        tabs.add("Tab 3");
+        UI.sync()
+        then: 'The tabbed pane is updated and the tab added.'
+        tabbedPane.getTabCount() == tabs.size()
+        tabbedPane.getTitleAt(0) == "Tab 1"
+        tabbedPane.getTitleAt(1) == "Tab 2"
+        tabbedPane.getTitleAt(2) == "Tab 3"
+
+        when: 'We add 2 tabs.'
+        tabs.addAll("Tab 4", "Tab 5");
+        UI.sync()
+        then: 'The tabbed pane is updated and the tabs added.'
+        tabbedPane.getTabCount() == tabs.size()
+        tabbedPane.getTitleAt(0) == "Tab 1"
+        tabbedPane.getTitleAt(1) == "Tab 2"
+        tabbedPane.getTitleAt(2) == "Tab 3"
+        tabbedPane.getTitleAt(3) == "Tab 4"
+        tabbedPane.getTitleAt(4) == "Tab 5"
+
+        when: 'We insert 1 tab.'
+        tabs.addAt(0, "Tab 0");
+        UI.sync()
+        then: 'The tabbed pane is updated and the tabs inserted.'
+        tabbedPane.getTabCount() == tabs.size()
+        tabbedPane.getTitleAt(0) == "Tab 0"
+        tabbedPane.getTitleAt(1) == "Tab 1"
+        tabbedPane.getTitleAt(2) == "Tab 2"
+        tabbedPane.getTitleAt(3) == "Tab 3"
+        tabbedPane.getTitleAt(4) == "Tab 4"
+        tabbedPane.getTitleAt(5) == "Tab 5"
+    }
+
 
 }
