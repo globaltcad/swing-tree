@@ -484,13 +484,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     case SET:
                         for (int i = 0; i < newValues.size(); i++) {
                             int position = delegate.index() + i;
-                            _updateTabAt(position, newValues.at(i).get(), tabSupplier, p);
+                            _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, p);
                         }
                         break;
                     case ADD:
                         for (int i = 0; i < newValues.size(); i++) {
                             int position = delegate.index() + i;
-                            _addTabAt(position, newValues.at(i).get(), tabSupplier, p);
+                            _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, p);
                         }
                         break;
                     case REMOVE:
