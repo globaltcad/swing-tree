@@ -174,7 +174,7 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconWidth() {
-        Size adjustedSize = _sizeWithAspectRatioCorrection(_size, _svgDocument);
+        Size adjustedSize = _sizeWithAspectRatioCorrection(_size);
         return adjustedSize.width().map(UI::scale).map(Math::round).orElse(NO_SIZE);
     }
 
@@ -212,7 +212,7 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public int getIconHeight() {
-        Size adjustedSize = _sizeWithAspectRatioCorrection(_size, _svgDocument);
+        Size adjustedSize = _sizeWithAspectRatioCorrection(_size);
         return adjustedSize.height().map(UI::scale).map(Math::round).orElse(NO_SIZE);
     }
 
@@ -330,7 +330,7 @@ public final class SvgIcon extends ImageIcon
         if ( newWidth < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth), _svgDocument);
+        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));
         return new SvgIcon(_svgDocument, adjustedSize, _fitComponent, _preferredPlacement);
     }
 
@@ -354,7 +354,7 @@ public final class SvgIcon extends ImageIcon
         if ( newHeight < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight), _svgDocument);
+        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));
         return new SvgIcon(_svgDocument, adjustedSize, _fitComponent, _preferredPlacement);
     }
 
@@ -845,8 +845,8 @@ public final class SvgIcon extends ImageIcon
                 "]";
     }
 
-    private static Size _sizeWithAspectRatioCorrection(Size size, @Nullable SVGDocument svgDocument) {
-        if ( svgDocument == null )
+    private Size _sizeWithAspectRatioCorrection( Size size ) {
+        if ( _svgDocument == null )
             return size;
         if ( size.hasPositiveWidth() && size.hasPositiveHeight() )
             return size;
@@ -863,30 +863,43 @@ public final class SvgIcon extends ImageIcon
 
             So we try to calculate the missing dimension here:
         */
+        return _aspectRatio().map( aspectRatio -> {
+                    // Now the two cases:
+                    if ( size.hasPositiveWidth() ) {
+                        // The width is known, calculate the height:
+                        double width = size.width().map(Number::doubleValue).orElse(1d);
+                        return size.withHeight((int) Math.ceil(width / aspectRatio));
+                    } else {
+                        // The height is known, calculate the width:
+                        double height = size.height().map(Number::doubleValue).orElse(1d);
+                        return size.withWidth((int) Math.ceil(height * aspectRatio));
+                    }
+                })
+                .orElse(size);
+    }
+
+    private Optional<Double> _aspectRatio() {
+        if ( _svgDocument == null )
+            return Optional.empty();
+
         double aspectRatio1 = 0;
         double aspectRatio2 = 0;
 
-        ViewBox viewBox = svgDocument.viewBox();
+        ViewBox viewBox = _svgDocument.viewBox();
         if ( viewBox.width > 0 && viewBox.height > 0 )
             aspectRatio1 = viewBox.width / viewBox.height;
 
-        FloatSize svgSize = svgDocument.size();
+        FloatSize svgSize = _svgDocument.size();
         if ( svgSize.width > 0 && svgSize.height > 0 )
             aspectRatio2 = svgSize.width / svgSize.height;
 
         // We prefer the "svgSize" aspect ratio over the "viewBox" aspect ratio:
         double aspectRatio = aspectRatio2 > 0 ? aspectRatio2 : aspectRatio1;
 
-        // Now the two cases:
-        if ( size.hasPositiveWidth() ) {
-            // The width is known, calculate the height:
-            double width = size.width().map(Number::doubleValue).orElse(1d);
-            return size.withHeight((int) Math.ceil(width / aspectRatio));
-        } else {
-            // The height is known, calculate the width:
-            double height = size.height().map(Number::doubleValue).orElse(1d);
-            return size.withWidth((int) Math.ceil(height * aspectRatio));
-        }
+        if ( aspectRatio == 0 )
+            return Optional.empty();
+        else
+            return Optional.of(aspectRatio);
     }
 
 }

@@ -1101,8 +1101,8 @@ final class StyleRenderer
             final Outline      padding         = style.padding();
             final int          componentWidth  = componentSize.width().orElse(0f).intValue();
             final int          componentHeight = componentSize.height().orElse(0f).intValue();
-            final int          iconBaseWidth   = _getDpiAwareWidth(imageIcon); // = unaffected by UI.scale()
-            final int          iconBaseHeight  = _getDpiAwareHeight(imageIcon);
+            final int          iconBaseWidth   = imageIcon.getIconWidth();
+            final int          iconBaseHeight  = imageIcon.getIconHeight();
 
             int imgWidth  = style.width().orElse(iconBaseWidth);
             int imgHeight = style.height().orElse(iconBaseHeight);
@@ -1248,36 +1248,6 @@ final class StyleRenderer
             }
             g2d.setClip(oldClip);
         });
-    }
-
-    private static int _getDpiAwareWidth(ImageIcon icon) {
-        int width;
-        if ( icon instanceof ScalableImageIcon )
-            width = ((ScalableImageIcon) icon).getBaseWidth();
-        else if ( icon instanceof SvgIcon )
-            width = ((SvgIcon) icon).getBaseWidth();
-        else
-            width = icon.getIconWidth();
-
-        if ( width < 0 )
-            return -1;
-        else
-            return UI.scale(width);
-    }
-
-    private static int _getDpiAwareHeight(ImageIcon icon) {
-        int height;
-        if ( icon instanceof ScalableImageIcon )
-            height = ((ScalableImageIcon) icon).getBaseHeight();
-        else if ( icon instanceof SvgIcon )
-            height = ((SvgIcon) icon).getBaseHeight();
-        else
-            height = icon.getIconHeight();
-
-        if ( height < 0 )
-            return -1;
-        else
-            return UI.scale(height);
     }
 
     private static void _renderText(
