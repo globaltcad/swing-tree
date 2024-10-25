@@ -57,7 +57,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     protected BuilderState<P> _state() {
         return _state;
     }
-    
+
     @Override
     protected UIForTabbedPane<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForTabbedPane<>(newState);
@@ -452,8 +452,22 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * <p>
      * The provided {@link TabSupplier} lambda is invoked with each item from the list,
      * returning a {@link Tab} to be added to the {@link JTabbedPane} wrapped by this builder.
-     *
-     * <p><b>Note:</b> Binding tabs to a {@link Vals} list assumes no other tabs are present.
+     * <p>
+     * <b>Note:</b> Binding tabs to a {@link Vals} list assumes no other tabs are present.
+     * <p>
+     * <b>Usage:</b>
+     * <pre>{@code
+     *     UI.panel()
+     *      .add(
+     *          UI.tabbedPane().add(tabs, model ->
+     *              switch(model.type()) {
+     *                  case LOGIN -> UI.tab("Login").add(..);
+     *                  case ABOUT -> UI.tab("About").add(..);
+     *                  case SETTINGS -> UI.tab("Settings").add(..);
+     *              }
+     *          )
+     *      )
+     * }</pre>
      *
      * @param <M>         The type of items in the {@link Vals} list.
      * @param tabModels   A list of items, typically view model instances.
@@ -770,7 +784,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
         private @Nullable Var<Integer> selectedTabIndex = null;
-        
+
         @Override public void setSelectedIndex(int index) {
             super.setSelectedIndex(index);
             if ( selectedTabIndex != null )
