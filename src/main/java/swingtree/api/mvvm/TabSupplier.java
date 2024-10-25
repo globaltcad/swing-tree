@@ -1,9 +1,28 @@
 package swingtree.api.mvvm;
 
+import sprouts.Vals;
 import swingtree.Tab;
+import swingtree.UIForTabbedPane;
 
 /**
  * Functional interface for dynamically creating tabs based on a provided model.
+ * <p>
+ * This interface is specifically designed for the {@link UIForTabbedPane#add(Vals, TabSupplier)} method
+ * in the {@link  UIForTabbedPane} class.
+ * <p>
+ * <b>Usage:</b>
+ * <pre>{@code
+ *     UI.panel()
+ *      .add(
+ *          UI.tabbedPane().add(tabs, model ->
+ *              switch(model.type()) {
+ *                  case LOGIN -> UI.tab("Login").add(..);
+ *                  case ABOUT -> UI.tab("About").add(..);
+ *                  case SETTINGS -> UI.tab("Settings").add(..);
+ *              }
+ *          )
+ *      )
+ * }</pre>
  *
  * @param <M> the type of the model used to create the tab
  */
