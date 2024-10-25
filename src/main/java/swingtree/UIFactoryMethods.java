@@ -6488,9 +6488,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         return Optional.ofNullable(icon);
     }
 
-    public static @Nullable Icon scaleIconTo( Size size, @Nullable final Icon icon ) {
+    public static @Nullable Icon scaleIconTo( Size size, @Nullable Icon icon ) {
         if ( icon == null )
             return null;
+
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svg = (SvgIcon) icon;
+            icon = svg.withIconSize(size);
+        } else if ( icon instanceof ScalableImageIcon ) {
+            ScalableImageIcon imageIcon = (ScalableImageIcon) icon;
+            icon = imageIcon.withSize(size);
+        }
 
         final double actualWidth  = _getBaseWidth(icon);
         final double actualHeight = _getBaseHeight(icon);
