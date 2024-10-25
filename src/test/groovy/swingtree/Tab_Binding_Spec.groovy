@@ -229,7 +229,7 @@ class Tab_Binding_Spec extends Specification
                         .get(JTabbedPane)
 
         when: 'We remove the tab at index 1.'
-        tabs.removeAt(1);
+        tabs.removeAt(1)
         UI.sync()
         then: 'The tabbed pane is updated and the tab removed.'
         tabbedPane.getTabCount() == tabs.size()
@@ -239,7 +239,7 @@ class Tab_Binding_Spec extends Specification
         tabbedPane.getTitleAt(3) == "Tab 5"
 
         when: 'We remove 2 tabs starting from index 1.'
-        tabs.removeAt(1, 2);
+        tabs.removeAt(1, 2)
         UI.sync()
         then: 'The tabbed pane is updated and the tabs removed.'
         tabbedPane.getTabCount() == tabs.size()
@@ -247,7 +247,7 @@ class Tab_Binding_Spec extends Specification
         tabbedPane.getTitleAt(1) == "Tab 5"
 
         when: 'We update the tab at index 1.'
-        tabs.setAt(1, "Tab 2");
+        tabs.setAt(1, "Tab 2")
         UI.sync()
         then: 'The tabbed pane is updated and the tab updated.'
         tabbedPane.getTabCount() == tabs.size()
@@ -255,7 +255,7 @@ class Tab_Binding_Spec extends Specification
         tabbedPane.getTitleAt(1) == "Tab 2"
 
         when: 'We add a tab.'
-        tabs.add("Tab 3");
+        tabs.add("Tab 3")
         UI.sync()
         then: 'The tabbed pane is updated and the tab added.'
         tabbedPane.getTabCount() == tabs.size()
@@ -264,7 +264,7 @@ class Tab_Binding_Spec extends Specification
         tabbedPane.getTitleAt(2) == "Tab 3"
 
         when: 'We add 2 tabs.'
-        tabs.addAll("Tab 4", "Tab 5");
+        tabs.addAll("Tab 4", "Tab 5")
         UI.sync()
         then: 'The tabbed pane is updated and the tabs added.'
         tabbedPane.getTabCount() == tabs.size()
@@ -275,7 +275,7 @@ class Tab_Binding_Spec extends Specification
         tabbedPane.getTitleAt(4) == "Tab 5"
 
         when: 'We insert 1 tab.'
-        tabs.addAt(0, "Tab 0");
+        tabs.addAt(0, "Tab 0")
         UI.sync()
         then: 'The tabbed pane is updated and the tabs inserted.'
         tabbedPane.getTabCount() == tabs.size()
