@@ -6,6 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.api.Layout
+import swingtree.layout.ResponsiveGridFlowLayout
 
 import javax.swing.JPanel
 import java.awt.*
@@ -117,8 +118,8 @@ class Layout_Styling_Spec extends Specification
             var panel = ui.get(JPanel)
             var button = panel.getComponent(0)
 
-        expect : 'The layout manager of the panel is a FlowLayout manager:'
-            panel.layout instanceof FlowLayout
+        expect : 'The layout manager of the panel is a responsive flow layout manager:'
+            panel.layout instanceof ResponsiveGridFlowLayout
 
         and : 'The button has the alignment values we specified in the styling API:'
             button.alignmentX == 0.33f

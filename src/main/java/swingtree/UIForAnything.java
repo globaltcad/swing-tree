@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.*;
 import swingtree.api.Peeker;
+import swingtree.layout.AddConstraint;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StyleConf;
 import swingtree.threading.EventProcessor;
@@ -432,7 +433,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
             _addBuilderTo(thisComponent, UI.of((JComponent) other), null);
     }
 
-    protected final void _addBuilderTo( C thisComponent, UIForAnything<?, ?, ?> builder, @Nullable Object conf )
+    protected final void _addBuilderTo( C thisComponent, UIForAnything<?, ?, ?> builder, @Nullable AddConstraint conf )
     {
         NullUtil.nullArgCheck(builder, "builder", UIForAnything.class);
 
@@ -453,7 +454,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
 
             StyleConf styleConf = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );
             if ( styleConf != null )
-                conf = styleConf.layoutConstraint().orElse(null);
+                conf = styleConf.layoutConstraint().map(it-> (AddConstraint) () -> it).orElse(null);
 
             _addComponentTo(thisComponent, childComponent, conf);
 
@@ -478,7 +479,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
      * @param addedComponent A component instance which ought to be added to the wrapped component type.
      * @param constraints    The layout constraint which ought to be used to add the component to the wrapped component type.
      */
-    protected abstract void _addComponentTo( C thisComponent, E addedComponent, @Nullable Object constraints );
+    protected abstract void _addComponentTo( C thisComponent, E addedComponent, @Nullable AddConstraint constraints );
 
     /**
      *  Returns the state of the builder, which is a container for the wrapped component

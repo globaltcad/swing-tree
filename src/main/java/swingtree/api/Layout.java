@@ -2,7 +2,9 @@ package swingtree.api;
 
 import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
+import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
@@ -436,49 +438,49 @@ public interface Layout
     @Immutable
     final class ForFlowLayout implements Layout
     {
-        private final int _align;
-        private final int _hgap;
-        private final int _vgap;
+        private final UI.HorizontalAlignment _align;
+        private final int                    _horizontalGapSize;
+        private final int                    _verticalGapSize;
 
         ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {
-            _align = align.forFlowLayout().orElse(FlowLayout.CENTER);
-            _hgap  = hgap;
-            _vgap  = vgap;
+            _align             = Objects.requireNonNull(align);
+            _horizontalGapSize = hgap;
+            _verticalGapSize   = vgap;
         }
 
-        @Override public int hashCode() { return Objects.hash( _align, _hgap, _vgap  ); }
+        @Override public int hashCode() { return Objects.hash( _align, _horizontalGapSize, _verticalGapSize); }
 
         @Override
-        public boolean equals( Object o ) {
+        public boolean equals( @Nullable Object o ) {
             if ( o == null ) return false;
             if ( o == this ) return true;
             if ( o.getClass() != getClass() ) return false;
             ForFlowLayout other = (ForFlowLayout) o;
-            return _align == other._align && _hgap == other._hgap && _vgap == other._vgap;
+            return _align == other._align && _horizontalGapSize == other._horizontalGapSize && _verticalGapSize == other._verticalGapSize;
         }
 
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
-            if ( !( currentLayout instanceof FlowLayout ) ) {
+            if ( !( currentLayout instanceof ResponsiveGridFlowLayout) ) {
                 // We need to replace the current layout with a FlowLayout:
-                FlowLayout newLayout = new FlowLayout(_align, _hgap, _vgap);
+                ResponsiveGridFlowLayout newLayout = new ResponsiveGridFlowLayout(_align, _horizontalGapSize, _verticalGapSize);
                 component.setLayout(newLayout);
                 return;
             }
-            FlowLayout flowLayout = (FlowLayout) currentLayout;
-            int alignment     = _align;
-            int horizontalGap = _hgap;
-            int verticalGap   = _vgap;
+            ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;
+            UI.HorizontalAlignment alignment = _align;
+            int horizontalGap                = _horizontalGapSize;
+            int verticalGap                  = _verticalGapSize;
 
             boolean alignmentChanged     = alignment != flowLayout.getAlignment();
-            boolean horizontalGapChanged = horizontalGap != flowLayout.getHgap();
-            boolean verticalGapChanged   = verticalGap   != flowLayout.getVgap();
+            boolean horizontalGapChanged = horizontalGap != flowLayout.horizontalGapSize();
+            boolean verticalGapChanged   = verticalGap   != flowLayout.verticalGapSize();
 
             if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {
                 flowLayout.setAlignment(alignment);
-                flowLayout.setHgap(horizontalGap);
-                flowLayout.setVgap(verticalGap);
+                flowLayout.setHorizontalGapSize(horizontalGap);
+                flowLayout.setVerticalGapSize(verticalGap);
                 component.revalidate();
             }
         }
@@ -486,8 +488,8 @@ public interface Layout
         @Override public String toString() {
             return getClass().getSimpleName() + "[" +
                         "align=" + _align + ", " +
-                        "hgap=" + _hgap + ", " +
-                        "vgap=" + _vgap +
+                        "hgap=" + _horizontalGapSize + ", " +
+                        "vgap=" + _verticalGapSize +
                     "]";
             }
         }
@@ -514,7 +516,7 @@ public interface Layout
         @Override public int hashCode() { return Objects.hash(_hgap, _vgap); }
 
         @Override
-        public boolean equals( Object o ) {
+        public boolean equals( @Nullable Object o ) {
             if ( o == null ) return false;
             if ( o == this ) return true;
             if ( o.getClass() != getClass() ) return false;
