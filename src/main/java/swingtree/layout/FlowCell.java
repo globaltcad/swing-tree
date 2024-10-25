@@ -58,7 +58,7 @@ public final class FlowCell implements AddConstraint
     }
 
     FlowCellConf fetchConfig(
-        int maxCells, Size parentSize, UI.ParentSize parentSizeCategory
+        int maxCells, Size parentSize, ParentSizeClass parentSizeCategory
     ) {
         FlowCellConf conf = new FlowCellConf(maxCells, parentSize, parentSizeCategory, new FlowCellSpanPolicy[0]);
         try {

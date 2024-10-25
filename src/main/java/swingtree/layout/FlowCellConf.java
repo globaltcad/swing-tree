@@ -50,7 +50,7 @@ public final class FlowCellConf
     private static final Logger log = LoggerFactory.getLogger(FlowCellConf.class);
     private final int                  _maxCellsToFill;
     private final Size                 _parentSize;
-    private final UI.ParentSize        _parentSizeCategory;
+    private final ParentSizeClass      _parentSizeCategory;
     @SuppressWarnings("Immutable")
     private final FlowCellSpanPolicy[] _autoSpans;
 
@@ -58,7 +58,7 @@ public final class FlowCellConf
     FlowCellConf(
         int                  maxCellsToFill,
         Size                 parentSize,
-        UI.ParentSize        parentSizeCategory,
+        ParentSizeClass parentSizeCategory,
         FlowCellSpanPolicy[] autoSpans
     ) {
         _maxCellsToFill     = maxCellsToFill;
@@ -88,32 +88,32 @@ public final class FlowCellConf
     }
 
     /**
-     *  Returns the {@link UI.ParentSize} category that represents the parent container's width
+     *  Returns the {@link ParentSizeClass} category that represents the parent container's width
      *  relative to its preferred width.<br>
      *  The cell exposes this information so that you can use for a more
      *  informed decision on how many cells a component should span.<br>
      *  <p>
-     *  The {@link UI.ParentSize} category is calculated by dividing the parent container's width
+     *  The {@link ParentSizeClass} category is calculated by dividing the parent container's width
      *  by the preferred width of the parent container. <br>
      *  So a parent container is considered large if its size is close to the preferred size,
-     *  and {@link UI.ParentSize#OVERSIZE} if it is significantly larger.
+     *  and {@link ParentSizeClass#OVERSIZE} if it is significantly larger.
      *
      *  @return The category of the parent container's size.
      */
-    public UI.ParentSize parentSizeCategory() {
+    public ParentSizeClass parentSizeCategory() {
         return _parentSizeCategory;
     }
 
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  for a given {@link UI.ParentSize} category.<br>
+     *  for a given {@link ParentSizeClass} category.<br>
      *
-     *  @param size The {@link UI.ParentSize} category to set.
+     *  @param size The {@link ParentSizeClass} category to set.
      *  @param cellsToFill The number of cells to fill.
-     *  @return A new {@link FlowCellConf} instance with the given {@link UI.ParentSize} and number of cells to fill.
+     *  @return A new {@link FlowCellConf} instance with the given {@link ParentSizeClass} and number of cells to fill.
      */
-    public FlowCellConf with( UI.ParentSize size, int cellsToFill ) {
+    public FlowCellConf with(ParentSizeClass size, int cellsToFill ) {
         Objects.requireNonNull(size);
         if ( cellsToFill < 0 ) {
             log.warn(
@@ -140,7 +140,7 @@ public final class FlowCellConf
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  when the parent container is categorized as {@link UI.ParentSize#VERY_SMALL}.<br>
+     *  when the parent container is categorized as {@link ParentSizeClass#VERY_SMALL}.<br>
      *  A parent container is considered "very small" if its width
      *  is between 0/5 and 1/5 of its preferred width.<br>
      *  <p>
@@ -150,16 +150,16 @@ public final class FlowCellConf
      *  @param span The number of cells to span as part of a grid
      *                     with a total of {@link #maxCellsToFill()} number of cells horizontally.
      *  @return A new {@link FlowCellConf} instance with the given number of cells to fill
-     *          for the {@link UI.ParentSize#VERY_SMALL} category.
+     *          for the {@link ParentSizeClass#VERY_SMALL} category.
      */
     public FlowCellConf verySmall( int span ) {
-        return with(UI.ParentSize.VERY_SMALL, span);
+        return with(ParentSizeClass.VERY_SMALL, span);
     }
 
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  when the parent container is categorized as {@link UI.ParentSize#SMALL}.<br>
+     *  when the parent container is categorized as {@link ParentSizeClass#SMALL}.<br>
      *  A parent container is considered "small" if its width
      *  is between 1/5 and 2/5 of its preferred width.<br>
      *  <p>
@@ -169,16 +169,16 @@ public final class FlowCellConf
      *  @param span The number of cells to span as part of a grid
      *                     with a total of {@link #maxCellsToFill()} number of cells horizontally.
      *  @return A new {@link FlowCellConf} instance with the given number of cells to fill
-     *          for the {@link UI.ParentSize#SMALL} category.
+     *          for the {@link ParentSizeClass#SMALL} category.
      */
     public FlowCellConf small( int span ) {
-        return with(UI.ParentSize.SMALL, span);
+        return with(ParentSizeClass.SMALL, span);
     }
 
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  when the parent container is categorized as {@link UI.ParentSize#MEDIUM}.<br>
+     *  when the parent container is categorized as {@link ParentSizeClass#MEDIUM}.<br>
      *  A parent container is considered "medium" if its width
      *  is between 2/5 and 3/5 of its preferred width.<br>
      *  <p>
@@ -188,16 +188,16 @@ public final class FlowCellConf
      *  @param span The number of cells to span as part of a grid
      *                     with a total of {@link #maxCellsToFill()} number of cells horizontally.
      *  @return A new {@link FlowCellConf} instance with the given number of cells to fill
-     *          for the {@link UI.ParentSize#MEDIUM} category.
+     *          for the {@link ParentSizeClass#MEDIUM} category.
      */
     public FlowCellConf medium( int span ) {
-        return with(UI.ParentSize.MEDIUM, span);
+        return with(ParentSizeClass.MEDIUM, span);
     }
 
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  when the parent container is categorized as {@link UI.ParentSize#LARGE}.<br>
+     *  when the parent container is categorized as {@link ParentSizeClass#LARGE}.<br>
      *  A parent container is considered "large" if its width
      *  is between 3/5 and 4/5 of its preferred width.<br>
      *  <p>
@@ -207,16 +207,16 @@ public final class FlowCellConf
      *  @param span The number of cells to span as part of a grid
      *                     with a total of {@link #maxCellsToFill()} number of cells horizontally.
      *  @return A new {@link FlowCellConf} instance with the given number of cells to fill
-     *          for the {@link UI.ParentSize#LARGE} category.
+     *          for the {@link ParentSizeClass#LARGE} category.
      */
     public FlowCellConf large( int span ) {
-        return with(UI.ParentSize.LARGE, span);
+        return with(ParentSizeClass.LARGE, span);
     }
 
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  when the parent container is categorized as {@link UI.ParentSize#VERY_LARGE}.<br>
+     *  when the parent container is categorized as {@link ParentSizeClass#VERY_LARGE}.<br>
      *  A parent container is considered "very large" if its width
      *  is between 4/5 and 5/5 of its preferred width.<br>
      *  <p>
@@ -226,16 +226,16 @@ public final class FlowCellConf
      *  @param span The number of cells to span as part of a grid
      *                     with a total of {@link #maxCellsToFill()} number of cells horizontally.
      *  @return A new {@link FlowCellConf} instance with the given number of cells to fill
-     *          for the {@link UI.ParentSize#VERY_LARGE} category.
+     *          for the {@link ParentSizeClass#VERY_LARGE} category.
      */
     public FlowCellConf veryLarge( int span ) {
-        return with(UI.ParentSize.VERY_LARGE, span);
+        return with(ParentSizeClass.VERY_LARGE, span);
     }
 
     /**
      *  Returns a new and updated {@link FlowCellConf} instance with an additional
      *  {@link FlowCellSpanPolicy} that specifies the number of cells to fill
-     *  when the parent container is categorized as {@link UI.ParentSize#OVERSIZE}.<br>
+     *  when the parent container is categorized as {@link ParentSizeClass#OVERSIZE}.<br>
      *  A parent container is considered "oversize" if its width is greater than its preferred width.<br>
      *  <p>
      *  The supplied number of cells to fill should be in the inclusive range of 0 to {@link #maxCellsToFill()}.<br>
@@ -244,10 +244,10 @@ public final class FlowCellConf
      *  @param span The number of cells to span as part of a grid
      *                     with a total of {@link #maxCellsToFill()} number of cells horizontally.
      *  @return A new {@link FlowCellConf} instance with the given number of cells to fill
-     *          for the {@link UI.ParentSize#OVERSIZE} category.
+     *          for the {@link ParentSizeClass#OVERSIZE} category.
      */
     public FlowCellConf oversize( int span ) {
-        return with(UI.ParentSize.OVERSIZE, span);
+        return with(ParentSizeClass.OVERSIZE, span);
     }
 
     @Override

@@ -174,8 +174,8 @@ public abstract class UILayoutConstants
      *  Here is an example of how this factory method might be used
      *  as part of a larger UI declaration:
      *  <pre>{@code
-     *    UI.panel().withPrefSize(400, 300)
-     *    .withFlowLayout()
+     *    UI.panel().withFlowLayout()
+     *    .withPrefSize(400, 300)
      *    .add(UI.AUTO_SPAN( it->it.small(12).medium(6).large(8) ),
      *         html("A red cell").withStyle(it->it
      *             .backgroundColor(UI.Color.RED)
@@ -204,7 +204,7 @@ public abstract class UILayoutConstants
      *  <p><b>
      *      Note that a {@link ResponsiveGridFlowLayout} is required for the {@link FlowCell} configuration
      *      to have any effect. The {@link FlowCell} configuration is not compatible with other layout managers
-     *      like the {@link net.miginfocom.swing.MigLayout}.
+     *      like {@link net.miginfocom.swing.MigLayout}.
      *  </b>
      * @param configurator A {@link swingtree.api.Configurator} that configures a {@link swingtree.layout.FlowCellConf} instance.
      * @return An {@link swingtree.layout.FlowCell} instance containing the responsive cell span
@@ -215,4 +215,50 @@ public abstract class UILayoutConstants
         return new FlowCell(configurator);
     }
 
+    /**
+     *  A factory method for creating a {@link swingtree.layout.FlowCell} instance
+     *  that will span the given number of cells for each parent size category
+     *  when used in a {@link swingtree.layout.ResponsiveGridFlowLayout} layout.<br>
+     *  <p>
+     *  Here is an example of how this factory method might be used
+     *  as part of a larger UI declaration:
+     *  <pre>{@code
+     *    UI.panel().withFlowLayout()
+     *    .withPrefSize(400, 300)
+     *    .add(UI.AUTO_SPAN(12),
+     *         html("A red cell").withStyle(it->it
+     *             .backgroundColor(UI.Color.RED)
+     *         )
+     *    )
+     *    .add(UI.AUTO_SPAN(6),
+     *         html("a green cell").withStyle(it->it
+     *             .backgroundColor(Color.GREEN)
+     *         )
+     *    )
+     *  }</pre>
+     *  In the above example, the first cell will always span 12 cells
+     *  and the second cell will always span 6 cells, regardless of the parent size.<br>
+     *  <p>
+     *  The {@link swingtree.UIForAnySwing#withFlowLayout()} creates the necessary {@link ResponsiveGridFlowLayout}
+     *  and attaches it to the panel.<br>
+     *  <p><b>
+     *      Note that a {@link ResponsiveGridFlowLayout} is required for the {@link FlowCell} configuration
+     *      to have any effect. The {@link FlowCell} configuration is not compatible with other layout managers
+     *      like {@link net.miginfocom.swing.MigLayout}.
+     *  </b>
+     * @param numberOfCells The number of cells to, irrespective of parent size category.
+     * @return An {@link swingtree.layout.FlowCell} instance containing the responsive cell span
+     *         configuration for a component that is part of a parent component with
+     *         a {@link swingtree.layout.ResponsiveGridFlowLayout} layout manager.
+     */
+    public static FlowCell AUTO_SPAN( int numberOfCells ) {
+        return new FlowCell(it->it
+                .verySmall(numberOfCells)
+                .small(numberOfCells)
+                .medium(numberOfCells)
+                .large(numberOfCells)
+                .veryLarge(numberOfCells)
+                .oversize(numberOfCells)
+        );
+    }
 }

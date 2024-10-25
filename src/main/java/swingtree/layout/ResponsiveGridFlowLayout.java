@@ -595,25 +595,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             return Optional.empty();
         }
         // How much preferred width the parent actually fills:
-        double howFull = maxWidth / (double) generalMaxWidth;
-        howFull = Math.max(0, howFull);
-
-        UI.ParentSize currentParentSizeCategory;
-        if ( howFull <= 0 ) {
-            currentParentSizeCategory = UI.ParentSize.NONE;
-        } else if (howFull < 1/5d) {
-            currentParentSizeCategory = UI.ParentSize.VERY_SMALL;
-        } else if (howFull < 2/5d) {
-            currentParentSizeCategory = UI.ParentSize.SMALL;
-        } else if (howFull < 3/5d) {
-            currentParentSizeCategory = UI.ParentSize.MEDIUM;
-        } else if (howFull < 4/5d) {
-            currentParentSizeCategory = UI.ParentSize.LARGE;
-        } else if (howFull <= 1) {
-            currentParentSizeCategory = UI.ParentSize.VERY_LARGE;
-        } else {
-            currentParentSizeCategory = UI.ParentSize.OVERSIZE;
-        }
+        ParentSizeClass currentParentSizeCategory = ParentSizeClass.of(maxWidth, generalMaxWidth);
 
         Size parentSize = Size.of(parent.getWidth(), parent.getHeight());
         FlowCellConf cell = flowCell.fetchConfig(NUMBER_OF_COLUMNS, parentSize, currentParentSizeCategory);
@@ -639,7 +621,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         return Optional.of(newSize);
     }
 
-    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, UI.ParentSize targetSize ) {
+    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, ParentSizeClass targetSize ) {
         for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
             if ( autoSpan.parentSize() == targetSize ) {
                 return Optional.of(autoSpan);
@@ -647,7 +629,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         }
         // We did not find the exact match. Let's try to find the closest match.
 
-        UI.ParentSize[] values = UI.ParentSize.values();
+        ParentSizeClass[] values = ParentSizeClass.values();
         int targetOrdinal = targetSize.ordinal();
         /*
             We want to find the enum value which is closed to the target ordinal.
@@ -656,7 +638,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         for ( int offset = 1; offset < values.length; offset++ ) {
             int nextOrdinal = targetOrdinal + offset * sign;
             if ( nextOrdinal > 0 && nextOrdinal < values.length ) {
-                UI.ParentSize next = values[nextOrdinal];
+                ParentSizeClass next = values[nextOrdinal];
                 for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
                     if ( autoSpan.parentSize() == next ) {
                         return Optional.of(autoSpan);
