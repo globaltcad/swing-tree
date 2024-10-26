@@ -475,7 +475,18 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * @return This instance, allowing for builder-style method chaining.
      */
     public <M> UIForTabbedPane<P> add(Vals<M> tabModels, TabSupplier<M> tabSupplier) {
+        Objects.requireNonNull(tabModels, "tabModels");
+        Objects.requireNonNull(tabSupplier, "tabSupplier");
         return _with(thisComponent -> {
+            if ( thisComponent.getTabCount() > 0 ) {
+                log.warn(
+                    "Trying to bind a list of tabs to a tabbed pane that already has tabs. \n" +
+                    "Manually defined tabs existing along with bound tabs is not supported. \n" +
+                    "The manually defined tabs will be removed now!",
+                    new Throwable() // Stack trace so that a user can see where this warning was triggered.
+                );
+                _doWithoutListeners(thisComponent, thisComponent::removeAll);
+            }
             _onShow(tabModels, thisComponent, (p, delegate) -> {
                 Vals<M> newValues = delegate.newValues();
                 Vals<M> oldValues = delegate.oldValues();
@@ -508,14 +519,19 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 }
 
                 if (p.getTabCount() != delegate.vals().size()) {
-                    log.warn("Broken binding to view model list detected! \n" +
-                            "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
-                            "A possible cause for this is that tabs were {} to this '{}' \n" +
-                            "directly, instead of through the property list binding. \n" +
-                            "However, this could also be a bug in the UI framework.",
-                        p.getComponentCount(), delegate.vals().size(), p.getTabCount() > delegate.vals().size() ? "added" : "removed", p, new Throwable());
+                    log.warn(
+                        "Broken binding to view model list detected! \n" +
+                        "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
+                        "A possible cause for this is that tabs were {} this '{}' \n" +
+                        "directly, instead of through the property list binding. \n" +
+                        "However, this could also be a bug in the UI framework.",
+                        p.getComponentCount(),
+                        delegate.vals().size(),
+                        p.getTabCount() > delegate.vals().size() ? "added to" : "removed from",
+                        p,
+                        new Throwable()
+                    );
                 }
-
             });
 
             tabModels.forEach(v -> _addTabAt(thisComponent.getTabCount(), v, tabSupplier, thisComponent));
