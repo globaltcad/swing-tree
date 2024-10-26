@@ -763,12 +763,17 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         p.removeTabAt(index);
     }
 
-    private <M> Tab _createTab(@Nullable M m, TabSupplier<M> tabSupplier) {
+    private <M> Tab _createTab( @Nullable M m, TabSupplier<M> tabSupplier ) {
         if (m == null)
             return UIForTabbedPane.TAB_NULL;
 
         try {
-            return tabSupplier.createTabFor(m);
+            Tab tab = tabSupplier.createTabFor(m);
+            if ( tab == null ) {
+                log.warn("Tab supplier returned null for '{}'.", m, new Throwable());
+                return UIForTabbedPane.TAB_NULL;
+            }
+            return tab;
         } catch (Exception e) {
             log.error("Error while creating tab for '{}'.", m, e);
             return UIForTabbedPane.TAB_ERROR;

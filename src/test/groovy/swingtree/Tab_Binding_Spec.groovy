@@ -1,15 +1,17 @@
 package swingtree
 
+import spock.lang.Narrative
+import spock.lang.Specification
+import spock.lang.Title
+import sprouts.Var
 import sprouts.Vars
 import swingtree.api.IconDeclaration
 import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
-import sprouts.Var
-import spock.lang.Narrative
-import spock.lang.Specification
-import spock.lang.Title
+import utility.Utility
 
-import javax.swing.JTabbedPane
+import javax.swing.*
+import java.time.DayOfWeek
 
 @Title("Binding Tabs to Properties")
 @Narrative('''
@@ -216,76 +218,250 @@ class Tab_Binding_Spec extends Specification
             tabbedPane.getToolTipTextAt(0) == "I am a new tooltip!"
     }
 
+    def 'Content rich tabs can be represented dynamically from property lists.'() {
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you want to
+            be able to swap out sub views at runtime. In this case it is useful
+            to represent your view models as property lists, especially if 
+            one view consists of multiple sub views.
+            
+            This is also true for the tabbed pane, whose sub-views
+            are the tabs!
+            To make this possible implement the 'TabSupplier' interface so
+            you can bind it to a view using the "Vars" class wrapping your tabs.
+            When the property list changes, the view will be updated automatically.
+        """
+        given : 'We create a view model.'
+            Var<String> address = Var.of("123 Main Street")
+            Var<String> title = Var.of("Mr.")
+            Var<Integer> price = Var.of(1000000)
+            Var<DayOfWeek> day = Var.of(DayOfWeek.MONDAY)
+
+        and : 'We create 4 view models with 4 locally created views:'
+            var vm1 = "Dummy View Model 1"
+            var vm2 = "Dummy View Model 2"
+            var vm3 = "Dummy View Model 3"
+            var vm4 = "Dummy View Model 4"
+            TabSupplier<String> viewer = viewModel -> {
+                switch ( viewModel ) {
+                    case "Dummy View Model 1":
+                            return UI.tab("T1").add(
+                                        UI.panel().id("sub-1")
+                                        .add(UI.label("Address:"))
+                                        .add(UI.textField(address))
+                                        .add(UI.button("Update").onClick( it -> address.set("456 Main Street") ))
+                                    )
+                    case "Dummy View Model 2":
+                            return UI.tab("T2").add(
+                                        UI.panel().id("sub-2")
+                                        .add(UI.label("Title:"))
+                                        .add(UI.textField(title))
+                                        .add(UI.button("Update").onClick( it -> title.set("Mrs.") ))
+                                    )
+                    case "Dummy View Model 3":
+                            return UI.tab("T3").add(
+                                        UI.panel().id("sub-3")
+                                        .add(UI.label("Price:"))
+                                        .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                        .add(UI.button("Update").onClick( it -> price.set(2000000.0) ))
+                                    )
+                    case "Dummy View Model 4":
+                                return UI.tab("T4").add(
+                                        UI.panel().id("sub-4")
+                                        .add(UI.label("Option:"))
+                                        .add(UI.comboBox(day, DayOfWeek.values()))
+                                        .add(UI.button("Update").onClick( it -> day.set(DayOfWeek.WEDNESDAY) ))
+                                    )
+                            }
+                        }
+        and : 'A property list storing the view models.'
+            var vms = Vars.of(vm1, vm2, vm3, vm4)
+        and : 'Finally a view which binds to the view model property list.'
+            var ui = UI.panel()
+                    .add(UI.label("Dynamic Super View:"))
+                    .add(UI.tabbedPane().id("super").add(vms, viewer))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(panel).find(JTabbedPane, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        when : 'We remove something from the view model property list.'
+            vms.remove(vm2)
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" view.'
+            new Utility.Query(panel).find(JTabbedPane, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'We remove something else from the view model property list but this time, for a change, use the index.'
+            vms.removeAt(2) // vm4
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" and "sub-4" views.'
+            new Utility.Query(panel).find(JTabbedPane, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        when : 'We reintroduce "vm2"...'
+            vms.add(vm2)
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-4" view.'
+            new Utility.Query(panel).find(JTabbedPane, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+
+        when : 'We clear the view model property list.'
+            vms.clear()
+            UI.sync()
+        then : 'We expect all views to be removed. (except for the "super" view)'
+            new Utility.Query(panel).find(JTabbedPane, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+    }
+
     def 'You can bind a property list and a tab supplier to dynamically add or remove tabs.'() {
         reportInfo """
             You can bind a string property list and a tab supplier to dynamically add or remove tabs.
         """
         given: 'A string property list, a tab supplier and a tabbed pane UI node.'
-        Vars<String> tabs = Vars.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
-        TabSupplier<String> supplier = (String title) -> UI.tab(title)
-        def tabbedPane =
-                UI.tabbedPane(UI.Side.TOP)
-                        .add(tabs, supplier)
-                        .get(JTabbedPane)
+            Vars<String> tabs = Vars.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+            def tabbedPane =
+                    UI.tabbedPane(UI.Side.TOP)
+                            .add(tabs, supplier)
+                            .get(JTabbedPane)
 
         when: 'We remove the tab at index 1.'
-        tabs.removeAt(1)
-        UI.sync()
+            tabs.removeAt(1)
+            UI.sync()
         then: 'The tabbed pane is updated and the tab removed.'
-        tabbedPane.getTabCount() == tabs.size()
-        tabbedPane.getTitleAt(0) == "Tab 1"
-        tabbedPane.getTitleAt(1) == "Tab 3"
-        tabbedPane.getTitleAt(2) == "Tab 4"
-        tabbedPane.getTitleAt(3) == "Tab 5"
+            tabbedPane.getTabCount() == tabs.size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 3"
+            tabbedPane.getTitleAt(2) == "Tab 4"
+            tabbedPane.getTitleAt(3) == "Tab 5"
 
         when: 'We remove 2 tabs starting from index 1.'
-        tabs.removeAt(1, 2)
-        UI.sync()
+            tabs.removeAt(1, 2)
+            UI.sync()
         then: 'The tabbed pane is updated and the tabs removed.'
-        tabbedPane.getTabCount() == tabs.size()
-        tabbedPane.getTitleAt(0) == "Tab 1"
-        tabbedPane.getTitleAt(1) == "Tab 5"
+            tabbedPane.getTabCount() == tabs.size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 5"
 
         when: 'We update the tab at index 1.'
-        tabs.setAt(1, "Tab 2")
-        UI.sync()
+            tabs.setAt(1, "Tab 2")
+            UI.sync()
         then: 'The tabbed pane is updated and the tab updated.'
-        tabbedPane.getTabCount() == tabs.size()
-        tabbedPane.getTitleAt(0) == "Tab 1"
-        tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTabCount() == tabs.size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
 
         when: 'We add a tab.'
-        tabs.add("Tab 3")
-        UI.sync()
+            tabs.add("Tab 3")
+            UI.sync()
         then: 'The tabbed pane is updated and the tab added.'
-        tabbedPane.getTabCount() == tabs.size()
-        tabbedPane.getTitleAt(0) == "Tab 1"
-        tabbedPane.getTitleAt(1) == "Tab 2"
-        tabbedPane.getTitleAt(2) == "Tab 3"
+            tabbedPane.getTabCount() == tabs.size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTitleAt(2) == "Tab 3"
 
         when: 'We add 2 tabs.'
-        tabs.addAll("Tab 4", "Tab 5")
-        UI.sync()
+            tabs.addAll("Tab 4", "Tab 5")
+            UI.sync()
         then: 'The tabbed pane is updated and the tabs added.'
-        tabbedPane.getTabCount() == tabs.size()
-        tabbedPane.getTitleAt(0) == "Tab 1"
-        tabbedPane.getTitleAt(1) == "Tab 2"
-        tabbedPane.getTitleAt(2) == "Tab 3"
-        tabbedPane.getTitleAt(3) == "Tab 4"
-        tabbedPane.getTitleAt(4) == "Tab 5"
+            tabbedPane.getTabCount() == tabs.size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTitleAt(2) == "Tab 3"
+            tabbedPane.getTitleAt(3) == "Tab 4"
+            tabbedPane.getTitleAt(4) == "Tab 5"
 
         when: 'We insert 1 tab.'
-        tabs.addAt(0, "Tab 0")
-        UI.sync()
+            tabs.addAt(0, "Tab 0")
+            UI.sync()
         then: 'The tabbed pane is updated and the tabs inserted.'
-        tabbedPane.getTabCount() == tabs.size()
-        tabbedPane.getTitleAt(0) == "Tab 0"
-        tabbedPane.getTitleAt(1) == "Tab 1"
-        tabbedPane.getTitleAt(2) == "Tab 2"
-        tabbedPane.getTitleAt(3) == "Tab 3"
-        tabbedPane.getTitleAt(4) == "Tab 4"
-        tabbedPane.getTitleAt(5) == "Tab 5"
+            tabbedPane.getTabCount() == tabs.size()
+            tabbedPane.getTitleAt(0) == "Tab 0"
+            tabbedPane.getTitleAt(1) == "Tab 1"
+            tabbedPane.getTitleAt(2) == "Tab 2"
+            tabbedPane.getTitleAt(3) == "Tab 3"
+            tabbedPane.getTitleAt(4) == "Tab 4"
+            tabbedPane.getTitleAt(5) == "Tab 5"
     }
 
+    def 'An exception in the tab supplier for a model property list, produces an error tab instead.'()
+    {
+        reportInfo """
+            A fundamental requirement when it comes to binding a list of models to
+            a set of UI components is that the number of models and the number of
+            UI components must match. If they do not, the list change listeners 
+            will not know which model corresponds to which UI component.
+            
+            This is why in case of an exception, a sort of dummy tab is created.
+            It indicates that something went wrong and the tab could not be created.
+        """
+        given : 'A property list and a tab supplier that throws an exception.'
+            Vars<String> tabs = Vars.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+            TabSupplier<String> supplier = (String title) -> {
+                if ( title == "Tab 3" ) {
+                    throw new RuntimeException("This tab could not be created!")
+                }
+                return UI.tab(title)
+            }
+        and : 'A UI declaration with a tabbed pane bound to the property list and the tab supplier.'
+            def ui = UI.tabbedPane(UI.Side.TOP).add(tabs, supplier)
 
+        when : 'We build the component.'
+            var tabbedPane = ui.get(JTabbedPane)
+        then : 'First of all, the exception does not leak to the outside.'
+            noExceptionThrown()
+
+        and : 'We expect the tabbed pane to have 5 tabs, even though one of them is an error tab.'
+            tabbedPane.getTabCount() == 5
+        and : 'We expect the error tab to have the correct title.'
+            tabbedPane.getTitleAt(2).contains("Error")
+    }
+
+    def 'If the tab supplier for a model property list return `null`, a null tab is shown instead'()
+    {
+        reportInfo """
+            A fundamental requirement when it comes to binding a list of models to
+            a set of UI components is that the number of models and the number of
+            UI components must match. If they do not, the list change listeners 
+            will not know which model corresponds to which UI component.
+            
+            So in case of a `null` return value, a sort of dummy tab is created and
+            added to the tabbed pane. 
+            It indicates that something went wrong and the tab could not be created.
+        """
+        given : 'A property list and a tab supplier that returns `null`.'
+            Vars<String> tabs = Vars.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+            TabSupplier<String> supplier = (String title) -> {
+                if ( title == "Tab 3" ) {
+                    return null
+                }
+                return UI.tab(title)
+            }
+        and : 'A UI declaration with a tabbed pane bound to the property list and the tab supplier.'
+            def ui = UI.tabbedPane(UI.Side.TOP).add(tabs, supplier)
+
+        when : 'We build the component.'
+            var tabbedPane = ui.get(JTabbedPane)
+        then : 'We expect the tabbed pane to have 5 tabs, even though one of them is a null tab.'
+            tabbedPane.getTabCount() == 5
+        and : 'We expect the null tab to have a title which indicates that content is missing.'
+            tabbedPane.getTitleAt(2).contains("Empty")
+    }
 }
