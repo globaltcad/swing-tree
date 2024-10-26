@@ -441,13 +441,25 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
 
         if ( !isCoupled && !isCoupledStrict && !UI.thisIsUIThread() )
-            throw new IllegalStateException(
+            throw new RuntimeException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +
                     "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
                 );
 
         E childComponent = (E) builder.getComponent();
+
+        if ( childComponent.getParent() != null )
+            log.warn(
+                "Trying to add component '{}' to this container " +
+                "despite it already being part of another container.\n" +
+                "Adding it to this '{}' will implicitly remove it from its current container. " +
+                "This side effect may not be intended!\n" +
+                "If it is, please make this intention explicit by removing " +
+                "the component from its current container first.",
+                childComponent.getClass(), _state().componentType(),
+                new Throwable()
+            );
 
         if ( childComponent instanceof JComponent ) {
             JComponent child = (JComponent) childComponent;
