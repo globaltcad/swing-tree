@@ -16,6 +16,7 @@ import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.*;
 import swingtree.api.mvvm.ViewSupplier;
+import swingtree.components.JBox;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.LayoutConstraint;
@@ -4819,6 +4820,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _addViewableProps( viewables, null, viewSupplier, thisComponent );
                 })
@@ -4934,12 +4936,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         _clearComponentsOf(c);
                         // and then we add all the components.
                         for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, c );
+                            _addComponentAt( i, delegate.vals().at(i).orElseNull(), viewSupplier, attr, c );
                     }
                     else {
                         for ( int i = 0; i < newValues.size(); i++ ) {
                             int position = i + delegate.index();
-                            _addComponentAt(position, newValues.at(i).get(), viewSupplier, attr, c);
+                            _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, c);
                         }
                     }
                     break;
@@ -4994,7 +4996,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 try {
                     view = viewSupplier.createViewFor(viewable.get());
                 } catch ( Exception e ) {
-                    log.error("Error while creating view for '"+viewable.get()+"'.", e);
+                    log.error("Error while creating view for '{}'.", viewable.orElseNull(), e);
                 }
                 if ( view == null )
                     view = UI.box(); // We add a dummy component to the list of children.
@@ -5008,7 +5010,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 try {
                     view = viewSupplier.createViewFor(viewable.get());
                 } catch ( Exception e ) {
-                    log.error("Error while creating view for '"+viewable.get()+"'.", e);
+                    log.error("Error while creating view for '{}'.", viewable.orElseNull(), e);
                 }
                 if ( view == null )
                     view = UI.box(); // We add a dummy component to the list of children.
@@ -5023,7 +5025,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M> void _updateComponentAt(
         int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C c
     ) {
-        JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -> {
+        JComponent newComponent;
+        if ( v == null ) {
+            newComponent = new JBox();
+        } else {
             UIForAnySwing<?, ?> view = null;
             try {
                 view = viewSupplier.createViewFor(v);
@@ -5033,8 +5038,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
 
-            return view.get((Class)view.getType());
-        });
+            newComponent = view.get((Class)view.getType());
+        }
         // We remove the old component.
         c.remove(c.getComponent(index));
         // We add the new component.
@@ -5048,9 +5053,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _addComponentAt(
-        int index, M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C thisComponent
+        int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C thisComponent
     ) {
-        Supplier<JComponent> componentSupplier = () -> {
+        JComponent newComponent;
+        if ( v == null ) {
+            newComponent = new JBox();
+        } else {
             UIForAnySwing<?, ?> view = null;
             try {
                 view = viewSupplier.createViewFor(v);
@@ -5060,13 +5068,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
 
-            return view.get((Class)view.getType());
-        };
+            newComponent = view.get((Class)view.getType());
+        }
         // We add the new component.
         if ( attr == null )
-            thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), index);
+            thisComponent.add(newComponent, index);
         else
-            thisComponent.add(UI.use(_state().eventProcessor(), componentSupplier), attr.toConstraintForLayoutManager(), index);
+            thisComponent.add(newComponent, attr.toConstraintForLayoutManager(), index);
         // We update the layout.
         thisComponent.revalidate();
         thisComponent.repaint();
