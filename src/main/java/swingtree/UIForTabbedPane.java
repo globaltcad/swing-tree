@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
+import sprouts.Vals;
 import sprouts.Var;
+import swingtree.api.mvvm.TabSupplier;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -33,6 +35,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 {
     private static final Logger log = LoggerFactory.getLogger(UIForTabbedPane.class);
 
+    private static final Tab TAB_ERROR = UI.tab("Error Tab");
+    private static final Tab TAB_NULL = UI.tab("Empty Tab");
 
     private final BuilderState<P> _state;
 
@@ -53,7 +57,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     protected BuilderState<P> _state() {
         return _state;
     }
-    
+
     @Override
     protected UIForTabbedPane<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForTabbedPane<>(newState);
@@ -442,6 +446,98 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         ._this();
     }
 
+    /**
+     * Dynamically generates tabs for items in a {@link Vals} list and automatically updates them
+     * when the items change. The items are typically view model instances, but can be any type.
+     * <p>
+     * The provided {@link TabSupplier} lambda is invoked with each item from the list,
+     * returning a {@link Tab} to be added to the {@link JTabbedPane} wrapped by this builder.
+     * <p>
+     * <b>Note:</b> Binding tabs to a {@link Vals} list assumes no other tabs are present.
+     * <p>
+     * <b>Usage:</b>
+     * <pre>{@code
+     *     UI.panel()
+     *      .add(
+     *          UI.tabbedPane().add(tabs, model ->
+     *              switch(model.type()) {
+     *                  case LOGIN -> UI.tab("Login").add(..);
+     *                  case ABOUT -> UI.tab("About").add(..);
+     *                  case SETTINGS -> UI.tab("Settings").add(..);
+     *              }
+     *          )
+     *      )
+     * }</pre>
+     *
+     * @param <M>         The type of items in the {@link Vals} list.
+     * @param tabModels   A list of items, typically view model instances.
+     * @param tabSupplier A lambda to generate a {@link Tab} for each item.
+     * @return This instance, allowing for builder-style method chaining.
+     */
+    public <M> UIForTabbedPane<P> add(Vals<M> tabModels, TabSupplier<M> tabSupplier) {
+        Objects.requireNonNull(tabModels, "tabModels");
+        Objects.requireNonNull(tabSupplier, "tabSupplier");
+        return _with(thisComponent -> {
+            if ( thisComponent.getTabCount() > 0 ) {
+                log.warn(
+                    "Trying to bind a list of tabs to a tabbed pane that already has tabs. \n" +
+                    "Manually defined tabs existing along with bound tabs is not supported. \n" +
+                    "The manually defined tabs will be removed now!",
+                    new Throwable() // Stack trace so that a user can see where this warning was triggered.
+                );
+                _doWithoutListeners(thisComponent, thisComponent::removeAll);
+            }
+            _onShow(tabModels, thisComponent, (p, delegate) -> {
+                Vals<M> newValues = delegate.newValues();
+                Vals<M> oldValues = delegate.oldValues();
+
+                switch (delegate.changeType()) {
+                    case SET:
+                        for (int i = 0; i < newValues.size(); i++) {
+                            int position = delegate.index() + i;
+                            _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, p);
+                        }
+                        break;
+                    case ADD:
+                        for (int i = 0; i < newValues.size(); i++) {
+                            int position = delegate.index() + i;
+                            _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, p);
+                        }
+                        break;
+                    case REMOVE:
+                        for (int i = 0; i < oldValues.size(); i++) {
+                            _removeTabAt(delegate.index(), p);
+                        }
+                        break;
+                    case CLEAR:
+                        p.removeAll();
+                        break;
+                    case NONE:
+                        break;
+                    default:
+                        throw new IllegalStateException("Unknown type: " + delegate.changeType());
+                }
+
+                if (p.getTabCount() != delegate.vals().size()) {
+                    log.warn(
+                        "Broken binding to view model list detected! \n" +
+                        "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
+                        "A possible cause for this is that tabs were {} this '{}' \n" +
+                        "directly, instead of through the property list binding. \n" +
+                        "However, this could also be a bug in the UI framework.",
+                        p.getComponentCount(),
+                        delegate.vals().size(),
+                        p.getTabCount() > delegate.vals().size() ? "added to" : "removed from",
+                        p,
+                        new Throwable()
+                    );
+                }
+            });
+
+            tabModels.forEach(v -> _addTabAt(thisComponent.getTabCount(), v, tabSupplier, thisComponent));
+        })._this();
+    }
+
     private void _doWithoutListeners( P thisComponent, Runnable r ) {
         ChangeListener[] listeners = thisComponent.getChangeListeners();
         for ( ChangeListener l : listeners ) thisComponent.removeChangeListener(l);
@@ -615,6 +711,91 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         thisComponent.addChangeListener(action::accept);
     }
 
+    private <M> void _addTabAt(int index, @Nullable M m, TabSupplier<M> tabSupplier, P p) {
+        Tab tab = _createTab(m, tabSupplier);
+
+        JComponent dummyContent = new JPanel();
+        WeakReference<P> paneRef = new WeakReference<>(p);
+        WeakReference<JComponent> contentRef = new WeakReference<>(tab.contents().orElse(dummyContent));
+        Supplier<Integer> indexFinder = _indexFinderFor(paneRef, contentRef);
+
+        tab.onSelection()
+            .ifPresent(onSelection ->
+                p.addChangeListener(e -> {
+                    JTabbedPane tabbedPane = paneRef.get();
+                    if (tabbedPane == null) return;
+                    int i = indexFinder.get();
+                    if (i >= 0 && i == tabbedPane.getSelectedIndex())
+                        _runInApp(() -> {
+                            try {
+                                onSelection.accept(new ComponentDelegate<>(tabbedPane, e));
+                            } catch (Exception ex) {
+                                log.error("Error while executing action on tab selection!", ex);
+                            }
+                        });
+                })
+            );
+
+        TabMouseClickListener mouseListener = new TabMouseClickListener(p, indexFinder, tab.onMouseClick().orElse(null));
+
+        // Initial tab setup:
+        p.insertTab(
+            tab.title().map(Val::orElseNull).orElse(null),
+            tab.icon().map(Val::orElseNull).orElse(null),
+            tab.contents().orElse(dummyContent),
+            tab.tip().map(Val::orElseNull).orElse(null),
+            index
+        );
+        tab.isEnabled().ifPresent(isEnabled -> p.setEnabledAt(indexFinder.get(), isEnabled.get()));
+        tab.isSelected().ifPresent(isSelected -> {
+            ExtraState state = ExtraState.of(p);
+            _selectTab(p, indexFinder.get(), isSelected.get());
+            if (isSelected instanceof Var && isSelected.isMutable()) {
+                Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
+                state.selectionListeners.add(i -> isSelectedMut.set(From.VIEW, Objects.equals(i, indexFinder.get())));
+            }
+            /*
+                The above listener will ensure that the isSelected property of the tab is updated when
+                the selection index property changes.
+             */
+        });
+
+        // Now on to binding:
+        tab.title().ifPresent(title -> _onShow(title, p, (c, t) -> c.setTitleAt(indexFinder.get(), t)));
+        tab.icon().ifPresent(icon -> _onShow(icon, p, (c, i) -> c.setIconAt(indexFinder.get(), i)));
+        tab.tip().ifPresent(tip -> _onShow(tip, p, (c, t) -> c.setToolTipTextAt(indexFinder.get(), t)));
+        tab.isEnabled().ifPresent(enabled -> _onShow(enabled, p, (c, e) -> c.setEnabledAt(indexFinder.get(), e)));
+        tab.isSelected().ifPresent(isSelected -> _onShow(isSelected, p, (c, s) -> _selectTab(c, indexFinder.get(), s)));
+
+        tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));
+    }
+
+    private <M> void _updateTabAt(int index, @Nullable M m, TabSupplier<M> tabSupplier, P p) {
+        _removeTabAt(index, p);
+        _addTabAt(index, m, tabSupplier, p);
+    }
+
+    private void _removeTabAt(int index, P p) {
+        p.removeTabAt(index);
+    }
+
+    private <M> Tab _createTab( @Nullable M m, TabSupplier<M> tabSupplier ) {
+        if (m == null)
+            return UIForTabbedPane.TAB_NULL;
+
+        try {
+            Tab tab = tabSupplier.createTabFor(m);
+            if ( tab == null ) {
+                log.warn("Tab supplier returned null for '{}'.", m, new Throwable());
+                return UIForTabbedPane.TAB_NULL;
+            }
+            return tab;
+        } catch (Exception e) {
+            log.error("Error while creating tab for '{}'.", m, e);
+            return UIForTabbedPane.TAB_ERROR;
+        }
+    }
+
     private static class ExtraState extends DefaultSingleSelectionModel
     {
         static ExtraState of( JTabbedPane pane ) {
@@ -624,7 +805,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
         private @Nullable Var<Integer> selectedTabIndex = null;
-        
+
         @Override public void setSelectedIndex(int index) {
             super.setSelectedIndex(index);
             if ( selectedTabIndex != null )
