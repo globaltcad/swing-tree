@@ -89,7 +89,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
             }
             ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);
             if ( constraints != null ) {
-                wrapper.add(addedComponent, constraints);
+                wrapper.add(addedComponent, constraints.toConstraintForLayoutManager());
             } else {
                 wrapper.add(addedComponent, "grow");
                 /*

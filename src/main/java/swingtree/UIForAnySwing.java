@@ -4659,7 +4659,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             thisComponent.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
         for ( UIForAnySwing<?, ?> b : builders )
-            _addBuilderTo(thisComponent, b, ()->constraints);
+            _addBuilderTo(thisComponent, b, attr);
     }
 
     /**
@@ -4779,7 +4779,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private final <E extends JComponent> void _addComponentsTo( C thisComponent, AddConstraint attr, E... components ) {
         for ( E component : components ) {
             NullUtil.nullArgCheck(component, "component", JComponent.class);
-            _addBuildersTo( thisComponent, ()->attr, new UIForSwing[]{UI.of(component)} );
+            _addBuildersTo( thisComponent, attr, new UIForSwing[]{UI.of(component)} );
         }
     }
 
