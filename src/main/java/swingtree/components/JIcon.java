@@ -5,22 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.From;
 import sprouts.Val;
-import swingtree.SwingTree;
+import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
-import swingtree.style.ScalableImageIcon;
 import swingtree.style.StylableComponent;
-import swingtree.style.SvgIcon;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.plaf.ComponentUI;
 import java.awt.Graphics;
-import java.awt.Image;
-import java.util.Map;
 
 /**
  *  A {@link JLabel} subclass specifically designed to display icons only.
@@ -81,8 +77,8 @@ public class JIcon extends JLabel implements StylableComponent
         dynamicIcon = null;
     }
 
-    public JIcon(Val<IconDeclaration> declaration) {
-        declaration.onChange(From.ALL, it -> {
+    public JIcon( Val<IconDeclaration> declaration ) {
+        Viewable.cast(declaration).onChange(From.ALL, it -> {
             UI.runNow(()->{
                 setIcon(_getFromCacheOrLoadFrom(it.get()));
             });

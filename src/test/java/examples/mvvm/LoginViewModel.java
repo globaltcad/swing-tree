@@ -3,6 +3,7 @@ package examples.mvvm;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
+import sprouts.Viewable;
 
 import java.awt.Color;
 
@@ -11,8 +12,8 @@ import java.awt.Color;
  */
 public class LoginViewModel
 {
-    private final Var<String> username = Var.of( "" ).onChange(From.VIEW, v -> validate() );
-    private final Var<String> password = Var.of( "" ).onChange(From.VIEW, v -> validate() );
+    private final Var<String> username = Var.of( "" );
+    private final Var<String> password = Var.of( "" );
     private final Var<String> feedback = Var.of( "" );
     private final Var<Boolean> buttonEnabled = Var.of( false );
     private final Var<String> buttonText = Var.of( "Login" );
@@ -20,6 +21,11 @@ public class LoginViewModel
     private final Var<Color> validityColor = Var.of( Color.WHITE );
 
     private Form finalForm = null;
+
+    public LoginViewModel() {
+        Viewable.cast(username).onChange(From.VIEW, it -> validate() );
+        Viewable.cast(password).onChange(From.VIEW, it -> validate() );
+    }
 
     public Var<String> username()       { return username;      }
     public Var<String> password()       { return password;      }

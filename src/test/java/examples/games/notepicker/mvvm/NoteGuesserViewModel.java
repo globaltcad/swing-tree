@@ -1,9 +1,6 @@
 package examples.games.notepicker.mvvm;
 
-import sprouts.Event;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Var;
+import sprouts.*;
 import swingtree.UI;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationStatus;
@@ -26,10 +23,17 @@ public class NoteGuesserViewModel
     private final Var<Color>   feedbackColor = Var.of(Color.WHITE);
     private final Var<Integer> feedbackFontSize = Var.of(24);
     private final Var<Integer> currentNoteIndex = Var.of(0);
-    private final Var<Boolean> playMode = Var.of(false).onChange(From.VIEW, it -> activatedPlayMode(it.get()) );
+    private final Var<Boolean> playMode = Var.of(false);
 
     private final Var<Integer> score = Var.of(0);
     private final Val<Integer> level = score.view( s -> s / 10 );
+
+
+    public NoteGuesserViewModel() {
+        Viewable.cast(playMode).onChange(From.VIEW, it -> activatedPlayMode(it.get()));
+        loadScore();
+        newRandomNoteIndex();
+    }
 
     public Event getRepaintEvent() { return repaint; }
 
@@ -47,11 +51,6 @@ public class NoteGuesserViewModel
 
     public Val<Integer> level() { return level; }
 
-
-    public NoteGuesserViewModel() {
-        loadScore();
-        newRandomNoteIndex();
-    }
 
     private void loadScore() {
         try {

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import sprouts.From;
 import sprouts.Var;
 import sprouts.Vars;
+import sprouts.Viewable;
 import swingtree.UI;
 
 import javax.swing.JPanel;
@@ -26,7 +27,7 @@ public class ListTestExample extends JPanel {
             "string3"
         );
 
-        selectedFile.onChange(From.ALL, it -> {
+        Viewable.cast(selectedFile).onChange(From.ALL, it -> {
             log.info("Selected file: " + it);
         });
 

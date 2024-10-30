@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
+import sprouts.Viewable;
 import swingtree.UI;
 
 import javax.swing.JPanel;
@@ -91,7 +92,7 @@ public final class KanaPickerView extends Panel
             .add(SPAN.and(WRAP).and(ALIGN_CENTER),
                 panel(INS(5)).peek( p -> {
                     buildAlphabetPanel(p, alphabets, vm);
-                    alphabets.onChange(From.ALL, it -> {
+                    Viewable.cast(alphabets).onChange(From.ALL, it -> {
                         p.removeAll();
                         buildAlphabetPanel(p, alphabets, vm);
                         p.revalidate();

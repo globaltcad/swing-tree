@@ -2,10 +2,7 @@ package swingtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.Action;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Var;
+import sprouts.*;
 
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
@@ -155,7 +152,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         Var<String> text = Var.of( formatter.apply(number.get()) );
         return ((UIForTextField<F>)_with( thisComponent -> {
                     _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, formatter.apply(n) ) );
-                    text.onChange(From.VIEW,  s -> {
+                    Viewable.cast(text).onChange(From.VIEW, s -> {
                         try {
                             if ( number.type() == Integer.class )
                                 number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );
