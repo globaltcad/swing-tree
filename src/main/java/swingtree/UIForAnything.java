@@ -703,7 +703,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
             public void accept( ValsDelegate<T> delegate ) {
                 C thisComponent = ref.get();
                 if ( thisComponent == null ) {
-                    properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    Viewables.cast(properties).unsubscribe(this); // We unsubscribe from the property if the component is disposed.
                     return;
                 }
                 _runInUI(() ->{
@@ -716,8 +716,8 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                 });
             }
         };
-        properties.onChange(action);
-        CustomCleaner.getInstance().register(ref.get(), () -> properties.unsubscribe(action));
+        Viewables.cast(properties).onChange(action);
+        CustomCleaner.getInstance().register(ref.get(), () -> Viewables.cast(properties).unsubscribe(action));
     }
 
     /**
