@@ -621,31 +621,42 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         return Optional.of(newSize);
     }
 
-    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, ParentSizeClass targetSize ) {
-        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
-            if ( autoSpan.parentSize() == targetSize ) {
-                return Optional.of(autoSpan);
-            }
-        }
+    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan( FlowCellConf cell, ParentSizeClass targetSize ) {
+        Optional<FlowCellSpanPolicy> autoSpan = _find(targetSize.ordinal(), cell);
+        if ( autoSpan.isPresent() )
+            return autoSpan;
+
         // We did not find the exact match. Let's try to find the closest match.
 
-        ParentSizeClass[] values = ParentSizeClass.values();
+        int numberOfSizeClasses = ParentSizeClass.values().length;
         int targetOrdinal = targetSize.ordinal();
         /*
             We want to find the enum value which is closed to the target ordinal.
          */
-        int sign = ( targetSize.ordinal() > values.length/2 ? -1 : 1 );
-        for ( int offset = 1; offset < values.length; offset++ ) {
-            int nextOrdinal = targetOrdinal + offset * sign;
-            if ( nextOrdinal > 0 && nextOrdinal < values.length ) {
-                ParentSizeClass next = values[nextOrdinal];
-                for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
-                    if ( autoSpan.parentSize() == next ) {
-                        return Optional.of(autoSpan);
-                    }
-                }
-            }
+        int sign = ( targetSize.ordinal() > numberOfSizeClasses / 2 ? 1 : -1 );
+        for ( int offset = 1; offset < numberOfSizeClasses; offset++ ) {
             sign = -sign;
+            autoSpan = _find(targetOrdinal + offset * sign, cell);
+            if ( autoSpan.isPresent() )
+                return autoSpan;
+
+            sign = -sign;
+            autoSpan = _find(targetOrdinal + offset * sign, cell);
+            if ( autoSpan.isPresent() )
+                return autoSpan;
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<FlowCellSpanPolicy> _find( int ordinal, FlowCellConf cell ) {
+        if ( ordinal < 0 || ordinal >= ParentSizeClass.values().length ) {
+            return Optional.empty();
+        }
+        ParentSizeClass targetSize = ParentSizeClass.values()[ordinal];
+        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
+            if ( autoSpan.parentSize() == targetSize ) {
+                return Optional.of(autoSpan);
+            }
         }
         return Optional.empty();
     }
