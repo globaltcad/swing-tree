@@ -230,6 +230,20 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
     }
 
     /**
+     *  Sets the placeholder text of this text field to a static string.
+     *  The placeholder text will not change.<br>
+     *  Use {@link #withPlaceholder(Val)} to bind the placeholder text to a {@link Val} property,
+     *  so that the placeholder text can change dynamically when the property state changes.
+     *
+     * @param placeholder The placeholder text to set.
+     * @return This UI builder node, to allow for method chaining.
+     */
+    public final UIForTextField<F> withPlaceholder( String placeholder ) {
+        Objects.requireNonNull(placeholder);
+        return this.withPlaceholder(Val.of(placeholder));
+    }
+
+    /**
      *  Binds the placeholder text of this text field to a {@link Val} property.
      *  When the item of the {@link Val} property changes, the placeholder text will be
      *  updated accordingly.
