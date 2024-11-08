@@ -133,7 +133,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullArgCheck(formatter, "formatter", Function.class);
         Var<Boolean> isValid = Var.of(true);
-        return withNumber( number, isValid, Object::toString );
+        return withNumber( number, isValid, formatter );
     }
 
     /**
