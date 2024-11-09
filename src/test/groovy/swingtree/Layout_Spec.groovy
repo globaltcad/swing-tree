@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.layout.FlowCell
 import swingtree.layout.ResponsiveGridFlowLayout
+import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
 import javax.swing.JPanel
@@ -87,7 +88,7 @@ class Layout_Spec extends Specification
     }
 
     def 'The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`.'(
-        UI.HorizontalAlignment alignment, int horizontalGap, int verticalGap
+        UI.HorizontalAlignment alignment, int horizontalGap, int verticalGap, Size prefSize
     ) {
         reportInfo """
             Without any additional configuration, the `ResponsiveGridFlowLayout` should
@@ -100,7 +101,7 @@ class Layout_Spec extends Specification
         given : 'Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.'
             var ourFlowPanel =
                         UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)
-                        .withPrefSize(100, 200)
+                        .withPrefSize(prefSize)
                         .add(UI.box().withPrefSize(10, 20))
                         .add(UI.box().withPrefSize(20, 20))
                         .add(UI.box().withPrefSize(30, 20))
@@ -109,7 +110,7 @@ class Layout_Spec extends Specification
                         .get(JPanel)
             var regularFlowPanel =
                         UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))
-                        .withPrefSize(100, 200)
+                        .withPrefSize(prefSize)
                         .add(UI.box().withPrefSize(10, 20))
                         .add(UI.box().withPrefSize(20, 20))
                         .add(UI.box().withPrefSize(30, 20))
@@ -133,19 +134,33 @@ class Layout_Spec extends Specification
             ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()
             ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()
         where :
-            alignment                      | horizontalGap | verticalGap
-            UI.HorizontalAlignment.LEFT    | 0             | 0
-            UI.HorizontalAlignment.LEFT    | 0             | 5
-            UI.HorizontalAlignment.LEFT    | 5             | 0
-            UI.HorizontalAlignment.LEFT    | 5             | 5
-            UI.HorizontalAlignment.CENTER  | 0             | 0
-            UI.HorizontalAlignment.CENTER  | 0             | 5
-            UI.HorizontalAlignment.CENTER  | 5             | 0
-            UI.HorizontalAlignment.CENTER  | 5             | 5
-            UI.HorizontalAlignment.RIGHT   | 0             | 0
-            UI.HorizontalAlignment.RIGHT   | 0             | 5
-            UI.HorizontalAlignment.RIGHT   | 5             | 0
-            UI.HorizontalAlignment.RIGHT   | 5             | 5
+            alignment                      | horizontalGap | verticalGap | prefSize
+
+            UI.HorizontalAlignment.LEFT    | 0             | 0           | Size.of(100, 200)
+            UI.HorizontalAlignment.LEFT    | 0             | 5           | Size.of(100, 200)
+            UI.HorizontalAlignment.LEFT    | 5             | 0           | Size.of(100, 200)
+            UI.HorizontalAlignment.LEFT    | 5             | 5           | Size.of(100, 200)
+            UI.HorizontalAlignment.CENTER  | 0             | 0           | Size.of(100, 200)
+            UI.HorizontalAlignment.CENTER  | 0             | 5           | Size.of(100, 200)
+            UI.HorizontalAlignment.CENTER  | 5             | 0           | Size.of(100, 200)
+            UI.HorizontalAlignment.CENTER  | 5             | 5           | Size.of(100, 200)
+            UI.HorizontalAlignment.RIGHT   | 0             | 0           | Size.of(100, 200)
+            UI.HorizontalAlignment.RIGHT   | 0             | 5           | Size.of(100, 200)
+            UI.HorizontalAlignment.RIGHT   | 5             | 0           | Size.of(100, 200)
+            UI.HorizontalAlignment.RIGHT   | 5             | 5           | Size.of(100, 200)
+
+            UI.HorizontalAlignment.LEFT    | 0             | 0           | Size.of(200, 100)
+            UI.HorizontalAlignment.LEFT    | 0             | 5           | Size.of(200, 100)
+            UI.HorizontalAlignment.LEFT    | 5             | 0           | Size.of(200, 100)
+            UI.HorizontalAlignment.LEFT    | 5             | 5           | Size.of(200, 100)
+            UI.HorizontalAlignment.CENTER  | 0             | 0           | Size.of(200, 100)
+            UI.HorizontalAlignment.CENTER  | 0             | 5           | Size.of(200, 100)
+            UI.HorizontalAlignment.CENTER  | 5             | 0           | Size.of(200, 100)
+            UI.HorizontalAlignment.CENTER  | 5             | 5           | Size.of(200, 100)
+            UI.HorizontalAlignment.RIGHT   | 0             | 0           | Size.of(200, 100)
+            UI.HorizontalAlignment.RIGHT   | 0             | 5           | Size.of(200, 100)
+            UI.HorizontalAlignment.RIGHT   | 5             | 0           | Size.of(200, 100)
+            UI.HorizontalAlignment.RIGHT   | 5             | 5           | Size.of(200, 100)
     }
 
     def 'Use the `UI.AUTO_SPAN(..)` factory method to define responsive component constraints.'()
