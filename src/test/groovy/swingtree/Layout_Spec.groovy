@@ -234,4 +234,67 @@ class Layout_Spec extends Specification
             panel.getComponent(3).getBounds() == new Rectangle(10, 100, 20, 20)
     }
 
+    def 'You can configure how the cell of a responsive flow layout is used vertically.'(
+        Size layoutSize, boolean isFill, UI.VerticalAlignment alignInCell, List<List<Integer>> expectedBounds
+    ) {
+        reportInfo """
+            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment
+            of components within their cells. The default vertical alignment is
+            that they are being centered within their cells and their height is
+            determined by the preferred height of the component.
+            
+            However, you can use the `UI.HorizontalAlignment` enum to configure 
+            if the components should stick to the top or bottom of their cells.
+            If you want the components to fill the entire height of their cells,
+            you can set the `fill` property to `true`.
+            
+            In this unit test, we will demonstrate how the vertical alignment
+            of components within their cells can be configured.
+        """
+        given : 'A panel with components that have responsive cell span constraints.'
+            var ui =
+                          UI.panel("ins 0").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)
+                          .withPrefSize(120, 200)
+                          .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),
+                                UI.box().withPrefHeight(10)
+                          )
+                          .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),
+                              UI.box().withPrefHeight(20)
+                          )
+                          .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),
+                              UI.box().withPrefHeight(30)
+                          )
+                          .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),
+                              UI.box().withPrefHeight(40)
+                          )
+        and : 'We construct the actual panel component and unpack the expected bounds:'
+            var panel = ui.get(JPanel)
+            var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])
+            var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])
+            var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])
+            var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])
+
+        when : 'We trigger the layout manager to do its job based on the targeted size.'
+            panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))
+            panel.doLayout()
+        then : 'The components span the correct number of cells in the grid.'
+            panel.getComponent(0).getBounds() == bounds1
+            panel.getComponent(1).getBounds() == bounds2
+            panel.getComponent(2).getBounds() == bounds3
+            panel.getComponent(3).getBounds() == bounds4
+
+        where :
+            layoutSize       | isFill | alignInCell                    || expectedBounds
+
+            Size.of(120,200) | false  | UI.VerticalAlignment.UNDEFINED || [[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.CENTER    || [[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.TOP       || [[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.BOTTOM    || [[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]
+
+            Size.of(120,200) | true   | UI.VerticalAlignment.UNDEFINED || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.CENTER    || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.TOP       || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
+    }
+
 }
