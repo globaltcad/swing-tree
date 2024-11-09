@@ -1,6 +1,8 @@
 
 package swingtree.layout;
 
+import net.miginfocom.layout.LC;
+import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,6 +318,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * Centers the elements in the specified row, if there is any slack.
      *
      * @param target      the component which needs to be moved
+     * @param cells       an array of cells, one for each component of the target
      * @param x           the x coordinate
      * @param y           the y coordinate
      * @param width       the width dimensions
@@ -329,10 +332,13 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      *                    useBaseline is true.
      * @return actual row height
      */
-    private int moveComponents(Container target, int x, int y, int width, int height,
-                               int rowStart, int rowEnd, boolean ltr,
-                               boolean useBaseline, @Nullable int[] ascent,
-                               @Nullable int[] descent) {
+    private int moveComponents(
+            Container target, Cell[] cells,
+            int x, int y, int width, int height,
+            int rowStart, int rowEnd, boolean ltr,
+            boolean useBaseline, @Nullable int[] ascent,
+            @Nullable int[] descent
+    ) {
         int hgap = UI.scale(_horizontalGapSize);
         switch (_alignmentCode) {
             case LEFT:
@@ -375,11 +381,23 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         for (int i = rowStart; i < rowEnd; i++) {
             Component m = target.getComponent(i);
             if (m.isVisible()) {
+                Optional<FlowCellConf> optionalFlowCellConf = cells[i].flowCell();
+                boolean fillHeight = optionalFlowCellConf.map(FlowCellConf::fill).orElse(false);
+                UI.VerticalAlignment verticalAlignment = optionalFlowCellConf.map(FlowCellConf::verticalAlignment).orElse(UI.VerticalAlignment.CENTER);
                 int cy;
                 if (ascent != null && useBaseline && ascent[i] >= 0) {
                     cy = y + baselineOffset + maxAscent - ascent[i];
                 } else {
-                    cy = y + (height - m.getHeight()) / 2;
+                    if (fillHeight) {
+                        cy = y;
+                    } else {
+                        if ( verticalAlignment == UI.VerticalAlignment.TOP )
+                            cy = y;
+                        else if ( verticalAlignment == UI.VerticalAlignment.BOTTOM )
+                            cy = y + height - m.getHeight();
+                        else // centered:
+                            cy = y + (height - m.getHeight()) / 2;
+                    }
                 }
                 if (ltr) {
                     m.setLocation(x, cy);
@@ -387,6 +405,10 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                     m.setLocation(target.getWidth() - x - m.getWidth(), cy);
                 }
                 x += m.getWidth() + hgap;
+
+                if ( fillHeight ) {
+                    m.setSize(m.getWidth(), height);
+                }
             }
         }
         return height;
@@ -455,9 +477,12 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                         x += d.width;
                         rowh = Math.max(rowh, d.height);
                     } else {
-                        rowh = moveComponents(target, insets.left + hgap, y,
+                        rowh = moveComponents(
+                                target, cells,
+                                insets.left + hgap, y,
                                 maxwidth - x, rowh, start, i, ltr,
-                                useBaseline, ascent, descent);
+                                useBaseline, ascent, descent
+                        );
                         x = d.width;
                         y += vgap + rowh;
                         rowh = d.height;
@@ -465,8 +490,11 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                     }
                 }
             }
-            moveComponents(target, insets.left + hgap, y, maxwidth - x, rowh,
-                    start, nmembers, ltr, useBaseline, ascent, descent);
+            moveComponents(
+                    target, cells,
+                    insets.left + hgap, y, maxwidth - x, rowh,
+                    start, nmembers, ltr, useBaseline, ascent, descent
+            );
         }
     }
 
@@ -501,7 +529,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                 }
             }
 
-            cells[i] = optionalCell.orElse(new Cell(m, componentsInRow, null));
+            cells[i] = optionalCell.orElse(new Cell(m, componentsInRow, null, null));
 
             double newRowSize = currentRowSize + rowSizeIncrease;
             if ( newRowSize < NUMBER_OF_COLUMNS ) {
@@ -597,10 +625,23 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         // How much preferred width the parent actually fills:
         ParentSizeClass currentParentSizeCategory = ParentSizeClass.of(maxWidth, generalMaxWidth);
 
+        boolean shouldFillHeight = false;
+        LayoutManager childLayout = ( child instanceof JComponent ) ? ((JComponent) child).getLayout() : null;
+        if ( childLayout instanceof MigLayout ) {
+            Object layoutConstraints = ((MigLayout) childLayout).getLayoutConstraints();
+            // If the child has the "fill" or "filly" constraint, we should fill the height.
+            if ( layoutConstraints instanceof String ) {
+                String constraints = (String) layoutConstraints;
+                shouldFillHeight = constraints.contains("fill") || constraints.contains("filly");
+            } else if ( layoutConstraints instanceof LC ) {
+                LC lc = (LC) layoutConstraints;
+                shouldFillHeight = lc.isFillY();
+            }
+        }
         Size parentSize = Size.of(parent.getWidth(), parent.getHeight());
-        FlowCellConf cell = flowCell.fetchConfig(NUMBER_OF_COLUMNS, parentSize, currentParentSizeCategory);
-        Optional<FlowCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cell, currentParentSizeCategory);
-        return autoSpan.map(autoCellSpanPolicy -> new Cell(child, componentCounter, autoCellSpanPolicy));
+        FlowCellConf cellConf = flowCell.fetchConfig(NUMBER_OF_COLUMNS, parentSize, currentParentSizeCategory, shouldFillHeight);
+        Optional<FlowCellSpanPolicy> autoSpan = _findNextBestAutoSpan(cellConf, currentParentSizeCategory);
+        return autoSpan.map(autoCellSpanPolicy -> new Cell(child, componentCounter, autoCellSpanPolicy, cellConf));
     }
 
     private Optional<Dimension> _dimensionsFromCellConf( Cell cell, int maxWidth ) {
@@ -621,47 +662,65 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         return Optional.of(newSize);
     }
 
-    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan(FlowCellConf cell, ParentSizeClass targetSize ) {
-        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
-            if ( autoSpan.parentSize() == targetSize ) {
-                return Optional.of(autoSpan);
-            }
-        }
+    private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan( FlowCellConf cell, ParentSizeClass targetSize ) {
+        Optional<FlowCellSpanPolicy> autoSpan = _find(targetSize.ordinal(), cell);
+        if ( autoSpan.isPresent() )
+            return autoSpan;
+
         // We did not find the exact match. Let's try to find the closest match.
 
-        ParentSizeClass[] values = ParentSizeClass.values();
+        int numberOfSizeClasses = ParentSizeClass.values().length;
         int targetOrdinal = targetSize.ordinal();
         /*
             We want to find the enum value which is closed to the target ordinal.
          */
-        int sign = ( targetSize.ordinal() > values.length/2 ? -1 : 1 );
-        for ( int offset = 1; offset < values.length; offset++ ) {
-            int nextOrdinal = targetOrdinal + offset * sign;
-            if ( nextOrdinal > 0 && nextOrdinal < values.length ) {
-                ParentSizeClass next = values[nextOrdinal];
-                for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
-                    if ( autoSpan.parentSize() == next ) {
-                        return Optional.of(autoSpan);
-                    }
-                }
-            }
+        int sign = ( targetSize.ordinal() > numberOfSizeClasses / 2 ? 1 : -1 );
+        for ( int offset = 1; offset < numberOfSizeClasses; offset++ ) {
             sign = -sign;
+            autoSpan = _find(targetOrdinal + offset * sign, cell);
+            if ( autoSpan.isPresent() )
+                return autoSpan;
+
+            sign = -sign;
+            autoSpan = _find(targetOrdinal + offset * sign, cell);
+            if ( autoSpan.isPresent() )
+                return autoSpan;
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<FlowCellSpanPolicy> _find( int ordinal, FlowCellConf cell ) {
+        if ( ordinal < 0 || ordinal >= ParentSizeClass.values().length ) {
+            return Optional.empty();
+        }
+        ParentSizeClass targetSize = ParentSizeClass.values()[ordinal];
+        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {
+            if ( autoSpan.parentSize() == targetSize ) {
+                return Optional.of(autoSpan);
+            }
         }
         return Optional.empty();
     }
 
     private static final class Cell {
 
-        final Component component;
-        final @Nullable FlowCellSpanPolicy autoSpan;
+        private final Component component;
+        private final @Nullable FlowCellSpanPolicy autoSpan;
+        private final @Nullable FlowCellConf cellConf;
 
         private AtomicInteger numberOfComponents;
 
 
-        Cell(Component component, AtomicInteger componentCounter, @Nullable FlowCellSpanPolicy autoSpan) {
+        Cell(
+                Component component,
+                AtomicInteger componentCounter,
+                @Nullable FlowCellSpanPolicy autoSpan,
+                @Nullable FlowCellConf cellConf
+        ) {
             this.component          = component;
             this.numberOfComponents = componentCounter;
             this.autoSpan           = autoSpan;
+            this.cellConf           = cellConf;
         }
 
         public Component component() {
@@ -670,6 +729,10 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 
         public Optional<FlowCellSpanPolicy> autoSpan() {
             return Optional.ofNullable(autoSpan);
+        }
+
+        public Optional<FlowCellConf> flowCell() {
+            return Optional.ofNullable(cellConf);
         }
 
         public int numberOfComponentsInRow() {

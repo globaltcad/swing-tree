@@ -43,34 +43,59 @@ import java.util.Objects;
  *      Note that the {@link FlowCell} configuration may only take effect if the parent
  *      container has a {@link ResponsiveGridFlowLayout} as a {@link java.awt.LayoutManager} installed.
  *  </b>
+ *  <br><br>
+ *  <p>
+ *  Besides configuring the number of cells to span, you can also
+ *  define how the cell should be filled vertically by the component
+ *  and how the component should be aligned vertically within the cell.<br>
+ *  Use the {@link #fill(boolean)} method to set the fill flag to {@code true}
+ *  if you want the component to fill the cell vertically.<br>
+ *  Use the {@link #align(UI.VerticalAlignment)} method to set the vertical alignment
+ *  of the component within the cell to either {@link UI.VerticalAlignment#TOP},
+ *  {@link UI.VerticalAlignment#CENTER}, or {@link UI.VerticalAlignment#BOTTOM}.
  */
 @Immutable
 public final class FlowCellConf
 {
     private static final Logger log = LoggerFactory.getLogger(FlowCellConf.class);
-    private final int                  _maxCellsToFill;
-    private final Size                 _parentSize;
-    private final ParentSizeClass      _parentSizeCategory;
+    private final int                    _maxCellsToFill;
+    private final Size                   _parentSize;
+    private final ParentSizeClass        _parentSizeCategory;
     @SuppressWarnings("Immutable")
-    private final FlowCellSpanPolicy[] _autoSpans;
+    private final FlowCellSpanPolicy[]   _autoSpans;
+    private final boolean                _fill;
+    private final UI.VerticalAlignment   _verticalAlignment;
 
 
     FlowCellConf(
-        int                  maxCellsToFill,
-        Size                 parentSize,
-        ParentSizeClass parentSizeCategory,
-        FlowCellSpanPolicy[] autoSpans
+            int                  maxCellsToFill,
+            Size                 parentSize,
+            ParentSizeClass      parentSizeCategory,
+            FlowCellSpanPolicy[] autoSpans,
+            boolean              fill,
+            UI.VerticalAlignment alignVertically
     ) {
         _maxCellsToFill     = maxCellsToFill;
         _parentSize         = Objects.requireNonNull(parentSize);
         _parentSizeCategory = Objects.requireNonNull(parentSizeCategory);
         _autoSpans          = Objects.requireNonNull(autoSpans.clone());
+        _fill               = fill;
+        _verticalAlignment = alignVertically;
     }
 
     FlowCellSpanPolicy[] autoSpans() {
         return _autoSpans.clone();
     }
 
+    /**
+     *  Returns the maximum number of cells that a component can span
+     *  in a grid layout managed by a {@link ResponsiveGridFlowLayout}.<br>
+     *  The default value is 12, which is the maximum number of cells in a row
+     *  of the {@link ResponsiveGridFlowLayout}.
+     *  You may use this value to respond to it dynamically in the {@link Configurator}.
+     *
+     *  @return The maximum number of cells that a component can span in a grid layout.
+     */
     public int maxCellsToFill() {
         return _maxCellsToFill;
     }
@@ -113,7 +138,7 @@ public final class FlowCellConf
      *  @param cellsToFill The number of cells to fill.
      *  @return A new {@link FlowCellConf} instance with the given {@link ParentSizeClass} and number of cells to fill.
      */
-    public FlowCellConf with(ParentSizeClass size, int cellsToFill ) {
+    public FlowCellConf with( ParentSizeClass size, int cellsToFill ) {
         Objects.requireNonNull(size);
         if ( cellsToFill < 0 ) {
             log.warn(
@@ -134,7 +159,7 @@ public final class FlowCellConf
         FlowCellSpanPolicy[] autoSpans = new FlowCellSpanPolicy[_autoSpans.length+1];
         System.arraycopy(_autoSpans, 0, autoSpans, 0, _autoSpans.length);
         autoSpans[_autoSpans.length] = FlowCellSpanPolicy.of(size, cellsToFill);
-        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, autoSpans);
+        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, autoSpans, _fill, _verticalAlignment);
     }
 
     /**
@@ -250,13 +275,55 @@ public final class FlowCellConf
         return with(ParentSizeClass.OVERSIZE, span);
     }
 
+    boolean fill() {
+        return _fill;
+    }
+
+    /**
+     *  This flag defines how the grid cell in the flow layout should be filled
+     *  by the component to which this cell configuration belongs.<br>
+     *  The default behavior is to not fill the cell, but rather to align the component
+     *  vertically in the center of the cell and use the component's preferred height.<br>
+     *  If this flag is set to {@code true}, the component will fill the cell vertically
+     *  and use the full height of the cell, which is also the full height of the row.<br>
+     *  Note that this will ignore the component's preferred height!
+     *
+     * @param fill Whether the cell should be filled by the component.
+     * @return A new {@link FlowCellConf} instance with the given fill flag.
+     */
+    public FlowCellConf fill(boolean fill) {
+        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, _autoSpans, fill, _verticalAlignment);
+    }
+
+    UI.VerticalAlignment verticalAlignment() {
+        return _verticalAlignment;
+    }
+
+    /**
+     *  The {@link UI.VerticalAlignment} of a flow cell tells the
+     *  {@link ResponsiveGridFlowLayout} how to place the component
+     *  vertically within the cell.<br>
+     *  So if you want the component to be aligned at the top,
+     *  use {@link UI.VerticalAlignment#TOP}, if you want it to be
+     *  centered, use {@link UI.VerticalAlignment#CENTER}, and if you
+     *  want it to be aligned at the bottom, use {@link UI.VerticalAlignment#BOTTOM}.
+     *
+     * @param alignment The vertical alignment of the component within the cell.
+     * @return A new {@link FlowCellConf} instance with the given vertical alignment policy.
+     */
+    public FlowCellConf align(UI.VerticalAlignment alignment) {
+        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, _autoSpans, _fill, alignment);
+    }
+
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
                     "maxCellsToFill="     + _maxCellsToFill + ", " +
                     "parentSize="         + _parentSize + ", " +
                     "parentSizeCategory=" + _parentSizeCategory + ", " +
-                    "autoSpans="          + _autoSpans.length +
+                    "autoSpans="          + _autoSpans.length + ", " +
+                    "fill="               + _fill + ", " +
+                    "alignVertically="    + _verticalAlignment +
                 "]";
     }
 
@@ -273,11 +340,13 @@ public final class FlowCellConf
             && this._parentSize.equals(that._parentSize)
             && this._parentSizeCategory == that._parentSizeCategory
             && this._autoSpans.length == that._autoSpans.length
-            && Arrays.deepEquals(this._autoSpans, that._autoSpans);
+            && Arrays.deepEquals(this._autoSpans, that._autoSpans)
+            && this._fill == that._fill
+            && this._verticalAlignment == that._verticalAlignment;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_maxCellsToFill, _parentSize, _parentSizeCategory, Arrays.hashCode(_autoSpans));
+        return Objects.hash(_maxCellsToFill, _parentSize, _parentSizeCategory, Arrays.hashCode(_autoSpans), _fill, _verticalAlignment);
     }
 }

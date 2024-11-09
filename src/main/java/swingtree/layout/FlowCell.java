@@ -58,9 +58,13 @@ public final class FlowCell implements AddConstraint
     }
 
     FlowCellConf fetchConfig(
-        int maxCells, Size parentSize, ParentSizeClass parentSizeCategory
+        int maxCells, Size parentSize, ParentSizeClass parentSizeCategory, boolean defaultHeightFill
     ) {
-        FlowCellConf conf = new FlowCellConf(maxCells, parentSize, parentSizeCategory, new FlowCellSpanPolicy[0]);
+        FlowCellConf conf = new FlowCellConf(
+                                    maxCells, parentSize, parentSizeCategory,
+                                    new FlowCellSpanPolicy[0], defaultHeightFill,
+                                    UI.VerticalAlignment.CENTER
+                            );
         try {
             return _configurator.configure(conf);
         } catch (Exception e) {
