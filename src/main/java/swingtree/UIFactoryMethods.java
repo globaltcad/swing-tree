@@ -4638,8 +4638,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
         return new UIForToggleButton<>(new BuilderState<>(JToggleButton.class, UI.ToggleButton::new))
-                .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
-                .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
+                .applyIf(icon.hasID(), it -> it.id(icon.id()))
+                .applyIf(isToggled.hasID(), it -> it.id(isToggled.id()))
                 .withIcon(icon)
                 .isSelectedIf(isToggled);
     }
