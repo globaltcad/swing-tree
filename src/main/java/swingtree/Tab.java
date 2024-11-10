@@ -2,10 +2,7 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
-import sprouts.Action;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Var;
+import sprouts.*;
 import swingtree.api.IconDeclaration;
 
 import javax.swing.Icon;
@@ -136,10 +133,10 @@ public final class Tab
             log.warn("Selection flag already specified!", new Throwable());
 
         Var<Boolean> isSelectedModel = Var.of(state == selectedState.get());
-        selectedState.onChange(From.ALL,  it -> {
+        Viewable.cast(selectedState).onChange(From.ALL, it -> {
             isSelectedModel.set(it.channel(), state == it.get());
         });
-        isSelectedModel.onChange(From.ALL,  it -> {
+        Viewable.cast(isSelectedModel).onChange(From.ALL,  it -> {
             if ( it.get() )
                 selectedState.set(it.channel(), state);
         });

@@ -3,6 +3,7 @@ package examples.tabs.mvi;
 import sprouts.Event;
 import sprouts.From;
 import sprouts.Var;
+import sprouts.Viewable;
 import swingtree.SwingTree;
 import swingtree.UI;
 
@@ -112,8 +113,8 @@ public class MyTabsView extends Panel
             )
         );
         currentTab.ifPresent( this::select );
-        currentTab.onChange(From.VIEW_MODEL,  it -> select(it.get()) );
-        tabs.onChange(From.ALL, it -> {
+        Viewable.cast(currentTab).onChange(From.VIEW_MODEL, it -> select(it.get()) );
+        Viewable.cast(tabs).onChange(From.ALL, it -> {
             updateContentComponents(
                 it.get().stream()
                 .map(MyTabsViewModel.TabModel::contentView)

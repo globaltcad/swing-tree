@@ -3,6 +3,7 @@ package examples.mvvm;
 import sprouts.From;
 import sprouts.Var;
 import sprouts.Vars;
+import sprouts.Viewable;
 import swingtree.components.JScrollPanels;
 
 import javax.swing.JList;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class ScrollPanelsViewModel
 {
-	private final Var<String> searchKey = Var.of("").onChange(From.VIEW, it -> search() );
+	private final Var<String> searchKey = Var.of("");
 	private final Vars<EntryViewModel> entries = Vars.of(EntryViewModel.class);
 	private final List<EntryViewModel> allEntries = new ArrayList<>();
 
@@ -32,6 +33,7 @@ public class ScrollPanelsViewModel
 
 	public ScrollPanelsViewModel()
 	{
+		Viewable.cast(searchKey).onChange(From.VIEW, it -> search() );
 		String[] colorAdjectives = {"Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Black", "White"};
 		String[] otherAdjectives = {"Big", "Small", "Round", "Square", "Long", "Short", "Fat", "Thin", "Tall", "Short"};
 		String[] nouns = {

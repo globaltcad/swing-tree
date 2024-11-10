@@ -627,7 +627,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                     */
                     Val<T> property = propertyRef.get();
                     if ( property != null )
-                        property.unsubscribe(this);
+                        Viewable.cast(property).unsubscribe(this);
                         // ^ We unsubscribe from the property because the component is disposed.
                     return;
                 }
@@ -654,7 +654,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
             }
         };
         Optional.ofNullable(propertyRef.get()).ifPresent(
-            property -> property.onChange(From.ALL, action)
+            property -> Viewable.cast(property).onChange(From.ALL, action)
         );
         CustomCleaner
             .getInstance()
@@ -662,7 +662,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                 () -> {
                     Val<T> property = propertyRef.get();
                     if ( property != null )
-                        property.unsubscribe(action);
+                        Viewable.cast(property).unsubscribe(action);
                 }
             );
     }
@@ -703,7 +703,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
             public void accept( ValsDelegate<T> delegate ) {
                 C thisComponent = ref.get();
                 if ( thisComponent == null ) {
-                    properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    Viewables.cast(properties).unsubscribe(this); // We unsubscribe from the property if the component is disposed.
                     return;
                 }
                 _runInUI(() ->{
@@ -716,8 +716,8 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                 });
             }
         };
-        properties.onChange(action);
-        CustomCleaner.getInstance().register(ref.get(), () -> properties.unsubscribe(action));
+        Viewables.cast(properties).onChange(action);
+        CustomCleaner.getInstance().register(ref.get(), () -> Viewables.cast(properties).unsubscribe(action));
     }
 
     /**

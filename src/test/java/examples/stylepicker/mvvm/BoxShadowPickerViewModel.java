@@ -1,9 +1,7 @@
 package examples.stylepicker.mvvm;
 
+import sprouts.*;
 import sprouts.Event;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Var;
 import swingtree.UI;
 
 import java.awt.*;
@@ -19,17 +17,27 @@ public class BoxShadowPickerViewModel
 {
     public class BorderEdgeViewModel
     {
-        private final Var<Integer> borderWidth = Var.of(3).onChange(From.VIEW, it -> repaint.fire() );
-        private final Var<Color>   borderColor = Var.of(new Color(0,0.4f,1)).onChange(From.VIEW,  it -> repaint.fire() );
+        private final Var<Integer> borderWidth = Var.of(3);
+        private final Var<Color>   borderColor = Var.of(new Color(0,0.4f,1));
+
+        public BorderEdgeViewModel() {
+            Viewable.cast(borderWidth).onChange(From.VIEW, it -> repaint.fire() );
+            Viewable.cast(borderColor).onChange(From.VIEW, it -> repaint.fire() );
+        }
 
         public Var<Integer> borderWidth() { return borderWidth; }
         public Var<Color> borderColor() { return borderColor; }
     }
 
-    public class BorderCornerViewModel{
+    public class BorderCornerViewModel {
 
-        private final Var<Integer> borderArcWidth  = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
-        private final Var<Integer> borderArcHeight = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
+        private final Var<Integer> borderArcWidth  = Var.of(25);
+        private final Var<Integer> borderArcHeight = Var.of(25);
+
+        public BorderCornerViewModel() {
+            Viewable.cast(borderArcWidth).onChange(From.VIEW, it -> repaint.fire() );
+            Viewable.cast(borderArcHeight).onChange(From.VIEW, it -> repaint.fire() );
+        }
 
         public Var<Integer> borderArcWidth() { return borderArcWidth; }
         public Var<Integer> borderArcHeight() { return borderArcHeight; }
@@ -38,20 +46,20 @@ public class BoxShadowPickerViewModel
     private final Event repaint = Event.create();
 
     // Padding
-    private final Var<Integer> paddingTop = Var.of(5).onChange(From.VIEW, it -> repaint.fire() );
-    private final Var<Integer> paddingLeft = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> paddingRight = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> paddingBottom = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> paddingTop = Var.of(5);
+    private final Var<Integer> paddingLeft = Var.of(5);
+    private final Var<Integer> paddingRight = Var.of(5);
+    private final Var<Integer> paddingBottom = Var.of(5);
 
     // Margin
-    private final Var<Integer> marginTop = Var.of(30).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> marginLeft = Var.of(35).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> marginRight = Var.of(35).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> marginBottom = Var.of(30).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> marginTop = Var.of(30);
+    private final Var<Integer> marginLeft = Var.of(35);
+    private final Var<Integer> marginRight = Var.of(35);
+    private final Var<Integer> marginBottom = Var.of(30);
 
     // Border
-    private final Var<UI.Edge>    borderEdge      = Var.of(UI.Edge.EVERY).onChange(From.VIEW, it -> updateEdgeSelection(it.get()) );
-    private final Var<UI.Corner>  borderCorner    = Var.of(UI.Corner.EVERY).onChange(From.VIEW, it -> updateCornerSelection(it.get()) );
+    private final Var<UI.Edge>    borderEdge   = Var.of(UI.Edge.EVERY);
+    private final Var<UI.Corner>  borderCorner = Var.of(UI.Corner.EVERY);
 
     private final Map<UI.Edge, BorderEdgeViewModel> edgeModels = new HashMap<>();
     private final Map<UI.Corner, BorderCornerViewModel> cornerModels = new HashMap<>();
@@ -60,27 +68,56 @@ public class BoxShadowPickerViewModel
     private final Var<BorderCornerViewModel> currentCornerModel = Var.ofNullable(BorderCornerViewModel.class, null);
 
     // Background
-    private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Color> foundationColor = Var.of(new Color(1f,1f,1f)).onChange(From.VIEW, it -> repaint.fire() );
+    private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f));
+    private final Var<Color> foundationColor = Var.of(new Color(1f,1f,1f));
 
     // Box Shadow
-    private final Var<Integer> horizontalShadowOffset = Var.of(0).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> verticalShadowOffset = Var.of(0).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> shadowBlurRadius = Var.of(6).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Integer> shadowSpreadRadius = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<Boolean> shadowInset = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> horizontalShadowOffset = Var.of(0);
+    private final Var<Integer> verticalShadowOffset = Var.of(0);
+    private final Var<Integer> shadowBlurRadius = Var.of(6);
+    private final Var<Integer> shadowSpreadRadius = Var.of(5);
+    private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY);
+    private final Var<Boolean> shadowInset = Var.of(false);
 
-    private final Var<UI.NoiseType>     noise       = Var.of(UI.NoiseType.TISSUE).onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<String>           noiseColors = Var.of("").onChange(From.VIEW,  it -> repaint.fire() );
-    private final Var<UI.ComponentArea> noiseArea   = Var.of(UI.ComponentArea.ALL).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<UI.NoiseType>     noise       = Var.of(UI.NoiseType.TISSUE);
+    private final Var<String>           noiseColors = Var.of("");
+    private final Var<UI.ComponentArea> noiseArea   = Var.of(UI.ComponentArea.ALL);
 
     // Smiley (For fun)
-    private final Var<Boolean> drawSmiley = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Boolean> drawSmiley = Var.of(false);
 
     private final Var<String> code = Var.of("");
 
     public BoxShadowPickerViewModel() {
+        Viewable.cast(paddingTop).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(paddingLeft).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(paddingRight).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(paddingBottom).onChange(From.VIEW, it -> repaint.fire() );
+
+        Viewable.cast(marginTop).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(marginLeft).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(marginRight).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(marginBottom).onChange(From.VIEW, it -> repaint.fire() );
+
+        Viewable.cast(borderEdge).onChange(From.VIEW, it -> updateEdgeSelection(it.get()) );
+        Viewable.cast(borderCorner).onChange(From.VIEW, it -> updateCornerSelection(it.get()) );
+
+        Viewable.cast(backgroundColor).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(foundationColor).onChange(From.VIEW, it -> repaint.fire() );
+
+        Viewable.cast(horizontalShadowOffset).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(verticalShadowOffset).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(shadowBlurRadius).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(shadowSpreadRadius).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(shadowColor).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(shadowInset).onChange(From.VIEW, it -> repaint.fire() );
+
+        Viewable.cast(noise).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(noiseColors).onChange(From.VIEW, it -> repaint.fire() );
+        Viewable.cast(noiseArea).onChange(From.VIEW, it -> repaint.fire() );
+
+        Viewable.cast(drawSmiley).onChange(From.VIEW, it -> repaint.fire() );
+
         // Creating sub-view models
         for (UI.Edge edge : UI.Edge.values()) {
             BorderEdgeViewModel model = new BorderEdgeViewModel();

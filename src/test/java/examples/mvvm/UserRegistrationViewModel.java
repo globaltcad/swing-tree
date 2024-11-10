@@ -3,6 +3,7 @@ package examples.mvvm;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
+import sprouts.Viewable;
 
 import java.awt.Color;
 
@@ -12,17 +13,24 @@ public class UserRegistrationViewModel
         NOT_SELECTED, MALE, FEMALE, OTHER
     }
 
-    private final Var<String> username           = Var.of("").onChange(From.VIEW, it -> validateAll() );
-    private final Var<String> password           = Var.of("").onChange(From.VIEW, it -> validateAll() );
-    private final Var<String> email              = Var.of("").onChange(From.VIEW, it -> validateAll() );
-    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED).onChange(From.VIEW, it -> validateAll() );
-    private final Var<Boolean> termsAccepted     = Var.of(false).onChange(From.VIEW, it -> validateAll() );
+    private final Var<String> username           = Var.of("");
+    private final Var<String> password           = Var.of("");
+    private final Var<String> email              = Var.of("");
+    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED);
+    private final Var<Boolean> termsAccepted     = Var.of(false);
     private final Var<String> feedback           = Var.of("");
     private final Var<Color> feedbackColor       = Var.of(Color.BLACK);
     private final Var<Boolean> allInputsDisabled = Var.of(false);
 
 
-    public UserRegistrationViewModel() { validateAll(); }
+    public UserRegistrationViewModel() {
+        Viewable.cast(username).onChange(From.VIEW, it -> validateAll() );
+        Viewable.cast(password).onChange(From.VIEW, it -> validateAll() );
+        Viewable.cast(email).onChange(From.VIEW, it -> validateAll() );
+        Viewable.cast(gender).onChange(From.VIEW, it -> validateAll() );
+        Viewable.cast(termsAccepted).onChange(From.VIEW, it -> validateAll() );
+        validateAll();
+    }
 
 
     public Var<String> username() { return username; }

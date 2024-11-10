@@ -80,6 +80,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
     }
 
+    public final I withRepaintOn( Val<?> event ) {
+        return _with( c -> Viewable.cast(event).subscribe( () -> _runInUI(c::repaint) ) )._this();
+    }
+
     /**
      *  This method exposes a concise way to bind multiple {@link Observable}s (usually sprouts.Events)
      *  to the {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
@@ -96,6 +100,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             second.subscribe( () -> _runInUI(c::repaint) );
             for ( Observable o : rest ) {
                 o.subscribe( () -> _runInUI(c::repaint) );
+            }
+        })._this();
+    }
+
+    public final I withRepaintOn( Val<?> first, Val<?> second, Val<?>... rest ) {
+        return _with( c -> {
+            Viewable.cast(first).subscribe( () -> _runInUI(c::repaint) );
+            Viewable.cast(second).subscribe( () -> _runInUI(c::repaint) );
+            for ( Val<?> o : rest ) {
+                Viewable.cast(o).subscribe( () -> _runInUI(c::repaint) );
             }
         })._this();
     }

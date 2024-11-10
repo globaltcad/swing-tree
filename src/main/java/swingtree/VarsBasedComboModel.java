@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import sprouts.Var;
 import sprouts.Vars;
+import sprouts.Viewables;
 
 import java.util.Objects;
 
@@ -14,14 +15,14 @@ class VarsBasedComboModel<E extends @Nullable Object> extends AbstractComboModel
         super(Var.ofNullable(_findCommonType(items), null));
         _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
-        _items.onChange( it -> _itemListChanged() );
+        Viewables.cast(_items).onChange(it -> _itemListChanged() );
     }
 
     VarsBasedComboModel( Var<E> var, Vars<E> items ) {
         super(var);
         _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
-        _items.onChange( it -> _itemListChanged() );
+        Viewables.cast(_items).onChange( it -> _itemListChanged() );
     }
 
     private void _itemListChanged() {

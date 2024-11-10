@@ -1,8 +1,6 @@
 package examples.tabs.mvvm;
 
-import sprouts.Event;
-import sprouts.From;
-import sprouts.Var;
+import sprouts.*;
 import swingtree.SwingTree;
 import swingtree.UI;
 
@@ -46,7 +44,7 @@ public class MyTabsView extends Panel
                 .withRepaintOn(repaintEvent)
                 .withTooltip(tabModel.tip())
                 .peek( b ->
-                    tabModel.iconSource().onChange(From.VIEW_MODEL, i -> {
+                    Viewable.cast(tabModel.iconSource()).onChange(From.VIEW_MODEL, i -> {
                         Optional<ImageIcon> icon = i.get().find();
                         if ( icon.isPresent() ) {
                             b.setIcon(icon.get());
@@ -104,8 +102,8 @@ public class MyTabsView extends Panel
             )
         );
         vm.getCurrentTab().ifPresent( this::select );
-        vm.getCurrentTab().onChange(From.VIEW_MODEL,  it -> select(it.get()) );
-        vm.getTabs().onChange( it -> {
+        Viewable.cast(vm.getCurrentTab()).onChange(From.VIEW_MODEL,  it -> select(it.get()) );
+        Viewables.cast(vm.getTabs()).onChange(it -> {
             updateContentComponents(
                 it.vals().stream()
                 .map(MyTabsViewModel.TabModel::contentView)

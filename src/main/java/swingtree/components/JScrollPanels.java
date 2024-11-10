@@ -4,6 +4,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
+import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.mvvm.EntryViewModel;
@@ -478,7 +479,7 @@ public class JScrollPanels extends UI.ScrollPane
 							};
 			_lastState = _provider.apply(false);
 			this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : "grow" );
-			_viewable.isSelected().onChange(From.VIEW_MODEL, it -> _selectThis(components) );
+			Viewable.cast(_viewable.isSelected()).onChange(From.VIEW_MODEL, it -> _selectThis(components) );
 			if ( _viewable.isSelected().is(true) )
 				_selectThis(components);
 			_viewable.position().set(From.VIEW, position);

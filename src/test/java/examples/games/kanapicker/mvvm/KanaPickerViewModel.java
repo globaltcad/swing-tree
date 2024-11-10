@@ -1,9 +1,6 @@
 package examples.games.kanapicker.mvvm;
 
-import sprouts.Event;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Var;
+import sprouts.*;
 import swingtree.UI;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationStatus;
@@ -22,30 +19,15 @@ public final class KanaPickerViewModel
     private final Var<Color>  feedbackColor = Var.of(Color.BLACK);
     private final Var<Integer> feedbackFontSize = Var.of(24);
     private final Var<Symbol> currentSymbol = Var.of(new Symbol('?', "?", "?"));
-    private final Var<Boolean> cheatMode = Var.of(false).onChange(From.VIEW, it -> cheated() );
+    private final Var<Boolean> cheatMode = Var.of(false);
 
     private final Var<Integer> score = Var.of(0);
     private final Val<Integer> level = score.view( s -> s / 10 );
 
     private final List<Alphabet> alphabets = new ArrayList<>();
 
-    public Event getRepaintEvent() { return repaint; }
-
-    public Var<String> feedback() { return feedback; }
-
-    public Var<Color> feedbackColor() { return feedbackColor; }
-
-    public Var<Integer> feedbackFontSize() { return feedbackFontSize; }
-
-    public Var<Symbol> currentSymbol() { return currentSymbol; }
-
-    public Var<Boolean> cheatMode() { return cheatMode; }
-
-    public Val<Integer> score() { return score; }
-
-    public Val<Integer> level() { return level; }
-
     public KanaPickerViewModel() {
+        Viewable.cast(cheatMode).onChange(From.VIEW, it -> cheated() );
         alphabets.add(new Alphabet("Hiragana",
             new Symbol('あ', "a", "a"),
             new Symbol('え', "e", "e"),
@@ -153,6 +135,22 @@ public final class KanaPickerViewModel
         enableSymbols();
         newRandomSymbol();
     }
+
+    public Event getRepaintEvent() { return repaint; }
+
+    public Var<String> feedback() { return feedback; }
+
+    public Var<Color> feedbackColor() { return feedbackColor; }
+
+    public Var<Integer> feedbackFontSize() { return feedbackFontSize; }
+
+    public Var<Symbol> currentSymbol() { return currentSymbol; }
+
+    public Var<Boolean> cheatMode() { return cheatMode; }
+
+    public Val<Integer> score() { return score; }
+
+    public Val<Integer> level() { return level; }
 
     private void cheated() {
         feedback.set( "Cheater!" );
