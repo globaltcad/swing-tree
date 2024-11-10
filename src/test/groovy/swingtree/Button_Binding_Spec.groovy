@@ -1,17 +1,15 @@
 package swingtree
 
-import spock.lang.Subject
-import swingtree.threading.EventProcessor
-import sprouts.Val
-import sprouts.Var
 import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Subject
 import spock.lang.Title
+import sprouts.Val
+import sprouts.Var
+import swingtree.api.IconDeclaration
+import swingtree.threading.EventProcessor
 
-import javax.swing.ButtonGroup
-import javax.swing.JButton
-import javax.swing.JRadioButton
-
+import javax.swing.*
 
 @Title("Button Binding")
 @Narrative('''
@@ -51,23 +49,23 @@ class Button_Binding_Spec extends Specification
             which triggers the observers registered by the UI.
         """
 
-        given : 'We create a simple swing-tree property for modelling the text.'
-            Val<String> text = Var.of("Hello World")
+        given : 'We create a simple Sprouts property for modelling the text displaying a documentary link.'
+            Val<String> documentary = Var.of("dominionmovement.com")
 
         when : 'We create and bind to a button UI node...'
-            var ui = UI.button("").withText(text)
+            var ui = UI.button("").withText(documentary)
         and : 'Build the component:'
             var button = ui.get(JButton)
 
         then : 'The button should be updated when the property is changed and shown.'
-            button.text == "Hello World"
+            button.text == "dominionmovement.com"
 
-        when : 'We change the property value...'
-            text.set("Goodbye World")
+        when : 'We change the property value to another documentary domain...'
+            documentary.set("landofhopeandglory.org")
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
-        then : 'The button should be updated.'
-            button.text == "Goodbye World"
+        then : 'The button should be updated to show the new text.'
+            button.text == "landofhopeandglory.org"
     }
 
     def 'You can bind to the selection state of a button.'()
@@ -225,15 +223,17 @@ class Button_Binding_Spec extends Specification
         given : 'We create a simple swing-tree property for modelling the selection state.'
             Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)
 
-        when : 'We create and bind to a button UI node...'
-            var ui = UI.button("test").isSelectedIfNot(SelectionState.SELECTED, selectionState)
+        when : 'We create and bind to a button displaying a link to a website...'
+            var ui =
+                        UI.button("cowspiracy.com")
+                        .isSelectedIfNot(SelectionState.SELECTED, selectionState)
         and : 'Build the component:'
             var button = ui.get(JButton)
 
         then : 'The button should be updated when the property is changed and shown.'
             button.selected == true
-        and : 'The button has the expected text.'
-            button.text == "test"
+        and : 'The button has set the text with the link that we previously declared.'
+            button.text == "cowspiracy.com"
 
         when : 'We change the property value...'
             selectionState.set(SelectionState.SELECTED)
@@ -334,5 +334,51 @@ class Button_Binding_Spec extends Specification
             UI.sync()
         then : 'The radio button is deselected again.'
             !radioButton.isSelected()
+    }
+
+    def 'You can bind the icon as well as selection state of a toggle button to properties.'()
+    {
+        reportInfo """
+            A typical use-case is for a toggle button
+            is to have both its selection flag as well as its icon
+            bound to properties.
+            One could for example make the icon change based on the selection state,
+            which is what we are testing here.
+        """
+        given : 'Two icon declarations pointing to icons in the test suite resource directory.'
+            IconDeclaration ICON1 = IconDeclaration.of("img/swing.png")
+            IconDeclaration ICON2 = IconDeclaration.of("img/funnel.svg")
+        and : """
+            A boolean property together with an icon property that is 
+            dynamically computed from the boolean property.
+            So when the boolean property is true, then we use
+            the first icon declaration.
+            And when it is false, we use the other one.
+        """
+            Var<Boolean> isToggled = Var.of(true)
+            Val<IconDeclaration> icon = isToggled.viewAs(IconDeclaration.class, o -> o ? ICON1 : ICON2)
+        and :
+            var button =
+                            UI.toggleButtonWithIcon(icon, isToggled).id("my-button")
+                            .withPrefHeight(15).withMinHeight(15)
+                            .withPrefWidth(45).withMinWidth(45)
+                            .get(JToggleButton.class)
+        expect : 'The button was initialized from the state of the properties.'
+            button.selected == true
+            button.icon == ICON1.find().get()
+
+        when : 'We invert the boolean property...'
+            isToggled.set(false)
+            UI.sync()
+        then : 'The button has changed its selection and icon accordingly.'
+            button.selected == false
+            button.icon == ICON2.find().get()
+
+        when : 'We set the property back to `true` again...'
+            isToggled.set(true)
+            UI.sync()
+        then : 'We are back at the initial state. The binding worked!'
+            button.selected == true
+            button.icon == ICON1.find().get()
     }
 }
