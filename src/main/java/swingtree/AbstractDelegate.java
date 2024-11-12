@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
@@ -37,8 +39,9 @@ import java.util.stream.Stream;
  *
  * @param <C> The type of the component that is delegated.
  */
-abstract class AbstractDelegate<C extends JComponent>
+public class AbstractDelegate<C extends JComponent>
 {
+    private static final Logger log = LoggerFactory.getLogger(AbstractDelegate.class);
     private final GuiTraverser _guiTraverser; // the traverser object that allows us to query the component tree
     private final C _component;
 
@@ -1377,6 +1380,74 @@ abstract class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
             ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);
+        });
+    }
+
+    /**
+     *  Use this method to delegate to the parent of the component.
+     *  This is useful if you want to apply a style or animation
+     *  to the parent of a component which just received an event,
+     *  like a mouse click event.
+     *  <p>
+     *  Here is an example demonstrating how
+     *  to apply a style to the parent of a component when it is clicked:
+     *  <pre>{@code
+     *      UI.button("Click me").withPrefSize(400, 400)
+     *      .onMouseClick( it -> it
+     *          .parentDelegate( parent -> parent
+     *              .style( style -> style
+     *                  .borderWidth(6)
+     *                  .borderColor(Color.RED)
+     *                  .borderRadius(60)
+     *              )
+     *          )
+     *      )
+     *  }</pre> <br>
+     *  And here another more advanced example demonstrating how to do animated
+     *  painting on the parent of a component that is being dragged away:
+     *  <pre>{@code
+     *  label("Drag me away")
+     *  .withDragAway( conf -> conf
+     *      .onDragStart( it -> {
+     *          it.parentDelegate( parent -> parent
+     *              .animateFor(1, TimeUnit.SECONDS, status -> {
+     *                  double r = 320 * status.fadeOut() * it.getScale();
+     *                  double x = it.getEvent().getDragOrigin().getX() - r / 2;
+     *                  double y = it.getEvent().getDragOrigin().getY() - r / 2;
+     *                  parent.paint(status, g -> {
+     *                      g.setColor(new Color(0f, 1f, 1f, (float) status.fadeIn()));
+     *                      g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *                  });
+     *              })
+     *          );
+     *      })
+     *  )
+     *  }</pre>
+     *  The paint method draws a circle around the drag origin of the drag event
+     *  which gets smaller and more opaque as the animation progresses
+     *  for a duration of 1 second. <br>
+     *  <p>
+     *  You may also be interested in doing style animations, if so, maybe consider taking a look at
+     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event
+     *  based styling animations and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)}
+     *  to see how to do 2 state switch based styling animations.
+     *
+     * @param action The action which should be executed on the delegate of the parent component.
+     */
+    public final void parentDelegate( sprouts.Action<AbstractDelegate<JComponent>> action ) {
+        Objects.requireNonNull(action);
+        UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
+            Container parent = _component().getParent();
+            if ( parent instanceof JComponent ) {
+                try {
+                    AbstractDelegate<JComponent> delegate = new AbstractDelegate<>( false, (JComponent) parent, (JComponent) parent );
+                    action.accept(delegate);
+                } catch( Exception e ) {
+                    log.error("Error while processing parent delegate!", e);
+                }
+            } else {
+                log.warn("Parent of component is not a JComponent, cannot apply parent delegate!");
+            }
         });
     }
 
