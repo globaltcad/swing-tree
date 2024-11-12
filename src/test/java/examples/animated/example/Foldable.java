@@ -27,9 +27,7 @@ public class Foldable extends JPanel {
                     .withPrefHeight(HEIGHT)
                     .withTransitionalStyle(isOpen, LifeTime.of(0.5, TimeUnit.SECONDS), (status, style) -> {
                         double h = style.component().getPreferredSize().height * status.fadeIn();
-                        if (h < 5) h = 0;
-                        //style.component().revalidate();
-                        style.component().setBackground( h == 0 ? Color.orange : Color.lightGray);
+                        style.component().setBackground(h == 0 ? Color.orange : Color.lightGray);
                         System.out.printf("TransitionalStyle[%s]: h=%f\n", content, h);
                         return style.minHeight(h).maxHeight(h);
                     })
