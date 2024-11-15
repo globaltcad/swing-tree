@@ -14,6 +14,14 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.Objects;
 
+/**
+ *  Defines an abstract builder for
+ *  constructing a scroll pane or any subclass of {@link JScrollPane}.
+ *
+ * @param <I> The concrete type of the builder instance, which is
+ *           important as a return type for the builder methods.
+ * @param <P> The type of the scroll pane or any subclass of {@link JScrollPane}.
+ */
 public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIForAnySwing<I, P>
 {
     @Override
@@ -40,10 +48,21 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     *  Use this to set the scroll bars policy for both horizontal and vertical scroll bars.
+     *  Use this to set the scroll bars policy for both horizontal and vertical scroll bars.<br>
+     *  The scroll policy can be one of the following:
+     *  <ul>
+     *      <li>{@link swingtree.UI.Active#NEVER}: The scrolls bar will never be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#ALWAYS}: The scrolls bar will always be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#AS_NEEDED}:
+     *          The two scroll bars will only be displayed when needed,
+     *          i.e. when the content is too large to fit in the viewport
+     *          and scrolling is required.
+     *      </li>
+     *  </ul>
      *
      * @param scrollPolicy The scroll policy to use.
-     * @return This builder node.
+     * @return The next builder instance, to allow for method chaining.
+     * @throws NullPointerException If the argument is null.
      */
     public final I withScrollBarPolicy( UI.Active scrollPolicy ) {
         Objects.requireNonNull(scrollPolicy);
@@ -55,10 +74,22 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     *  Use this to set the scroll bars policy for the vertical scroll bar.
+     *  Use this to set the scroll bars policy for the vertical scroll bar,
+     *  which controls when the vertical scroll bar should be displayed or not.<br>
+     *  The scroll policy can be one of the following:
+     *  <ul>
+     *      <li>{@link swingtree.UI.Active#NEVER}: The vertical scroll bar will never be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#ALWAYS}: The vertical scroll bar will always be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#AS_NEEDED}:
+     *          The vertical scroll bar will only be displayed when needed,
+     *          i.e. when the content is too large to fit in the viewport
+     *          and scrolling is required.
+     *      </li>
+     *  </ul>
      *
-     * @param scrollBarPolicy The scroll policy to use.
-     * @return This builder node.
+     * @param scrollBarPolicy The scroll policy to determine when the vertical scroll bar should be displayed.
+     * @return This builder node, to allow for method chaining.
+     * @throws NullPointerException If the argument is null.
      */
     public final I withVerticalScrollBarPolicy( UI.Active scrollBarPolicy ) {
         Objects.requireNonNull(scrollBarPolicy);
@@ -78,9 +109,22 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
 
     /**
      *  Use this to dynamically set the scroll bars policy for the vertical scroll bar.
+     *  When the property changes, the scroll bar policy will be updated accordingly.
+     *  <p>
+     *  The scroll policy can be one of the following:
+     *  <ul>
+     *      <li>{@link swingtree.UI.Active#NEVER}: The vertical scroll bar will never be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#ALWAYS}: The vertical scroll bar will always be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#AS_NEEDED}:
+     *          The vertical scroll bar will only be displayed when needed,
+     *          i.e. when the content is too large to fit in the viewport
+     *          and scrolling is required.
+     *      </li>
+     *  </ul>
      *
-     * @param scrollBarPolicy The scroll policy property to use.
-     * @return This builder node.
+     * @param scrollBarPolicy The scroll policy property, whose value will determine when
+     *                        the vertical scroll bar should be displayed.
+     * @return This builder instance, to allow for method chaining.
      */
     public final I withVerticalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
@@ -96,11 +140,22 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
 
     /**
      *  Use this to set the scroll bars policy for the horizontal scroll bar.
+     *  The scroll policy can be one of the following:
+     *  <ul>
+     *      <li>{@link swingtree.UI.Active#NEVER}: The horizontal scroll bar will never be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#ALWAYS}: The horizontal scroll bar will always be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#AS_NEEDED}:
+     *          The horizontal scroll bar will only be displayed when needed,
+     *          i.e. when the content is too large to fit in the viewport
+     *          and scrolling is required.
+     *      </li>
+     *  </ul>
      *
      * @param scrollBarPolicy The scroll policy to use.
-     * @return This builder node.
+     * @return The next builder instance, to allow for method chaining.
+     * @throws NullPointerException If the argument is null.
      */
-    public final I withHorizontalScrollBarPolicy(UI.Active scrollBarPolicy ) {
+    public final I withHorizontalScrollBarPolicy( UI.Active scrollBarPolicy ) {
         Objects.requireNonNull(scrollBarPolicy);
         return _with( thisComponent -> {
                     _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy);
@@ -118,9 +173,23 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
 
     /**
      *  Use this to dynamically set the scroll bars policy for the horizontal scroll bar.
+     *  When the property changes, the scroll bar policy will be updated accordingly.
+     *  <p>
+     *  The scroll policy can be one of the following:
+     *  <ul>
+     *      <li>{@link swingtree.UI.Active#NEVER}: The horizontal scroll bar will never be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#ALWAYS}: The horizontal scroll bar will always be displayed.</li>
+     *      <li>{@link swingtree.UI.Active#AS_NEEDED}:
+     *          The horizontal scroll bar will only be displayed when needed,
+     *          i.e. when the content is too large to fit in the viewport
+     *          and scrolling is required.
+     *      </li>
+     *  </ul>
      *
-     * @param scrollBarPolicy The scroll policy property to use.
-     * @return This builder node.
+     * @param scrollBarPolicy The scroll policy property, whose value will determine when
+     *                        the horizontal scroll bar should be displayed.
+     * @return The next builder instance, to allow for method chaining.
+     * @throws NullPointerException If the argument is null.
      */
     public final I withHorizontalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
@@ -135,7 +204,13 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     *  Use this to set the vertical scroll increment.
+     *  Use this to set the vertical scroll increment unit,
+     *  which controls how far the content moves when you
+     *  use the mouse wheel, scroll gesture on a touchpad or
+     *  press the arrow buttons on the scrollbar.
+     *  This can be thought of as the smallest step size for
+     *  scrolling. Like for example, scrolling by one line of text
+     *  at a time in a text area.
      *
      * @param increment The scroll vertical increment to use.
      * @return This builder instance, to allow for method chaining.
@@ -148,7 +223,17 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     *  Use this to set the horizontal scroll increment.
+     *  Use this to set the horizontal scroll increment unit,
+     *  which typically controls how far the content moves when you:
+     *  <ul>
+     *      <li>press the left and right arrow buttons on the scrollbar</li>
+     *      <li>press the left and right arrow buttons on the keyboard</li>
+     *      <li>use the mouse wheel or scroll gesture on a touchpad</li>
+     *  </ul>
+     *  <br>
+     *  This can be thought of as the smallest step size for
+     *  scrolling. Like for example, scrolling by one line of text
+     *  at a time in a text area.
      *
      * @param increment The scroll horizontal increment to use.
      * @return This builder instance, to allow for method chaining.
@@ -161,7 +246,20 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     * Use this to set the vertical and horizontal scroll increment.
+     * Use this to set the vertical and horizontal scroll increment,
+     * which controls how far the content moves when you:
+     *  <ul>
+     *      <li>press the arrow buttons on the scrollbars</li>
+     *      <li>press the arrow buttons on the keyboard</li>
+     *      <li>use the mouse wheel or scroll gesture on a touchpad</li>
+     *  </ul>
+     *  <br>
+     *  This can be thought of as the smallest step size for
+     *  scrolling. Like for example, scrolling by one line of text
+     *  at a time in a text area.
+     *
+     * @see #withVerticalScrollIncrement(int) if you only want to define the vertical increment.
+     * @see #withHorizontalScrollIncrement(int) if you only want to define the horizontal increment.
      * @param increment The scroll increment to use.
      * @return This builder instance, to allow for method chaining.
      */
@@ -174,9 +272,25 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     *  Use this to set the vertical scroll block increment.
+     *  Use this to set the vertical scroll bar block increment,
+     *  which typically controls how far the content moves when you:
+     *  <ul>
+     *      <li>press the page up or page down keys (not to be confused with the arrow keys)</li>
+     *      <li>click on a scroll bar track (the empty area of the scrollbar, not the thumb or arrows)</li>
+     *  </ul>
+     *  It represents a larger jump, like moving an entire "page" or a
+     *  significant chunk of content.
+     *  <p>
+     *  Note, that if the argument is equal to the value of Integer.MIN_VALUE,
+     *  then most look and feel implementations will not provide scrolling
+     *  to the right/down.
+     *  <br><b>
+     *  Please be aware that look and feel implementations
+     *  that provide custom scrolling behavior may ignore
+     *  the block increment value.
+     *  </b>
      *
-     * @param increment The scroll vertical block increment to use.
+     * @param increment The scroll vertical block increment to use when scrolling by a "block".
      * @return This builder instance, to allow for method chaining.
      */
     public final I withVerticalBlockScrollIncrement( int increment ) {
@@ -187,11 +301,18 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     *  Use this to set the horizontal scroll block increment.
-     *  It is the amount to change the scrollbar's value by,
-     *  given a block (usually "page") up/down request or when the user clicks
-     *  above or below the scrollbar "knob" to change the value
-     *  up or down by large amount.
+     *  Use this to set the horizontal scroll bar block increment,
+     *  which typically controls how far the content moves
+     *  to the left or right when you:
+     *  <ul>
+     *      <li>press the page up or page down keys (not to be confused with the arrow keys)</li>
+     *      <li>click on a scroll bar track (the empty area of the scrollbar, not the thumb or arrows)</li>
+     *  </ul>
+     *  <br><b>
+     *  Please be aware that look and feel implementations
+     *  that provide custom scrolling behavior may ignore
+     *  the block increment value.
+     *  </b>
      *
      * @param increment The scroll horizontal block increment to use.
      * @return This builder instance, to allow for method chaining.
@@ -204,12 +325,19 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
     /**
-     * Use this to set the vertical and horizontal scroll block increment.
+     * Use this to set both the vertical and horizontal scroll block increment.
      * The block increment is the amount to change the scrollbar's value by,
      * given a block (usually "page") up/down request or when the user clicks
      * above or below the scrollbar "knob" to change the value
      * up or down by large amount.
+     * <br><b>
+     *  Please be aware that look and feel implementations
+     *  that provide custom scrolling behavior may ignore
+     *  the block increment value.
+     * </b>
      *
+     * @see #withVerticalBlockScrollIncrement(int) if you only want to define the vertical increment.
+     * @see #withHorizontalBlockScrollIncrement(int) if you only want to define the horizontal increment.
      * @param increment The scroll block increment to use.
      * @return This builder instance, to allow for method chaining.
      */
@@ -222,6 +350,10 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     }
 
 
+    /**
+     *  Delegate class for wrapping a component in a thin container
+     *  which always has the same sizes as the wrapped component.
+     */
     static class ThinDelegationBox extends JBox {
 
         protected final JComponent _child;
