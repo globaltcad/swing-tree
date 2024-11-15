@@ -119,7 +119,7 @@ final class AnimationRunner
 
         Runnable requestComponentRepaint = () -> {
                                                 if ( component != null ) {
-                                                    if ( component.getParent() == null || (component.getWidth() <= 0) || (component.getHeight() <= 0) ) {
+                                                    if ( component.getParent() == null || !_isVisible(component) ) {
                                                         ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);
                                                         /*
                                                             There will be no repaint if the component is not visible.
@@ -194,6 +194,32 @@ final class AnimationRunner
 
         requestComponentRepaint.run();
         return true;
+    }
+
+    /**
+     *  Determines the actual visibility of a component.
+     *  Merely checking {@link Component#isVisible()} is not enough, because
+     *  a component may be invisible if one of its parents is invisible
+     *  or if it has no size (width or height are 0).<br>
+     *  If a component is not visible, its paint method will not be called,
+     *  and so we have to manually gather and apply the style information.
+     *
+     * @param component The component to check for visibility to the user on the screen.
+     * @return True if the component is visible, false otherwise.
+     */
+    private static boolean _isVisible( Component component ) {
+        boolean hasSize = component.getWidth() > 0 && component.getHeight() > 0;
+        if ( !hasSize )
+            return false;
+
+        boolean isVisible = true;
+        for ( Component current = component; current != null; current = current.getParent() ) {
+            if ( !current.isVisible() ) {
+                isVisible = false;
+                break;
+            }
+        }
+        return isVisible;
     }
 
 }
