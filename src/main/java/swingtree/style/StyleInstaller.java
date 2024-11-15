@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
+import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.layout.Bounds;
 
@@ -403,20 +404,21 @@ final class StyleInstaller<C extends JComponent>
         else
         {
             boolean shouldBeOpaque = !_isTransparentConstant(owner.getBackground());
-
-            if ( owner.isOpaque() != shouldBeOpaque )
-                owner.setOpaque(shouldBeOpaque);
-
             boolean bypassLaFBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
-            if ( bypassLaFBackgroundPainting )
-                if ( backgroundIsActuallyBackground && !hasUndefinedNullBackground )
-                    backgroundSetter = () -> {
-                        if ( !Objects.equals( owner.getBackground(), UI.Color.UNDEFINED ) )
-                            owner.setBackground(UI.Color.UNDEFINED);
-                    };
+            if ( bypassLaFBackgroundPainting && backgroundIsActuallyBackground && !hasUndefinedNullBackground ) {
+                backgroundSetter = () -> {
+                    if ( !Objects.equals( owner.getBackground(), UI.Color.UNDEFINED ) )
+                        owner.setBackground(UI.Color.UNDEFINED);
+                };
+                if ( !hasBackground && owner instanceof JBox )
+                    shouldBeOpaque = false;
+            }
+            if ( owner.isOpaque() != shouldBeOpaque )
+                owner.setOpaque(shouldBeOpaque);
             /*
-                The above line looks very strange, but it is very important!
+                The above line 'owner.setBackground(UI.Color.UNDEFINED);'
+                may look very strange to you, but it is very important!
 
                 To understand what is going on here, you have to know that when a component is
                 flagged as opaque, then every Swing look and feel will, before painting

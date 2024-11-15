@@ -6,6 +6,8 @@ import spock.lang.Title
 import sprouts.Var
 import swingtree.animation.LifeTime
 import swingtree.api.Styler
+import swingtree.components.JBox
+import swingtree.style.ComponentExtension
 
 import javax.swing.*
 import java.awt.*
@@ -1124,7 +1126,7 @@ class Opaqueness_Styles_Spec extends Specification
             false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "transparent blue")}
     }
 
-    def 'A `JComboBox` (which typically opaque) may become non-opaque when transitioning to various styles.'(
+    def 'A `JComboBox` (which is typically opaque) may become non-opaque when transitioning to various styles.'(
         boolean opaque, Styler<?> styler
     ) {
         reportInfo """
@@ -1232,6 +1234,52 @@ class Opaqueness_Styles_Spec extends Specification
                         { it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) },
                         { it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) },
                     ]
+    }
+
+    def 'A `JBox` may or may not be opaque, depending on its style.'(
+        boolean opaque, Styler<JBox> styler
+    ) {
+        reportInfo """
+ 
+            A `JBox` is a component that is opaque by default.
+            This test demonstrates that it may or may not change its opaqueness
+            depending on what kind of styles are applied to it.
+
+        """
+        given : 'We first define a boolean flag that we will use to control the style:'
+            var isOn = false
+        and : 'Then we create the box based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.box().withSize(100, 100)
+                    .withStyle({ isOn ? styler(it) : it })
+        and : 'We build the underlying box:'
+            var box = ui.get(JBox)
+        expect : 'A plain box is transparent by default:'
+            !box.isOpaque()
+        when : 'We set the `isOn` flag to true and then refresh the UI:'
+            isOn = true
+            UI.runNow(()->{
+                ComponentExtension.from(box).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The box has the expected opaqueness:'
+            box.isOpaque() == opaque
+        when : 'We set the `isOn` flag to false and then refresh the UI:'
+            isOn = false
+            UI.runNow(()->{
+                ComponentExtension.from(box).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The box has the expected opaqueness:'
+            !box.isOpaque()
+        where :
+            opaque | styler
+            false  | {it}
+            true   | {it.backgroundColor("red")}
+            false  | {it.backgroundColor("transparent red")}
+            true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
     }
 }
 

@@ -59,6 +59,10 @@ final class ActiveDrag {
         this.dragConf          = dragConf;
     }
 
+    public @Nullable Component draggedComponent() {
+        return draggedComponent;
+    }
+
     public @Nullable BufferedImage currentDragImage() {
         return currentDragImage;
     }

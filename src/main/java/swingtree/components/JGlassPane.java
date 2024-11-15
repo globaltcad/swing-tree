@@ -14,14 +14,13 @@ import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -81,13 +80,24 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             UI.DragAction dragAction = activeDrag.dragConf().map(DragAwayComponentConf::dragAction).orElse(UI.DragAction.NONE);
 
             gestureRecognizer[0].setSourceActions(dragAction.toIntCode());
+            Component draggedComponent = activeDrag.draggedComponent();
             dragTrigger.startDrag(
                     activeDrag.dragConf().map(DragAwayComponentConf::cursor).map(UI.Cursor::toAWTCursor).orElse(Cursor.getDefaultCursor()),
                     bufferedImage,
                     new Point(offsetX, offsetY),
-                    activeDrag.dragConf().flatMap(DragAwayComponentConf::payload).orElse(new StringSelection("")),
+                    activeDrag.dragConf().flatMap(DragAwayComponentConf::payload).orElseGet(() -> _findRelevantDataFor(draggedComponent)),
                     new GlassPaneDragSourceListener()
             );
+            activeDrag.dragConf().ifPresent(conf -> {
+                try {
+                    conf.onDragStart().accept(new ComponentDelegate(conf.component(), dragTrigger));
+                } catch (Exception ex) {
+                    log.error(
+                            "Error while executing drag start event handlers.",
+                            ex
+                    );
+                }
+            });
         });
         dragSource.addDragSourceMotionListener(event -> {
             ActiveDrag activeDrag = getActiveDrag();
@@ -492,5 +502,78 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
             repaintRootPaneFor(activeDrag, activeDrag);
             setActiveDrag(ActiveDrag.none());
         }
+    }
+
+    private static Transferable _findRelevantDataFor(@Nullable Component component) {
+        try {
+            if (component == null)
+                return new StringSelection("");
+            if (component instanceof TextComponent) {
+                String text = ((TextComponent) component).getText();
+                if (text == null)
+                    return new StringSelection("");
+                return new StringSelection(text);
+            } else if (component instanceof JTextComponent) {
+                String text = ((JTextComponent) component).getText();
+                if (text == null)
+                    return new StringSelection("");
+                return new StringSelection(text);
+            } else if (component instanceof AbstractButton) {
+                String text = ((AbstractButton) component).getText();
+                if (text == null)
+                    return new StringSelection("");
+            } else if (component instanceof JLabel) {
+                String text = ((JLabel) component).getText();
+                if (text == null)
+                    return new StringSelection("");
+                return new StringSelection(text);
+            } else if (component instanceof JList) {
+                Object selectedValue = ((JList<?>) component).getSelectedValue();
+                if (selectedValue == null)
+                    return new StringSelection("");
+            } else if (component instanceof JTable) {
+                JTable table = (JTable) component;
+                int row = table.getSelectedRow();
+                int column = table.getSelectedColumn();
+                Object value = table.getValueAt(row, column);
+                if (value == null)
+                    return new StringSelection("");
+                return new StringSelection(value.toString());
+            } else if (component instanceof JTree) {
+                JTree tree = (JTree) component;
+                Object lastSelectedPathComponent = tree.getLastSelectedPathComponent();
+                if (lastSelectedPathComponent == null)
+                    return new StringSelection("");
+                return new StringSelection(lastSelectedPathComponent.toString());
+            } else if (component instanceof JTabbedPane) {
+                JTabbedPane tabbedPane = (JTabbedPane) component;
+                int selectedIndex = tabbedPane.getSelectedIndex();
+                if (selectedIndex == -1)
+                    return new StringSelection("");
+                String titleAt = tabbedPane.getTitleAt(selectedIndex);
+                if (titleAt == null)
+                    return new StringSelection("");
+                return new StringSelection(titleAt);
+            } else if (component instanceof JSpinner) {
+                Object value = ((JSpinner) component).getValue();
+                if (value == null)
+                    return new StringSelection("");
+                return new StringSelection(value.toString());
+            } else if (component instanceof JSlider) {
+                int value = ((JSlider) component).getValue();
+                return new StringSelection(String.valueOf(value));
+            } else if (component instanceof JProgressBar) {
+                int value = ((JProgressBar) component).getValue();
+                return new StringSelection(String.valueOf(value));
+            } else if (component instanceof JComboBox) {
+                Object selectedItem = ((JComboBox<?>) component).getSelectedItem();
+                if (selectedItem == null)
+                    return new StringSelection("");
+                return new StringSelection(selectedItem.toString());
+            }
+        } catch (Exception ignored) {
+            return new StringSelection("");
+        }
+        return new StringSelection("");
     }
 }
