@@ -142,16 +142,69 @@ class Event_Handling_Spec extends Specification
         and : 'We actually build the component:'
             var panel = ui.get(JTextArea)
 
-        when : 'The text area is set to visible.'
+        when : 'We try to trigger the shown event...'
+            panel.setVisible(false)
+            UI.sync()
             panel.setVisible(true)
             UI.sync()
-        then : 'Nothing happens because the text area is already shown.'
+        then : 'Nothing happens because the text area is not in a window.'
             trace == []
 
-        when : 'The text area is set to invisible and then visible again.'
+        when : 'We then put it into a window:'
+            var frame = UI.frame("Test").add(panel).get(JFrame)
+        and : 'Try again to trigger the shown event....'
             panel.setVisible(false)
+            UI.sync()
             panel.setVisible(true)
             UI.sync()
+        then : 'Again, nothing happens, because the frame is not visible.'
+            trace == []
+
+        when : 'We make the window visible.'
+            frame.setVisible(true)
+            UI.sync()
+        then : 'The handlers are triggered in the same order as they were registered.'
+            trace == ["1", "2", "3", "4", "5", "6", "7"]
+    }
+
+    def 'The "onHidden" event handlers are triggered in the same order as they were registered.'()
+    {
+        reportInfo """
+            This type of event occurs when the component is made invisible.
+            Internally this is based on an `ComponentListener` which
+            will for example be triggered by the `setVisible(boolean)` method
+           and then call your Swing-Tree event handler implementation.
+        """
+        given : 'A simple list where handlers are going to leave a trace.'
+            var trace = []
+
+        and : 'A simple text area UI.'
+            var ui =
+                    UI.textArea("Some content...")
+                    .onHidden( it -> trace.add("1") )
+                    .onHidden( it -> trace.add("2") )
+                    .onHidden( it -> trace.add("3") )
+                    .onHidden( it -> trace.add("4") )
+                    .onHidden( it -> trace.add("5") )
+                    .onHidden( it -> trace.add("6") )
+                    .onHidden( it -> trace.add("7") )
+        and : 'We actually build the component:'
+            var panel = ui.get(JTextArea)
+        and : 'We make the panel visible initially:'
+            panel.setVisible(true)
+            UI.sync()
+
+        expect : 'The trace is empty because the text area has not been hidden.'
+            trace == []
+
+        when : 'We then put it into a window:'
+            var frame = UI.frame("Test").add(panel).get(JFrame)
+        and : 'We trigger the hidden event by making the frame visible and then invisible.'
+            frame.setVisible(true)
+            UI.sync()
+            frame.setVisible(false)
+            UI.sync()
+
         then : 'The handlers are triggered in the same order as they were registered.'
             trace == ["1", "2", "3", "4", "5", "6", "7"]
     }

@@ -1,15 +1,15 @@
 package swingtree
 
-
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
 import swingtree.components.JBox
-import swingtree.threading.EventProcessor
 import swingtree.input.Keyboard
+import swingtree.threading.EventProcessor
 
 import javax.swing.*
+import javax.swing.event.AncestorListener
 import javax.swing.event.ListSelectionListener
 import java.awt.*
 import java.awt.event.ComponentListener
@@ -391,7 +391,8 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     .onHidden(it -> {/*something*/})
                     .get(JPanel)
         then : 'We can verify that the panel has the expected number of listeners.'
-            panel.getListeners(ComponentListener.class).size() == 4
+            panel.getListeners(ComponentListener.class).size() == 3
+            panel.getListeners(AncestorListener.class).size() == 2
     }
 
     def 'A tabbed pane can be created and populated in a declarative way.'()
