@@ -25,7 +25,7 @@ public class ListRendering extends Panel
         .add(GROW,
             panel().withBorderTitled("Object to String").withMinWidth(200)
             .add(GROW,
-                of(new List<Test>()).id("my-test-list")
+                of(new ListView<Test>()).id("my-test-list")
                 .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
                 .withCells( it -> it
                     .when(Test.class)

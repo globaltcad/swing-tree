@@ -3136,7 +3136,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         return ((UIForCombo)comboBox()).withItems(items);
     }
 
@@ -3163,7 +3163,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the list.
      */
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items, Function<E, String> renderer ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         Objects.requireNonNull(renderer, "renderer");
         return comboBox(items)
                 .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
@@ -3171,7 +3171,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new  {@link JComboBox} instance
-     *  with the provided {@link UI.List} of elements as selectable items which
+     *  with the provided {@link UI.ListView} of elements as selectable items which
      *  may not be modified by the user. <br>
      *  So even if the combo box is editable, the user will not be able to
      *  modify the items in the list (the selected item inside the
@@ -3182,7 +3182,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the list.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( java.util.List<E> items ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         java.util.List<E> unmodifiableList = Collections.unmodifiableList(items);
         return comboBox(unmodifiableList);
     }
@@ -3227,7 +3227,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the list.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, java.util.List<E> items ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         return ((UIForCombo)comboBox()).withItems(selection, items);
     }
@@ -3257,7 +3257,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox(
         Var<E> selection, java.util.List<E> items, Function<E, String> renderer
     ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(selection, items)
@@ -3489,7 +3489,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the combo box.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, E... items ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         return ((UIForCombo)comboBox()).withItems(var, items);
     }
 
@@ -3511,7 +3511,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox(
         Var<E> var, E[] items, Function<E, String> renderer
     ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         return comboBox(var, items)
                 .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
@@ -3529,7 +3529,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the combo box.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         return ((UIForCombo)comboBox()).withItems(var, items);
     }
 
@@ -3564,7 +3564,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the list.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items, Function<E, String> renderer ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(var, "var", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(var, items)
@@ -3584,7 +3584,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the combo box.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
         return ((UIForCombo)comboBox()).withItems(selectedItem, items);
     }
@@ -3620,7 +3620,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <E> The type of the elements in the list.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items, Function<E, String> renderer ) {
-        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(selectedItem, items)
@@ -5353,7 +5353,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JList}.
      */
     public static <E> UIForList<E, JList<E>> list() {
-        return new UIForList<>(new BuilderState<>(UI.List.class, UI.List::new));
+        return new UIForList<>(new BuilderState<>(UI.ListView.class, UI.ListView::new));
     }
 
     /**
@@ -5366,8 +5366,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E> UIForList<E, JList<E>> list( ListModel<E> model ) {
         NullUtil.nullArgCheck(model, "model", ListModel.class);
-        return new UIForList<>(new BuilderState<>(UI.List.class, ()->{
-            JList<E> list = new UI.List<>();
+        return new UIForList<>(new BuilderState<>(UI.ListView.class, ()->{
+            JList<E> list = new UI.ListView<>();
             list.setModel(model);
             return list;
         }));
@@ -5385,7 +5385,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     @SafeVarargs
     public static <E> UIForList<E, JList<E>> list( E... elements ) {
         NullUtil.nullArgCheck(elements, "elements", Object[].class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, ()->new UI.List<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.ListView.class, ()->new UI.ListView<E>()))
                 .withEntries( elements );
     }
 
@@ -5400,7 +5400,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.ListView.class, UI.ListView::new))
                 .withEntries( elements );
     }
 
@@ -5453,7 +5453,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.ListView.class, UI.ListView::new))
                 .withEntries( elements ).withSelection( selection );
     }
 
@@ -5470,27 +5470,27 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForList<E, JList<E>> listOf( E... elements ) { return list( elements ); }
 
     /**
-     *  Creates a new {@link JList} instance with the provided {@link UI.List}
+     *  Creates a new {@link JList} instance with the provided {@link UI.ListView}
      *  as data model.
      *  This is functionally equivalent to {@link #listOf(java.util.List)}.
      *
      * @param entries The list of entries used for populating a new {@link JList} component.
      * @param <E> The type parameter defining the concrete type of the list entries.
-     * @return A builder instance for a new {@link JList} with the provided {@link UI.List} as data model.
+     * @return A builder instance for a new {@link JList} with the provided {@link UI.ListView} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
-        return new UIForList<>(new BuilderState<JList<E>>(UI.List.class, UI.List::new))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.ListView.class, UI.ListView::new))
                 .withEntries( entries );
     }
 
     /**
-     *  Creates a new {@link JList} instance with the provided {@link UI.List}
+     *  Creates a new {@link JList} instance with the provided {@link UI.ListView}
      *  as data model.
      *  This is functionally equivalent to {@link #list(java.util.List)}.
      *
      * @param entries The elements which should be used as model data for the new {@link JList}.
      * @param <E> The type of the elements in the list.
-     * @return A builder instance for a new {@link JList} with the provided {@link UI.List} as data model.
+     * @return A builder instance for a new {@link JList} with the provided {@link UI.ListView} as data model.
      */
     public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) { return list( entries ); }
 
