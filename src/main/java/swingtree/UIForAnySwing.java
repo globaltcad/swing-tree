@@ -10,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
+import sprouts.Observable;
 import sprouts.*;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
@@ -24,20 +25,20 @@ import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
+import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 
 /**
@@ -3943,53 +3944,89 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Adds the supplied {@link Action} wrapped in a {@link ComponentListener}
-     *  to the component, to receive those component events where the wrapped component becomes visible.
+     *  Adds the supplied {@link Action} wrapped in a {@link AncestorListener}
+     *  to the component, to receive calls when the wrapped component becomes visible
+     *  on the screen. <br>
+     *  <p>
+     *  Note that this does not correlate 1:1 with the {@link Component#isVisible()} flag,
+     *  because a component may also be invisible when it is not part of the component hierarchy
+     *  with a visible root component (window) or one of its ancestors (parent components)
+     *  is not visible.
      *
-     * @param onShown The {@link Action} which gets invoked when the component has been made visible.
+     * @param onShown The {@link Action} which gets invoked when the component has been made visible
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onShown( Action<ComponentDelegate<C, ComponentEvent>> onShown ) {
+    public final I onShown( Action<ComponentDelegate<C, AncestorEvent>> onShown ) {
         NullUtil.nullArgCheck(onShown, "onShown", Action.class);
         return _with( thisComponent -> {
-                   thisComponent.addComponentListener(new ComponentAdapter() {
-                       @Override public void componentShown(ComponentEvent e) {
+                   _prependAncestorListenerTo(thisComponent, new AncestorListener() {
+                       @Override public void ancestorAdded(AncestorEvent event) {
                            _runInApp(()->{
                                try {
-                                   onShown.accept(new ComponentDelegate<>(thisComponent, e));
+                                   onShown.accept(new ComponentDelegate<>(thisComponent, event));
                                } catch ( Exception ex ) {
                                    log.error("Error in show event action handler!", ex);
                                }
                            });
                        }
+                       @Override public void ancestorRemoved(AncestorEvent event) {}
+                       @Override public void ancestorMoved(AncestorEvent event) {}
                    });
                })
                ._this();
     }
 
     /**
-     *  Adds the supplied {@link Action} wrapped in a {@link ComponentListener}
-     *  to the component, to receive those component events where the wrapped component becomes invisible.
+     *  Adds the supplied {@link Action} wrapped in a {@link AncestorListener}
+     *  to the component, to receive calls when the wrapped component becomes invisible
+     *  on the users screen. <br>
+     *  <p>
+     *  Note that this does not correlate 1:1 with the {@link Component#isVisible()} flag,
+     *  because a component may also be invisible when it is not part of the component hierarchy
+     *  with a visible root component (window) or one of its ancestors (parent components)
+     *  is not visible.
      *
      * @param onHidden The {@link Action} which gets invoked when the component has been made invisible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onHidden( Action<ComponentDelegate<C, ComponentEvent>> onHidden ) {
+    public final I onHidden( Action<ComponentDelegate<C, AncestorEvent>> onHidden ) {
         NullUtil.nullArgCheck(onHidden, "onHidden", Action.class);
         return _with( thisComponent -> {
-                   thisComponent.addComponentListener(new ComponentAdapter() {
-                       @Override public void componentHidden(ComponentEvent e) {
-                           _runInApp(()->{
-                               try {
-                                   onHidden.accept(new ComponentDelegate<>(thisComponent, e));
-                               } catch ( Exception ex ) {
-                                   log.error("Error in hide event action handler!", ex);
-                               }
-                           });
-                       }
-                   });
+                    _prependAncestorListenerTo(thisComponent, new AncestorListener() {
+                          @Override public void ancestorAdded(AncestorEvent event) {}
+                          @Override public void ancestorRemoved(AncestorEvent event) {
+                            _runInApp(()->{
+                                 try {
+                                      onHidden.accept(new ComponentDelegate<>(thisComponent, event));
+                                 } catch ( Exception ex ) {
+                                      log.error("Error in hide event action handler!", ex);
+                                 }
+                            });
+                          }
+                          @Override public void ancestorMoved(AncestorEvent event) {}
+                     });
                })
                ._this();
+    }
+
+    /**
+     *  Adds {@link AncestorListener} to the component so that it will
+     *  be called after the previously added ancestor listener was called.<br>
+     *  The default behavior of Swing is to call the listeners from the most recently added to the oldest.
+     *  This method will prepend the listener to the list of listeners, so that it will be called first.
+     * @param component The component to which the listener should be added.
+     * @param listener The listener to be added.
+     */
+    private static void _prependAncestorListenerTo( JComponent component, AncestorListener listener ) {
+        java.util.List<AncestorListener> listeners = new ArrayList<>(Arrays.asList(component.getAncestorListeners()));
+        for ( AncestorListener l : listeners )
+            component.removeAncestorListener(l);
+
+        listeners.add(listener);
+        Collections.reverse(listeners);// revert the order of the listeners
+
+        for ( AncestorListener l : listeners )
+            component.addAncestorListener(l);
     }
 
     /**
