@@ -55,48 +55,6 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         return new UIForCombo<>(newState);
     }
 
-    private void _bindComboModelToEditor( JComboBox<E> thisComponent, AbstractComboModel<E> model ) {
-        Component editor = thisComponent.getEditor().getEditorComponent();
-        if ( editor instanceof JTextField ) {
-            JTextField field = (JTextField) editor;
-            boolean[] comboIsOpen = {false};
-            WeakReference<JComboBox<E>> weakCombo = new WeakReference<>(thisComponent);
-            UI.of(field).onTextChange( it -> {
-                JComboBox<E> strongCombo = weakCombo.get();
-                if ( !comboIsOpen[0] && strongCombo != null && strongCombo.isEditable() )
-                    model.setFromEditor(field.getText());
-            });
-
-            _onShow( model._getSelectedItemVar(), thisComponent, (c, v) ->
-                model.doQuietly(()->{
-                    c.getEditor().setItem(v);
-                    model.fireListeners();
-                })
-            );
-
-            // Adds a PopupMenu listener which will listen to notification
-            // messages from the popup portion of the combo box.
-            thisComponent.addPopupMenuListener(new PopupMenuListener() {
-                @Override
-                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                    // This method is called before the popup menu becomes visible.
-                    comboIsOpen[0] = true;
-                }
-                @Override
-                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                    // This method is called before the popup menu becomes invisible
-                    comboIsOpen[0] = false;
-                }
-                @Override
-                public void popupMenuCanceled(PopupMenuEvent e) {
-                    // This method is called when the popup menu is canceled
-                    comboIsOpen[0] = false;
-                }
-            });
-
-        }
-    }
-
     /**
      *  Registers a listener to be notified when the combo box is opened,
      *  meaning its popup menu is shown after the user clicks on the combo box.
@@ -710,6 +668,85 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
             for (DocumentListener listener : docListeners) {
                 abstractDocument.addDocumentListener(listener);
             }
+        }
+    }
+
+    private void _bindComboModelToEditor( JComboBox<E> thisComponent, AbstractComboModel<E> model ) {
+        Component editor = thisComponent.getEditor().getEditorComponent();
+        if ( editor instanceof JTextField ) {
+            JTextField field = (JTextField) editor;
+            MemSafeBinding<E> memSafeBinding = new MemSafeBinding<>(field, thisComponent, model);
+
+            UI.of(field).onTextChange( it -> {
+                memSafeBinding.textChanged();
+            });
+            _onShow( model._getSelectedItemVar(), thisComponent, (c, v) -> {
+                memSafeBinding.itemChanged(c, v);
+            });
+            // Adds a PopupMenu listener which will listen to notification
+            // messages from the popup portion of the combo box.
+            thisComponent.addPopupMenuListener(memSafeBinding);
+        }
+    }
+
+    /**
+     *  A popup menu listener for the combo box which synchronizes text field, model
+     *  and combo box while at the same time keeping weak references on
+     *  all involved components to ensure that no memory leaks occur.
+     * @param <E>
+     */
+    private static class MemSafeBinding<E> implements PopupMenuListener {
+
+        private final WeakReference<JTextField> weakField;
+        private final WeakReference<JComboBox<E>> weakCombo;
+        private final WeakReference<AbstractComboModel<E>> weakModel;
+
+        private boolean comboIsOpen = false;
+
+        private MemSafeBinding(
+                JTextField field,
+                JComboBox<E> combo,
+                AbstractComboModel<E> model
+        ) {
+            this.weakField = new WeakReference<>(field);
+            this.weakCombo = new WeakReference<>(combo);
+            this.weakModel = new WeakReference<>(model);
+        }
+
+        public void textChanged() {
+            JTextField field = weakField.get();
+            AbstractComboModel<E> strongModel = weakModel.get();
+            if ( strongModel != null && field != null ) {
+                JComboBox<E> strongCombo = weakCombo.get();
+                if (!comboIsOpen && strongCombo != null && strongCombo.isEditable())
+                    strongModel.setFromEditor(field.getText());
+            }
+        }
+
+        public void itemChanged(JComboBox<E> combo, E newItem) {
+            AbstractComboModel<E> strongModel = weakModel.get();
+            if ( strongModel != null ) {
+                strongModel.doQuietly(() -> {
+                    combo.getEditor().setItem(newItem);
+                    strongModel.fireListeners();
+                });
+            }
+        }
+
+        @Override
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            // This method is called before the popup menu becomes visible.
+            comboIsOpen = true;
+        }
+        @Override
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+            // This method is called before the popup menu becomes invisible
+            comboIsOpen = false;
+        }
+        @Override
+        public void popupMenuCanceled(PopupMenuEvent e) {
+            // This method is called when the popup menu is canceled
+            comboIsOpen = false;
         }
     }
 

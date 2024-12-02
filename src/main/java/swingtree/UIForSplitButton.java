@@ -14,6 +14,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.event.ActionEvent;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -506,7 +507,12 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     private <I extends JMenuItem> void _addSplitItem( SplitItem<I> splitItem, B thisComponent ) {
         I item = splitItem.getItem();
         splitItem.getIsEnabled().ifPresent( isEnabled -> {
-            _onShow( isEnabled, thisComponent, (c,v) -> item.setEnabled(v) );
+            WeakReference<I> weakItem = new WeakReference<>(item);
+            _onShow( isEnabled, thisComponent, (scopedComponent,newIsSelected) -> {
+                I strongItem = weakItem.get();
+                if ( strongItem != null )
+                    strongItem.setEnabled(newIsSelected);
+            });
         });
 
         ExtraState state = ExtraState.of(thisComponent);
