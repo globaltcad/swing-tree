@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Action;
 import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.layout.AddConstraint;
@@ -10,8 +11,8 @@ import swingtree.style.ComponentExtension;
 import swingtree.style.StyleConf;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.JComponent;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -596,7 +597,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         else
             valRef = Ref.of(new WeakReference<>(val));
 
-        _onShow( valRef, Ref.of(new WeakReference<>(thisComponent)), displayAction );
+        _onShow( valRef, new WeakReference<>(thisComponent), displayAction );
     }
 
     protected final <T> UIForAnything<I,C,E> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
@@ -608,63 +609,36 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
 
     private <T> void _onShow(
         Ref<Val<T>>       propertyRef,
-        Ref<C>            componentRef,
+        WeakReference<C>  weakComponent,
         BiConsumer<C, T>  displayAction
     ) {
         Objects.requireNonNull(propertyRef);
-        Objects.requireNonNull(componentRef);
+        Objects.requireNonNull(weakComponent);
         Objects.requireNonNull(displayAction);
-        Action<ValDelegate<T>> action = new Action<ValDelegate<T>>() {
-            @Override
-            public void accept( ValDelegate<T> value )
-            {
-                C thisComponent = componentRef.get();
-                if ( thisComponent == null ) {
-                    /*
-                        We make sure that the action is only executed if the component
-                        is not disposed. This is important because the action may
-                        access the component, and we don't want to get a NPE.
-                    */
-                    Val<T> property = propertyRef.get();
-                    if ( property != null )
-                        Viewable.cast(property).unsubscribe(this);
-                        // ^ We unsubscribe from the property because the component is disposed.
-                    return;
-                }
-
-                T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
-                _runInUI(() ->
-                    UI.run( () -> {
-                        try {
-                            displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
-                            /*
-                                 Since this is happening in another thread we are using the captured property item/value.
-                                 The property might have changed in the meantime, but we don't care about that,
-                                 we want things to happen in the order they were triggered.
-                             */
-                        } catch ( Exception e ) {
-                            throw new RuntimeException(
-                                "Failed to apply state of property '" + propertyRef.get() + "' to " +
-                                "component '" + thisComponent + "'.",
-                                e
-                            );
-                        }
-                    })
-                );
-            }
-        };
+        Action<ValDelegate<T>> action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)->{
+            T v = delegate.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
+            _runInUI(() ->
+                UI.run( () -> {
+                    try {
+                        displayAction.accept(localComponent, v); // Here the captured value is used. This is extremely important!
+                        /*
+                             Since this is happening in another thread we are using the captured property item/value.
+                             The property might have changed in the meantime, but we don't care about that,
+                             we want things to happen in the order they were triggered.
+                         */
+                    } catch ( Exception e ) {
+                        throw new RuntimeException(
+                            "Failed to apply state of property '" + propertyRef.get() + "' to " +
+                            "component '" + localComponent + "'.",
+                            e
+                        );
+                    }
+                })
+            );
+        });
         Optional.ofNullable(propertyRef.get()).ifPresent(
             property -> Viewable.cast(property).onChange(From.ALL, action)
         );
-        CustomCleaner
-            .getInstance()
-            .register(componentRef.get(),
-                () -> {
-                    Val<T> property = propertyRef.get();
-                    if ( property != null )
-                        Viewable.cast(property).unsubscribe(action);
-                }
-            );
     }
 
     /**
@@ -694,30 +668,21 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     private <T> void _onShow(
-        Vals<T> properties, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
+        Vals<T> properties, WeakReference<C> weakComponent, BiConsumer<C, ValsDelegate<T>> displayAction
     ) {
         Objects.requireNonNull(properties);
         Objects.requireNonNull(displayAction);
-        Action<ValsDelegate<T>> action = new Action<ValsDelegate<T>>() {
-            @Override
-            public void accept( ValsDelegate<T> delegate ) {
-                C thisComponent = ref.get();
-                if ( thisComponent == null ) {
-                    Viewables.cast(properties).unsubscribe(this); // We unsubscribe from the property if the component is disposed.
-                    return;
-                }
-                _runInUI(() ->{
-                    displayAction.accept(thisComponent, delegate);
-                    /*
-                        We make sure that the action is only executed if the component
-                        is not disposed. This is important because the action may
-                        access the component, and we don't want to get a NPE.
-                    */
-                });
-            }
-        };
+        Action<ValsDelegate<T>> action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)->{
+            _runInUI(() ->{
+                displayAction.accept(localComponent, delegate);
+                /*
+                    We make sure that the action is only executed if the component
+                    is not disposed. This is important because the action may
+                    access the component, and we don't want to get a NPE.
+                */
+            });
+        });
         Viewables.cast(properties).onChange(action);
-        CustomCleaner.getInstance().register(ref.get(), () -> Viewables.cast(properties).unsubscribe(action));
     }
 
     /**
