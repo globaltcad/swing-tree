@@ -226,6 +226,8 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     private static boolean containsScreenLocation(Component component, Point screenLocation) {
+        if (!component.isShowing())
+            return false;
         Point compLocation = component.getLocationOnScreen();
         Dimension compSize = component.getSize();
         int relativeX = screenLocation.x - compLocation.x;
