@@ -3,6 +3,8 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
+import sprouts.Observable;
+import sprouts.Observer;
 import swingtree.api.Buildable;
 import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
@@ -711,9 +713,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     public final UIForTable<T> updateTableOn( Event event ) {
         NullUtil.nullArgCheck(event, "event", Event.class);
         return _with( thisComponent -> {
-                    event.subscribe(()->
+                    Observable.cast(event).subscribe(Observer.ofWeak(thisComponent, innerComponent->
                         _runInUI(()->{
-                            TableModel model = thisComponent.getModel();
+                            TableModel model = innerComponent.getModel();
                             if ( model instanceof AbstractTableModel ) {
                                 // We want the table model update to be as thorough as possible, so we
                                 // will fire a table structure changed event, followed by a table data
@@ -724,7 +726,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                             else
                                 throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
                         })
-                    );
+                    ));
                 })
                 ._this();
     }
