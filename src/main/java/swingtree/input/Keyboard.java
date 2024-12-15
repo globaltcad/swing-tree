@@ -1,5 +1,9 @@
 package swingtree.input;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.UI;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -16,13 +20,22 @@ import java.util.Objects;
 public final class Keyboard
 {
     private final static Keyboard INSTANCE = new Keyboard();
+    private static final Logger log = LoggerFactory.getLogger(Keyboard.class);
 
     /**
      *  Exposes the singleton instance of the {@link Keyboard} class.
      *
      * @return The singleton instance of the {@link Keyboard} class.
      */
-    public static Keyboard get() { return INSTANCE; }
+    public static Keyboard get() {
+        if ( !UI.thisIsUIThread() )
+            log.warn(
+                "Keyboard.get() should only be called from the UI thread (Swing Event Dispatch Thread).\n" +
+                "Encountered thread '{}' instead!", Thread.currentThread().getName(),
+                new Throwable() // Stack trace for debugging purposes
+            );
+        return INSTANCE;
+    }
 
     /**
      *  This enum represents all the keys on the keyboard which can be queried for their current state.

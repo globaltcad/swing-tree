@@ -4250,7 +4250,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
-     * to receive key events triggered when the wrapped component receives a particular
+     * to receive key events triggered when the built component receives a particular
      * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
      * <br><br>
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
