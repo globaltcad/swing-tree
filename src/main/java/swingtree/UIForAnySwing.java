@@ -12,6 +12,7 @@ import sprouts.Action;
 import sprouts.Event;
 import sprouts.Observable;
 import sprouts.*;
+import sprouts.Observer;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
@@ -55,9 +56,10 @@ import java.util.function.Function;
  */
 public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnything<I, C, JComponent>
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForAnySwing.class);
 
     private final static String _TIMERS_KEY = "_swing-tree.timers";
+
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
@@ -69,55 +71,142 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return color == UI.Color.UNDEFINED;
     }
 
+    private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
+        event.subscribe( () -> _runInUI( thisComponent::repaint ) );
+    }
+
+    private void _bindRepaintOn( JComponent thisComponent, Event event ) {
+        Observable.cast(event).subscribe(
+            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
+        );
+    }
+
+    private void _bindRepaintOn( JComponent thisComponent, Val<?> event ) {
+        Viewable.cast(event).subscribe(
+            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
+        );
+    }
+
     /**
-     *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
-     *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
-     *  This means that the component will be repainted whenever the event is fired.
+     *  Use this to bind an {@link Observable} (usually from a sprouts.Event)
+     *  to the {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever
+     *  the source of the observable is fired or changed.
+     *
+     * @param observable The observable to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Observable observable ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, observable) )._this();
+    }
+
+    /**
+     *  This method exposes a concise way to bind multiple {@link Observable}s (usually sprouts.Event instances)
+     *  to the {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever the source of any one of the
+     *  observables is fired or changed.
+     *
+     * @param first The first observable to which the repaint method of the component will be bound.
+     * @param second The second observable to which the repaint method of the component will be bound.
+     * @param rest The rest of the observables to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Observable first, Observable second, Observable... rest ) {
+        return _with( c -> {
+                    _bindRepaintOn(c, first);
+                    _bindRepaintOn(c, second);
+                    for ( Observable o : rest ) {
+                        _bindRepaintOn(c, o);
+                    }
+                })._this();
+    }
+
+    /**
+     *  Allows you to bind an {@link Event} to the {@link JComponent#repaint()} method of
+     *  the component represented by this builder. <br>
+     *  This means that the component will be repainted whenever the event is fired
+     *  through the {@link Event#fire()} method.
      *
      * @param event The event to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
-    public final I withRepaintOn( Observable event ) {
-        return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
-    }
-
-    public final I withRepaintOn( Val<?> event ) {
-        return _with( c -> Viewable.cast(event).subscribe( () -> _runInUI(c::repaint) ) )._this();
+    public final I withRepaintOn( Event event ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, event) )._this();
     }
 
     /**
-     *  This method exposes a concise way to bind multiple {@link Observable}s (usually sprouts.Events)
-     *  to the {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
-     *  This means that the component will be repainted whenever any of the events are fired.
+     *  This method exposes a concise way to bind multiple {@link Event}s to the
+     *  {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever any one of the events is fired
+     *  through the {@link Event#fire()} method.
      *
      * @param first The first event to which the repaint method of the component will be bound.
      * @param second The second event to which the repaint method of the component will be bound.
      * @param rest The rest of the events to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
-    public final I withRepaintOn( Observable first, Observable second, Observable... rest ) {
-        return _with( c -> {
-            first.subscribe( () -> _runInUI(c::repaint) );
-            second.subscribe( () -> _runInUI(c::repaint) );
-            for ( Observable o : rest ) {
-                o.subscribe( () -> _runInUI(c::repaint) );
-            }
-        })._this();
+    public final I withRepaintOn( Event first, Event second, Event... rest ) {
+        return _with( thisComponent -> {
+                    _bindRepaintOn(thisComponent, first);
+                    _bindRepaintOn(thisComponent, second);
+                    for ( Event e : rest ) {
+                        _bindRepaintOn(thisComponent, e);
+                    }
+                })
+                ._this();
     }
 
+    /**
+     *  Allows you to bind a {@link Val} to the {@link JComponent#repaint()} method
+     *  of the component represented by this builder. <br>
+     *  This means that the component will be repainted whenever the value of the {@link Val}
+     *  changes. If the {@link Val} is a mutable {@link Var} property,
+     *  then this event is usually triggered through the {@link Var#set(Object)} method.<br>
+     *  <p>
+     *      A typical use case is to use {@link Var} properties in the
+     *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
+     *      and then also pass these properties to the this {@code withRepaintOn}
+     *      method to ensure that the style gets re-evaluated and then repainted.
+     *  </p>
+     *
+     * @param event The {@link Val} to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Val<?> event ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, event) )._this();
+    }
+
+    /**
+     *  Use this method to bind multiple {@link Val}s to the
+     *  {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever the value of any one of the
+     *  {@link Val}s changes. If the {@link Val} is a mutable {@link Var} property,
+     *  then this event is usually triggered through the {@link Var#set(Object)} method.<br>
+     *  <p>
+     *      A typical use case is to use {@link Var} properties in the
+     *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
+     *      and then also pass these properties to the this {@code withRepaintOn}
+     *      method to ensure that the style gets re-evaluated and then repainted.
+     *  </p>
+     *
+     * @param first The first {@link Val} to which the repaint method of the component will be bound.
+     * @param second The second {@link Val} to which the repaint method of the component will be bound.
+     * @param rest The rest of the {@link Val}s to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
     public final I withRepaintOn( Val<?> first, Val<?> second, Val<?>... rest ) {
         return _with( c -> {
-            Viewable.cast(first).subscribe( () -> _runInUI(c::repaint) );
-            Viewable.cast(second).subscribe( () -> _runInUI(c::repaint) );
-            for ( Val<?> o : rest ) {
-                Viewable.cast(o).subscribe( () -> _runInUI(c::repaint) );
-            }
-        })._this();
+                    _bindRepaintOn(c, first);
+                    _bindRepaintOn(c, second);
+                    for ( Val<?> o : rest ) {
+                        _bindRepaintOn(c, o);
+                    }
+                })._this();
     }
 
     /**
      *  This method exposes a concise way to set an identifier for the component
-     *  wrapped by this {@link UI}!
+     *  represented by this builder chain.
      *  In essence this is simply a delegate for the {@link JComponent#setName(String)} method
      *  to make it more expressive and widely recognized what is meant
      *  ("id" is shorter and makes more sense than "name" which could be confused with "title").
@@ -133,7 +222,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  This method exposes a concise way to set an enum based identifier for the component
-     *  wrapped by this {@link UI}!
+     *  represented by this builder chain.
      *  In essence this is simply a delegate for the {@link JComponent#setName(String)} method
      *  to make it more expressive and widely recognized what is meant
      *  ("id" is shorter and makes more sense than "name" which could be confused with "title").
@@ -2327,12 +2416,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
-                    styleEvent.subscribe( ()->{
+                    Observable.cast(styleEvent).subscribe(Observer.ofWeak(thisComponent, (innerComponent)->{
                         AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
                             ComponentExtension.from(thisComponent)
                                 .addAnimatedStyler(status, conf -> styler.style(status, conf))
                         );
-                    });
+                    }));
                 })
                 ._this();
     }

@@ -133,7 +133,7 @@ public class BoxShadowPickerViewModel
                 currentCornerModel.set(model);
             }
         }
-        repaint.subscribe( () -> createCode() );
+        Observable.cast(repaint).subscribe( () -> createCode() );
         createCode();
     }
 
