@@ -25,7 +25,7 @@ public class ComposedView extends Panel
             panel("fill")
             .add("grow, push, wrap",
                 scrollPanels()
-                .add(vm.entries(), entry ->
+                .addAll(vm.entries(), entry ->
                         panel("fill").add(
                             label(entry)
                         )

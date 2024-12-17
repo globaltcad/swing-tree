@@ -465,7 +465,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * <pre>{@code
      *     UI.panel()
      *      .add(
-     *          UI.tabbedPane().add(tabs, model ->
+     *          UI.tabbedPane().addAll(tabs, model ->
      *              switch(model.type()) {
      *                  case LOGIN -> UI.tab("Login").add(..);
      *                  case ABOUT -> UI.tab("About").add(..);
@@ -480,7 +480,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * @param tabSupplier A lambda to generate a {@link Tab} for each item.
      * @return This instance, allowing for builder-style method chaining.
      */
-    public <M> UIForTabbedPane<P> add(Vals<M> tabModels, TabSupplier<M> tabSupplier) {
+    public <M> UIForTabbedPane<P> addAll(Vals<M> tabModels, TabSupplier<M> tabSupplier) {
         Objects.requireNonNull(tabModels, "tabModels");
         Objects.requireNonNull(tabSupplier, "tabSupplier");
         return _with(thisComponent -> {

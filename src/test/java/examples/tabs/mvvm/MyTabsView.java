@@ -39,7 +39,7 @@ public class MyTabsView extends Panel
                 .borderWidthAt(Edge.BOTTOM, 1)
                 .padding(2, 5, -1, 5)
             )
-            .add(vm.getTabs(), tabModel ->
+            .addAll(vm.getTabs(), tabModel ->
                 button(tabModel.title()).withMaxHeight(38).withMinHeight(38).withFontSize(12)
                 .withRepaintOn(repaintEvent)
                 .withTooltip(tabModel.tip())

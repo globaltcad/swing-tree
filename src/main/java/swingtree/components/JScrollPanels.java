@@ -48,7 +48,7 @@ import java.util.stream.IntStream;
  * 	}</pre>
  * 	...where {@code entries()} is a method returning a {@link sprouts.Vars} instance
  * 	which contains a list of your sub-view models.
- * 	The second parameter of the {@link swingtree.UIForScrollPanels#add(sprouts.Vals, ViewSupplier)} method is a lambda
+ * 	The second parameter of the {@link swingtree.UIForScrollPanels#addAll(sprouts.Vals, ViewSupplier)} method is a lambda
  *  which takes a single view model from the list of view models and turns it into a view.
  */
 public class JScrollPanels extends UI.ScrollPane

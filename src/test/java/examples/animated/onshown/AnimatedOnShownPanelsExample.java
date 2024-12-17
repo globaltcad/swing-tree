@@ -88,7 +88,7 @@ public class AnimatedOnShownPanelsExample {
                     )
                 )
                 .add(UI.GROW,
-                    UI.scrollPanels().add( eventLog, UI::label )
+                    UI.scrollPanels().addAll( eventLog, UI::label )
                 )
                 .get(JPanel.class);
         });
@@ -131,7 +131,7 @@ public class AnimatedOnShownPanelsExample {
                     )
                 )
                 .add(UI.GROW,
-                    UI.scrollPanels().add( eventLog, UI::label )
+                    UI.scrollPanels().addAll( eventLog, UI::label )
                 )
                 .get(JPanel.class);
         });

@@ -30,7 +30,7 @@ public class ScrollPanelsView extends Panel
 		.add( "shrink, span, wrap", separator() )
 		.add( "grow, push, span, wrap",
 			scrollPanels()
-			.add(vm.entries(), evm ->// <-- Here we bind the entries to the scroll panels
+			.addAll(vm.entries(), evm ->// <-- Here we bind the entries to the scroll panels
 				UI.panel("fill")
 				.add("pushx", UI.label(evm.text()))
 				.add(UI.label(evm.position().viewAs(String.class, s -> "Position: " + s)))

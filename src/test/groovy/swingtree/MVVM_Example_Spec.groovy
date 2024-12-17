@@ -471,7 +471,7 @@ class MVVM_Example_Spec extends Specification
         and : 'Finally a view which binds to the view model property list.'
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
-                    .add(UI.panel().id("super").add(vms, viewer))
+                    .add(UI.panel().id("super").addAll(vms, viewer))
         and : 'We build the component:'
             var panel = ui.get(JPanel)
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
@@ -557,7 +557,7 @@ class MVVM_Example_Spec extends Specification
                         .add(UI.label("Dynamic Super View:"))
                         .add(
                             UI.panel("wrap 1").id("super")
-                            .add("growx", vms, viewer)
+                            .addAll("growx", vms, viewer)
                         )
         and : 'We build the component and get its layout.'
             var panel = ui.get(JPanel)

@@ -48,7 +48,7 @@ class Scroll_Panels_Spec extends Specification
                 .add( UI.label("Something to scroll:") )
                 .add( UI.separator() )
                 .add(
-                    UI.scrollPanels().add(vm.entries(), evm ->
+                    UI.scrollPanels().addAll(vm.entries(), evm ->
                         UI.panel("fill").id("sub-view")
                         .add("pushx", UI.label(evm.text()))
                         .add(UI.label(evm.position().viewAs(String.class, s -> "Position: " + s)))
@@ -114,7 +114,7 @@ class Scroll_Panels_Spec extends Specification
                 .add( UI.label("Something to scroll:") )
                 .add( UI.separator() )
                 .add(
-                    UI.scrollPanels().add(list, item ->
+                    UI.scrollPanels().addAll(list, item ->
                         UI.panel("fill").id("sub-view")
                         .add("pushx", UI.label(item))
                         .add(UI.button("Delete me!").onClick(it -> {

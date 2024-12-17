@@ -4958,7 +4958,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
@@ -5005,7 +5005,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         return _with( thisComponent -> {
@@ -5050,7 +5050,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         return _with( thisComponent -> {
                     _addViewableProps( viewables, attr, viewSupplier, thisComponent );
                 })

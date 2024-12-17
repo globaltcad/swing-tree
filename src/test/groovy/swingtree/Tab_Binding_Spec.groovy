@@ -342,7 +342,7 @@ class Tab_Binding_Spec extends Specification
         and : 'Finally a view which binds to the view model property list.'
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
-                    .add(UI.tabbedPane().id("super").add(vms, viewer))
+                    .add(UI.tabbedPane().id("super").addAll(vms, viewer))
         and : 'We build the component:'
             var panel = ui.get(JPanel)
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
@@ -399,7 +399,7 @@ class Tab_Binding_Spec extends Specification
             TabSupplier<String> supplier = (String title) -> UI.tab(title)
             def tabbedPane =
                     UI.tabbedPane(UI.Side.TOP)
-                            .add(tabs, supplier)
+                            .addAll(tabs, supplier)
                             .get(JTabbedPane)
 
         when: 'We remove the tab at index 1.'
@@ -481,7 +481,7 @@ class Tab_Binding_Spec extends Specification
                 return UI.tab(title)
             }
         and : 'A UI declaration with a tabbed pane bound to the property list and the tab supplier.'
-            def ui = UI.tabbedPane(UI.Side.TOP).add(tabs, supplier)
+            def ui = UI.tabbedPane(UI.Side.TOP).addAll(tabs, supplier)
 
         when : 'We build the component.'
             var tabbedPane = ui.get(JTabbedPane)
@@ -515,7 +515,7 @@ class Tab_Binding_Spec extends Specification
                 return UI.tab(title)
             }
         and : 'A UI declaration with a tabbed pane bound to the property list and the tab supplier.'
-            def ui = UI.tabbedPane(UI.Side.TOP).add(tabs, supplier)
+            def ui = UI.tabbedPane(UI.Side.TOP).addAll(tabs, supplier)
 
         when : 'We build the component.'
             var tabbedPane = ui.get(JTabbedPane)

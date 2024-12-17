@@ -21,11 +21,11 @@ public class BasicTabExample extends JPanel {
         of(this).withLayout("fill, wrap, ins 0", "", "[grow][][]")
             .add(
                 GROW,
-                tabbedPane().add(tabs, BasicTabExample::toTab)
+                tabbedPane().addAll(tabs, BasicTabExample::toTab)
             )
             .add(
                 GROW_X,
-                panel().add(tabs, BasicTabExample::toPanel)
+                panel().addAll(tabs, BasicTabExample::toPanel)
             )
             .add(
                 GROW_X,
