@@ -4945,6 +4945,50 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
+     */
+    public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        return _with( thisComponent -> {
+            _addViewablePropTo(thisComponent, viewable, ()->attr, viewSupplier);
+        })
+                ._this();
+    }
+
+    /**
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
+     */
+    public final <M> I add( AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
+        return  _with( thisComponent -> {
+            _addViewablePropTo(thisComponent, viewable, attr, viewSupplier);
+        })
+                ._this();
+    }
+
+    /**
      *  This allows you to dynamically generate views for the items in a {@link Vals} property list
      *  and automatically regenerate the view when any of the items change.
      *  The type of item can be anything, but it is usually a view model instance.
@@ -4968,29 +5012,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  This allows you to dynamically generate a view for the item of a property (usually a property
-     *  holding a sub-view model) and automatically regenerate the view when the property changes.
-     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
-     *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
-     *
-     * @param attr The layout information which should be used as layout constraints for the generated view.
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
-     *                 preferably a view model instance.
-     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <M> The type of the value held by the {@link Val} property.
-     */
-    public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
-        return _with( thisComponent -> {
-                   _addViewablePropTo(thisComponent, viewable, ()->attr, viewSupplier);
-               })
-               ._this();
-    }
-
-    /**
      *  This allows you to dynamically generate views for the items in a {@link Vals} property list
      *  and automatically regenerate the view when any of the items change.
      *  The type of item can be anything, but it is usually a view model instance.
@@ -5010,27 +5031,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         return _with( thisComponent -> {
                     _addViewableProps( viewables, ()->attr, viewSupplier, thisComponent );
-                })
-                ._this();
-    }
-
-    /**
-     *  This allows you to dynamically generate a view for the item of a property (usually a property
-     *  holding a sub-view model) and automatically regenerate the view when the property changes.
-     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
-     *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
-     *
-     * @param attr The layout information which should be used as layout constraints for the generated view.
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
-     *                 preferably a view model instance.
-     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <M> The type of the value held by the {@link Val} property.
-     */
-    public final <M> I add( AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        return  _with( thisComponent -> {
-                    _addViewablePropTo(thisComponent, viewable, attr, viewSupplier);
                 })
                 ._this();
     }
