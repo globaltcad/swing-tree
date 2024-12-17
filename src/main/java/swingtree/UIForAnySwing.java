@@ -13,6 +13,8 @@ import sprouts.Event;
 import sprouts.Observable;
 import sprouts.*;
 import sprouts.Observer;
+import sprouts.impl.TupleDiff;
+import sprouts.impl.TupleDiffOwner;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
@@ -5057,6 +5059,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    public final <M> I addAll( Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
+        return _with( thisComponent -> {
+                    _addViewableProps( viewables, null, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    public final <M> I addAll( String attr, Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        return _with( thisComponent -> {
+                    _addViewableProps( viewables, ()->attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    public final <M> I addAll( AddConstraint attr, Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
+        return _with( thisComponent -> {
+                    _addViewableProps( viewables, attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
     protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _onShow( models, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
@@ -5093,7 +5120,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     break;
                 case CLEAR: _clearComponentsOf(c); break;
                 case NONE: break;
-                default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
+                default:
+                    log.error("Unknown type: "+delegate.changeType());
+                    // We do a simple rebuild:
+                    Vals<M> currentValues = delegate.vals();
+                    _clearComponentsOf(c);
+                    for ( int i = 0; i < currentValues.size(); i++ )
+                        _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, c );
             }
             if ( c.getComponentCount() != delegate.vals().size() )
                 log.warn(
@@ -5122,6 +5155,83 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             else
                 _addBuildersTo( thisComponent, attr, view );
         });
+    }
+
+
+    protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+            Optional<TupleDiff> optionalDiff = Optional.empty();
+            if (tupleOfModels instanceof TupleDiffOwner )
+                optionalDiff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious();
+
+            if ( !optionalDiff.isPresent() ) {
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            } else {
+                TupleDiff diff = optionalDiff.get();
+                int index = diff.index().orElse(-1);
+                int count = diff.count();
+                if ( index < 0 ) {
+                    // We do a simple re-build
+                    _clearComponentsOf(c);
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    switch (diff.change()) {
+                        case SET:
+                            for (int i = index; i < (index + count); i++)
+                                _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                            break;
+                        case ADD:
+                            for (int i = index; i < (index + count); i++)
+                                _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                            break;
+                        case REMOVE:
+                            for (int i = (index + count - 1); i >= index; i--)
+                                _removeComponentAt(i, c);
+                            break;
+                        case RETAIN: // Only keep the elements in the range.
+                            // Remove trailing components:
+                            for (int i = (c.getComponentCount() - 1); i >= (index + count); i--)
+                                _removeComponentAt(i, c);
+                            // Remove leading components:
+                            for (int i = (index - 1); i >= 0; i--)
+                                _removeComponentAt(i, c);
+                            break;
+                        case CLEAR:
+                            _clearComponentsOf(c);
+                            break;
+                        case NONE:
+                            break;
+                        default:
+                            log.error("Unknown type: " + diff.change());
+                            // We do a simple rebuild:
+                            _clearComponentsOf(c);
+                            for (int i = 0; i < tupleOfModels.size(); i++)
+                                _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                    }
+                }
+            }
+        });
+        Tuple<M> tupleOfModels = models.get();
+        _addAllFromTuple(tupleOfModels, attr, viewSupplier, thisComponent);
+    }
+
+    private <M> void _addAllFromTuple( Tuple<M> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        for ( int i = 0; i < tupleOfModels.size(); i++ ) {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(tupleOfModels.get(i));
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+tupleOfModels.get(i)+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            if ( attr == null )
+                _addBuildersTo( thisComponent, view );
+            else
+                _addBuildersTo( thisComponent, attr, view );
+        }
     }
 
     private <M> void _addViewablePropTo(
