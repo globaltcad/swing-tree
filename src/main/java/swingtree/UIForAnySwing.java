@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.Observable;
-import sprouts.*;
 import sprouts.Observer;
+import sprouts.*;
 import sprouts.impl.TupleDiff;
 import sprouts.impl.TupleDiffOwner;
 import swingtree.animation.AnimationDispatcher;
@@ -5085,7 +5085,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
-        _onShow( models, thisComponent, (c, delegate) -> {
+        _onShow( models, thisComponent, (innerComponent, delegate) -> {
             // we simply redo all the components.
             Vals<M> newValues = delegate.newValues();
             Vals<M> oldValues = delegate.oldValues();
@@ -5094,48 +5094,48 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 case SET:
                     for ( int i = 0; i < newValues.size(); i++ ) {
                         int position = i + delegate.index();
-                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, c);
+                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
                     }
                     break;
                 case ADD:
                     if ( delegate.index() < 0 && newValues.any(Val::isEmpty) ) {
                         // This is basically a add all operation, so we clear the components first.
-                        _clearComponentsOf(c);
+                        _clearComponentsOf(innerComponent);
                         // and then we add all the components.
-                        for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).orElseNull(), viewSupplier, attr, c );
+                        for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                            _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
                     }
                     else {
                         for ( int i = 0; i < newValues.size(); i++ ) {
                             int position = i + delegate.index();
-                            _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, c);
+                            _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, innerComponent);
                         }
                     }
                     break;
                 case REMOVE:
                     for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
                         int position = i + delegate.index();
-                        _removeComponentAt(position, c);
+                        _removeComponentAt(position, innerComponent);
                     }
                     break;
-                case CLEAR: _clearComponentsOf(c); break;
+                case CLEAR: _clearComponentsOf(innerComponent); break;
                 case NONE: break;
                 default:
-                    log.error("Unknown type: "+delegate.changeType());
+                    log.error("Unknown change type: {}", delegate.changeType(), new Throwable());
                     // We do a simple rebuild:
-                    Vals<M> currentValues = delegate.vals();
-                    _clearComponentsOf(c);
+                    Vals<M> currentValues = delegate.currentValues();
+                    _clearComponentsOf(innerComponent);
                     for ( int i = 0; i < currentValues.size(); i++ )
-                        _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, c );
+                        _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, innerComponent );
             }
-            if ( c.getComponentCount() != delegate.vals().size() )
+            if ( innerComponent.getComponentCount() != delegate.currentValues().size() )
                 log.warn(
                         "Broken binding to view model list detected! \n" +
-                        "UI sub-component count '"+c.getComponentCount()+"' " +
-                        "does not match viewable models list of size '"+delegate.vals().size()+"'. \n" +
+                        "UI sub-component count '"+innerComponent.getComponentCount()+"' " +
+                        "does not match viewable models list of size '"+delegate.currentValues().size()+"'. \n" +
                         "A possible cause for this is that components " +
-                        "were " + ( c.getComponentCount() > delegate.vals().size() ? "added" : "removed" ) + " " +
-                        "to this '" + c + "' \ndirectly, instead of through the property list binding. \n" +
+                        "were " + ( innerComponent.getComponentCount() > delegate.currentValues().size() ? "added" : "removed" ) + " " +
+                        "to this '" + innerComponent + "' \ndirectly, instead of through the property list binding. \n" +
                         "However, this could also be a bug in the UI framework.",
                         new Throwable()
                     );
@@ -5170,7 +5170,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             } else {
                 TupleDiff diff = optionalDiff.get();
                 int index = diff.index().orElse(-1);
-                int count = diff.count();
+                int count = diff.size();
                 if ( index < 0 ) {
                     // We do a simple re-build
                     _clearComponentsOf(c);
@@ -5203,7 +5203,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         case NONE:
                             break;
                         default:
-                            log.error("Unknown type: " + diff.change());
+                            log.error("Unknown change type: {}", diff.change(), new Throwable());
                             // We do a simple rebuild:
                             _clearComponentsOf(c);
                             for (int i = 0; i < tupleOfModels.size(); i++)

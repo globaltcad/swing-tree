@@ -493,7 +493,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 );
                 _doWithoutListeners(thisComponent, thisComponent::removeAll);
             }
-            _onShow(tabModels, thisComponent, (p, delegate) -> {
+            _onShow(tabModels, thisComponent, (pane, delegate) -> {
                 Vals<M> newValues = delegate.newValues();
                 Vals<M> oldValues = delegate.oldValues();
 
@@ -501,40 +501,43 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     case SET:
                         for (int i = 0; i < newValues.size(); i++) {
                             int position = delegate.index() + i;
-                            _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, p);
+                            _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
                         }
                         break;
                     case ADD:
                         for (int i = 0; i < newValues.size(); i++) {
                             int position = delegate.index() + i;
-                            _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, p);
+                            _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
                         }
                         break;
                     case REMOVE:
                         for (int i = 0; i < oldValues.size(); i++) {
-                            _removeTabAt(delegate.index(), p);
+                            _removeTabAt(delegate.index(), pane);
                         }
                         break;
                     case CLEAR:
-                        p.removeAll();
+                        pane.removeAll();
                         break;
                     case NONE:
                         break;
                     default:
-                        throw new IllegalStateException("Unknown type: " + delegate.changeType());
+                        log.error("Unknown change type: {}", delegate.changeType(), new Throwable());
+                        // We do a simple rebuild:
+                        pane.removeAll();
+                        delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
                 }
 
-                if (p.getTabCount() != delegate.vals().size()) {
+                if (pane.getTabCount() != delegate.currentValues().size()) {
                     log.warn(
                         "Broken binding to view model list detected! \n" +
                         "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
                         "A possible cause for this is that tabs were {} this '{}' \n" +
                         "directly, instead of through the property list binding. \n" +
                         "However, this could also be a bug in the UI framework.",
-                        p.getComponentCount(),
-                        delegate.vals().size(),
-                        p.getTabCount() > delegate.vals().size() ? "added to" : "removed from",
-                        p,
+                        pane.getComponentCount(),
+                        delegate.currentValues().size(),
+                        pane.getTabCount() > delegate.currentValues().size() ? "added to" : "removed from",
+                        pane,
                         new Throwable()
                     );
                 }

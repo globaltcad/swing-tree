@@ -1,6 +1,5 @@
 package swingtree.api.mvvm;
 
-import sprouts.Val;
 import sprouts.Vals;
 import swingtree.Tab;
 import swingtree.UIForTabbedPane;

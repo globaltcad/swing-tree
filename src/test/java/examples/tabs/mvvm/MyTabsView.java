@@ -105,7 +105,7 @@ public class MyTabsView extends Panel
         Viewable.cast(vm.getCurrentTab()).onChange(From.VIEW_MODEL,  it -> select(it.get()) );
         Viewables.cast(vm.getTabs()).onChange(it -> {
             updateContentComponents(
-                it.vals().stream()
+                it.currentValues().stream()
                 .map(MyTabsViewModel.TabModel::contentView)
                 .map(Var::get)
                 .filter(Objects::nonNull)

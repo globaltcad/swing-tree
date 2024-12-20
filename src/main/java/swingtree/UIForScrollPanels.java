@@ -99,7 +99,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 		};
 
 		_onShow( models, thisComponent, (c, delegate) -> {
-			Vals<M> vals = delegate.vals();
+			Vals<M> vals = delegate.currentValues();
 			int delegateIndex = delegate.index();
 			Change changeType = delegate.changeType();
 			// we simply redo all the components.
