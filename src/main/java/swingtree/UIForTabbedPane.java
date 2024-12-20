@@ -3,11 +3,10 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.*;
 import sprouts.Action;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Vals;
-import sprouts.Var;
+import sprouts.impl.TupleDiff;
+import sprouts.impl.TupleDiffOwner;
 import swingtree.api.mvvm.TabSupplier;
 import swingtree.style.ComponentExtension;
 
@@ -23,6 +22,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -379,8 +379,17 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         };
     }
 
+    /**
+     *  Adds a tab to the tabbed pane based on the given {@link Tab} configuration.
+     *  The tab will be added to the end of the tab list.
+     *
+     * @param tab The tab to add to the tabbed pane.
+     * @return This builder node.
+     * @throws NullPointerException if the given tab is null.
+     */
     public final UIForTabbedPane<P> add( Tab tab )
     {
+        Objects.requireNonNull(tab);
         return _with( thisComponent -> {
             JComponent dummyContent = new JPanel();
             WeakReference<P> paneRef = new WeakReference<>(thisComponent);
@@ -544,6 +553,108 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             });
 
             tabModels.forEach(v -> _addTabAt(thisComponent.getTabCount(), v, tabSupplier, thisComponent));
+        })._this();
+    }
+
+    /**
+     * Dynamically generates tabs for items in a {@link Tuple} {@link Val} and automatically updates them
+     * when the items change. The tuple items are typically view model instances, but can be any type.
+     * <p>
+     * The provided {@link TabSupplier} lambda is invoked with each item from the tuple,
+     * returning a {@link Tab} to be added to the {@link JTabbedPane} wrapped by this builder.
+     * <p>
+     * <b>Note:</b> Binding tabs to a {@link Tuple} {@link Val} assumes no other tabs are present.
+     * <p>
+     * <b>Usage:</b>
+     * <pre>{@code
+     *     UI.panel()
+     *      .add(
+     *          UI.tabbedPane().addAll(tabs, model ->
+     *              switch(model.type()) {
+     *                  case LOGIN -> UI.tab("Login").add(..);
+     *                  case ABOUT -> UI.tab("About").add(..);
+     *                  case SETTINGS -> UI.tab("Settings").add(..);
+     *              }
+     *          )
+     *      )
+     * }</pre>
+     *
+     * @param <M>         The type of items in the form of a {@link Tuple} wrapped by a {@link Val}.
+     * @param tabModels   A list of items, typically view model instances.
+     * @param tabSupplier A lambda to generate a {@link Tab} for each item.
+     * @return This instance, allowing for builder-style method chaining.
+     */
+    public <M> UIForTabbedPane<P> addAll(Val<Tuple<M>> tabModels, TabSupplier<M> tabSupplier) {
+        Objects.requireNonNull(tabModels, "tabModels");
+        Objects.requireNonNull(tabSupplier, "tabSupplier");
+        return _with(thisComponent -> {
+            if ( thisComponent.getTabCount() > 0 ) {
+                log.warn(
+                    "Trying to bind a tuple of tabs to a tabbed pane that already has tabs. \n" +
+                    "Manually defined tabs existing along with bound tabs is not supported. \n" +
+                    "The manually defined tabs will be removed now!",
+                    new Throwable() // Stack trace so that a user can see where this warning was triggered.
+                );
+                _doWithoutListeners(thisComponent, thisComponent::removeAll);
+            }
+            _onShow(tabModels, thisComponent, (pane, tupleOfModels) -> {
+                Optional<TupleDiff> optionalDiff = Optional.empty();
+                if (tupleOfModels instanceof TupleDiffOwner)
+                    optionalDiff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious();
+
+                if ( !optionalDiff.isPresent() ) {
+                    pane.removeAll();
+                    tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                } else {
+                    TupleDiff diff = optionalDiff.get();
+                    switch (diff.change()) {
+                        case SET:
+                            for (int i = 0; i < diff.size(); i++) {
+                                int position = diff.index().orElse(0) + i;
+                                _updateTabAt(position, tupleOfModels.get(position), tabSupplier, pane);
+                            }
+                            break;
+                        case ADD:
+                            for (int i = 0; i < diff.size(); i++) {
+                                int position = diff.index().orElse(0) + i;
+                                _addTabAt(position, tupleOfModels.get(position), tabSupplier, pane);
+                            }
+                            break;
+                        case REMOVE:
+                            for (int i = 0; i < diff.size(); i++) {
+                                _removeTabAt(diff.index().orElse(0), pane);
+                            }
+                            break;
+                        case CLEAR:
+                            pane.removeAll();
+                            break;
+                        case NONE:
+                            break;
+                        default:
+                            log.error("Unknown change type: {}", diff.change(), new Throwable());
+                            // We do a simple rebuild:
+                            pane.removeAll();
+                            tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                    }
+                }
+
+                if (pane.getTabCount() != tabModels.get().size()) {
+                    log.warn(
+                        "Broken binding to view model tuple detected! \n" +
+                        "TabbedPane tab count '{}' does not match tab models tuple of size '{}'. \n" +
+                        "A possible cause for this is that tabs were {} this '{}' \n" +
+                        "directly, instead of through the property tuple binding. \n" +
+                        "However, this could also be a bug in the UI framework.",
+                        pane.getComponentCount(),
+                            tabModels.get().size(),
+                        pane.getTabCount() > tabModels.get().size() ? "added to" : "removed from",
+                        pane,
+                        new Throwable()
+                    );
+                }
+            });
+
+            tabModels.get().forEach(v -> _addTabAt(thisComponent.getTabCount(), v, tabSupplier, thisComponent));
         })._this();
     }
 
