@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -597,16 +598,20 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 );
                 _doWithoutListeners(thisComponent, thisComponent::removeAll);
             }
+            AtomicReference<@Nullable TupleDiff> lastDiffRef = new AtomicReference<>(null);
+            if (tabModels.get() instanceof TupleDiffOwner)
+                lastDiffRef.set(((TupleDiffOwner)tabModels.get()).differenceFromPrevious().orElse(null));
             _onShow(tabModels, thisComponent, (pane, tupleOfModels) -> {
-                Optional<TupleDiff> optionalDiff = Optional.empty();
+                TupleDiff diff = null;
+                TupleDiff lastDiff = lastDiffRef.get();
                 if (tupleOfModels instanceof TupleDiffOwner)
-                    optionalDiff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious();
+                    diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+                lastDiffRef.set(diff);
 
-                if ( !optionalDiff.isPresent() ) {
+                if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
                     pane.removeAll();
                     tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
                 } else {
-                    TupleDiff diff = optionalDiff.get();
                     switch (diff.change()) {
                         case SET:
                             for (int i = 0; i < diff.size(); i++) {
@@ -623,6 +628,19 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                         case REMOVE:
                             for (int i = 0; i < diff.size(); i++) {
                                 _removeTabAt(diff.index().orElse(0), pane);
+                            }
+                            break;
+                        case RETAIN:
+                            int currentNumberOfTabs = pane.getTabCount();
+                            int firstToRemove = diff.index().orElse(0);
+                            int lastToRemove = currentNumberOfTabs - (firstToRemove + diff.size());
+                            //remove the first n tabs
+                            for (int i = 0; i < firstToRemove; i++) {
+                                _removeTabAt(0, pane);
+                            }
+                            // remove the last n tabs
+                            for (int i = 0; i < lastToRemove; i++) {
+                                _removeTabAt(diff.size(), pane);
                             }
                             break;
                         case CLEAR:

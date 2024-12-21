@@ -648,6 +648,124 @@ class Tab_Binding_Spec extends Specification
             tabbedPane.getTitleAt(5) == "Tab 5"
     }
 
+    def 'A property list is bound to a tabbed pane compute efficiently.'(
+        List<Integer> diff, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based property list and a tab supplier 
+            to dynamically add or remove tabs. The GUI will only update the
+            tabs that have changed.
+        """
+        given: 'A string based property list, a tab supplier and a tabbed pane UI node.'
+            var tabs = Vars.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+            def pane =
+                    UI.tabbedPane(UI.Side.TOP)
+                            .addAll(tabs, supplier)
+                            .get(JTabbedPane)
+        and : 'We unpack the pane and the expected differences:'
+            var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})
+
+        when: 'We run the operation on the tuple...'
+            operation(tabs)
+            UI.sync()
+        and : 'We unpack the updated components:'
+            var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})
+        then: 'The tabbed pane is updated.'
+            pane.getTabCount() == tabs.size()
+            pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
+        and :
+            diff.findAll({it == _ || it >= 0}).indexed().every({
+                it.value == _ || iniComps[it.value] === updatedComps[it.key]
+            })
+        and : 'The components at `-1` are totally new.'
+            diff.indexed().every({
+                it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)
+            })
+
+        where : 'We test the following operations:'
+            diff                 | operation
+            [0, -1, 2, 3, 4]     | { it.removeAt(1) }
+            [0, -1, -1, 3, 4]    | { it.removeAt(1, 2) }
+            [0, _, 2, 3, 4]      | { it.setAt(1, "Tab X") }
+            [0, 1, 2, 3, 4, _]   | { it.add("Tab X") }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll("Tab X", "Tab Y") }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Tab X") }
+    }
+
+    def 'You can bind a tuple property and a tab supplier to dynamically add or remove tabs.'() {
+        reportInfo """
+            You can bind a string based tuple property and a tab supplier 
+            to dynamically add or remove tabs.
+        """
+        given: 'A string tuple property, a tab supplier and a tabbed pane UI node.'
+            var tuple = Tuple.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+            var tabs = Var.of(tuple)
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+            def tabbedPane =
+                    UI.tabbedPane(UI.Side.TOP)
+                            .addAll(tabs, supplier)
+                            .get(JTabbedPane)
+
+        when: 'We remove the tab at index 1.'
+            tabs.update( it -> it.removeAt(1) )
+            UI.sync()
+        then: 'The tabbed pane is updated and the tab removed.'
+            tabbedPane.getTabCount() == tabs.get().size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 3"
+            tabbedPane.getTitleAt(2) == "Tab 4"
+            tabbedPane.getTitleAt(3) == "Tab 5"
+
+        when: 'We remove 2 tabs starting from index 1.'
+            tabs.update( it -> it.removeAt(1, 2) )
+            UI.sync()
+        then: 'The tabbed pane is updated and the tabs removed.'
+            tabbedPane.getTabCount() == tabs.get().size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 5"
+
+        when: 'We update the tab at index 1.'
+            tabs.update( it -> it.setAt(1, "Tab 2") )
+            UI.sync()
+        then: 'The tabbed pane is updated and the tab updated.'
+            tabbedPane.getTabCount() == tabs.get().size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+
+        when: 'We add a tab.'
+            tabs.update( it -> it.add("Tab 3") )
+            UI.sync()
+        then: 'The tabbed pane is updated and the tab added.'
+            tabbedPane.getTabCount() == tabs.get().size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTitleAt(2) == "Tab 3"
+
+        when: 'We add 2 tabs.'
+            tabs.update( it -> it.addAll("Tab 4", "Tab 5") )
+            UI.sync()
+        then: 'The tabbed pane is updated and the tabs added.'
+            tabbedPane.getTabCount() == tabs.get().size()
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTitleAt(2) == "Tab 3"
+            tabbedPane.getTitleAt(3) == "Tab 4"
+            tabbedPane.getTitleAt(4) == "Tab 5"
+
+        when: 'We insert 1 tab.'
+            tabs.update( it -> it.addAt(0, "Tab 0") )
+            UI.sync()
+        then: 'The tabbed pane is updated and the tabs inserted.'
+            tabbedPane.getTabCount() == tabs.get().size()
+            tabbedPane.getTitleAt(0) == "Tab 0"
+            tabbedPane.getTitleAt(1) == "Tab 1"
+            tabbedPane.getTitleAt(2) == "Tab 2"
+            tabbedPane.getTitleAt(3) == "Tab 3"
+            tabbedPane.getTitleAt(4) == "Tab 4"
+            tabbedPane.getTitleAt(5) == "Tab 5"
+    }
+
     def 'A tuple property is bound to a tabbed pane compute efficiently.'(
         List<Integer> diff, Closure<Tuple> operation
     ) {
@@ -686,12 +804,19 @@ class Tab_Binding_Spec extends Specification
 
         where : 'We test the following operations:'
             diff                 | operation
-            [0, -1, 2, 3, 4]     | { it.removeAt(1) }
-            [0, -1, -1, 3, 4]    | { it.removeAt(1, 2) }
+            [0,-1, 2, 3, 4]      | { it.removeAt(1) }
+            [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Tab X") }
             [0, 1, 2, 3, 4, _]   | { it.add("Tab X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Tab X", "Tab Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Tab X") }
+            [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
+            [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
+            [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
+            [_, _, _, _, _]      | { Tuple.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5") }
+            [_, _, _, _, _]      | { it.clear().addAll("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5") }
+            [_, _, _, _, _]      | { Tuple.of("Tab a", "Tab b", "Tab c", "Tab d", "Tab e") }
+            [_, _, _, _, _]      | { it.clear().addAll("Tab a", "Tab b", "Tab c", "Tab d", "Tab e") }
     }
 
     def 'An exception in the tab supplier for a model property list, produces an error tab instead.'()

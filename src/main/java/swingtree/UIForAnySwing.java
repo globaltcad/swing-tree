@@ -40,6 +40,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -5159,16 +5160,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
 
     protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        AtomicReference<@Nullable TupleDiff> lastDiffRef = new AtomicReference<>(null);
+        if (models.get() instanceof TupleDiffOwner)
+            lastDiffRef.set(((TupleDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShow( models, thisComponent, (c, tupleOfModels) -> {
-            Optional<TupleDiff> optionalDiff = Optional.empty();
-            if (tupleOfModels instanceof TupleDiffOwner )
-                optionalDiff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious();
+                TupleDiff diff = null;
+                TupleDiff lastDiff = lastDiffRef.get();
+                if (tupleOfModels instanceof TupleDiffOwner)
+                    diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+                lastDiffRef.set(diff);
 
-            if ( !optionalDiff.isPresent() ) {
+            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
             } else {
-                TupleDiff diff = optionalDiff.get();
                 int index = diff.index().orElse(-1);
                 int count = diff.size();
                 if ( index < 0 ) {
