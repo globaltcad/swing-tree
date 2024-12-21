@@ -842,6 +842,60 @@ class MVVM_Example_Spec extends Specification
             layout.constraintMap.size() == 0
     }
 
+    def 'A tuple property is bound to a panel compute efficiently.'(
+        List<Integer> diff, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove tabs. The GUI will only update the
+            tabs that have changed.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
+            var models = Var.of(tuple)
+            ViewSupplier<String> supplier = (String title) -> UI.button(title)
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We unpack the pane and the expected differences:'
+            var iniComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We unpack the updated components:'
+            var updatedComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+        then: 'The tabbed pane is updated.'
+            panel.getComponentCount() == models.get().size()
+            panel.getComponentCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
+        and :
+            diff.findAll({it == _ || it >= 0}).indexed().every({
+                it.value == _ || iniComps[it.value] === updatedComps[it.key]
+            })
+        and : 'The components at `-1` are totally new.'
+            diff.indexed().every({
+                it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)
+            })
+
+        where : 'We test the following operations:'
+            diff                 | operation
+            [0,-1, 2, 3, 4]      | { it.removeAt(1) }
+            [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
+            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
+            [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
+            [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
+            [-1, -1, -1, -1, -1] | { it.clear() }
+            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+    }
+
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {
 
         reportInfo """

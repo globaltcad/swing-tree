@@ -776,22 +776,22 @@ class Tab_Binding_Spec extends Specification
         """
         given: 'A string tuple property, a tab supplier and a tabbed pane UI node.'
             var tuple = Tuple.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
-            var tabs = Var.of(tuple)
+            var models = Var.of(tuple)
             TabSupplier<String> supplier = (String title) -> UI.tab(title)
             def pane =
                     UI.tabbedPane(UI.Side.TOP)
-                            .addAll(tabs, supplier)
+                            .addAll(models, supplier)
                             .get(JTabbedPane)
         and : 'We unpack the pane and the expected differences:'
             var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})
 
         when: 'We run the operation on the tuple...'
-            tabs.update( it -> operation(it) )
+            models.update( it -> operation(it) )
             UI.sync()
         and : 'We unpack the updated components:'
             var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})
         then: 'The tabbed pane is updated.'
-            pane.getTabCount() == tabs.get().size()
+            pane.getTabCount() == models.get().size()
             pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
         and :
             diff.findAll({it == _ || it >= 0}).indexed().every({
@@ -813,6 +813,7 @@ class Tab_Binding_Spec extends Specification
             [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
             [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
             [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
+            [-1, -1, -1, -1, -1] | { it.clear() }
             [_, _, _, _, _]      | { Tuple.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5") }
             [_, _, _, _, _]      | { it.clear().addAll("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5") }
             [_, _, _, _, _]      | { Tuple.of("Tab a", "Tab b", "Tab c", "Tab d", "Tab e") }
