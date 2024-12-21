@@ -13,6 +13,6 @@ import java.awt.*;
 @FunctionalInterface
 public interface ListEntryRenderer<E, L extends JList<E>> {
 
-	Component render( ListEntryDelegate<E, L> delegate );
+    Component render( ListEntryDelegate<E, L> delegate );
 
 }
