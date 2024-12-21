@@ -134,8 +134,13 @@ public class JScrollPanels extends UI.ScrollPane
 	 */
 	public <M extends EntryViewModel> void addEntry( M entryViewModel, ViewSupplier<M> viewSupplier) {
 		Objects.requireNonNull(entryViewModel);
-		EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewSupplier, _internal.getComponents().length);
-		_internal.add(entryPanel);
+		addEntry(null, entryViewModel, viewSupplier);
+	}
+
+	public <M extends EntryViewModel> void addEntryAt( int index, M entryViewModel, ViewSupplier<M> viewSupplier) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewSupplier, index);
+		_internal.add(entryPanel, index);
 	}
 
 	/**
@@ -150,7 +155,7 @@ public class JScrollPanels extends UI.ScrollPane
 	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
 	 * @param <M> The type of the entry view model.
 	 */
-	public <M extends EntryViewModel> void addEntry( AddConstraint constraints, M entryViewModel, ViewSupplier<M> viewSupplier ) {
+	public <M extends EntryViewModel> void addEntry( @Nullable AddConstraint constraints, M entryViewModel, ViewSupplier<M> viewSupplier ) {
 		Objects.requireNonNull(entryViewModel);
 		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, viewSupplier, _internal.getComponents().length);
 		_internal.add(entryPanel);
@@ -164,20 +169,67 @@ public class JScrollPanels extends UI.ScrollPane
 	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
 	 * @param <M> The type of the entry view model.
 	 */
-	public <M extends EntryViewModel> void addAllEntries( @Nullable AddConstraint constraints, List<M> entryViewModels, ViewSupplier<M> viewSupplier ) {
+	public <M extends EntryViewModel> void addAllEntries( @Nullable AddConstraint constraints, Iterable<M> entryViewModels, ViewSupplier<M> viewSupplier ) {
 		Objects.requireNonNull(entryViewModels);
-		List<EntryPanel> entryPanels = IntStream.range(0, entryViewModels.size())
-				.mapToObj(
-						i -> _createEntryPanel(
-								constraints,
-								entryViewModels.get(i),
-								viewSupplier,
-								_internal.getComponents().length + i
-						)
-				)
-				.collect(Collectors.toList());
+		addAllEntriesAt(_internal.getComponents().length, constraints, entryViewModels, viewSupplier);
+	}
 
-		entryPanels.forEach(_internal::add);
+	/**
+	 *  Adds multiple entries at once to this {@link JScrollPanels} at a certain index.
+	 * @param index The index at which the entries ought to be added.
+	 * @param constraints The constraints which ought to be applied to the entry.
+	 * @param entryViewModels A list of entry models which ought to be added.
+	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
+	 * @param <M> The type of the entry view model.
+	 */
+	public <M extends EntryViewModel> void addAllEntriesAt( int index, @Nullable AddConstraint constraints, Iterable<M> entryViewModels, ViewSupplier<M> viewSupplier ) {
+		Objects.requireNonNull(entryViewModels);
+		List<EntryPanel> entryPanels = new ArrayList<>();
+		int i = 0;
+		for ( M model : entryViewModels ) {
+			entryPanels.add(
+					_createEntryPanel(
+							constraints,
+							model,
+							viewSupplier,
+							index + i
+					)
+			);
+			i++;
+		}
+		entryPanels.forEach(e -> _internal.add(e, index));
+		this.validate();
+	}
+
+	/**
+	 * 	Use this to set all entries at a certain index
+	 * 	to effectively replace the old entries with the new ones.
+	 * @param index The index at which the entries ought to be set.
+	 * @param constraints The constraints which ought to be applied to the entry.
+	 * @param entryViewModels A list of entry models which ought to be added.
+	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
+	 * @param <M> The type of the entry view model.
+	 */
+	public <M extends EntryViewModel> void setAllEntriesAt( int index, @Nullable AddConstraint constraints, Iterable<M> entryViewModels, ViewSupplier<M> viewSupplier ) {
+		Objects.requireNonNull(entryViewModels);
+		List<EntryPanel> entryPanels = new ArrayList<>();
+		int i = 0;
+		for ( M model : entryViewModels ) {
+			entryPanels.add(
+					_createEntryPanel(
+							constraints,
+							model,
+							viewSupplier,
+							index + i
+					)
+			);
+			i++;
+		}
+		// We override the old entries with the new ones.
+		entryPanels.forEach(e -> {
+			_internal.remove(index);
+			_internal.add(e, index);
+		});
 		this.validate();
 	}
 
@@ -195,6 +247,16 @@ public class JScrollPanels extends UI.ScrollPane
 	 */
 	public void removeEntryAt( int index ) {
 		_internal.remove(index);
+		this.validate();
+	}
+
+	/**
+	 * 	Use this to remove a certain number of entries starting at a certain index.
+	 * @param index The index at which the entries ought to be removed.
+	 * @param count The number of entries which ought to be removed.
+	 */
+	public void removeEntriesAt( int index, int count ) {
+		IntStream.range(0, count).forEach( i -> _internal.remove(index) );
 		this.validate();
 	}
 

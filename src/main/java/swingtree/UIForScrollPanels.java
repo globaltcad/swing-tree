@@ -4,6 +4,8 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.*;
+import sprouts.impl.TupleDiff;
+import sprouts.impl.TupleDiffOwner;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
@@ -12,6 +14,7 @@ import swingtree.layout.AddConstraint;
 import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -60,7 +63,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             thisComponent.addEntry( constraints, entry, m -> UI.of(addedComponent) );
     }
 
-    private EntryViewModel _entryModel() {
+    private static EntryViewModel _entryModel() {
         Var<Boolean> selected = Var.of(false);
         Var<Integer> position = Var.of(0);
         return new EntryViewModel() {
@@ -145,25 +148,114 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         });
         addAll.accept(models);
     }
+
+    private static <M> M _modelFetcher(int i, Tuple<M> tuple) {
+        M v = tuple.get(i);
+        if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);
+        return v;
+    }
+
+    private static <M> M _entryFetcher(int i, Tuple<M> tuple) {
+        M v = _modelFetcher(i, tuple);
+        return ( v != null ? (M) v : (M)_entryModel() );
+    }
+
+    private <M> void _addAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Tuple<M> tuple, ViewSupplier<M> viewSupplier) {
+        boolean allAreEntries = tuple.stream().allMatch( v -> v instanceof EntryViewModel );
+        if ( allAreEntries ) {
+            List<EntryViewModel> entries = (List) tuple.toList();
+            thisComponent.addAllEntriesAt(index, attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
+        }
+        else
+            for ( int i = 0; i< tuple.size(); i++ ) {
+                int finalI = i + index;
+                thisComponent.addEntryAt(
+                   finalI, attr,
+                   _entryModel(),
+                   m -> viewSupplier.createViewFor(_entryFetcher(finalI,tuple))
+                );
+            }
+    }
+
+    private <M> void _setAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Tuple<M> tuple, ViewSupplier<M> viewSupplier) {
+        boolean allAreEntries = tuple.stream().allMatch( v -> v instanceof EntryViewModel );
+        if ( allAreEntries ) {
+            List<EntryViewModel> entries = (List) tuple.toList();
+            thisComponent.setAllEntriesAt(index, attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
+        }
+        else
+            for ( int i = 0; i< tuple.size(); i++ ) {
+                int finalI = i + index;
+                thisComponent.setEntryAt(
+                   finalI, attr,
+                   _entryModel(),
+                   m -> viewSupplier.createViewFor(_entryFetcher(finalI,tuple))
+                );
+            }
+    }
     
     @Override
-    protected <M> void _addViewableProps( 
+    protected <M> void _addViewableProps(
             Val<Tuple<M>> models, 
             @Nullable AddConstraint attr, 
             ViewSupplier<M> viewSupplier, 
             P thisComponent 
     ) {
-        _onShow( models, thisComponent, (c, newModels) -> {
-            c.removeAllEntries();
-            newModels.forEach( (m) -> {
-                c.addEntry( _entryModel(), em -> viewSupplier.createViewFor(m) );
-            });
+        AtomicReference<@Nullable TupleDiff> lastDiffRef = new AtomicReference<>(null);
+        if (models.get() instanceof TupleDiffOwner)
+            lastDiffRef.set(((TupleDiffOwner)models.get()).differenceFromPrevious().orElse(null));
+        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+            TupleDiff diff = null;
+            TupleDiff lastDiff = lastDiffRef.get();
+            if (tupleOfModels instanceof TupleDiffOwner)
+                diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+            lastDiffRef.set(diff);
+
+            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+                c.removeAllEntries();
+                _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
+            } else {
+                int index = diff.index().orElse(-1);
+                int count = diff.size();
+                if ( index < 0 ) {
+                    // We do a simple re-build
+                    c.removeAllEntries();
+                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
+                } else {
+                    switch (diff.change()) {
+                        case SET:
+                            Tuple<M> slice = tupleOfModels.slice(index, index+count);
+                            _setAllEntriesAt(attr, c, index, slice, viewSupplier);
+                            break;
+                        case ADD:
+                            _addAllEntriesAt(attr, c, index, tupleOfModels.slice(index, index+count), viewSupplier);
+                            break;
+                        case REMOVE:
+                            c.removeEntriesAt(index, count);
+                            break;
+                        case RETAIN: // Only keep the elements in the range.
+                            // Remove trailing components:
+                            c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));
+                            // Remove leading components:
+                            c.removeEntriesAt(0, index);
+                            break;
+                        case CLEAR:
+                            c.removeAllEntries();
+                            break;
+                        case NONE:
+                            break;
+                        default:
+                            log.error("Unknown change type: {}", diff.change(), new Throwable());
+                            // We do a simple rebuild:
+                            c.removeAllEntries();
+                            _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
+                    }
+                }
+            }
         });
         models.ifPresent( (tupleOfModels) -> {
             thisComponent.removeAllEntries();
-            tupleOfModels.forEach( (m) -> {
-                thisComponent.addEntry( _entryModel(), em -> viewSupplier.createViewFor(m) );
-            });
+            _addAllEntriesAt(attr, thisComponent, 0, tupleOfModels, viewSupplier);
         });
     }
 }

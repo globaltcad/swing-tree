@@ -5,12 +5,16 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.Tuple
+import sprouts.Var
 import sprouts.Vars
+import swingtree.api.mvvm.ViewSupplier
 import swingtree.components.JScrollPanels
 import swingtree.threading.EventProcessor
 import utility.Utility
 
 import javax.swing.JPanel
+import javax.swing.JScrollPane
 
 @Title("Scroll Panels")
 @Narrative('''
@@ -164,6 +168,62 @@ class Scroll_Panels_Spec extends Specification
             UI.sync()
         then : 'The view is updated.'
             new Utility.Query(panel).findAll("sub-view").size() == list.size()
+    }
+
+
+    def 'A tuple property is bound to a scroll panel compute efficiently.'(
+        List<Integer> diff, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove tabs. The GUI will only update the
+            tabs that have changed.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
+            var models = Var.of(tuple)
+            ViewSupplier<String> supplier = (String title) -> UI.button(title)
+            var panels =
+                        UI.scrollPanels()
+                        .addAll(models, supplier)
+                        .get(JScrollPanels)
+            var panel = panels.getViewport().getComponent(0)
+        and : 'We unpack the pane and the expected differences:'
+            var iniComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We unpack the updated components:'
+            var updatedComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+        then: 'The tabbed pane is updated.'
+            panel.getComponentCount() == models.get().size()
+            panel.getComponentCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
+        and :
+            diff.findAll({it == _ || it >= 0}).indexed().every({
+                it.value == _ || iniComps[it.value] === updatedComps[it.key]
+            })
+        and : 'The components at `-1` are totally new.'
+            diff.indexed().every({
+                it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)
+            })
+
+        where : 'We test the following operations:'
+            diff                 | operation
+            [0,-1, 2, 3, 4]      | { it.removeAt(1) }
+            [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
+            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
+            [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
+            [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
+            [-1, -1, -1, -1, -1] | { it.clear() }
+            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
     }
 
 }

@@ -5164,11 +5164,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         if (models.get() instanceof TupleDiffOwner)
             lastDiffRef.set(((TupleDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShow( models, thisComponent, (c, tupleOfModels) -> {
-                TupleDiff diff = null;
-                TupleDiff lastDiff = lastDiffRef.get();
-                if (tupleOfModels instanceof TupleDiffOwner)
-                    diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
-                lastDiffRef.set(diff);
+            TupleDiff diff = null;
+            TupleDiff lastDiff = lastDiffRef.get();
+            if (tupleOfModels instanceof TupleDiffOwner)
+                diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+            lastDiffRef.set(diff);
 
             if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
                 _clearComponentsOf(c);
