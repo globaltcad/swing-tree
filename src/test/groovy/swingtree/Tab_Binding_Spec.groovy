@@ -648,6 +648,52 @@ class Tab_Binding_Spec extends Specification
             tabbedPane.getTitleAt(5) == "Tab 5"
     }
 
+    def 'A tuple property is bound to a tabbed pane compute efficiently.'(
+        List<Integer> diff, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a tab supplier 
+            to dynamically add or remove tabs. The GUI will only update the
+            tabs that have changed.
+        """
+        given: 'A string tuple property, a tab supplier and a tabbed pane UI node.'
+            var tuple = Tuple.of("Tab 1", "Tab 2", "Tab 3", "Tab 4", "Tab 5")
+            var tabs = Var.of(tuple)
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+            def pane =
+                    UI.tabbedPane(UI.Side.TOP)
+                            .addAll(tabs, supplier)
+                            .get(JTabbedPane)
+        and : 'We unpack the pane and the expected differences:'
+            var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})
+
+        when: 'We run the operation on the tuple...'
+            tabs.update( it -> operation(it) )
+            UI.sync()
+        and : 'We unpack the updated components:'
+            var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})
+        then: 'The tabbed pane is updated.'
+            pane.getTabCount() == tabs.get().size()
+            pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
+        and :
+            diff.findAll({it == _ || it >= 0}).indexed().every({
+                it.value == _ || iniComps[it.value] === updatedComps[it.key]
+            })
+        and : 'The components at `-1` are totally new.'
+            diff.indexed().every({
+                it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)
+            })
+
+        where : 'We test the following operations:'
+            diff                 | operation
+            [0, -1, 2, 3, 4]     | { it.removeAt(1) }
+            [0, -1, -1, 3, 4]    | { it.removeAt(1, 2) }
+            [0, _, 2, 3, 4]      | { it.setAt(1, "Tab X") }
+            [0, 1, 2, 3, 4, _]   | { it.add("Tab X") }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll("Tab X", "Tab Y") }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Tab X") }
+    }
+
     def 'An exception in the tab supplier for a model property list, produces an error tab instead.'()
     {
         reportInfo """
