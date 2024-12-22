@@ -15,8 +15,12 @@ import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  *  A builder node for {@link JScrollPanels}, a custom SwingTree component,
@@ -87,16 +91,17 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
     protected <M> void _addViewableProps(
             Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, P thisComponent
     ) {
-        Consumer<Vals<M>> addAll = vals -> {
+        BiConsumer<Integer, Vals<M>> addAllAt = (index, vals) -> {
             boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
             if ( allAreEntries ) {
                 List<EntryViewModel> entries = (List) vals.toList();
-                thisComponent.addAllEntries(attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
+                thisComponent.addAllEntriesAt(index, attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
             }
             else
                 for ( int i = 0; i< vals.size(); i++ ) {
                     int finalI = i;
-                    thisComponent.addEntry(
+                    thisComponent.addEntryAt(
+                            finalI + index, attr,
                             _entryModel(),
                             m -> viewSupplier.createViewFor(_entryFetcher(finalI,vals))
                         );
@@ -136,7 +141,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
                         }
                     } else {
                         c.removeAllEntries();
-                        addAll.accept(vals);
+                        addAllAt.accept(0,vals);
                     }
                 break;
                 case CLEAR: c.removeAllEntries(); break;
@@ -144,10 +149,10 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
                 default: 
                     log.error("Unknown type: {}", delegate.changeType(), new Throwable());
                     c.removeAllEntries();
-                    addAll.accept(vals);
+                    addAllAt.accept(0,vals);
             }
         });
-        addAll.accept(models);
+        addAllAt.accept(0,models);
     }
 
     private static <M> M _modelFetcher(int i, Tuple<M> tuple) {
@@ -161,21 +166,38 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         return ( v != null ? (M) v : (M)_entryModel() );
     }
 
-    private <M> void _addAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Tuple<M> tuple, ViewSupplier<M> viewSupplier) {
-        boolean allAreEntries = tuple.stream().allMatch( v -> v instanceof EntryViewModel );
+    private <M> void _addAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Iterable<M> iterable, ViewSupplier<M> viewSupplier) {
+        Stream<M> stream = iterable instanceof Stream ? (Stream<M>) iterable : StreamSupport.stream(iterable.spliterator(), false);
+        boolean allAreEntries = stream.allMatch( v -> v instanceof EntryViewModel );
         if ( allAreEntries ) {
-            List<EntryViewModel> entries = (List) tuple.toList();
+            List<EntryViewModel> entries = StreamSupport.stream(iterable.spliterator(), false).map(v -> (EntryViewModel)v).collect(Collectors.toList());
             thisComponent.addAllEntriesAt(index, attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
         }
-        else
-            for ( int i = 0; i< tuple.size(); i++ ) {
+        else {
+            int i = 0;
+            for ( M current : iterable ) {
                 int finalI = i + index;
-                thisComponent.addEntryAt(
-                   finalI, attr,
-                   _entryModel(),
-                   m -> viewSupplier.createViewFor(_entryFetcher(finalI,tuple))
-                );
+                if ( iterable instanceof Tuple )
+                    thisComponent.addEntryAt(
+                       finalI, attr,
+                       _entryModel(),
+                       m -> viewSupplier.createViewFor(_entryFetcher(finalI,(Tuple<? extends M>) iterable))
+                    );
+                if ( iterable instanceof Vals )
+                    thisComponent.addEntryAt(
+                       finalI, attr,
+                       _entryModel(),
+                       m -> viewSupplier.createViewFor(_entryFetcher(finalI,(Vals<? extends M>) iterable))
+                    );
+                else
+                    thisComponent.addEntryAt(
+                       finalI, attr,
+                       _entryModel(),
+                       m -> viewSupplier.createViewFor(current)
+                    );
+                i++;
             }
+        }
     }
 
     private <M> void _setAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Tuple<M> tuple, ViewSupplier<M> viewSupplier) {
