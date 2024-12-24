@@ -166,55 +166,54 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         return ( v != null ? (M) v : (M)_entryModel() );
     }
 
-    private <M> void _addAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Iterable<M> iterable, ViewSupplier<M> viewSupplier) {
-        Stream<M> stream = iterable instanceof Stream ? (Stream<M>) iterable : StreamSupport.stream(iterable.spliterator(), false);
-        boolean allAreEntries = stream.allMatch( v -> v instanceof EntryViewModel );
+    private <M> void _addAllEntriesAt(
+            @Nullable AddConstraint attr,
+            JScrollPanels thisComponent,
+            int index,
+            Iterable<M> iterable,
+            ViewSupplier<M> viewSupplier
+    ) {
+        boolean allAreEntries = StreamSupport.stream(iterable.spliterator(), false).allMatch( v -> v instanceof EntryViewModel );
         if ( allAreEntries ) {
             List<EntryViewModel> entries = StreamSupport.stream(iterable.spliterator(), false).map(v -> (EntryViewModel)v).collect(Collectors.toList());
             thisComponent.addAllEntriesAt(index, attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
         }
         else {
-            int i = 0;
-            for ( M current : iterable ) {
+            Tuple<M> tuple = (iterable instanceof Tuple) ? (Tuple<M>) iterable : (Tuple<M>) Tuple.of(Object.class, (Iterable<Object>) iterable);
+            for ( int i = 0; i< tuple.size(); i++ ) {
                 int finalI = i + index;
-                if ( iterable instanceof Tuple )
-                    thisComponent.addEntryAt(
-                       finalI, attr,
-                       _entryModel(),
-                       m -> viewSupplier.createViewFor(_entryFetcher(finalI,(Tuple<? extends M>) iterable))
-                    );
-                if ( iterable instanceof Vals )
-                    thisComponent.addEntryAt(
-                       finalI, attr,
-                       _entryModel(),
-                       m -> viewSupplier.createViewFor(_entryFetcher(finalI,(Vals<? extends M>) iterable))
-                    );
-                else
-                    thisComponent.addEntryAt(
-                       finalI, attr,
-                       _entryModel(),
-                       m -> viewSupplier.createViewFor(current)
-                    );
-                i++;
+                thisComponent.addEntryAt(
+                    finalI, attr,
+                    _entryModel(),
+                    m -> viewSupplier.createViewFor(_entryFetcher(finalI,tuple))
+                );
             }
         }
     }
 
-    private <M> void _setAllEntriesAt(@Nullable AddConstraint attr, JScrollPanels thisComponent, int index, Tuple<M> tuple, ViewSupplier<M> viewSupplier) {
-        boolean allAreEntries = tuple.stream().allMatch( v -> v instanceof EntryViewModel );
+    private <M> void _setAllEntriesAt(
+        @Nullable AddConstraint attr,
+        JScrollPanels thisComponent,
+        int index,
+        Iterable<M> iterable,
+        ViewSupplier<M> viewSupplier
+    ) {
+        boolean allAreEntries = StreamSupport.stream(iterable.spliterator(), false).allMatch( v -> v instanceof EntryViewModel );
         if ( allAreEntries ) {
-            List<EntryViewModel> entries = (List) tuple.toList();
+            List<EntryViewModel> entries = StreamSupport.stream(iterable.spliterator(), false).map(v -> (EntryViewModel)v).collect(Collectors.toList());
             thisComponent.setAllEntriesAt(index, attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
         }
-        else
-            for ( int i = 0; i< tuple.size(); i++ ) {
+        else {
+            Tuple<M> tuple = (iterable instanceof Tuple) ? (Tuple<M>) iterable : (Tuple<M>) Tuple.of(Object.class, (Iterable<Object>) iterable);
+            for (int i = 0; i < tuple.size(); i++) {
                 int finalI = i + index;
                 thisComponent.setEntryAt(
-                   finalI, attr,
-                   _entryModel(),
-                   m -> viewSupplier.createViewFor(_entryFetcher(finalI,tuple))
+                    finalI, attr,
+                    _entryModel(),
+                    m -> viewSupplier.createViewFor(_entryFetcher(finalI, tuple))
                 );
             }
+        }
     }
     
     @Override
@@ -281,4 +280,5 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             _addAllEntriesAt(attr, thisComponent, 0, tupleOfModels, viewSupplier);
         });
     }
+
 }
