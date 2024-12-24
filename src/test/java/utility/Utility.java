@@ -16,6 +16,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -102,6 +104,29 @@ public class Utility
         public List<JComponent> findAll(String id) {
             return findAll(JComponent.class, id);
         }
+
+        public <C extends JComponent> List<C> findAll(Class<C> type) {
+            Component current = _traverseUpwards(_current);
+            // No id, we traverse manually:
+            Set<C> found = new LinkedHashSet<>();
+            _traverseDownwards(current, c -> {
+                if ( type.isAssignableFrom(c.getClass()) )
+                    found.add((C) c);
+            });
+            return new ArrayList<>(found);
+        }
+
+        private void _traverseDownwards(Component start, Consumer<Component> visitor) {
+            visitor.accept(start);
+            if ( start instanceof Container ) {
+                Container container = (Container) start;
+                for ( Component component : container.getComponents() ) {
+                    if ( component != null)
+                        _traverseDownwards(component, visitor);
+                }
+            }
+        }
+
 
         private Component _traverseUpwards(Component component) {
             Container parent = component.getParent();

@@ -16,6 +16,7 @@ import examples.hover.HoverExample
 import examples.lists.ListTestExample
 import examples.calculator.mvi.CalculatorView
 import examples.scrollpanes.ScrollConfigExample
+import examples.tabs.mvvm.TabSelectionExample1
 import examples.team.mvi.TeamView
 import examples.mvvm.*
 import examples.simple.Form
@@ -585,6 +586,17 @@ class Examples_Spec extends Specification
             var ui = new FoldableExample()
         expect :
             ui != null
+    }
+
+    def 'The tab selection binding examples, all start off with the third tab selected.'() {
+        given : 'We create the UI.'
+            var ui1 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())
+            var ui2 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())
+            var ui3 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())
+        expect :
+            new Utility.Query(ui1).findAll(JTabbedPane).get(0).getSelectedIndex() == 2
+            new Utility.Query(ui2).findAll(JTabbedPane).get(0).getSelectedIndex() == 2
+            new Utility.Query(ui3).findAll(JTabbedPane).get(0).getSelectedIndex() == 2
     }
 
 }
