@@ -417,10 +417,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             tab.isEnabled().ifPresent( isEnabled -> thisComponent.setEnabledAt(indexFinder.get(), isEnabled.get()) );
             tab.isSelected().ifPresent( isSelected -> {
                 ExtraState state = ExtraState.of(thisComponent);
-                _selectTab(thisComponent, indexFinder.get(), isSelected.get());
+                _selectTabFromModelling(thisComponent, indexFinder.get(), isSelected.get());
                 if ( isSelected instanceof Var && isSelected.isMutable() ) {
                     Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
-                    state.selectionListeners.add(i -> isSelectedMut.set(From.VIEW, Objects.equals(i, indexFinder.get())) );
+                    state.selectionListeners.add(i -> {
+                        boolean isNowSelected = Objects.equals(i, indexFinder.get());
+                        isSelectedMut.set(From.VIEW, isNowSelected);
+                    });
                 }
             /*
                 The above listener will ensure that the isSelected property of the tab is updated when
@@ -554,10 +557,16 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         int selectedIndex = ( isSelected ? tabIndex : thisComponent.getSelectedIndex() );
         if ( state.selectedTabIndex != null )
             state.selectedTabIndex.set(From.VIEW, selectedIndex);
-        else
+        else if ( isSelected )
             thisComponent.setSelectedIndex(selectedIndex);
 
         state.selectionListeners.forEach(l -> l.accept(selectedIndex));
+    }
+
+    private void _selectTabFromModelling( P thisComponent, int tabIndex, boolean isSelected ) {
+        int selectedIndex = ( isSelected ? tabIndex : thisComponent.getSelectedIndex() );
+        if ( isSelected )
+            thisComponent.setSelectedIndex(selectedIndex);
     }
 
     private JComponent _buildTabHeader( Tab tab, TabMouseClickListener mouseListener )
@@ -749,10 +758,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         tab.isEnabled().ifPresent(isEnabled -> p.setEnabledAt(indexFinder.get(), isEnabled.get()));
         tab.isSelected().ifPresent(isSelected -> {
             ExtraState state = ExtraState.of(p);
-            _selectTab(p, indexFinder.get(), isSelected.get());
+            _selectTabFromModelling(p, indexFinder.get(), isSelected.get());
             if (isSelected instanceof Var && isSelected.isMutable()) {
                 Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
-                state.selectionListeners.add(i -> isSelectedMut.set(From.VIEW, Objects.equals(i, indexFinder.get())));
+                state.selectionListeners.add(i -> {
+                    boolean isNowSelected = Objects.equals(i, indexFinder.get());
+                    isSelectedMut.set(From.VIEW, isNowSelected);
+                });
             }
             /*
                 The above listener will ensure that the isSelected property of the tab is updated when
