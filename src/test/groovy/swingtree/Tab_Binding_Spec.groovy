@@ -48,6 +48,9 @@ class Tab_Binding_Spec extends Specification
                 .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
                 .add(UI.tab("Tab 3").isSelectedIf(tab3Selected))
                 .get(JTabbedPane)
+        expect :
+            tabbedPane.getSelectedIndex() == -1
+            tabbedPane.getTabCount() == 3
 
         when : 'We select the first tab.'
             tabbedPane.selectedIndex = 0
@@ -87,15 +90,72 @@ class Tab_Binding_Spec extends Specification
             tab2Selected.get() == true
             tab3Selected.get() == false
 
-        when : 'We change the selected index property to an invalid selection.'
+        when : 'We change the selected index property to an invalid selection (not tab selected).'
             selectedIndex.set(-1)
             UI.sync()
 
-        then : 'All boolean properties are false.'
+        then : 'All boolean properties are false and the selected index property is -1.'
             tabbedPane.selectedIndex == -1
             tab1Selected.get() == false
             tab2Selected.get() == false
             tab3Selected.get() == false
+    }
+
+    def 'The selection states of tabs can be modelled through boolean properties.'()
+    {
+        given : '3 different properties, 1 for each tab.'
+            var tab1Selected = Var.of(false)
+            var tab2Selected = Var.of(false)
+            var tab3Selected = Var.of(false)
+        and : 'We create a tabbed pane UI node and attach tabs with custom tab header components to the properties.'
+            def tabbedPane =
+                UI.tabbedPane(UI.Side.TOP)
+                .add(UI.tab("Tab 1").isSelectedIf(tab1Selected))
+                .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
+                .add(UI.tab("Tab 3").isSelectedIf(tab3Selected))
+                .get(JTabbedPane)
+        expect :
+            tabbedPane.getSelectedIndex() == -1
+            tabbedPane.getTabCount() == 3
+
+        when : 'We select the first tab.'
+            tabbedPane.selectedIndex = 0
+
+        then : 'The properties reflect this change.'
+            tab1Selected.get() == true
+            tab2Selected.get() == false
+            tab3Selected.get() == false
+
+        when : 'We select the second tab.'
+            tabbedPane.selectedIndex = 1
+
+        then : 'The properties reflect this change, only the second tab is selected.'
+            tab1Selected.get() == false
+            tab2Selected.get() == true
+            tab3Selected.get() == false
+
+        when : 'We select the third tab using the boolean property.'
+            tab3Selected.set(true)
+            UI.sync()
+
+        then : 'The boolean properties change to match the selected tab.'
+            tab1Selected.get() == false
+            tab2Selected.get() == false
+            tab3Selected.get() == true
+    }
+
+    def 'An unbound tabbed pane has the expect initial state.'()
+    {
+        given : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
+            def tabbedPane =
+                UI.tabbedPane(UI.Side.TOP)
+                .add(UI.tab("Tab 1"))
+                .add(UI.tab("Tab 2"))
+                .add(UI.tab("Tab 3"))
+                .get(JTabbedPane)
+        expect :
+            tabbedPane.getSelectedIndex() == 0
+            tabbedPane.getTabCount() == 3
     }
 
     def 'A string property can model the title of a tab!'()

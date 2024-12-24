@@ -406,14 +406,17 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             TabMouseClickListener mouseListener = new TabMouseClickListener(thisComponent, indexFinder, tab.onMouseClick().orElse(null));
 
             // Initial tab setup:
-            _doWithoutListeners(thisComponent, ()->
-                thisComponent.addTab(
-                    tab.title().map(Val::orElseNull).orElse(null),
-                    tab.icon().map(Val::orElseNull).orElse(null),
-                    tab.contents().orElse(dummyContent),
-                    tab.tip().map(Val::orElseNull).orElse(null)
-                )
-            );
+            _doWithoutListeners(thisComponent, ()-> {
+                boolean hasSelectionBoolProp = tab.isSelected().isPresent();
+                ExtraState.of(thisComponent).doSilentlyIfAlreadyHasSelectionOrIf(hasSelectionBoolProp, ()->{
+                    thisComponent.addTab(
+                        tab.title().map(Val::orElseNull).orElse(null),
+                        tab.icon().map(Val::orElseNull).orElse(null),
+                        tab.contents().orElse(dummyContent),
+                        tab.tip().map(Val::orElseNull).orElse(null)
+                    );
+                });
+            });
             tab.isEnabled().ifPresent( isEnabled -> thisComponent.setEnabledAt(indexFinder.get(), isEnabled.get()) );
             tab.isSelected().ifPresent( isSelected -> {
                 ExtraState state = ExtraState.of(thisComponent);
@@ -817,16 +820,32 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
         private @Nullable Var<Integer> selectedTabIndex = null;
+        private boolean ignoreChanges = false;
 
         @Override public void setSelectedIndex(int index) {
+            if ( ignoreChanges )
+                return;
             super.setSelectedIndex(index);
             if ( selectedTabIndex != null )
                 selectedTabIndex.set(From.VIEW, index);
+
+            selectionListeners.forEach(l -> l.accept(index));
         }
         @Override public void clearSelection() {
+            if ( ignoreChanges )
+                return;
             super.clearSelection();
             if ( selectedTabIndex != null )
                 selectedTabIndex.set(From.VIEW, -1);
+        }
+
+        private void doSilentlyIfAlreadyHasSelectionOrIf(boolean condition, Runnable action) {
+            ignoreChanges = ( condition || this.selectedTabIndex != null );
+            try {
+                action.run();
+            } finally {
+                ignoreChanges = false;
+            }
         }
     }
 
