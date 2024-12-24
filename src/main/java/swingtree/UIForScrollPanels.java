@@ -109,48 +109,13 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         };
 
         _onShow( models, thisComponent, (c, delegate) -> {
-            Vals<M> vals = delegate.currentValues();
+            Tuple<M> tupleOfModels = Tuple.of(delegate.currentValues().type(), delegate.currentValues());
             int delegateIndex = delegate.index();
             Change changeType = delegate.changeType();
-            // we simply redo all the components.
-            switch ( changeType ) {
-                case SET:
-                case ADD:
-                case REMOVE:
-                    if ( delegateIndex >= 0 ) {
-                        if ( changeType == Change.ADD ) {
-                            M m = _entryFetcher(delegateIndex, vals);
-                            if ( m instanceof EntryViewModel )
-                                c.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
-                            else
-                                c.addEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
-                        } else if ( changeType == Change.REMOVE )
-                            c.removeEntryAt( delegateIndex );
-                        else if ( changeType == Change.SET ) {
-                            M m = _entryFetcher(delegateIndex, vals);
-                            if ( m instanceof EntryViewModel )
-                                c.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
-                            else
-                                c.setEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
-                        }
-                        // Now we need to update the positions of all the entries
-                        for ( int i = delegateIndex; i < vals.size(); i++ ) {
-                            M m = _entryFetcher(i, vals);
-                            if ( m instanceof EntryViewModel )
-                                ((EntryViewModel)m).position().set(i);
-                        }
-                    } else {
-                        c.removeAllEntries();
-                        addAllAt.accept(0,vals);
-                    }
-                break;
-                case CLEAR: c.removeAllEntries(); break;
-                case NONE: break;
-                default: 
-                    log.error("Unknown type: {}", delegate.changeType(), new Throwable());
-                    c.removeAllEntries();
-                    addAllAt.accept(0,vals);
-            }
+            int removeCount = delegate.oldValues().size();
+            int addCount = delegate.newValues().size();
+            int maxChange = Math.max(removeCount, addCount);
+            _update(c, attr, changeType, delegateIndex, maxChange, tupleOfModels, viewSupplier);
         });
         addAllAt.accept(0,models);
     }
@@ -181,9 +146,9 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         else {
             Tuple<M> tuple = (iterable instanceof Tuple) ? (Tuple<M>) iterable : (Tuple<M>) Tuple.of(Object.class, (Iterable<Object>) iterable);
             for ( int i = 0; i< tuple.size(); i++ ) {
-                int finalI = i + index;
+                int finalI = i;
                 thisComponent.addEntryAt(
-                    finalI, attr,
+                    i + index, attr,
                     _entryModel(),
                     m -> viewSupplier.createViewFor(_entryFetcher(finalI,tuple))
                 );
@@ -206,9 +171,9 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         else {
             Tuple<M> tuple = (iterable instanceof Tuple) ? (Tuple<M>) iterable : (Tuple<M>) Tuple.of(Object.class, (Iterable<Object>) iterable);
             for (int i = 0; i < tuple.size(); i++) {
-                int finalI = i + index;
+                int finalI = i;
                 thisComponent.setEntryAt(
-                    finalI, attr,
+                    i + index, attr,
                     _entryModel(),
                     m -> viewSupplier.createViewFor(_entryFetcher(finalI, tuple))
                 );
@@ -239,46 +204,58 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             } else {
                 int index = diff.index().orElse(-1);
                 int count = diff.size();
-                if ( index < 0 ) {
-                    // We do a simple re-build
-                    c.removeAllEntries();
-                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
-                } else {
-                    switch (diff.change()) {
-                        case SET:
-                            Tuple<M> slice = tupleOfModels.slice(index, index+count);
-                            _setAllEntriesAt(attr, c, index, slice, viewSupplier);
-                            break;
-                        case ADD:
-                            _addAllEntriesAt(attr, c, index, tupleOfModels.slice(index, index+count), viewSupplier);
-                            break;
-                        case REMOVE:
-                            c.removeEntriesAt(index, count);
-                            break;
-                        case RETAIN: // Only keep the elements in the range.
-                            // Remove trailing components:
-                            c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));
-                            // Remove leading components:
-                            c.removeEntriesAt(0, index);
-                            break;
-                        case CLEAR:
-                            c.removeAllEntries();
-                            break;
-                        case NONE:
-                            break;
-                        default:
-                            log.error("Unknown change type: {}", diff.change(), new Throwable());
-                            // We do a simple rebuild:
-                            c.removeAllEntries();
-                            _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
-                    }
-                }
+                _update(c, attr, diff.change(), index, count, tupleOfModels, viewSupplier);
             }
         });
         models.ifPresent( (tupleOfModels) -> {
             thisComponent.removeAllEntries();
             _addAllEntriesAt(attr, thisComponent, 0, tupleOfModels, viewSupplier);
         });
+    }
+
+    private <M> void _update(
+            P c,
+            @Nullable AddConstraint attr,
+            Change change,
+            int index,
+            int count,
+            Tuple<M> tupleOfModels,
+            ViewSupplier<M> viewSupplier
+    ) {
+        if ( index < 0 ) {
+            // We do a simple re-build
+            c.removeAllEntries();
+            _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
+        } else {
+            switch (change) {
+                case SET:
+                    Tuple<M> slice = tupleOfModels.slice(index, index+count);
+                    _setAllEntriesAt(attr, c, index, slice, viewSupplier);
+                    break;
+                case ADD:
+                    _addAllEntriesAt(attr, c, index, tupleOfModels.slice(index, index+count), viewSupplier);
+                    break;
+                case REMOVE:
+                    c.removeEntriesAt(index, count);
+                    break;
+                case RETAIN: // Only keep the elements in the range.
+                    // Remove trailing components:
+                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));
+                    // Remove leading components:
+                    c.removeEntriesAt(0, index);
+                    break;
+                case CLEAR:
+                    c.removeAllEntries();
+                    break;
+                case NONE:
+                    break;
+                default:
+                    log.error("Unknown change type: {}", change, new Throwable());
+                    // We do a simple rebuild:
+                    c.removeAllEntries();
+                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
+            }
+        }
     }
 
 }
