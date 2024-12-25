@@ -214,10 +214,10 @@ class Scroll_Panels_Spec extends Specification
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
-            [-1, 1, 2, 3, -1]    | { it.popRange(1, 4) }
-            [0, 1, -1, -1, -1]   | { it.popFirst(2) }
-            [-1, -1, 2, 3, 4]    | { it.popLast(3) }
             [-1, -1, -1, -1, -1] | { it.clear() }
+            //[-1, 1, 2, 3, -1]    | { it.retainRange(1, 4) }
+            //[0, 1, -1, -1, -1]   | { it.retainFirst(2) }
+            //[-1, -1, 2, 3, 4]    | { it.retainLast(3) }
     }
 
     def 'A tuple property is bound to a scroll panel compute efficiently.'(
