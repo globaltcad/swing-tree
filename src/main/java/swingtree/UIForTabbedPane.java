@@ -424,7 +424,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 if ( isSelected instanceof Var && isSelected.isMutable() ) {
                     Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
                     state.selectionListeners.add(i -> {
-                        boolean isNowSelected = Objects.equals(i, indexFinder.get());
+                        boolean isNowSelected = _isSuppliedTabIndexSelected(indexFinder, i);
                         isSelectedMut.set(From.VIEW, isNowSelected);
                     });
                 }
@@ -765,7 +765,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             if (isSelected instanceof Var && isSelected.isMutable()) {
                 Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
                 state.selectionListeners.add(i -> {
-                    boolean isNowSelected = Objects.equals(i, indexFinder.get());
+                    boolean isNowSelected = _isSuppliedTabIndexSelected(indexFinder, i);
                     isSelectedMut.set(From.VIEW, isNowSelected);
                 });
             }
@@ -783,6 +783,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         tab.isSelected().ifPresent(isSelected -> _onShow(isSelected, p, (c, s) -> _selectTab(c, indexFinder.get(), s)));
 
         tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));
+    }
+
+    private static boolean _isSuppliedTabIndexSelected(Supplier<Integer> indexOfCurrent, int newIndex) {
+        return newIndex >= 0 && Objects.equals(newIndex, indexOfCurrent.get());
     }
 
     private <M> void _updateTabAt(int index, @Nullable M m, TabSupplier<M> tabSupplier, P p) {
