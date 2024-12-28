@@ -13,8 +13,8 @@ import sprouts.Event;
 import sprouts.Observable;
 import sprouts.Observer;
 import sprouts.*;
-import sprouts.impl.TupleDiff;
-import sprouts.impl.TupleDiffOwner;
+import sprouts.impl.SequenceDiff;
+import sprouts.impl.SequenceDiffOwner;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
@@ -5090,39 +5090,51 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             // we simply redo all the components.
             Vals<M> newValues = delegate.newValues();
             Vals<M> oldValues = delegate.oldValues();
+            int index = delegate.index().orElse(-1);
 
-            switch ( delegate.changeType() ) {
+            switch ( delegate.change() ) {
                 case SET:
-                    for ( int i = 0; i < newValues.size(); i++ ) {
-                        int position = i + delegate.index();
-                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
+                    if ( index < 0 ) {
+                        log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                        _clearComponentsOf(innerComponent);
+                        for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                            _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                    } else {
+                        for ( int i = 0; i < newValues.size(); i++ ) {
+                            int position = i + index;
+                            _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
+                        }
                     }
                     break;
                 case ADD:
-                    if ( delegate.index() < 0 && newValues.any(Val::isEmpty) ) {
-                        // This is basically a add all operation, so we clear the components first.
+                    if ( index < 0 || newValues.any(Val::isEmpty) ) {
                         _clearComponentsOf(innerComponent);
-                        // and then we add all the components.
                         for ( int i = 0; i < delegate.currentValues().size(); i++ )
                             _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
-                    }
-                    else {
+                    } else {
                         for ( int i = 0; i < newValues.size(); i++ ) {
-                            int position = i + delegate.index();
+                            int position = i + index;
                             _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, innerComponent);
                         }
                     }
                     break;
                 case REMOVE:
-                    for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
-                        int position = i + delegate.index();
-                        _removeComponentAt(position, innerComponent);
+                    if ( index < 0 ) {
+                        log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                        _clearComponentsOf(innerComponent);
+                        for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                            _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                    } else {
+                        for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
+                            int position = i + index;
+                            _removeComponentAt(position, innerComponent);
+                        }
                     }
                     break;
                 case CLEAR: _clearComponentsOf(innerComponent); break;
                 case NONE: break;
                 default:
-                    log.error("Unknown change type: {}", delegate.changeType(), new Throwable());
+                    log.error("Unknown change type: {}", delegate.change(), new Throwable());
                     // We do a simple rebuild:
                     Vals<M> currentValues = delegate.currentValues();
                     _clearComponentsOf(innerComponent);
@@ -5160,14 +5172,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
 
     protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
-        AtomicReference<@Nullable TupleDiff> lastDiffRef = new AtomicReference<>(null);
-        if (models.get() instanceof TupleDiffOwner)
-            lastDiffRef.set(((TupleDiffOwner)models.get()).differenceFromPrevious().orElse(null));
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
+        if (models.get() instanceof SequenceDiffOwner)
+            lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShow( models, thisComponent, (c, tupleOfModels) -> {
-            TupleDiff diff = null;
-            TupleDiff lastDiff = lastDiffRef.get();
-            if (tupleOfModels instanceof TupleDiffOwner)
-                diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+            SequenceDiff diff = null;
+            SequenceDiff lastDiff = lastDiffRef.get();
+            if (tupleOfModels instanceof SequenceDiffOwner)
+                diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
             lastDiffRef.set(diff);
 
             if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {

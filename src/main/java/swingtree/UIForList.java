@@ -372,12 +372,12 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         }
 
         public void fire( ValsDelegate<E> v ) {
-            int index = v.index();
+            int index = v.index().orElse(-1);
             if ( index < 0 ) {
                 fireContentsChanged( this, 0, _entries.size() );
                 return;
             }
-            switch ( v.changeType() ) {
+            switch ( v.change() ) {
                 case ADD:    fireIntervalAdded(   this, index, index + v.newValues().size() ); break;
                 case REMOVE: fireIntervalRemoved( this, index, index + v.oldValues().size() ); break;
                 case SET:    fireContentsChanged( this, index, index + v.newValues().size() ); break;

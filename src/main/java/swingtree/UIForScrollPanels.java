@@ -4,8 +4,8 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.*;
-import sprouts.impl.TupleDiff;
-import sprouts.impl.TupleDiffOwner;
+import sprouts.impl.SequenceDiff;
+import sprouts.impl.SequenceDiffOwner;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
@@ -110,8 +110,8 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 
         _onShow( models, thisComponent, (c, delegate) -> {
             Tuple<M> tupleOfModels = Tuple.of(delegate.currentValues().type(), delegate.currentValues());
-            int delegateIndex = delegate.index();
-            Change changeType = delegate.changeType();
+            int delegateIndex = delegate.index().orElse(-1);
+            Change changeType = delegate.change();
             int removeCount = delegate.oldValues().size();
             int addCount = delegate.newValues().size();
             int maxChange = Math.max(removeCount, addCount);
@@ -188,14 +188,14 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             ViewSupplier<M> viewSupplier, 
             P thisComponent 
     ) {
-        AtomicReference<@Nullable TupleDiff> lastDiffRef = new AtomicReference<>(null);
-        if (models.get() instanceof TupleDiffOwner)
-            lastDiffRef.set(((TupleDiffOwner)models.get()).differenceFromPrevious().orElse(null));
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
+        if (models.get() instanceof SequenceDiffOwner)
+            lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShow( models, thisComponent, (c, tupleOfModels) -> {
-            TupleDiff diff = null;
-            TupleDiff lastDiff = lastDiffRef.get();
-            if (tupleOfModels instanceof TupleDiffOwner)
-                diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+            SequenceDiff diff = null;
+            SequenceDiff lastDiff = lastDiffRef.get();
+            if (tupleOfModels instanceof SequenceDiffOwner)
+                diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
             lastDiffRef.set(diff);
 
             if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {

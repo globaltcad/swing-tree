@@ -5,8 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.*;
 import sprouts.Action;
-import sprouts.impl.TupleDiff;
-import sprouts.impl.TupleDiffOwner;
+import sprouts.impl.SequenceDiff;
+import sprouts.impl.SequenceDiffOwner;
 import swingtree.api.mvvm.TabSupplier;
 import swingtree.style.ComponentExtension;
 
@@ -506,23 +506,42 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             _onShow(tabModels, thisComponent, (pane, delegate) -> {
                 Vals<M> newValues = delegate.newValues();
                 Vals<M> oldValues = delegate.oldValues();
+                int index = delegate.index().orElse(-1);
 
-                switch (delegate.changeType()) {
+                switch (delegate.change()) {
                     case SET:
-                        for (int i = 0; i < newValues.size(); i++) {
-                            int position = delegate.index() + i;
-                            _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
+                        if ( index < 0 ) {
+                            log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                            pane.removeAll();
+                            delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                        } else {
+                            for (int i = 0; i < newValues.size(); i++) {
+                                int position = index + i;
+                                _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
+                            }
                         }
                         break;
                     case ADD:
-                        for (int i = 0; i < newValues.size(); i++) {
-                            int position = delegate.index() + i;
-                            _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
+                        if ( index < 0 ) {
+                            log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                            pane.removeAll();
+                            delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                        } else {
+                            for (int i = 0; i < newValues.size(); i++) {
+                                int position = index + i;
+                                _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
+                            }
                         }
                         break;
                     case REMOVE:
-                        for (int i = 0; i < oldValues.size(); i++) {
-                            _removeTabAt(delegate.index(), pane);
+                        if ( index < 0 ) {
+                            log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                            pane.removeAll();
+                            delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                        } else {
+                            for (int i = 0; i < oldValues.size(); i++) {
+                                _removeTabAt(index, pane);
+                            }
                         }
                         break;
                     case CLEAR:
@@ -531,7 +550,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     case NONE:
                         break;
                     default:
-                        log.error("Unknown change type: {}", delegate.changeType(), new Throwable());
+                        log.error("Unknown change type: {}", delegate.change(), new Throwable());
                         // We do a simple rebuild:
                         pane.removeAll();
                         delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
@@ -598,14 +617,14 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 );
                 _doWithoutListeners(thisComponent, thisComponent::removeAll);
             }
-            AtomicReference<@Nullable TupleDiff> lastDiffRef = new AtomicReference<>(null);
-            if (tabModels.get() instanceof TupleDiffOwner)
-                lastDiffRef.set(((TupleDiffOwner)tabModels.get()).differenceFromPrevious().orElse(null));
+            AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
+            if (tabModels.get() instanceof SequenceDiffOwner)
+                lastDiffRef.set(((SequenceDiffOwner)tabModels.get()).differenceFromPrevious().orElse(null));
             _onShow(tabModels, thisComponent, (pane, tupleOfModels) -> {
-                TupleDiff diff = null;
-                TupleDiff lastDiff = lastDiffRef.get();
-                if (tupleOfModels instanceof TupleDiffOwner)
-                    diff = ((TupleDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+                SequenceDiff diff = null;
+                SequenceDiff lastDiff = lastDiffRef.get();
+                if (tupleOfModels instanceof SequenceDiffOwner)
+                    diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
                 lastDiffRef.set(diff);
 
                 if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {

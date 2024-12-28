@@ -226,7 +226,7 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listener on the "Vars" class.'
-            vars.onChange{ changes << it.index() }
+            vars.onChange{ changes << it.index().orElse(-1) }
 
         when : 'We modify the property in various ways...'
             vars.addAt(1, 1)
@@ -287,7 +287,7 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a change listener on the "Vars" class.'
-            vars.onChange{ changes << it.changeType() }
+            vars.onChange{ changes << it.change() }
 
         when : 'We modify the property in various ways...'
             vars.addAt(1, 1)
@@ -330,7 +330,7 @@ class Properties_List_Spec extends Specification
         and : 'A regular list where we are going to record changes.'
             var changes = []
         and : 'Now we register a change listener on the properties.'
-            vars.onChange({ changes << it.changeType() })
+            vars.onChange({ changes << it.change() })
 
         when : 'We sort the list.'
             vars.sort()
@@ -422,7 +422,7 @@ class Properties_List_Spec extends Specification
                                             )
         and : 'We register a listener which will record changes for us.'
             var changes = []
-            vars.onChange({ changes << it.changeType() })
+            vars.onChange({ changes << it.change() })
 
         when : 'We call the "makeDistinct" method.'
             vars.makeDistinct()
