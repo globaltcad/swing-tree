@@ -4933,16 +4933,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  and is then expected to return a {@link JComponent} instance which will be added to the
      *  wrapped {@link JComponent} type of this builder.
      *
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     * @param model A {@link sprouts.Val} property holding null or any other type of value,
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+    public final <M> I add( Val<M> model, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(model, "viewable", Val.class);
         return _with( thisComponent -> {
-                   _addViewablePropTo(thisComponent, viewable, null, viewSupplier);
+                   _addViewablePropTo(thisComponent, model, null, viewSupplier);
                })
                ._this();
     }
@@ -4955,17 +4955,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  wrapped {@link JComponent} type of this builder.
      *
      * @param attr The layout information which should be used as layout constraints for the generated view.
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     * @param model A {@link sprouts.Val} property holding null or any other type of value,
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
+    public final <M> I add( String attr, Val<M> model, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        NullUtil.nullArgCheck(model, "viewable", Val.class);
         return _with( thisComponent -> {
-            _addViewablePropTo(thisComponent, viewable, ()->attr, viewSupplier);
+            _addViewablePropTo(thisComponent, model, ()->attr, viewSupplier);
         })
                 ._this();
     }
@@ -4978,15 +4978,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  wrapped {@link JComponent} type of this builder.
      *
      * @param attr The layout information which should be used as layout constraints for the generated view.
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     * @param model A {@link sprouts.Val} property holding null or any other type of value,
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
+    public final <M> I add( AddConstraint attr, Val<M> model, ViewSupplier<M> viewSupplier ) {
         return  _with( thisComponent -> {
-            _addViewablePropTo(thisComponent, viewable, attr, viewSupplier);
+            _addViewablePropTo(thisComponent, model, attr, viewSupplier);
         })
                 ._this();
     }
@@ -4997,19 +4997,26 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The type of item can be anything, but it is usually a view model instance.
      *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
      *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
+     *  wrapped {@link JComponent} type of this builder.<br>
+     *  <b>
+     *      Due to the usage of the mutable the {@link Vals} property list, this method assumes your view models
+     *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
+     *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
+     *      instead of {@link Vals} lists. <br>
+     *      <u>See {@link #addAll(Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *  </b>
      *
-     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I addAll( Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+    public final <M> I addAll( Vals<M> models, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, null, viewSupplier, thisComponent );
+                    _addViewableProps( models, null, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -5020,20 +5027,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The type of item can be anything, but it is usually a view model instance.
      *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
      *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
+     *  wrapped {@link JComponent} type of this builder.<br>
+     *  <b>
+     *      Due to the usage of the mutable the {@link Vals} property list, this method assumes your view models
+     *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
+     *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
+     *      instead of {@link Vals} lists. <br>
+     *      <u>See {@link #addAll(String, Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *  </b>
      *
      * @param attr The layout information which should be used as layout constraints for the generated views.
-     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I addAll( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( String attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, ()->attr, viewSupplier, thisComponent );
+                    _addViewableProps( models, ()->attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -5044,36 +5058,57 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The type of item can be anything, but it is usually a view model instance.
      *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
      *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
+     *  wrapped {@link JComponent} type of this builder.<br>
+     *  <b>
+     *      Due to the usage of the mutable the {@link Vals} property list, this method assumes your view models
+     *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
+     *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
+     *      instead of {@link Vals} lists. <br>
+     *      <u>See {@link #addAll(AddConstraint, Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *  </b>
      *
      * @param attr The layout information which should be used as layout constraints for the generated views.
-     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I addAll( AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( AddConstraint attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, attr, viewSupplier, thisComponent );
+                    _addViewableProps( models, attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
 
-    public final <M> I addAll( Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+    /**
+     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  and automatically regenerate the view when any of the items in the tuple change.
+     *  The type of item can be anything, but it is usually value based view models.
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will either be added to this UI component or replace an existing view.<br>
+     *
+     *
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
+    public final <M> I addAll( Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, null, viewSupplier, thisComponent );
+                    _addViewableProps( models, null, viewSupplier, thisComponent );
                 })
                 ._this();
     }
 
-    public final <M> I addAll( String attr, Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( String attr, Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, ()->attr, viewSupplier, thisComponent );
+                    _addViewableProps( models, ()->attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }

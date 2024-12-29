@@ -74,7 +74,7 @@ class MVVM_Example_Spec extends Specification
     {
         given : 'We instantiate the "view model" in the form of a single property.'
             var pressedStates = []
-            Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.get()) })
+            Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.currentValue().orElseThrowUnchecked()) })
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isPressedIf(buttonPressed)
         and : 'Build the root component:'

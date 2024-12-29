@@ -99,8 +99,8 @@ public class BoxShadowPickerViewModel
         Viewable.cast(marginRight).onChange(From.VIEW, it -> repaint.fire() );
         Viewable.cast(marginBottom).onChange(From.VIEW, it -> repaint.fire() );
 
-        Viewable.cast(borderEdge).onChange(From.VIEW, it -> updateEdgeSelection(it.get()) );
-        Viewable.cast(borderCorner).onChange(From.VIEW, it -> updateCornerSelection(it.get()) );
+        Viewable.cast(borderEdge).onChange(From.VIEW, it -> updateEdgeSelection(it.currentValue().orElseThrowUnchecked()) );
+        Viewable.cast(borderCorner).onChange(From.VIEW, it -> updateCornerSelection(it.currentValue().orElseThrowUnchecked()) );
 
         Viewable.cast(backgroundColor).onChange(From.VIEW, it -> repaint.fire() );
         Viewable.cast(foundationColor).onChange(From.VIEW, it -> repaint.fire() );

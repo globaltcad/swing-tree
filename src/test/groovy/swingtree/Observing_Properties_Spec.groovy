@@ -43,7 +43,7 @@ class Observing_Properties_Spec extends Specification
         and : 'Something we want to have a side effect on:'
             var list = []
         when : 'We subscribe to the property using the `onChange(..)` method.'
-            mutable.onChange(From.VIEW_MODEL, it -> list.add(it.orElseNull()) )
+            mutable.onChange(From.VIEW_MODEL, it -> list.add(it.currentValue().orElseNull()) )
         and : 'We change the value of the property.'
             mutable.set("Tofu")
         then : 'The side effect is executed.'
@@ -69,12 +69,12 @@ class Observing_Properties_Spec extends Specification
             Var<String> property = Var.of("Hello World")
         and : 'we bind 1 subscriber to the property.'
             var list1 = []
-            property.onChange(From.VIEW_MODEL, it -> list1.add(it.orElseNull()) )
+            property.onChange(From.VIEW_MODEL, it -> list1.add(it.currentValue().orElseNull()) )
         and : 'We create a new property with a different id.'
             Val<String> property2 = property.withId("XY")
         and : 'Another subscriber to the new property.'
             var list2 = []
-            property2.onChange(From.VIEW_MODEL, it -> list2.add(it.orElseNull()) )
+            property2.onChange(From.VIEW_MODEL, it -> list2.add(it.currentValue().orElseNull()) )
 
         when : 'We change the value of the original property.'
             property.set("Tofu")
@@ -141,9 +141,9 @@ class Observing_Properties_Spec extends Specification
             var modelListener = []
             var anyListener = []
             var property = Var.of(":)")
-            property.onChange(From.VIEW, it -> viewListener << it.orElseThrow() )
-            property.onChange(From.VIEW_MODEL, it -> modelListener << it.orElseNull() )
-            property.onChange(From.ALL, it -> anyListener << it.orElseThrow() )
+            property.onChange(From.VIEW, it -> viewListener << it.currentValue().orElseThrow() )
+            property.onChange(From.VIEW_MODEL, it -> modelListener << it.currentValue().orElseNull() )
+            property.onChange(From.ALL, it -> anyListener << it.currentValue().orElseThrow() )
 
         when : 'We change the state of the property multiple times using the `set(Channel, T)` method.'
             property.set(From.VIEW, ":(")
@@ -173,9 +173,9 @@ class Observing_Properties_Spec extends Specification
             var modelListener = []
             var property = Var.of(":)")
                                 .onChange(From.ALL, it ->{
-                                    modelListener << it.orElseThrow()
+                                    modelListener << it.currentValue().orElseThrow()
                                 })
-            property.onChange(From.VIEW_MODEL, it -> showListener << it.orElseNull() )
+            property.onChange(From.VIEW_MODEL, it -> showListener << it.currentValue().orElseNull() )
 
         when : 'We change the state of the property using the "set(T)" method.'
             property.set(":(")

@@ -134,10 +134,10 @@ public final class Tab
 
         Var<Boolean> isSelectedModel = Var.of(state == selectedState.get());
         Viewable.cast(selectedState).onChange(From.ALL, it -> {
-            isSelectedModel.set(it.channel(), state == it.get());
+            isSelectedModel.set(it.channel(), state == it.currentValue().orElseThrowUnchecked());
         });
         Viewable.cast(isSelectedModel).onChange(From.ALL,  it -> {
-            if ( it.get() )
+            if ( it.currentValue().orElseThrowUnchecked() )
                 selectedState.set(it.channel(), state);
         });
         return new Tab(_contents, _headerComponent, _title, isSelectedModel, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);

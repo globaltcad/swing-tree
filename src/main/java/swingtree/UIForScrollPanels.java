@@ -111,7 +111,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         _onShow( models, thisComponent, (c, delegate) -> {
             Tuple<M> tupleOfModels = Tuple.of(delegate.currentValues().type(), delegate.currentValues());
             int delegateIndex = delegate.index().orElse(-1);
-            Change changeType = delegate.change();
+            SequenceChange changeType = delegate.change();
             int removeCount = delegate.oldValues().size();
             int addCount = delegate.newValues().size();
             int maxChange = Math.max(removeCount, addCount);
@@ -216,7 +216,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
     private <M> void _update(
             P c,
             @Nullable AddConstraint attr,
-            Change change,
+            SequenceChange change,
             int index,
             int count,
             Tuple<M> tupleOfModels,

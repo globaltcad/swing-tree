@@ -30,7 +30,7 @@ public class NoteGuesserViewModel
 
 
     public NoteGuesserViewModel() {
-        Viewable.cast(playMode).onChange(From.VIEW, it -> activatedPlayMode(it.get()));
+        Viewable.cast(playMode).onChange(From.VIEW, it -> activatedPlayMode(it.currentValue().orElseThrowUnchecked()));
         loadScore();
         newRandomNoteIndex();
     }

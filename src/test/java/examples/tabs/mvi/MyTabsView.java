@@ -113,10 +113,10 @@ public class MyTabsView extends Panel
             )
         );
         currentTab.ifPresent( this::select );
-        Viewable.cast(currentTab).onChange(From.VIEW_MODEL, it -> select(it.get()) );
+        Viewable.cast(currentTab).onChange(From.VIEW_MODEL, it -> select(it.currentValue().orElseThrowUnchecked()) );
         Viewable.cast(tabs).onChange(From.ALL, it -> {
             updateContentComponents(
-                it.get().stream()
+                it.currentValue().orElseThrowUnchecked().stream()
                 .map(MyTabsViewModel.TabModel::contentView)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList())

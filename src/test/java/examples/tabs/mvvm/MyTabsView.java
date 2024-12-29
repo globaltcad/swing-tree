@@ -45,7 +45,7 @@ public class MyTabsView extends Panel
                 .withTooltip(tabModel.tip())
                 .peek( b ->
                     Viewable.cast(tabModel.iconSource()).onChange(From.VIEW_MODEL, i -> {
-                        Optional<ImageIcon> icon = i.get().find();
+                        Optional<ImageIcon> icon = i.currentValue().orElseThrowUnchecked().find();
                         if ( icon.isPresent() ) {
                             b.setIcon(icon.get());
                             b.setText("");
@@ -102,7 +102,7 @@ public class MyTabsView extends Panel
             )
         );
         vm.getCurrentTab().ifPresent( this::select );
-        Viewable.cast(vm.getCurrentTab()).onChange(From.VIEW_MODEL,  it -> select(it.get()) );
+        Viewable.cast(vm.getCurrentTab()).onChange(From.VIEW_MODEL,  it -> select(it.currentValue().orElseThrowUnchecked()) );
         Viewables.cast(vm.getTabs()).onChange(it -> {
             updateContentComponents(
                 it.currentValues().stream()

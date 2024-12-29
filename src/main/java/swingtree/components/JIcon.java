@@ -80,7 +80,7 @@ public class JIcon extends JLabel implements StylableComponent
     public JIcon( Val<IconDeclaration> declaration ) {
         Viewable.cast(declaration).onChange(From.ALL, it -> {
             UI.runNow(()->{
-                setIcon(_getFromCacheOrLoadFrom(it.get()));
+                setIcon(_getFromCacheOrLoadFrom(it.currentValue().orElseThrowUnchecked()));
             });
         });
         declaration.ifPresent( it -> setIcon(_getFromCacheOrLoadFrom(it)) );
