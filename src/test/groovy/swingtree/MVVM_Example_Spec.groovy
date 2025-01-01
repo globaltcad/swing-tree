@@ -896,6 +896,51 @@ class MVVM_Example_Spec extends Specification
             [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
     }
 
+    def 'Views bound to a tuple property will be reused efficiently.'(
+        Tuple<Object> initialModels, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove tabs. The GUI will only update the
+            tabs that have changed and it will reuse views for items that
+            existed in the previous tuple.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var models = Var.of(initialModels)
+            ViewSupplier<Object> supplier = (Object aThing) -> UI.button(Objects.toString(aThing))
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We get a list of the current views.'
+            var initialComponents = panel.components as List<JComponent>
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We evaluate the situation after the change:'
+            var newComponents = panel.components as List<JComponent>
+            var whichViewReused = initialComponents.collect({newComponents.contains(it)})
+            var whichModelsReused = initialModels.collect({models.get().contains(it)})
+        then: 'The tabbed pane is updated.'
+            whichModelsReused == whichViewReused
+
+        where : 'We test the following operations:'
+            initialModels                | operation
+            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z") }
+            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42) }
+            Tuple.of("a", "b")           | { it.revert() }
+            Tuple.of(1, 2, 3)            | { it.revert() }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.revert() }
+            Tuple.of("a", "b")           | { it.removeFirst(1) }
+            Tuple.of(1, 2, 3)            | { it.removeFirst(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }
+            Tuple.of("a", "b")           | { it.removeLast(1) }
+            Tuple.of(1, 2, 3)            | { it.removeLast(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+    }
+
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {
 
         reportInfo """

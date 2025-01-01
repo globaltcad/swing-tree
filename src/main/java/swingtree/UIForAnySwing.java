@@ -5016,7 +5016,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _addViewableProps( models, null, viewSupplier, thisComponent );
+                    _bindTo( models, null, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -5047,7 +5047,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
         return _with( thisComponent -> {
-                    _addViewableProps( models, ()->attr, viewSupplier, thisComponent );
+                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -5076,7 +5076,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final <M> I addAll( AddConstraint attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
         return _with( thisComponent -> {
-                    _addViewableProps( models, attr, viewSupplier, thisComponent );
+                    _bindTo( models, attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -5099,7 +5099,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _addViewableProps( models, null, viewSupplier, thisComponent );
+                    _bindTo( models, null, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -5108,85 +5108,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
         return _with( thisComponent -> {
-                    _addViewableProps( models, ()->attr, viewSupplier, thisComponent );
+                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
 
     public final <M> I addAll( AddConstraint attr, Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, attr, viewSupplier, thisComponent );
+                    _bindTo( viewables, attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
 
-    protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
-        _onShow( models, thisComponent, (innerComponent, delegate) -> {
-            // we simply redo all the components.
-            Vals<M> newValues = delegate.newValues();
-            Vals<M> oldValues = delegate.oldValues();
-            int index = delegate.index().orElse(-1);
+    private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
+                log.error("Error while creating view for '"+model+"'.", exception);
+                return UI.box().get(JBox.class);
+            }), thisComponent);
+    }
 
-            switch ( delegate.change() ) {
-                case SET:
-                    if ( index < 0 ) {
-                        log.error("Missing index for change type: {}", delegate.change(), new Throwable());
-                        _clearComponentsOf(innerComponent);
-                        for ( int i = 0; i < delegate.currentValues().size(); i++ )
-                            _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
-                    } else {
-                        for ( int i = 0; i < newValues.size(); i++ ) {
-                            int position = i + index;
-                            _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
-                        }
-                    }
-                    break;
-                case ADD:
-                    if ( index < 0 || newValues.any(Val::isEmpty) ) {
-                        _clearComponentsOf(innerComponent);
-                        for ( int i = 0; i < delegate.currentValues().size(); i++ )
-                            _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
-                    } else {
-                        for ( int i = 0; i < newValues.size(); i++ ) {
-                            int position = i + index;
-                            _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, innerComponent);
-                        }
-                    }
-                    break;
-                case REMOVE:
-                    if ( index < 0 ) {
-                        log.error("Missing index for change type: {}", delegate.change(), new Throwable());
-                        _clearComponentsOf(innerComponent);
-                        for ( int i = 0; i < delegate.currentValues().size(); i++ )
-                            _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
-                    } else {
-                        for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
-                            int position = i + index;
-                            _removeComponentAt(position, innerComponent);
-                        }
-                    }
-                    break;
-                case CLEAR: _clearComponentsOf(innerComponent); break;
-                case NONE: break;
-                default:
-                    log.error("Unknown change type: {}", delegate.change(), new Throwable());
-                    // We do a simple rebuild:
-                    Vals<M> currentValues = delegate.currentValues();
-                    _clearComponentsOf(innerComponent);
-                    for ( int i = 0; i < currentValues.size(); i++ )
-                        _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, innerComponent );
-            }
-            if ( innerComponent.getComponentCount() != delegate.currentValues().size() )
-                log.warn(
-                        "Broken binding to view model list detected! \n" +
-                        "UI sub-component count '"+innerComponent.getComponentCount()+"' " +
-                        "does not match viewable models list of size '"+delegate.currentValues().size()+"'. \n" +
-                        "A possible cause for this is that components " +
-                        "were " + ( innerComponent.getComponentCount() > delegate.currentValues().size() ? "added" : "removed" ) + " " +
-                        "to this '" + innerComponent + "' \ndirectly, instead of through the property list binding. \n" +
-                        "However, this could also be a bug in the UI framework.",
-                        new Throwable()
-                    );
+    protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
+        _onShow( models, thisComponent, (innerComponent, delegate) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
+            _updateSubViews(innerComponent, models, attr, delegate, viewSupplier);
+            viewSupplier.clearCurrentViews();
         });
         models.forEach( v -> {
             UIForAnySwing<?, ?> view = null;
@@ -5205,12 +5150,95 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
     }
 
+    private <M> void _updateSubViews(C innerComponent, Vals<M> tupleOfModels, @Nullable AddConstraint attr, ValsDelegate<M> delegate, ModelToViewConverter<M> viewSupplier) {
+        // we simply redo all the components.
+        Vals<M> newValues = delegate.newValues();
+        Vals<M> oldValues = delegate.oldValues();
+        int index = delegate.index().orElse(-1);
 
-    protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        switch ( delegate.change() ) {
+            case SET:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    _clearComponentsOf(innerComponent);
+                    for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                        _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                } else {
+                    for ( int i = 0; i < newValues.size(); i++ ) {
+                        int position = i + index;
+                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
+                    }
+                }
+                break;
+            case ADD:
+                if ( index < 0 || newValues.any(Val::isEmpty) ) {
+                    _clearComponentsOf(innerComponent);
+                    for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                        _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                } else {
+                    for ( int i = 0; i < newValues.size(); i++ ) {
+                        int position = i + index;
+                        _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, innerComponent);
+                    }
+                }
+                break;
+            case REMOVE:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    _clearComponentsOf(innerComponent);
+                    for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                        _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                } else {
+                    for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
+                        int position = i + index;
+                        _removeComponentAt(position, innerComponent);
+                    }
+                }
+                break;
+            case CLEAR: _clearComponentsOf(innerComponent); break;
+            case NONE: break;
+            default:
+                log.error("Unknown change type: {}", delegate.change(), new Throwable());
+                // We do a simple rebuild:
+                Vals<M> currentValues = delegate.currentValues();
+                _clearComponentsOf(innerComponent);
+                for ( int i = 0; i < currentValues.size(); i++ )
+                    _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, innerComponent );
+        }
+        if ( innerComponent.getComponentCount() != delegate.currentValues().size() )
+            log.warn(
+                    "Broken binding to view model list detected! \n" +
+                    "UI sub-component count '"+innerComponent.getComponentCount()+"' " +
+                    "does not match viewable models list of size '"+delegate.currentValues().size()+"'. \n" +
+                    "A possible cause for this is that components " +
+                    "were " + ( innerComponent.getComponentCount() > delegate.currentValues().size() ? "added" : "removed" ) + " " +
+                    "to this '" + innerComponent + "' \ndirectly, instead of through the property list binding. \n" +
+                    "However, this could also be a bug in the UI framework.",
+                    new Throwable()
+                );
+    }
+
+    private <M> void _bindTo( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
+            log.error("Error while creating view for '"+model+"'.", exception);
+            return UI.box().get(JBox.class);
+        }), thisComponent);
+    }
+
+    protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShow( models, thisComponent, (c, tupleOfModels) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
+            _updateSubViews(c, tupleOfModels, attr, lastDiffRef, viewSupplier);
+            viewSupplier.clearCurrentViews();
+        });
+        Tuple<M> tupleOfModels = models.get();
+        _addAllFromTuple(tupleOfModels, attr, viewSupplier, thisComponent);
+    }
+
+    private <M> void _updateSubViews(C c, Tuple<M> tupleOfModels, @Nullable AddConstraint attr, AtomicReference<@Nullable SequenceDiff> lastDiffRef, ModelToViewConverter<M> viewSupplier) {
             SequenceDiff diff = null;
             SequenceDiff lastDiff = lastDiffRef.get();
             if (tupleOfModels instanceof SequenceDiffOwner)
@@ -5263,9 +5291,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     }
                 }
             }
-        });
-        Tuple<M> tupleOfModels = models.get();
-        _addAllFromTuple(tupleOfModels, attr, viewSupplier, thisComponent);
     }
 
     private <M> void _addAllFromTuple( Tuple<M> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {

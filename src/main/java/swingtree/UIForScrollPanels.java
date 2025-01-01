@@ -16,10 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -89,7 +86,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 
     @Override
     protected <M> void _addViewableProps(
-            Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, P thisComponent
+            Vals<M> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, P thisComponent
     ) {
         BiConsumer<Integer, Vals<M>> addAllAt = (index, vals) -> {
             boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
@@ -109,6 +106,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         };
 
         _onShow( models, thisComponent, (c, delegate) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
             Tuple<M> tupleOfModels = Tuple.of(delegate.currentValues().type(), delegate.currentValues());
             int delegateIndex = delegate.index().orElse(-1);
             SequenceChange changeType = delegate.change();
@@ -116,6 +114,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             int addCount = delegate.newValues().size();
             int maxChange = Math.max(removeCount, addCount);
             _update(c, attr, changeType, delegateIndex, maxChange, tupleOfModels, viewSupplier);
+            viewSupplier.clearCurrentViews();
         });
         addAllAt.accept(0,models);
     }
@@ -185,13 +184,14 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
     protected <M> void _addViewableProps(
             Val<Tuple<M>> models, 
             @Nullable AddConstraint attr, 
-            ViewSupplier<M> viewSupplier, 
+            ModelToViewConverter<M> viewSupplier,
             P thisComponent 
     ) {
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShow( models, thisComponent, (c, tupleOfModels) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
             SequenceDiff diff = null;
             SequenceDiff lastDiff = lastDiffRef.get();
             if (tupleOfModels instanceof SequenceDiffOwner)
@@ -206,6 +206,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
                 int count = diff.size();
                 _update(c, attr, diff.change(), index, count, tupleOfModels, viewSupplier);
             }
+            viewSupplier.clearCurrentViews();
         });
         models.ifPresent( (tupleOfModels) -> {
             thisComponent.removeAllEntries();
@@ -220,7 +221,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             int index,
             int count,
             Tuple<M> tupleOfModels,
-            ViewSupplier<M> viewSupplier
+            ModelToViewConverter<M> viewSupplier
     ) {
         if ( index < 0 ) {
             // We do a simple re-build

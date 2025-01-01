@@ -122,6 +122,14 @@ public class JScrollPanels extends UI.ScrollPane
     public int getNumberOfEntries() { return _internal.getComponents().length; }
 
     /**
+     *  Exposes the content panel that contains the actual entry components.
+     * @return The container of the entry views.
+     */
+    public JComponent getContentPanel() {
+        return _internal;
+    }
+
+    /**
      *  The {@link JScrollPanels} does not store components statically in the UI tree.
      *  Instead, it is a hybrid of the traditional static approach
      *  and a renderer based approach (as in the {@link JList}).
