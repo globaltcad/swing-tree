@@ -3,8 +3,8 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.*;
 import sprouts.Action;
+import sprouts.*;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.api.mvvm.TabSupplier;
@@ -22,7 +22,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -504,76 +503,80 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 _doWithoutListeners(thisComponent, thisComponent::removeAll);
             }
             _onShow(tabModels, thisComponent, (pane, delegate) -> {
-                Vals<M> newValues = delegate.newValues();
-                Vals<M> oldValues = delegate.oldValues();
-                int index = delegate.index().orElse(-1);
-
-                switch (delegate.change()) {
-                    case SET:
-                        if ( index < 0 ) {
-                            log.error("Missing index for change type: {}", delegate.change(), new Throwable());
-                            pane.removeAll();
-                            delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
-                        } else {
-                            for (int i = 0; i < newValues.size(); i++) {
-                                int position = index + i;
-                                _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
-                            }
-                        }
-                        break;
-                    case ADD:
-                        if ( index < 0 ) {
-                            log.error("Missing index for change type: {}", delegate.change(), new Throwable());
-                            pane.removeAll();
-                            delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
-                        } else {
-                            for (int i = 0; i < newValues.size(); i++) {
-                                int position = index + i;
-                                _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
-                            }
-                        }
-                        break;
-                    case REMOVE:
-                        if ( index < 0 ) {
-                            log.error("Missing index for change type: {}", delegate.change(), new Throwable());
-                            pane.removeAll();
-                            delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
-                        } else {
-                            for (int i = 0; i < oldValues.size(); i++) {
-                                _removeTabAt(index, pane);
-                            }
-                        }
-                        break;
-                    case CLEAR:
-                        pane.removeAll();
-                        break;
-                    case NONE:
-                        break;
-                    default:
-                        log.error("Unknown change type: {}", delegate.change(), new Throwable());
-                        // We do a simple rebuild:
-                        pane.removeAll();
-                        delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
-                }
-
-                if (pane.getTabCount() != delegate.currentValues().size()) {
-                    log.warn(
-                        "Broken binding to view model list detected! \n" +
-                        "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
-                        "A possible cause for this is that tabs were {} this '{}' \n" +
-                        "directly, instead of through the property list binding. \n" +
-                        "However, this could also be a bug in the UI framework.",
-                        pane.getComponentCount(),
-                        delegate.currentValues().size(),
-                        pane.getTabCount() > delegate.currentValues().size() ? "added to" : "removed from",
-                        pane,
-                        new Throwable()
-                    );
-                }
+                _updateTabs(pane, delegate, tabSupplier);
             });
 
             tabModels.forEach(v -> _addTabAt(thisComponent.getTabCount(), v, tabSupplier, thisComponent));
         })._this();
+    }
+
+    private <M> void _updateTabs(P pane, ValsDelegate<M> delegate, TabSupplier<M> tabSupplier) {
+        Vals<M> newValues = delegate.newValues();
+        Vals<M> oldValues = delegate.oldValues();
+        int index = delegate.index().orElse(-1);
+
+        switch (delegate.change()) {
+            case SET:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    pane.removeAll();
+                    delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                } else {
+                    for (int i = 0; i < newValues.size(); i++) {
+                        int position = index + i;
+                        _updateTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
+                    }
+                }
+                break;
+            case ADD:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    pane.removeAll();
+                    delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                } else {
+                    for (int i = 0; i < newValues.size(); i++) {
+                        int position = index + i;
+                        _addTabAt(position, newValues.at(i).orElseNull(), tabSupplier, pane);
+                    }
+                }
+                break;
+            case REMOVE:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    pane.removeAll();
+                    delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+                } else {
+                    for (int i = 0; i < oldValues.size(); i++) {
+                        _removeTabAt(index, pane);
+                    }
+                }
+                break;
+            case CLEAR:
+                pane.removeAll();
+                break;
+            case NONE:
+                break;
+            default:
+                log.error("Unknown change type: {}", delegate.change(), new Throwable());
+                // We do a simple rebuild:
+                pane.removeAll();
+                delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+        }
+
+        if (pane.getTabCount() != delegate.currentValues().size()) {
+            log.warn(
+                "Broken binding to view model list detected! \n" +
+                "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
+                "A possible cause for this is that tabs were {} this '{}' \n" +
+                "directly, instead of through the property list binding. \n" +
+                "However, this could also be a bug in the UI framework.",
+                pane.getComponentCount(),
+                delegate.currentValues().size(),
+                pane.getTabCount() > delegate.currentValues().size() ? "added to" : "removed from",
+                pane,
+                new Throwable()
+            );
+        }
     }
 
     /**
@@ -621,78 +624,82 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             if (tabModels.get() instanceof SequenceDiffOwner)
                 lastDiffRef.set(((SequenceDiffOwner)tabModels.get()).differenceFromPrevious().orElse(null));
             _onShow(tabModels, thisComponent, (pane, tupleOfModels) -> {
-                SequenceDiff diff = null;
-                SequenceDiff lastDiff = lastDiffRef.get();
-                if (tupleOfModels instanceof SequenceDiffOwner)
-                    diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
-                lastDiffRef.set(diff);
-
-                if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-                    pane.removeAll();
-                    tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
-                } else {
-                    switch (diff.change()) {
-                        case SET:
-                            for (int i = 0; i < diff.size(); i++) {
-                                int position = diff.index().orElse(0) + i;
-                                _updateTabAt(position, tupleOfModels.get(position), tabSupplier, pane);
-                            }
-                            break;
-                        case ADD:
-                            for (int i = 0; i < diff.size(); i++) {
-                                int position = diff.index().orElse(0) + i;
-                                _addTabAt(position, tupleOfModels.get(position), tabSupplier, pane);
-                            }
-                            break;
-                        case REMOVE:
-                            for (int i = 0; i < diff.size(); i++) {
-                                _removeTabAt(diff.index().orElse(0), pane);
-                            }
-                            break;
-                        case RETAIN:
-                            int currentNumberOfTabs = pane.getTabCount();
-                            int firstToRemove = diff.index().orElse(0);
-                            int lastToRemove = currentNumberOfTabs - (firstToRemove + diff.size());
-                            //remove the first n tabs
-                            for (int i = 0; i < firstToRemove; i++) {
-                                _removeTabAt(0, pane);
-                            }
-                            // remove the last n tabs
-                            for (int i = 0; i < lastToRemove; i++) {
-                                _removeTabAt(diff.size(), pane);
-                            }
-                            break;
-                        case CLEAR:
-                            pane.removeAll();
-                            break;
-                        case NONE:
-                            break;
-                        default:
-                            log.error("Unknown change type: {}", diff.change(), new Throwable());
-                            // We do a simple rebuild:
-                            pane.removeAll();
-                            tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
-                    }
-                }
-
-                if (pane.getTabCount() != tabModels.get().size()) {
-                    log.warn(
-                        "Broken binding to view model tuple detected! \n" +
-                        "TabbedPane tab count '{}' does not match tab models tuple of size '{}'. \n" +
-                        "A possible cause for this is that tabs were {} this '{}' \n" +
-                        "directly, instead of through the property tuple binding. \n" +
-                        "However, this could also be a bug in the UI framework.",
-                        pane.getComponentCount(),
-                            tabModels.get().size(),
-                        pane.getTabCount() > tabModels.get().size() ? "added to" : "removed from",
-                        pane,
-                        new Throwable()
-                    );
-                }
+                _updateTabs(pane, tupleOfModels, lastDiffRef, tabSupplier);
             });
 
             tabModels.get().forEach(v -> _addTabAt(thisComponent.getTabCount(), v, tabSupplier, thisComponent));
         })._this();
+    }
+
+    private  <M> void _updateTabs(P pane, Tuple<M> tupleOfModels, AtomicReference<@Nullable SequenceDiff> lastDiffRef, TabSupplier<M> tabSupplier) {
+        SequenceDiff diff = null;
+        SequenceDiff lastDiff = lastDiffRef.get();
+        if (tupleOfModels instanceof SequenceDiffOwner)
+            diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+        lastDiffRef.set(diff);
+
+        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+            pane.removeAll();
+            tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+        } else {
+            switch (diff.change()) {
+                case SET:
+                    for (int i = 0; i < diff.size(); i++) {
+                        int position = diff.index().orElse(0) + i;
+                        _updateTabAt(position, tupleOfModels.get(position), tabSupplier, pane);
+                    }
+                    break;
+                case ADD:
+                    for (int i = 0; i < diff.size(); i++) {
+                        int position = diff.index().orElse(0) + i;
+                        _addTabAt(position, tupleOfModels.get(position), tabSupplier, pane);
+                    }
+                    break;
+                case REMOVE:
+                    for (int i = 0; i < diff.size(); i++) {
+                        _removeTabAt(diff.index().orElse(0), pane);
+                    }
+                    break;
+                case RETAIN:
+                    int currentNumberOfTabs = pane.getTabCount();
+                    int firstToRemove = diff.index().orElse(0);
+                    int lastToRemove = currentNumberOfTabs - (firstToRemove + diff.size());
+                    //remove the first n tabs
+                    for (int i = 0; i < firstToRemove; i++) {
+                        _removeTabAt(0, pane);
+                    }
+                    // remove the last n tabs
+                    for (int i = 0; i < lastToRemove; i++) {
+                        _removeTabAt(diff.size(), pane);
+                    }
+                    break;
+                case CLEAR:
+                    pane.removeAll();
+                    break;
+                case NONE:
+                    break;
+                default:
+                    log.error("Unknown change type: {}", diff.change(), new Throwable());
+                    // We do a simple rebuild:
+                    pane.removeAll();
+                    tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
+            }
+        }
+
+        if (pane.getTabCount() != tupleOfModels.size()) {
+            log.warn(
+                "Broken binding to view model tuple detected! \n" +
+                "TabbedPane tab count '{}' does not match tab models tuple of size '{}'. \n" +
+                "A possible cause for this is that tabs were {} this '{}' \n" +
+                "directly, instead of through the property tuple binding. \n" +
+                "However, this could also be a bug in the UI framework.",
+                pane.getComponentCount(),
+                tupleOfModels.size(),
+                pane.getTabCount() > tupleOfModels.size() ? "added to" : "removed from",
+                pane,
+                new Throwable()
+            );
+        }
     }
 
     private void _doWithoutListeners( P thisComponent, Runnable r ) {
