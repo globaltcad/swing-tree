@@ -5130,7 +5130,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
         _onShow( models, thisComponent, (innerComponent, delegate) -> {
             viewSupplier.rememberCurrentViewsForReuse();
-            _updateSubViews(innerComponent, models, attr, delegate, viewSupplier);
+            _updateSubViews(innerComponent, attr, delegate, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
         models.forEach( v -> {
@@ -5150,7 +5150,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
     }
 
-    private <M> void _updateSubViews(C innerComponent, Vals<M> tupleOfModels, @Nullable AddConstraint attr, ValsDelegate<M> delegate, ModelToViewConverter<M> viewSupplier) {
+    private <M> void _updateSubViews(C innerComponent, @Nullable AddConstraint attr, ValsDelegate<M> delegate, ModelToViewConverter<M> viewSupplier) {
         // we simply redo all the components.
         Vals<M> newValues = delegate.newValues();
         Vals<M> oldValues = delegate.oldValues();
