@@ -847,8 +847,8 @@ class MVVM_Example_Spec extends Specification
     ) {
         reportInfo """
             You can bind a string based tuple property and a view supplier 
-            to dynamically add or remove tabs. The GUI will only update the
-            tabs that have changed.
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed.
         """
         given: 'A string tuple property, a view supplier and a panel UI node.'
             var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
@@ -897,12 +897,12 @@ class MVVM_Example_Spec extends Specification
     }
 
     def 'Views bound to a tuple property will be reused efficiently.'(
-        Tuple<Object> initialModels, Closure<Tuple> operation
+        Tuple<Object> initialModels, Closure<Tuple<Object>> operation
     ) {
         reportInfo """
             You can bind a string based tuple property and a view supplier 
-            to dynamically add or remove tabs. The GUI will only update the
-            tabs that have changed and it will reuse views for items that
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed and it will reuse views for items that
             existed in the previous tuple.
         """
         given: 'A string tuple property, a view supplier and a panel UI node.'
@@ -939,6 +939,51 @@ class MVVM_Example_Spec extends Specification
             Tuple.of("a", "b")           | { it.removeLast(1) }
             Tuple.of(1, 2, 3)            | { it.removeLast(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+    }
+
+    def 'Views bound to a property list will be reused efficiently.'(
+        Vars<Object> models, Closure<Vars<Object>> operation
+    ) {
+        reportInfo """
+            You can bind a string based property list and a view supplier 
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed and it will reuse views for items that
+            existed in the previous tuple.
+        """
+        given: 'A string based property list, a view supplier and a panel UI node.'
+            var initialModels = models.toList()
+            ViewSupplier<Object> supplier = (Object aThing) -> UI.button(Objects.toString(aThing))
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We get a list of the current views.'
+            var initialComponents = panel.components as List<JComponent>
+
+        when: 'We run the operation on the list...'
+            operation(models)
+            UI.sync()
+        and : 'We evaluate the situation after the change:'
+            var newComponents = panel.components as List<JComponent>
+            var whichViewReused = initialComponents.collect({newComponents.contains(it)})
+            var whichModelsReused = initialModels.collect({models.contains(it)})
+        then: 'The tabbed pane is updated.'
+            whichModelsReused == whichViewReused
+
+        where : 'We test the following operations:'
+            models                      | operation
+            Vars.of("a", "b")           | { Vars.of("X", "a", "z") }
+            Vars.of(1, 2, 3)            | { Vars.of(-1, 2, -3) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { Vars.of(-1, 2, -3, 4, 5, 42) }
+            Vars.of("a", "b")           | { it.revert() }
+            Vars.of(1, 2, 3)            | { it.revert() }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.revert() }
+            Vars.of("a", "b")           | { it.removeFirst(1) }
+            Vars.of(1, 2, 3)            | { it.removeFirst(1) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }
+            Vars.of("a", "b")           | { it.removeLast(1) }
+            Vars.of(1, 2, 3)            | { it.removeLast(1) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
     }
 
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {

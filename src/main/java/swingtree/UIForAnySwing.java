@@ -40,6 +40,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -5196,6 +5197,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 }
                 break;
             case CLEAR: _clearComponentsOf(innerComponent); break;
+            case REVERT: _reverseComponentsOf(innerComponent); break;
             case NONE: break;
             default:
                 log.error("Unknown change type: {}", delegate.change(), new Throwable());
@@ -5251,44 +5253,56 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             } else {
                 int index = diff.index().orElse(-1);
                 int count = diff.size();
-                if ( index < 0 ) {
-                    // We do a simple re-build
-                    _clearComponentsOf(c);
-                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                } else {
-                    switch (diff.change()) {
-                        case SET:
-                            for (int i = index; i < (index + count); i++)
+                switch (diff.change()) {
+                    case SET:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = index; i < (index + count); i++ )
                                 _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
-                            break;
-                        case ADD:
-                            for (int i = index; i < (index + count); i++)
+                        }
+                        break;
+                    case ADD:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = index; i < (index + count); i++ )
                                 _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
-                            break;
-                        case REMOVE:
-                            for (int i = (index + count - 1); i >= index; i--)
+                        }
+                        break;
+                    case REMOVE:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = (index + count - 1); i >= index; i-- )
                                 _removeComponentAt(i, c);
-                            break;
-                        case RETAIN: // Only keep the elements in the range.
+                        }
+                        break;
+                    case RETAIN: // Only keep the elements in the range.
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
                             // Remove trailing components:
-                            for (int i = (c.getComponentCount() - 1); i >= (index + count); i--)
+                            for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
                                 _removeComponentAt(i, c);
                             // Remove leading components:
-                            for (int i = (index - 1); i >= 0; i--)
+                            for ( int i = (index - 1); i >= 0; i-- )
                                 _removeComponentAt(i, c);
-                            break;
-                        case CLEAR:
-                            _clearComponentsOf(c);
-                            break;
-                        case NONE:
-                            break;
-                        default:
-                            log.error("Unknown change type: {}", diff.change(), new Throwable());
-                            // We do a simple rebuild:
-                            _clearComponentsOf(c);
-                            for (int i = 0; i < tupleOfModels.size(); i++)
-                                _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
-                    }
+                        }
+                        break;
+                    case CLEAR: _clearComponentsOf(c); break;
+                    case REVERT: _reverseComponentsOf(c); break;
+                    case NONE:
+                        break;
+                    default:
+                        log.error("Unknown change type: {}", diff.change(), new Throwable());
+                        // We do a simple rebuild:
+                        _clearComponentsOf(c);
+                        _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 }
             }
     }
@@ -5450,6 +5464,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         // We update the layout.
         thisComponent.revalidate();
         thisComponent.repaint();
+    }
+
+    private void _reverseComponentsOf(C thisComponent ) {
+        // save to a list
+        List<Component> components = new ArrayList<>();
+        Collections.addAll(components, thisComponent.getComponents());
+        // We remove all components.
+        thisComponent.removeAll();
+        // Reverse the list
+        Collections.reverse(components);
+        // Add the components back in reverse order
+        components.forEach(thisComponent::add);
     }
 
     private static boolean _isBorderLayout( Object o ) {
