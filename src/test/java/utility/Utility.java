@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -152,19 +153,24 @@ public class Utility
     }
 
     public static BufferedImage offscreenRender(Component component) {
-        JWindow f = new JWindow();
-        f.add(component);
-        f.pack();
+        CompletableFuture<BufferedImage> future = new CompletableFuture<>();
+        SwingUtilities.invokeLater(() -> {
+            JWindow f = new JWindow();
+            f.add(component);
+            f.pack();
+            SwingUtilities.invokeLater(()->{
+                BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = image.createGraphics();
+                component.paint(g2d);
+                g2d.dispose();
+                future.complete(image);
+            });
+        });
         try {
-            UI.sync();
+            return future.get();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to render component offscreen!", e);
         }
-        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        component.paint(g2d);
-        g2d.dispose();
-        return image;
     }
 
     public static BufferedImage renderSingleComponent(Component component) {
