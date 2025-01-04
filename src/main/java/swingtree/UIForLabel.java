@@ -21,6 +21,8 @@ import java.util.Objects;
  * 	<p>
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ * @param <L> The type of {@link JLabel} that this {@link UIForLabel} is configuring.
  */
 public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L>
 {

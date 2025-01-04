@@ -11,6 +11,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSplitPane} instances.
+ *
+ * @param <P> The type of {@link JSplitPane} that this {@link UIForSplitPane} is configuring.
  */
 public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSplitPane<P>, P>
 {

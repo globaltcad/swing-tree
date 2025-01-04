@@ -468,6 +468,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *
      *  @param x The focus offset on the x-axis.
      *  @param y The focus offset on the y-axis.
+     * @return An updated gradient configuration with the specified focus offset.
      */
     public GradientConf focus( double x, double y ) {
         return of(_span, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);

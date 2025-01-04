@@ -5,6 +5,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JTextArea} instances.
+ *
+ * @param <A> The type of {@link JTextArea} that this {@link UIForTextArea} is configuring.
  */
 public final class UIForTextArea<A extends JTextArea> extends UIForAnyTextComponent<UIForTextArea<A>, A>
 {

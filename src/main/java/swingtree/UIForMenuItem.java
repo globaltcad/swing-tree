@@ -6,6 +6,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JMenuItem} instances.
+ *
+ * @param <M> The type of {@link JMenuItem} that this {@link UIForMenuItem} is configuring.
  */
 public final class UIForMenuItem<M extends JMenuItem> extends UIForAnyMenuItem<UIForMenuItem<M>, M>
 {

@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSplitButton} instances.
+ *
+ * @param <B> The type of {@link JSplitButton} that this {@link UIForSplitButton} is configuring.
  */
 public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {

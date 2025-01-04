@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
  *  used by {@link UIForAnySwing#onMouseDrag(Action)} like for example the {@link #mouseX()} and
  *  {@link #mouseY()} of the event as well as more drag specific information like
  *  {@link #dragEvents()} and {@link #dragPositions()}.
+ *
+ * @param <C> The type of {@link JComponent} that this {@link ComponentDragEventDelegate} is delegating to.
  */
 public final class ComponentDragEventDelegate<C extends JComponent> extends ComponentMouseEventDelegate<C>
 {

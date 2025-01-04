@@ -7,6 +7,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JPasswordField} instances.
+ *
+ * @param <F> The type of {@link JPasswordField} that this {@link UIForPasswordField} is configuring.
  */
 public final class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {

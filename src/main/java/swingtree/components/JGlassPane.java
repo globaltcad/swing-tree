@@ -285,6 +285,14 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         */
     }
 
+    /**
+     *  Marries this glass pane to the supplied {@link JRootPane} object
+     *  and detaches it from the previous root pane using the {@link #detachFromRootPane(JRootPane)} method,
+     *  if a previous root pane was attached.
+     *
+     * @param rootPane The {@link JRootPane} object to which this glass
+     *                 pane should be attached.
+     */
     protected void attachToRootPane(JRootPane rootPane) {
         Objects.requireNonNull(rootPane);
         if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);
@@ -293,6 +301,12 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         this.setVisible(true);
     }
 
+    /**
+     *  Detaches this glass pane from the supplied {@link JRootPane} object,
+     *  if the {@link JRootPane#getGlassPane()} method returns this glass pane.
+     *
+     * @param rootPane The {@link JRootPane} object from which this glass pane should be detached.
+     */
     protected void detachFromRootPane( @Nullable JRootPane rootPane ) {
         Objects.requireNonNull(rootPane);
         if ( rootPane.getGlassPane() == this ) {

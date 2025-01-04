@@ -10,6 +10,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link swingtree.components.JBox} instances.
+ *
+ * @param <B> The type of {@link swingtree.components.JBox} that this {@link UIForBox} is configuring.
  */
 public final class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
 {

@@ -21,6 +21,8 @@ import java.util.function.Function;
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ * @param <S> The type of {@link JSlider} that this {@link UIForSlider} is configuring.
  */
 public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>, S>
 {

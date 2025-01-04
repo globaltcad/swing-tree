@@ -23,6 +23,9 @@ import java.util.function.Supplier;
 /**
  *  Is attached to UI components in the form of a client property.
  *  It exists to give Swing-Tree components some custom style and animation capabilities.
+ *
+ * @param <C> The type of the component to which this extension is attached
+ *            as a client property (see {@link JComponent#putClientProperty(Object, Object)}).
  */
 public final class ComponentExtension<C extends JComponent>
 {

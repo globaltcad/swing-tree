@@ -10,6 +10,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JPanel} instances.
+ *
+ * @param <P> The type of {@link JPanel} that this {@link UIForPanel} is configuring.
  */
 public final class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P>
 {

@@ -9,6 +9,8 @@ import java.util.Objects;
 /**
  * A SwingTree builder node designed for configuring {@link AbstractButton} sub-type instances,
  * usually the {@link JButton} type.
+ *
+ * @param <B> The type of {@link AbstractButton} that this {@link UIForButton} is configuring.
  */
 public final class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForButton<B>, B>
 {

@@ -34,6 +34,8 @@ import java.awt.event.MouseEvent;
  *  <p>
  *  For some more examples <b>please take a look at the
  *  <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a></b>.
+ *
+ * @param <C> The type of {@link JComponent} that this {@link ComponentMouseEventDelegate} is delegating to.
  */
 public class ComponentMouseEventDelegate<C extends JComponent> extends ComponentDelegate<C, MouseEvent>
 {

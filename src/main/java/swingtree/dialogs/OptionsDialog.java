@@ -42,6 +42,8 @@ import java.util.function.Function;
  *  <p>
  *  Note that this API translates to the
  *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)} method.
+ *
+ * @param <E> The type of the {@link Enum} options that the dialog will present to the user.
  */
 public final class OptionsDialog<E extends Enum<E>>
 {
