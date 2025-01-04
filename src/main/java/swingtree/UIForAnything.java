@@ -616,7 +616,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         Objects.requireNonNull(weakComponent);
         Objects.requireNonNull(displayAction);
         Action<ValDelegate<T>> action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)->{
-            T v = delegate.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
+            T v = delegate.currentValue().orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
             _runInUI(() ->
                 UI.run( () -> {
                     try {

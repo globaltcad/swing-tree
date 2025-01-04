@@ -39,13 +39,13 @@ public class MyTabsView extends Panel
                 .borderWidthAt(Edge.BOTTOM, 1)
                 .padding(2, 5, -1, 5)
             )
-            .add(vm.getTabs(), tabModel ->
+            .addAll(vm.getTabs(), tabModel ->
                 button(tabModel.title()).withMaxHeight(38).withMinHeight(38).withFontSize(12)
                 .withRepaintOn(repaintEvent)
                 .withTooltip(tabModel.tip())
                 .peek( b ->
                     Viewable.cast(tabModel.iconSource()).onChange(From.VIEW_MODEL, i -> {
-                        Optional<ImageIcon> icon = i.get().find();
+                        Optional<ImageIcon> icon = i.currentValue().orElseThrowUnchecked().find();
                         if ( icon.isPresent() ) {
                             b.setIcon(icon.get());
                             b.setText("");
@@ -102,10 +102,10 @@ public class MyTabsView extends Panel
             )
         );
         vm.getCurrentTab().ifPresent( this::select );
-        Viewable.cast(vm.getCurrentTab()).onChange(From.VIEW_MODEL,  it -> select(it.get()) );
+        Viewable.cast(vm.getCurrentTab()).onChange(From.VIEW_MODEL,  it -> select(it.currentValue().orElseThrowUnchecked()) );
         Viewables.cast(vm.getTabs()).onChange(it -> {
             updateContentComponents(
-                it.vals().stream()
+                it.currentValues().stream()
                 .map(MyTabsViewModel.TabModel::contentView)
                 .map(Var::get)
                 .filter(Objects::nonNull)

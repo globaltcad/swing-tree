@@ -28,7 +28,7 @@ public class TabExample extends JPanel {
         of(this).withLayout("fill, wrap, ins 0", "", "[grow][][]")
             .add(
                 GROW,
-                tabbedPane().add(tabs, TabViewModel::createTab)
+                tabbedPane().addAll(tabs, TabViewModel::createTab)
             )
             .add(
                 GROW_X,

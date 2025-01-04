@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -152,19 +153,25 @@ public class Utility
     }
 
     public static BufferedImage offscreenRender(Component component) {
-        JWindow f = new JWindow();
-        f.add(component);
-        f.pack();
+        CompletableFuture<BufferedImage> future = new CompletableFuture<>();
+        SwingUtilities.invokeLater(() -> {
+            JWindow f = new JWindow();
+            f.add(component);
+            f.pack();
+            SwingUtilities.invokeLater(()->{
+                BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = image.createGraphics();
+                component.paint(g2d);
+                g2d.dispose();
+                future.complete(image);
+                f.dispose();
+            });
+        });
         try {
-            UI.sync();
+            return future.get();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to render component offscreen!", e);
         }
-        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        component.paint(g2d);
-        g2d.dispose();
-        return image;
     }
 
     public static BufferedImage renderSingleComponent(Component component) {
@@ -175,11 +182,21 @@ public class Utility
         if ( w < 1 ) w = Math.max(component.getWidth() , component.getPreferredSize().width);
         if ( h < 1 ) h = Math.max(component.getHeight(), component.getPreferredSize().height);
 
-        BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        component.paint(g2d);
-        g2d.dispose();
-        return image;
+        CompletableFuture<BufferedImage> future = new CompletableFuture<>();
+        int finalWidth = w;
+        int finalHeight = h;
+        SwingUtilities.invokeLater(() -> {
+            BufferedImage image = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = image.createGraphics();
+            component.paint(g2d);
+            g2d.dispose();
+            future.complete(image);
+        });
+        try {
+            return future.get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to render component offscreen!", e);
+        }
     }
 
     /**

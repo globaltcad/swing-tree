@@ -155,17 +155,17 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
                     Viewable.cast(text).onChange(From.VIEW, s -> {
                         try {
                             if ( number.type() == Integer.class )
-                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );
+                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.currentValue().orElseThrowUnchecked())) );
                             else if ( number.type() == Long.class )
-                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );
+                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.currentValue().orElseThrowUnchecked())) );
                             else if ( number.type() == Float.class )
-                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );
+                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.currentValue().orElseThrowUnchecked())) );
                             else if ( number.type() == Double.class )
-                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );
+                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.currentValue().orElseThrowUnchecked())) );
                             else if ( number.type() == Short.class )
-                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );
+                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.currentValue().orElseThrowUnchecked())) );
                             else if ( number.type() == Byte.class )
-                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );
+                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.currentValue().orElseThrowUnchecked())) );
                             else
                                 throw new IllegalStateException("Unsupported number type: " + number.type());
 

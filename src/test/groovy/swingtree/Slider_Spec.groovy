@@ -76,7 +76,7 @@ class Slider_Spec extends Specification
         given : 'We create a double based Sprouts property and a list for recording changes.'
             var currentState = Var.of(0.42d)
             var trace = []
-            currentState.onChange(From.ALL, it -> trace << "property=${it.get()}" )
+            currentState.onChange(From.ALL, it -> trace << "property=${it.currentValue().orElseThrowUnchecked()}" )
         and : 'Then we build a declarative JSlider.'
             var slider =
                     UI.slider(UI.Align.HORIZONTAL, -2d, 2d, currentState)
@@ -119,12 +119,12 @@ class Slider_Spec extends Specification
         given : 'We create a double based Sprouts property and a list for recording changes.'
             var currentState = Var.of(0.42d)
             var trace = []
-            currentState.onChange(From.ALL, it -> trace << "property=${it.get()}" )
+            currentState.onChange(From.ALL, it -> trace << "property=${it.currentValue().orElseThrowUnchecked()}" )
         and : 'Two more properties for min and max'
             var min = Var.of(-3d)
             var max = Var.of(4d)
-            min.onChange(From.ALL, it -> trace << "min=${it.get()}" )
-            max.onChange(From.ALL, it -> trace << "max=${it.get()}" )
+            min.onChange(From.ALL, it -> trace << "min=${it.currentValue().orElseThrowUnchecked()}" )
+            max.onChange(From.ALL, it -> trace << "max=${it.currentValue().orElseThrowUnchecked()}" )
         and : 'Then we build a declarative JSlider.'
             var slider =
                     UI.slider(UI.Align.VERTICAL, min, max, currentState)

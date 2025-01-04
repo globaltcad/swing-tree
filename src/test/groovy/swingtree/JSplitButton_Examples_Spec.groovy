@@ -336,7 +336,8 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'A Colour enum based property and an event.'
             var tracker = []
             var selection = Var.of(Colour.B).onChange(From.VIEW, {tracker << "#"})
-            var event = Event.of((Observer){tracker << "!"})
+            var event = Event.create()
+            sprouts.Observable.cast(event).subscribe((Observer){tracker << "!"})
         and : 'We create a UI builder node for the enum states.'
             var ui = UI.splitButton(selection, event)
         and : 'We get the built split button component.'

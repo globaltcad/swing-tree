@@ -6,6 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.From
+import sprouts.Tuple
 import sprouts.Var
 import sprouts.Vars
 import swingtree.api.mvvm.ViewSupplier
@@ -73,7 +74,7 @@ class MVVM_Example_Spec extends Specification
     {
         given : 'We instantiate the "view model" in the form of a single property.'
             var pressedStates = []
-            Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.get()) })
+            Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.currentValue().orElseThrowUnchecked()) })
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isPressedIf(buttonPressed)
         and : 'Build the root component:'
@@ -417,7 +418,6 @@ class MVVM_Example_Spec extends Specification
             new Utility.Query(panel).find(JPanel, "super").isPresent()
     }
 
-
     def 'View Models can be represented by property lists.'() {
         reportInfo """
             In larger GUIs usually consist views which themselves consist of multiple
@@ -471,7 +471,7 @@ class MVVM_Example_Spec extends Specification
         and : 'Finally a view which binds to the view model property list.'
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
-                    .add(UI.panel().id("super").add(vms, viewer))
+                    .add(UI.panel().id("super").addAll(vms, viewer))
         and : 'We build the component:'
             var panel = ui.get(JPanel)
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
@@ -519,6 +519,108 @@ class MVVM_Example_Spec extends Specification
             new Utility.Query(panel).find(JPanel, "super").isPresent()
     }
 
+    def 'View Models can be represented by tuples of models.'() {
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you want to
+            be able to swap out sub views at runtime. In this case of value based view models
+            it is useful to represent your view models as a tuple, especially if 
+            one view consists of multiple sub views.
+            Simply implement the functional 'Viewable' interface to supply a view
+            for each model in the tuple and you can bind it to a view using the "Tuple" class.
+            When the tuple changes, the view will be updated automatically.
+        """
+        given : 'We create a view model.'
+            Var<String> address = Var.of("123 Main Street")
+            Var<String> title = Var.of("Mr.")
+            Var<Integer> price = Var.of(1000000)
+            Var<Option> option = Var.of(Option.YES)
+
+        and : 'We create 4 view models with 4 locally created views:'
+            var vm1 = "Dummy View Model 1"
+            var vm2 = "Dummy View Model 2"
+            var vm3 = "Dummy View Model 3"
+            var vm4 = "Dummy View Model 4"
+            ViewSupplier<String> viewer = viewModel -> {
+                switch ( viewModel ) {
+                    case "Dummy View Model 1":
+                            return UI.panel().id("sub-1")
+                                    .add(UI.label("Address:"))
+                                    .add(UI.textField(address))
+                                    .add(UI.button("Update").onClick { address.set("456 Main Street") })
+                    case "Dummy View Model 2":
+                            return UI.panel().id("sub-2")
+                                    .add(UI.label("Title:"))
+                                    .add(UI.textField(title))
+                                    .add(UI.button("Update").onClick { title.set("Mrs.") })
+                    case "Dummy View Model 3":
+                            return UI.panel().id("sub-3")
+                                    .add(UI.label("Price:"))
+                                    .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                    .add(UI.button("Update").onClick { price.set(2000000.0) })
+                    case "Dummy View Model 4":
+                                return UI.panel().id("sub-4")
+                                    .add(UI.label("Option:"))
+                                    .add(UI.comboBox(option, Option.values()))
+                                    .add(UI.button("Update").onClick { option.set(Option.NO) })
+                            }
+                        }
+        and : 'A tuple storing the view models and a property storing the tuple.'
+            var models = Tuple.of(vm1, vm2, vm3, vm4)
+            var vms = Var.of(models)
+        and : 'Finally a view which binds to the tuple of view models.'
+            var ui = UI.panel()
+                    .add(UI.label("Dynamic Super View:"))
+                    .add(UI.panel().id("super").addAll(vms, viewer))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        when : 'We remove something from the tuple.'
+            vms.update( tuple -> tuple.remove(vm2) )
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" view.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'We remove something else from the view model property list but this time, for a change, use the index.'
+            vms.update( tuple -> tuple.removeAt(2) ) // vm4
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" and "sub-4" views.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        when : 'We reintroduce "vm2"...'
+            vms.update( tuple -> tuple.add(vm2) )
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-4" view.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+
+        when : 'We clear the view model tuple.'
+            vms.update( tuple -> tuple.clear() )
+            UI.sync()
+        then : 'We expect all views to be removed. (except for the "super" view)'
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+    }
+
     def 'A dynamic property list based UI declaration can have layout constraints.'()
     {
         reportInfo """
@@ -557,7 +659,7 @@ class MVVM_Example_Spec extends Specification
                         .add(UI.label("Dynamic Super View:"))
                         .add(
                             UI.panel("wrap 1").id("super")
-                            .add("growx", vms, viewer)
+                            .addAll("growx", vms, viewer)
                         )
         and : 'We build the component and get its layout.'
             var panel = ui.get(JPanel)
@@ -627,6 +729,261 @@ class MVVM_Example_Spec extends Specification
             new Utility.Query(panel).find(JPanel, "super").isPresent()
         and : 'The layout manager reports no constraints.'
             layout.constraintMap.size() == 0
+    }
+
+    def 'A dynamic tuple based UI declaration can have layout constraints.'()
+    {
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you want to
+            be able to swap out sub views at runtime. In this case of value based modelling, 
+            it is useful to represent your view models as tuples, especially if 
+            one view consists of multiple sub views.
+            Simply implement the functional 'Viewable' interface and
+            supply a view for individual values in the tuple.
+            When the tuple changes, the view will be updated automatically.
+        """
+        given : 'We create 4 view models with 4 locally created views:'
+            var vm1 = "Dummy View Model 1"
+            var vm2 = "Dummy View Model 2"
+            var vm3 = "Dummy View Model 3"
+            var vm4 = "Dummy View Model 4"
+            ViewSupplier<String> viewer = viewModel -> {
+                switch ( viewModel ) {
+                    case "Dummy View Model 1":
+                            return UI.panel().id("sub-1")
+                    case "Dummy View Model 2":
+                            return UI.panel().id("sub-2")
+                    case "Dummy View Model 3":
+                            return UI.panel().id("sub-3")
+                    case "Dummy View Model 4":
+                                return UI.panel().id("sub-4")
+                }
+            }
+        and : 'A property storing a tuple of view models.'
+            var models = Tuple.of(vm1, vm2, vm3, vm4)
+            var vms = Var.of(models)
+        and : 'Finally a view which binds to the view model property list.'
+            var ui = UI.panel()
+                        .add(UI.label("Dynamic Super View:"))
+                        .add(
+                            UI.panel("wrap 1").id("super")
+                            .addAll("growx", vms, viewer)
+                        )
+        and : 'We build the component and get its layout.'
+            var panel = ui.get(JPanel)
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        when : 'We unpack the layout manager for the "super" view.'
+            var layout = (MigLayout) new Utility.Query(panel).find(JPanel, "super").get().getLayout()
+        then : 'Each sub view has the layout constraints "growx".'
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-1").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-3").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+        when : 'We remove something from the view model property list.'
+            vms.update( tuple -> tuple.remove(vm1) )
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" view.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'The layout manager was updated accordingly:'
+            layout.constraintMap.size() == 3
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-3").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+        when : 'We remove something else from the view model property list but this time, for a change, use the index.'
+            vms.update( tuple -> tuple.removeAt(1) )// vm3
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-1" and "sub-3" views.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'Again, as expected, the layout manager was updated accordingly:'
+            layout.constraintMap.size() == 2
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+        when : 'We reintroduce "vm1"...'
+            vms.update( tuple -> tuple.add(vm1) )
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-3" view.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'The layout manager also knows about the new constraint:'
+            layout.constraintMap.size() == 3
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-1").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+
+        when : 'We clear the view model property list.'
+            vms.update( tuple -> tuple.clear() )
+            UI.sync()
+        then : 'We expect all views to be removed. (except for the "super" view)'
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+        and : 'The layout manager reports no constraints.'
+            layout.constraintMap.size() == 0
+    }
+
+    def 'A tuple property is bound to a panel compute efficiently.'(
+        List<Integer> diff, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
+            var models = Var.of(tuple)
+            ViewSupplier<String> supplier = (String title) -> UI.button(title)
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We unpack the pane and the expected differences:'
+            var iniComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We unpack the updated components:'
+            var updatedComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+        then: 'The tabbed pane is updated.'
+            panel.getComponentCount() == models.get().size()
+            panel.getComponentCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
+        and :
+            diff.findAll({it == _ || it >= 0}).indexed().every({
+                it.value == _ || iniComps[it.value] === updatedComps[it.key]
+            })
+        and : 'The components at `-1` are totally new.'
+            diff.indexed().every({
+                it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)
+            })
+
+        where : 'We test the following operations:'
+            diff                 | operation
+            [0,-1, 2, 3, 4]      | { it.removeAt(1) }
+            [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
+            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
+            [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
+            [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
+            [-1, -1, -1, -1, -1] | { it.clear() }
+            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+    }
+
+    def 'Views bound to a tuple property will be reused efficiently.'(
+        Tuple<Object> initialModels, Closure<Tuple<Object>> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed and it will reuse views for items that
+            existed in the previous tuple.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var models = Var.of(initialModels)
+            ViewSupplier<Object> supplier = (Object aThing) -> UI.button(Objects.toString(aThing))
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We get a list of the current views.'
+            var initialComponents = panel.components as List<JComponent>
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We evaluate the situation after the change:'
+            var newComponents = panel.components as List<JComponent>
+            var whichViewReused = initialComponents.collect({newComponents.contains(it)})
+            var whichModelsReused = initialModels.collect({models.get().contains(it)})
+        then: 'The tabbed pane is updated.'
+            whichModelsReused == whichViewReused
+
+        where : 'We test the following operations:'
+            initialModels                | operation
+            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z") }
+            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42) }
+            Tuple.of("a", "b")           | { it.reversed() }
+            Tuple.of(1, 2, 3)            | { it.reversed() }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
+            Tuple.of("a", "b")           | { it.removeFirst(1) }
+            Tuple.of(1, 2, 3)            | { it.removeFirst(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }
+            Tuple.of("a", "b")           | { it.removeLast(1) }
+            Tuple.of(1, 2, 3)            | { it.removeLast(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+    }
+
+    def 'Views bound to a property list will be reused efficiently.'(
+        Vars<Object> models, Closure<Vars<Object>> operation
+    ) {
+        reportInfo """
+            You can bind a string based property list and a view supplier 
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed and it will reuse views for items that
+            existed in the previous tuple.
+        """
+        given: 'A string based property list, a view supplier and a panel UI node.'
+            var initialModels = models.toList()
+            ViewSupplier<Object> supplier = (Object aThing) -> UI.button(Objects.toString(aThing))
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We get a list of the current views.'
+            var initialComponents = panel.components as List<JComponent>
+
+        when: 'We run the operation on the list...'
+            operation(models)
+            UI.sync()
+        and : 'We evaluate the situation after the change:'
+            var newComponents = panel.components as List<JComponent>
+            var whichViewReused = initialComponents.collect({newComponents.contains(it)})
+            var whichModelsReused = initialModels.collect({models.contains(it)})
+        then: 'The tabbed pane is updated.'
+            whichModelsReused == whichViewReused
+
+        where : 'We test the following operations:'
+            models                      | operation
+            Vars.of("a", "b")           | { Vars.of("X", "a", "z") }
+            Vars.of(1, 2, 3)            | { Vars.of(-1, 2, -3) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { Vars.of(-1, 2, -3, 4, 5, 42) }
+            Vars.of("a", "b")           | { it.reversed() }
+            Vars.of(1, 2, 3)            | { it.reversed() }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
+            Vars.of("a", "b")           | { it.removeFirst(1) }
+            Vars.of(1, 2, 3)            | { it.removeFirst(1) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }
+            Vars.of("a", "b")           | { it.removeLast(1) }
+            Vars.of(1, 2, 3)            | { it.removeLast(1) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
     }
 
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {

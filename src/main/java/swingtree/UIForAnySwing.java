@@ -11,7 +11,10 @@ import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.Observable;
+import sprouts.Observer;
 import sprouts.*;
+import sprouts.impl.SequenceDiff;
+import sprouts.impl.SequenceDiffOwner;
 import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
@@ -37,6 +40,8 @@ import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -55,9 +60,10 @@ import java.util.function.Function;
  */
 public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnything<I, C, JComponent>
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForAnySwing.class);
 
     private final static String _TIMERS_KEY = "_swing-tree.timers";
+
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
@@ -69,55 +75,142 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return color == UI.Color.UNDEFINED;
     }
 
+    private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
+        event.subscribe( () -> _runInUI( thisComponent::repaint ) );
+    }
+
+    private void _bindRepaintOn( JComponent thisComponent, Event event ) {
+        Observable.cast(event).subscribe(
+            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
+        );
+    }
+
+    private void _bindRepaintOn( JComponent thisComponent, Val<?> event ) {
+        Viewable.cast(event).subscribe(
+            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
+        );
+    }
+
     /**
-     *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
-     *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
-     *  This means that the component will be repainted whenever the event is fired.
+     *  Use this to bind an {@link Observable} (usually from a sprouts.Event)
+     *  to the {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever
+     *  the source of the observable is fired or changed.
+     *
+     * @param observable The observable to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Observable observable ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, observable) )._this();
+    }
+
+    /**
+     *  This method exposes a concise way to bind multiple {@link Observable}s (usually sprouts.Event instances)
+     *  to the {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever the source of any one of the
+     *  observables is fired or changed.
+     *
+     * @param first The first observable to which the repaint method of the component will be bound.
+     * @param second The second observable to which the repaint method of the component will be bound.
+     * @param rest The rest of the observables to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Observable first, Observable second, Observable... rest ) {
+        return _with( c -> {
+                    _bindRepaintOn(c, first);
+                    _bindRepaintOn(c, second);
+                    for ( Observable o : rest ) {
+                        _bindRepaintOn(c, o);
+                    }
+                })._this();
+    }
+
+    /**
+     *  Allows you to bind an {@link Event} to the {@link JComponent#repaint()} method of
+     *  the component represented by this builder. <br>
+     *  This means that the component will be repainted whenever the event is fired
+     *  through the {@link Event#fire()} method.
      *
      * @param event The event to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
-    public final I withRepaintOn( Observable event ) {
-        return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
-    }
-
-    public final I withRepaintOn( Val<?> event ) {
-        return _with( c -> Viewable.cast(event).subscribe( () -> _runInUI(c::repaint) ) )._this();
+    public final I withRepaintOn( Event event ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, event) )._this();
     }
 
     /**
-     *  This method exposes a concise way to bind multiple {@link Observable}s (usually sprouts.Events)
-     *  to the {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
-     *  This means that the component will be repainted whenever any of the events are fired.
+     *  This method exposes a concise way to bind multiple {@link Event}s to the
+     *  {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever any one of the events is fired
+     *  through the {@link Event#fire()} method.
      *
      * @param first The first event to which the repaint method of the component will be bound.
      * @param second The second event to which the repaint method of the component will be bound.
      * @param rest The rest of the events to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
-    public final I withRepaintOn( Observable first, Observable second, Observable... rest ) {
-        return _with( c -> {
-            first.subscribe( () -> _runInUI(c::repaint) );
-            second.subscribe( () -> _runInUI(c::repaint) );
-            for ( Observable o : rest ) {
-                o.subscribe( () -> _runInUI(c::repaint) );
-            }
-        })._this();
+    public final I withRepaintOn( Event first, Event second, Event... rest ) {
+        return _with( thisComponent -> {
+                    _bindRepaintOn(thisComponent, first);
+                    _bindRepaintOn(thisComponent, second);
+                    for ( Event e : rest ) {
+                        _bindRepaintOn(thisComponent, e);
+                    }
+                })
+                ._this();
     }
 
+    /**
+     *  Allows you to bind a {@link Val} to the {@link JComponent#repaint()} method
+     *  of the component represented by this builder. <br>
+     *  This means that the component will be repainted whenever the value of the {@link Val}
+     *  changes. If the {@link Val} is a mutable {@link Var} property,
+     *  then this event is usually triggered through the {@link Var#set(Object)} method.<br>
+     *  <p>
+     *      A typical use case is to use {@link Var} properties in the
+     *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
+     *      and then also pass these properties to the this {@code withRepaintOn}
+     *      method to ensure that the style gets re-evaluated and then repainted.
+     *  </p>
+     *
+     * @param event The {@link Val} to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Val<?> event ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, event) )._this();
+    }
+
+    /**
+     *  Use this method to bind multiple {@link Val}s to the
+     *  {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever the value of any one of the
+     *  {@link Val}s changes. If the {@link Val} is a mutable {@link Var} property,
+     *  then this event is usually triggered through the {@link Var#set(Object)} method.<br>
+     *  <p>
+     *      A typical use case is to use {@link Var} properties in the
+     *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
+     *      and then also pass these properties to the this {@code withRepaintOn}
+     *      method to ensure that the style gets re-evaluated and then repainted.
+     *  </p>
+     *
+     * @param first The first {@link Val} to which the repaint method of the component will be bound.
+     * @param second The second {@link Val} to which the repaint method of the component will be bound.
+     * @param rest The rest of the {@link Val}s to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
     public final I withRepaintOn( Val<?> first, Val<?> second, Val<?>... rest ) {
         return _with( c -> {
-            Viewable.cast(first).subscribe( () -> _runInUI(c::repaint) );
-            Viewable.cast(second).subscribe( () -> _runInUI(c::repaint) );
-            for ( Val<?> o : rest ) {
-                Viewable.cast(o).subscribe( () -> _runInUI(c::repaint) );
-            }
-        })._this();
+                    _bindRepaintOn(c, first);
+                    _bindRepaintOn(c, second);
+                    for ( Val<?> o : rest ) {
+                        _bindRepaintOn(c, o);
+                    }
+                })._this();
     }
 
     /**
      *  This method exposes a concise way to set an identifier for the component
-     *  wrapped by this {@link UI}!
+     *  represented by this builder chain.
      *  In essence this is simply a delegate for the {@link JComponent#setName(String)} method
      *  to make it more expressive and widely recognized what is meant
      *  ("id" is shorter and makes more sense than "name" which could be confused with "title").
@@ -133,7 +226,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  This method exposes a concise way to set an enum based identifier for the component
-     *  wrapped by this {@link UI}!
+     *  represented by this builder chain.
      *  In essence this is simply a delegate for the {@link JComponent#setName(String)} method
      *  to make it more expressive and widely recognized what is meant
      *  ("id" is shorter and makes more sense than "name" which could be confused with "title").
@@ -2327,12 +2420,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
-                    styleEvent.subscribe( ()->{
+                    Observable.cast(styleEvent).subscribe(Observer.ofWeak(thisComponent, (innerComponent)->{
                         AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
                             ComponentExtension.from(thisComponent)
                                 .addAnimatedStyler(status, conf -> styler.style(status, conf))
                         );
-                    });
+                    }));
                 })
                 ._this();
     }
@@ -4161,7 +4254,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
-     * to receive key events triggered when the wrapped component receives a particular
+     * to receive key events triggered when the built component receives a particular
      * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
      * <br><br>
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
@@ -4841,18 +4934,62 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  and is then expected to return a {@link JComponent} instance which will be added to the
      *  wrapped {@link JComponent} type of this builder.
      *
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     * @param model A {@link sprouts.Val} property holding null or any other type of value,
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+    public final <M> I add( Val<M> model, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(model, "viewable", Val.class);
         return _with( thisComponent -> {
-                   _addViewablePropTo(thisComponent, viewable, null, viewSupplier);
+                   _addViewablePropTo(thisComponent, model, null, viewSupplier);
                })
                ._this();
+    }
+
+    /**
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param model A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
+     */
+    public final <M> I add( String attr, Val<M> model, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(model, "viewable", Val.class);
+        return _with( thisComponent -> {
+            _addViewablePropTo(thisComponent, model, ()->attr, viewSupplier);
+        })
+                ._this();
+    }
+
+    /**
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param model A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
+     */
+    public final <M> I add( AddConstraint attr, Val<M> model, ViewSupplier<M> viewSupplier ) {
+        return  _with( thisComponent -> {
+            _addViewablePropTo(thisComponent, model, attr, viewSupplier);
+        })
+                ._this();
     }
 
     /**
@@ -4861,87 +4998,26 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The type of item can be anything, but it is usually a view model instance.
      *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
      *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
+     *  wrapped {@link JComponent} type of this builder.<br>
+     *  <b>
+     *      Due to the usage of the mutable the {@link Vals} property list, this method assumes your view models
+     *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
+     *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
+     *      instead of {@link Vals} lists. <br>
+     *      <u>See {@link #addAll(Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *  </b>
      *
-     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+    public final <M> I addAll( Vals<M> models, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, null, viewSupplier, thisComponent );
-                })
-                ._this();
-    }
-
-    /**
-     *  This allows you to dynamically generate a view for the item of a property (usually a property
-     *  holding a sub-view model) and automatically regenerate the view when the property changes.
-     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
-     *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
-     *
-     * @param attr The layout information which should be used as layout constraints for the generated view.
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
-     *                 preferably a view model instance.
-     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <M> The type of the value held by the {@link Val} property.
-     */
-    public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
-        return _with( thisComponent -> {
-                   _addViewablePropTo(thisComponent, viewable, ()->attr, viewSupplier);
-               })
-               ._this();
-    }
-
-    /**
-     *  This allows you to dynamically generate views for the items in a {@link Vals} property list
-     *  and automatically regenerate the view when any of the items change.
-     *  The type of item can be anything, but it is usually a view model instance.
-     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
-     *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
-     *
-     * @param attr The layout information which should be used as layout constraints for the generated views.
-     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
-     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
-     *               The views will be added to the component wrapped by this builder instance.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <M> The type of the items in the {@link Vals} list.
-     */
-    public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        return _with( thisComponent -> {
-                    _addViewableProps( viewables, ()->attr, viewSupplier, thisComponent );
-                })
-                ._this();
-    }
-
-    /**
-     *  This allows you to dynamically generate a view for the item of a property (usually a property
-     *  holding a sub-view model) and automatically regenerate the view when the property changes.
-     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
-     *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
-     *
-     * @param attr The layout information which should be used as layout constraints for the generated view.
-     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
-     *                 preferably a view model instance.
-     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <M> The type of the value held by the {@link Val} property.
-     */
-    public final <M> I add( AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
-        return  _with( thisComponent -> {
-                    _addViewablePropTo(thisComponent, viewable, attr, viewSupplier);
+                    _bindTo( models, null, viewSupplier, thisComponent );
                 })
                 ._this();
     }
@@ -4952,71 +5028,111 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The type of item can be anything, but it is usually a view model instance.
      *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
      *  and is then expected to return a {@link JComponent} instance which will be added to the
-     *  wrapped {@link JComponent} type of this builder.
+     *  wrapped {@link JComponent} type of this builder.<br>
+     *  <b>
+     *      Due to the usage of the mutable the {@link Vals} property list, this method assumes your view models
+     *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
+     *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
+     *      instead of {@link Vals} lists. <br>
+     *      <u>See {@link #addAll(String, Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *  </b>
      *
      * @param attr The layout information which should be used as layout constraints for the generated views.
-     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
+    public final <M> I addAll( String attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
         return _with( thisComponent -> {
-                    _addViewableProps( viewables, attr, viewSupplier, thisComponent );
+                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
 
-    protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
-        _onShow( models, thisComponent, (c, delegate) -> {
-            // we simply redo all the components.
-            Vals<M> newValues = delegate.newValues();
-            Vals<M> oldValues = delegate.oldValues();
+    /**
+     *  This allows you to dynamically generate views for the items in a {@link Vals} property list
+     *  and automatically regenerate the view when any of the items change.
+     *  The type of item can be anything, but it is usually a view model instance.
+     *  The {@link ViewSupplier} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.<br>
+     *  <b>
+     *      Due to the usage of the mutable the {@link Vals} property list, this method assumes your view models
+     *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
+     *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
+     *      instead of {@link Vals} lists. <br>
+     *      <u>See {@link #addAll(AddConstraint, Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *  </b>
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated views.
+     * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
+     *               The views will be added to the component wrapped by this builder instance.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Vals} list.
+     */
+    public final <M> I addAll( AddConstraint attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
+        return _with( thisComponent -> {
+                    _bindTo( models, attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
 
-            switch ( delegate.changeType() ) {
-                case SET:
-                    for ( int i = 0; i < newValues.size(); i++ ) {
-                        int position = i + delegate.index();
-                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, c);
-                    }
-                    break;
-                case ADD:
-                    if ( delegate.index() < 0 && newValues.any(Val::isEmpty) ) {
-                        // This is basically a add all operation, so we clear the components first.
-                        _clearComponentsOf(c);
-                        // and then we add all the components.
-                        for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).orElseNull(), viewSupplier, attr, c );
-                    }
-                    else {
-                        for ( int i = 0; i < newValues.size(); i++ ) {
-                            int position = i + delegate.index();
-                            _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, c);
-                        }
-                    }
-                    break;
-                case REMOVE:
-                    for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
-                        int position = i + delegate.index();
-                        _removeComponentAt(position, c);
-                    }
-                    break;
-                case CLEAR: _clearComponentsOf(c); break;
-                case NONE: break;
-                default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
-            }
-            if ( c.getComponentCount() != delegate.vals().size() )
-                log.warn(
-                        "Broken binding to view model list detected! \n" +
-                        "UI sub-component count '"+c.getComponentCount()+"' " +
-                        "does not match viewable models list of size '"+delegate.vals().size()+"'. \n" +
-                        "A possible cause for this is that components " +
-                        "were " + ( c.getComponentCount() > delegate.vals().size() ? "added" : "removed" ) + " " +
-                        "to this '" + c + "' \ndirectly, instead of through the property list binding. \n" +
-                        "However, this could also be a bug in the UI framework.",
-                        new Throwable()
-                    );
+    /**
+     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  and automatically regenerate the view when any of the items in the tuple change.
+     *  The type of item can be anything, but it is usually value based view models.
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will either be added to this UI component or replace an existing view.<br>
+     *
+     *
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
+    public final <M> I addAll( Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
+        return _with( thisComponent -> {
+                    _bindTo( models, null, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    public final <M> I addAll( String attr, Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        return _with( thisComponent -> {
+                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    public final <M> I addAll( AddConstraint attr, Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
+        return _with( thisComponent -> {
+                    _bindTo( viewables, attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
+                log.error("Error while creating view for '"+model+"'.", exception);
+                return UI.box().get(JBox.class);
+            }), thisComponent);
+    }
+
+    protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
+        _onShow( models, thisComponent, (innerComponent, delegate) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
+            _updateSubViews(innerComponent, attr, delegate, viewSupplier);
+            viewSupplier.clearCurrentViews();
         });
         models.forEach( v -> {
             UIForAnySwing<?, ?> view = null;
@@ -5033,6 +5149,180 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             else
                 _addBuildersTo( thisComponent, attr, view );
         });
+    }
+
+    private <M> void _updateSubViews(C innerComponent, @Nullable AddConstraint attr, ValsDelegate<M> delegate, ModelToViewConverter<M> viewSupplier) {
+        // we simply redo all the components.
+        Vals<M> newValues = delegate.newValues();
+        Vals<M> oldValues = delegate.oldValues();
+        int index = delegate.index().orElse(-1);
+
+        switch ( delegate.change() ) {
+            case SET:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    _clearComponentsOf(innerComponent);
+                    for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                        _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                } else {
+                    for ( int i = 0; i < newValues.size(); i++ ) {
+                        int position = i + index;
+                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
+                    }
+                }
+                break;
+            case ADD:
+                if ( index < 0 || newValues.any(Val::isEmpty) ) {
+                    _clearComponentsOf(innerComponent);
+                    for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                        _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                } else {
+                    for ( int i = 0; i < newValues.size(); i++ ) {
+                        int position = i + index;
+                        _addComponentAt(position, newValues.at(i).orElseNull(), viewSupplier, attr, innerComponent);
+                    }
+                }
+                break;
+            case REMOVE:
+                if ( index < 0 ) {
+                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    _clearComponentsOf(innerComponent);
+                    for ( int i = 0; i < delegate.currentValues().size(); i++ )
+                        _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
+                } else {
+                    for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
+                        int position = i + index;
+                        _removeComponentAt(position, innerComponent);
+                    }
+                }
+                break;
+            case CLEAR: _clearComponentsOf(innerComponent); break;
+            case REVERSE: _reverseComponentsOf(innerComponent); break;
+            case NONE: break;
+            default:
+                log.error("Unknown change type: {}", delegate.change(), new Throwable());
+                // We do a simple rebuild:
+                Vals<M> currentValues = delegate.currentValues();
+                _clearComponentsOf(innerComponent);
+                for ( int i = 0; i < currentValues.size(); i++ )
+                    _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, innerComponent );
+        }
+        if ( innerComponent.getComponentCount() != delegate.currentValues().size() )
+            log.warn(
+                    "Broken binding to view model list detected! \n" +
+                    "UI sub-component count '"+innerComponent.getComponentCount()+"' " +
+                    "does not match viewable models list of size '"+delegate.currentValues().size()+"'. \n" +
+                    "A possible cause for this is that components " +
+                    "were " + ( innerComponent.getComponentCount() > delegate.currentValues().size() ? "added" : "removed" ) + " " +
+                    "to this '" + innerComponent + "' \ndirectly, instead of through the property list binding. \n" +
+                    "However, this could also be a bug in the UI framework.",
+                    new Throwable()
+                );
+    }
+
+    private <M> void _bindTo( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
+            log.error("Error while creating view for '"+model+"'.", exception);
+            return UI.box().get(JBox.class);
+        }), thisComponent);
+    }
+
+    protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
+        if (models.get() instanceof SequenceDiffOwner)
+            lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
+        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
+            _updateSubViews(c, tupleOfModels, attr, lastDiffRef, viewSupplier);
+            viewSupplier.clearCurrentViews();
+        });
+        Tuple<M> tupleOfModels = models.get();
+        _addAllFromTuple(tupleOfModels, attr, viewSupplier, thisComponent);
+    }
+
+    private <M> void _updateSubViews(C c, Tuple<M> tupleOfModels, @Nullable AddConstraint attr, AtomicReference<@Nullable SequenceDiff> lastDiffRef, ModelToViewConverter<M> viewSupplier) {
+            SequenceDiff diff = null;
+            SequenceDiff lastDiff = lastDiffRef.get();
+            if (tupleOfModels instanceof SequenceDiffOwner)
+                diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+            lastDiffRef.set(diff);
+
+            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            } else {
+                int index = diff.index().orElse(-1);
+                int count = diff.size();
+                switch (diff.change()) {
+                    case SET:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = index; i < (index + count); i++ )
+                                _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                        }
+                        break;
+                    case ADD:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = index; i < (index + count); i++ )
+                                _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                        }
+                        break;
+                    case REMOVE:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = (index + count - 1); i >= index; i-- )
+                                _removeComponentAt(i, c);
+                        }
+                        break;
+                    case RETAIN: // Only keep the elements in the range.
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            // Remove trailing components:
+                            for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
+                                _removeComponentAt(i, c);
+                            // Remove leading components:
+                            for ( int i = (index - 1); i >= 0; i-- )
+                                _removeComponentAt(i, c);
+                        }
+                        break;
+                    case CLEAR: _clearComponentsOf(c); break;
+                    case REVERSE: _reverseComponentsOf(c); break;
+                    case NONE:
+                        break;
+                    default:
+                        log.error("Unknown change type: {}", diff.change(), new Throwable());
+                        // We do a simple rebuild:
+                        _clearComponentsOf(c);
+                        _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                }
+            }
+    }
+
+    private <M> void _addAllFromTuple( Tuple<M> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        for ( int i = 0; i < tupleOfModels.size(); i++ ) {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(tupleOfModels.get(i));
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+tupleOfModels.get(i)+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            if ( attr == null )
+                _addBuildersTo( thisComponent, view );
+            else
+                _addBuildersTo( thisComponent, attr, view );
+        }
     }
 
     private <M> void _addViewablePropTo(
@@ -5174,6 +5464,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         // We update the layout.
         thisComponent.revalidate();
         thisComponent.repaint();
+    }
+
+    private void _reverseComponentsOf(C thisComponent ) {
+        // save to a list
+        List<Component> components = new ArrayList<>();
+        Collections.addAll(components, thisComponent.getComponents());
+        // We remove all components.
+        thisComponent.removeAll();
+        // Reverse the list
+        Collections.reverse(components);
+        // Add the components back in reverse order
+        components.forEach(thisComponent::add);
     }
 
     private static boolean _isBorderLayout( Object o ) {

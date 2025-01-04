@@ -12,11 +12,11 @@ import swingtree.layout.AddConstraint;
  *  <p>
  *  See: <br>
  *  {@link swingtree.UIForAnySwing#add(Val, ViewSupplier)},  <br>
- *  {@link swingtree.UIForAnySwing#add(Vals, ViewSupplier)},  <br>
+ *  {@link swingtree.UIForAnySwing#addAll(Vals, ViewSupplier)},  <br>
  *  {@link swingtree.UIForAnySwing#add(String, Val, ViewSupplier)},  <br>
- *  {@link swingtree.UIForAnySwing#add(String, Vals, ViewSupplier)}, <br>
+ *  {@link swingtree.UIForAnySwing#addAll(String, Vals, ViewSupplier)}, <br>
  *  {@link swingtree.UIForAnySwing#add(AddConstraint, Val, ViewSupplier)},  <br>
- *  {@link swingtree.UIForAnySwing#add(AddConstraint, Vals, ViewSupplier)}, <br>
+ *  {@link swingtree.UIForAnySwing#addAll(AddConstraint, Vals, ViewSupplier)}, <br>
  */
 @FunctionalInterface
 public interface ViewSupplier<M>
