@@ -276,6 +276,7 @@ public final class OptionsDialog<E extends Enum<E>>
      *  Note that this method is blocking and will only return when the user has selected
      *  an option in the dialog.
      *
+     * @param presenter The presenter function that converts the enum options to strings to be displayed to the user.
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsQuestion( Function<E, String> presenter ) {
@@ -304,6 +305,7 @@ public final class OptionsDialog<E extends Enum<E>>
      *  Note that this method is blocking and will only return when the user has selected
      *  an option in the dialog.
      *
+     * @param presenter The presenter function that converts the enum options to strings to be displayed to the user.
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsError( Function<E, String> presenter ) {
@@ -332,6 +334,7 @@ public final class OptionsDialog<E extends Enum<E>>
      *  Note that this method is blocking and will only return when the user has selected
      *  an option in the dialog.
      *
+     * @param presenter The presenter function that converts the enum options to strings to be displayed to the user.
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsWarning( Function<E, String> presenter ) {
@@ -360,6 +363,7 @@ public final class OptionsDialog<E extends Enum<E>>
      *  Note that this method is blocking and will only return when the user has selected
      *  an option in the dialog.
      *
+     * @param presenter The presenter function that converts the enum options to strings to be displayed to the user.
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsInfo( Function<E, String> presenter ) {
@@ -388,6 +392,7 @@ public final class OptionsDialog<E extends Enum<E>>
      *  Note that this method is blocking and will only return when the user has selected
      *  an option in the dialog.
      *
+     * @param presenter A function that converts the enum options to strings that will be displayed in the dialog.
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsPlain( Function<E, String> presenter ) {
@@ -419,6 +424,7 @@ public final class OptionsDialog<E extends Enum<E>>
      *  This is useful when your enum constant naming adheres to a specific naming convention,
      *  like capitalized snake case, and you want to present the options in a more user-centric format.
      *
+     * @param presenter The presenter function that converts the enum options to strings to be displayed to the user.
      * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
      *         or an empty {@link Optional} if the user closed the dialog.
      */

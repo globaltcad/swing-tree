@@ -40,6 +40,7 @@ public interface Peeker<C>
      *   all of them will be able to execute gracefully without throwing exceptions.
      *
      * @param component The component to be modified.
+     * @throws Exception if the peek operation could not be performed by the client code.
      */
     void accept(C component) throws Exception;
 }

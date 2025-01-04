@@ -51,6 +51,7 @@ public interface AnimatedStyler<C extends JComponent>
      *              (usually based on the {@link AnimationStatus#progress()}).
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
+     * @throws Exception if the style could not be applied by the client code.
      */
     ComponentStyleDelegate<C> style( AnimationStatus status, ComponentStyleDelegate<C> delegate ) throws Exception;
 
