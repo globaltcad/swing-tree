@@ -359,6 +359,8 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             case TRAILING:
                 x += width;
                 break;
+            case UNDEFINED:
+                break; // Should happen?
         }
         int maxAscent = 0;
         int nonbaselineHeight = 0;
