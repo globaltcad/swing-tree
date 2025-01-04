@@ -106,8 +106,8 @@ public final class UI extends UIFactoryMethods
      *  All UI components are at their core rectangular, meaning they
      *  always have exactly 4 uniquely identifiable sides.
      *  This enum is used to target specific sides of a {@link JComponent}
-     *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(Side)}
-     *  or the tapped pane factory method {@link UI#tabbedPane(Side)}.
+     *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(swingtree.UI.Side)}
+     *  or the tapped pane factory method {@link UI#tabbedPane(swingtree.UI.Side)}.
      */
     @Immutable
     public enum Side implements UIEnum<Side>
@@ -304,7 +304,8 @@ public final class UI extends UIFactoryMethods
     /**
      *  Defines whether the list based data model of a {@link JTable} is row or column major
      *  and whether it is editable or not.
-     *  See {@link UI#table(ListData, TableListDataSource)}  or {@link UIForTable#withModel(ListData, TableListDataSource)}
+     *  See {@link UI#table(swingtree.UI.ListData, TableListDataSource)}
+     *  or {@link UIForTable#withModel(swingtree.UI.ListData, TableListDataSource)}
      *  for more information about the usage of this enum.
      */
     @Immutable
@@ -342,7 +343,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Defines whether the data model of a {@link JTable} should be editable or not.
-     *  See {@link UI#table(MapData, TableMapDataSource)} or {@link UIForTable#withModel(MapData, TableMapDataSource)}
+     *  See {@link UI#table(swingtree.UI.MapData, TableMapDataSource)} or
+     *  {@link UIForTable#withModel(swingtree.UI.MapData, TableMapDataSource)}
      *  for more information about the usage of this enum.
      */
     @Immutable
@@ -362,7 +364,7 @@ public final class UI extends UIFactoryMethods
      *  Use this to target specific edges of a {@link JComponent} and apply
      *  custom {@link StyleConf} properties to them.
      *  <br>
-     *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, double)}
+     *  See {@link ComponentStyleDelegate#borderWidthAt(swingtree.UI.Edge, double)}
      */
     @Immutable
     public enum Edge implements UIEnum<Edge>
@@ -403,11 +405,11 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Use these enum instances to specify the gradient type for various sub styles,
-     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(swingtree.UI.Layer, String, Configurator)}
      *  or {@link ComponentStyleDelegate#gradient(Configurator)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      *  <p>
-     *  {@link GradientConf#type(GradientType)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}.
+     *  {@link GradientConf#type(swingtree.UI.GradientType)} method exposed by methods like
+     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or {@link ComponentStyleDelegate#gradient(swingtree.UI.Layer, String, Configurator)}.
      */
     @Immutable
     public enum GradientType implements UIEnum<GradientType>
@@ -474,8 +476,9 @@ public final class UI extends UIFactoryMethods
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Configurator)}
      *  or {@link ComponentStyleDelegate#gradient(Configurator)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      * <p>
-     *  {@link GradientConf#span(Span)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}.
+     *  {@link GradientConf#span(swingtree.UI.Span)} method exposed by methods like
+     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or
+     *  {@link ComponentStyleDelegate#gradient(swingtree.UI.Layer, String, Configurator)}.
      */
     @Immutable
     public enum Span implements UIEnum<Span>
@@ -533,7 +536,7 @@ public final class UI extends UIFactoryMethods
      *  to target specific corners of a {@link JComponent} and apply
      *  custom {@link StyleConf} properties to them.
      *  <br>
-     *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, double, double)}.
+     *  See {@link ComponentStyleDelegate#borderRadiusAt(swingtree.UI.Corner, double, double)}.
      */
     @Immutable
     public enum Corner implements UIEnum<Corner>
@@ -545,7 +548,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Use this to specify the placement of an image as part of the {@link ImageConf} through
-     *  the {@link ImageConf#placement(Placement)} method exposed by the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  the {@link ImageConf#placement(swingtree.UI.Placement)} method exposed by the
+     *  style API (see {@link UIForAnySwing#withStyle(Styler)}).
      */
     @Immutable
     public enum Placement implements UIEnum<Placement>
@@ -560,7 +564,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Defines the areas of a component, which is used
      *  to by the {@link ImageConf} to determine if and how an image should be clipped.
-     *  Pass instances of this to {@link ImageConf#clipTo(ComponentArea)} to configure the clipping behaviour
+     *  Pass instances of this to {@link ImageConf#clipTo(swingtree.UI.ComponentArea)} to configure the clipping behaviour
      *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}). <br>
      *  The following list describes what each enum instance represents:
      *  <ul>
@@ -643,7 +647,7 @@ public final class UI extends UIFactoryMethods
      *  Use this to specify the orientation of a component.
      *  This is especially important for components that display text.
      *  <br>
-     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(ComponentOrientation)}.
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(swingtree.UI.ComponentOrientation)}.
      */
     @Immutable
     public enum ComponentOrientation implements UIEnum<ComponentOrientation>
@@ -666,7 +670,7 @@ public final class UI extends UIFactoryMethods
      *      The window does nothing when it is closed.
      *      </li>
      *  </ul>
-     *  See {@link UIForAnyWindow#withOnCloseOperation(OnWindowClose)} for more
+     *  See {@link UIForAnyWindow#withOnCloseOperation(swingtree.UI.OnWindowClose)} for more
      *  information about the usage of this enum.
      */
     @Immutable
@@ -688,8 +692,8 @@ public final class UI extends UIFactoryMethods
      *  Used to define how a layout manager (typically the {@link BoxLayout})
      *  will lay out components along the given axis. <br>
      *  Create a simple box layout for your components
-     *  by calling the {@link UIForAnySwing#withBoxLayout(Axis)} method,
-     *  or use {@link Layout#box(Axis)} factory method returning a {@link Layout} config
+     *  by calling the {@link UIForAnySwing#withBoxLayout(swingtree.UI.Axis)} method,
+     *  or use {@link Layout#box(swingtree.UI.Axis)} factory method returning a {@link Layout} config
      *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
      *  and {@link ComponentStyleDelegate#layout(Layout)}).
      */
@@ -731,7 +735,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Use this to specify the font style of a component.
      *  <br>
-     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(FontStyle)}.
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)}.
      */
     @Immutable
     public enum FontStyle implements UIEnum<FontStyle>
@@ -824,16 +828,16 @@ public final class UI extends UIFactoryMethods
     /**
      *  SwingTree tries to be compatible with different look and feels, which is
      *  why it maintains a set of constants for the most common look and feels through
-     *  the {@link LookAndFeel} enum.
+     *  the {@link swingtree.UI.LookAndFeel} enum.
      *  This method returns the current look and feel of the application
-     *  or {@link LookAndFeel#OTHER} if the look and feel is not recognized.
+     *  or {@link swingtree.UI.LookAndFeel#OTHER} if the look and feel is not recognized.
      * @return One of
      *            <ul>
-     *                <li>{@link LookAndFeel#FLAT_LAF}</li>
-     *                <li>{@link LookAndFeel#NIMBUS}</li>
-     *                <li>{@link LookAndFeel#METAL}</li>
+     *                <li>{@link swingtree.UI.LookAndFeel#FLAT_LAF}</li>
+     *                <li>{@link swingtree.UI.LookAndFeel#NIMBUS}</li>
+     *                <li>{@link swingtree.UI.LookAndFeel#METAL}</li>
      *            </ul>
-     *            or {@link LookAndFeel#OTHER} if none of the above
+     *            or {@link swingtree.UI.LookAndFeel#OTHER} if none of the above
      *            was recognized.
      */
     public static LookAndFeel currentLookAndFeel() {
@@ -2616,6 +2620,7 @@ public final class UI extends UIFactoryMethods
          * @see #getBlue
          * @see #getAlpha
          * @see #getRGB
+         * @return the {@code Color}
          */
         public static Color ofRgba( int r, int g, int b, int a ) {
             return new Color(r, g, b, a);
@@ -2635,6 +2640,7 @@ public final class UI extends UIFactoryMethods
          * @see #getGreen
          * @see #getBlue
          * @see #getRGB
+         * @return the {@code Color}
          */
         public static Color ofRgb( int rgb ) {
             return new Color(rgb);
@@ -2656,6 +2662,7 @@ public final class UI extends UIFactoryMethods
          * @see #getBlue
          * @see #getAlpha
          * @see #getRGB
+         * @return the {@code Color} from the specified RGBA value or RGB value depending on whether the {@code hasalpha} flag is set
          */
         public static Color ofRgb( int rgba, boolean hasalpha ) {
             return new Color(rgba, hasalpha);
@@ -2750,6 +2757,7 @@ public final class UI extends UIFactoryMethods
          *         outside of the range 0.0 to 1.0
          * @see #getComponents
          * @see #getColorComponents
+         * @return the {@code Color} corresponding to the specified components and alpha.
          */
         public static Color of( ColorSpace cspace, float[] components, float alpha ) {
             return new Color(cspace, components, alpha);

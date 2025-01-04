@@ -696,7 +696,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  A popup menu listener for the combo box which synchronizes text field, model
      *  and combo box while at the same time keeping weak references on
      *  all involved components to ensure that no memory leaks occur.
-     * @param <E>
+     * @param <E> The type of the items in the combo box.
      */
     private static class MemSafeBinding<E> implements PopupMenuListener {
 
