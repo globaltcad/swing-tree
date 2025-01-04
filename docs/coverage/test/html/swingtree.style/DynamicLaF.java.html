@@ -7,17 +7,16 @@ import swingtree.components.JBox;
 import swingtree.components.JIcon;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  *   This class is responsible for installing and uninstalling custom look and feel
@@ -25,9 +24,10 @@ import java.util.function.Supplier;
  */
 final class DynamicLaF
 {
-<span class="fc" id="L28">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(DynamicLaF.class);</span>
+<span class="fc" id="L27">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(DynamicLaF.class);</span>
 
-<span class="fc" id="L30">    private static final DynamicLaF _NONE = new DynamicLaF(null, null, false);</span>
+<span class="fc" id="L29">    private static final DynamicLaF _NONE = new DynamicLaF(null, null, false);</span>
+<span class="fc" id="L30">    private static final UIUpdateListenerAndSwingTreeLookAndFeelRestorer _UI_UPDATE_LISTENER = new UIUpdateListenerAndSwingTreeLookAndFeelRestorer();</span>
 
 <span class="fc" id="L32">    static DynamicLaF none() { return _NONE; }</span>
 
@@ -105,7 +105,7 @@ final class DynamicLaF
                 to make the component non-opaque so that the previous rendering get's flushed out!
              */
             try {
-<span class="fc" id="L108">                result = _installCustomLaF(owner);</span>
+<span class="fc" id="L108">                result = _installCustomLaF(owner, false);</span>
 <span class="nc" id="L109">            } catch ( Exception e ) {</span>
 <span class="nc" id="L110">                log.error(&quot;Failed to install custom LaF for component '&quot;+owner+&quot;'!&quot;, e);</span>
 <span class="pc" id="L111">            }</span>
@@ -124,133 +124,137 @@ final class DynamicLaF
     }
 
 
-    private DynamicLaF _installCustomLaF( JComponent owner ) {
+    private DynamicLaF _installCustomLaF( JComponent owner, boolean isUpdate ) {
         // First we check if we already have a custom LaF installed:
 <span class="fc" id="L129">        ComponentUI formerLaF = _formerLaF;</span>
 <span class="fc" id="L130">        ComponentUI styleLaF  = _styleLaF;</span>
 
-<span class="fc bfc" id="L132" title="All 2 branches covered.">        if ( !customLookAndFeelIsInstalled() ) {</span>
-<span class="fc bfc" id="L133" title="All 2 branches covered.">            if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.</span>
-<span class="fc" id="L134">                JBox p = (JBox) owner;</span>
-<span class="fc" id="L135">                formerLaF = p.getUI();</span>
-<span class="fc" id="L136">                styleLaF = formerLaF;</span>
-<span class="fc bfc" id="L137" title="All 2 branches covered.">            } else if (owner instanceof JIcon) { // This is a SwingTree component, so it already has a custom LaF.</span>
-<span class="fc" id="L138">                JIcon i = (JIcon) owner;</span>
-<span class="fc" id="L139">                formerLaF = i.getUI();</span>
-<span class="fc" id="L140">                styleLaF = formerLaF;</span>
-<span class="fc bfc" id="L141" title="All 2 branches covered.">            } else if (owner instanceof JPanel) {</span>
-<span class="fc" id="L142">                JPanel p = (JPanel) owner;</span>
-<span class="fc" id="L143">                formerLaF = p.getUI();</span>
-<span class="fc" id="L144">                PanelStyler laf = PanelStyler.INSTANCE;</span>
-<span class="fc" id="L145">                boolean success = _tryInstallingUISilently(p, laf);</span>
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">                if ( !success ) {</span>
-<span class="nc" id="L147">                    p.setUI(laf);</span>
-<span class="nc bnc" id="L148" title="All 2 branches missed.">                    if (formerLaF != null) {</span>
-<span class="nc" id="L149">                        PanelUI panelUI = (PanelUI) formerLaF;</span>
-<span class="nc" id="L150">                        panelUI.installUI(p);</span>
+<span class="fc bfc" id="L132" title="All 4 branches covered.">        if ( !customLookAndFeelIsInstalled() || isUpdate ) {</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            if ( !isUpdate )</span>
+<span class="fc" id="L134">                owner.addPropertyChangeListener(&quot;UI&quot;, _UI_UPDATE_LISTENER);</span>
+
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.</span>
+<span class="fc" id="L137">                JBox p = (JBox) owner;</span>
+<span class="fc" id="L138">                formerLaF = p.getUI();</span>
+<span class="fc" id="L139">                styleLaF = formerLaF;</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            } else if (owner instanceof JIcon) { // This is a SwingTree component, so it already has a custom LaF.</span>
+<span class="fc" id="L141">                JIcon i = (JIcon) owner;</span>
+<span class="fc" id="L142">                formerLaF = i.getUI();</span>
+<span class="fc" id="L143">                styleLaF = formerLaF;</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            } else if (owner instanceof JPanel) {</span>
+<span class="fc" id="L145">                JPanel p = (JPanel) owner;</span>
+<span class="fc" id="L146">                formerLaF = p.getUI();</span>
+<span class="fc" id="L147">                PanelStyler laf = PanelStyler.INSTANCE;</span>
+<span class="fc" id="L148">                boolean success = _tryInstallingUISilently(p, laf);</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">                if ( !success ) {</span>
+<span class="nc" id="L150">                    p.setUI(laf);</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                    if (formerLaF != null) {</span>
+<span class="nc" id="L152">                        PanelUI panelUI = (PanelUI) formerLaF;</span>
+<span class="nc" id="L153">                        panelUI.installUI(p);</span>
                         // We make the former LaF believe that it is still in charge of the component.
                     }
                 }
-<span class="fc" id="L154">                styleLaF = laf;</span>
-<span class="fc bfc" id="L155" title="All 2 branches covered.">            } else if (owner instanceof AbstractButton) {</span>
-<span class="fc" id="L156">                AbstractButton b = (AbstractButton) owner;</span>
-<span class="fc" id="L157">                formerLaF = b.getUI();</span>
-<span class="fc" id="L158">                ButtonStyler laf = new ButtonStyler(b.getUI());</span>
-<span class="fc" id="L159">                boolean success = _tryInstallingUISilently(b, laf);</span>
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">                if ( !success ) {</span>
-<span class="nc" id="L161">                    b.setUI(laf);</span>
-<span class="nc bnc" id="L162" title="All 2 branches missed.">                    if ( formerLaF != null ) {</span>
-<span class="nc" id="L163">                        ButtonUI buttonUI = (ButtonUI) formerLaF;</span>
-<span class="nc" id="L164">                        buttonUI.installUI(b);</span>
+<span class="fc" id="L157">                styleLaF = laf;</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">            } else if (owner instanceof AbstractButton) {</span>
+<span class="fc" id="L159">                AbstractButton b = (AbstractButton) owner;</span>
+<span class="fc" id="L160">                formerLaF = b.getUI();</span>
+<span class="fc" id="L161">                ButtonStyler laf = new ButtonStyler(b.getUI());</span>
+<span class="fc" id="L162">                boolean success = _tryInstallingUISilently(b, laf);</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">                if ( !success ) {</span>
+<span class="nc" id="L164">                    b.setUI(laf);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                    if ( formerLaF != null ) {</span>
+<span class="nc" id="L166">                        ButtonUI buttonUI = (ButtonUI) formerLaF;</span>
+<span class="nc" id="L167">                        buttonUI.installUI(b);</span>
                         // We make the former LaF believe that it is still in charge of the component.
                     }
                 }
-<span class="fc" id="L168">                styleLaF = laf;</span>
-<span class="fc bfc" id="L169" title="All 2 branches covered.">            } else if (owner instanceof JLabel) {</span>
-<span class="fc" id="L170">                JLabel l = (JLabel) owner;</span>
-<span class="fc" id="L171">                formerLaF = l.getUI();</span>
-<span class="fc" id="L172">                LabelStyler laf = new LabelStyler(l.getUI());</span>
-<span class="fc" id="L173">                boolean success = _tryInstallingUISilently(l, laf);</span>
-<span class="pc bpc" id="L174" title="1 of 2 branches missed.">                if ( !success ) {</span>
-<span class="nc" id="L175">                    l.setUI(laf);</span>
-<span class="nc bnc" id="L176" title="All 2 branches missed.">                    if (formerLaF != null) {</span>
-<span class="nc" id="L177">                        LabelUI labelUI = (LabelUI) formerLaF;</span>
-<span class="nc" id="L178">                        labelUI.installUI(l);</span>
+<span class="fc" id="L171">                styleLaF = laf;</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            } else if (owner instanceof JLabel) {</span>
+<span class="fc" id="L173">                JLabel l = (JLabel) owner;</span>
+<span class="fc" id="L174">                formerLaF = l.getUI();</span>
+<span class="fc" id="L175">                LabelStyler laf = new LabelStyler(l.getUI());</span>
+<span class="fc" id="L176">                boolean success = _tryInstallingUISilently(l, laf);</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">                if ( !success ) {</span>
+<span class="nc" id="L178">                    l.setUI(laf);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                    if (formerLaF != null) {</span>
+<span class="nc" id="L180">                        LabelUI labelUI = (LabelUI) formerLaF;</span>
+<span class="nc" id="L181">                        labelUI.installUI(l);</span>
                         // We make the former LaF believe that it is still in charge of the component.
                     }
                 }
-<span class="fc" id="L182">                styleLaF = laf;</span>
-<span class="fc bfc" id="L183" title="All 4 branches covered.">            } else if (owner instanceof JTextField &amp;&amp; !(owner instanceof JPasswordField)) {</span>
-<span class="fc" id="L184">                JTextField t = (JTextField) owner;</span>
-<span class="fc" id="L185">                formerLaF = t.getUI();</span>
-<span class="fc" id="L186">                TextFieldStyler laf = new TextFieldStyler(t.getUI());</span>
-<span class="fc" id="L187">                boolean success = _tryInstallingUISilently(t, laf);</span>
-<span class="pc bpc" id="L188" title="1 of 2 branches missed.">                if ( !success ) {</span>
-<span class="nc" id="L189">                    t.setUI(laf);</span>
-<span class="nc bnc" id="L190" title="All 2 branches missed.">                    if ( formerLaF != null ) {</span>
-<span class="nc" id="L191">                        TextUI textFieldUI = (TextUI) formerLaF;</span>
-<span class="nc" id="L192">                        textFieldUI.installUI(t);</span>
+<span class="fc" id="L185">                styleLaF = laf;</span>
+<span class="fc bfc" id="L186" title="All 4 branches covered.">            } else if (owner instanceof JTextField &amp;&amp; !(owner instanceof JPasswordField)) {</span>
+<span class="fc" id="L187">                JTextField t = (JTextField) owner;</span>
+<span class="fc" id="L188">                formerLaF = t.getUI();</span>
+<span class="fc" id="L189">                TextFieldStyler laf = new TextFieldStyler(t.getUI());</span>
+<span class="fc" id="L190">                boolean success = _tryInstallingUISilently(t, laf);</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">                if ( !success ) {</span>
+<span class="nc" id="L192">                    t.setUI(laf);</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                    if ( formerLaF != null ) {</span>
+<span class="nc" id="L194">                        TextUI textFieldUI = (TextUI) formerLaF;</span>
+<span class="nc" id="L195">                        textFieldUI.installUI(t);</span>
                         // We make the former LaF believe that it is still in charge of the component.
                     }
                 }
-<span class="fc" id="L196">                styleLaF = laf;</span>
+<span class="fc" id="L199">                styleLaF = laf;</span>
             }
         }
 
-<span class="fc" id="L200">        return new DynamicLaF(styleLaF, formerLaF, true);</span>
+<span class="fc" id="L203">        return new DynamicLaF(styleLaF, formerLaF, true);</span>
     }
 
     DynamicLaF _uninstallCustomLaF( JComponent _owner )
     {
-<span class="fc" id="L205">        ComponentUI styleLaF = _styleLaF;</span>
+<span class="fc" id="L208">        ComponentUI styleLaF = _styleLaF;</span>
 
-<span class="fc bfc" id="L207" title="All 2 branches covered.">        if ( customLookAndFeelIsInstalled() ) {</span>
-<span class="fc bfc" id="L208" title="All 2 branches covered.">            if ( _owner instanceof JPanel ) {</span>
-<span class="fc" id="L209">                JPanel p = (JPanel) _owner;</span>
-<span class="fc" id="L210">                boolean success = _tryInstallingUISilently(p, _formerLaF);</span>
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                if ( !success )</span>
-<span class="nc" id="L212">                    p.setUI((PanelUI) _formerLaF);</span>
-<span class="fc" id="L213">                styleLaF = null;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if ( customLookAndFeelIsInstalled() ) {</span>
+<span class="fc" id="L211">            _owner.removePropertyChangeListener(_UI_UPDATE_LISTENER);</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            if ( _owner instanceof JPanel ) {</span>
+<span class="fc" id="L213">                JPanel p = (JPanel) _owner;</span>
+<span class="fc" id="L214">                boolean success = _tryInstallingUISilently(p, _formerLaF);</span>
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">                if ( !success )</span>
+<span class="nc" id="L216">                    p.setUI((PanelUI) _formerLaF);</span>
+<span class="fc" id="L217">                styleLaF = null;</span>
             }
-<span class="pc bpc" id="L215" title="1 of 2 branches missed.">            if ( _owner instanceof JBox ) {</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">            if ( _owner instanceof JBox ) {</span>
                 // The JBox is a SwingTree native type, so it also enjoys the perks of having a SwingTree look and feel!
-<span class="nc" id="L217">                styleLaF = null;</span>
+<span class="fc" id="L221">                styleLaF = null;</span>
             }
-<span class="pc bpc" id="L219" title="1 of 2 branches missed.">            if ( _owner instanceof JIcon ) {</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if ( _owner instanceof JIcon ) {</span>
                 // The JIcon is a SwingTree native type, so it also enjoys the perks of having a SwingTree look and feel!
-<span class="nc" id="L221">                styleLaF = null;</span>
+<span class="nc" id="L225">                styleLaF = null;</span>
             }
-<span class="fc bfc" id="L223" title="All 2 branches covered.">            else if ( _owner instanceof AbstractButton ) {</span>
-<span class="fc" id="L224">                AbstractButton b = (AbstractButton) _owner;</span>
-<span class="fc" id="L225">                boolean success = _tryInstallingUISilently(b, _formerLaF);</span>
-<span class="pc bpc" id="L226" title="1 of 2 branches missed.">                if ( !success )</span>
-<span class="nc" id="L227">                    b.setUI((ButtonUI) _formerLaF);</span>
-<span class="fc" id="L228">                styleLaF = null;</span>
-<span class="fc" id="L229">            }</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">            else if ( _owner instanceof JLabel ) {</span>
-<span class="fc" id="L231">                JLabel l = (JLabel) _owner;</span>
-<span class="fc" id="L232">                boolean success = _tryInstallingUISilently(l, _formerLaF);</span>
-<span class="pc bpc" id="L233" title="1 of 2 branches missed.">                if ( !success )</span>
-<span class="nc" id="L234">                    l.setUI((LabelUI) _formerLaF);</span>
-<span class="fc" id="L235">                styleLaF = null;</span>
-<span class="fc" id="L236">            }</span>
-<span class="pc bpc" id="L237" title="1 of 4 branches missed.">            else if ( _owner instanceof JTextField &amp;&amp; !(_owner instanceof JPasswordField) ) {</span>
-<span class="fc" id="L238">                JTextField t = (JTextField) _owner;</span>
-<span class="fc" id="L239">                boolean success = _tryInstallingUISilently(t, _formerLaF);</span>
-<span class="pc bpc" id="L240" title="1 of 2 branches missed.">                if ( !success )</span>
-<span class="nc" id="L241">                    t.setUI((TextUI) _formerLaF);</span>
-<span class="fc" id="L242">                styleLaF = null;</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">            else if ( _owner instanceof AbstractButton ) {</span>
+<span class="fc" id="L228">                AbstractButton b = (AbstractButton) _owner;</span>
+<span class="fc" id="L229">                boolean success = _tryInstallingUISilently(b, _formerLaF);</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">                if ( !success )</span>
+<span class="nc" id="L231">                    b.setUI((ButtonUI) _formerLaF);</span>
+<span class="fc" id="L232">                styleLaF = null;</span>
+<span class="fc" id="L233">            }</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">            else if ( _owner instanceof JLabel ) {</span>
+<span class="fc" id="L235">                JLabel l = (JLabel) _owner;</span>
+<span class="fc" id="L236">                boolean success = _tryInstallingUISilently(l, _formerLaF);</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">                if ( !success )</span>
+<span class="nc" id="L238">                    l.setUI((LabelUI) _formerLaF);</span>
+<span class="fc" id="L239">                styleLaF = null;</span>
+<span class="fc" id="L240">            }</span>
+<span class="pc bpc" id="L241" title="1 of 4 branches missed.">            else if ( _owner instanceof JTextField &amp;&amp; !(_owner instanceof JPasswordField) ) {</span>
+<span class="fc" id="L242">                JTextField t = (JTextField) _owner;</span>
+<span class="fc" id="L243">                boolean success = _tryInstallingUISilently(t, _formerLaF);</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">                if ( !success )</span>
+<span class="nc" id="L245">                    t.setUI((TextUI) _formerLaF);</span>
+<span class="fc" id="L246">                styleLaF = null;</span>
             }
         }
-<span class="fc" id="L245">        return new DynamicLaF(styleLaF, _formerLaF, false);</span>
+<span class="fc" id="L249">        return new DynamicLaF(styleLaF, _formerLaF, false);</span>
     }
 
     private static boolean _tryInstallingUISilently(
         final           JComponent  owner,
         final @Nullable ComponentUI laf
     ) {
-<span class="pc bpc" id="L252" title="1 of 2 branches missed.">        if ( laf == null )</span>
-<span class="nc" id="L253">            return false;</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">        if ( laf == null )</span>
+<span class="nc" id="L257">            return false;</span>
         /*
             We wish installing the UI by simply calling setUI(..) was so easy,
             but it is not due to the fact that this method has a lot of unwanted side effects.
@@ -261,201 +265,212 @@ final class DynamicLaF
             subcomponents.
         */
         try {
-<span class="pc bpc" id="L264" title="1 of 2 branches missed.">            if ( owner instanceof StylableComponent) {</span>
-<span class="fc" id="L265">                ((StylableComponent) owner).setUISilently(laf);</span>
-<span class="fc" id="L266">                laf.installUI(owner);</span>
-<span class="fc" id="L267">                return true;</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">            if ( owner instanceof StylableComponent) {</span>
+<span class="fc" id="L269">                ((StylableComponent) owner).setUISilently(laf);</span>
+<span class="fc" id="L270">                laf.installUI(owner);</span>
+<span class="fc" id="L271">                return true;</span>
             }
-<span class="nc" id="L269">        } catch (Exception e) {</span>
-<span class="nc" id="L270">            log.error(&quot;Failed to install custom SwingTree UI for component '&quot;+owner+&quot;'!&quot;, e);</span>
-<span class="nc" id="L271">        }</span>
-<span class="nc" id="L272">        return false;</span>
+<span class="nc" id="L273">        } catch (Exception e) {</span>
+<span class="nc" id="L274">            log.error(&quot;Failed to install custom SwingTree UI for component '&quot;+owner+&quot;'!&quot;, e);</span>
+<span class="nc" id="L275">        }</span>
+<span class="nc" id="L276">        return false;</span>
     }
 
 
 
     void installCustomUIFor(JComponent owner )
     {
-<span class="fc bfc" id="L279" title="All 2 branches covered.">        if ( owner instanceof JBox )</span>
-<span class="fc" id="L280">            ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {</span>
-<span class="fc" id="L281">                @Override public void installUI(JComponent c) { installDefaults((JBox)c); }</span>
-<span class="nc" id="L282">                @Override public void uninstallUI(JComponent c) { uninstallDefaults((JBox)c); }</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">        if ( owner instanceof JBox )</span>
+<span class="fc" id="L284">            ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {</span>
+<span class="fc" id="L285">                @Override public void installUI(JComponent c) { installDefaults((JBox)c); }</span>
+<span class="nc" id="L286">                @Override public void uninstallUI(JComponent c) { uninstallDefaults((JBox)c); }</span>
                 private void installDefaults(JBox b) {
-<span class="fc" id="L284">                    LookAndFeel.installColorsAndFont(b, &quot;Box.background&quot;, &quot;Box.foreground&quot;, &quot;Box.font&quot;);</span>
-<span class="fc" id="L285">                    LookAndFeel.installBorder(b,&quot;Box.border&quot;);</span>
-<span class="fc" id="L286">                    LookAndFeel.installProperty(b, &quot;opaque&quot;, Boolean.FALSE);</span>
-<span class="fc" id="L287">                }</span>
-<span class="nc" id="L288">                private void uninstallDefaults(JBox b) { LookAndFeel.uninstallBorder(b); }</span>
+<span class="fc" id="L288">                    LookAndFeel.installColorsAndFont(b, &quot;Box.background&quot;, &quot;Box.foreground&quot;, &quot;Box.font&quot;);</span>
+<span class="fc" id="L289">                    LookAndFeel.installBorder(b,&quot;Box.border&quot;);</span>
+<span class="fc" id="L290">                    LookAndFeel.installProperty(b, &quot;opaque&quot;, Boolean.FALSE);</span>
+<span class="fc" id="L291">                }</span>
+<span class="nc" id="L292">                private void uninstallDefaults(JBox b) { LookAndFeel.uninstallBorder(b); }</span>
             });
-<span class="pc bpc" id="L290" title="1 of 2 branches missed.">        else if ( owner instanceof JIcon )</span>
-<span class="fc" id="L291">            ((JIcon)owner).setUI(new DynamicLaF.LabelStyler(null));</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">        else if ( owner instanceof JIcon )</span>
+<span class="fc" id="L295">            ((JIcon)owner).setUI(new DynamicLaF.LabelStyler(null));</span>
 
         // Other types of components are not supported yet!
-<span class="fc" id="L294">    }</span>
+<span class="fc" id="L298">    }</span>
 
     static class PanelStyler extends BasicPanelUI
     {
-<span class="fc" id="L298">        static final PanelStyler INSTANCE = new PanelStyler();</span>
+<span class="fc" id="L302">        static final PanelStyler INSTANCE = new PanelStyler();</span>
 
-<span class="fc" id="L300">        PanelStyler() {}</span>
+<span class="fc" id="L304">        PanelStyler() {}</span>
 
-<span class="fc" id="L302">        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c).paintBackground(g, null); }</span>
-<span class="fc" id="L303">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
-        @Override
-<span class="fc" id="L305">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+        @Override public void paint(Graphics g, JComponent c ) {
+<span class="fc" id="L307">            ComponentExtension.from(c).paintBackground(g, true, null);</span>
+<span class="fc" id="L308">        }</span>
+<span class="fc" id="L309">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
     }
 
     static class ButtonStyler extends BasicButtonUI
     {
-        private final ButtonUI _formerUI;
+        private final @Nullable ButtonUI _formerUI;
 
-<span class="fc" id="L312">        ButtonStyler(ButtonUI formerUI) {</span>
-<span class="pc bpc" id="L313" title="1 of 2 branches missed.">            _formerUI = ( formerUI instanceof ButtonStyler ) ? ((ButtonStyler)formerUI)._formerUI : formerUI;</span>
-<span class="fc" id="L314">        }</span>
+<span class="fc" id="L316">        ButtonStyler( @Nullable ButtonUI formerUI ) {</span>
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">            _formerUI = ( formerUI instanceof ButtonStyler ) ? ((ButtonStyler)formerUI)._formerUI : formerUI;</span>
+<span class="fc" id="L318">        }</span>
 
         @Override public void paint( Graphics g, JComponent c ) {
-<span class="fc" id="L317">            ComponentExtension.from(c).paintBackground(g, localGraphics-&gt;{</span>
-<span class="fc" id="L318">                _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
-<span class="fc" id="L319">            });</span>
-<span class="fc" id="L320">        }</span>
-<span class="fc" id="L321">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
-        @Override
-<span class="nc" id="L323">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">            boolean customWipe = _formerUI == null;</span>
+<span class="fc" id="L322">            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics-&gt;{</span>
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">                if ( _formerUI != null )</span>
+<span class="fc" id="L324">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
+<span class="fc" id="L325">            });</span>
+<span class="fc" id="L326">        }</span>
+<span class="fc" id="L327">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
     }
 
     static class LabelStyler extends BasicLabelUI
     {
         private final @Nullable LabelUI _formerUI;
 
-<span class="fc" id="L330">        LabelStyler(@Nullable LabelUI formerUI) {</span>
-<span class="pc bpc" id="L331" title="1 of 2 branches missed.">            _formerUI = (formerUI instanceof LabelStyler) ? ((LabelStyler)formerUI)._formerUI : formerUI;</span>
-<span class="fc" id="L332">        }</span>
+<span class="fc" id="L334">        LabelStyler(@Nullable LabelUI formerUI) {</span>
+<span class="pc bpc" id="L335" title="1 of 2 branches missed.">            _formerUI = (formerUI instanceof LabelStyler) ? ((LabelStyler)formerUI)._formerUI : formerUI;</span>
+<span class="fc" id="L336">        }</span>
 
         @Override public void paint( Graphics g, JComponent c ) {
-<span class="fc" id="L335">            ComponentExtension.from(c).paintBackground(g, localGraphics-&gt;{</span>
-<span class="fc bfc" id="L336" title="All 2 branches covered.">                if ( _formerUI != null )</span>
-<span class="fc" id="L337">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
+<span class="fc" id="L339">            ComponentExtension.from(c).paintBackground(g, false, localGraphics-&gt;{</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">                if ( _formerUI != null )</span>
+<span class="fc" id="L341">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
                 else
-<span class="fc" id="L339">                    super.paint(localGraphics, c);</span>
-<span class="fc" id="L340">            });</span>
-<span class="fc" id="L341">        }</span>
-<span class="fc" id="L342">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
-        @Override
-<span class="nc" id="L344">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="fc" id="L343">                    super.paint(localGraphics, c);</span>
+<span class="fc" id="L344">            });</span>
+<span class="fc" id="L345">        }</span>
+<span class="fc" id="L346">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
     }
 
     static class TextFieldStyler extends BasicTextFieldUI
     {
-        private final TextUI _formerUI;
+        private final @Nullable TextUI _formerUI;
 
-<span class="fc" id="L351">        TextFieldStyler(TextUI formerUI) {</span>
-<span class="pc bpc" id="L352" title="1 of 2 branches missed.">            _formerUI = ( formerUI instanceof TextFieldStyler ) ? ((TextFieldStyler)formerUI)._formerUI : formerUI;</span>
-<span class="fc" id="L353">        }</span>
+<span class="fc" id="L353">        TextFieldStyler(@Nullable TextUI formerUI) {</span>
+<span class="pc bpc" id="L354" title="1 of 2 branches missed.">            _formerUI = ( formerUI instanceof TextFieldStyler ) ? ((TextFieldStyler)formerUI)._formerUI : formerUI;</span>
+<span class="fc" id="L355">        }</span>
         @Override protected void paintSafely(Graphics g) {
-<span class="pc bpc" id="L355" title="1 of 2 branches missed.">            if ( !getComponent().isOpaque() )</span>
-<span class="nc" id="L356">                paintBackground(g);</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">            if ( !getComponent().isOpaque() )</span>
+<span class="nc" id="L358">                paintBackground(g);</span>
 
-<span class="fc" id="L358">            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()-&gt;{</span>
-<span class="fc" id="L359">                super.paintSafely(g);// Paints the text</span>
-<span class="fc" id="L360">            });</span>
-<span class="fc" id="L361">        }</span>
+<span class="fc" id="L360">            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
+<span class="fc" id="L361">                super.paintSafely(g);// Paints the text</span>
+<span class="fc" id="L362">            });</span>
+<span class="fc" id="L363">        }</span>
         @Override protected void paintBackground(Graphics g) {
-<span class="fc" id="L363">            JComponent c = getComponent();</span>
+<span class="fc" id="L365">            JComponent c = getComponent();</span>
 
-<span class="fc" id="L365">            Insets margins = ComponentExtension.from(c).getMarginInsets();</span>
-<span class="fc" id="L366">            int insetTop    = margins.top   ;</span>
-<span class="fc" id="L367">            int insetLeft   = margins.left  ;</span>
-<span class="fc" id="L368">            int insetBottom = margins.bottom;</span>
-<span class="fc" id="L369">            int insetRight  = margins.right ;</span>
+<span class="fc" id="L367">            Insets margins = ComponentExtension.from(c).getMarginInsets();</span>
+<span class="fc" id="L368">            int insetTop    = margins.top   ;</span>
+<span class="fc" id="L369">            int insetLeft   = margins.left  ;</span>
+<span class="fc" id="L370">            int insetBottom = margins.bottom;</span>
+<span class="fc" id="L371">            int insetRight  = margins.right ;</span>
 
-<span class="fc" id="L371">            g.setColor(c.getBackground());</span>
-<span class="fc" id="L372">            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()-&gt;{</span>
-<span class="fc" id="L373">                g.fillRect(</span>
+<span class="fc" id="L373">            g.setColor(c.getBackground());</span>
+<span class="fc" id="L374">            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
+<span class="fc" id="L375">                g.fillRect(</span>
                         insetLeft, insetTop,
-<span class="fc" id="L375">                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom</span>
+<span class="fc" id="L377">                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom</span>
                     );
-<span class="fc" id="L377">            });</span>
+<span class="fc" id="L379">            });</span>
 
-<span class="pc bpc" id="L379" title="7 of 8 branches missed.">            boolean shouldPaintFormerUI = ( insetLeft == 0 &amp;&amp; insetRight == 0 &amp;&amp; insetTop == 0 &amp;&amp; insetBottom == 0 );</span>
-<span class="fc" id="L380">            ComponentExtension.from(c).paintBackground(g, localGraphics-&gt;{</span>
-<span class="pc bpc" id="L381" title="1 of 2 branches missed.">                if ( shouldPaintFormerUI )</span>
-<span class="nc" id="L382">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
-<span class="fc" id="L383">            });</span>
-<span class="fc" id="L384">        }</span>
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">            boolean customWipe = _formerUI == null;</span>
+<span class="pc bpc" id="L382" title="7 of 8 branches missed.">            boolean shouldPaintFormerUI = (insetLeft == 0 &amp;&amp; insetRight == 0 &amp;&amp; insetTop == 0 &amp;&amp; insetBottom == 0);</span>
+<span class="fc" id="L383">            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics -&gt; {</span>
+<span class="pc bpc" id="L384" title="3 of 4 branches missed.">                if (shouldPaintFormerUI &amp;&amp; _formerUI != null)</span>
+<span class="nc" id="L385">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
+<span class="fc" id="L386">            });</span>
+<span class="fc" id="L387">        }</span>
 
-<span class="fc" id="L386">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
-        @Override
-<span class="nc" id="L388">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="fc" id="L389">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
     }
 
     private static void _paintComponentThroughFormerUI(
         ComponentUI formerUI, Graphics g, JComponent c
     ) {
         try {
-<span class="pc bpc" id="L395" title="1 of 2 branches missed.">            if ( formerUI != null ) {</span>
-<span class="fc" id="L396">                StyleConf styleConf = ComponentExtension.from(c).getStyle();</span>
-<span class="fc" id="L397">                boolean hasMargin       = styleConf.margin().isPositive();</span>
-<span class="fc" id="L398">                boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();</span>
-<span class="fc bfc" id="L399" title="All 4 branches covered.">                if ( !hasMargin &amp;&amp; !hasBorderRadius )</span>
-<span class="fc" id="L400">                    formerUI.update(g, c);</span>
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">            if ( formerUI != null ) {</span>
+<span class="fc" id="L397">                StyleConf styleConf = ComponentExtension.from(c).getStyle();</span>
+<span class="fc" id="L398">                boolean hasMargin       = styleConf.margin().isPositive();</span>
+<span class="fc" id="L399">                boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();</span>
+<span class="fc bfc" id="L400" title="All 4 branches covered.">                if ( !hasMargin &amp;&amp; !hasBorderRadius )</span>
+<span class="fc" id="L401">                    formerUI.update(g, c);</span>
                 else {
-<span class="fc" id="L402">                    ComponentExtension.from(c).paintWithContentAreaClip(g, ()-&gt;{</span>
-<span class="fc" id="L403">                        formerUI.update(g, c);</span>
-<span class="fc" id="L404">                    });</span>
+<span class="fc" id="L403">                    ComponentExtension.from(c).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
+<span class="fc" id="L404">                        formerUI.update(g, c);</span>
+<span class="fc" id="L405">                    });</span>
                 }
             }
-<span class="nc" id="L407">        } catch ( Exception ex ) {</span>
-<span class="nc" id="L408">            log.error(&quot;Failed to paint component through former UI&quot;, ex);</span>
-<span class="nc" id="L409">            ex.printStackTrace();</span>
-<span class="fc" id="L410">        }</span>
-<span class="fc" id="L411">    }</span>
+<span class="nc" id="L408">        } catch ( Exception ex ) {</span>
+<span class="nc" id="L409">            log.error(&quot;Failed to paint component through former UI&quot;, ex);</span>
+<span class="nc" id="L410">            ex.printStackTrace();</span>
+<span class="fc" id="L411">        }</span>
+<span class="fc" id="L412">    }</span>
 
     /**
-     *  Determines whether the given point, in the parent's coordinate space, is within this component.
-     *  This method accounts for the current SwingTree border and style insets (padding, border widths and margin)
-     *  as well as subcomponents outside the inner component area.
-     * @param c the component
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param superContains the super.contains() method
-     * @return true if the point is within the component
+     *  If the user installs another look and feel, we use this property change listener to
+     *  capture this update and then ensure that the SwingTree look and feel delegate wraps
+     *  the newly installed {@link ComponentUI} instead of it being replaced and forgotten...&lt;br&gt;
+     *  You can test if this works through the following Code:
+     *  &lt;pre&gt;{@code
+     *    for ( Window w : Window.getWindows() ) {
+     *        SwingUtilities.updateComponentTreeUI(w);
+     *        if ( !w.isDisplayable() )
+     *            continue;
+     *        if ( w instanceof Frame
+     *            ? !((Frame)w).isResizable()
+     *            : !(w instanceof Dialog) || !((Dialog) w).isResizable()
+     *        ) w.pack();
+     *    }
+     *  }&lt;/pre&gt;
      */
-    private static boolean _contains(JComponent c, int x, int y, Supplier&lt;Boolean&gt; superContains)
-    {
-<span class="fc" id="L425">        Border border = c.getBorder();</span>
-<span class="pc bpc" id="L426" title="1 of 2 branches missed.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
-<span class="nc" id="L427">            StyleAndAnimationBorder&lt;?&gt; b = (StyleAndAnimationBorder&lt;?&gt;) border;</span>
-<span class="nc" id="L428">            Insets margins = b.getMarginInsets();</span>
-<span class="nc" id="L429">            int width  = c.getWidth();</span>
-<span class="nc" id="L430">            int height = c.getHeight();</span>
-<span class="nc bnc" id="L431" title="All 8 branches missed.">            boolean isInside = (x &gt;= margins.left) &amp;&amp; (x &lt; width - margins.right) &amp;&amp; (y &gt;= margins.top) &amp;&amp; (y &lt; height - margins.bottom);</span>
-
-<span class="nc bnc" id="L433" title="All 2 branches missed.">            if ( isInside )</span>
-<span class="nc" id="L434">                return true;</span>
-            else
-            {/*
-                You might be thinking that we should return false here, but that would be wrong in certain cases!
-                A child component might be outside the border, but still be a subcomponent of the parent component.
-                This is the case for example, when the padding is negative, and the child component is inside the border.
-                So, if there are negative paddings, we loop through the subcomponents and see if any of
-                them contains the point.                                                                               */
-
-<span class="nc" id="L443">                Insets padding = b.getPaddingInsets();</span>
-
-<span class="nc bnc" id="L445" title="All 8 branches missed.">                if ( padding.top &lt; 0 || padding.left &lt; 0 || padding.bottom &lt; 0 || padding.right &lt; 0 )</span>
-<span class="nc bnc" id="L446" title="All 2 branches missed.">                    for ( Component child : c.getComponents() ) {</span>
-<span class="nc bnc" id="L447" title="All 2 branches missed.">                        if ( child instanceof JComponent ) {</span>
-<span class="nc" id="L448">                            JComponent jc = (JComponent) child;</span>
-<span class="nc bnc" id="L449" title="All 2 branches missed.">                            if ( jc.contains(x, y) )</span>
-<span class="nc" id="L450">                                return true;</span>
-                        }
-                    }
-                else
-<span class="nc" id="L454">                    return false;</span>
+    private static final class UIUpdateListenerAndSwingTreeLookAndFeelRestorer implements PropertyChangeListener {
+        @Override
+        public void propertyChange(PropertyChangeEvent event) {
+<span class="fc" id="L434">            Object oldValue = event.getOldValue();</span>
+<span class="fc" id="L435">            Object newValue = event.getNewValue();</span>
+<span class="fc" id="L436">            Object source   = event.getSource();</span>
+<span class="pc bpc" id="L437" title="1 of 2 branches missed.">            if ( !(source instanceof JComponent) ) {</span>
+<span class="nc" id="L438">                String sourceTypeAsString = Optional.ofNullable(source).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
+<span class="nc" id="L439">                log.error(</span>
+                        &quot;Invalid UI update event source detected! &quot; +
+                        &quot;Source object is expected to be a 'JComponent'.\n&quot; +
+                        &quot;Received unknown object of type '&quot; + sourceTypeAsString + &quot;' instead.&quot;,
+                        new Throwable()
+                    );
+<span class="nc" id="L445">                return;</span>
             }
-        }
-<span class="fc" id="L457">        return superContains.get();</span>
+<span class="pc bpc" id="L447" title="1 of 2 branches missed.">            if ( !(oldValue instanceof ComponentUI) ) {</span>
+<span class="nc" id="L448">                String oldValueTypeAsString = Optional.ofNullable(oldValue).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
+<span class="nc" id="L449">                log.error(</span>
+                        &quot;Detected invalid 'oldValue'  object in UI update event! &quot; +
+                        &quot;Old value is expected to be a 'ComponentUI'.\n&quot; +
+                        &quot;Received unknown object of type '&quot; + oldValueTypeAsString + &quot;' instead.&quot;,
+                        new Throwable()
+                    );
+<span class="nc" id="L455">                return;</span>
+            }
+<span class="pc bpc" id="L457" title="1 of 2 branches missed.">            if ( !(newValue instanceof ComponentUI) ) {</span>
+<span class="nc" id="L458">                String newValueTypeAsString = Optional.ofNullable(newValue).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
+<span class="nc" id="L459">                log.error(</span>
+                        &quot;Detected invalid 'newValue'  object in UI update event! &quot; +
+                        &quot;New value is expected to be a 'ComponentUI'.\n&quot; +
+                        &quot;Received unknown object of type '&quot; + newValueTypeAsString + &quot;' instead.&quot;,
+                        new Throwable()
+                    );
+<span class="nc" id="L465">                return;</span>
+            }
+<span class="fc" id="L467">            JComponent owner = (JComponent) source;</span>
+<span class="fc" id="L468">            ComponentExtension.from(owner).updateDynamicLookAndFeel( oldLaf -&gt; {</span>
+<span class="pc bpc" id="L469" title="1 of 2 branches missed.">                if (  oldLaf.customLookAndFeelIsInstalled() )</span>
+<span class="fc" id="L470">                    oldLaf = oldLaf._installCustomLaF(owner, true);</span>
+<span class="fc" id="L471">                return oldLaf;</span>
+            });
+<span class="fc" id="L473">        }</span>
     }
-
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

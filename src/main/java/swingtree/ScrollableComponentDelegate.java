@@ -256,6 +256,7 @@ public final class ScrollableComponentDelegate
      * Scrolling containers, like JViewport, will use this method each
      * time they are validated.
      *
+     * @param fitWidth If true, the viewport will force the Scrollables width to match its own.
      * @return A new scroll config with the desired width fitting mode, which,
      *          if true, makes the viewport force the Scrollables width to match its own.
      */
@@ -275,6 +276,7 @@ public final class ScrollableComponentDelegate
      * Scrolling containers, like JViewport, will use this method each
      * time they are validated.
      *
+     * @param fitHeight If true, the viewport will force the Scrollables height to match its own.
      * @return A new scroll config with the desired width fitting mode, which,
      *          if true, makes a viewport force the Scrollables height to match its own.
      */

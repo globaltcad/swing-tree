@@ -55,7 +55,7 @@ final class StyleSource&lt;C extends JComponent&gt;
 <span class="fc" id="L55">        return new StyleSource&lt;&gt;(compositeStyler, _animationStylers, _styleSheet);</span>
     }
 
-    StyleSource&lt;C&gt; withAnimationStyler(LifeSpan lifeSpan, Styler&lt;C&gt; animationStyler ) {
+    StyleSource&lt;C&gt; withAnimationStyler( LifeSpan lifeSpan, Styler&lt;C&gt; animationStyler ) {
 <span class="fc" id="L59">        List&lt;Expirable&lt;Styler&lt;C&gt;&gt;&gt; animationStylers = new ArrayList&lt;&gt;(Arrays.asList(_animationStylers));</span>
 <span class="fc" id="L60">        animationStylers.add(new Expirable&lt;&gt;(lifeSpan, animationStyler));</span>
 <span class="fc" id="L61">        return new StyleSource&lt;&gt;(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);</span>
@@ -88,22 +88,24 @@ final class StyleSource&lt;C extends JComponent&gt;
 <span class="fc" id="L88">        }</span>
 
         try {
-<span class="fc" id="L91">            styleConf = _localStyler.style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
-<span class="nc" id="L92">        } catch (Exception e) {</span>
-<span class="nc" id="L93">            log.error(&quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="fc" id="L91">            ComponentStyleDelegate&lt;C&gt; updated = _localStyler.style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf));</span>
+<span class="fc" id="L92">            Objects.requireNonNull(updated);</span>
+<span class="fc" id="L93">            styleConf = updated.style();</span>
+<span class="nc" id="L94">        } catch (Exception e) {</span>
+<span class="nc" id="L95">            log.error(&quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
             /*
                  If any exceptions happen in a Styler implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
                  which is why we catch any exceptions immediately!
             */
-<span class="fc" id="L99">        }</span>
+<span class="fc" id="L101">        }</span>
 
         // Animation styles are last: they override everything else:
-<span class="fc bfc" id="L102" title="All 2 branches covered.">        for ( Expirable&lt;Styler&lt;C&gt;&gt; expirableStyler : _animationStylers )</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        for ( Expirable&lt;Styler&lt;C&gt;&gt; expirableStyler : _animationStylers )</span>
             try {
-<span class="fc" id="L104">                styleConf = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
-<span class="nc" id="L105">            } catch ( Exception e ) {</span>
-<span class="nc" id="L106">                log.warn(&quot;An exception occurred while applying an animation styler!&quot;, e);</span>
+<span class="fc" id="L106">                styleConf = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
+<span class="nc" id="L107">            } catch ( Exception e ) {</span>
+<span class="nc" id="L108">                log.warn(&quot;An exception occurred while applying an animation styler!&quot;, e);</span>
                 /*
                      If any exceptions happen in a Styler implementation provided by a user,
                      then we don't want to prevent the other Stylers from doing their job,
@@ -115,22 +117,22 @@ final class StyleSource&lt;C extends JComponent&gt;
                      Hi there! If you are reading this, you are probably a developer using the SwingTree
                      library, thank you for using it! Good luck finding out what went wrong! :)
                 */
-<span class="fc" id="L118">            }</span>
+<span class="fc" id="L120">            }</span>
 
-<span class="fc" id="L120">        styleConf = styleConf.simplified();</span>
+<span class="fc" id="L122">        styleConf = styleConf.simplified();</span>
 
-<span class="fc" id="L122">        styleConf = _applyDPIScaling(styleConf);</span>
+<span class="fc" id="L124">        styleConf = _applyDPIScaling(styleConf);</span>
 
-<span class="fc" id="L124">        styleConf = styleConf.correctedForRounding();</span>
+<span class="fc" id="L126">        styleConf = styleConf.correctedForRounding();</span>
 
-<span class="fc" id="L126">        return styleConf;</span>
+<span class="fc" id="L128">        return styleConf;</span>
     }
 
     private static StyleConf _applyDPIScaling(StyleConf styleConf) {
-<span class="fc bfc" id="L130" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
-<span class="fc" id="L131">            return styleConf;</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
+<span class="fc" id="L133">            return styleConf;</span>
 
-<span class="fc" id="L133">        return styleConf.scale( UI.scale() );</span>
+<span class="fc" id="L135">        return styleConf.scale( UI.scale() );</span>
     }
 
 }

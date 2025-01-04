@@ -12,38 +12,50 @@ import javax.swing.JOptionPane;
  */
 <span class="fc" id="L13">public enum ConfirmAnswer</span>
 {
-<span class="fc" id="L15">    YES,</span>
-<span class="fc" id="L16">    NO,</span>
-<span class="fc" id="L17">    CANCEL,</span>
-<span class="fc" id="L18">    CLOSE;</span>
+    /**
+     *  The user selected the &quot;yes&quot; option in the dialog.
+     */
+<span class="fc" id="L18">    YES,</span>
+    /**
+     *  The user selected the &quot;no&quot; option in the dialog.
+     */
+<span class="fc" id="L22">    NO,</span>
+    /**
+     *  The user selected the &quot;cancel&quot; option in the dialog.
+     */
+<span class="fc" id="L26">    CANCEL,</span>
+    /**
+     *  The user closed the dialog without selecting any option.
+     */
+<span class="fc" id="L30">    CLOSE;</span>
 
     /**
      *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.YES}.
      *
      * @return {@code true} if the user selected the &quot;yes&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L25" title="All 2 branches missed.">    public boolean isYes() { return this == YES; }</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">    public boolean isYes() { return this == YES; }</span>
 
     /**
      *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.NO}.
      *
      * @return {@code true} if the user selected the &quot;no&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L32" title="All 2 branches missed.">    public boolean isNo() { return this == NO; }</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">    public boolean isNo() { return this == NO; }</span>
 
     /**
      *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.CANCEL}.
      *
      * @return {@code true} if the user selected the &quot;cancel&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L39" title="All 2 branches missed.">    public boolean isCancel() { return this == CANCEL; }</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">    public boolean isCancel() { return this == CANCEL; }</span>
 
     /**
      *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.CLOSE}.
      *
      * @return {@code true} if the user selected the &quot;close&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L46" title="All 2 branches missed.">    public boolean isClose() { return this == CLOSE; }</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">    public boolean isClose() { return this == CLOSE; }</span>
 
     /**
      *  A convenience method to check if the user
@@ -52,7 +64,7 @@ import javax.swing.JOptionPane;
      *
      * @return {@code true} if the user selected the &quot;cancel&quot; option, or they closed the dialog, {@code false} otherwise.
      */
-<span class="nc bnc" id="L55" title="All 4 branches missed.">    public boolean isCancelOrClose() { return isCancel() || isClose(); }</span>
+<span class="nc bnc" id="L67" title="All 4 branches missed.">    public boolean isCancelOrClose() { return isCancel() || isClose(); }</span>
 
     /**
      *  Converts a {@link JOptionPane} constant to a {@link ConfirmAnswer} enum.
@@ -60,12 +72,12 @@ import javax.swing.JOptionPane;
      * @return The {@link JOptionPane} constant corresponding to this answer.
      */
     static ConfirmAnswer from( int option ) {
-<span class="pc bpc" id="L63" title="3 of 4 branches missed.">        switch ( option ) {</span>
-<span class="nc" id="L64">            case JOptionPane.YES_OPTION:    return YES;</span>
-<span class="fc" id="L65">            case JOptionPane.NO_OPTION:     return NO;</span>
-<span class="nc" id="L66">            case JOptionPane.CLOSED_OPTION: return CLOSE;</span>
+<span class="pc bpc" id="L75" title="3 of 4 branches missed.">        switch ( option ) {</span>
+<span class="nc" id="L76">            case JOptionPane.YES_OPTION:    return YES;</span>
+<span class="fc" id="L77">            case JOptionPane.NO_OPTION:     return NO;</span>
+<span class="nc" id="L78">            case JOptionPane.CLOSED_OPTION: return CLOSE;</span>
             default:
-<span class="nc" id="L68">                return CANCEL;</span>
+<span class="nc" id="L80">                return CANCEL;</span>
         }
     }
 }

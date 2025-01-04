@@ -17,6 +17,8 @@ import java.util.Objects;
  *  A SwingTree builder node designed for configuring {@link JScrollPane} instances. <br>
  *  Use {@link UI#scrollPane()} or {@link UI#scrollPane(Configurator)} to create a new instance
  *  of this builder type.
+ *
+ * @param <P> The type of {@link JScrollPane} that this {@link UIForScrollPane} is configuring.
  */
 public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScrollPane<UIForScrollPane<P>,P>
 {

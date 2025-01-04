@@ -321,6 +321,13 @@ final class LayerCache
         }
 
         /**
+         *  Creates a {@link Graphics2D} object for rendering into the cached image if
+         *  the number of cache hits until allocation count-down has reached zero.
+         *  Calling this method will decrement the count-down once if it is greater than zero,
+         *  or allocate the image if it is not greater than zero and the image is not yet allocated.
+         *  A graphics object is only returned if the count-down has reached zero,
+         *  otherwise null is returned.
+         *
          * @return a {@link Graphics2D} object for rendering into the cached image or null if
          *         the image is not yet allocated. Continuous calls to this method will eventually
          *         allocate the image.

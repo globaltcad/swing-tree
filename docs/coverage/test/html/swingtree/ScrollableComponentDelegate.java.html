@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScrollableComponentDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">ScrollableComponentDelegate.java</span></div><h1>ScrollableComponentDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.api.Configurator;
+import swingtree.api.ScrollIncrementSupplier;
+import swingtree.layout.Bounds;
+import swingtree.layout.Size;
+
+import javax.swing.JComponent;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import java.awt.Component;
+import java.util.Objects;
+
+/**
+ * This class is an immutable builder which defines the {@link javax.swing.Scrollable} behavior of a component
+ * within a {@link JScrollPane}.
+ * So it is in essence a config object that provides information to a scrolling container
+ * like {@link JScrollPane}.
+ * &lt;p&gt;
+ * Instances of this class are exposed to the {@link swingtree.api.Configurator} lambda
+ * of the {@link UI#scrollPane(Configurator)} factory method, where you can configure the scrollable behavior
+ * according to your needs. &lt;br&gt;
+ * This includes setting the preferred size, unit increment, block increment, and whether the component should
+ * fit the width or height of the viewport. &lt;br&gt;
+ * Here an example demonstrating how the API of this class
+ * is typically used:
+ * &lt;pre&gt;{@code
+ * UI.panel()
+ * .withBorderTitled(&quot;Scrollable Panel&quot;)
+ * .add(
+ *     UI.scrollPane(conf -&gt; conf
+ *         .prefSize(400, 300)
+ *         .unitIncrement(20)
+ *         .blockIncrement(50)
+ *         .fitWidth(true)
+ *         .fitHeight(false)
+ *     )
+ * )
+ * }&lt;/pre&gt;
+ * &lt;p&gt;
+ * Note that the provided {@link Configurator} will be called
+ * for every call to a method of the underlying {@link javax.swing.Scrollable}
+ * component implementation, so the settings you provide can
+ * also change dynamically based on the context captured by the lambda.&lt;br&gt;
+ * &lt;p&gt;
+ * Also note that this configuration object also exposes some context
+ * information you may find useful when defining its properties like {@link #fitWidth(boolean)},
+ * {@link #fitHeight(boolean)}, {@link #unitIncrement(int)}, and so on...&lt;br&gt;
+ * Like for example the current {@link #view()}, which implements the {@link javax.swing.Scrollable}
+ * and wraps your {@link #content} component. You can also access the {@link #viewport()} as
+ * well as the overarching {@link #scrollPane()} overall!&lt;br&gt;
+ * Again, the configurator you pass to {@link UI#scrollPane(Configurator)} will be
+ * called eagerly, so everything you define in there will be completely dynamic,
+ * which means your scroll behaviour can dynamically react to the involved components.
+ */
+public final class ScrollableComponentDelegate
+{
+    static ScrollableComponentDelegate of(
+        JScrollPane scrollPane,
+        JComponent content,
+        Size preferredSize,
+        int unitIncrement, int blockIncrement
+    ) {
+<span class="fc" id="L65">        Component view     = scrollPane.getViewport().getView();</span>
+<span class="fc" id="L66">        JViewport viewport = scrollPane.getViewport();</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        boolean fitWidth  = viewport.getWidth()  &gt;  view.getPreferredSize().width;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        boolean fitHeight = viewport.getHeight() &gt; view.getPreferredSize().height;</span>
+<span class="fc" id="L69">        return new ScrollableComponentDelegate(</span>
+                    scrollPane, content, view, preferredSize,
+<span class="nc" id="L71">                    (a,b,c)-&gt;unitIncrement, (a,b,c)-&gt;blockIncrement,</span>
+                    fitWidth, fitHeight
+                );
+    }
+
+    private final JScrollPane             _scrollPane;
+    private final JComponent              _content;
+    private final Component               _view;
+    private final Size                    _preferredSize;
+    private final ScrollIncrementSupplier _unitIncrement;
+    private final ScrollIncrementSupplier _blockIncrement;
+    private final boolean                 _fitWidth;
+    private final boolean                 _fitHeight;
+
+
+    private ScrollableComponentDelegate(
+        JScrollPane             scrollPane,
+        JComponent              content,
+        Component               view,
+        Size                    preferredSize,
+        ScrollIncrementSupplier unitIncrement,
+        ScrollIncrementSupplier blockIncrement,
+        boolean                 fitWidth,
+        boolean                 fitHeight
+<span class="fc" id="L95">    ) {</span>
+<span class="fc" id="L96">        _scrollPane     = scrollPane;</span>
+<span class="fc" id="L97">        _content        = content;</span>
+<span class="fc" id="L98">        _view           = view;</span>
+<span class="fc" id="L99">        _preferredSize  = preferredSize;</span>
+<span class="fc" id="L100">        _unitIncrement  = unitIncrement;</span>
+<span class="fc" id="L101">        _blockIncrement = blockIncrement;</span>
+<span class="fc" id="L102">        _fitWidth       = fitWidth;</span>
+<span class="fc" id="L103">        _fitHeight      = fitHeight;</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Creates an updated scrollable config with the
+     * preferred size of the viewport for a view component.
+     * For example, the preferred size of a &lt;code&gt;JList&lt;/code&gt; component
+     * is the size required to accommodate all the cells in its list.
+     * However, the value of &lt;code&gt;preferredScrollableViewportSize&lt;/code&gt;
+     * is the size required for &lt;code&gt;JList.getVisibleRowCount&lt;/code&gt; rows.
+     * A component without any properties that would affect the viewport
+     * size should just return &lt;code&gt;getPreferredSize&lt;/code&gt; here.
+     *
+     * @param width  The preferred width of a &lt;code&gt;JViewport&lt;/code&gt; whose view a
+     *               &lt;code&gt;Scrollable&lt;/code&gt; configured by this config object.
+     * @param height The preferred height of a &lt;code&gt;JViewport&lt;/code&gt; whose view a
+     *               &lt;code&gt;Scrollable&lt;/code&gt; configured by this config object.
+     * @return A new instance of {@link ScrollableComponentDelegate} with the updated preferred size.
+     * @see JViewport#getPreferredSize
+     */
+    public ScrollableComponentDelegate prefSize( int width, int height ) {
+<span class="fc" id="L124">        return new ScrollableComponentDelegate(</span>
+<span class="fc" id="L125">                _scrollPane, _content, _view, Size.of(width, height), _unitIncrement, _blockIncrement, _fitWidth, _fitHeight</span>
+            );
+    }
+
+    /**
+     * Creates an updated scrollable config with the
+     * preferred size of the viewport for a view component.
+     * For example, the preferred size of a &lt;code&gt;JList&lt;/code&gt; component
+     * is the size required to accommodate all the cells in its list.
+     * However, the value of &lt;code&gt;preferredScrollableViewportSize&lt;/code&gt;
+     * is the size required for &lt;code&gt;JList.getVisibleRowCount&lt;/code&gt; rows.
+     * A component without any properties that would affect the viewport
+     * size should just return &lt;code&gt;getPreferredSize&lt;/code&gt; here.
+     *
+     * @param preferredSize The preferred size of the component.
+     * @return A new instance of {@link ScrollableComponentDelegate} with the updated preferred size.
+     * @see JViewport#getPreferredSize
+     * @throws NullPointerException If the preferred size is null, use {@link Size#unknown()}
+     *                              to indicate that the preferred size is unknown.
+     */
+    public ScrollableComponentDelegate prefSize( Size preferredSize ) {
+<span class="nc" id="L146">        Objects.requireNonNull(preferredSize);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if ( preferredSize.equals(Size.unknown()) )</span>
+<span class="nc" id="L148">            return this;</span>
+<span class="nc" id="L149">        return new ScrollableComponentDelegate(</span>
+                _scrollPane, _content, _view, preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+            );
+    }
+
+    /**
+     * Creates an updated scrollable config with the specified unit increment.
+     * The unit increment is the amount to scroll when the user requests a unit scroll.
+     * For example, this could be the amount to scroll when the user presses the arrow keys.
+     * Components that display logical rows or columns should compute
+     * the scroll increment that will completely expose one new row
+     * or column, depending on the value of orientation.  Ideally,
+     * components should handle a partially exposed row or column by
+     * returning the distance required to completely expose the item.
+     * &lt;p&gt;
+     * Scrolling containers, like JScrollPane, will use this increment value
+     * each time the user requests a unit scroll.
+     *
+     * @param unitIncrement The unit increment value.
+     * @return A new instance of {@link ScrollableComponentDelegate} with the updated unit increment.
+     * @see JScrollBar#setUnitIncrement
+     */
+    public ScrollableComponentDelegate unitIncrement( int unitIncrement ) {
+<span class="fc" id="L172">        return new ScrollableComponentDelegate(</span>
+<span class="fc" id="L173">                _scrollPane, _content, _view, _preferredSize, (a, b, c)-&gt;unitIncrement, _blockIncrement, _fitWidth, _fitHeight</span>
+            );
+    }
+
+    /**
+     * Creates an updated scrollable config with the specified unit increment supplier,
+     * (see {@link ScrollIncrementSupplier}) which takes the visible rectangle,
+     * orientation and direction as arguments and returns the unit increment for the given context. &lt;br&gt;
+     * The unit increment is the amount to scroll when the user requests a unit scroll.
+     * For example, this could be the amount to scroll when the user presses the arrow keys.
+     * Components that display logical rows or columns should compute
+     * the scroll increment that will completely expose one new row
+     * or column, depending on the value of orientation.  Ideally,
+     * components should handle a partially exposed row or column by
+     * returning the distance required to completely expose the item.
+     * &lt;p&gt;
+     * Scrolling containers, like JScrollPane, will use this increment value
+     * each time the user requests a unit scroll.
+     *
+     * @param unitIncrement A {@link ScrollIncrementSupplier} that returns the unit increment for the given context.
+     * @return A new instance of {@link ScrollableComponentDelegate} with the updated unit increment supplier.
+     * @see JScrollBar#setUnitIncrement
+     */
+    public ScrollableComponentDelegate unitIncrement( ScrollIncrementSupplier unitIncrement ) {
+<span class="nc" id="L197">        return new ScrollableComponentDelegate(</span>
+                _scrollPane, _content, _view, _preferredSize, unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+            );
+    }
+
+    /**
+     * Creates an updated scrollable config with the specified block increment.
+     * The block increment is the amount to scroll when the user requests a block scroll.
+     * For example, this could be the amount to scroll when the user presses the page up or page down keys.
+     * Components that display logical rows or columns should compute
+     * the scroll increment that will completely expose one block
+     * of rows or columns, depending on the value of orientation.
+     * &lt;p&gt;
+     * Scrolling containers, like JScrollPane, will use this increment value
+     * each time the user requests a block scroll.
+     *
+     * @param blockIncrement The block increment value.
+     * @return A new instance of {@link ScrollableComponentDelegate} with the updated block increment.
+     * @see JScrollBar#setBlockIncrement
+     */
+    public ScrollableComponentDelegate blockIncrement( int blockIncrement ) {
+<span class="fc" id="L218">        return new ScrollableComponentDelegate(</span>
+<span class="fc" id="L219">                _scrollPane, _content, _view, _preferredSize, _unitIncrement, (a, b, c)-&gt;blockIncrement, _fitWidth, _fitHeight</span>
+            );
+    }
+
+    /**
+     * Creates an updated scrollable config with the specified block increment supplier,
+     * (see {@link ScrollIncrementSupplier}) which takes the visible rectangle,
+     * orientation and direction as arguments and returns the block increment for the given context. &lt;br&gt;
+     * The block increment is the amount to scroll when the user requests a block scroll.
+     * For example, this could be the amount to scroll when the user presses the page up or page down keys.
+     * Components that display logical rows or columns should compute
+     * the scroll increment that will completely expose one block
+     * of rows or columns, depending on the value of orientation.
+     * &lt;p&gt;
+     * Scrolling containers, like JScrollPane, will use this increment value
+     * each time the user requests a block scroll.
+     *
+     * @param blockIncrement A {@link ScrollIncrementSupplier} that returns the block increment for the given context.
+     * @return A new instance of {@link ScrollableComponentDelegate} with the updated block increment supplier.
+     * @see JScrollBar#setBlockIncrement
+     */
+    public ScrollableComponentDelegate blockIncrement( ScrollIncrementSupplier blockIncrement ) {
+<span class="nc" id="L241">        return new ScrollableComponentDelegate(</span>
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, blockIncrement, _fitWidth, _fitHeight
+            );
+    }
+
+    /**
+     * Set this to true if a viewport should always force the width of this
+     * &lt;code&gt;Scrollable&lt;/code&gt; to match the width of the viewport.
+     * For example a normal
+     * text view that supported line wrapping would return true here, since it
+     * would be undesirable for wrapped lines to disappear beyond the right
+     * edge of the viewport.  Note that returning true for a Scrollable
+     * whose ancestor is a JScrollPane effectively disables horizontal
+     * scrolling.
+     * &lt;p&gt;
+     * Scrolling containers, like JViewport, will use this method each
+     * time they are validated.
+     *
+     * @return A new scroll config with the desired width fitting mode, which,
+     *          if true, makes the viewport force the Scrollables width to match its own.
+     */
+    public ScrollableComponentDelegate fitWidth( boolean fitWidth ) {
+<span class="fc" id="L263">        return new ScrollableComponentDelegate(</span>
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidth, _fitHeight
+        );
+    }
+
+    /**
+     * Set this to true if a viewport should always force the height of this
+     * Scrollable to match the height of the viewport.  For example a
+     * columnar text view that flowed text in left to right columns
+     * could effectively disable vertical scrolling by returning
+     * true here.
+     * &lt;p&gt;
+     * Scrolling containers, like JViewport, will use this method each
+     * time they are validated.
+     *
+     * @return A new scroll config with the desired width fitting mode, which,
+     *          if true, makes a viewport force the Scrollables height to match its own.
+     */
+    public ScrollableComponentDelegate fitHeight( boolean fitHeight ) {
+<span class="fc" id="L282">        return new ScrollableComponentDelegate(</span>
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeight
+        );
+    }
+
+    /**
+     * Returns the scroll pane that contains the scrollable component
+     * this configuration is for.
+     *
+     * @return The scroll pane that contains the scrollable component.
+     */
+    public JScrollPane scrollPane() {
+<span class="nc" id="L294">        return _scrollPane;</span>
+    }
+
+    /**
+     * Returns the viewport of the scroll pane that contains the {@link javax.swing.Scrollable} component
+     * this configuration is for.
+     *
+     * @return The viewport of the scroll pane that contains the scrollable component.
+     */
+    public JViewport viewport() {
+<span class="nc" id="L304">        return _scrollPane.getViewport();</span>
+    }
+
+    /**
+     * Returns the user provided content component that is contained in the scroll pane
+     * and which is wrapped by a view component implementing the {@link javax.swing.Scrollable}
+     * interface configured by this {@link ScrollableComponentDelegate}.
+     * &lt;b&gt;
+     *     The content component is effectively the component supplied to
+     *     the {@link UIForAnyScrollPane#add(Component[])} method.
+     *     (Please note that a scroll pane can only ever hold a single content component)
+     * &lt;/b&gt;
+     *
+     * @return The content component that is contained within the scroll pane
+     *         and wrapped by the {@link #view()} component.
+     */
+    public JComponent content() {
+<span class="nc" id="L321">        return _content;</span>
+    }
+
+    /**
+     * Returns the view component implementing the {@link javax.swing.Scrollable} interface and which
+     * is placed directly in the scroll panes {@link #viewport()} through {@link JViewport#setView(Component)}.&lt;br&gt;
+     * This is the main UI component that is configured by this {@link ScrollableComponentDelegate}.
+     *
+     * @return The view component that is contained within the scroll pane.
+     */
+    public Component view() {
+<span class="nc" id="L332">        return _view;</span>
+    }
+
+    // Not part of the public API below:
+
+    Size preferredSize() {
+<span class="fc" id="L338">        return _preferredSize;</span>
+    }
+
+    int unitIncrement(
+        Bounds   viewRectangle,
+        UI.Align orientation,
+        int      direction
+    ) {
+<span class="fc" id="L346">        return _unitIncrement.get(viewRectangle, orientation, direction);</span>
+    }
+
+    int blockIncrement(
+        Bounds   viewRectangle,
+        UI.Align orientation,
+        int      direction
+    ) {
+<span class="fc" id="L354">        return _blockIncrement.get(viewRectangle, orientation, direction);</span>
+    }
+
+    boolean fitWidth() {
+<span class="fc" id="L358">        return _fitWidth;</span>
+    }
+
+    boolean fitHeight() {
+<span class="fc" id="L362">        return _fitHeight;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L367">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+                &quot;preferredSize=&quot;  + _preferredSize  + &quot;, &quot; +
+                &quot;unitIncrement=&quot;  + _unitIncrement  + &quot;, &quot; +
+                &quot;blockIncrement=&quot; + _blockIncrement + &quot;, &quot; +
+                &quot;fitWidth=&quot;       + _fitWidth       + &quot;, &quot; +
+                &quot;fitHeight=&quot;      + _fitHeight      +
+            &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        if ( this == obj )</span>
+<span class="nc" id="L379">            return true;</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if ( !(obj instanceof ScrollableComponentDelegate) )</span>
+<span class="nc" id="L381">            return false;</span>
+<span class="nc" id="L382">        ScrollableComponentDelegate that = (ScrollableComponentDelegate) obj;</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        return _preferredSize.equals(that._preferredSize) &amp;&amp;</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">               _unitIncrement.equals(that._unitIncrement) &amp;&amp;</span>
+<span class="nc bnc" id="L385" title="All 6 branches missed.">               _blockIncrement.equals(that._blockIncrement) &amp;&amp;</span>
+               _fitWidth       == that._fitWidth &amp;&amp;
+               _fitHeight      == that._fitHeight;
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L392">        return Objects.hash(_preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

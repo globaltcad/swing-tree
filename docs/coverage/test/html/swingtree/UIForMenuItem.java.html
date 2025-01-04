@@ -6,24 +6,26 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JMenuItem} instances.
+ *
+ * @param &lt;M&gt; The type of {@link JMenuItem} that this {@link UIForMenuItem} is configuring.
  */
 public final class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAnyMenuItem&lt;UIForMenuItem&lt;M&gt;, M&gt;
 {
     private final BuilderState&lt;M&gt; _state;
 
-<span class="fc" id="L14">    UIForMenuItem( BuilderState&lt;M&gt; state ) {</span>
-<span class="fc" id="L15">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L16">        _state = state;</span>
-<span class="fc" id="L17">    }</span>
+<span class="fc" id="L16">    UIForMenuItem( BuilderState&lt;M&gt; state ) {</span>
+<span class="fc" id="L17">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L18">        _state = state;</span>
+<span class="fc" id="L19">    }</span>
 
     @Override
     protected BuilderState&lt;M&gt; _state() {
-<span class="fc" id="L21">        return _state;</span>
+<span class="fc" id="L23">        return _state;</span>
     }
     
     @Override
     protected UIForMenuItem&lt;M&gt; _newBuilderWithState(BuilderState&lt;M&gt; newState ) {
-<span class="fc" id="L26">        return new UIForMenuItem&lt;&gt;(newState);</span>
+<span class="fc" id="L28">        return new UIForMenuItem&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

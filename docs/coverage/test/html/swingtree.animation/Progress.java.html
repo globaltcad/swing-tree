@@ -158,7 +158,7 @@ public interface Progress
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
     default double fadeIn() {
-<span class="nc" id="L161">        return 0.5 * (1 + Math.sin( Math.PI * (progress() - 0.5) ));</span>
+<span class="fc" id="L161">        return 0.5 * (1 + Math.sin( Math.PI * (progress() - 0.5) ));</span>
     }
 
     /**

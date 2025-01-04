@@ -21,6 +21,7 @@ public interface SwingBuilder<C extends JComponent>
      *  all of them will be able to execute gracefully without throwing exceptions.
      *
      * @return The built {@link JComponent} type.
+     * @throws Exception if the build operation could not be performed by the client code.
      */
     C build() throws Exception;
 }

@@ -5,24 +5,26 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JTextArea} instances.
+ *
+ * @param &lt;A&gt; The type of {@link JTextArea} that this {@link UIForTextArea} is configuring.
  */
 public final class UIForTextArea&lt;A extends JTextArea&gt; extends UIForAnyTextComponent&lt;UIForTextArea&lt;A&gt;, A&gt;
 {
     private final BuilderState&lt;A&gt; _state;
 
-<span class="fc" id="L13">    UIForTextArea( BuilderState&lt;A&gt; state ) {</span>
-<span class="fc" id="L14">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L15">        _state = state;</span>
-<span class="fc" id="L16">    }</span>
+<span class="fc" id="L15">    UIForTextArea( BuilderState&lt;A&gt; state ) {</span>
+<span class="fc" id="L16">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L17">        _state = state;</span>
+<span class="fc" id="L18">    }</span>
 
     @Override
     protected BuilderState&lt;A&gt; _state() {
-<span class="fc" id="L20">        return _state;</span>
+<span class="fc" id="L22">        return _state;</span>
     }
     
     @Override
     protected UIForTextArea&lt;A&gt; _newBuilderWithState(BuilderState&lt;A&gt; newState ) {
-<span class="fc" id="L25">        return new UIForTextArea&lt;&gt;(newState);</span>
+<span class="fc" id="L27">        return new UIForTextArea&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

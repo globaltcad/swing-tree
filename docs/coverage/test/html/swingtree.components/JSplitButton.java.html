@@ -125,17 +125,12 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
 <span class="fc" id="L125">    }</span>
 
     /** {@inheritDoc} */
-    @Override public void paint(Graphics g){
-<span class="fc" id="L129">        paintBackground(g, super::paint);</span>
+    @Override public void paintChildren(Graphics g) {
+<span class="fc" id="L129">        paintForeground(g, super::paintChildren);</span>
 <span class="fc" id="L130">    }</span>
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g) {
-<span class="fc" id="L134">        paintForeground(g, super::paintChildren);</span>
-<span class="fc" id="L135">    }</span>
-
-    /** {@inheritDoc} */
-<span class="nc" id="L138">    @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L133">    @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
 
     /**
      * Returns the JPopupMenu if set, null otherwise.
@@ -143,7 +138,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return JPopupMenu
      */
     public @Nullable JPopupMenu getPopupMenu() {
-<span class="fc" id="L146">        return popupMenu;</span>
+<span class="fc" id="L141">        return popupMenu;</span>
     }
 
     /**
@@ -153,9 +148,9 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param popupMenu the menu to display
      */
     public void setPopupMenu(final JPopupMenu popupMenu) {
-<span class="fc" id="L156">        this.popupMenu = popupMenu;</span>
-<span class="fc" id="L157">        image = null; //to repaint the arrow image</span>
-<span class="fc" id="L158">    }</span>
+<span class="fc" id="L151">        this.popupMenu = popupMenu;</span>
+<span class="fc" id="L152">        image = null; //to repaint the arrow image</span>
+<span class="fc" id="L153">    }</span>
 
     /**
      * Returns the separatorSpacing. Separator spacing is the space above and
@@ -165,7 +160,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return the spacing
      */
     public int getSeparatorSpacing() {
-<span class="nc" id="L168">        return separatorSpacing;</span>
+<span class="nc" id="L163">        return separatorSpacing;</span>
     }
 
     /**
@@ -176,8 +171,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param separatorSpacing the spacing
      */
     public void setSeparatorSpacing(final int separatorSpacing) {
-<span class="nc" id="L179">        this.separatorSpacing = separatorSpacing;</span>
-<span class="nc" id="L180">    }</span>
+<span class="nc" id="L174">        this.separatorSpacing = separatorSpacing;</span>
+<span class="nc" id="L175">    }</span>
 
     /**
      * Show the popup menu, if attached, even if the button part is clicked.
@@ -185,7 +180,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return true if alwaysPopup, false otherwise.
      */
     public boolean isAlwaysPopup() {
-<span class="nc" id="L188">        return alwaysPopup;</span>
+<span class="nc" id="L183">        return alwaysPopup;</span>
     }
 
     /**
@@ -195,8 +190,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      *                    button part is clicked, false otherwise
      */
     public void setAlwaysPopup(final boolean alwaysPopup) {
-<span class="nc" id="L198">        this.alwaysPopup = alwaysPopup;</span>
-<span class="nc" id="L199">    }</span>
+<span class="nc" id="L193">        this.alwaysPopup = alwaysPopup;</span>
+<span class="nc" id="L194">    }</span>
 
     /**
      * Show the dropdown menu, if attached, even if the button part is clicked.
@@ -206,7 +201,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      */
     @Deprecated
     public boolean isAlwaysDropDown() {
-<span class="nc" id="L209">        return alwaysPopup;</span>
+<span class="nc" id="L204">        return alwaysPopup;</span>
     }
 
     /**
@@ -218,8 +213,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      */
     @Deprecated
     public void setAlwaysDropDown(final boolean alwaysDropDown) {
-<span class="nc" id="L221">        this.alwaysPopup = alwaysDropDown;</span>
-<span class="nc" id="L222">    }</span>
+<span class="nc" id="L216">        this.alwaysPopup = alwaysDropDown;</span>
+<span class="nc" id="L217">    }</span>
 
     /**
      * Gets the color of the arrow.
@@ -227,7 +222,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return the color of the arrow
      */
     public Color getArrowColor() {
-<span class="nc" id="L230">        return arrowColor;</span>
+<span class="nc" id="L225">        return arrowColor;</span>
     }
 
     /**
@@ -236,9 +231,9 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param arrowColor the color of the arrow
      */
     public void setArrowColor(final Color arrowColor) {
-<span class="nc" id="L239">        this.arrowColor = arrowColor;</span>
-<span class="nc" id="L240">        image = null; // to repaint the image with the new color</span>
-<span class="nc" id="L241">    }</span>
+<span class="nc" id="L234">        this.arrowColor = arrowColor;</span>
+<span class="nc" id="L235">        image = null; // to repaint the image with the new color</span>
+<span class="nc" id="L236">    }</span>
 
     /**
      * Gets the disabled arrow color.
@@ -246,7 +241,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return color of the arrow if no popup menu is attached.
      */
     public Color getDisabledArrowColor() {
-<span class="nc" id="L249">        return disabledArrowColor;</span>
+<span class="nc" id="L244">        return disabledArrowColor;</span>
     }
 
     /**
@@ -256,9 +251,9 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      *                           attached.
      */
     public void setDisabledArrowColor(final Color disabledArrowColor) {
-<span class="nc" id="L259">        this.disabledArrowColor = disabledArrowColor;</span>
-<span class="nc" id="L260">        image = null; //to repaint the image with the new color</span>
-<span class="nc" id="L261">    }</span>
+<span class="nc" id="L254">        this.disabledArrowColor = disabledArrowColor;</span>
+<span class="nc" id="L255">        image = null; //to repaint the image with the new color</span>
+<span class="nc" id="L256">    }</span>
 
     /**
      * Splitwidth is the width of the split part of the button.
@@ -266,7 +261,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return the width of the split
      */
     public int getSplitWidth() {
-<span class="fc" id="L269">        return splitWidth;</span>
+<span class="fc" id="L264">        return splitWidth;</span>
     }
 
     /**
@@ -275,8 +270,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param splitWidth the width of the split
      */
     public void setSplitWidth(final int splitWidth) {
-<span class="nc" id="L278">        this.splitWidth = splitWidth;</span>
-<span class="nc" id="L279">    }</span>
+<span class="nc" id="L273">        this.splitWidth = splitWidth;</span>
+<span class="nc" id="L274">    }</span>
 
     /**
      * Gets the size of the arrow.
@@ -284,7 +279,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return size of the arrow
      */
     public int getArrowSize() {
-<span class="nc" id="L287">        return arrowSize;</span>
+<span class="nc" id="L282">        return arrowSize;</span>
     }
 
     /**
@@ -293,9 +288,9 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param arrowSize the size of the arrow
      */
     public void setArrowSize(final int arrowSize) {
-<span class="nc" id="L296">        this.arrowSize = arrowSize;</span>
-<span class="nc" id="L297">        image = null; //to repaint the image with the new size</span>
-<span class="nc" id="L298">    }</span>
+<span class="nc" id="L291">        this.arrowSize = arrowSize;</span>
+<span class="nc" id="L292">        image = null; //to repaint the image with the new size</span>
+<span class="nc" id="L293">    }</span>
 
     /**
      * Gets the image to be drawn in the split part. If no is set, a new image
@@ -304,13 +299,13 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return image
      */
     public Image getImage() {
-<span class="pc bpc" id="L307" title="1 of 2 branches missed.">        if (image != null) {</span>
-<span class="nc" id="L308">            return image;</span>
-<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        } else if (popupMenu == null) {</span>
-<span class="nc" id="L310">            return this.getDisabledImage();</span>
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if (image != null) {</span>
+<span class="nc" id="L303">            return image;</span>
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">        } else if (popupMenu == null) {</span>
+<span class="nc" id="L305">            return this.getDisabledImage();</span>
         } else {
-<span class="fc" id="L312">            image = this.getImage(this.arrowColor);</span>
-<span class="fc" id="L313">            return image;</span>
+<span class="fc" id="L307">            image = this.getImage(this.arrowColor);</span>
+<span class="fc" id="L308">            return image;</span>
         }
     }
 
@@ -320,8 +315,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param image the image
      */
     public void setImage(final Image image) {
-<span class="nc" id="L323">        this.image = image;</span>
-<span class="nc" id="L324">    }</span>
+<span class="nc" id="L318">        this.image = image;</span>
+<span class="nc" id="L319">    }</span>
 
     /**
      * Gets the disabled image to be drawn in the split part. If no is set, a
@@ -330,11 +325,11 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return image
      */
     public Image getDisabledImage() {
-<span class="nc bnc" id="L333" title="All 2 branches missed.">        if (disabledImage != null) {</span>
-<span class="nc" id="L334">            return disabledImage;</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if (disabledImage != null) {</span>
+<span class="nc" id="L329">            return disabledImage;</span>
         } else {
-<span class="nc" id="L336">            disabledImage = this.getImage(this.disabledArrowColor);</span>
-<span class="nc" id="L337">            return disabledImage;</span>
+<span class="nc" id="L331">            disabledImage = this.getImage(this.disabledArrowColor);</span>
+<span class="nc" id="L332">            return disabledImage;</span>
         }
     }
 
@@ -345,32 +340,32 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return image of the arrow
      */
     private Image getImage(final Color color) {
-<span class="fc" id="L348">        final int size = _calculateArrowSize();</span>
+<span class="fc" id="L343">        final int size = _calculateArrowSize();</span>
         Graphics2D g;
-<span class="fc" id="L350">        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);</span>
-<span class="fc" id="L351">        g = img.createGraphics();</span>
-<span class="fc" id="L352">        g.setColor(Color.WHITE);</span>
-<span class="fc" id="L353">        g.fillRect(0, 0, img.getWidth(), img.getHeight());</span>
-<span class="fc" id="L354">        g.setColor(color);</span>
+<span class="fc" id="L345">        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);</span>
+<span class="fc" id="L346">        g = img.createGraphics();</span>
+<span class="fc" id="L347">        g.setColor(Color.WHITE);</span>
+<span class="fc" id="L348">        g.fillRect(0, 0, img.getWidth(), img.getHeight());</span>
+<span class="fc" id="L349">        g.setColor(color);</span>
         // this creates a triangle facing right &gt;
-<span class="fc" id="L356">        g.fillPolygon(new int[]{0, 0, size / 2}, new int[]{0, size, size / 2}, 3);</span>
-<span class="fc" id="L357">        g.dispose();</span>
+<span class="fc" id="L351">        g.fillPolygon(new int[]{0, 0, size / 2}, new int[]{0, size, size / 2}, 3);</span>
+<span class="fc" id="L352">        g.dispose();</span>
         // rotate it to face downwards
-<span class="fc" id="L359">        img = rotate(img, 90);</span>
-<span class="fc" id="L360">        BufferedImage dimg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);</span>
-<span class="fc" id="L361">        g = dimg.createGraphics();</span>
-<span class="fc" id="L362">        g.setComposite(AlphaComposite.Src);</span>
-<span class="fc" id="L363">        g.drawImage(img, null, 0, 0);</span>
-<span class="fc" id="L364">        g.dispose();</span>
-<span class="fc bfc" id="L365" title="All 2 branches covered.">        for (int i = 0; i &lt; dimg.getHeight(); i++) {</span>
-<span class="fc bfc" id="L366" title="All 2 branches covered.">            for (int j = 0; j &lt; dimg.getWidth(); j++) {</span>
-<span class="fc bfc" id="L367" title="All 2 branches covered.">                if (dimg.getRGB(j, i) == Color.WHITE.getRGB()) {</span>
-<span class="fc" id="L368">                    dimg.setRGB(j, i, 0x8F1C1C);</span>
+<span class="fc" id="L354">        img = rotate(img, 90);</span>
+<span class="fc" id="L355">        BufferedImage dimg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L356">        g = dimg.createGraphics();</span>
+<span class="fc" id="L357">        g.setComposite(AlphaComposite.Src);</span>
+<span class="fc" id="L358">        g.drawImage(img, null, 0, 0);</span>
+<span class="fc" id="L359">        g.dispose();</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">        for (int i = 0; i &lt; dimg.getHeight(); i++) {</span>
+<span class="fc bfc" id="L361" title="All 2 branches covered.">            for (int j = 0; j &lt; dimg.getWidth(); j++) {</span>
+<span class="fc bfc" id="L362" title="All 2 branches covered.">                if (dimg.getRGB(j, i) == Color.WHITE.getRGB()) {</span>
+<span class="fc" id="L363">                    dimg.setRGB(j, i, 0x8F1C1C);</span>
                 }
             }
         }
 
-<span class="fc" id="L373">        return Toolkit.getDefaultToolkit().createImage(dimg.getSource());</span>
+<span class="fc" id="L368">        return Toolkit.getDefaultToolkit().createImage(dimg.getSource());</span>
     }
 
     /**
@@ -379,41 +374,41 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param image the new image to use
      */
     public void setDisabledImage(final Image image) {
-<span class="nc" id="L382">        this.disabledImage = image;</span>
-<span class="nc" id="L383">    }</span>
+<span class="nc" id="L377">        this.disabledImage = image;</span>
+<span class="nc" id="L378">    }</span>
 
     @Override
     protected void paintComponent(final Graphics g) {
-<span class="fc" id="L387">        super.paintComponent(g);</span>
-<span class="fc" id="L388">        Color oldColor = g.getColor();</span>
-<span class="fc" id="L389">        int splitWidth = _calculateSplitWidth();</span>
-<span class="fc" id="L390">        splitRectangle = new Rectangle(getWidth() - splitWidth, 0, splitWidth, getHeight());</span>
-<span class="fc" id="L391">        g.translate(splitRectangle.x, splitRectangle.y);</span>
-<span class="fc" id="L392">        int mh = getHeight() / 2;</span>
-<span class="fc" id="L393">        int mw = splitWidth / 2;</span>
-<span class="fc" id="L394">        int arrowSize = _calculateArrowSize();</span>
-<span class="pc bpc" id="L395" title="1 of 2 branches missed.">        g.drawImage((isEnabled() ? getImage() : getDisabledImage()), mw - arrowSize / 2, mh + 2 - arrowSize / 2, null);</span>
-<span class="pc bpc" id="L396" title="5 of 6 branches missed.">        if (onSplit &amp;&amp; !alwaysPopup &amp;&amp; popupMenu != null) {</span>
-<span class="nc" id="L397">            int separatorSpacing = _calculateSeparatorSpacing();</span>
-<span class="nc" id="L398">            g.setColor(UIManager.getLookAndFeelDefaults().getColor(&quot;Button.background&quot;));</span>
-<span class="nc" id="L399">            g.drawLine(1, separatorSpacing + 2, 1, getHeight() - separatorSpacing - 2);</span>
-<span class="nc" id="L400">            g.setColor(UIManager.getLookAndFeelDefaults().getColor(&quot;Button.shadow&quot;));</span>
-<span class="nc" id="L401">            g.drawLine(2, separatorSpacing + 2, 2, getHeight() - separatorSpacing - 2);</span>
+<span class="fc" id="L382">        paintBackground(g, super::paintComponent);</span>
+<span class="fc" id="L383">        Color oldColor = g.getColor();</span>
+<span class="fc" id="L384">        int splitWidth = _calculateSplitWidth();</span>
+<span class="fc" id="L385">        splitRectangle = new Rectangle(getWidth() - splitWidth, 0, splitWidth, getHeight());</span>
+<span class="fc" id="L386">        g.translate(splitRectangle.x, splitRectangle.y);</span>
+<span class="fc" id="L387">        int mh = getHeight() / 2;</span>
+<span class="fc" id="L388">        int mw = splitWidth / 2;</span>
+<span class="fc" id="L389">        int arrowSize = _calculateArrowSize();</span>
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">        g.drawImage((isEnabled() ? getImage() : getDisabledImage()), mw - arrowSize / 2, mh + 2 - arrowSize / 2, null);</span>
+<span class="pc bpc" id="L391" title="5 of 6 branches missed.">        if (onSplit &amp;&amp; !alwaysPopup &amp;&amp; popupMenu != null) {</span>
+<span class="nc" id="L392">            int separatorSpacing = _calculateSeparatorSpacing();</span>
+<span class="nc" id="L393">            g.setColor(UIManager.getLookAndFeelDefaults().getColor(&quot;Button.background&quot;));</span>
+<span class="nc" id="L394">            g.drawLine(1, separatorSpacing + 2, 1, getHeight() - separatorSpacing - 2);</span>
+<span class="nc" id="L395">            g.setColor(UIManager.getLookAndFeelDefaults().getColor(&quot;Button.shadow&quot;));</span>
+<span class="nc" id="L396">            g.drawLine(2, separatorSpacing + 2, 2, getHeight() - separatorSpacing - 2);</span>
         }
-<span class="fc" id="L403">        g.setColor(oldColor);</span>
-<span class="fc" id="L404">        g.translate(-splitRectangle.x, -splitRectangle.y);</span>
-<span class="fc" id="L405">    }</span>
+<span class="fc" id="L398">        g.setColor(oldColor);</span>
+<span class="fc" id="L399">        g.translate(-splitRectangle.x, -splitRectangle.y);</span>
+<span class="fc" id="L400">    }</span>
 
     private int _calculateArrowSize() {
-<span class="fc" id="L408">        return UI.scale(this.arrowSize);</span>
+<span class="fc" id="L403">        return UI.scale(this.arrowSize);</span>
     }
 
     private int _calculateSplitWidth() {
-<span class="fc" id="L412">        return UI.scale(this.splitWidth);</span>
+<span class="fc" id="L407">        return UI.scale(this.splitWidth);</span>
     }
 
     private int _calculateSeparatorSpacing() {
-<span class="nc" id="L416">        return UI.scale(this.separatorSpacing);</span>
+<span class="nc" id="L411">        return UI.scale(this.separatorSpacing);</span>
     }
 
     /**
@@ -424,13 +419,13 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return rotated image
      */
     private BufferedImage rotate(final BufferedImage img, final int angle) {
-<span class="fc" id="L427">        int w = img.getWidth();</span>
-<span class="fc" id="L428">        int h = img.getHeight();</span>
-<span class="fc" id="L429">        BufferedImage dimg = new BufferedImage(w, h, img.getType());</span>
-<span class="fc" id="L430">        Graphics2D g = dimg.createGraphics();</span>
-<span class="fc" id="L431">        g.rotate(Math.toRadians(angle), w / 2f, h / 2f);</span>
-<span class="fc" id="L432">        g.drawImage(img, null, 0, 0);</span>
-<span class="fc" id="L433">        return dimg;</span>
+<span class="fc" id="L422">        int w = img.getWidth();</span>
+<span class="fc" id="L423">        int h = img.getHeight();</span>
+<span class="fc" id="L424">        BufferedImage dimg = new BufferedImage(w, h, img.getType());</span>
+<span class="fc" id="L425">        Graphics2D g = dimg.createGraphics();</span>
+<span class="fc" id="L426">        g.rotate(Math.toRadians(angle), w / 2f, h / 2f);</span>
+<span class="fc" id="L427">        g.drawImage(img, null, 0, 0);</span>
+<span class="fc" id="L428">        return dimg;</span>
     }
 
     /**
@@ -445,8 +440,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      */
     @Deprecated
     public void addSplitButtonActionListener(final SplitButtonActionListener l) {
-<span class="nc" id="L448">        listenerList.add(SplitButtonActionListener.class, l);</span>
-<span class="nc" id="L449">    }</span>
+<span class="nc" id="L443">        listenerList.add(SplitButtonActionListener.class, l);</span>
+<span class="nc" id="L444">    }</span>
 
     /**
      * Removes an &lt;code&gt;SplitButtonActionListener&lt;/code&gt; from the button. If the
@@ -462,12 +457,12 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      */
     @Deprecated
     public void removeSplitButtonActionListener( final SplitButtonActionListener l ) {
-<span class="nc bnc" id="L465" title="All 4 branches missed.">        if ((l != null) &amp;&amp; (getAction() == l)) {</span>
-<span class="nc" id="L466">            setAction(null);</span>
+<span class="nc bnc" id="L460" title="All 4 branches missed.">        if ((l != null) &amp;&amp; (getAction() == l)) {</span>
+<span class="nc" id="L461">            setAction(null);</span>
         } else {
-<span class="nc" id="L468">            listenerList.remove(SplitButtonActionListener.class, l);</span>
+<span class="nc" id="L463">            listenerList.remove(SplitButtonActionListener.class, l);</span>
         }
-<span class="nc" id="L470">    }</span>
+<span class="nc" id="L465">    }</span>
 
     /**
      * Add a
@@ -478,8 +473,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param l the listener to add.
      */
     public void addButtonClickedActionListener(final ButtonClickedActionListener l) {
-<span class="fc" id="L481">        listenerList.add(ButtonClickedActionListener.class, l);</span>
-<span class="fc" id="L482">    }</span>
+<span class="fc" id="L476">        listenerList.add(ButtonClickedActionListener.class, l);</span>
+<span class="fc" id="L477">    }</span>
 
     /**
      * Remove a
@@ -489,8 +484,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param l the listener to remove.
      */
     public void removeButtonClickedActionListener(final ButtonClickedActionListener l) {
-<span class="nc" id="L492">        listenerList.remove(ButtonClickedActionListener.class, l);</span>
-<span class="nc" id="L493">    }</span>
+<span class="nc" id="L487">        listenerList.remove(ButtonClickedActionListener.class, l);</span>
+<span class="nc" id="L488">    }</span>
 
     /**
      * Add a
@@ -501,8 +496,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param l the listener to add.
      */
     public void addSplitButtonClickedActionListener(final SplitButtonClickedActionListener l) {
-<span class="fc" id="L504">        listenerList.add(SplitButtonClickedActionListener.class, l);</span>
-<span class="fc" id="L505">    }</span>
+<span class="fc" id="L499">        listenerList.add(SplitButtonClickedActionListener.class, l);</span>
+<span class="fc" id="L500">    }</span>
 
     /**
      * Remove a
@@ -512,8 +507,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param l the listener to remove.
      */
     public void removeSplitButtonClickedActionListener(final SplitButtonClickedActionListener l) {
-<span class="nc" id="L515">        listenerList.remove(SplitButtonClickedActionListener.class, l);</span>
-<span class="nc" id="L516">    }</span>
+<span class="nc" id="L510">        listenerList.remove(SplitButtonClickedActionListener.class, l);</span>
+<span class="nc" id="L511">    }</span>
 
     /**
      * Notifies all listeners that have registered interest for notification on
@@ -525,31 +520,31 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      */
     private void fireButtonClicked(final ActionEvent event) {
         // Guaranteed to return a non-null array
-<span class="fc" id="L528">        SplitButtonActionListener[] splitButtonListeners = listenerList.getListeners(SplitButtonActionListener.class);</span>
-<span class="fc" id="L529">        ButtonClickedActionListener[] buttonClickedListeners = listenerList.getListeners(ButtonClickedActionListener.class);</span>
-<span class="pc bpc" id="L530" title="2 of 4 branches missed.">        if (splitButtonListeners.length != 0 || buttonClickedListeners.length != 0) {</span>
-<span class="fc" id="L531">            String actionCommand = event.getActionCommand();</span>
-<span class="pc bpc" id="L532" title="1 of 2 branches missed.">            if (actionCommand == null) {</span>
-<span class="nc" id="L533">                actionCommand = getActionCommand();</span>
+<span class="fc" id="L523">        SplitButtonActionListener[] splitButtonListeners = listenerList.getListeners(SplitButtonActionListener.class);</span>
+<span class="fc" id="L524">        ButtonClickedActionListener[] buttonClickedListeners = listenerList.getListeners(ButtonClickedActionListener.class);</span>
+<span class="pc bpc" id="L525" title="2 of 4 branches missed.">        if (splitButtonListeners.length != 0 || buttonClickedListeners.length != 0) {</span>
+<span class="fc" id="L526">            String actionCommand = event.getActionCommand();</span>
+<span class="pc bpc" id="L527" title="1 of 2 branches missed.">            if (actionCommand == null) {</span>
+<span class="nc" id="L528">                actionCommand = getActionCommand();</span>
             }
-<span class="fc" id="L535">            ActionEvent e = new ActionEvent(swingtree.components.JSplitButton.this,</span>
+<span class="fc" id="L530">            ActionEvent e = new ActionEvent(swingtree.components.JSplitButton.this,</span>
                     ActionEvent.ACTION_PERFORMED,
                     actionCommand,
-<span class="fc" id="L538">                    event.getWhen(),</span>
-<span class="fc" id="L539">                    event.getModifiers());</span>
+<span class="fc" id="L533">                    event.getWhen(),</span>
+<span class="fc" id="L534">                    event.getModifiers());</span>
             // Process the listeners last to first
-<span class="pc bpc" id="L541" title="1 of 2 branches missed.">            if (splitButtonListeners.length != 0) {</span>
-<span class="nc bnc" id="L542" title="All 2 branches missed.">                for (int i = splitButtonListeners.length - 1; i &gt;= 0; i--) {</span>
-<span class="nc" id="L543">                    splitButtonListeners[i].buttonClicked(e);</span>
+<span class="pc bpc" id="L536" title="1 of 2 branches missed.">            if (splitButtonListeners.length != 0) {</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">                for (int i = splitButtonListeners.length - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L538">                    splitButtonListeners[i].buttonClicked(e);</span>
                 }
             }
-<span class="pc bpc" id="L546" title="1 of 2 branches missed.">            if (buttonClickedListeners.length != 0) {</span>
-<span class="fc bfc" id="L547" title="All 2 branches covered.">                for (int i = buttonClickedListeners.length - 1; i &gt;= 0; i--) {</span>
-<span class="fc" id="L548">                    buttonClickedListeners[i].actionPerformed(e);</span>
+<span class="pc bpc" id="L541" title="1 of 2 branches missed.">            if (buttonClickedListeners.length != 0) {</span>
+<span class="fc bfc" id="L542" title="All 2 branches covered.">                for (int i = buttonClickedListeners.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc" id="L543">                    buttonClickedListeners[i].actionPerformed(e);</span>
                 }
             }
         }
-<span class="fc" id="L552">    }</span>
+<span class="fc" id="L547">    }</span>
 
     /**
      * Notifies all listeners that have registered interest for notification on
@@ -561,31 +556,31 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      */
     private void fireSplitButtonClicked(final ActionEvent event) {
         // Guaranteed to return a non-null array
-<span class="nc" id="L564">        SplitButtonActionListener[] splitButtonListeners = listenerList.getListeners(SplitButtonActionListener.class);</span>
-<span class="nc" id="L565">        SplitButtonClickedActionListener[] buttonClickedListeners = listenerList.getListeners(SplitButtonClickedActionListener.class);</span>
-<span class="nc bnc" id="L566" title="All 4 branches missed.">        if (splitButtonListeners.length != 0 || buttonClickedListeners.length != 0) {</span>
-<span class="nc" id="L567">            String actionCommand = event.getActionCommand();</span>
-<span class="nc bnc" id="L568" title="All 2 branches missed.">            if (actionCommand == null) {</span>
-<span class="nc" id="L569">                actionCommand = getActionCommand();</span>
+<span class="nc" id="L559">        SplitButtonActionListener[] splitButtonListeners = listenerList.getListeners(SplitButtonActionListener.class);</span>
+<span class="nc" id="L560">        SplitButtonClickedActionListener[] buttonClickedListeners = listenerList.getListeners(SplitButtonClickedActionListener.class);</span>
+<span class="nc bnc" id="L561" title="All 4 branches missed.">        if (splitButtonListeners.length != 0 || buttonClickedListeners.length != 0) {</span>
+<span class="nc" id="L562">            String actionCommand = event.getActionCommand();</span>
+<span class="nc bnc" id="L563" title="All 2 branches missed.">            if (actionCommand == null) {</span>
+<span class="nc" id="L564">                actionCommand = getActionCommand();</span>
             }
-<span class="nc" id="L571">            ActionEvent e = new ActionEvent(swingtree.components.JSplitButton.this,</span>
+<span class="nc" id="L566">            ActionEvent e = new ActionEvent(swingtree.components.JSplitButton.this,</span>
                     ActionEvent.ACTION_PERFORMED,
                     actionCommand,
-<span class="nc" id="L574">                    event.getWhen(),</span>
-<span class="nc" id="L575">                    event.getModifiers());</span>
+<span class="nc" id="L569">                    event.getWhen(),</span>
+<span class="nc" id="L570">                    event.getModifiers());</span>
             // Process the listeners last to first
-<span class="nc bnc" id="L577" title="All 2 branches missed.">            if (splitButtonListeners.length != 0) {</span>
-<span class="nc bnc" id="L578" title="All 2 branches missed.">                for (int i = splitButtonListeners.length - 1; i &gt;= 0; i--) {</span>
-<span class="nc" id="L579">                    splitButtonListeners[i].splitButtonClicked(e);</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">            if (splitButtonListeners.length != 0) {</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">                for (int i = splitButtonListeners.length - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L574">                    splitButtonListeners[i].splitButtonClicked(e);</span>
                 }
             }
-<span class="nc bnc" id="L582" title="All 2 branches missed.">            if (buttonClickedListeners.length != 0) {</span>
-<span class="nc bnc" id="L583" title="All 2 branches missed.">                for (int i = buttonClickedListeners.length - 1; i &gt;= 0; i--) {</span>
-<span class="nc" id="L584">                    buttonClickedListeners[i].actionPerformed(e);</span>
+<span class="nc bnc" id="L577" title="All 2 branches missed.">            if (buttonClickedListeners.length != 0) {</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">                for (int i = buttonClickedListeners.length - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L579">                    buttonClickedListeners[i].actionPerformed(e);</span>
                 }
             }
         }
-<span class="nc" id="L588">    }</span>
+<span class="nc" id="L583">    }</span>
 
     /**
      *  Returns the {@link swingtree.components.JSplitButton.Listener},
@@ -593,7 +588,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @return the listener
      */
     swingtree.components.JSplitButton.Listener getListener() {
-<span class="nc" id="L596">        return listener;</span>
+<span class="nc" id="L591">        return listener;</span>
     }
 
     /**
@@ -601,55 +596,55 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      *
      * Package private so its available to tests.
      */
-<span class="fc" id="L604">    class Listener implements MouseMotionListener, MouseListener, ActionListener {</span>
+<span class="fc" id="L599">    class Listener implements MouseMotionListener, MouseListener, ActionListener {</span>
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-<span class="pc bpc" id="L608" title="1 of 2 branches missed.">            if (popupMenu == null) {</span>
-<span class="nc" id="L609">                fireButtonClicked(e);</span>
-<span class="pc bpc" id="L610" title="1 of 2 branches missed.">            } else if (alwaysPopup) {</span>
-<span class="nc" id="L611">                popupMenu.show(swingtree.components.JSplitButton.this, getWidth() - (int) popupMenu.getPreferredSize().getWidth(), getHeight());</span>
-<span class="nc" id="L612">                fireButtonClicked(e);</span>
-<span class="pc bpc" id="L613" title="1 of 2 branches missed.">            } else if (onSplit) {</span>
-<span class="nc" id="L614">                popupMenu.show(swingtree.components.JSplitButton.this, getWidth() - (int) popupMenu.getPreferredSize().getWidth(), getHeight());</span>
-<span class="nc" id="L615">                fireSplitButtonClicked(e);</span>
+<span class="pc bpc" id="L603" title="1 of 2 branches missed.">            if (popupMenu == null) {</span>
+<span class="nc" id="L604">                fireButtonClicked(e);</span>
+<span class="pc bpc" id="L605" title="1 of 2 branches missed.">            } else if (alwaysPopup) {</span>
+<span class="nc" id="L606">                popupMenu.show(swingtree.components.JSplitButton.this, getWidth() - (int) popupMenu.getPreferredSize().getWidth(), getHeight());</span>
+<span class="nc" id="L607">                fireButtonClicked(e);</span>
+<span class="pc bpc" id="L608" title="1 of 2 branches missed.">            } else if (onSplit) {</span>
+<span class="nc" id="L609">                popupMenu.show(swingtree.components.JSplitButton.this, getWidth() - (int) popupMenu.getPreferredSize().getWidth(), getHeight());</span>
+<span class="nc" id="L610">                fireSplitButtonClicked(e);</span>
             } else {
-<span class="fc" id="L617">                fireButtonClicked(e);</span>
+<span class="fc" id="L612">                fireButtonClicked(e);</span>
             }
-<span class="fc" id="L619">        }</span>
+<span class="fc" id="L614">        }</span>
 
         @Override
         public void mouseExited(final MouseEvent e) {
-<span class="nc" id="L623">            onSplit = false;</span>
-<span class="nc" id="L624">            repaint(splitRectangle);</span>
-<span class="nc" id="L625">        }</span>
+<span class="nc" id="L618">            onSplit = false;</span>
+<span class="nc" id="L619">            repaint(splitRectangle);</span>
+<span class="nc" id="L620">        }</span>
 
         @Override
         public void mouseMoved(final MouseEvent e) {
-<span class="nc" id="L629">            onSplit = splitRectangle.contains(e.getPoint());</span>
-<span class="nc" id="L630">            repaint(splitRectangle);</span>
-<span class="nc" id="L631">        }</span>
+<span class="nc" id="L624">            onSplit = splitRectangle.contains(e.getPoint());</span>
+<span class="nc" id="L625">            repaint(splitRectangle);</span>
+<span class="nc" id="L626">        }</span>
 
         // &lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;Unused Listeners&quot;&gt;
         @Override
         public void mouseDragged(final MouseEvent e) {
-<span class="nc" id="L636">        }</span>
+<span class="nc" id="L631">        }</span>
 
         @Override
         public void mouseClicked(final MouseEvent e) {
-<span class="nc" id="L640">        }</span>
+<span class="nc" id="L635">        }</span>
 
         @Override
         public void mousePressed(final MouseEvent e) {
-<span class="nc" id="L644">        }</span>
+<span class="nc" id="L639">        }</span>
 
         @Override
         public void mouseReleased(final MouseEvent e) {
-<span class="nc" id="L648">        }</span>
+<span class="nc" id="L643">        }</span>
 
         @Override
         public void mouseEntered(final MouseEvent e) {
-<span class="nc" id="L652">        }</span>
+<span class="nc" id="L647">        }</span>
         // &lt;/editor-fold&gt;
     }
 }

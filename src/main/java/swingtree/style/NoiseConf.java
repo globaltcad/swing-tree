@@ -320,6 +320,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      *  This will rotate the input space of the noise function.
      *
      *  @param rotation The rotation of the noise gradient in degrees.
+     *  @return A new noise gradient style with the specified rotation.
      */
     public NoiseConf rotation( float rotation ) {
         return of(_function, _colors, _offset, _scale, _area, _boundary, rotation, _fractions);
@@ -334,6 +335,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      *  colors will be evenly distributed between the last two fractions.
      *
      *  @param fractions The fractions of the noise gradient.
+     *  @return A new noise gradient style with the specified fractions.
      */
     public NoiseConf fractions( double... fractions ) {
         float[] actualFractions = new float[fractions.length];

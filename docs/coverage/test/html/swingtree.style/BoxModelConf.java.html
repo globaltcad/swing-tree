@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  An immutable config container for border styles that is part of
+ *  An immutable config container defining the shape of a component as part of
  *  a {@link StyleConf} configuration object.
  *  The state of this object is updated through with-methods that return
  *  a new instance of this class with the updated state.

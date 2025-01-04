@@ -6,6 +6,8 @@ import java.util.Objects;
 
 /**
  * A {@link UIForAnySwing} subclass specifically designed for adding icons to your SwingTree.
+ *
+ * @param &lt;I&gt; The type of {@link JIcon} that this {@link UIForIcon} is configuring.
  */
 public final class UIForIcon&lt;I extends JIcon&gt; extends UIForAnySwing&lt;UIForIcon&lt;I&gt;, I&gt;
 {
@@ -17,19 +19,19 @@ public final class UIForIcon&lt;I extends JIcon&gt; extends UIForAnySwing&lt;UIF
      *
      * @param state The state of the builder used for creating an icon based component.
      */
-<span class="fc" id="L20">    UIForIcon( BuilderState&lt;I&gt; state ) {</span>
-<span class="fc" id="L21">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L22">        _state = state;</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L22">    UIForIcon( BuilderState&lt;I&gt; state ) {</span>
+<span class="fc" id="L23">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L24">        _state = state;</span>
+<span class="fc" id="L25">    }</span>
 
     @Override
     protected BuilderState&lt;I&gt; _state() {
-<span class="fc" id="L27">        return _state;</span>
+<span class="fc" id="L29">        return _state;</span>
     }
     
     @Override
     protected UIForIcon&lt;I&gt; _newBuilderWithState( BuilderState&lt;I&gt; newState ) {
-<span class="fc" id="L32">        return new UIForIcon&lt;&gt;(newState);</span>
+<span class="fc" id="L34">        return new UIForIcon&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

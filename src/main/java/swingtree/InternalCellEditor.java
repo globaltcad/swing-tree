@@ -439,6 +439,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         protected abstract @Nullable Object getCurrentCellEditorEntry();
 
         /**
+         *  Tries to convert the value of this cell to the target type
+         *  and returns it as a {@link Result}, which may contain problems
+         *  if the conversion failed.
+         *
          * @return the value of this cell as the target type if possible
          *         or the raw value if conversion is not possible.
          */

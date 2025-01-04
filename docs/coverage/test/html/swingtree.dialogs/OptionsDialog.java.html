@@ -42,12 +42,14 @@ import java.util.function.Function;
  *  &lt;p&gt;
  *  Note that this API translates to the
  *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)} method.
+ *
+ * @param &lt;E&gt; The type of the {@link Enum} options that the dialog will present to the user.
  */
 public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
 {
-<span class="fc" id="L48">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OptionsDialog.class);</span>
+<span class="fc" id="L50">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OptionsDialog.class);</span>
 
-<span class="fc" id="L50">    private static final OptionsDialog&lt;?&gt; _NONE = new OptionsDialog&lt;&gt;(</span>
+<span class="fc" id="L52">    private static final OptionsDialog&lt;?&gt; _NONE = new OptionsDialog&lt;&gt;(</span>
                                                                 -1,
                                                                 &quot;&quot;,
                                                                 &quot;&quot;,
@@ -67,11 +69,11 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @param &lt;E&gt; The type of the {@link Enum} options.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; OptionsDialog&lt;E&gt; offering( String message, E... options ) {
-<span class="fc" id="L70">        Objects.requireNonNull(options);</span>
-<span class="fc bfc" id="L71" title="All 2 branches covered.">        for ( Enum&lt;?&gt; option : options )</span>
-<span class="fc" id="L72">            Objects.requireNonNull(option);</span>
+<span class="fc" id="L72">        Objects.requireNonNull(options);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        for ( Enum&lt;?&gt; option : options )</span>
+<span class="fc" id="L74">            Objects.requireNonNull(option);</span>
         
-<span class="fc" id="L74">        return ((OptionsDialog&lt;E&gt;)_NONE).message(message).options(options);</span>
+<span class="fc" id="L76">        return ((OptionsDialog&lt;E&gt;)_NONE).message(message).options(options);</span>
     }
 
 
@@ -85,8 +87,8 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @param &lt;E&gt; The type of the {@link Enum} options.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; OptionsDialog&lt;E&gt; offering( String message, Var&lt;E&gt; property ) {
-<span class="fc" id="L88">        Objects.requireNonNull(property);</span>
-<span class="fc" id="L89">        return ((OptionsDialog&lt;E&gt;)_NONE).message(message).property(property);</span>
+<span class="fc" id="L90">        Objects.requireNonNull(property);</span>
+<span class="fc" id="L91">        return ((OptionsDialog&lt;E&gt;)_NONE).message(message).property(property);</span>
     }
 
 
@@ -109,16 +111,16 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
         @Nullable Icon      icon,
         @Nullable Component parent,
         @Nullable Var&lt;E&gt;    property
-<span class="fc" id="L112">    ) {</span>
-<span class="fc" id="L113">        _type     = type;</span>
-<span class="fc" id="L114">        _title    = Objects.requireNonNull(title);</span>
-<span class="fc" id="L115">        _message  = Objects.requireNonNull(message);</span>
-<span class="fc" id="L116">        _default  = defaultOption;</span>
-<span class="fc" id="L117">        _options  = options;</span>
-<span class="fc" id="L118">        _icon     = icon;</span>
-<span class="fc" id="L119">        _parent   = parent;</span>
-<span class="fc" id="L120">        _property = property;</span>
-<span class="fc" id="L121">    }</span>
+<span class="fc" id="L114">    ) {</span>
+<span class="fc" id="L115">        _type     = type;</span>
+<span class="fc" id="L116">        _title    = Objects.requireNonNull(title);</span>
+<span class="fc" id="L117">        _message  = Objects.requireNonNull(message);</span>
+<span class="fc" id="L118">        _default  = defaultOption;</span>
+<span class="fc" id="L119">        _options  = options;</span>
+<span class="fc" id="L120">        _icon     = icon;</span>
+<span class="fc" id="L121">        _parent   = parent;</span>
+<span class="fc" id="L122">        _property = property;</span>
+<span class="fc" id="L123">    }</span>
 
     /**
      *  Creates an updated options dialog config with the specified title
@@ -129,7 +131,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified title.
      */
     public OptionsDialog&lt;E&gt; titled( String title ) {
-<span class="fc" id="L132">        return new OptionsDialog&lt;&gt;(_type, title, _message, _default, _options, _icon, _parent, _property);</span>
+<span class="fc" id="L134">        return new OptionsDialog&lt;&gt;(_type, title, _message, _default, _options, _icon, _parent, _property);</span>
     }
 
     /**
@@ -137,7 +139,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified message.
      */
     private OptionsDialog&lt;E&gt; message( String message ) {
-<span class="fc" id="L140">        return new OptionsDialog&lt;&gt;(_type, _title, message, _default, _options, _icon, _parent, _property);</span>
+<span class="fc" id="L142">        return new OptionsDialog&lt;&gt;(_type, _title, message, _default, _options, _icon, _parent, _property);</span>
     }
 
     /**
@@ -150,8 +152,8 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified default option.
      */
     public OptionsDialog&lt;E&gt; defaultOption( E defaultOption ) {
-<span class="fc" id="L153">        Objects.requireNonNull(defaultOption);</span>
-<span class="fc" id="L154">        return new OptionsDialog&lt;&gt;(_type, _title, _message, defaultOption, _options, _icon, _parent, _property);</span>
+<span class="fc" id="L155">        Objects.requireNonNull(defaultOption);</span>
+<span class="fc" id="L156">        return new OptionsDialog&lt;&gt;(_type, _title, _message, defaultOption, _options, _icon, _parent, _property);</span>
     }
 
     /**
@@ -160,10 +162,10 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified options.
      */
     private OptionsDialog&lt;E&gt; options( E... options ) {
-<span class="fc" id="L163">        Objects.requireNonNull(options);</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">        for ( Enum&lt;?&gt; option : options )</span>
-<span class="fc" id="L165">            Objects.requireNonNull(option);</span>
-<span class="fc" id="L166">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, options, _icon, _parent, _property);</span>
+<span class="fc" id="L165">        Objects.requireNonNull(options);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        for ( Enum&lt;?&gt; option : options )</span>
+<span class="fc" id="L167">            Objects.requireNonNull(option);</span>
+<span class="fc" id="L168">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, options, _icon, _parent, _property);</span>
     }
 
     /**
@@ -175,8 +177,8 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified icon.
      */
     public OptionsDialog&lt;E&gt; icon( IconDeclaration icon ) {
-<span class="nc" id="L178">        Objects.requireNonNull(icon);</span>
-<span class="nc" id="L179">        return icon.find().map(this::icon).orElse(this);</span>
+<span class="nc" id="L180">        Objects.requireNonNull(icon);</span>
+<span class="nc" id="L181">        return icon.find().map(this::icon).orElse(this);</span>
     }
 
     /**
@@ -189,7 +191,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified icon.
      */
     public OptionsDialog&lt;E&gt; icon( Icon icon ) {
-<span class="fc" id="L192">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, icon, _parent, _property);</span>
+<span class="fc" id="L194">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, icon, _parent, _property);</span>
     }
 
     /**
@@ -203,8 +205,8 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified icon.
      */
     public OptionsDialog&lt;E&gt; icon( String path ) {
-<span class="nc" id="L206">        Objects.requireNonNull(path);</span>
-<span class="nc" id="L207">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, UI.findIcon(path).orElse(null), _parent, _property);</span>
+<span class="nc" id="L208">        Objects.requireNonNull(path);</span>
+<span class="nc" id="L209">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, UI.findIcon(path).orElse(null), _parent, _property);</span>
     }
 
     /**
@@ -217,8 +219,8 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified parent component.
      */
     public OptionsDialog&lt;E&gt; parent( Component parent ) {
-<span class="nc" id="L220">        Objects.requireNonNull(parent);</span>
-<span class="nc" id="L221">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, _icon, parent, _property);</span>
+<span class="nc" id="L222">        Objects.requireNonNull(parent);</span>
+<span class="nc" id="L223">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, _icon, parent, _property);</span>
     }
     
     /**
@@ -226,15 +228,15 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified property.
      */
     private OptionsDialog&lt;E&gt; property( Var&lt;E&gt; property ) {
-<span class="fc" id="L229">        Objects.requireNonNull(property);</span>
-<span class="fc" id="L230">        E[] options       = _options;</span>
-<span class="fc" id="L231">        E   defaultOption = _default;</span>
-<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if ( options == null ) </span>
-<span class="fc" id="L233">            options = property.type().getEnumConstants();</span>
-<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        if ( defaultOption == null )</span>
-<span class="fc" id="L235">            defaultOption = property.orElseNull();</span>
+<span class="fc" id="L231">        Objects.requireNonNull(property);</span>
+<span class="fc" id="L232">        E[] options       = _options;</span>
+<span class="fc" id="L233">        E   defaultOption = _default;</span>
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        if ( options == null ) </span>
+<span class="fc" id="L235">            options = property.type().getEnumConstants();</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">        if ( defaultOption == null )</span>
+<span class="fc" id="L237">            defaultOption = property.orElseNull();</span>
         
-<span class="fc" id="L237">        return new OptionsDialog&lt;&gt;(_type, _title, _message, defaultOption, options, _icon, _parent, property);</span>
+<span class="fc" id="L239">        return new OptionsDialog&lt;&gt;(_type, _title, _message, defaultOption, options, _icon, _parent, property);</span>
     }
 
     /**
@@ -249,7 +251,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return A new {@link OptionsDialog} instance with the specified type.
      */
     private OptionsDialog&lt;E&gt; _type( int type ) {
-<span class="fc" id="L252">        return new OptionsDialog&lt;&gt;(type, _title, _message, _default, _options, _icon, _parent, _property);</span>
+<span class="fc" id="L254">        return new OptionsDialog&lt;&gt;(type, _title, _message, _default, _options, _icon, _parent, _property);</span>
     }
 
     /**
@@ -261,7 +263,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsQuestion() {
-<span class="fc" id="L264">        return showAsQuestion(Object::toString);</span>
+<span class="fc" id="L266">        return showAsQuestion(Object::toString);</span>
     }
 
     /**
@@ -277,7 +279,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsQuestion( Function&lt;E, String&gt; presenter ) {
-<span class="fc" id="L280">        return _type(JOptionPane.QUESTION_MESSAGE).show(presenter);</span>
+<span class="fc" id="L282">        return _type(JOptionPane.QUESTION_MESSAGE).show(presenter);</span>
     }
 
     /**
@@ -289,7 +291,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsError() {
-<span class="nc" id="L292">        return showAsError(Object::toString);</span>
+<span class="nc" id="L294">        return showAsError(Object::toString);</span>
     }
 
     /**
@@ -305,7 +307,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsError( Function&lt;E, String&gt; presenter ) {
-<span class="nc" id="L308">        return _type(JOptionPane.ERROR_MESSAGE).show(presenter);</span>
+<span class="nc" id="L310">        return _type(JOptionPane.ERROR_MESSAGE).show(presenter);</span>
     }
 
     /**
@@ -317,7 +319,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsWarning() {
-<span class="nc" id="L320">        return showAsWarning(Object::toString);</span>
+<span class="nc" id="L322">        return showAsWarning(Object::toString);</span>
     }
 
     /**
@@ -333,7 +335,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsWarning( Function&lt;E, String&gt; presenter ) {
-<span class="nc" id="L336">        return _type(JOptionPane.WARNING_MESSAGE).show(presenter);</span>
+<span class="nc" id="L338">        return _type(JOptionPane.WARNING_MESSAGE).show(presenter);</span>
     }
 
     /**
@@ -345,7 +347,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsInfo() {
-<span class="nc" id="L348">        return showAsInfo(Object::toString);</span>
+<span class="nc" id="L350">        return showAsInfo(Object::toString);</span>
     }
 
     /**
@@ -361,7 +363,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsInfo( Function&lt;E, String&gt; presenter ) {
-<span class="nc" id="L364">        return _type(JOptionPane.INFORMATION_MESSAGE).show(presenter);</span>
+<span class="nc" id="L366">        return _type(JOptionPane.INFORMATION_MESSAGE).show(presenter);</span>
     }
 
     /**
@@ -373,7 +375,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsPlain() {
-<span class="nc" id="L376">        return showAsPlain(Object::toString);</span>
+<span class="nc" id="L378">        return showAsPlain(Object::toString);</span>
     }
 
     /**
@@ -389,7 +391,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional&lt;E&gt; showAsPlain( Function&lt;E, String&gt; presenter ) {
-<span class="nc" id="L392">        return _type(JOptionPane.PLAIN_MESSAGE).show(presenter);</span>
+<span class="nc" id="L394">        return _type(JOptionPane.PLAIN_MESSAGE).show(presenter);</span>
     }
 
     /**
@@ -403,7 +405,7 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      *         or an empty {@link Optional} if the user closed the dialog.
      */
     public Optional&lt;E&gt; show() {
-<span class="fc" id="L406">        return this.show(Object::toString);</span>
+<span class="fc" id="L408">        return this.show(Object::toString);</span>
     }
 
     /**
@@ -421,56 +423,56 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
      *         or an empty {@link Optional} if the user closed the dialog.
      */
     public Optional&lt;E&gt; show( Function&lt;E, String&gt; presenter ) {
-<span class="fc" id="L424">        E[] options = _options;</span>
-<span class="pc bpc" id="L425" title="1 of 2 branches missed.">        if ( options == null ) {</span>
-<span class="nc bnc" id="L426" title="All 2 branches missed.">            if ( _property != null )</span>
-<span class="nc" id="L427">                options = _property.type().getEnumConstants();</span>
+<span class="fc" id="L426">        E[] options = _options;</span>
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">        if ( options == null ) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">            if ( _property != null )</span>
+<span class="nc" id="L429">                options = _property.type().getEnumConstants();</span>
             else {
-<span class="nc" id="L429">                log.warn(&quot;No options were specified for dialog with title '{}' and message '{}'.&quot;, _title, _message);</span>
+<span class="nc" id="L431">                log.warn(&quot;No options were specified for dialog with title '{}' and message '{}'.&quot;, _title, _message);</span>
             }
         }
-<span class="pc bpc" id="L432" title="1 of 2 branches missed.">        if ( options == null )</span>
-<span class="nc" id="L433">            options = (E[])new Enum&lt;?&gt;[0];</span>
+<span class="pc bpc" id="L434" title="1 of 2 branches missed.">        if ( options == null )</span>
+<span class="nc" id="L435">            options = (E[])new Enum&lt;?&gt;[0];</span>
 
-<span class="fc" id="L435">        String[] asStr = new String[options.length];</span>
-<span class="fc bfc" id="L436" title="All 2 branches covered.">        for ( int i = 0; i &lt; options.length; i++ ) {</span>
+<span class="fc" id="L437">        String[] asStr = new String[options.length];</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        for ( int i = 0; i &lt; options.length; i++ ) {</span>
             try {
-<span class="fc" id="L438">                asStr[i] = presenter.apply(options[i]);</span>
-<span class="nc" id="L439">            } catch ( Exception e ) {</span>
-<span class="nc" id="L440">                log.warn(&quot;An exception occurred while converting an enum option to a string!&quot;, e);</span>
-<span class="nc" id="L441">                asStr[i] = options[i].toString();</span>
-<span class="fc" id="L442">            }</span>
+<span class="fc" id="L440">                asStr[i] = presenter.apply(options[i]);</span>
+<span class="nc" id="L441">            } catch ( Exception e ) {</span>
+<span class="nc" id="L442">                log.warn(&quot;An exception occurred while converting an enum option to a string!&quot;, e);</span>
+<span class="nc" id="L443">                asStr[i] = options[i].toString();</span>
+<span class="fc" id="L444">            }</span>
         }
 
-<span class="fc" id="L445">        E defaultOption = _default;</span>
+<span class="fc" id="L447">        E defaultOption = _default;</span>
 
-<span class="pc bpc" id="L447" title="1 of 2 branches missed.">        if ( defaultOption == null ) {</span>
-<span class="nc bnc" id="L448" title="All 4 branches missed.">            if ( _property != null &amp;&amp; _property.isPresent() )</span>
-<span class="nc" id="L449">                defaultOption = _property.get();</span>
-<span class="nc bnc" id="L450" title="All 2 branches missed.">            else if ( options.length &gt; 0 )</span>
-<span class="nc" id="L451">                defaultOption = options[0];</span>
+<span class="pc bpc" id="L449" title="1 of 2 branches missed.">        if ( defaultOption == null ) {</span>
+<span class="nc bnc" id="L450" title="All 4 branches missed.">            if ( _property != null &amp;&amp; _property.isPresent() )</span>
+<span class="nc" id="L451">                defaultOption = _property.get();</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">            else if ( options.length &gt; 0 )</span>
+<span class="nc" id="L453">                defaultOption = options[0];</span>
         }
 
-<span class="fc" id="L454">        String defaultOptionStr = &quot;&quot;;</span>
-<span class="pc bpc" id="L455" title="1 of 2 branches missed.">        if ( defaultOption != null ) {</span>
+<span class="fc" id="L456">        String defaultOptionStr = &quot;&quot;;</span>
+<span class="pc bpc" id="L457" title="1 of 2 branches missed.">        if ( defaultOption != null ) {</span>
             try {
-<span class="fc" id="L457">                defaultOptionStr = presenter.apply(defaultOption);</span>
-<span class="nc" id="L458">            } catch ( Exception e ) {</span>
-<span class="nc" id="L459">                log.warn(&quot;An exception occurred while converting the default option to a string!&quot;, e);</span>
-<span class="nc" id="L460">                defaultOptionStr = defaultOption.toString();</span>
-<span class="fc" id="L461">            }</span>
+<span class="fc" id="L459">                defaultOptionStr = presenter.apply(defaultOption);</span>
+<span class="nc" id="L460">            } catch ( Exception e ) {</span>
+<span class="nc" id="L461">                log.warn(&quot;An exception occurred while converting the default option to a string!&quot;, e);</span>
+<span class="nc" id="L462">                defaultOptionStr = defaultOption.toString();</span>
+<span class="fc" id="L463">            }</span>
         }
 
-<span class="fc" id="L464">        int type = _type;</span>
-<span class="fc bfc" id="L465" title="All 2 branches covered.">        if ( type &lt; 0 ) {</span>
-<span class="pc bpc" id="L466" title="1 of 4 branches missed.">            if ( _property != null || options.length != 0 )</span>
-<span class="fc" id="L467">                type = JOptionPane.QUESTION_MESSAGE;</span>
+<span class="fc" id="L466">        int type = _type;</span>
+<span class="fc bfc" id="L467" title="All 2 branches covered.">        if ( type &lt; 0 ) {</span>
+<span class="pc bpc" id="L468" title="1 of 4 branches missed.">            if ( _property != null || options.length != 0 )</span>
+<span class="fc" id="L469">                type = JOptionPane.QUESTION_MESSAGE;</span>
             else {
-<span class="nc" id="L469">                type = JOptionPane.PLAIN_MESSAGE;</span>
+<span class="nc" id="L471">                type = JOptionPane.PLAIN_MESSAGE;</span>
             }
         }
 
-<span class="fc" id="L473">        int selectedIdx = Context.summoner.showOptionDialog(</span>
+<span class="fc" id="L475">        int selectedIdx = Context.summoner.showOptionDialog(</span>
                                     _parent,                    // parent component, if this is not null then the dialog will be centered on it
                                     _message,                   // message to display
                                     _title,                     // title of the dialog
@@ -481,10 +483,10 @@ public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
                                     defaultOptionStr               // default option
                                 );
 
-<span class="pc bpc" id="L484" title="2 of 6 branches missed.">        if ( _property != null &amp;&amp; selectedIdx &gt;= 0 &amp;&amp; options[selectedIdx] != null )</span>
-<span class="fc" id="L485">            _property.set( From.VIEW,  options[selectedIdx] );</span>
+<span class="pc bpc" id="L486" title="2 of 6 branches missed.">        if ( _property != null &amp;&amp; selectedIdx &gt;= 0 &amp;&amp; options[selectedIdx] != null )</span>
+<span class="fc" id="L487">            _property.set( From.VIEW,  options[selectedIdx] );</span>
 
-<span class="pc bpc" id="L487" title="1 of 2 branches missed.">        return Optional.ofNullable( selectedIdx &gt;= 0 ? options[selectedIdx] : null );</span>
+<span class="pc bpc" id="L489" title="1 of 2 branches missed.">        return Optional.ofNullable( selectedIdx &gt;= 0 ? options[selectedIdx] : null );</span>
     }
 }
 

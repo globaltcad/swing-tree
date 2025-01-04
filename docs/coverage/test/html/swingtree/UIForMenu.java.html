@@ -15,19 +15,19 @@ public final class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;
     private final BuilderState&lt;M&gt; _state;
 
 
-<span class="nc" id="L18">    UIForMenu( BuilderState&lt;M&gt; state ) {</span>
-<span class="nc" id="L19">        Objects.requireNonNull(state);</span>
-<span class="nc" id="L20">        _state = state;</span>
-<span class="nc" id="L21">    }</span>
+<span class="fc" id="L18">    UIForMenu( BuilderState&lt;M&gt; state ) {</span>
+<span class="fc" id="L19">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L20">        _state = state;</span>
+<span class="fc" id="L21">    }</span>
 
     @Override
     protected BuilderState&lt;M&gt; _state() {
-<span class="nc" id="L25">        return _state;</span>
+<span class="fc" id="L25">        return _state;</span>
     }
     
     @Override
     protected UIForMenu&lt;M&gt; _newBuilderWithState( BuilderState&lt;M&gt; newState ) {
-<span class="nc" id="L30">        return new UIForMenu&lt;&gt;(newState);</span>
+<span class="fc" id="L30">        return new UIForMenu&lt;&gt;(newState);</span>
     }
 
     /**

@@ -6,6 +6,8 @@ import javax.swing.*;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JProgressBar} instances.
+ *
+ * @param <P> The type of {@link JProgressBar} that this {@link UIForProgressBar} is configuring.
  */
 public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIForProgressBar<P>, P>
 {

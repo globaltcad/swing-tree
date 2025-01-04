@@ -194,6 +194,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param name the name of the component
      * @param comp the component to be added
      */
+    @Override
     public void addLayoutComponent( String name, Component comp ) {
     }
 
@@ -204,6 +205,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param comp the component to remove
      * @see java.awt.Container#removeAll
      */
+    @Override
     public void removeLayoutComponent( Component comp ) {
     }
 
@@ -218,6 +220,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @see #minimumLayoutSize
      * @see java.awt.Container#getPreferredSize
      */
+    @Override
     public Dimension preferredLayoutSize( Container target ) {
         synchronized (target.getTreeLock()) {
             Dimension dim = new Dimension(0, 0);
@@ -270,6 +273,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @see java.awt.Container
      * @see java.awt.Container#doLayout
      */
+    @Override
     public Dimension minimumLayoutSize( Container target ) {
         synchronized (target.getTreeLock()) {
             boolean useBaseline = getAlignOnBaseline();
@@ -355,6 +359,8 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             case TRAILING:
                 x += width;
                 break;
+            case UNDEFINED:
+                break; // Should happen?
         }
         int maxAscent = 0;
         int nonbaselineHeight = 0;
@@ -425,6 +431,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @see Container
      * @see java.awt.Container#doLayout
      */
+    @Override
     public void layoutContainer(Container target) {
         synchronized (target.getTreeLock()) {
             final int hgap = UI.scale(_horizontalGapSize);
@@ -557,6 +564,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      *
      * @return a string representation of this layout
      */
+    @Override
     public String toString() {
         String str = "";
         int hgap = UI.scale(_horizontalGapSize);
@@ -576,6 +584,9 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                 break;
             case TRAILING:
                 str = ",align=trailing";
+                break;
+            case UNDEFINED:
+                str = ",align=?";
                 break;
         }
         return getClass().getName() + "[horizontalGap=" + hgap + ",verticalGap=" + vgap + str + "]";

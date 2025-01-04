@@ -16,7 +16,7 @@ public final class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForS
      *
      * @param state The {@link BuilderState} modelling how the component is built.
      */
-    protected UIForSwing( BuilderState<C> state ) {
+    UIForSwing(BuilderState<C> state) {
         Objects.requireNonNull(state);
         _state = state;
     }

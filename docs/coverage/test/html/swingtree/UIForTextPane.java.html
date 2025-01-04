@@ -4,7 +4,9 @@ import javax.swing.*;
 import java.util.Objects;
 
 /**
- *  A SwingTree builder node designed for configuring {@link UIForTextPane} instances.
+ *  A declarative SwingTree builder designed for configuring {@link UIForTextPane} instances.
+ *
+ * @param &lt;P&gt; The type of {@link JTextPane} that this {@link UIForTextPane} configures.
  */
 public final class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEditorPane&lt;UIForTextPane&lt;P&gt;, P&gt;
 {
@@ -16,19 +18,19 @@ public final class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEdit
      *
      * @param state The {@link BuilderState} modelling how the component is built.
      */
-<span class="nc" id="L19">    UIForTextPane( BuilderState&lt;P&gt; state ) {</span>
-<span class="nc" id="L20">        Objects.requireNonNull(state);</span>
-<span class="nc" id="L21">        _state = state;</span>
-<span class="nc" id="L22">    }</span>
+<span class="fc" id="L21">    UIForTextPane( BuilderState&lt;P&gt; state ) {</span>
+<span class="fc" id="L22">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L23">        _state = state;</span>
+<span class="fc" id="L24">    }</span>
 
     @Override
     protected BuilderState&lt;P&gt; _state() {
-<span class="nc" id="L26">        return _state;</span>
+<span class="fc" id="L28">        return _state;</span>
     }
     
     @Override
     protected UIForTextPane&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
-<span class="nc" id="L31">        return new UIForTextPane&lt;&gt;(newState);</span>
+<span class="fc" id="L33">        return new UIForTextPane&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

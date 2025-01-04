@@ -77,8 +77,6 @@ import swingtree.layout.*;
  */
 public abstract class UILayoutConstants
 {
-    private static final Logger log = LoggerFactory.getLogger(UILayoutConstants.class);
-
     UILayoutConstants() { throw new UnsupportedOperationException(); }
 
     // Common Mig layout constants:

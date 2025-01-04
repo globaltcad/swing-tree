@@ -8,14 +8,39 @@
 <span class="fc" id="L8">public enum Stride</span>
 {
     /**
-     *  The animation progress defined by {@link AnimationState#progress()}
+     *  The animation progress defined by {@link AnimationStatus#progress()}
      *  will start at 0 and end at 1.
      */
 <span class="fc" id="L14">    PROGRESSIVE,</span>
     /**
-     *  The animation progress defined by {@link AnimationState#progress()}
+     *  The animation progress defined by {@link AnimationStatus#progress()}
      *  will start at 1 and end at 0.
      */
-<span class="fc" id="L19">    REGRESSIVE</span>
+<span class="fc" id="L19">    REGRESSIVE;</span>
+
+    /**
+     *  There are only two possible values for this enum,
+     *  which are {@link #PROGRESSIVE} and {@link #REGRESSIVE}.
+     *  So this returns the inverse of this stride, which is either
+     *  {@link #PROGRESSIVE} if this is {@link #REGRESSIVE}
+     *  or {@link #REGRESSIVE} if this is {@link #PROGRESSIVE}.
+     *
+     * @return The inverse of this stride.
+     */
+    public Stride inverse() {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        return this == PROGRESSIVE ? REGRESSIVE : PROGRESSIVE;</span>
+    }
+
+    /**
+     *  Applies this stride to the supplied progress value.
+     *  If this is {@link #PROGRESSIVE}, the progress is returned as is.
+     *  If this is {@link #REGRESSIVE}, the progress is inverted.
+     *
+     * @param progress The progress value to apply this stride to.
+     * @return The progress value after applying this stride.
+     */
+    public double applyTo( double progress ) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        return this == PROGRESSIVE ? progress : 1 - progress;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

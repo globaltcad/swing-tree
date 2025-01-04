@@ -267,7 +267,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified area.
      */
     public NoiseConf clipTo( UI.ComponentArea area ) {
-<span class="nc" id="L270">        return of(_function, _colors, _offset, _scale, area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L270">        return of(_function, _colors, _offset, _scale, area, _boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -396,8 +396,8 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
 <span class="pc bpc" id="L396" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
 <span class="nc" id="L397">            return _NONE;</span>
 
-<span class="pc bpc" id="L399" title="3 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
-<span class="nc" id="L400">            return _NONE;</span>
+<span class="pc bpc" id="L399" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
+<span class="fc" id="L400">            return _NONE;</span>
 
 <span class="fc bfc" id="L402" title="All 2 branches covered.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();</span>
 

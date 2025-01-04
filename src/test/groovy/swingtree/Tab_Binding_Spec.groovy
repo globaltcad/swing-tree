@@ -54,7 +54,7 @@ class Tab_Binding_Spec extends Specification
             tabbedPane.getTabCount() == 3
 
         when : 'We select the first tab.'
-            tabbedPane.selectedIndex = 0
+            UI.runNow(()->{ tabbedPane.selectedIndex = 0 })
 
         then : 'All properties reflect this change.'
             selectedIndex.get() == 0
@@ -63,7 +63,7 @@ class Tab_Binding_Spec extends Specification
             tab3Selected.get() == false
 
         when : 'We select the second tab.'
-            tabbedPane.selectedIndex = 1
+            UI.runNow(()->{ tabbedPane.selectedIndex = 1 })
 
         then : 'The selected index property is updated, and the boolean properties are correct too.'
             selectedIndex.get() == 1
@@ -120,7 +120,7 @@ class Tab_Binding_Spec extends Specification
             tabbedPane.getTabCount() == 3
 
         when : 'We select the first tab.'
-            tabbedPane.selectedIndex = 0
+            UI.runNow(()->{ tabbedPane.selectedIndex = 0 })
 
         then : 'The properties reflect this change.'
             tab1Selected.get() == true
@@ -128,7 +128,7 @@ class Tab_Binding_Spec extends Specification
             tab3Selected.get() == false
 
         when : 'We select the second tab.'
-            tabbedPane.selectedIndex = 1
+            UI.runNow(()->{ tabbedPane.selectedIndex = 1 })
 
         then : 'The properties reflect this change, only the second tab is selected.'
             tab1Selected.get() == false

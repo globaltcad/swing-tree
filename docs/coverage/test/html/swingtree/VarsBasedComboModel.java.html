@@ -3,6 +3,7 @@
 import org.jspecify.annotations.Nullable;
 import sprouts.Var;
 import sprouts.Vars;
+import sprouts.Viewables;
 
 import java.util.Objects;
 
@@ -11,36 +12,36 @@ class VarsBasedComboModel&lt;E extends @Nullable Object&gt; extends AbstractComb
     private final Vars&lt;E&gt; _items;
 
     VarsBasedComboModel( Vars&lt;E&gt; items ) {
-<span class="fc" id="L14">        super(Var.ofNullable(_findCommonType(items), null));</span>
-<span class="fc" id="L15">        _items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L16">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="pc" id="L17">        _items.onChange( it -&gt; _itemListChanged() );</span>
-<span class="fc" id="L18">    }</span>
+<span class="fc" id="L15">        super(Var.ofNullable(_findCommonType(items), null));</span>
+<span class="fc" id="L16">        _items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L17">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="pc" id="L18">        Viewables.cast(_items).onChange(it -&gt; _itemListChanged() );</span>
+<span class="fc" id="L19">    }</span>
 
     VarsBasedComboModel( Var&lt;E&gt; var, Vars&lt;E&gt; items ) {
-<span class="fc" id="L21">        super(var);</span>
-<span class="fc" id="L22">        _items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L23">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L24">        _items.onChange( it -&gt; _itemListChanged() );</span>
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L22">        super(var);</span>
+<span class="fc" id="L23">        _items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L24">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L25">        Viewables.cast(_items).onChange( it -&gt; _itemListChanged() );</span>
+<span class="fc" id="L26">    }</span>
 
     private void _itemListChanged() {
-<span class="fc" id="L28">        UI.run(()-&gt; {</span>
-<span class="fc" id="L29">            int newSelection = _indexOf(_selectedItem.orElseNull());</span>
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">            if ( newSelection != _selectedIndex )</span>
-<span class="nc" id="L31">                this.setSelectedItem(_items.at(newSelection).orElseNull());</span>
+<span class="fc" id="L29">        UI.run(()-&gt; {</span>
+<span class="fc" id="L30">            int newSelection = _indexOf(_selectedItem.orElseNull());</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            if ( newSelection != _selectedIndex )</span>
+<span class="nc" id="L32">                this.setSelectedItem(_items.at(newSelection).orElseNull());</span>
                 // ^ This will fire the listeners for us already
             else
-<span class="fc" id="L34">                fireListeners();</span>
-<span class="fc" id="L35">        });</span>
-<span class="fc" id="L36">    }</span>
+<span class="fc" id="L35">                fireListeners();</span>
+<span class="fc" id="L36">        });</span>
+<span class="fc" id="L37">    }</span>
 
-<span class="fc" id="L38">    @Override public int getSize() { return _items.size(); }</span>
+<span class="fc" id="L39">    @Override public int getSize() { return _items.size(); }</span>
 
-<span class="fc" id="L40">    @Override public @Nullable E getElementAt(int index ) { return _items.at(index).orElseNull(); }</span>
+<span class="fc" id="L41">    @Override public @Nullable E getElementAt(int index ) { return _items.at(index).orElseNull(); }</span>
 
     @Override public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
-<span class="fc" id="L43">        return new VarsBasedComboModel&lt;&gt;(newVar, _items);</span>
+<span class="fc" id="L44">        return new VarsBasedComboModel&lt;&gt;(newVar, _items);</span>
     }
 
     @Override
@@ -57,10 +58,10 @@ class VarsBasedComboModel&lt;E extends @Nullable Object&gt; extends AbstractComb
             So we'll just try to modify it, and if it fails, we'll just ignore it.
          */
         try {
-<span class="fc" id="L60">            _items.at(index).set(NullUtil.fakeNonNull(element));</span>
-<span class="nc" id="L61">        } catch ( UnsupportedOperationException ignored ) {</span>
+<span class="fc" id="L61">            _items.at(index).set(NullUtil.fakeNonNull(element));</span>
+<span class="nc" id="L62">        } catch ( UnsupportedOperationException ignored ) {</span>
             // ignore, the user of this library doesn't want us to modify the list
-<span class="fc" id="L63">        }</span>
-<span class="fc" id="L64">    }</span>
+<span class="fc" id="L64">        }</span>
+<span class="fc" id="L65">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

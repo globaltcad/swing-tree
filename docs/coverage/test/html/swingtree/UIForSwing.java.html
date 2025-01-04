@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  *  A SwingTree builder node designed for configuring {@link JComponent} types.
  */
-public class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&lt;UIForSwing&lt;C&gt;, C&gt;
+public final class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&lt;UIForSwing&lt;C&gt;, C&gt;
 {
     private final BuilderState&lt;C&gt; _state;
 
@@ -16,7 +16,7 @@ public class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&lt;UIF
      *
      * @param state The {@link BuilderState} modelling how the component is built.
      */
-<span class="fc" id="L19">    protected UIForSwing( BuilderState&lt;C&gt; state ) {</span>
+<span class="fc" id="L19">    UIForSwing(BuilderState&lt;C&gt; state) {</span>
 <span class="fc" id="L20">        Objects.requireNonNull(state);</span>
 <span class="fc" id="L21">        _state = state;</span>
 <span class="fc" id="L22">    }</span>

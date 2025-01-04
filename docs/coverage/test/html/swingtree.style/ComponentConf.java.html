@@ -87,12 +87,12 @@ final class ComponentConf
 
     @Override
     public int hashCode() {
-<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( _wasAlreadyHashed )</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( _wasAlreadyHashed )</span>
 <span class="nc" id="L91">            return _hashCode;</span>
 
-<span class="nc" id="L93">        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);</span>
-<span class="nc" id="L94">        _wasAlreadyHashed = true;</span>
-<span class="nc" id="L95">        return _hashCode;</span>
+<span class="fc" id="L93">        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);</span>
+<span class="fc" id="L94">        _wasAlreadyHashed = true;</span>
+<span class="fc" id="L95">        return _hashCode;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -42,6 +42,7 @@ public interface Styler<C extends JComponent>
      *
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
+     * @throws Exception if the style could not be applied by the client code.
      */
     ComponentStyleDelegate<C> style( ComponentStyleDelegate<C> delegate ) throws Exception;
 

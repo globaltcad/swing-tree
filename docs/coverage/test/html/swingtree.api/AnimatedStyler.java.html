@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnimatedStyler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">AnimatedStyler.java</span></div><h1>AnimatedStyler.java</h1><pre class="source lang-java linenums">package swingtree.api;
 
-import swingtree.animation.AnimationState;
+import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.style.ComponentStyleDelegate;
 
@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link AnimatedStyler} is conceptually a union of the {@link swingtree.animation.Animation}
- * and {@link Styler} functions, which is to say that it takes both an {@link AnimationState} and a
+ * and {@link Styler} functions, which is to say that it takes both an {@link AnimationStatus} and a
  * {@link ComponentStyleDelegate} to produce a new {@link ComponentStyleDelegate}
- * with some style properties applied to it (usually based on the {@link AnimationState}). &lt;br&gt;
+ * with some style properties applied to it (usually based on the {@link AnimationStatus}). &lt;br&gt;
  * Note that both paramters are immutable value oriented objects, so the function is pure and
- * does not modify the original {@link ComponentStyleDelegate} or {@link AnimationState} objects. &lt;br&gt;
+ * does not modify the original {@link ComponentStyleDelegate} or {@link AnimationStatus} objects. &lt;br&gt;
  * This design makes the underlying style engine of SwingTree very flexible and scalable
  * because it allows for the composition of styles and reuse of style logic across many components
  * (see {@link swingtree.style.StyleSheet} for more advanced usage).
@@ -41,13 +41,18 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
 
     /**
      * Applies some style to the given {@link ComponentStyleDelegate} and returns a new {@link ComponentStyleDelegate}
-     * that has the style applied (if any).
-     * @param state The {@link AnimationState} which is used to configure the style
-     *              (usually based on the {@link AnimationState#progress}).
+     * that has the style applied (if any). &lt;br&gt;
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
+     *
+     * @param status The {@link AnimationStatus} which is used to configure the style
+     *              (usually based on the {@link AnimationStatus#progress()}).
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
      */
-    ComponentStyleDelegate&lt;C&gt; style( AnimationState state, ComponentStyleDelegate&lt;C&gt; delegate );
+    ComponentStyleDelegate&lt;C&gt; style( AnimationStatus status, ComponentStyleDelegate&lt;C&gt; delegate ) throws Exception;
 
     /**
      * Returns a new {@link AnimatedStyler} that applies the style of this {@link AnimatedStyler} and then applies the style
@@ -60,20 +65,20 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
      * of the given {@link AnimatedStyler}.
      */
     default AnimatedStyler&lt;C&gt; andThen( AnimatedStyler&lt;C&gt; other ) {
-<span class="nc" id="L63">        Objects.requireNonNull(other, &quot;Use AnimatedStyler.none() instead of null.&quot;);</span>
-<span class="nc bnc" id="L64" title="All 2 branches missed.">        if ( this == none() )</span>
-<span class="nc" id="L65">            return other;</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">        if ( other == none() )</span>
-<span class="nc" id="L67">            return this;</span>
+<span class="nc" id="L68">        Objects.requireNonNull(other, &quot;Use AnimatedStyler.none() instead of null.&quot;);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if ( this == none() )</span>
+<span class="nc" id="L70">            return other;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( other == none() )</span>
+<span class="nc" id="L72">            return this;</span>
 
-<span class="nc" id="L69">        return (state, delegate) -&gt; {</span>
-<span class="nc" id="L70">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
+<span class="nc" id="L74">        return (state, delegate) -&gt; {</span>
+<span class="nc" id="L75">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
             try {
-<span class="nc" id="L72">                result = style( state, delegate );</span>
-<span class="nc" id="L73">            } catch ( Exception e ) {</span>
-<span class="nc" id="L74">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
-<span class="nc" id="L75">            }</span>
-<span class="nc" id="L76">            return other.style( state, result );</span>
+<span class="nc" id="L77">                result = style( state, delegate );</span>
+<span class="nc" id="L78">            } catch ( Exception e ) {</span>
+<span class="nc" id="L79">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
+<span class="nc" id="L80">            }</span>
+<span class="nc" id="L81">            return other.style( state, result );</span>
         };
     }
 }

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTextField.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTextField.java</span></div><h1>UIForTextField.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import sprouts.Action;
-import sprouts.From;
-import sprouts.Val;
-import sprouts.Var;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.*;
 
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
@@ -25,6 +24,7 @@ import java.util.function.Function;
  */
 public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTextComponent&lt;UIForTextField&lt;F&gt;, F&gt;
 {
+<span class="fc" id="L27">    private static final Logger log = LoggerFactory.getLogger(UIForTextField.class);</span>
     private final BuilderState&lt;F&gt; _state;
 
 
@@ -53,10 +53,16 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
 <span class="fc" id="L53">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L54">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L55">                   _onEnter(thisComponent,</span>
-<span class="fc" id="L56">                       e -&gt; _runInApp( () -&gt; action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+<span class="fc" id="L56">                       e -&gt; _runInApp( () -&gt; {</span>
+                           try {
+<span class="fc" id="L58">                               action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L59">                           } catch (Exception ex) {</span>
+<span class="nc" id="L60">                               log.error(&quot;An error occurred while executing on enter action.&quot;, ex);</span>
+<span class="fc" id="L61">                           }</span>
+<span class="fc" id="L62">                       })</span>
                    );
-<span class="fc" id="L58">               })</span>
-<span class="fc" id="L59">               ._this();</span>
+<span class="fc" id="L64">               })</span>
+<span class="fc" id="L65">               ._this();</span>
     }
 
     private void _onEnter( F thisComponent, Consumer&lt;ActionEvent&gt; action ) {
@@ -71,15 +77,15 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L74">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
-<span class="fc bfc" id="L75" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L76">            thisComponent.removeActionListener(listener);</span>
+<span class="fc" id="L80">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L82">            thisComponent.removeActionListener(listener);</span>
 
-<span class="fc" id="L78">        thisComponent.addActionListener(action::accept);</span>
+<span class="fc" id="L84">        thisComponent.addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L80" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L81">            thisComponent.addActionListener(listeners[i]);</span>
-<span class="fc" id="L82">    }</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L87">            thisComponent.addActionListener(listeners[i]);</span>
+<span class="fc" id="L88">    }</span>
 
     /**
      *  Effectively bind this text field to a numeric {@link Var} property
@@ -90,9 +96,9 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number ) {
-<span class="fc" id="L93">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="fc" id="L94">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
-<span class="fc" id="L95">        return this.withNumber( number, isValid );</span>
+<span class="fc" id="L99">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="fc" id="L100">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
+<span class="fc" id="L101">        return this.withNumber( number, isValid );</span>
     }
 
     /**
@@ -105,9 +111,9 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number, Var&lt;Boolean&gt; isValid ) {
-<span class="fc" id="L108">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="fc" id="L109">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
-<span class="fc" id="L110">        return withNumber( number, isValid, Object::toString );</span>
+<span class="fc" id="L114">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="fc" id="L115">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
+<span class="fc" id="L116">        return withNumber( number, isValid, Object::toString );</span>
     }
 
     /**
@@ -121,10 +127,10 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number, Function&lt;N, String&gt; formatter ) {
-<span class="nc" id="L124">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="nc" id="L125">        NullUtil.nullArgCheck(formatter, &quot;formatter&quot;, Function.class);</span>
-<span class="nc" id="L126">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
-<span class="nc" id="L127">        return withNumber( number, isValid, Object::toString );</span>
+<span class="nc" id="L130">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="nc" id="L131">        NullUtil.nullArgCheck(formatter, &quot;formatter&quot;, Function.class);</span>
+<span class="nc" id="L132">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
+<span class="nc" id="L133">        return withNumber( number, isValid, formatter );</span>
     }
 
     /**
@@ -138,46 +144,46 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number, Var&lt;Boolean&gt; isValid, Function&lt;N, String&gt; formatter ) {
-<span class="fc" id="L141">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="fc" id="L142">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
-<span class="fc" id="L143">        NullUtil.nullArgCheck(formatter, &quot;formatter&quot;, Function.class);</span>
-<span class="fc" id="L144">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
-<span class="fc" id="L145">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
-<span class="fc" id="L146">        Var&lt;String&gt; text = Var.of( formatter.apply(number.get()) );</span>
-<span class="fc" id="L147">        return ((UIForTextField&lt;F&gt;)_with( thisComponent -&gt; {</span>
-<span class="pc" id="L148">                    _onShow( number, thisComponent, (c,n) -&gt; _setTextSilently( thisComponent, formatter.apply(n) ) );</span>
-<span class="fc" id="L149">                    text.onChange(From.VIEW,  s -&gt; {</span>
+<span class="fc" id="L147">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="fc" id="L148">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
+<span class="fc" id="L149">        NullUtil.nullArgCheck(formatter, &quot;formatter&quot;, Function.class);</span>
+<span class="fc" id="L150">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
+<span class="fc" id="L151">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
+<span class="fc" id="L152">        Var&lt;String&gt; text = Var.of( formatter.apply(number.get()) );</span>
+<span class="fc" id="L153">        return ((UIForTextField&lt;F&gt;)_with( thisComponent -&gt; {</span>
+<span class="pc" id="L154">                    _onShow( number, thisComponent, (c,n) -&gt; _setTextSilently( thisComponent, formatter.apply(n) ) );</span>
+<span class="fc" id="L155">                    Viewable.cast(text).onChange(From.VIEW, s -&gt; {</span>
                         try {
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">                            if ( number.type() == Integer.class )</span>
-<span class="nc" id="L152">                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );</span>
-<span class="pc bpc" id="L153" title="1 of 2 branches missed.">                            else if ( number.type() == Long.class )</span>
-<span class="nc" id="L154">                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );</span>
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                            else if ( number.type() == Float.class )</span>
-<span class="nc" id="L156">                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );</span>
-<span class="pc bpc" id="L157" title="1 of 2 branches missed.">                            else if ( number.type() == Double.class )</span>
-<span class="nc" id="L158">                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );</span>
-<span class="nc bnc" id="L159" title="All 2 branches missed.">                            else if ( number.type() == Short.class )</span>
-<span class="nc" id="L160">                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );</span>
-<span class="nc bnc" id="L161" title="All 2 branches missed.">                            else if ( number.type() == Byte.class )</span>
-<span class="nc" id="L162">                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">                            if ( number.type() == Integer.class )</span>
+<span class="nc" id="L158">                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.currentValue().orElseThrowUnchecked())) );</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">                            else if ( number.type() == Long.class )</span>
+<span class="nc" id="L160">                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.currentValue().orElseThrowUnchecked())) );</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">                            else if ( number.type() == Float.class )</span>
+<span class="nc" id="L162">                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.currentValue().orElseThrowUnchecked())) );</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">                            else if ( number.type() == Double.class )</span>
+<span class="nc" id="L164">                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.currentValue().orElseThrowUnchecked())) );</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                            else if ( number.type() == Short.class )</span>
+<span class="nc" id="L166">                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.currentValue().orElseThrowUnchecked())) );</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                            else if ( number.type() == Byte.class )</span>
+<span class="nc" id="L168">                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.currentValue().orElseThrowUnchecked())) );</span>
                             else
-<span class="nc" id="L164">                                throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
+<span class="nc" id="L170">                                throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
 
-<span class="nc bnc" id="L166" title="All 2 branches missed.">                            if ( isValid.is(false) ) {</span>
-<span class="nc" id="L167">                                isValid.set(true);</span>
-<span class="nc" id="L168">                                isValid.fireChange(From.VIEW);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                            if ( isValid.is(false) ) {</span>
+<span class="nc" id="L173">                                isValid.set(true);</span>
+<span class="nc" id="L174">                                isValid.fireChange(From.VIEW);</span>
                             }
-<span class="fc" id="L170">                        } catch (NumberFormatException e) {</span>
+<span class="fc" id="L176">                        } catch (NumberFormatException e) {</span>
                             // ignore
-<span class="fc bfc" id="L172" title="All 2 branches covered.">                            if ( isValid.is(true) ) {</span>
-<span class="fc" id="L173">                                isValid.set(false);</span>
-<span class="fc" id="L174">                                isValid.fireChange(From.VIEW);</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">                            if ( isValid.is(true) ) {</span>
+<span class="fc" id="L179">                                isValid.set(false);</span>
+<span class="fc" id="L180">                                isValid.fireChange(From.VIEW);</span>
                             }
-<span class="nc" id="L176">                        }</span>
-<span class="fc" id="L177">                    });</span>
-<span class="fc" id="L178">                }))</span>
-<span class="fc" id="L179">                .withText( text )</span>
-<span class="fc" id="L180">                ._this();</span>
+<span class="nc" id="L182">                        }</span>
+<span class="fc" id="L183">                    });</span>
+<span class="fc" id="L184">                }))</span>
+<span class="fc" id="L185">                .withText( text )</span>
+<span class="fc" id="L186">                ._this();</span>
     }
 
     /**
@@ -192,11 +198,11 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Val} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Val&lt;N&gt; number ) {
-<span class="nc" id="L195">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="nc" id="L196">        return _withOnShow( number, (thisComponent, n) -&gt; {</span>
-<span class="nc" id="L197">                    _setTextSilently( thisComponent, n.toString() );</span>
-<span class="nc" id="L198">               })</span>
-<span class="nc" id="L199">               ._this();</span>
+<span class="nc" id="L201">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="nc" id="L202">        return _withOnShow( number, (thisComponent, n) -&gt; {</span>
+<span class="nc" id="L203">                    _setTextSilently( thisComponent, n.toString() );</span>
+<span class="nc" id="L204">               })</span>
+<span class="nc" id="L205">               ._this();</span>
     }
 
     /**
@@ -213,11 +219,25 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @return This very builder to allow for method chaining.
      */
     public final UIForTextField&lt;F&gt; withTextOrientation( UI.HorizontalAlignment orientation ) {
-<span class="fc" id="L216">        NullUtil.nullArgCheck(orientation, &quot;direction&quot;, UI.HorizontalAlignment.class);</span>
-<span class="fc" id="L217">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L218">                    orientation.forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="fc" id="L219">               })</span>
-<span class="fc" id="L220">               ._this();</span>
+<span class="fc" id="L222">        NullUtil.nullArgCheck(orientation, &quot;direction&quot;, UI.HorizontalAlignment.class);</span>
+<span class="fc" id="L223">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L224">                    orientation.forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="fc" id="L225">               })</span>
+<span class="fc" id="L226">               ._this();</span>
+    }
+
+    /**
+     *  Sets the placeholder text of this text field to a static string.
+     *  The placeholder text will not change.&lt;br&gt;
+     *  Use {@link #withPlaceholder(Val)} to bind the placeholder text to a {@link Val} property,
+     *  so that the placeholder text can change dynamically when the property state changes.
+     *
+     * @param placeholder The placeholder text to set.
+     * @return This UI builder node, to allow for method chaining.
+     */
+    public final UIForTextField&lt;F&gt; withPlaceholder( String placeholder ) {
+<span class="fc" id="L239">        Objects.requireNonNull(placeholder);</span>
+<span class="fc" id="L240">        return this.withPlaceholder(Val.of(placeholder));</span>
     }
 
     /**
@@ -229,36 +249,36 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @return This UI builder node, to allow for method chaining.
      */
     public final UIForTextField&lt;F&gt; withPlaceholder( Val&lt;String&gt; placeholder ) {
-<span class="nc" id="L232">        NullUtil.nullArgCheck(placeholder, &quot;placeholder&quot;, Val.class);</span>
-<span class="nc" id="L233">        NullUtil.nullPropertyCheck(placeholder, &quot;placeholder&quot;, &quot;Null is not a valid value for a placeholder.&quot;);</span>
-<span class="nc" id="L234">        return this.withRepaintOn(placeholder)</span>
-<span class="nc" id="L235">                    .withStyle( conf -&gt; conf</span>
-<span class="nc" id="L236">                        .text(&quot;placeholder&quot;, textConf -&gt; textConf</span>
-<span class="nc" id="L237">                             .content(</span>
-<span class="nc" id="L238">                                 Optional.ofNullable(conf.component().getText())</span>
-<span class="nc bnc" id="L239" title="All 2 branches missed.">                                     .map(s -&gt; !s.isEmpty())</span>
-<span class="nc bnc" id="L240" title="All 2 branches missed.">                                     .map( hasContent -&gt; hasContent ? &quot;&quot; : placeholder.get() )</span>
-<span class="nc" id="L241">                                     .orElse(placeholder.get())</span>
+<span class="fc" id="L252">        NullUtil.nullArgCheck(placeholder, &quot;placeholder&quot;, Val.class);</span>
+<span class="fc" id="L253">        NullUtil.nullPropertyCheck(placeholder, &quot;placeholder&quot;, &quot;Null is not a valid value for a placeholder.&quot;);</span>
+<span class="fc" id="L254">        return this.withRepaintOn(placeholder)</span>
+<span class="fc" id="L255">                    .withStyle( conf -&gt; conf</span>
+<span class="fc" id="L256">                        .text(&quot;placeholder&quot;, textConf -&gt; textConf</span>
+<span class="fc" id="L257">                             .content(</span>
+<span class="fc" id="L258">                                 Optional.ofNullable(conf.component().getText())</span>
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">                                     .map(s -&gt; !s.isEmpty())</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">                                     .map( hasContent -&gt; hasContent ? &quot;&quot; : placeholder.get() )</span>
+<span class="fc" id="L261">                                     .orElse(placeholder.get())</span>
                              )
-<span class="nc" id="L243">                             .placement( UI.Placement.LEFT )</span>
-<span class="nc" id="L244">                             .font( f -&gt; f.color(_nicePlaceholderColorFor(conf.component())) )</span>
+<span class="fc" id="L263">                             .placement( UI.Placement.LEFT )</span>
+<span class="fc" id="L264">                             .font( f -&gt; f.color(_nicePlaceholderColorFor(conf.component())) )</span>
                         )
                     );
     }
 
     private static Color _nicePlaceholderColorFor( JTextField textField ) {
-<span class="nc" id="L250">        Color currentBackground = Optional.ofNullable(textField.getBackground()).orElse(Color.WHITE);</span>
-<span class="nc" id="L251">        Color currentForeground = Optional.ofNullable(textField.getForeground()).orElse(Color.BLACK);</span>
+<span class="fc" id="L270">        Color currentBackground = Optional.ofNullable(textField.getBackground()).orElse(Color.WHITE);</span>
+<span class="fc" id="L271">        Color currentForeground = Optional.ofNullable(textField.getForeground()).orElse(Color.BLACK);</span>
         /*
             We assume that &quot;the color between&quot; the background and the foreground is the color
             that would be the most readable as a placeholder color.
             So we interpolate the background and the foreground color to find the &quot;in-between&quot; color.
          */
-<span class="nc" id="L257">        return new Color(</span>
-<span class="nc" id="L258">            (currentBackground.getRed() + currentForeground.getRed()) / 2,</span>
-<span class="nc" id="L259">            (currentBackground.getGreen() + currentForeground.getGreen()) / 2,</span>
-<span class="nc" id="L260">            (currentBackground.getBlue() + currentForeground.getBlue()) / 2,</span>
-<span class="nc" id="L261">            (currentBackground.getAlpha() + currentForeground.getAlpha()) / 2</span>
+<span class="fc" id="L277">        return new Color(</span>
+<span class="fc" id="L278">            (currentBackground.getRed() + currentForeground.getRed()) / 2,</span>
+<span class="fc" id="L279">            (currentBackground.getGreen() + currentForeground.getGreen()) / 2,</span>
+<span class="fc" id="L280">            (currentBackground.getBlue() + currentForeground.getBlue()) / 2,</span>
+<span class="fc" id="L281">            (currentBackground.getAlpha() + currentForeground.getAlpha()) / 2</span>
         );
     }
 

@@ -25,6 +25,9 @@ import java.util.function.Function;
  *  <p>
  *  <b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  *  where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ * @param <E> The type of the items of the {@link JComboBox} that this {@link UIForCombo} is configuring.
+ * @param <C> The type of the {@link JComboBox} that this {@link UIForCombo} is configuring.
  */
 public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCombo<E,C>, JComboBox<E>>
 {
@@ -693,7 +696,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  A popup menu listener for the combo box which synchronizes text field, model
      *  and combo box while at the same time keeping weak references on
      *  all involved components to ensure that no memory leaks occur.
-     * @param <E>
+     * @param <E> The type of the items in the combo box.
      */
     private static class MemSafeBinding<E> implements PopupMenuListener {
 

@@ -1,0 +1,820 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DragAwayComponentConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">DragAwayComponentConf.java</span></div><h1>DragAwayComponentConf.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Action;
+import swingtree.api.Configurator;
+import swingtree.api.IconDeclaration;
+import swingtree.layout.Position;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import java.awt.Cursor;
+import java.awt.Image;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.*;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  A value based builder object for configuring drag away events of a component
+ *  using the {@link UIForAnySwing#withDragAway(Configurator)} method, where an instance of this
+ *  class is passed to the {@link Configurator} lambda defining how
+ *  the component should behave and look when dragged away. &lt;br&gt;
+ *  &lt;br&gt;
+ *  &lt;b&gt;So you may for example use the following methods to define the visual appearance of the
+ *  drag away operation:&lt;/b&gt;
+ *  &lt;ul&gt;
+ *      &lt;li&gt;{@link #enabled(boolean)} -
+ *          Enables or disables the drag away operation entirely.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #opacity(double)} -
+ *          Sets the opacity of the drag image. The value should be between 0.0 and 1.0.
+ *          A value of 0.0 means the drag image is completely transparent and a value of 1.0
+ *          means the drag image is completely opaque.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #cursor(UI.Cursor)} -
+ *          Sets the cursor to be used during the drag operation.
+ *          The default cursor is {@link UI.Cursor#DEFAULT}.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #customDragImage(Image)} -
+ *          Sets a custom drag image to be used during the drag operation.
+ *          If no custom drag image is set, the component will be rendered int
+ *          a drag image during the drag operation.
+ *      &lt;/li&gt;
+ *  &lt;/ul&gt;
+ *  &lt;br&gt;
+ *  &lt;b&gt;For listening to drag away events, the following methods are available:&lt;/b&gt;
+ *  &lt;ul&gt;
+ *      &lt;li&gt;{@link #onDragEnter(Action)} - 
+ *           Called as the cursor's hotspot enters a platform-dependent drop site.
+ *           The provided {@link Action} is invoked when all the following conditions are true:
+ *           &lt;ul&gt;
+ *           &lt;li&gt;The cursor's hotspot enters the operable part of a platform-
+ *           dependent drop site.
+ *           &lt;li&gt;The drop site is active.
+ *           &lt;li&gt;The drop site accepts the drag.
+ *           &lt;/ul&gt;
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDragMove(Action)} -
+ *          Called whenever the mouse is moved during a drag operation.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDragOver(Action)} -
+ *          Called as the cursor's hotspot moves over a platform-dependent drop site.
+ *          This method is invoked when all the following conditions are true:
+ *          &lt;ul&gt;
+ *          &lt;li&gt;The cursor's hotspot has moved, but still intersects the
+ *          operable part of the drop site associated with the previous
+ *          dragEnter() invocation.
+ *          &lt;li&gt;The drop site is still active.
+ *          &lt;li&gt;The drop site accepts the drag.
+ *          &lt;/ul&gt;
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDropActionChanged(Action)} -
+ *          Called when the user has modified the drop gesture.
+ *          This method is invoked when the state of the input
+ *          device(s) that the user is interacting with changes.
+ *          Such devices are typically the mouse buttons or keyboard
+ *          modifiers that the user is interacting with.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDragExit(Action)} -
+ *          Called as the cursor's hotspot exits a platform-dependent drop site.
+ *          This {@link Action} is invoked when any of the following conditions are true:
+ *          &lt;ul&gt;
+ *          &lt;li&gt;The cursor's hotspot no longer intersects the operable part
+ *          of the drop site associated with the previous dragEnter() invocation.
+ *          &lt;/ul&gt;
+ *          OR
+ *          &lt;ul&gt;
+ *          &lt;li&gt;The drop site associated with the previous dragEnter() invocation
+ *          is no longer active.
+ *          &lt;/ul&gt;
+ *          OR
+ *          &lt;ul&gt;
+ *          &lt;li&gt; The drop site associated with the previous dragEnter() invocation
+ *          has rejected the drag.
+ *          &lt;/ul&gt;
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDragDropEnd(Action)} -
+ *          This {@link Action} is invoked to signify that the Drag and Drop
+ *          operation is complete. The getDropSuccess() method of
+ *          the &lt;code&gt;DragSourceDropEvent&lt;/code&gt; can be used to
+ *          determine the termination state. The getDropAction() method
+ *      &lt;/li&gt;
+ *  &lt;/ul&gt;
+ *          
+ * @param &lt;C&gt; The type of the component to be dragged away.
+ */
+public final class DragAwayComponentConf&lt;C extends JComponent&gt;
+{
+<span class="nc" id="L110">    private static final Action NO_ACTION = e -&gt; {};</span>
+
+    public static &lt;C extends JComponent&gt; DragAwayComponentConf&lt;C&gt; of(
+        C        component,
+        Position mousePosition
+    ) {
+<span class="nc" id="L116">        return new DragAwayComponentConf&lt;&gt;(</span>
+                component, mousePosition, true, 1, UI.Cursor.DEFAULT, null, null,
+                UI.DragAction.COPY_OR_MOVE, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION
+        );
+    }
+
+    private final C                      _component;
+    private final Position               _mousePosition;
+    private final boolean                _enabled;
+    private final double                 _opacity;
+    private final UI.Cursor              _cursor;
+    private final @Nullable Image        _customDragImage;
+    private final @Nullable Transferable _payload;
+    private final UI.DragAction          _dragAction;
+    private final Action&lt;ComponentDelegate&lt;C, DragGestureEvent&gt;&gt;    _onDragStart;
+    private final Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; _onDragEnter;
+    private final Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; _onDragMove;
+    private final Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; _onDragOver;
+    private final Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; _onDropActionChanged;
+    private final Action&lt;ComponentDelegate&lt;C, DragSourceEvent    &gt;&gt; _onDragExit;
+    private final Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; _onDragDropEnd;
+
+
+    private DragAwayComponentConf(
+        C                      component,
+        Position               mousePosition,
+        boolean                enabled,
+        double                 opacity,
+        UI.Cursor              cursor,
+        @Nullable Image        customDragImage,
+        @Nullable Transferable payload,
+        UI.DragAction          dragAction,
+        Action&lt;ComponentDelegate&lt;C, DragGestureEvent&gt;&gt;    onDragStart,
+        Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragEnter,
+        Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragMove,
+        Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragOver,
+        Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDropActionChanged,
+        Action&lt;ComponentDelegate&lt;C, DragSourceEvent&gt;&gt;     onDragExit,
+        Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; onDragDropEnd
+<span class="nc" id="L155">    ) {</span>
+<span class="nc" id="L156">        _component           = Objects.requireNonNull(component);</span>
+<span class="nc" id="L157">        _mousePosition       = Objects.requireNonNull(mousePosition);</span>
+<span class="nc" id="L158">        _enabled             = enabled;</span>
+<span class="nc" id="L159">        _opacity             = opacity;</span>
+<span class="nc" id="L160">        _cursor              = Objects.requireNonNull(cursor);</span>
+<span class="nc" id="L161">        _customDragImage     = customDragImage;</span>
+<span class="nc" id="L162">        _payload             = payload;</span>
+<span class="nc" id="L163">        _dragAction          = Objects.requireNonNull(dragAction);</span>
+<span class="nc" id="L164">        _onDragStart         = Objects.requireNonNull(onDragStart);</span>
+<span class="nc" id="L165">        _onDragEnter         = Objects.requireNonNull(onDragEnter);</span>
+<span class="nc" id="L166">        _onDragMove          = Objects.requireNonNull(onDragMove);</span>
+<span class="nc" id="L167">        _onDragOver          = Objects.requireNonNull(onDragOver);</span>
+<span class="nc" id="L168">        _onDropActionChanged = Objects.requireNonNull(onDropActionChanged);</span>
+<span class="nc" id="L169">        _onDragExit          = Objects.requireNonNull(onDragExit);</span>
+<span class="nc" id="L170">        _onDragDropEnd       = Objects.requireNonNull(onDragDropEnd);</span>
+<span class="nc" id="L171">    }</span>
+
+    /**
+     *  Exposes the component that can be dragged away by the user.
+     *  You may use this method configure the drag away operation based
+     *  on the component's properties.
+     *
+     * @return The component to be dragged away.
+     */
+    public C component() {
+<span class="nc" id="L181">        return _component;</span>
+    }
+
+    /**
+     *  Exposes the current mouse position of the drag operation.
+     *  The mouse position is the location of the mouse cursor when the drag operation
+     *  was initiated.
+     *
+     * @return The mouse position of the drag operation.
+     */
+    public Position mousePosition() {
+<span class="nc" id="L192">        return _mousePosition;</span>
+    }
+
+    /**
+     *  Exposes the current x-coordinate of the mouse position of the drag operation.
+     *  The x-coordinate is the horizontal position of the mouse cursor when the drag operation
+     *  was initiated.
+     *
+     * @return The x-coordinate of the mouse position of the drag operation.
+     */
+    public double mouseX() {
+<span class="nc" id="L203">        return _mousePosition.x();</span>
+    }
+
+    /**
+     *  Exposes the current y-coordinate of the mouse position of the drag operation.
+     *  The y-coordinate is the vertical position of the mouse cursor when the drag operation
+     *  was initiated.
+     *
+     * @return The y-coordinate of the mouse position of the drag operation.
+     */
+    public double mouseY() {
+<span class="nc" id="L214">        return _mousePosition.y();</span>
+    }
+
+    /**
+     *  Exposes the current enabled state of the drag away operation.
+     *  If the drag away operation is disabled, the user will not be able to drag
+     *  the component away.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if the drag away operation is enabled, &lt;code&gt;false&lt;/code&gt; otherwise.
+     */
+    public boolean enabled() {
+<span class="nc" id="L225">        return _enabled;</span>
+    }
+
+    /**
+     *  Exposes the current opacity of the drag image.
+     *  The value should be between 0.0 and 1.0.
+     *  A value of 0.0 means the drag image is completely transparent and a value of 1.0
+     *  means the drag image is completely opaque.
+     *
+     * @return The opacity of the drag image in the form of a double value
+     *         ranging from 0.0 to 1.0.
+     */
+    public double opacity() {
+<span class="nc" id="L238">        return _opacity;</span>
+    }
+
+    /**
+     *  Gives you the current cursor to be used during the drag operation.
+     *  The default cursor is {@link UI.Cursor#DEFAULT}.
+     *  You may want to use {@link UI.Cursor#MOVE} for example to indicate that the user
+     *  is moving the component.
+     *
+     * @return The cursor to be used during the drag operation.
+     */
+    public UI.Cursor cursor() {
+<span class="nc" id="L250">        return _cursor;</span>
+    }
+
+    /**
+     *  Returns an {@link Optional} of the current custom drag image to be used
+     *  as a visual representation of the component during the drag operation.
+     *  If no custom drag image is set, the component will be rendered into
+     *  a drag image during the drag operation. &lt;br&gt;
+     *  Note that a visualization of the component outside the application
+     *  window depends on the platform and the implementation of the drag and drop
+     *  operation, see {@link DragSource#isDragImageSupported()} for more information.
+     *
+     * @return The custom drag image to be used during the drag operation
+     *         or &lt;code&gt;Optional.empty()&lt;/code&gt; if no custom drag image is set.
+     */
+    public Optional&lt;Image&gt; customDragImage() {
+<span class="nc" id="L266">        return Optional.ofNullable(_customDragImage);</span>
+    }
+
+    /**
+     *  Returns an {@link Optional} of the current {@link Transferable} object
+     *  that is used to transfer the data during the drag operation.
+     *  If no custom {@link Transferable} object is set, the default
+     *  {@link Transferable} object will be used to transfer the data.
+     *
+     * @return The {@link Transferable} object that is used to transfer the data
+     *         during the drag operation or &lt;code&gt;Optional.empty()&lt;/code&gt; if no
+     *         custom {@link Transferable} object is set.
+     */
+    public Optional&lt;Transferable&gt; payload() {
+<span class="nc" id="L280">        return Optional.ofNullable(_payload);</span>
+    }
+
+    /**
+     *  Returns the current drag action of this drag away operation.
+     *  The drag action constant is used to specify the action(s) supported by the drag source.
+     *  If no drag action is set, the default drag action is {@link UI.DragAction#NONE}.
+     *  The {@link UI.DragAction} enum type used here, directly maps to the
+     *  int based constants defined in {@link java.awt.dnd.DnDConstants}.
+     *
+     * @return The drag action of this drag away operation.
+     */
+    public UI.DragAction dragAction() {
+<span class="nc" id="L293">        return _dragAction;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked when the drag operation is initiated.&lt;br&gt;
+     *  This event handler is invoked by the {@link DragGestureRecognizer}
+     *  when the {@link DragGestureRecognizer} detects a platform-dependent
+     *  drag initiating gesture.
+     *
+     * @return The {@link Action} that is invoked when the drag operation is initiated.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragGestureEvent&gt;&gt; onDragStart() {
+<span class="nc" id="L305">        return _onDragStart;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked when the cursor's hotspot enters
+     *  a platform-dependent drop site. This method is invoked when all the following
+     *  conditions are true:
+     *  &lt;ul&gt;
+     *  &lt;li&gt;The cursor's hotspot enters the operable part of a platform-dependent drop site.
+     *  &lt;li&gt;The drop site is active.
+     *  &lt;li&gt;The drop site accepts the drag.
+     *  &lt;/ul&gt;
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragEnter(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @return The {@link Action} that is invoked when the cursor's hotspot enters
+     *         a platform-dependent drop site.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragEnter() {
+<span class="nc" id="L331">        return _onDragEnter;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked whenever the mouse is moved during a drag operation.
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceMotionListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceMotionListener#dragMouseMoved(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceMotionListener} implementation registered to listen to
+     *      AWT native drag operations, through {@link java.awt.dnd.DragSource#addDragSourceMotionListener}.
+     *  &lt;/p&gt;
+     *
+     * @return The {@link Action} that is invoked whenever the mouse is moved during a drag operation.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragMove() {
+<span class="nc" id="L348">        return _onDragMove;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked as the cursor's hotspot moves over a platform-dependent drop site.
+     *  This method is invoked when all the following conditions are true:
+     *  &lt;ul&gt;
+     *  &lt;li&gt;The cursor's hotspot has moved, but still intersects the operable part of the drop site
+     *  associated with the previous {@link #onDragEnter(Action)} invocation.
+     *  &lt;li&gt;The drop site is still active.
+     *  &lt;li&gt;The drop site accepts the drag.
+     *  &lt;/ul&gt;
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragOver(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @return The {@link Action} that is invoked as the cursor's hotspot moves over a platform-dependent drop site.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragOver() {
+<span class="nc" id="L373">        return _onDragOver;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked when the user has modified the drop gesture.
+     *  This method is invoked when the state of the input device(s) that the user is interacting with changes.
+     *  Such devices are typically the mouse buttons or keyboard modifiers that the user is interacting with.
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dropActionChanged(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @return The {@link Action} that is invoked when the user has modified the drop gesture.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDropActionChanged() {
+<span class="nc" id="L393">        return _onDropActionChanged;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked as the cursor's hotspot exits a platform-dependent drop site.
+     *  This {@link Action} is invoked when any of the following conditions are true:
+     *  &lt;ul&gt;
+     *  &lt;li&gt;
+     *      The cursor's hotspot no longer intersects the operable part of the
+     *      drop site associated with the previous {@link #onDragEnter(Action)} invocation.
+     *  &lt;/ul&gt;
+     *  OR
+     *  &lt;ul&gt;
+     *  &lt;li&gt;
+     *      The drop site associated with the previous {@link #onDragEnter(Action)} invocation
+     *      is no longer active.
+     *  &lt;/ul&gt;
+     *  OR
+     *  &lt;ul&gt;
+     *  &lt;li&gt;
+     *      The drop site associated with the previous {@link #onDragEnter(Action)} invocation
+     *      has rejected the drag.
+     *  &lt;/ul&gt;
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragExit(DragSourceEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @return The {@link Action} that is invoked as the cursor's hotspot exits a platform-dependent drop site.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragSourceEvent&gt;&gt; onDragExit() {
+<span class="nc" id="L429">        return _onDragExit;</span>
+    }
+
+    /**
+     *  Returns the {@link Action} that is invoked to signify that the Drag and Drop
+     *  operation is complete.
+     *  The getDropSuccess() method of the &lt;code&gt;DragSourceDropEvent&lt;/code&gt; can be used to
+     *  determine the termination state. The getDropAction() method
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragDropEnd(DragSourceDropEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @return The {@link Action} that is invoked to signify that the Drag and Drop
+     *         operation is complete.
+     */
+    public Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; onDragDropEnd() {
+<span class="nc" id="L451">        return _onDragDropEnd;</span>
+    }
+
+    /**
+     *  Enables or disables the drag away operation entirely.
+     *
+     * @param enabled &lt;code&gt;true&lt;/code&gt; to enable the drag away operation, &lt;code&gt;false&lt;/code&gt; to disable it.
+     * @return A new {@link DragAwayComponentConf} instance with the updated enabled state.
+     */
+    public DragAwayComponentConf&lt;C&gt; enabled( boolean enabled ) {
+<span class="nc" id="L461">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+            );
+    }
+
+    /**
+     *  Allows you to define the opacity of the drag image.
+     *  The value should be between {@code 0.0} and {@code 1.0}, where
+     *  the number {@code 0.0} means the drag image is completely
+     *  transparent and a value of {@code 1.0}
+     *  means the drag image is completely opaque.
+     *  &lt;br&gt;&lt;p&gt;
+     *      Note that the opacity will automatically applied to the {@link #customDragImage(Image)}
+     *      if a custom drag image is set. &lt;br&gt;
+     *      If no custom drag image is set, the opacity will be applied to the
+     *      drag image that is created from the component during the drag operation.
+     *  &lt;/p&gt;
+     *
+     * @param opacity The opacity of the drag image in the form of a double value
+     *                ranging from {@code 0.0} to {@code 1.0}.
+     * @return A new {@link DragAwayComponentConf} instance with the updated opacity.
+     */
+    public DragAwayComponentConf&lt;C&gt; opacity( double opacity ) {
+<span class="nc" id="L485">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Configures the mouse cursor to be displayed during the drag operation.
+     *  The default cursor is {@link UI.Cursor#DEFAULT}.
+     *  You may want to use {@link UI.Cursor#MOVE} for example to indicate that the user
+     *  is moving the component.
+     *
+     * @param cursor The cursor to be used during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated cursor.
+     */
+    public DragAwayComponentConf&lt;C&gt; cursor( UI.Cursor cursor ) {
+<span class="nc" id="L501">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Allows you to define a custom drag image to be used during the drag operation.
+     *  If no custom drag image is set, the component appearance will be used
+     *  as the drag image during the drag operation. &lt;br&gt;
+     *  &lt;br&gt;
+     *  Note that a visualization of the component outside the application
+     *  window depends on the platform and the implementation of the drag and drop
+     *  operation, see {@link DragSource#isDragImageSupported()} for more information.
+     *
+     * @param customDragImage The custom drag image to be used during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated custom drag image.
+     */
+    public DragAwayComponentConf&lt;C&gt; customDragImage( Image customDragImage ) {
+<span class="nc" id="L520">        Objects.requireNonNull(customDragImage);</span>
+<span class="nc" id="L521">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Allows you to define a custom drag image to be used during the drag operation.
+     *  If no custom drag image is set, the component appearance will be used
+     *  as the drag image during the drag operation. &lt;br&gt;
+     *  &lt;br&gt;
+     *  Note that a visualization of the component outside the application
+     *  window depends on the platform and the implementation of the drag and drop
+     *  operation, see {@link DragSource#isDragImageSupported()} for more information.
+     *
+     * @param icon The icon declaration to be used as the custom drag image.
+     *             An {@link IconDeclaration} is a constant which defines the path to the icon image.
+     * @return A new {@link DragAwayComponentConf} instance with the updated custom drag image.
+     */
+    public DragAwayComponentConf&lt;C&gt; customDragImage( IconDeclaration icon ) {
+<span class="nc" id="L541">        Objects.requireNonNull(icon);</span>
+<span class="nc" id="L542">        return icon.find().map(ImageIcon::getImage).map(this::customDragImage).orElse(this);</span>
+    }
+
+    /**
+     *  Allows you to define a custom drag image to be used during the drag operation.
+     *  If no custom drag image is set, the component appearance will be used
+     *  as the drag image during the drag operation. &lt;br&gt;
+     *  &lt;br&gt;
+     *  Note that a visualization of the component outside the application
+     *  window depends on the platform and the implementation of the drag and drop
+     *  operation, see {@link DragSource#isDragImageSupported()} for more information.
+     *
+     * @param path The path to the custom drag image to be used during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated custom drag image.
+     */
+    public DragAwayComponentConf&lt;C&gt; customDragImage( String path ) {
+<span class="nc" id="L558">        return customDragImage(IconDeclaration.of(path));</span>
+    }
+
+    /**
+     *  Use this to specify the payload of this drag away operation
+     *  in the form of a {@link Transferable} object.
+     *  The {@link Transferable} object is used to transfer data in various
+     *  data formats during the drag operation so that it may eventually be
+     *  dropped at a drop site, like for example {@link UIForAnySwing#withDropSite(Configurator)}. &lt;br&gt;
+     *  If no custom {@link Transferable} object is set,
+     *  {@link java.awt.datatransfer.StringSelection} with an
+     *  empty string is used as the default payload.
+     *
+     * @param payload The {@link Transferable} object that is used to transfer the data
+     *                     during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Transferable} object.
+     */
+    public DragAwayComponentConf&lt;C&gt; payload( Transferable payload ) {
+<span class="nc" id="L576">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Allows you to specify the payload of this drag away operation
+     *  in the form of a {@link String} object to be transferred during the
+     *  drag away operation. &lt;br&gt;
+     *  If no payload object is specified an empty string will be used as the default payload.
+     *
+     * @param payload The {@link String} object that is used to transfer the data
+     *                during the drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Transferable}
+     *         of the {@link StringSelection} subtype.
+     */
+    public DragAwayComponentConf&lt;C&gt; payload( String payload ) {
+<span class="nc" id="L594">        return payload(new StringSelection(payload));</span>
+    }
+
+    /**
+     *  Use this to specify the type drag action of this drag away operation by
+     *  passing one of the following {@link UI.DragAction} enum values:
+     *  &lt;ul&gt;
+     *      &lt;li&gt;{@link UI.DragAction#NONE}
+     *      &lt;li&gt;{@link UI.DragAction#COPY}
+     *      &lt;li&gt;{@link UI.DragAction#MOVE}
+     *      &lt;li&gt;{@link UI.DragAction#COPY_OR_MOVE}
+     *      &lt;li&gt;{@link UI.DragAction#LINK}
+     *  &lt;/ul&gt;
+     *  This drag action constant is used to specify the action(s) supported by the drag source.&lt;br&gt;
+     *  If no drag action is set, the default drag action is {@link UI.DragAction#NONE}. &lt;br&gt;
+     *  The {@link UI.DragAction} enum type used here, directly maps to the
+     *  int based constants defined in {@link java.awt.dnd.DnDConstants}.
+     *
+     * @param dragAction The drag action of this drag away operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated drag action.
+     */
+    public DragAwayComponentConf&lt;C&gt; dragAction( UI.DragAction dragAction ) {
+<span class="nc" id="L616">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked when the drag operation is initiated.
+     *  This method is invoked by the {@link DragGestureRecognizer}
+     *  when the {@link DragGestureRecognizer} detects a platform-dependent
+     *  drag initiating gesture. &lt;br&gt;
+     *  By using this API, SwingTree will automatically initiate the drag and drop operation
+     *  through the {@link DragGestureEvent#startDrag(Cursor, Transferable, DragSourceListener)}
+     *  method on the {@code DragGestureEvent}
+     *  exposed in this {@link Action}. &lt;br&gt;
+     *  To initiate another the drag and drop operation, you can call the
+     *  {@link DragGestureEvent#startDrag(Cursor, Transferable, DragSourceListener)}
+     *  method on the {@code DragGestureEvent} exposed in the {@link ComponentDelegate} parameter.
+     *
+     * @see java.awt.dnd.DragGestureRecognizer
+     * @see java.awt.dnd.DragGestureEvent
+     * @param onDragStart The {@link Action} to be invoked when the drag operation is initiated.
+     *                    It receives a {@link ComponentDelegate} with the {@link DragGestureEvent}
+     *                    as well as the {@link JComponent} that is being dragged away.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragStart.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDragStart( Action&lt;ComponentDelegate&lt;C, DragGestureEvent&gt;&gt; onDragStart ) {
+<span class="nc" id="L643">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked when the cursor's hotspot enters
+     *  a platform-dependent drop site.
+     *  This method is invoked when all the following conditions are true:
+     *  &lt;ul&gt;
+     *    &lt;li&gt;The cursor's hotspot enters the operable part of a platform-dependent drop site.
+     *    &lt;li&gt;The drop site is active.
+     *    &lt;li&gt;The drop site accepts the drag.
+     *  &lt;/ul&gt;
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragEnter(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @param onDragEnter The {@link Action} to be invoked when the cursor's hotspot enters
+     *                    a platform-dependent drop site.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragEnter.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDragEnter( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragEnter ) {
+<span class="nc" id="L673">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked whenever the mouse is moved during a drag operation.
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceMotionListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceMotionListener#dragMouseMoved(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceMotionListener} implementation registered to listen to
+     *      AWT native drag operations, through {@link java.awt.dnd.DragSource#addDragSourceMotionListener}.
+     *  &lt;/p&gt;
+     *
+     * @param onDragMove The {@link Action} to be invoked whenever the mouse is moved during a drag operation.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragMove.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDragMove( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragMove ) {
+<span class="nc" id="L694">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked as the cursor's hotspot moves over a platform-dependent drop site.
+     *  This method is invoked when all the following conditions are true:
+     *  &lt;ul&gt;
+     *  &lt;li&gt;The cursor's hotspot has moved, but still intersects the operable part of the drop site
+     *  associated with the previous {@link #onDragEnter(Action)} invocation.
+     *  &lt;li&gt;The drop site is still active.
+     *  &lt;li&gt;The drop site accepts the drag.
+     *  &lt;/ul&gt;
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragOver(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @param onDragOver The {@link Action} to be invoked as the cursor's hotspot moves over a platform-dependent drop site.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragOver.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDragOver( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragOver ) {
+<span class="nc" id="L723">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked when the user has modified the drop gesture.
+     *  This method is invoked when the state of the input device(s) that the user is interacting with changes.
+     *  Such devices are typically the mouse buttons or keyboard modifiers that the user is interacting with.
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dropActionChanged(DragSourceDragEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @param onDropActionChanged The {@link Action} to be invoked when the user has modified the drop gesture.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDropActionChanged.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDropActionChanged( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDropActionChanged ) {
+<span class="nc" id="L747">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, onDropActionChanged, _onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked as the cursor's hotspot exits a platform-dependent drop site.
+     *  This {@link Action} is invoked when any of the following conditions are true:
+     *  &lt;ul&gt;
+     *  &lt;li&gt;
+     *      The cursor's hotspot no longer intersects the operable part of the
+     *      drop site associated with the previous {@link #onDragEnter(Action)} invocation.
+     *  &lt;/ul&gt;
+     *  OR
+     *  &lt;ul&gt;
+     *  &lt;li&gt;
+     *      The drop site associated with the previous {@link #onDragEnter(Action)} invocation
+     *      is no longer active.
+     *  &lt;/ul&gt;
+     *  OR
+     *  &lt;ul&gt;
+     *  &lt;li&gt;
+     *      The drop site associated with the previous {@link #onDragEnter(Action)} invocation
+     *      has rejected the drag.
+     *  &lt;/ul&gt;
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragExit(DragSourceEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @param onDragExit The {@link Action} to be invoked as the cursor's hotspot exits a platform-dependent drop site.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragExit.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDragExit( Action&lt;ComponentDelegate&lt;C, DragSourceEvent&gt;&gt; onDragExit ) {
+<span class="nc" id="L787">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, onDragExit, _onDragDropEnd
+        );
+    }
+
+    /**
+     *  Use this to specify an {@link Action} that is invoked to signify that the Drag and Drop
+     *  operation is complete.
+     *  The getDropSuccess() method of the &lt;code&gt;DragSourceDropEvent&lt;/code&gt; can be used to
+     *  determine the termination state. The getDropAction() method
+     *  &lt;br&gt;&lt;p&gt;
+     *      For more information about how this is implemented, check out the
+     *      documentation of {@link java.awt.dnd.DragSourceListener}. &lt;br&gt;
+     *      As the supplied {@link Action} will be invoked inside the
+     *      {@link java.awt.dnd.DragSourceListener#dragDropEnd(DragSourceDropEvent)} method as part of
+     *      a custom {@link java.awt.dnd.DragSourceListener} implementation registered to listen to
+     *      AWT native drag and drop operations, through {@link java.awt.dnd.DragGestureEvent#startDrag}
+     *      and ultimately {@link DragSource#startDrag}.
+     *  &lt;/p&gt;
+     *
+     * @param onDragDropEnd The {@link Action} to be invoked to signify that the Drag and Drop
+     *                      operation is complete.
+     * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragDropEnd.
+     */
+    public DragAwayComponentConf&lt;C&gt; onDragDropEnd( Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; onDragDropEnd ) {
+<span class="nc" id="L813">        return new DragAwayComponentConf&lt;&gt;(</span>
+                _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
+                _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, onDragDropEnd
+        );
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -9,26 +9,28 @@ import java.util.Objects;
 /**
  * A SwingTree builder node designed for configuring {@link AbstractButton} sub-type instances,
  * usually the {@link JButton} type.
+ *
+ * @param &lt;B&gt; The type of {@link AbstractButton} that this {@link UIForButton} is configuring.
  */
-public class UIForButton&lt;B extends AbstractButton&gt; extends UIForAnyButton&lt;UIForButton&lt;B&gt;, B&gt;
+public final class UIForButton&lt;B extends AbstractButton&gt; extends UIForAnyButton&lt;UIForButton&lt;B&gt;, B&gt;
 {
-<span class="fc" id="L15">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForButton.class);</span>
+<span class="fc" id="L17">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForButton.class);</span>
 
     private final BuilderState&lt;B&gt; _state;
 
-<span class="fc" id="L19">    UIForButton( BuilderState&lt;B&gt; state ) {</span>
-<span class="fc" id="L20">        Objects.requireNonNull(state, &quot;state&quot;);</span>
-<span class="fc" id="L21">        _state = state;</span>
-<span class="fc" id="L22">    }</span>
+<span class="fc" id="L21">    UIForButton( BuilderState&lt;B&gt; state ) {</span>
+<span class="fc" id="L22">        Objects.requireNonNull(state, &quot;state&quot;);</span>
+<span class="fc" id="L23">        _state = state;</span>
+<span class="fc" id="L24">    }</span>
 
     @Override
     protected BuilderState&lt;B&gt; _state() {
-<span class="fc" id="L26">        return _state;</span>
+<span class="fc" id="L28">        return _state;</span>
     }
     
     @Override
     protected UIForButton&lt;B&gt; _newBuilderWithState(BuilderState&lt;B&gt; newState ) {
-<span class="fc" id="L31">        return new UIForButton&lt;&gt;(newState);</span>
+<span class="fc" id="L33">        return new UIForButton&lt;&gt;(newState);</span>
     }
 
     /**
@@ -36,30 +38,30 @@ public class UIForButton&lt;B extends AbstractButton&gt; extends UIForAnyButton&
      * @return this
      */
     public final UIForButton&lt;B&gt; makeDefaultButton() {
-<span class="fc" id="L39">        return _with( thisButton -&gt; {</span>
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">                    if ( !(thisButton instanceof JButton) ) {</span>
-<span class="nc" id="L41">                        log.warn(&quot;Method 'makeDefaultButton()' called on a non JButton component.&quot;);</span>
-<span class="nc" id="L42">                        return;</span>
+<span class="fc" id="L41">        return _with( thisButton -&gt; {</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">                    if ( !(thisButton instanceof JButton) ) {</span>
+<span class="nc" id="L43">                        log.warn(&quot;Method 'makeDefaultButton()' called on a non JButton component.&quot;);</span>
+<span class="nc" id="L44">                        return;</span>
                     }
-<span class="fc" id="L44">                    UI.runLater(()-&gt;{</span>
+<span class="fc" id="L46">                    UI.runLater(()-&gt;{</span>
                         // We do this later because at this point in time the UI is probably not
                         // yet fully built (swing-tree is using the builder-pattern).
-<span class="fc" id="L47">                        _trySetDefaultButton((JButton) thisButton, 3);</span>
-<span class="fc" id="L48">                    });</span>
-<span class="fc" id="L49">                })</span>
-<span class="fc" id="L50">                ._this();</span>
+<span class="fc" id="L49">                        _trySetDefaultButton((JButton) thisButton, 3);</span>
+<span class="fc" id="L50">                    });</span>
+<span class="fc" id="L51">                })</span>
+<span class="fc" id="L52">                ._this();</span>
     }
 
     private void _trySetDefaultButton(JButton button, int tries) {
-<span class="fc" id="L54">            JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if ( rootPane != null )</span>
-<span class="fc" id="L56">                rootPane.setDefaultButton(button);</span>
+<span class="fc" id="L56">            JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">            if ( rootPane != null )</span>
+<span class="fc" id="L58">                rootPane.setDefaultButton(button);</span>
             else {
-<span class="nc bnc" id="L58" title="All 2 branches missed.">                if ( tries &gt; 0 )</span>
-<span class="nc" id="L59">                    UI.runLater(100, () -&gt; _trySetDefaultButton(button, tries - 1) );</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                if ( tries &gt; 0 )</span>
+<span class="nc" id="L61">                    UI.runLater(100, () -&gt; _trySetDefaultButton(button, tries - 1) );</span>
                 else
-<span class="nc" id="L61">                    log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
+<span class="nc" id="L63">                    log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
             }
-<span class="fc" id="L63">    }</span>
+<span class="fc" id="L65">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

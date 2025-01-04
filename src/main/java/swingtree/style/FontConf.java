@@ -188,6 +188,12 @@ public final class FontConf
                                                         UI.VerticalAlignment.UNDEFINED   // vertical alignment
                                                     );
 
+    /**
+     * Returns a font style with all properties set to their no-op default values,
+     * effectively making it a representation of the absence of a font style.
+     *
+     * @return A font style with all properties set to no-op default values.
+     */
     public static FontConf none() { return _NONE; }
 
     static FontConf of(

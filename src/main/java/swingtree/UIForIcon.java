@@ -6,6 +6,8 @@ import java.util.Objects;
 
 /**
  * A {@link UIForAnySwing} subclass specifically designed for adding icons to your SwingTree.
+ *
+ * @param <I> The type of {@link JIcon} that this {@link UIForIcon} is configuring.
  */
 public final class UIForIcon<I extends JIcon> extends UIForAnySwing<UIForIcon<I>, I>
 {

@@ -5614,6 +5614,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *                            and then returns a fully configured model builder
      *                            used as a basis for the table model.
      * @return This builder instance, to allow for further method chaining.
+     * @param <T> The type of the items in the table model.
      */
     public static <T> UIForTable<JTable> table(
         Class<T> itemType,

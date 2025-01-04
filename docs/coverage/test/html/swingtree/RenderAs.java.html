@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * This class models the API of the {@link RenderBuilder} which allows you to
+ * This class models the API of the {@link CellBuilder} which allows you to
  * specify how a cell should be rendered.
  * Most likely you will want to call {@link #asText(Function)}
  * on this as most cells are rendered as simple texts.
@@ -28,19 +28,19 @@ public final class RenderAs&lt;C extends JComponent, E, T extends E&gt;
 {
 <span class="fc" id="L29">    private static final org.slf4j.Logger log = LoggerFactory.getLogger(RenderAs.class);</span>
 
-    private final RenderBuilder&lt;C, E&gt;           _builder;
+    private final CellBuilder&lt;C, E&gt; _builder;
     private final Class&lt;T&gt;                      _valueType;
-    private final Predicate&lt;CellDelegate&lt;C, T&gt;&gt; _valueValidator;
+    private final Predicate&lt;CellConf&lt;C, T&gt;&gt; _valueValidator;
 
 
-<span class="fc" id="L36">    RenderAs(RenderBuilder&lt;C, E&gt; builder, Class&lt;T&gt; valueType, Predicate&lt;CellDelegate&lt;C, T&gt;&gt; valueValidator) {</span>
+<span class="fc" id="L36">    RenderAs(CellBuilder&lt;C, E&gt; builder, Class&lt;T&gt; valueType, Predicate&lt;CellConf&lt;C, T&gt;&gt; valueValidator) {</span>
 <span class="fc" id="L37">        _builder        = builder;</span>
 <span class="fc" id="L38">        _valueType      = valueType;</span>
 <span class="fc" id="L39">        _valueValidator = valueValidator;</span>
 <span class="fc" id="L40">    }</span>
 
     /**
-     * Specify a lambda which receives a {@link CellDelegate} instance
+     * Specify a lambda which receives a {@link CellConf} instance
      * for you to customize its renderer.
      * This is the most generic way to customize the rendering of a cell,
      * as you can choose between vastly different ways of rendering:
@@ -60,14 +60,14 @@ public final class RenderAs&lt;C extends JComponent, E, T extends E&gt;
      * @param valueInterpreter A lambda which customizes the provided cell.
      * @return The builder API allowing method chaining.
      */
-    public RenderBuilder&lt;C, E&gt; as( Configurator&lt;CellDelegate&lt;C, T&gt;&gt; valueInterpreter ) {
+    public CellBuilder&lt;C, E&gt; as(Configurator&lt;CellConf&lt;C, T&gt;&gt; valueInterpreter ) {
 <span class="fc" id="L64">        NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Configurator.class);</span>
 <span class="fc" id="L65">        _builder._store(_valueType, _valueValidator, valueInterpreter);</span>
 <span class="fc" id="L66">        return _builder;</span>
     }
 
     /**
-     * Specify a lambda which receives a {@link CellDelegate} instance
+     * Specify a lambda which receives a {@link CellConf} instance
      * and return a {@link Component} which is then used to render the cell.
      * &lt;pre&gt;{@code
      * 		.when( MyEnum.class )
@@ -77,12 +77,12 @@ public final class RenderAs&lt;C extends JComponent, E, T extends E&gt;
      * @param renderer A function which returns a {@link Component} which is then used to render the cell.
      * @return The builder API allowing method chaining.
      */
-    public RenderBuilder&lt;C, E&gt; asComponent( Function&lt;CellDelegate&lt;C ,T&gt;, Component&gt; renderer ) {
-<span class="nc" id="L81">        return this.as( cell -&gt; cell.withRenderer(renderer.apply(cell)) );</span>
+    public CellBuilder&lt;C, E&gt; asComponent(Function&lt;CellConf&lt;C ,T&gt;, Component&gt; renderer ) {
+<span class="nc" id="L81">        return this.as( cell -&gt; cell.view(renderer.apply(cell)) );</span>
     }
 
     /**
-     * Specify a lambda which receives a {@link CellDelegate} instance
+     * Specify a lambda which receives a {@link CellConf} instance
      * and return a {@link String} which is then used to render the cell.
      * &lt;pre&gt;{@code
      * 		.when( MyEnum.class )
@@ -92,12 +92,12 @@ public final class RenderAs&lt;C extends JComponent, E, T extends E&gt;
      * @param renderer A function which returns a {@link String} which is then used to render the cell.
      * @return The builder API allowing method chaining.
      */
-    public RenderBuilder&lt;C, E&gt; asText(Function&lt;CellDelegate&lt;C ,T&gt;, String&gt; renderer ) {
-<span class="fc" id="L96">        return this.as(RenderBuilder._createDefaultTextRenderer(renderer));</span>
+    public CellBuilder&lt;C, E&gt; asText(Function&lt;CellConf&lt;C ,T&gt;, String&gt; renderer ) {
+<span class="fc" id="L96">        return this.as(CellBuilder._createDefaultTextRenderer(renderer));</span>
     }
 
     /**
-     * Specify a lambda which receives a {@link CellDelegate} instance as well as a {@link Graphics} instance
+     * Specify a lambda which receives a {@link CellConf} instance as well as a {@link Graphics} instance
      * and then renders the cell.
      * &lt;pre&gt;{@code
      *  	.when( MyEnum.class )
@@ -107,11 +107,11 @@ public final class RenderAs&lt;C extends JComponent, E, T extends E&gt;
      *    })
      * }&lt;/pre&gt;
      *
-     * @param renderer A function which receives a {@link CellDelegate} instance as well as a {@link Graphics} instance and then renders the cell.
+     * @param renderer A function which receives a {@link CellConf} instance as well as a {@link Graphics} instance and then renders the cell.
      * @return The builder API allowing method chaining.
      */
-    public RenderBuilder&lt;C, E&gt; render(BiConsumer&lt;CellDelegate&lt;C ,T&gt;, Graphics2D&gt; renderer ) {
-<span class="nc" id="L114">        return this.as( cell -&gt; cell.withRenderer(new JComponent( ){</span>
+    public CellBuilder&lt;C, E&gt; render(BiConsumer&lt;CellConf&lt;C ,T&gt;, Graphics2D&gt; renderer ) {
+<span class="nc" id="L114">        return this.as( cell -&gt; cell.view(new JComponent( ){</span>
             @Override public void paintComponent(Graphics g) {
                 try {
 <span class="nc" id="L117">                    renderer.accept(cell, (Graphics2D) g);</span>

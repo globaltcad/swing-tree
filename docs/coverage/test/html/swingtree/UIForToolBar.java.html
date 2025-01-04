@@ -64,7 +64,7 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
 <span class="nc" id="L64">                    c.setOrientation(v.forToolBar());</span>
 <span class="nc" id="L65">                })</span>
 <span class="nc" id="L66">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L67">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
+<span class="nc" id="L67">                    thisComponent.setOrientation(alignment.orElseThrowUnchecked().forToolBar());</span>
 <span class="nc" id="L68">                })</span>
 <span class="nc" id="L69">                ._this();</span>
     }
