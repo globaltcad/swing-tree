@@ -23,7 +23,7 @@ public final class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B
      *
      * @param state The {@link BuilderState} containing the component which will be managed by this builder.
      */
-    protected UIForBox( BuilderState<B> state ) {
+    UIForBox(BuilderState<B> state) {
         Objects.requireNonNull(state, "state");
         _state = state;
     }

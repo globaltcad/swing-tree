@@ -189,7 +189,7 @@ public final class ScalableImageIcon extends ImageIcon
     }
 
     @Override
-    public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
+    public synchronized void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
         _updateScale();
         _scaled.paintIcon(c, g, x, y);
     }
