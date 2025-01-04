@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnimationTransformation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">AnimationTransformation.java</span></div><h1>AnimationTransformation.java</h1><pre class="source lang-java linenums">package swingtree.animation;
+
+/**
+ *  Defines an animation in terms of functional transformations
+ *  taking in an {@link AnimationStatus} together with a value
+ *  and returning an updated value. &lt;br&gt;
+ *  The value is expected to be immutable and may be everything
+ *  from a simple {@link java.lang.Number} to a complex view model
+ *  holding your application state and business logic. &lt;br&gt;
+ *  &lt;p&gt;
+ *  Implementations of this are designed to be used as
+ *  part of the {@link Animatable} class holding the initial
+ *  animation state and the {@link LifeTime} determining
+ *  when the animation should run.&lt;br&gt;
+ *  So you may use this interface to define an {@link Animatable}
+ *  like this: &lt;br&gt;
+ *  &lt;pre&gt;{@code
+ *      return Animatable.of(
+ *          LifeTime.of(0.45, TimeUnit.SECONDS), this,
+ *          (status, model) -&gt; model.withFontSize((int) (24 + status.pulse() * 16))
+ *      );
+ *  }
+ *  &lt;/pre&gt;
+ *  An {@link Animatable} may then be passed to
+ *  {@link swingtree.UI#animate(sprouts.Var, Animatable)} together
+ *  with a {@link sprouts.Var} property to repeatedly transform
+ *  the property item during the iterations of the entire animation lifetime.
+ *
+ * @param &lt;T&gt; The type of the value that is animated
+ *           through repeated transformations.
+ */
+@FunctionalInterface
+public interface AnimationTransformation&lt;T&gt;
+{
+    /**
+     *  This takes in the current {@link AnimationStatus} and an immutable
+     *  value of type {@code T} and returns a new updated value of type {@code T}.
+     *  This may typically be an immutable view model whose fields are bound
+     *  to the UI components of your application through property lenses.
+     *
+     * @param status The current status of the animation.
+     * @param value The current value of the animated item.
+     * @return The updated value of the animated item based on the current status,
+     *          typically the {@link AnimationStatus#progress()} number.
+     * @throws Exception If the method call encounters errors in the execution of its implementations.
+     *                   Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.
+     */
+    T run( AnimationStatus status, T value ) throws Exception;
+
+    /**
+     *  This method is called after the animation has finished.
+     *  The default implementation does nothing but returns the
+     *  supplied value. &lt;br&gt;
+     *  Implement this to create a cleaned up final version
+     *  of the item after the animation has finished. &lt;br&gt;
+     *  Note that this method deliberately requires the handling of checked exceptions
+     *  at its invocation sites because there may be any number of implementations
+     *  hiding behind this interface and so it is unwise to assume that
+     *  all of them will be able to execute gracefully without throwing exceptions.
+     *
+     * @param status The current progress status of the animation, which
+     *               is used to determine the intermediate values of
+     *               the animated item. You may typically want to use
+     *               the {@link AnimationStatus#progress()} number to
+     *               interpolate fields of your view model.
+     * @param value The final value of the animated item, which is
+     *              expected to be an immutable object.
+     * @return The final value of the animated item after the animation has finished.
+     * @throws Exception If the method call encounters errors in the execution of its implementations.
+     *                   Due to this being a generic interface, the likelihood of
+     *                   exceptions being thrown is high and so it is recommended
+     *                   to handle them at the invocation site.
+     */
+    default T finish( AnimationStatus status, T value ) throws Exception {
+<span class="fc" id="L77">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

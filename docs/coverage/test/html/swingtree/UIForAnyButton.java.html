@@ -1,0 +1,967 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnyButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnyButton.java</span></div><h1>UIForAnyButton.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Action;
+import sprouts.From;
+import sprouts.Val;
+import sprouts.Var;
+import swingtree.api.IconDeclaration;
+import swingtree.layout.Size;
+import swingtree.style.ScalableImageIcon;
+import swingtree.style.SvgIcon;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+/**
+ *  The following is a more specialized type of builder node based on the {@link UIForAnySwing} builder type,
+ *  and provides additional features associated with the more specialized
+ *  {@link AbstractButton}&quot; Swing component type.
+ *  One of such features is the {@link #onClick(Action)} method allowing for a more readable way of adding
+ *  {@link ActionListener} instances to button types...
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
+ *  &lt;br&gt;&lt;br&gt;
+ *
+ * @param &lt;B&gt; The type parameter for the component wrapped by an instance of this class.
+ * @param &lt;I&gt; The type parameter for the instance type of this concrete class itself.
+ */
+<span class="fc" id="L39">public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends UIForAnySwing&lt;I, B&gt;</span>
+{
+<span class="fc" id="L41">    private static final Logger log = LoggerFactory.getLogger(UIForAnyButton.class);</span>
+
+    /**
+     * Defines the single line of text the wrapped button type will display.
+     * If the value of text is null or empty string, nothing is displayed.
+     *
+     * @param text The new text to be set for the wrapped button type.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withText( String text ) {
+<span class="fc" id="L51">        return _with( thisComponent -&gt; thisComponent.setText(text) )._this();</span>
+    }
+
+    /**
+     *  Binds the provided {@link Val} property to the wrapped button type
+     *  and sets the text of the button to the value of the property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to manually
+     * send the property value to this view component.&lt;/i&gt;
+     * @param text The view model property which should be bound to this UI.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code text} is {@code null}.
+     */
+    public final I withText( Val&lt;String&gt; text ) {
+<span class="fc" id="L64">        NullUtil.nullArgCheck(text, &quot;val&quot;, Val.class);</span>
+<span class="fc" id="L65">        NullUtil.nullPropertyCheck(text, &quot;text&quot;);</span>
+<span class="fc" id="L66">        return _withOnShow( text, AbstractButton::setText )</span>
+<span class="fc" id="L67">               ._with( c -&gt; c.setText(text.orElseThrowUnchecked()) )</span>
+<span class="fc" id="L68">               ._this();</span>
+    }
+
+    /**
+     *  Use this to set the icon for the wrapped button type.
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Something&quot;)
+     *     .peek( button -&gt; button.setIcon(...) );
+     *  }&lt;/pre&gt;
+     *
+     *
+     * @param icon The {@link Icon} which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code icon} is {@code null}.
+     */
+    public I withIcon( Icon icon ) {
+<span class="fc" id="L85">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
+<span class="fc" id="L86">        return _with( c -&gt; c.setIcon(icon) )._this();</span>
+    }
+
+    /**
+     *  Takes the provided {@link Icon} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, ImageIcon icon ) {
+<span class="fc" id="L99">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
+<span class="fc" id="L100">        icon = _fitTo( width, height, icon );</span>
+<span class="fc" id="L101">        return withIcon(icon);</span>
+    }
+
+    private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if ( icon instanceof SvgIcon ) {</span>
+<span class="fc" id="L106">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="fc" id="L107">            svgIcon = svgIcon.withIconWidth(width);</span>
+<span class="fc" id="L108">            return svgIcon.withIconHeight(height);</span>
+        }
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        else if ( icon instanceof ScalableImageIcon ) {</span>
+<span class="fc" id="L111">            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));</span>
+        }
+<span class="pc bpc" id="L113" title="3 of 4 branches missed.">        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {</span>
+<span class="fc" id="L114">            return ScalableImageIcon.of(Size.of(width, height), icon);</span>
+        }
+<span class="nc" id="L116">        return icon;</span>
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon ) {
+<span class="nc" id="L129">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,IconDeclaration.class);</span>
+<span class="nc" id="L130">        return icon.find()</span>
+<span class="nc" id="L131">                   .map( i -&gt; withIcon(width, height, i) )</span>
+<span class="nc" id="L132">                   .orElseGet( this::_this );</span>
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+<span class="nc" id="L146">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,IconDeclaration.class);</span>
+<span class="nc" id="L147">        return icon.find()</span>
+<span class="nc" id="L148">                .map( i -&gt; withIcon(_fitTo(width, height, i), fitComponent) )</span>
+<span class="nc" id="L149">                .orElseGet( this::_this );</span>
+    }
+
+    /**
+     *  Sets the {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is also used as the &quot;pressed&quot; and &quot;disabled&quot; icon if
+     *  there is no explicitly set pressed icon.
+     *
+     * @param icon The {@link SvgIcon} which should be displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( ImageIcon icon, UI.FitComponent fitComponent ) {
+<span class="fc" id="L163">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, ImageIcon.class);</span>
+<span class="fc" id="L164">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if ( icon instanceof SvgIcon)</span>
+        {
+<span class="fc" id="L167">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="fc" id="L168">            return withIcon( svgIcon.withFitComponent(fitComponent) );</span>
+        }
+        else
+<span class="nc" id="L171">            return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L172">                       UI.runLater(()-&gt;{</span>
+<span class="nc" id="L173">                           int width  = thisComponent.getWidth();</span>
+<span class="nc" id="L174">                           int height = thisComponent.getHeight();</span>
+<span class="nc" id="L175">                           width  = Math.max(width,  thisComponent.getMinimumSize().width);</span>
+<span class="nc" id="L176">                           height = Math.max(height, thisComponent.getMinimumSize().height);</span>
+<span class="nc bnc" id="L177" title="All 4 branches missed.">                           if ( width &gt; 0 &amp;&amp; height &gt; 0 )</span>
+<span class="nc" id="L178">                               thisComponent.setIcon(_fitTo( width, height, icon ));</span>
+<span class="nc" id="L179">                       });</span>
+<span class="nc" id="L180">                   })</span>
+<span class="nc" id="L181">                   ._this();</span>
+
+    }
+
+    public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
+<span class="fc" id="L186">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
+<span class="fc" id="L187">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
+<span class="fc" id="L188">        return icon.find()</span>
+<span class="fc" id="L189">                   .map( i -&gt; withIcon(i, fitComponent) )</span>
+<span class="fc" id="L190">                   .orElseGet( this::_this );</span>
+    }
+
+    /**
+     *  Use this to specify the icon for the wrapped button type.
+     *  The icon is determined based on the provided {@link IconDeclaration}
+     *  instance which is conceptually merely a resource path to the icon.
+     *
+     * @param icon The desired icon to be displayed on top of the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( IconDeclaration icon ) {
+<span class="nc" id="L202">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
+<span class="nc" id="L203">        return _with( c -&gt; icon.find().ifPresent(c::setIcon) )._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the icon property for the wrapped button type.
+     *  When the icon wrapped by the provided property changes,
+     *  then so does the icon displayed on this button.
+     *  &lt;p&gt;
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead &lt;b&gt;you must use implementations of the {@link IconDeclaration} interface&lt;/b&gt;,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  &lt;p&gt;
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  &lt;p&gt;
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
+     * @param icon The {@link Icon} property which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code icon} is {@code null}.
+     */
+    public I withIcon( Val&lt;IconDeclaration&gt; icon ) {
+<span class="fc" id="L232">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, Val.class);</span>
+<span class="fc" id="L233">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
+<span class="fc" id="L234">        return _withOnShow( icon, UIForAnyButton::_setIconFromDeclaration)</span>
+<span class="fc" id="L235">               ._with( c -&gt; _setIconFromDeclaration(c, icon.orElseThrowUnchecked()) )</span>
+<span class="fc" id="L236">               ._this();</span>
+    }
+
+    private static void _setIconFromDeclaration( AbstractButton button, IconDeclaration icon ) {
+<span class="fc" id="L240">        Optional&lt;ImageIcon&gt; optIcon = icon.find();</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if ( optIcon.isPresent() )</span>
+<span class="fc" id="L242">            button.setIcon(optIcon.get());</span>
+        else {
+<span class="nc" id="L244">            log.warn(</span>
+                    &quot;Failed to load from 'IconDeclaration' instance '{}', &quot; +
+                    &quot;with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.&quot;,
+<span class="nc" id="L247">                    icon, icon.path(), icon.size(), button,</span>
+                    new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                );
+<span class="nc" id="L250">            button.setIcon(null);</span>
+        }
+<span class="fc" id="L252">    }</span>
+
+    /**
+     *  Use this to set the size of the font of the wrapped button type.
+     * @param size The size of the font which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withFontSize( int size ) {
+<span class="fc" id="L260">        return _with( button -&gt; {</span>
+<span class="fc" id="L261">                   Font old = button.getFont();</span>
+<span class="fc" id="L262">                   button.setFont(old.deriveFont(UI.scale((float)size)));</span>
+<span class="fc" id="L263">               })</span>
+<span class="fc" id="L264">               ._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the size of the font of the wrapped button type
+     *  through the provided view model property.
+     *  When the integer wrapped by the provided property changes,
+     *  then so does the font size of the text displayed on this button.
+     *
+     * @param size The size property of the font which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
+     */
+    public I withFontSize( Val&lt;Integer&gt; size ) {
+<span class="nc" id="L278">        NullUtil.nullArgCheck(size, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L279">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not a sensible value for a font size.&quot;);</span>
+<span class="nc" id="L280">        return _withOnShow( size, (c,v)-&gt;{</span>
+<span class="nc" id="L281">                    c.setFont(c.getFont().deriveFont(UI.scale((float)v)));</span>
+<span class="nc" id="L282">                })</span>
+<span class="nc" id="L283">                ._with( c -&gt; {</span>
+<span class="nc" id="L284">                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrowUnchecked())));</span>
+<span class="nc" id="L285">                })</span>
+<span class="nc" id="L286">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the font of the wrapped button type.
+     * @param font The font of the text which should be displayed on the button.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final I withFont( Font font ) {
+<span class="nc" id="L296">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="nc" id="L297">        return _with( button -&gt; {</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                        if ( _isUndefinedFont(font) )</span>
+<span class="nc" id="L299">                            button.setFont(null);</span>
+                        else
+<span class="nc" id="L301">                            button.setFont(font);</span>
+<span class="nc" id="L302">                    })._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the font of the wrapped button type
+     *  through the provided view model property.
+     *  When the font wrapped by the provided property changes,
+     *  then so does the font of the text displayed on this button.
+     *
+     * @param font The font property of the text which should be displayed on the button type.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
+     */
+    public final I withFont( Val&lt;Font&gt; font ) {
+<span class="nc" id="L317">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="nc" id="L318">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="nc" id="L319">        return _withOnShow( font, (c,v) -&gt; {</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                    if ( _isUndefinedFont(v) )</span>
+<span class="nc" id="L321">                        c.setFont(null);</span>
+                    else
+<span class="nc" id="L323">                        c.setFont(v);</span>
+<span class="nc" id="L324">                })</span>
+<span class="nc" id="L325">               ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L326">                   Font newFont = font.orElseThrowUnchecked();</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                   if ( _isUndefinedFont(newFont) )</span>
+<span class="nc" id="L328">                       thisComponent.setFont( null );</span>
+                   else
+<span class="nc" id="L330">                       thisComponent.setFont( newFont );</span>
+<span class="nc" id="L331">               } )</span>
+<span class="nc" id="L332">               ._this();</span>
+    }
+
+    /**
+     *  Use this to set the selection state of the wrapped button type.
+     *
+     * @param isSelected The selection state of the wrapped button type, which translates to {@link AbstractButton#setSelected(boolean)}.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I isSelectedIf( boolean isSelected ) {
+<span class="fc" id="L342">        return _with( button -&gt; _setSelectedSilently(button, isSelected) )._this();</span>
+    }
+
+    void _setSelectedSilently( B thisButton, boolean isSelected ) {
+        /*
+            This is used to change the selection state of the button without triggering
+            any action listeners. We need this because we want to construct the
+            GUI and the state of its properties without side effects.
+         */
+<span class="fc" id="L351">        ItemListener[] listeners = thisButton.getItemListeners();</span>
+<span class="fc bfc" id="L352" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
+<span class="fc" id="L353">            thisButton.removeItemListener(l);</span>
+
+<span class="fc" id="L355">        thisButton.setSelected(isSelected);</span>
+
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
+<span class="fc" id="L358">            thisButton.addItemListener(l);</span>
+
+<span class="fc" id="L360">    }</span>
+
+    /**
+     *  Use this to bind to a {@link sprouts.Var}
+     *  instance which will be used to dynamically model the selection state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final I isSelectedIf( Val&lt;Boolean&gt; selected ) {
+<span class="nc" id="L372">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L373">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L374">        return _withOnShow(selected, this::_setSelectedSilently)</span>
+<span class="nc" id="L375">               ._with( button -&gt; _setSelectedSilently(button, selected.get()) )._this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link sprouts.Var}
+     *  instance which will be used to dynamically model the inverse selection state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link sprouts.Var} instance which will be used to
+     *                 model the inverse selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final I isSelectedIfNot( Val&lt;Boolean&gt; selected ) {
+<span class="nc" id="L389">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L390">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">        return _withOnShow( selected, (c, v) -&gt; _setSelectedSilently(c, !v) )</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">               ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )._this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link sprouts.Var}
+     *  instance which will be used to dynamically model the selection state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final I isSelectedIf( Var&lt;Boolean&gt; selected ) {
+<span class="fc" id="L405">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="fc" id="L406">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="fc" id="L407">        return _withOnShow( selected, this::_setSelectedSilently )</span>
+<span class="fc" id="L408">                ._with( button -&gt; {</span>
+<span class="fc" id="L409">                    _onClick(button,</span>
+<span class="fc" id="L410">                        e -&gt; _runInApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+                    );
+<span class="fc" id="L412">                    _onChange(button,</span>
+<span class="fc" id="L413">                        v -&gt; _runInApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+                    );
+<span class="fc" id="L415">                })</span>
+<span class="fc" id="L416">                ._with( button -&gt; _setSelectedSilently(button, selected.get()) )</span>
+<span class="fc" id="L417">                ._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically bind to a {@link sprouts.Var}
+     *  instance which will be used to dynamically model the inverse selection state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link sprouts.Var} instance which will be used to
+     *                 model the inverse selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final I isSelectedIfNot( Var&lt;Boolean&gt; selected ) {
+<span class="fc" id="L431">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="nc" id="L432">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L433">        return _withOnShow( selected, (c, v) -&gt; {</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">                    _setSelectedSilently(c, !v);</span>
+<span class="nc" id="L435">                })</span>
+<span class="nc" id="L436">                ._with( button -&gt; {</span>
+<span class="nc" id="L437">                    _onClick(button,</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                        e -&gt; _runInApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+                    );
+<span class="nc" id="L440">                    _onChange(button,</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">                        v -&gt; _runInApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+                    );
+<span class="nc" id="L443">                })</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">                ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )</span>
+<span class="nc" id="L445">                ._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically bind the selection flag of the button to a {@link Val}
+     *  property which will determine the selection state of the button based on the
+     *  equality of the property value and the provided reference value.
+     *  So if the first {@code state} argument is equal to the value of the {@code selection} property,
+     *  the button will be selected, otherwise it will be deselected.&lt;br&gt;
+     *  A typical use case is to bind a button to an enum property, like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var&lt;Step&gt; step = Var.of(Step.ONE);
+     *
+     *      // In your view:
+     *      UI.radioButton(&quot;Two&quot;).isSelectedIf(Step.TWO, vm.getStep());
+     *  }&lt;/pre&gt;
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. &lt;br&gt;
+     *  &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param state The reference value which the button type should represent when selected.
+     * @param selection The {@link sprouts.Val} instance which will be used
+     *                  to dynamically model the selection state of the wrapped button type
+     *                  based on the equality of the {@code state} argument and the value of the property.
+     * @param &lt;T&gt; The type of the property value.
+     * @return The current builder type, to allow for further method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final &lt;T&gt; I isSelectedIf( T state, Val&lt;T&gt; selection ) {
+<span class="fc" id="L477">        NullUtil.nullArgCheck(state, &quot;state&quot;, Object.class);</span>
+<span class="fc" id="L478">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
+<span class="fc" id="L479">        return _withOnShow( selection, (c,v) -&gt; _setSelectedSilently(c, state.equals(v)) )</span>
+<span class="fc" id="L480">                ._with( button -&gt;</span>
+<span class="fc" id="L481">                     _setSelectedSilently(button, state.equals(selection.orElseThrowUnchecked()))</span>
+                )
+<span class="fc" id="L483">                ._this();</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isSelectedIf(Object, Val)}.
+     *  Use this to make the wrapped UI component dynamically deselected or selected,
+     *  based on the equality between the supplied value and the property value. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;&lt;br&gt;
+     *  A typical use case is to bind to an enum property, like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var&lt;Step&gt; step = Var.of(Step.ONE);
+     *
+     *      // In your view:
+     *      UI.radioButton(&quot;Not Two&quot;)
+     *      .isSelectedIfNot(Step.TWO, vm.getStep());
+     *  }&lt;/pre&gt;
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. &lt;br&gt;
+     *
+     * @param state The value which, if equal to the supplied property value, makes the UI component deselected.
+     * @param selection The enum property which, if equal to the supplied value, makes the UI component deselected.
+     * @param &lt;T&gt; The type of the value.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;T&gt; I isSelectedIfNot( T state, Val&lt;T&gt; selection ) {
+<span class="fc" id="L510">        NullUtil.nullArgCheck(state, &quot;state&quot;, Object.class);</span>
+<span class="fc" id="L511">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
+<span class="pc bpc" id="L512" title="1 of 2 branches missed.">        return _withOnShow( selection, (c, v) -&gt; _setSelectedSilently(c, !state.equals(v)) )</span>
+<span class="fc" id="L513">                ._with( button -&gt;</span>
+<span class="pc bpc" id="L514" title="1 of 2 branches missed.">                     _setSelectedSilently(button, !state.equals(selection.orElseThrowUnchecked()))</span>
+                )
+<span class="fc" id="L516">                ._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically bind to a {@link sprouts.Var}
+     *  instance which will be used to dynamically model the pressed state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param var The {@link sprouts.Var} instance which will be used to model the pressed state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code var} is {@code null}.
+     */
+    public final I isPressedIf( Var&lt;Boolean&gt; var ) {
+<span class="fc" id="L529">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
+<span class="fc" id="L530">        return _withOnShow( var, (c,v) -&gt; {</span>
+<span class="pc bpc" id="L531" title="1 of 2 branches missed.">                    if ( v != c.getModel().isPressed() )</span>
+<span class="nc" id="L532">                        c.getModel().setPressed(v);</span>
+<span class="fc" id="L533">                })</span>
+<span class="fc" id="L534">                ._with( button -&gt; {</span>
+<span class="fc" id="L535">                    _onModelChange(button, e -&gt;</span>
+<span class="fc" id="L536">                        _runInApp(button.getModel().isPressed(), pressed-&gt;{</span>
+<span class="fc" id="L537">                            var.set(From.VIEW, pressed);</span>
+<span class="fc" id="L538">                        })</span>
+                    );
+<span class="fc" id="L540">                })</span>
+                // on change is not needed because the pressed state is only changed by the user.
+<span class="fc" id="L542">                ._with( button -&gt;</span>
+<span class="fc" id="L543">                    button.setSelected(var.orElseThrowUnchecked())</span>
+                )
+<span class="fc" id="L545">                ._this();</span>
+    }
+
+    protected final void _onModelChange( B button, Consumer&lt;ChangeEvent&gt; action ) {
+        /*
+            When an item event is fired Swing will go through all the listeners
+            from the most recently added to the first added. This means that if we simply add
+            a listener through the &quot;addItemListener&quot; method, we will be the last to be notified.
+            This is problematic because the first listeners we register are usually
+            the ones that are responsible for updating properties.
+            This means that when the item listener events of the user
+            are fired, the properties will not be updated yet.
+            To solve this problem, we do the revers by making sure that our listener is added
+            at the first position in the list of listeners inside the button.
+        */
+<span class="fc" id="L560">        ItemListener[] listeners = button.getItemListeners();</span>
+<span class="pc bpc" id="L561" title="1 of 2 branches missed.">        for (ItemListener listener : listeners)</span>
+<span class="nc" id="L562">            button.removeItemListener(listener);</span>
+
+<span class="fc" id="L564">        button.addChangeListener(action::accept);</span>
+
+<span class="pc bpc" id="L566" title="1 of 2 branches missed.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="nc" id="L567">            button.addItemListener(listeners[i]);</span>
+        /*
+            The reasoning behind why Swing calls item listeners from last to first is
+            the assumption that the last listener added is more interested in the event
+            than the first listener added.
+            This however is an unintuitive assumption, meaning a user would expect
+            the first listener added to be the most interested in the event
+            simply because it was added first.
+            This is especially true in the context of declarative UI design.
+         */
+<span class="fc" id="L577">    }</span>
+
+
+    /**
+     *  Sets the {@link AbstractButton#setBorderPainted(boolean)} flag of the wrapped button type.
+     *  If the flag is set to true, the border of the button will be painted.
+     *  The default value for the borderPainted property is true.
+     *  Some look and feels might not support the borderPainted property,
+     *  in which case they ignore this.
+     *
+     * @param borderPainted Whether the border of the button should be painted.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I isBorderPaintedIf( boolean borderPainted ) {
+<span class="fc" id="L591">        return _with( button -&gt; button.setBorderPainted(borderPainted) )._this();</span>
+    }
+
+    /**
+     *  Binds the provided {@link Val} property to the {@link AbstractButton#setBorderPainted(boolean)} method.,
+     *  which means that whenever the value of the property changes, the border of the button will be painted or not.
+     *  The default value for the borderPainted property is true.
+     *  Some look and feels might not support the borderPainted property, in which case they ignore this.
+     *
+     * @param val Whether the border of the button should be painted.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I isBorderPaintedIf( Val&lt;Boolean&gt; val ) {
+<span class="nc" id="L604">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L605">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid value for the border painted property.&quot;);</span>
+<span class="nc" id="L606">        return _withOnShow( val, AbstractButton::setBorderPainted )</span>
+<span class="nc" id="L607">               ._with( button -&gt; button.setBorderPainted(val.orElseThrowUnchecked()) )</span>
+<span class="nc" id="L608">               ._this();</span>
+    }
+
+    /**
+     *  Effectively removes the native style of this button.
+     *  Without an icon or text, one will not be able to recognize the button.
+     *  Use this for buttons with a custom icon or clickable text!
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makePlain() {
+<span class="fc" id="L619">        return peek( it -&gt; {</span>
+<span class="fc" id="L620">                    it.setBorderPainted(false);</span>
+<span class="fc" id="L621">                    it.setContentAreaFilled(false);</span>
+<span class="fc" id="L622">                    it.setOpaque(false);</span>
+<span class="fc" id="L623">                    it.setFocusPainted(false);</span>
+<span class="fc" id="L624">                    it.setMargin(new Insets(0,0,0,0));</span>
+<span class="fc" id="L625">                    _setBackground(it, UI.Color.TRANSPARENT);</span>
+<span class="fc" id="L626">                });</span>
+    }
+
+    /**
+     *  This method adds the provided
+     *  {@link ItemListener} instance to the wrapped button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param action The change action lambda which will be passed to the button component.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     */
+    public final I onChange( Action&lt;ComponentDelegate&lt;B, ItemEvent&gt;&gt; action ) {
+<span class="fc" id="L639">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L640">        return _with( button -&gt; {</span>
+<span class="fc" id="L641">                    _onChange(button, e -&gt;</span>
+<span class="fc" id="L642">                        _runInApp(()-&gt;{</span>
+                            try {
+<span class="fc" id="L644">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
+<span class="nc" id="L645">                            } catch ( Exception ex ) {</span>
+<span class="nc" id="L646">                                log.error(&quot;Failed to execute action on button change event.&quot;, ex);</span>
+<span class="fc" id="L647">                            }</span>
+<span class="fc" id="L648">                        })</span>
+                    );
+<span class="fc" id="L650">                })</span>
+<span class="fc" id="L651">                ._this();</span>
+    }
+
+    protected final void _onChange( B button, Consumer&lt;ItemEvent&gt; action ) {
+        /*
+            When an item event is fired Swing will go through all the listeners
+            from the most recently added to the first added. This means that if we simply add
+            a listener through the &quot;addItemListener&quot; method, we will be the last to be notified.
+            This is problematic because the first listeners we register are usually
+            the ones that are responsible for updating properties.
+            This means that when the item listener events of the user
+            are fired, the properties will not be updated yet.
+            To solve this problem, we do the revers by making sure that our listener is added
+            at the first position in the list of listeners inside the button.
+        */
+<span class="fc" id="L666">        ItemListener[] listeners = button.getItemListeners();</span>
+<span class="fc bfc" id="L667" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
+<span class="fc" id="L668">            button.removeItemListener(listener);</span>
+
+<span class="fc" id="L670">        button.addItemListener(action::accept);</span>
+
+<span class="fc bfc" id="L672" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L673">            button.addItemListener(listeners[i]);</span>
+        /*
+            The reasoning behind why Swing calls item listeners from last to first is
+            the assumption that the last listener added is more interested in the event
+            than the first listener added.
+            This however is an unintuitive assumption, meaning a user would expect
+            the first listener added to be the most interested in the event
+            simply because it was added first.
+            This is especially true in the context of declarative UI design.
+         */
+<span class="fc" id="L683">    }</span>
+
+    /**
+     *  This method enables a more readable way of adding
+     *  {@link ActionListener} instances to button types.
+     *  Additionally, to the other &quot;onClick&quot; method this method enables the involvement of the
+     *  {@link JComponent} itself into the action supplied to it.
+     *  This is very useful for changing the state of the JComponent when the action is being triggered.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param action an {@link Action} instance which will receive an {@link ComponentDelegate} containing important context information.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     */
+    public I onClick( Action&lt;ComponentDelegate&lt;B, ActionEvent&gt;&gt; action ) {
+<span class="fc" id="L698">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L699">        return _with( button -&gt; {</span>
+<span class="fc" id="L700">                    _onClick(button, e -&gt;</span>
+<span class="fc" id="L701">                        _runInApp(() -&gt; {</span>
+                            try {
+<span class="fc" id="L703">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
+<span class="nc" id="L704">                            } catch ( Exception ex ) {</span>
+<span class="nc" id="L705">                                log.error(&quot;Failed to execute action on button click event.&quot;, ex);</span>
+<span class="fc" id="L706">                            }</span>
+<span class="fc" id="L707">                        })</span>
+                    );
+<span class="fc" id="L709">                })</span>
+<span class="fc" id="L710">                ._this();</span>
+    }
+
+    protected final void _onClick( B button, Consumer&lt;ActionEvent&gt; action ) {
+        /*
+            When an action event is fired, Swing will go through all the listeners
+            from the most recently added to the first added. This means that if we simply add
+            a listener through the &quot;addActionListener&quot; method, we will be the last to be notified.
+            This is problematic because it is built on the assumption that the last listener
+            added is more interested in the event than the first listener added.
+            This however is an unintuitive assumption, meaning a user would expect
+            the first listener added to be the most interested in the event
+            simply because it was added first.
+            This is especially true in the context of declarative UI design.
+        */
+<span class="fc" id="L725">        ActionListener[] listeners = button.getActionListeners();</span>
+<span class="fc bfc" id="L726" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L727">            button.removeActionListener(listener);</span>
+
+<span class="fc" id="L729">        button.addActionListener(action::accept);</span>
+
+<span class="fc bfc" id="L731" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L732">            button.addActionListener(listeners[i]);</span>
+<span class="fc" id="L733">    }</span>
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setHorizontalAlignment(...) );
+     *  }&lt;/pre&gt;
+     * This sets the horizontal alignment of the icon and text.
+     *
+     * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
+     */
+    public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
+<span class="nc" id="L748">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L749">        return _with( c -&gt;</span>
+<span class="nc" id="L750">                    horizontalAlign.forSwing().ifPresent(c::setHorizontalAlignment)</span>
+                )
+<span class="nc" id="L752">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *     .peek( button -&gt; {
+     *          property.onSetItem(v-&gt;button.setHorizontalAlignment(v.forSwing()));
+     *          button.setHorizontalAlignment(property.get().forSwing());
+     *     });
+     *  }&lt;/pre&gt;
+     * This sets the horizontal alignment of the icon and text
+     * and also binds the provided property to the underlying component. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
+     */
+    public final I withHorizontalAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
+<span class="nc" id="L773">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L774">        NullUtil.nullPropertyCheck(horizontalAlign, &quot;horizontalAlign&quot;);</span>
+<span class="nc" id="L775">        return _withOnShow( horizontalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L776">                    align.forSwing().ifPresent(c::setHorizontalAlignment);</span>
+<span class="nc" id="L777">                })</span>
+<span class="nc" id="L778">                ._with( c -&gt;</span>
+<span class="nc" id="L779">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalAlignment)</span>
+                )
+<span class="nc" id="L781">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setVerticalAlignment(...) );
+     *  }&lt;/pre&gt;
+     * This sets the vertical alignment of the icon and text.
+     *
+     * @param verticalAlign The vertical alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
+     */
+    public final I withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
+<span class="nc" id="L797">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L798">        return _with( c -&gt;</span>
+<span class="nc" id="L799">                    verticalAlign.forSwing().ifPresent(c::setVerticalAlignment)</span>
+                )
+<span class="nc" id="L801">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *     .peek( button -&gt; {
+     *          property.onSetItem(v-&gt;button.setVerticalAlignment(v.forSwing()));
+     *          button.setVerticalAlignment(property.get().forSwing());
+     *     });
+     *  }&lt;/pre&gt;
+     * This sets the vertical alignment of the icon and text
+     * and also binds the provided property to the underlying component. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
+     */
+    public final I withVerticalAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
+<span class="nc" id="L822">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L823">        NullUtil.nullPropertyCheck(verticalAlign, &quot;verticalAlign&quot;);</span>
+<span class="nc" id="L824">        return _withOnShow( verticalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L825">                    align.forSwing().ifPresent(c::setVerticalAlignment);</span>
+<span class="nc" id="L826">                })</span>
+<span class="nc" id="L827">                ._with( c -&gt;</span>
+<span class="nc" id="L828">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalAlignment)</span>
+                )
+<span class="nc" id="L830">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setHorizontalTextPosition(...) );
+     *  }&lt;/pre&gt;
+     * This sets the horizontal position of the text relative to the icon.
+     *
+     * @param horizontalAlign The horizontal text alignment relative to the icon which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
+     */
+    public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
+<span class="nc" id="L846">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L847">        return _with( c -&gt;</span>
+<span class="nc" id="L848">                    horizontalAlign.forSwing().ifPresent(c::setHorizontalTextPosition)</span>
+                )
+<span class="nc" id="L850">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *     .peek( button -&gt; {
+     *          property.onSetItem(v-&gt;button.setHorizontalTextPosition(v.forSwing()));
+     *          button.setHorizontalTextPosition(property.get().forSwing());
+     *     });
+     *  }&lt;/pre&gt;
+     * This sets the horizontal position of the text relative to the icon
+     * and also binds the provided property to the underlying component. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
+     */
+    public final I withHorizontalTextAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
+<span class="nc" id="L871">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L872">        return _withOnShow( horizontalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L873">                    align.forSwing().ifPresent(c::setHorizontalTextPosition);</span>
+<span class="nc" id="L874">                })</span>
+<span class="nc" id="L875">                ._with( c -&gt;</span>
+<span class="nc" id="L876">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalTextPosition)</span>
+                )
+<span class="nc" id="L878">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setVerticalTextPosition(...) );
+     *  }&lt;/pre&gt;
+     * This sets the vertical position of the text relative to the icon.
+     *
+     * @param verticalAlign The vertical text alignment relative to the icon which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
+     */
+    public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
+<span class="nc" id="L894">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L895">        return _with( c -&gt;</span>
+<span class="nc" id="L896">                    verticalAlign.forSwing().ifPresent(c::setVerticalTextPosition)</span>
+                )
+<span class="nc" id="L898">                ._this();</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *     .peek( button -&gt; {
+     *          property.onSetItem(v-&gt;button.setVerticalTextPosition(v.forSwing()));
+     *          button.setVerticalTextPosition(property.get().forSwing());
+     *     });
+     *  }&lt;/pre&gt;
+     * This sets the vertical position of the text relative to the icon
+     * and also binds the provided property to the underlying component. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
+     */
+    public final I withVerticalTextAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
+<span class="nc" id="L919">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L920">        return _withOnShow( verticalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L921">                    align.forSwing().ifPresent(c::setVerticalTextPosition);</span>
+<span class="nc" id="L922">                })</span>
+<span class="nc" id="L923">                ._with( c -&gt;</span>
+<span class="nc" id="L924">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalTextPosition)</span>
+                )
+<span class="nc" id="L926">                ._this();</span>
+    }
+
+    /**
+     *  Use this to attach this button type to a button group.
+     *
+     * @param group The button group to which this button should be attached.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withButtonGroup( ButtonGroup group ) {
+<span class="fc" id="L936">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
+<span class="fc" id="L937">        return _with(group::add)._this();</span>
+    }
+
+    /**
+     *  Use this to set the margin of the wrapped button type.
+     *
+     * @param insets The margin of the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMargin( Insets insets ) {
+<span class="nc" id="L947">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
+<span class="nc" id="L948">        return _with( thisComponent -&gt;</span>
+<span class="nc" id="L949">                    thisComponent.setMargin(insets)</span>
+                )
+<span class="nc" id="L951">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the margin of the wrapped button type.
+     *
+     * @param top The top margin of the button.
+     * @param left The left margin of the button.
+     * @param bottom The bottom margin of the button.
+     * @param right The right margin of the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMargin( int top, int left, int bottom, int right ) {
+<span class="nc" id="L964">        return withMargin( new Insets(top, left, bottom, right) );</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

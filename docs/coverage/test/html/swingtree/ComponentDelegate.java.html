@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">ComponentDelegate.java</span></div><h1>ComponentDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Action;
+
+import javax.swing.JComponent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+/**
+ *  Instances of this are delegates for a specific components and events that
+ *  are passed to user event action handlers (see {@link Action}),
+ *  with the purpose of providing useful context information to the action handler.
+ *  &lt;br&gt;
+ *  You would typically use this to access and change the state of the component, schedule animations
+ *  for the component or query the tree of neighboring components. &lt;br&gt;
+ *  Here a nice usage example where the delegate is used to animate a button:
+ *  &lt;pre&gt;{@code
+ *      button(&quot;I turn green when you hover over me&quot;)
+ *      .onMouseEnter( it -&gt;
+ *          it.animateFor(0.5, TimeUnit.SECONDS, status -&gt; {
+ *              double highlight = 1 - status.progress() * 0.5;
+ *              it.setBackgroundColor(highlight, 1, highlight);
+ *          })
+ *      )
+ *      .onMouseExit( it -&gt;
+ *          it.animateFor(0.5, TimeUnit.SECONDS, status -&gt; {
+ *              double highlight = 0.5 + status.progress() * 0.5;
+ *              it.setBackgroundColor(highlight, 1, highlight);
+ *          })
+ *      )
+ *  }&lt;/pre&gt;
+ *  In this example the {@code it} parameter is a {@code ComponentDelegate&lt;JButton,MouseEvent&gt;}
+ *  which can be used to access/modify the button, the event, the sibling components...
+ *  ...but also exposes a nice API to schedule animations for the button.
+ * 	&lt;p&gt;
+ * 	For some more examples &lt;b&gt;please take a look at the
+ * 	&lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
+ *
+ * @param &lt;C&gt; The delegate (in most cases origin UI component) type parameter stored by this.
+ * @param &lt;E&gt; The event type parameter of the event stored by this.
+ */
+public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDelegate&lt;C&gt;
+{
+    private final E _event;
+
+    /**
+     *  Creates a new delegate for the specified component and event.
+     *
+     * @param component The component for which the delegate is created.
+     * @param event The event that represents the action that was triggered either by the user or by the system.
+     */
+    public ComponentDelegate( C component, E event ) {
+<span class="fc" id="L57">        super(false, component, component);</span>
+<span class="fc" id="L58">        _event = Objects.requireNonNull(event);</span>
+<span class="fc" id="L59">    }</span>
+
+    /**
+     *  Exposes the underlying component from which this delegate
+     *  and user event actions originate.
+     *  This method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *
+     * @return The component for which the current {@link Action} originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
+     */
+    public final C getComponent() {
+        // We make sure that only the Swing thread can access the component:
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if ( UI.thisIsUIThread() )</span>
+<span class="fc" id="L73">            return _component();</span>
+        else
+<span class="fc" id="L75">            throw new IllegalStateException(</span>
+                    &quot;Component can only be accessed by the Swing thread.&quot;
+                );
+    }
+
+    /**
+     *  Use this to access the component of this delegate in the swing thread.
+     *  This method will make sure that the passed lambda will
+     *  be executed by the Swing thread.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param action The action consuming the component,
+     *               which will be executed by the Swing thread.
+     */
+    public final void forComponent( Consumer&lt;C&gt; action ) {
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L90">            action.accept(_component());</span>
+        else
+<span class="fc" id="L92">            UI.run( () -&gt; action.accept(_component()) );</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     *  Exposes the event that represents the action that was triggered
+     *  either by the user or by the system.
+     *
+     * @return An object holding relevant information about an event that was triggered.
+     */
+<span class="fc" id="L101">    public final E getEvent() { return _event; }</span>
+
+    /**
+     *  Exposes the &quot;siblings&quot;, which consist of all
+     *  the child components of the parent of the delegated component
+     *  except the for the delegated component itself.
+     *
+     * @return A list of all siblings excluding the component from which this instance originated.
+     */
+    public final List&lt;JComponent&gt; getSiblings() {
+        // We make sure that only the Swing thread can access the sibling components:
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L113">            throw new IllegalStateException(</span>
+                    &quot;Sibling components can only be accessed by the Swing thread. &quot; +
+                    &quot;Please use 'forSiblings(..)' methods instead.&quot;
+                );
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        return _siblingsSource().stream().filter( s -&gt; _component() != s ).collect(Collectors.toList());</span>
+    }
+    
+    /**
+     *  Use this to access the sibling components of this delegate in the swing thread.
+     *  This method will make sure that the passed lambda will
+     *  be executed by the Swing thread.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param action The action consuming a list of all siblings (excluding the
+     *               component from which this instance originated),
+     *               which will be executed by the Swing thread.
+     */
+    public final void forSiblings( Consumer&lt;List&lt;JComponent&gt;&gt; action ) {
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L131">            action.accept(getSiblings());</span>
+        else
+<span class="fc" id="L133">            UI.run( () -&gt; action.accept(getSiblings()) );</span>
+<span class="fc" id="L134">    }</span>
+
+    /**
+     *  Allows you to query the sibling components of the delegated component
+     *  of the specified type. So a list of all siblings which are of the specified type
+     *  will be returned, &lt;b&gt;excluding&lt;/b&gt; the currently delegated component itself. &lt;br&gt;
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblingsOfType(Class, Consumer)} to access the sibling components
+     *  of the specified type in a thread-safe way.
+     *
+     * @param type The type class of the sibling components to return.
+     * @param &lt;T&gt; The type of the sibling components to return.
+     * @return A list of all siblings of the specified type, excluding the component from which this instance originated.
+     */
+    public final &lt;T extends JComponent&gt; List&lt;T&gt; getSiblingsOfType(Class&lt;T&gt; type) {
+        // We make sure that only the Swing thread can access the sibling components:
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L152">            throw new IllegalStateException(</span>
+                    &quot;Sibling components can only be accessed by the Swing thread. &quot; +
+                    &quot;Please use 'forSiblingsOfType(..)' methods instead.&quot;
+            );
+<span class="fc" id="L156">        return getSiblings()</span>
+<span class="fc" id="L157">                .stream()</span>
+<span class="pc" id="L158">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
+<span class="pc" id="L159">                .map( s -&gt; (T) s )</span>
+<span class="fc" id="L160">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     *  Use this to access the sibling components of this delegate
+     *  of the specified type in the swing thread.
+     *  This method will make sure that the passed lambda will
+     *  be executed by the Swing thread.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param type The type class of the sibling components to return.
+     * @param &lt;T&gt; The {@link JComponent} type of the sibling components to return.
+     * @param action The action consuming a list of all siblings of the specified type,
+     *               excluding the component from which this instance originated,
+     *               which will be executed by the Swing thread.
+     */
+    public final &lt;T extends JComponent&gt; void forSiblingsOfType(
+        Class&lt;T&gt; type, Consumer&lt;List&lt;T&gt;&gt; action
+    ) {
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L179">            action.accept(getSiblingsOfType(type));</span>
+        else
+<span class="fc" id="L181">            UI.run( () -&gt; action.accept(getSiblingsOfType(type)) );</span>
+<span class="fc" id="L182">    }</span>
+
+    /**
+     *  This method provides a convenient way to access all the children of the parent component
+     *  of the component this delegate is for.
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblinghood(Consumer)} to access the sibling components
+     *
+     * @return A list of all siblings including the component from which this instance originated.
+     */
+    public final List&lt;JComponent&gt; getSiblinghood() {
+        // We make sure that only the Swing thread can access the sibling components:
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L196">            throw new IllegalStateException(</span>
+                    &quot;Sibling components can only be accessed by the Swing thread. &quot; +
+                    &quot;Please use 'forSiblinghood(..)' methods instead.&quot;
+            );
+<span class="fc" id="L200">        return new ArrayList&lt;&gt;(_siblingsSource());</span>
+    }
+
+    /**
+     *  Use this to access the sibling components of this delegate in the swing thread.
+     *  This method will make sure that the passed lambda will
+     *  be executed by the Swing thread.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param action The action consuming a list of all siblings (including the
+     *               component from which this instance originated),
+     *               which will be executed by the Swing thread.
+     */
+    public final void forSiblinghood( Consumer&lt;List&lt;JComponent&gt;&gt; action ) {
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L214">            action.accept(getSiblinghood());</span>
+        else
+<span class="fc" id="L216">            UI.run( () -&gt; action.accept(getSiblinghood()) );</span>
+<span class="fc" id="L217">    }</span>
+
+    /**
+     *  Allows you to query the sibling components of the delegated component
+     *  of the specified type. So a list of all siblings which are of the specified type
+     *  will be returned, possibly including the delegated component itself. &lt;br&gt;
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblinghoodOfType(Class, Consumer)} to access the sibling components
+     *  of the specified type in a thread-safe way.
+     *
+     * @param type The type of the sibling components to return.
+     * @param &lt;T&gt; The {@link JComponent} type of the sibling components to return.
+     * @return A list of all siblings of the specified type, including the component from which this instance originated.
+     */
+    public final &lt;T extends JComponent&gt; List&lt;T&gt; getSiblinghoodOfType(Class&lt;T&gt; type) {
+        // We make sure that only the Swing thread can access the sibling components:
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L235">            throw new IllegalStateException(</span>
+                &quot;Sibling components can only be accessed by the Swing thread. &quot; +
+                &quot;Please use 'forSiblinghoodOfType(..)' methods instead.&quot;
+            );
+<span class="fc" id="L239">        return new ArrayList&lt;&gt;(_siblingsSource())</span>
+<span class="fc" id="L240">                .stream()</span>
+<span class="pc" id="L241">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
+<span class="pc" id="L242">                .map( s -&gt; (T) s )</span>
+<span class="fc" id="L243">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     *  Use this to access all sibling components (including the one represented by this delegate)
+     *  of the specified type in the swing thread.
+     *  This method will make sure that the passed lambda will
+     *  be executed by the Swing thread.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param type The type of the sibling components to return.
+     * @param &lt;T&gt; The {@link JComponent} type of the sibling components to return.
+     * @param action The action consuming a list of all siblings of the specified type,
+     *               including the component from which this instance originated,
+     *               which will be executed by the Swing thread.
+     */
+    public final &lt;T extends JComponent&gt; void forSiblinghoodOfType(
+        Class&lt;T&gt; type, Consumer&lt;List&lt;T&gt;&gt; action
+    ) {
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L262">            action.accept(getSiblinghoodOfType(type));</span>
+        else
+<span class="fc" id="L264">            UI.run( () -&gt; action.accept(getSiblinghoodOfType(type)) );</span>
+<span class="fc" id="L265">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

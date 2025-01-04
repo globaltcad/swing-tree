@@ -1,0 +1,130 @@
+{
+  "className":"swingtree.Layout_Styling_Spec",
+  "title":"Layout Styling",
+  "narrative":"SwingTree allows you to define the layout of your components\n    through the styling API, which is a functional DSL\n    that not only allows you to define how a component should be painted,\n    like for example the background color, the font, the border widths, etc.\n    but also allows you to define the miglayout constraints for the component.\n\n    The examples defined in this specification will demonstrate how to use the styling API\n    to define the layout of your components.",
+  "subjects":[],
+  "statistics":{
+    "runs":"6",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The x and y alignment values of a component can be configured through the styling API",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The x, and y alignment values are float values that can be used to align a component\n            within its parent container. The x alignment value is used to align the component\n            horizontally, and the y alignment value is used to align the component vertically.\n\n            Note that not all layout managers support the alignment values, and that the alignment\n            values are only used when the component is smaller than the parent container.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","        UI.panel(\"fill\")","        .add(","            UI.button().withStyle( it -> it","                .alignmentX(0.27f)","                .alignmentY(0.73f)","            )","        )"]},
+
+        {"kind":"and","text":"We build the root component of the SwingTree declaration and unpack the first sub-component:","code":["var panel = ui.get(JPanel)","var button = panel.getComponent(0)"]},
+
+        {"kind":"expect","text":"The alignment values of the button are set to the values we specified in the styling API:","code":["button.alignmentX == 0.27f","button.alignmentY == 0.73f"]},
+
+        {"kind":"and","text":"\n            Although the vanilla MigLayout does not support the alignment values,\n            the SwingTree layout will inform the MigLayout of the alignment values.\n            So we can check and see that the MigLayout has \n            the alignment values encoded into the component constraints of the button:\n        ","code":["((CC)((MigLayout)panel.layout).constraintMap[button]).horizontal.getAlign().value == 27f","((CC)((MigLayout)panel.layout).constraintMap[button]).vertical.getAlign().value == 73f"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the style API to configure the MigLayout manager for your components.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API allows you to configure MigLayout managers for your components\n            by exposing various methods for specifying layout constraints\n            in a way that is more readable than the vanilla MigLayout API.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","        UI.panel(\"fill\")","        .withStyle( it -> it","            .layout(\"flowy, insets 10 20 30 40\", \"[grow, fill] 10 [grow, fill]\", \"[shrink] 12 [shrink]\")","        )","        .add(","            UI.button().withStyle( it -> it","                .addConstraint(\"grow, span 2\")","            )","        )"]},
+
+        {"kind":"and","text":"We unpack the Swing tree:","code":["var panel = ui.get(JPanel)","var button = panel.getComponent(0)"]},
+
+        {"kind":"expect","text":"The layout manager of the panel is a MigLayout manager:","code":["panel.layout instanceof MigLayout"]},
+
+        {"kind":"and","text":"The layout manager of the panel has the layout constraints we specified in the styling API:","code":["panel.layout.layoutConstraints == \"flowy, insets 10 20 30 40\"","panel.layout.columnConstraints == \"[grow, fill] 10 [grow, fill]\"","panel.layout.rowConstraints == \"[shrink] 12 [shrink]\""]},
+
+        {"kind":"and","text":"Finally, the button has the layout constraints we specified in the styling API:","code":["((MigLayout)panel.layout).constraintMap[button] == \"grow, span 2\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The style Allows you to configure the flow layout as layout manager for components.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API allows you to configure the flow layout as layout manager for components.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","        UI.panel(\"fill\")","        .withStyle( it -> it","            .layout(Layout.flow())","        )","        .add(","            UI.toggleButton().withStyle( it -> it","                .alignmentX(0.33f)","                .alignmentY(0.66f)","            )","        )"]},
+
+        {"kind":"and","text":"We unpack the Swing tree:","code":["var panel = ui.get(JPanel)","var button = panel.getComponent(0)"]},
+
+        {"kind":"expect","text":"The layout manager of the panel is a responsive flow layout manager:","code":["panel.layout instanceof ResponsiveGridFlowLayout"]},
+
+        {"kind":"and","text":"The button has the alignment values we specified in the styling API:","code":["button.alignmentX == 0.33f","button.alignmentY == 0.66f"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Define a border layout for a parent component and the corresponding constraints for their child components through the style API.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API allows you to define a border layout for a parent component\n            as well as the corresponding constraints for their child components.\n            So for example in case of a component having a `BorderLayout`, \n            the constraints for the child components may be `BorderLayout.NORTH`, `BorderLayout.SOUTH`, etc.\n            and they can all be specified through the style API. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","        UI.panel(\"fill\")","        .withStyle( it -> it","            .layout(Layout.border())","        )","        .add(","            UI.slider(UI.Align.VERTICAL).withStyle( it -> it","                .addConstraint(BorderLayout.WEST)","            )","        )","        .add(","            UI.textArea(\"Some content\").withStyle( it -> it","                .addConstraint(BorderLayout.CENTER)","            )","        )","        .add(","            UI.button(\"Click me\").withStyle( it -> it","                .addConstraint(BorderLayout.SOUTH)","            )","        )"]},
+
+        {"kind":"and","text":"We unpack the Swing tree:","code":["var panel = ui.get(JPanel)","var slider = panel.getComponent(0)","var textArea = panel.getComponent(1)","var button = panel.getComponent(2)","var layout = panel.layout"]},
+
+        {"kind":"expect","text":"The layout manager of the panel is a BorderLayout manager:","code":["layout instanceof BorderLayout"]},
+
+        {"kind":"and","text":"The box layout manager will associate the constraints we specified in the styling API with the child components:","code":["((BorderLayout)layout).getLayoutComponent(BorderLayout.WEST) == slider","((BorderLayout)layout).getLayoutComponent(BorderLayout.CENTER) == textArea","((BorderLayout)layout).getLayoutComponent(BorderLayout.SOUTH) == button"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"If you do not want a component to be managed by a layout manager, you can set the layout manager to `Layout.none()`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you do not want a component to be managed by a layout manager, you can set the layout manager to\n            the `Layout.none()` value, which is a `Layout` implementation that \n            installs a `null` layout manager on the component.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","        UI.panel(\"fill\")","        .withStyle( it -> it","            .layout(Layout.none())","        )","        .add(","            UI.button()","        )"]},
+
+        {"kind":"and","text":"We unpack the Swing tree:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The layout manager of the panel is null:","code":["panel.layout == null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Configure the `ComponentOrientation` of a component, through the style API.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API allows you to configure the `ComponentOrientation` of a component.\n            We do this by passing one of the `UI.ComponentOrientation` enum constants to the `orientation` method.\n            These constants directly map to the `java.awt.ComponentOrientation` constants\n            of the same name.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","        UI.panel(\"fill, wrap 1\")","        .add(","            UI.menuItem(\"Right to left\").withStyle( it -> it","                .orientation(UI.ComponentOrientation.RIGHT_TO_LEFT)","            )","        )","        .add(","            UI.menuItem(\"Left to right\").withStyle( it -> it","                .orientation(UI.ComponentOrientation.LEFT_TO_RIGHT)","            )","        )","        .add(","            UI.menuItem(\"Unknown\").withStyle( it -> it","                .orientation(UI.ComponentOrientation.UNKNOWN)","            )","        )","        .add(","            UI.menuItem(\"Default\")","        )"]},
+
+        {"kind":"and","text":"We unpack the Swing tree:","code":["var panel = ui.get(JPanel)","var menuItem1 = panel.getComponent(0)","var menuItem2 = panel.getComponent(1)","var menuItem3 = panel.getComponent(2)","var menuItem4 = panel.getComponent(3)"]},
+
+        {"kind":"expect","text":"The component orientation of the menu items is set to the values we specified in the styling API:","code":["menuItem1.componentOrientation == ComponentOrientation.RIGHT_TO_LEFT","menuItem2.componentOrientation == ComponentOrientation.LEFT_TO_RIGHT","menuItem3.componentOrientation == ComponentOrientation.UNKNOWN","menuItem4.componentOrientation == ComponentOrientation.UNKNOWN"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

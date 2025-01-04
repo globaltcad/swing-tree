@@ -1,0 +1,769 @@
+{
+  "className":"swingtree.Layout_Spec",
+  "title":"Responsive Layouts",
+  "narrative":"A basic requirement of any UI framework is the ability to create UIs\n    with layouts that adapt to different screen sizes and resolutions.\n    SwingTree is primarily based on the `MigLayout` layout manager, which\n    is a powerful and flexible layout manager that can be used to create\n    all kinds of layouts.\n\n    However, `MigLayout` is based on a rigid grid system, which can make\n    it difficult to create responsive layouts that adapt to different\n    size constraints.\n\n    To address this limitation, SwingTree provides an alternative layout\n    manager called `ResponsiveGridFlowLayout`, that is originally\n    based on the `FlowLayout` layout manager, but has been extended to\n    support responsive grid cell sizing.\n\n    In this specification, we will explore the features of the `ResponsiveGridFlowLayout`\n    as part of declarative SwingTree UI code.",
+  "subjects":["swingtree.layout.ResponsiveGridFlowLayout","swingtree.layout.FlowCell","swingtree.UIFactoryMethods","swingtree.UI"],
+  "statistics":{
+    "runs":"37",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree UI builder API supports various `withFlowLayout(..)` method\n            variants that attach a `ResponsiveGridFlowLayout` to the UI component.\n            Note that due to the nature of the `ResponsiveGridFlowLayout` being\n            inherently based on the `FlowLayout` layout manager, it is not \n            obvious from the API that the layout manager is actually a\n            `ResponsiveGridFlowLayout`.\n\n            This is intentional, as the `ResponsiveGridFlowLayout` is designed\n            as a replacement for the `FlowLayout` layout manager which also\n            supports high DPI scaling of gutter gaps and cell sizes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Before we build the UI, we set the UI scale factor (for high DPI screens):","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"We build a simple panel with a button and a label:","code":["var ui =","          UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 12, 12)","          .add(","              UI.button(\"Random Button\")","          )","          .add(","              UI.label(\"Some text\")","          )"]},
+
+        {"kind":"and","text":"Then we construct the actual panel component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a `ResponsiveGridFlowLayout` layout manager attached:","code":["panel.getLayout() instanceof ResponsiveGridFlowLayout"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal alignment:","code":["panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal and vertical gap sizes:","code":["panel.getLayout().horizontalGapSize() == Math.round(12 * uiScaleFactor)","panel.getLayout().verticalGapSize() == Math.round(12 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.25f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree UI builder API supports various `withFlowLayout(..)` method\n            variants that attach a `ResponsiveGridFlowLayout` to the UI component.\n            Note that due to the nature of the `ResponsiveGridFlowLayout` being\n            inherently based on the `FlowLayout` layout manager, it is not \n            obvious from the API that the layout manager is actually a\n            `ResponsiveGridFlowLayout`.\n\n            This is intentional, as the `ResponsiveGridFlowLayout` is designed\n            as a replacement for the `FlowLayout` layout manager which also\n            supports high DPI scaling of gutter gaps and cell sizes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Before we build the UI, we set the UI scale factor (for high DPI screens):","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"We build a simple panel with a button and a label:","code":["var ui =","          UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 12, 12)","          .add(","              UI.button(\"Random Button\")","          )","          .add(","              UI.label(\"Some text\")","          )"]},
+
+        {"kind":"and","text":"Then we construct the actual panel component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a `ResponsiveGridFlowLayout` layout manager attached:","code":["panel.getLayout() instanceof ResponsiveGridFlowLayout"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal alignment:","code":["panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal and vertical gap sizes:","code":["panel.getLayout().horizontalGapSize() == Math.round(12 * uiScaleFactor)","panel.getLayout().verticalGapSize() == Math.round(12 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.25f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree UI builder API supports various `withFlowLayout(..)` method\n            variants that attach a `ResponsiveGridFlowLayout` to the UI component.\n            Note that due to the nature of the `ResponsiveGridFlowLayout` being\n            inherently based on the `FlowLayout` layout manager, it is not \n            obvious from the API that the layout manager is actually a\n            `ResponsiveGridFlowLayout`.\n\n            This is intentional, as the `ResponsiveGridFlowLayout` is designed\n            as a replacement for the `FlowLayout` layout manager which also\n            supports high DPI scaling of gutter gaps and cell sizes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Before we build the UI, we set the UI scale factor (for high DPI screens):","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"We build a simple panel with a button and a label:","code":["var ui =","          UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 12, 12)","          .add(","              UI.button(\"Random Button\")","          )","          .add(","              UI.label(\"Some text\")","          )"]},
+
+        {"kind":"and","text":"Then we construct the actual panel component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a `ResponsiveGridFlowLayout` layout manager attached:","code":["panel.getLayout() instanceof ResponsiveGridFlowLayout"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal alignment:","code":["panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal and vertical gap sizes:","code":["panel.getLayout().horizontalGapSize() == Math.round(12 * uiScaleFactor)","panel.getLayout().verticalGapSize() == Math.round(12 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.25f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree UI builder API supports various `withFlowLayout(..)` method\n            variants that attach a `ResponsiveGridFlowLayout` to the UI component.\n            Note that due to the nature of the `ResponsiveGridFlowLayout` being\n            inherently based on the `FlowLayout` layout manager, it is not \n            obvious from the API that the layout manager is actually a\n            `ResponsiveGridFlowLayout`.\n\n            This is intentional, as the `ResponsiveGridFlowLayout` is designed\n            as a replacement for the `FlowLayout` layout manager which also\n            supports high DPI scaling of gutter gaps and cell sizes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Before we build the UI, we set the UI scale factor (for high DPI screens):","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"We build a simple panel with a button and a label:","code":["var ui =","          UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 12, 12)","          .add(","              UI.button(\"Random Button\")","          )","          .add(","              UI.label(\"Some text\")","          )"]},
+
+        {"kind":"and","text":"Then we construct the actual panel component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a `ResponsiveGridFlowLayout` layout manager attached:","code":["panel.getLayout() instanceof ResponsiveGridFlowLayout"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal alignment:","code":["panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER"]},
+
+        {"kind":"and","text":"The layout manager has the correct horizontal and vertical gap sizes:","code":["panel.getLayout().horizontalGapSize() == Math.round(12 * uiScaleFactor)","panel.getLayout().verticalGapSize() == Math.round(12 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.25f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [14]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [15]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [16]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [17]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [18]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [19]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [20]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [21]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [22]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`. [23]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any additional configuration, the `ResponsiveGridFlowLayout` should\n            behave exactly like the regular `FlowLayout` layout manager.\n\n            In this unit test confirm this functional equivalence by comparing \n            two panels with the same components, one using a `FlowLayout` and the\n            other using a `ResponsiveGridFlowLayout`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.","code":["var ourFlowPanel =","            UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)","var regularFlowPanel =","            UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))","            .withPrefSize(prefSize)","            .add(UI.box().withPrefSize(10, 20))","            .add(UI.box().withPrefSize(20, 20))","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"when","text":"\n            We now trigger the layout managers to do their job, we should see\n            that the components are laid out exactly the same way in both panels.\n\n            But since this is a unit test, we need to manually trigger the layout\n            of the components in both panels, so that we can compare the actual\n            positions of the components.\n        ","code":["ourFlowPanel.doLayout()","regularFlowPanel.doLayout()"]},
+
+        {"kind":"then","text":"The components are laid out exactly the same way in both panels.","code":["ourFlowPanel.getComponent(0).getBounds() == regularFlowPanel.getComponent(0).getBounds()","ourFlowPanel.getComponent(1).getBounds() == regularFlowPanel.getComponent(1).getBounds()","ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()","ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()","ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()"]},
+
+        {"kind":"where","text":"","code":{"alignment":["UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.LEFT","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.CENTER","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT","UI.HorizontalAlignment.RIGHT"],"horizontalGap":["0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5","0","0","5","5"],"verticalGap":["0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5","0","5"],"prefSize":["Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(100, 200)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)","Size.of(200, 100)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the `UI.AUTO_SPAN(..)` factory method to define responsive component constraints.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            To make the `ResponsiveGridFlowLayout` layout manager truly responsive,\n            you have to define responsive cell span constraints for the components.\n            This means that for different sizes of the parent container, the\n            components will span different numbers of cells in the grid.\n\n            A parent container is considered larger if its width is closer to \n            or larger than its preferred width. Conversely, a parent container\n            is considered smaller if its width is getting closer to 0.\n\n            In this unit test, we will use the `UI.AUTO_SPAN(..)` factory method\n            to define responsive cell span constraints for the components in a panel,\n            and then demonstrate how the components span different numbers of cells\n            in the grid for different sizes of the parent container.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 10, 20)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2)}),","                    UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.small(6).medium(2).large(2)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.small(6).medium(4).large(4)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3)}),","                  UI.box().withPrefHeight(20)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the panel having its full preferred width.","code":["panel.setSize(120, 200)","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == new Rectangle(14, 20, 11, 20)","panel.getComponent(1).getBounds() == new Rectangle(35, 20, 11, 20)","panel.getComponent(2).getBounds() == new Rectangle(56, 20, 23, 20)","panel.getComponent(3).getBounds() == new Rectangle(89, 20, 17, 20)"]},
+
+        {"kind":"when","text":"\n            We now target the medium size of the parent container, which is\n            defined as having a width that is between 2/5 and 3/5 of the\n            preferred width of the parent container.\n        ","code":["panel.setSize(60, 200)","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == new Rectangle(13, 20, 5, 20)","panel.getComponent(1).getBounds() == new Rectangle(28, 20, 3, 20)","panel.getComponent(2).getBounds() == new Rectangle(41, 20, 6, 20)","panel.getComponent(3).getBounds() == new Rectangle(23, 60, 13, 20)"]},
+
+        {"kind":"when","text":"\n            We now target the small size of the parent container, which is\n            defined as having a width that is less than 2/5 of the preferred\n            width of the parent container.\n        ","code":["panel.setSize(40, 200)","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == new Rectangle(10, 20, 5, 20)","panel.getComponent(1).getBounds() == new Rectangle(25, 20, 5, 20)","panel.getComponent(2).getBounds() == new Rectangle(15, 60, 10, 20)","panel.getComponent(3).getBounds() == new Rectangle(10, 100, 20, 20)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can configure how the cell of a responsive flow layout is used vertically. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ResponsiveGridFlowLayout` layout manager supports vertical alignment\n            of components within their cells. The default vertical alignment is\n            that they are being centered within their cells and their height is\n            determined by the preferred height of the component.\n\n            However, you can use the `UI.HorizontalAlignment` enum to configure \n            if the components should stick to the top or bottom of their cells.\n            If you want the components to fill the entire height of their cells,\n            you can set the `fill` property to `true`.\n\n            In this unit test, we will demonstrate how the vertical alignment\n            of components within their cells can be configured.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with components that have responsive cell span constraints.","code":["var ui =","              UI.panel(\"ins 0\").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)","              .withPrefSize(120, 200)","              .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),","                    UI.box().withPrefHeight(10)","              )","              .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(20)","              )","              .add(UI.AUTO_SPAN({it.verySmall(8).small(6).large(4).oversize(1).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(30)","              )","              .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3).fill(isFill).align(alignInCell)}),","                  UI.box().withPrefHeight(40)","              )"]},
+
+        {"kind":"and","text":"We construct the actual panel component and unpack the expected bounds:","code":["var panel = ui.get(JPanel)","var bounds1 = new Rectangle(expectedBounds[0][0], expectedBounds[0][1], expectedBounds[0][2], expectedBounds[0][3])","var bounds2 = new Rectangle(expectedBounds[1][0], expectedBounds[1][1], expectedBounds[1][2], expectedBounds[1][3])","var bounds3 = new Rectangle(expectedBounds[2][0], expectedBounds[2][1], expectedBounds[2][2], expectedBounds[2][3])","var bounds4 = new Rectangle(expectedBounds[3][0], expectedBounds[3][1], expectedBounds[3][2], expectedBounds[3][3])"]},
+
+        {"kind":"when","text":"We trigger the layout manager to do its job based on the targeted size.","code":["panel.setSize(layoutSize.width().map(Number::intValue).orElse(0), layoutSize.height().map(Number::intValue).orElse(0))","panel.doLayout()"]},
+
+        {"kind":"then","text":"The components span the correct number of cells in the grid.","code":["panel.getComponent(0).getBounds() == bounds1","panel.getComponent(1).getBounds() == bounds2","panel.getComponent(2).getBounds() == bounds3","panel.getComponent(3).getBounds() == bounds4"]},
+
+        {"kind":"where","text":"","code":{"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]","[[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]","[[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

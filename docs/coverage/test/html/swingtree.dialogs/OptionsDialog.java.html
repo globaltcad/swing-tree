@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OptionsDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.dialogs</a> &gt; <span class="el_source">OptionsDialog.java</span></div><h1>OptionsDialog.java</h1><pre class="source lang-java linenums">package swingtree.dialogs;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import sprouts.From;
+import sprouts.Var;
+import swingtree.UI;
+import swingtree.api.IconDeclaration;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import java.awt.Component;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+/**
+ *  An immutable builder class for creating simple enum based option dialogs
+ *  where the user can select one of the enum options.
+ *  &lt;p&gt;
+ *  This class is intended to be used as part of the {@link UI} API
+ *  by calling the {@link UI#choice(String, Enum[])} or {@link UI#choice(String, Var)} factory methods.
+ *  &lt;p&gt;
+ *  Here a simple usage example:
+ *  &lt;pre&gt;{@code
+ *      // In your view model:
+ *      public enum MyOptions { YES, NO, CANCEL }
+ *      private final Var&lt;MyOptions&gt; selectedOption = Var.of(MyOptions.YES);
+ *      // In your view:
+ *      UI.choice(&quot;Select an option:&quot;, vm.selectedOption())
+ *      .parent(this)
+ *      .showAsQuestion( o -&gt; switch(o) {
+ *          case YES    -&gt; &quot;Yes, please!&quot;;
+ *          case NO     -&gt; &quot;No, thank you!&quot;;
+ *          case CANCEL -&gt; &quot;Cancel&quot;;
+ *      });
+ *  }&lt;/pre&gt;
+ *  In this example, the user will be presented with a dialog
+ *  containing the message &quot;Select an option:&quot; and the enum options &quot;YES&quot;, &quot;NO&quot; and &quot;CANCEL&quot;
+ *  presented as &quot;Yes, please!&quot;, &quot;No, thank you!&quot; and &quot;Cancel&quot; respectively.
+ *  The dialog will know the available options from the {@link Var} instance &quot;selectedOption&quot;.
+ *  &lt;p&gt;
+ *  Note that this API translates to the
+ *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)} method.
+ *
+ * @param &lt;E&gt; The type of the {@link Enum} options that the dialog will present to the user.
+ */
+public final class OptionsDialog&lt;E extends Enum&lt;E&gt;&gt;
+{
+<span class="fc" id="L50">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(OptionsDialog.class);</span>
+
+<span class="fc" id="L52">    private static final OptionsDialog&lt;?&gt; _NONE = new OptionsDialog&lt;&gt;(</span>
+                                                                -1,
+                                                                &quot;&quot;,
+                                                                &quot;&quot;,
+                                                                null,
+                                                                null,
+                                                                null,
+                                                                null,
+                                                                null
+                                                                );
+
+    /**
+     *  Creates a new {@link OptionsDialog} instance with the specified message and options.
+     *
+     * @param message The message of the dialog presenting various options to the user.
+     * @param options The {@link Enum} options that the user can select from.
+     * @return A new {@link OptionsDialog} instance with the specified message and options.
+     * @param &lt;E&gt; The type of the {@link Enum} options.
+     */
+    public static &lt;E extends Enum&lt;E&gt;&gt; OptionsDialog&lt;E&gt; offering( String message, E... options ) {
+<span class="fc" id="L72">        Objects.requireNonNull(options);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        for ( Enum&lt;?&gt; option : options )</span>
+<span class="fc" id="L74">            Objects.requireNonNull(option);</span>
+        
+<span class="fc" id="L76">        return ((OptionsDialog&lt;E&gt;)_NONE).message(message).options(options);</span>
+    }
+
+
+    /**
+     *  Creates a new {@link OptionsDialog} instance with the specified message and enum property
+     *  from which the options, default option and selected option will be derived.
+     *
+     * @param message The message of the dialog presenting various options to the user.
+     * @param property The property to which the selected option will be assigned.
+     * @return A new {@link OptionsDialog} instance with the specified message and options.
+     * @param &lt;E&gt; The type of the {@link Enum} options.
+     */
+    public static &lt;E extends Enum&lt;E&gt;&gt; OptionsDialog&lt;E&gt; offering( String message, Var&lt;E&gt; property ) {
+<span class="fc" id="L90">        Objects.requireNonNull(property);</span>
+<span class="fc" id="L91">        return ((OptionsDialog&lt;E&gt;)_NONE).message(message).property(property);</span>
+    }
+
+
+    private final int                    _type;
+    private final String                 _title;
+    private final String                 _message;
+    private final @Nullable E            _default;
+    private final @Nullable E[]          _options;
+    private final @Nullable Icon         _icon;
+    private final @Nullable Component    _parent;
+    private final @Nullable Var&lt;E&gt;       _property;
+
+
+    private OptionsDialog(
+        int                 type,
+        String              title,
+        String              message,
+        @Nullable E         defaultOption,
+        @Nullable E[]       options,
+        @Nullable Icon      icon,
+        @Nullable Component parent,
+        @Nullable Var&lt;E&gt;    property
+<span class="fc" id="L114">    ) {</span>
+<span class="fc" id="L115">        _type     = type;</span>
+<span class="fc" id="L116">        _title    = Objects.requireNonNull(title);</span>
+<span class="fc" id="L117">        _message  = Objects.requireNonNull(message);</span>
+<span class="fc" id="L118">        _default  = defaultOption;</span>
+<span class="fc" id="L119">        _options  = options;</span>
+<span class="fc" id="L120">        _icon     = icon;</span>
+<span class="fc" id="L121">        _parent   = parent;</span>
+<span class="fc" id="L122">        _property = property;</span>
+<span class="fc" id="L123">    }</span>
+
+    /**
+     *  Creates an updated options dialog config with the specified title
+     *  which will used as the window title of the dialog
+     *  when it is shown to the user.
+     *
+     * @param title The title of the dialog.
+     * @return A new {@link OptionsDialog} instance with the specified title.
+     */
+    public OptionsDialog&lt;E&gt; titled( String title ) {
+<span class="fc" id="L134">        return new OptionsDialog&lt;&gt;(_type, title, _message, _default, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param message The message of the dialog.
+     * @return A new {@link OptionsDialog} instance with the specified message.
+     */
+    private OptionsDialog&lt;E&gt; message( String message ) {
+<span class="fc" id="L142">        return new OptionsDialog&lt;&gt;(_type, _title, message, _default, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     *  Creates an updated options dialog config with the specified default option,
+     *  which will be the option with the initial focus when the dialog is shown.
+     *  If the user presses the enter key, this option will be selected automatically.
+     *
+     * @param defaultOption The default option of the dialog.
+     *                      This option will be selected by default.
+     * @return A new {@link OptionsDialog} instance with the specified default option.
+     */
+    public OptionsDialog&lt;E&gt; defaultOption( E defaultOption ) {
+<span class="fc" id="L155">        Objects.requireNonNull(defaultOption);</span>
+<span class="fc" id="L156">        return new OptionsDialog&lt;&gt;(_type, _title, _message, defaultOption, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param options The options of the dialog.
+     *                The user will be able to select one of these options.
+     * @return A new {@link OptionsDialog} instance with the specified options.
+     */
+    private OptionsDialog&lt;E&gt; options( E... options ) {
+<span class="fc" id="L165">        Objects.requireNonNull(options);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        for ( Enum&lt;?&gt; option : options )</span>
+<span class="fc" id="L167">            Objects.requireNonNull(option);</span>
+<span class="fc" id="L168">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     *  Allows you to specify an icon declaration for an icon that will be displayed in the dialog window.
+     *  An icon declaration is a constant that simply holds the location of the icon resource.
+     *  This is the preferred way to specify an icon for the dialog.
+     *
+     * @param icon The icon declaration for an icon that will be displayed in the dialog window.
+     * @return A new {@link OptionsDialog} instance with the specified icon.
+     */
+    public OptionsDialog&lt;E&gt; icon( IconDeclaration icon ) {
+<span class="nc" id="L180">        Objects.requireNonNull(icon);</span>
+<span class="nc" id="L181">        return icon.find().map(this::icon).orElse(this);</span>
+    }
+
+    /**
+     *  Creates an updated options dialog config with the specified icon,
+     *  which will be displayed in the dialog window.
+     *  Consider using the {@link #icon(IconDeclaration)} method instead,
+     *  as it is the preferred way to specify an icon for the dialog.
+     *
+     * @param icon The icon of the dialog.
+     * @return A new {@link OptionsDialog} instance with the specified icon.
+     */
+    public OptionsDialog&lt;E&gt; icon( Icon icon ) {
+<span class="fc" id="L194">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, icon, _parent, _property);</span>
+    }
+
+    /**
+     *  Creates an updated options dialog config with the specified icon path
+     *  leading to the icon that will be displayed in the dialog window.
+     *  The icon will be loaded using the {@link UI#findIcon(String)} method.
+     *  But consider using the {@link #icon(IconDeclaration)} method instead of this,
+     *  as it is the preferred way to specify an icon for the dialog.
+     *
+     * @param path The path to the icon of the dialog.
+     * @return A new {@link OptionsDialog} instance with the specified icon.
+     */
+    public OptionsDialog&lt;E&gt; icon( String path ) {
+<span class="nc" id="L208">        Objects.requireNonNull(path);</span>
+<span class="nc" id="L209">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, UI.findIcon(path).orElse(null), _parent, _property);</span>
+    }
+
+    /**
+     *  You may specify a reference to a parent component for the dialog,
+     *  which will be used to center the dialog on the parent component.
+     *  See {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)}
+     *  for more information.
+     *
+     * @param parent The parent component of the dialog.
+     * @return A new {@link OptionsDialog} instance with the specified parent component.
+     */
+    public OptionsDialog&lt;E&gt; parent( Component parent ) {
+<span class="nc" id="L222">        Objects.requireNonNull(parent);</span>
+<span class="nc" id="L223">        return new OptionsDialog&lt;&gt;(_type, _title, _message, _default, _options, _icon, parent, _property);</span>
+    }
+    
+    /**
+     * @param property The property to which the selected option will be assigned.
+     * @return A new {@link OptionsDialog} instance with the specified property.
+     */
+    private OptionsDialog&lt;E&gt; property( Var&lt;E&gt; property ) {
+<span class="fc" id="L231">        Objects.requireNonNull(property);</span>
+<span class="fc" id="L232">        E[] options       = _options;</span>
+<span class="fc" id="L233">        E   defaultOption = _default;</span>
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        if ( options == null ) </span>
+<span class="fc" id="L235">            options = property.type().getEnumConstants();</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">        if ( defaultOption == null )</span>
+<span class="fc" id="L237">            defaultOption = property.orElseNull();</span>
+        
+<span class="fc" id="L239">        return new OptionsDialog&lt;&gt;(_type, _title, _message, defaultOption, options, _icon, _parent, property);</span>
+    }
+
+    /**
+     * @param type The type of the dialog, which may be one of the following:
+     *             &lt;ul&gt;
+     *                  &lt;li&gt;{@link JOptionPane#ERROR_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#INFORMATION_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#WARNING_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#PLAIN_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#QUESTION_MESSAGE}&lt;/li&gt;
+     *             &lt;/ul&gt;
+     * @return A new {@link OptionsDialog} instance with the specified type.
+     */
+    private OptionsDialog&lt;E&gt; _type( int type ) {
+<span class="fc" id="L254">        return new OptionsDialog&lt;&gt;(type, _title, _message, _default, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     *  Shows the options dialog as a question dialog (see {@link JOptionPane#QUESTION_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsQuestion() {
+<span class="fc" id="L266">        return showAsQuestion(Object::toString);</span>
+    }
+
+    /**
+     *  Shows the options dialog as a question dialog (see {@link JOptionPane#QUESTION_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. &lt;br&gt;
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsQuestion( Function&lt;E, String&gt; presenter ) {
+<span class="fc" id="L282">        return _type(JOptionPane.QUESTION_MESSAGE).show(presenter);</span>
+    }
+
+    /**
+     *  Shows the options dialog as an error dialog (see {@link JOptionPane#ERROR_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsError() {
+<span class="nc" id="L294">        return showAsError(Object::toString);</span>
+    }
+
+    /**
+     *  Shows the options dialog as an error dialog (see {@link JOptionPane#ERROR_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. &lt;br&gt;
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsError( Function&lt;E, String&gt; presenter ) {
+<span class="nc" id="L310">        return _type(JOptionPane.ERROR_MESSAGE).show(presenter);</span>
+    }
+
+    /**
+     *  Shows the options dialog as a warning dialog (see {@link JOptionPane#WARNING_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsWarning() {
+<span class="nc" id="L322">        return showAsWarning(Object::toString);</span>
+    }
+
+    /**
+     *  Shows the options dialog as a warning dialog (see {@link JOptionPane#WARNING_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. &lt;br&gt;
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsWarning( Function&lt;E, String&gt; presenter ) {
+<span class="nc" id="L338">        return _type(JOptionPane.WARNING_MESSAGE).show(presenter);</span>
+    }
+
+    /**
+     *  Shows the options dialog as an information dialog (see {@link JOptionPane#INFORMATION_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsInfo() {
+<span class="nc" id="L350">        return showAsInfo(Object::toString);</span>
+    }
+
+    /**
+     *  Shows the options dialog as an information dialog (see {@link JOptionPane#INFORMATION_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. &lt;br&gt;
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsInfo( Function&lt;E, String&gt; presenter ) {
+<span class="nc" id="L366">        return _type(JOptionPane.INFORMATION_MESSAGE).show(presenter);</span>
+    }
+
+    /**
+     *  Shows the options dialog as a plain dialog (see {@link JOptionPane#PLAIN_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsPlain() {
+<span class="nc" id="L378">        return showAsPlain(Object::toString);</span>
+    }
+
+    /**
+     *  Shows the options dialog as a plain dialog (see {@link JOptionPane#PLAIN_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. &lt;br&gt;
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional&lt;E&gt; showAsPlain( Function&lt;E, String&gt; presenter ) {
+<span class="nc" id="L394">        return _type(JOptionPane.PLAIN_MESSAGE).show(presenter);</span>
+    }
+
+    /**
+     *  Calling this method causes the dialog to be shown to the user.
+     *  The method is blocking and will only return when the user has selected an option
+     *  or closed the dialog.
+     *  If the dialog is closed, the method will return an empty {@link Optional},
+     *  otherwise it will return the {@link Enum} that the user selected.
+     *
+     * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
+     *         or an empty {@link Optional} if the user closed the dialog.
+     */
+    public Optional&lt;E&gt; show() {
+<span class="fc" id="L408">        return this.show(Object::toString);</span>
+    }
+
+    /**
+     *  Calling this method causes the dialog to be shown to the user.
+     *  The method is blocking and will only return when the user has selected an option
+     *  or closed the dialog.
+     *  If the dialog is closed, the method will return an empty {@link Optional},
+     *  otherwise it will return the {@link Enum} that the user selected.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. &lt;br&gt;
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *
+     * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
+     *         or an empty {@link Optional} if the user closed the dialog.
+     */
+    public Optional&lt;E&gt; show( Function&lt;E, String&gt; presenter ) {
+<span class="fc" id="L426">        E[] options = _options;</span>
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">        if ( options == null ) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">            if ( _property != null )</span>
+<span class="nc" id="L429">                options = _property.type().getEnumConstants();</span>
+            else {
+<span class="nc" id="L431">                log.warn(&quot;No options were specified for dialog with title '{}' and message '{}'.&quot;, _title, _message);</span>
+            }
+        }
+<span class="pc bpc" id="L434" title="1 of 2 branches missed.">        if ( options == null )</span>
+<span class="nc" id="L435">            options = (E[])new Enum&lt;?&gt;[0];</span>
+
+<span class="fc" id="L437">        String[] asStr = new String[options.length];</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        for ( int i = 0; i &lt; options.length; i++ ) {</span>
+            try {
+<span class="fc" id="L440">                asStr[i] = presenter.apply(options[i]);</span>
+<span class="nc" id="L441">            } catch ( Exception e ) {</span>
+<span class="nc" id="L442">                log.warn(&quot;An exception occurred while converting an enum option to a string!&quot;, e);</span>
+<span class="nc" id="L443">                asStr[i] = options[i].toString();</span>
+<span class="fc" id="L444">            }</span>
+        }
+
+<span class="fc" id="L447">        E defaultOption = _default;</span>
+
+<span class="pc bpc" id="L449" title="1 of 2 branches missed.">        if ( defaultOption == null ) {</span>
+<span class="nc bnc" id="L450" title="All 4 branches missed.">            if ( _property != null &amp;&amp; _property.isPresent() )</span>
+<span class="nc" id="L451">                defaultOption = _property.get();</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">            else if ( options.length &gt; 0 )</span>
+<span class="nc" id="L453">                defaultOption = options[0];</span>
+        }
+
+<span class="fc" id="L456">        String defaultOptionStr = &quot;&quot;;</span>
+<span class="pc bpc" id="L457" title="1 of 2 branches missed.">        if ( defaultOption != null ) {</span>
+            try {
+<span class="fc" id="L459">                defaultOptionStr = presenter.apply(defaultOption);</span>
+<span class="nc" id="L460">            } catch ( Exception e ) {</span>
+<span class="nc" id="L461">                log.warn(&quot;An exception occurred while converting the default option to a string!&quot;, e);</span>
+<span class="nc" id="L462">                defaultOptionStr = defaultOption.toString();</span>
+<span class="fc" id="L463">            }</span>
+        }
+
+<span class="fc" id="L466">        int type = _type;</span>
+<span class="fc bfc" id="L467" title="All 2 branches covered.">        if ( type &lt; 0 ) {</span>
+<span class="pc bpc" id="L468" title="1 of 4 branches missed.">            if ( _property != null || options.length != 0 )</span>
+<span class="fc" id="L469">                type = JOptionPane.QUESTION_MESSAGE;</span>
+            else {
+<span class="nc" id="L471">                type = JOptionPane.PLAIN_MESSAGE;</span>
+            }
+        }
+
+<span class="fc" id="L475">        int selectedIdx = Context.summoner.showOptionDialog(</span>
+                                    _parent,                    // parent component, if this is not null then the dialog will be centered on it
+                                    _message,                   // message to display
+                                    _title,                     // title of the dialog
+                                    JOptionPane.DEFAULT_OPTION, // type of the dialog
+                                    type,                       // type of the dialog
+                                    _icon,                      // icon to display
+                                    asStr,                      // options to display
+                                    defaultOptionStr               // default option
+                                );
+
+<span class="pc bpc" id="L486" title="2 of 6 branches missed.">        if ( _property != null &amp;&amp; selectedIdx &gt;= 0 &amp;&amp; options[selectedIdx] != null )</span>
+<span class="fc" id="L487">            _property.set( From.VIEW,  options[selectedIdx] );</span>
+
+<span class="pc bpc" id="L489" title="1 of 2 branches missed.">        return Optional.ofNullable( selectedIdx &gt;= 0 ? options[selectedIdx] : null );</span>
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

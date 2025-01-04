@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSpinner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSpinner.java</span></div><h1>UIForSpinner.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Action;
+import sprouts.From;
+import sprouts.Val;
+import sprouts.Var;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.text.*;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.util.Date;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+/**
+ *  A SwingTree builder node designed for configuring {@link JSpinner} instances.
+ */
+public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIForSpinner&lt;S&gt;, S&gt;
+{
+<span class="fc" id="L27">    private static final Logger log = LoggerFactory.getLogger(UIForSpinner.class);</span>
+    private final BuilderState&lt;S&gt; _state;
+
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param state The {@link BuilderState} modelling how the component is built.
+     */
+<span class="fc" id="L36">    UIForSpinner( BuilderState&lt;S&gt; state ) {</span>
+<span class="fc" id="L37">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L38">        _state = state.withMutator(this::_initialize);</span>
+<span class="fc" id="L39">    }</span>
+
+    private void _initialize( S thisComponent )
+    {
+<span class="pc bpc" id="L43" title="1 of 4 branches missed.">        if ( thisComponent.getModel() != null &amp;&amp; thisComponent.getModel().getClass() != SpinnerNumberModel.class )</span>
+<span class="fc" id="L44">            return;</span>
+        /*
+            So it turns out that the default SpinnerNumberModel implementation
+            is not very good. It does not support floating point step sizes...
+            So we have to replace it with our own implementation, where the incrementation logic
+            is a bit more flexible.
+         */
+<span class="fc" id="L51">        SpinnerNumberModel model = (SpinnerNumberModel) thisComponent.getModel();</span>
+<span class="fc" id="L52">        thisComponent.setModel(</span>
+            new SpinnerNumberModel(
+<span class="fc" id="L54">                model.getNumber(),</span>
+<span class="fc" id="L55">                model.getMinimum(),</span>
+<span class="fc" id="L56">                model.getMaximum(),</span>
+<span class="fc" id="L57">                model.getStepSize()</span>
+<span class="fc" id="L58">            ) {</span>
+                @Override public void setValue(Object value) {
+<span class="fc" id="L60">                    super.setValue(value);</span>
+<span class="fc" id="L61">                    updateEditorFormatter();</span>
+<span class="fc" id="L62">                }</span>
+<span class="nc" id="L63">                @Override public @Nullable Object getNextValue() { return incrValue(+1); }</span>
+<span class="nc" id="L64">                @Override public @Nullable Object getPreviousValue() { return incrValue(-1); }</span>
+                private @Nullable Number incrValue(int dir)
+                {
+                    Number newValue;
+<span class="nc" id="L68">                    Number value = this.getNumber();</span>
+<span class="nc" id="L69">                    Number stepSize = this.getStepSize();</span>
+<span class="nc" id="L70">                    Comparable&lt;Number&gt; maximum = (Comparable&lt;Number&gt;) this.getMaximum();</span>
+<span class="nc" id="L71">                    Comparable&lt;Number&gt; minimum = (Comparable&lt;Number&gt;) this.getMinimum();</span>
+<span class="nc bnc" id="L72" title="All 4 branches missed.">                    boolean valueIsRational = (value instanceof Float) || (value instanceof Double);</span>
+<span class="nc bnc" id="L73" title="All 4 branches missed.">                    boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);</span>
+<span class="nc bnc" id="L74" title="All 4 branches missed.">                    if ( valueIsRational || stepIsRational ) {</span>
+<span class="nc" id="L75">                        double v = value.doubleValue() + (stepSize.doubleValue() * (double)dir);</span>
+<span class="nc bnc" id="L76" title="All 4 branches missed.">                        if ( value instanceof Double || stepSize instanceof Double )</span>
+<span class="nc" id="L77">                            newValue = v;</span>
+                        else
+<span class="nc" id="L79">                            newValue = (float) v;</span>
+<span class="nc" id="L80">                    }</span>
+                    else {
+<span class="nc" id="L82">                        long v = value.longValue() + (stepSize.longValue() * (long)dir);</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">                        if      ( value instanceof Long    ) newValue = v;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                        else if ( value instanceof Integer ) newValue = (int) v;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                        else if ( value instanceof Short   ) newValue = (short) v;</span>
+                        else
+<span class="nc" id="L88">                            newValue = (byte) v;</span>
+                    }
+<span class="nc bnc" id="L90" title="All 4 branches missed.">                    if ( (maximum != null) &amp;&amp; (maximum.compareTo(newValue) &lt; 0) ) return null;</span>
+<span class="nc bnc" id="L91" title="All 4 branches missed.">                    if ( (minimum != null) &amp;&amp; (minimum.compareTo(newValue) &gt; 0) ) return null;</span>
+                    else
+<span class="nc" id="L93">                        return newValue;</span>
+                }
+                private void updateEditorFormatter() {
+<span class="fc" id="L96">                    JComponent editor = thisComponent.getEditor();</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                    if (editor instanceof JSpinner.DefaultEditor) {</span>
+<span class="fc" id="L98">                        ((JSpinner.DefaultEditor)editor).getTextField().setFormatterFactory(</span>
+<span class="fc" id="L99">                            new JFormattedTextField.AbstractFormatterFactory() {</span>
+                                @Override public JFormattedTextField.AbstractFormatter getFormatter(JFormattedTextField tf) {
+<span class="fc" id="L101">                                    return getDefaultFormatterFactory(getNumber().getClass()).getFormatter(tf);</span>
+                                }
+                            }
+                        );
+                    }
+<span class="fc" id="L106">                }</span>
+            }
+        );
+<span class="fc" id="L109">    }</span>
+
+    @Override
+    protected BuilderState&lt;S&gt; _state() {
+<span class="fc" id="L113">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForSpinner&lt;S&gt; _newBuilderWithState(BuilderState&lt;S&gt; newState ) {
+<span class="fc" id="L118">        return new UIForSpinner&lt;&gt;(newState);</span>
+    }
+
+    private JFormattedTextField.AbstractFormatterFactory getDefaultFormatterFactory(Object type) {
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (type instanceof DateFormat) {</span>
+<span class="nc" id="L123">            return new DefaultFormatterFactory(new DateFormatter</span>
+                    ((DateFormat)type));
+        }
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if (type instanceof NumberFormat) {</span>
+<span class="nc" id="L127">            return new DefaultFormatterFactory(new NumberFormatter(</span>
+                    (NumberFormat)type));
+        }
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (type instanceof Format) {</span>
+<span class="nc" id="L131">            return new DefaultFormatterFactory(new InternationalFormatter(</span>
+                    (Format)type));
+        }
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (type instanceof Date) {</span>
+<span class="nc" id="L135">            return new DefaultFormatterFactory(new DateFormatter());</span>
+        }
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (type instanceof Number) {</span>
+<span class="nc" id="L138">            JFormattedTextField.AbstractFormatter displayFormatter = new NumberFormatter();</span>
+<span class="nc" id="L139">            ((NumberFormatter)displayFormatter).setValueClass(type.getClass());</span>
+<span class="nc" id="L140">            JFormattedTextField.AbstractFormatter editFormatter = new NumberFormatter(</span>
+                    new DecimalFormat(&quot;#.#&quot;));
+<span class="nc" id="L142">            ((NumberFormatter)editFormatter).setValueClass(type.getClass());</span>
+
+<span class="nc" id="L144">            return new DefaultFormatterFactory(displayFormatter,</span>
+                    displayFormatter,editFormatter);
+        }
+<span class="fc" id="L147">        return new DefaultFormatterFactory(new DefaultFormatter());</span>
+    }
+
+    /**
+     * Adds an {@link Action} to the underlying {@link JSpinner}
+     * through an {@link javax.swing.event.ChangeListener},
+     * Use this to register an action to be performed when the spinner's value changes.
+     *
+     * @param action The action to be performed.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner&lt;S&gt; onChange( Action&lt;ComponentDelegate&lt;JSpinner, ChangeEvent&gt;&gt; action ) {
+<span class="nc" id="L159">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="nc" id="L160">        return _with( thisComponent -&gt;</span>
+<span class="nc" id="L161">                    _onChange(thisComponent,</span>
+<span class="nc" id="L162">                        e -&gt; _runInApp(()-&gt;{</span>
+                            try {
+<span class="nc" id="L164">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L165">                            } catch (Exception ex) {</span>
+<span class="nc" id="L166">                                log.error(&quot;Error while executing action on spinner change!&quot;, ex);</span>
+<span class="nc" id="L167">                            }</span>
+<span class="nc" id="L168">                        })</span>
+                    )
+                )
+<span class="nc" id="L171">                ._this();</span>
+    }
+
+    private void _onChange( S thisComponent, Consumer&lt;ChangeEvent&gt; consumer ) {
+<span class="fc" id="L175">        thisComponent.addChangeListener(consumer::accept);</span>
+<span class="fc" id="L176">    }</span>
+
+    /**
+     * Sets the value of the spinner.
+     *
+     * @param value The value to set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSpinner&lt;S&gt; withValue( Object value ) {
+<span class="nc" id="L186">        NullUtil.nullArgCheck(value, &quot;value&quot;, Object.class);</span>
+<span class="nc" id="L187">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L188">                    thisComponent.setValue(value);</span>
+<span class="nc" id="L189">                })</span>
+<span class="nc" id="L190">                ._this();</span>
+    }
+
+    /**
+     * Sets the value of the spinner and also binds to said value.
+     *
+     * @param value The {@link sprouts.Val} wrapper whose value should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSpinner&lt;S&gt; withValue( Val&lt;?&gt; value ) {
+<span class="nc" id="L201">        NullUtil.nullArgCheck(value, &quot;value&quot;, Val.class);</span>
+<span class="nc" id="L202">        NullUtil.nullPropertyCheck(value, &quot;value&quot;, &quot;Null is not a valid spinner state!&quot;);</span>
+<span class="nc" id="L203">        return _withOnShow( value, (thisComponent,it) -&gt; {</span>
+<span class="nc" id="L204">                    thisComponent.setValue(it);</span>
+<span class="nc" id="L205">                })</span>
+<span class="nc" id="L206">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L207">                    thisComponent.setValue(value.get());</span>
+<span class="nc" id="L208">                })</span>
+<span class="nc" id="L209">                ._this();</span>
+    }
+
+    /**
+     * Sets the value of the spinner and also binds to the provided property.
+     *
+     * @param value The {@link sprouts.Var} wrapper whose value should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSpinner&lt;S&gt; withValue( Var&lt;?&gt; value ) {
+<span class="fc" id="L220">        NullUtil.nullArgCheck(value, &quot;value&quot;, Var.class);</span>
+<span class="fc" id="L221">        NullUtil.nullPropertyCheck(value, &quot;value&quot;, &quot;Null is not a valid spinner state!&quot;);</span>
+<span class="fc" id="L222">        return _withOnShow( value, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L223">                    thisComponent.setValue(v);</span>
+<span class="nc" id="L224">                })</span>
+<span class="fc" id="L225">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L226">                    _onChange(thisComponent, e -&gt; {</span>
+                        // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
+<span class="fc" id="L228">                        final Object current = thisComponent.getValue();</span>
+                        // Now let's do the actual work in the application thread:
+<span class="fc" id="L230">                        _runInApp(() -&gt; {</span>
+<span class="fc" id="L231">                            Object interpreted = current;</span>
+<span class="pc bpc" id="L232" title="2 of 4 branches missed.">                            if (current != null &amp;&amp; Number.class.isAssignableFrom(value.type())) {</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">                                if (Number.class.isAssignableFrom(current.getClass())) {</span>
+<span class="fc" id="L234">                                    Number n = (Number) current;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">                                    if      (value.type() == Integer.class) interpreted = n.intValue();</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">                                    else if (value.type() == Long.class   ) interpreted = n.longValue();</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">                                    else if (value.type() == Float.class  ) interpreted = n.floatValue();</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">                                    else if (value.type() == Double.class ) interpreted = n.doubleValue();</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                                    else if (value.type() == Short.class  ) interpreted = n.shortValue();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                                    else if (value.type() == Byte.class   ) interpreted = n.byteValue();</span>
+                                }
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">                                if (current.getClass() == String.class) {</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">                                    if      (value.type() == Integer.class) interpreted = Integer.parseInt((String) current);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                                    else if (value.type() == Long.class   ) interpreted = Long.parseLong((String) current);</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                                    else if (value.type() == Float.class  ) interpreted = Float.parseFloat((String) current);</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                                    else if (value.type() == Double.class ) interpreted = Double.parseDouble((String) current);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                                    else if (value.type() == Short.class  ) interpreted = Short.parseShort((String) current);</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                                    else if (value.type() == Byte.class   ) interpreted = Byte.parseByte((String) current);</span>
+                                }
+                            }
+<span class="fc" id="L251">                            ((Var&lt;Object&gt;) value).set(From.VIEW,  interpreted );</span>
+<span class="fc" id="L252">                        });</span>
+<span class="fc" id="L253">                    });</span>
+<span class="fc" id="L254">                    thisComponent.setValue( value.get() );</span>
+<span class="fc" id="L255">                })</span>
+<span class="fc" id="L256">                ._this();</span>
+    }
+
+    /**
+     * Sets the numeric step size of the value of the spinner.
+     * This expects your spinner to be based on the {@link SpinnerNumberModel}.
+     *
+     * @param n The {@link Number} which should be set as step size.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner&lt;S&gt; withStepSize( Number n ) {
+<span class="fc" id="L267">        NullUtil.nullArgCheck(n, &quot;n&quot;, Number.class);</span>
+<span class="fc" id="L268">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L269">            SpinnerModel model = thisComponent.getModel();</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">            if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L271">                throw new IllegalArgumentException(</span>
+                        &quot;This JSpinner can not have a numeric step size as it is not &quot; +
+                        &quot;based on the SpinnerNumberModel!&quot;
+                    );
+<span class="fc" id="L275">            SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="fc" id="L276">            numberModel.setStepSize(n);</span>
+<span class="fc" id="L277">        })</span>
+<span class="fc" id="L278">        ._this();</span>
+    }
+
+    /**
+     * Sets the numeric step size of the value of the spinner and also binds to said value.
+     * This expects your spinner to be based on the {@link SpinnerNumberModel}.
+     *
+     * @param val The {@link sprouts.Val} wrapper whose step size should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param &lt;N&gt; The type of the number.
+     * @throws IllegalArgumentException if {@code val} is {@code null}.
+     */
+    public final &lt;N extends Number&gt; UIForSpinner&lt;S&gt; withStepSize( Val&lt;N&gt; val ) {
+<span class="nc" id="L291">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L292">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid spinner step size!&quot;);</span>
+<span class="nc" id="L293">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L294">                    SpinnerModel model = thisComponent.getModel();</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                    if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L296">                        throw new IllegalArgumentException(</span>
+                                &quot;This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!&quot;
+                            );
+<span class="nc" id="L299">                    SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="nc" id="L300">                    _onShow( val, thisComponent, (c,v) -&gt; numberModel.setStepSize(v) );</span>
+<span class="nc" id="L301">                    numberModel.setStepSize(val.get());</span>
+<span class="nc" id="L302">                })</span>
+<span class="nc" id="L303">                ._this();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

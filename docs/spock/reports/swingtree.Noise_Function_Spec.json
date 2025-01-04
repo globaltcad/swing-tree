@@ -1,0 +1,33 @@
+{
+  "className":"swingtree.Noise_Function_Spec",
+  "title":"Noise Functions",
+  "narrative":"One powerful part of the style API is\n    the ability to create noise gradients with\n    special noise functions.\n\n    These functions can generate interesting\n    patterns procedurally simply by converting\n    a simple pixel coordinate to a value between 0 and 1.\n\n    In this specification we ensure that the noise functions\n    behave as expected.",
+  "subjects":["swingtree.UI$NoiseType","swingtree.style.NoiseFunctions"],
+  "statistics":{
+    "runs":"1",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The available noise functions produce values in the range between 0 and 1.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `noise` configuration in the style API is really a gradient,\n            hence the name \"noise gradient\". What this means in practise is\n            that in order to render the gradient, SwingTree needs to pick\n            the correctly interpolated number in an array of colors.\n            For this interpolation a number between 0 and 1 tells us where to interpolate.\n            The number 0 means that the first color in the array is meant, whereas\n            1 refers to the last. Numbers in between are interpolated.\n\n            In this test we verify that the noise functions never\n            produce values outside that range.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var random = new Random(42)"]},
+
+        {"kind":"expect","text":"","code":["UI.NoiseType.values().every( fun ->","    1_000.every( n -> {","        var x = (float)( random.nextGaussian() * n )","        var y = (float)( random.nextGaussian() * n )","        var fraction = fun.getFractionAt( x, y )","        return 0 <= fraction && fraction <= 1","    })",")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
