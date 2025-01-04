@@ -164,6 +164,7 @@ public class Utility
                 component.paint(g2d);
                 g2d.dispose();
                 future.complete(image);
+                f.dispose();
             });
         });
         try {
@@ -181,11 +182,21 @@ public class Utility
         if ( w < 1 ) w = Math.max(component.getWidth() , component.getPreferredSize().width);
         if ( h < 1 ) h = Math.max(component.getHeight(), component.getPreferredSize().height);
 
-        BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
-        component.paint(g2d);
-        g2d.dispose();
-        return image;
+        CompletableFuture<BufferedImage> future = new CompletableFuture<>();
+        int finalWidth = w;
+        int finalHeight = h;
+        SwingUtilities.invokeLater(() -> {
+            BufferedImage image = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = image.createGraphics();
+            component.paint(g2d);
+            g2d.dispose();
+            future.complete(image);
+        });
+        try {
+            return future.get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to render component offscreen!", e);
+        }
     }
 
     /**
