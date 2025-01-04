@@ -930,9 +930,9 @@ class MVVM_Example_Spec extends Specification
             Tuple.of("a", "b")           | { Tuple.of("X", "a", "z") }
             Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42) }
-            Tuple.of("a", "b")           | { it.revert() }
-            Tuple.of(1, 2, 3)            | { it.revert() }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.revert() }
+            Tuple.of("a", "b")           | { it.reversed() }
+            Tuple.of(1, 2, 3)            | { it.reversed() }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
             Tuple.of("a", "b")           | { it.removeFirst(1) }
             Tuple.of(1, 2, 3)            | { it.removeFirst(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }
@@ -975,9 +975,9 @@ class MVVM_Example_Spec extends Specification
             Vars.of("a", "b")           | { Vars.of("X", "a", "z") }
             Vars.of(1, 2, 3)            | { Vars.of(-1, 2, -3) }
             Vars.of(1, 2, 3, 4, 5, 6)   | { Vars.of(-1, 2, -3, 4, 5, 42) }
-            Vars.of("a", "b")           | { it.revert() }
-            Vars.of(1, 2, 3)            | { it.revert() }
-            Vars.of(1, 2, 3, 4, 5, 6)   | { it.revert() }
+            Vars.of("a", "b")           | { it.reversed() }
+            Vars.of(1, 2, 3)            | { it.reversed() }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
             Vars.of("a", "b")           | { it.removeFirst(1) }
             Vars.of(1, 2, 3)            | { it.removeFirst(1) }
             Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }

@@ -5197,7 +5197,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 }
                 break;
             case CLEAR: _clearComponentsOf(innerComponent); break;
-            case REVERT: _reverseComponentsOf(innerComponent); break;
+            case REVERSE: _reverseComponentsOf(innerComponent); break;
             case NONE: break;
             default:
                 log.error("Unknown change type: {}", delegate.change(), new Throwable());
@@ -5295,7 +5295,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         }
                         break;
                     case CLEAR: _clearComponentsOf(c); break;
-                    case REVERT: _reverseComponentsOf(c); break;
+                    case REVERSE: _reverseComponentsOf(c); break;
                     case NONE:
                         break;
                     default:
