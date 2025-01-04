@@ -1333,6 +1333,7 @@ public class AbstractDelegate<C extends JComponent>
      *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
+     * @param layer The layer of the component which should be painted on.
      * @param status The current animation progress status, which is important so that the rendering can be synchronized with the animation.
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */

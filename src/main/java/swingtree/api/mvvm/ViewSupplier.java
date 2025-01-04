@@ -32,6 +32,7 @@ public interface ViewSupplier<M>
      * @param viewModel The thing to create a view for, usually a view model or a simple data model.
      * @return A view for the given view model in the form of a {@link UIForAnySwing}, a builder node
      *         which wraps the actual main component of the view.
+     * @throws Exception if the view could not be created by the client code.
      */
     UIForAnySwing<?,?> createViewFor( M viewModel ) throws Exception;
 }

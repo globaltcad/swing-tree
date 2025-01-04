@@ -18,6 +18,9 @@ public interface Animation
      * @param animator A function taking in the current animation status and
      *                 a value to be transformed and returned based in the status.
      * @return The created {@link Animation}.
+     * @param <T> The type of the value that is animated.
+     *            This is typically a value object that models the state of the animation
+     *            in terms of the properties that change over time.
      */
     static <T> Animation of( Var<T> target, AnimationTransformation<T> animator )
     {

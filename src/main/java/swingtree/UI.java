@@ -3016,6 +3016,7 @@ public final class UI extends UIFactoryMethods
         /**
          * Creates an updated color whose brightness is increased by the specified factor.
          * @param percentage The factor by which to increase the brightness.
+         * @return A color that is a brighter version of this color or the same color if the factor is 0.0.
          */
         public Color brighterBy(double percentage) {
             if ( percentage == 0.0 )
@@ -3038,6 +3039,7 @@ public final class UI extends UIFactoryMethods
          * Creates an updated color whose brightness is decreased by the specified
          * percentage factor.
          * @param percentage The factor by which to decrease the brightness.
+         * @return A color that is a darker version of this color or the same color if the factor is 0.0.
          */
         public Color darkerBy(double percentage) {
             if ( percentage == 0.0 )
@@ -3063,6 +3065,7 @@ public final class UI extends UIFactoryMethods
          *  and the value {@code 1.0} will return a fully saturated color.
          *
          * @param percentage The percentage factor by which to increase the saturation.
+         * @return A color that is saturated by the specified percentage factor or the same color if the factor is 0.0.
          */
         public Color saturateBy(double percentage) {
             if ( percentage == 0.0 )
@@ -3088,6 +3091,7 @@ public final class UI extends UIFactoryMethods
          *  and the value {@code 1.0} will return a fully desaturated color.
          *
          * @param percentage The percentage factor by which to decrease the saturation.
+         * @return A color that is desaturated by the specified percentage factor or the same color if the factor is 0.0.
          */
         public Color desaturateBy(double percentage) {
             if ( percentage == 0.0 )
