@@ -518,7 +518,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         switch (delegate.change()) {
             case SET:
                 if ( index < 0 ) {
-                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    // Some things were set, but we don't know where exactly
                     pane.removeAll();
                     delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
                 } else {
@@ -530,7 +530,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 break;
             case ADD:
                 if ( index < 0 ) {
-                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    // Some things were added, but we don't know where exactly
                     pane.removeAll();
                     delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
                 } else {
@@ -542,7 +542,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 break;
             case REMOVE:
                 if ( index < 0 ) {
-                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    // Some things were removed, but we don't know where exactly
                     pane.removeAll();
                     delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
                 } else {
@@ -557,7 +557,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             case NONE:
                 break;
             default:
-                log.error("Unknown change type: {}", delegate.change(), new Throwable());
+                log.warn("Unknown change type: {}", delegate.change(), new Throwable());
                 // We do a simple rebuild:
                 pane.removeAll();
                 delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
@@ -679,7 +679,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 case NONE:
                     break;
                 default:
-                    log.error("Unknown change type: {}", diff.change(), new Throwable());
+                    log.warn("Unknown change type: {}", diff.change(), new Throwable());
                     // We do a simple rebuild:
                     pane.removeAll();
                     tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
