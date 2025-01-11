@@ -38,7 +38,7 @@ public final class Size
 
     /**
      *  A factory method that creates a {@link Size} instance from a width and height.
-     *  If the width or height is negative, the returned size will be the {@link #UNKNOWN} size
+     *  If the width and height is negative, the returned size will be the {@link #UNKNOWN} size
      *  constant with a width or height of -1.
      *
      * @param width The width of the size in the form of a float.
@@ -148,6 +148,74 @@ public final class Size
      */
     public Size withHeight( double height ) {
         return new Size(_width, (float) height);
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance where the width and height
+     *  are increased by the given amount. A dimension of -1 will remain -1.
+     * @param size The size to add to this size.
+     * @return A new {@link Size} instance with the added size.
+     */
+    public Size plus( double size ) {
+        return plus(size, size);
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance where the width and height
+     *  are increased by the given amount. A dimension of -1 will remain -1.
+     * @param width The width to add to this size.
+     * @param height The height to add to this size.
+     * @return A new {@link Size} instance with the added size.
+     */
+    public Size plus( double width, double height ) {
+        return Size.of( _width < 0 ? -1 : _width + width, _height < 0 ? -1 : _height + height );
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance where the width and height
+     *  are increased by the width and height of the given size. A dimension of -1 will remain -1.
+     *
+     * @param size The size to add to this size.
+     * @return A new {@link Size} instance with the added size.
+     */
+    public Size plus( Size size ) {
+        double width  = size._width  < 0 ? 0 : size._width;
+        double height = size._height < 0 ? 0 : size._height;
+        return Size.of(_width + width, _height + height);
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance where the width and height
+     *  are decreased by the given amount. A dimension of -1 will remain -1.
+     * @param size The size to subtract from this size.
+     * @return A new {@link Size} instance with the subtracted size.
+     */
+    public Size minus( double size ) {
+        return minus(size, size);
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance where the width and height
+     *  are decreased by the given amount. A dimension of -1 will remain -1.
+     * @param width The width to subtract from this size.
+     * @param height The height to subtract from this size.
+     * @return A new {@link Size} instance with the subtracted size.
+     */
+    public Size minus( double width, double height ) {
+        return Size.of( _width < 0 ? -1 : _width - width, _height < 0 ? -1 : _height - height );
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance where the width and height
+     *  are decreased by the width and height of the given size. A dimension of -1 will remain -1.
+     *
+     * @param size The size to subtract from this size.
+     * @return A new {@link Size} instance with the subtracted size.
+     */
+    public Size minus( Size size ) {
+        double width  = size._width  < 0 ? 0 : size._width;
+        double height = size._height < 0 ? 0 : size._height;
+        return Size.of(_width - width, _height - height);
     }
 
     public Dimension toDimension() {
