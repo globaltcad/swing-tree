@@ -1,4 +1,4 @@
-package examples.mvvm;
+package examples.tasks.mvvm;
 
 import sprouts.Vars;
 import swingtree.UI;
@@ -11,7 +11,7 @@ import java.awt.dnd.DropTargetDropEvent;
 
 import static swingtree.UI.*;
 
-public class TasksView extends Panel
+public final class TasksView extends Panel
 {
     enum TaskType {
         IN_PROGRESS, DONE;

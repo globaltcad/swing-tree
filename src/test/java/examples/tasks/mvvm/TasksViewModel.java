@@ -1,4 +1,4 @@
-package examples.mvvm;
+package examples.tasks.mvvm;
 
 import sprouts.Val;
 import sprouts.Var;
@@ -6,7 +6,7 @@ import sprouts.Vars;
 
 import java.time.DayOfWeek;
 
-public class TasksViewModel
+public final class TasksViewModel
 {
     private final Vars<TaskViewModel>   tasksInProgress = Vars.of(TaskViewModel.class);
     private final Vars<TaskViewModel>   tasksDone       = Vars.of(TaskViewModel.class);
