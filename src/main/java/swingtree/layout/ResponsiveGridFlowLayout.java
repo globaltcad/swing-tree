@@ -232,10 +232,13 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             int hgap = UI.scale(_horizontalGapSize);
             int vgap = UI.scale(_verticalGapSize);
 
+            Bounds bounds = Bounds.of(Position.of(0,0), Size.of(target.getPreferredSize()));
             for (int i = 0; i < nmembers; i++) {
                 Component m = target.getComponent(i);
                 if (m.isVisible()) {
-                    Dimension d = m.getPreferredSize();
+                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(m.getSize()).plus(hgap, vgap));
+                    bounds = bounds.merge(childBounds);
+                    Dimension d = m.getSize();
                     dim.height = Math.max(dim.height, d.height);
                     if (firstVisibleComponent) {
                         firstVisibleComponent = false;
@@ -256,8 +259,10 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                 dim.height = Math.max(maxAscent + maxDescent, dim.height);
             }
             Insets insets = target.getInsets();
-            dim.width += insets.left + insets.right + hgap * 2;
-            dim.height += insets.top + insets.bottom + vgap * 2;
+            dim.width  = Math.max( dim.width  + hgap * 2, bounds.size().width().orElse(0f).intValue() );
+            dim.height = Math.max( dim.height + vgap * 2, bounds.size().height().orElse(0f).intValue() );
+            dim.width  += insets.left + insets.right;
+            dim.height += insets.top  + insets.bottom;
             return dim;
         }
     }

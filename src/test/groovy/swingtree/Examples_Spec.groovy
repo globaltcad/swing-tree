@@ -31,6 +31,7 @@ import examples.stylish.WellRoundedView
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.Var
 import swingtree.components.JSplitButton
 import swingtree.examples.AdvancedUI
 import swingtree.style.ComponentExtension
@@ -597,6 +598,14 @@ class Examples_Spec extends Specification
             new Utility.Query(ui1).findAll(JTabbedPane).get(0).getSelectedIndex() == 2
             new Utility.Query(ui2).findAll(JTabbedPane).get(0).getSelectedIndex() == 2
             new Utility.Query(ui3).findAll(JTabbedPane).get(0).getSelectedIndex() == 2
+    }
+
+    def 'The tasks manager examples can be created error free.'() {
+        when :
+            new examples.tasks.mvvm.TasksView(new examples.tasks.mvvm.TasksViewModel())
+            new examples.tasks.mvi.TasksView(Var.of(new examples.tasks.mvi.TasksViewModel()))
+        then :
+            noExceptionThrown()
     }
 
 }

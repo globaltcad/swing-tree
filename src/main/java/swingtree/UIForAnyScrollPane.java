@@ -2,6 +2,8 @@ package swingtree;
 
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Val;
 import swingtree.components.JBox;
 import swingtree.layout.AddConstraint;
@@ -10,8 +12,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.Scrollable;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Objects;
 
 /**
@@ -24,6 +25,8 @@ import java.util.Objects;
  */
 public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIForAnySwing<I, P>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForAnyScrollPane.class);
+
     @Override
     protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints) {
         if ( constraints != null ) {
@@ -371,7 +374,16 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
 
         @Override
         public Dimension getPreferredSize() {
-            Dimension prefChildSize = _child.getPreferredSize();
+            Dimension prefChildSize = null;
+            try {
+                LayoutManager layout = _child.getLayout();
+                if ( layout != null)
+                    prefChildSize = layout.preferredLayoutSize(_child);
+            } catch (Exception e) {
+                log.warn("Failed to compute preferred size from the layout manager of the child component.", e);
+            }
+            if ( prefChildSize == null )
+                prefChildSize = _child.getPreferredSize();
             Dimension prefSelfSize  = super.getPreferredSize();
             if ( !Objects.equals(prefChildSize, prefSelfSize) ) {
                 this.setPreferredSize(prefChildSize);

@@ -10,6 +10,7 @@ import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
 import javax.swing.JPanel
+import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Rectangle
 
@@ -183,17 +184,17 @@ class Layout_Spec extends Specification
         given : 'A panel with components that have responsive cell span constraints.'
             var ui =
                           UI.panel("ins 0").withFlowLayout(UI.HorizontalAlignment.CENTER, 10, 20)
-                          .withPrefSize(120, 200)
-                          .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2)}),
+                          .withPrefSize(120, 100)
+                          .add(UI.AUTO_SPAN({it.verySmall(12).small(6).medium(3).large(2)}),
                                 UI.box().withPrefHeight(20)
                           )
-                          .add(UI.AUTO_SPAN({it.small(6).medium(2).large(2)}),
+                          .add(UI.AUTO_SPAN({it.verySmall(12).small(6).medium(2).large(2)}),
                               UI.box().withPrefHeight(20)
                           )
-                          .add(UI.AUTO_SPAN({it.small(6).medium(4).large(4)}),
+                          .add(UI.AUTO_SPAN({it.verySmall(12).small(6).medium(4).large(4)}),
                               UI.box().withPrefHeight(20)
                           )
-                          .add(UI.AUTO_SPAN({it.small(12).medium(4).large(3)}),
+                          .add(UI.AUTO_SPAN({it.verySmall(12).small(12).medium(4).large(3)}),
                               UI.box().withPrefHeight(20)
                           )
         and : 'We construct the actual panel component:'
@@ -206,6 +207,9 @@ class Layout_Spec extends Specification
             panel.getComponent(1).getBounds() == new Rectangle(35, 20, 11, 20)
             panel.getComponent(2).getBounds() == new Rectangle(56, 20, 23, 20)
             panel.getComponent(3).getBounds() == new Rectangle(89, 20, 17, 20)
+        and : 'The parent container has the correct static and dynamic preferred size:'
+            panel.getPreferredSize() == new Dimension(120, 100)
+            panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 100)
 
         when : """
             We now target the medium size of the parent container, which is
@@ -219,6 +223,9 @@ class Layout_Spec extends Specification
             panel.getComponent(1).getBounds() == new Rectangle(28, 20, 3, 20)
             panel.getComponent(2).getBounds() == new Rectangle(41, 20, 6, 20)
             panel.getComponent(3).getBounds() == new Rectangle(23, 60, 13, 20)
+        and : 'The parent container has the correct static and dynamic preferred size:'
+            panel.getPreferredSize() == new Dimension(120, 100)
+            panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 100)
 
         when : """
             We now target the small size of the parent container, which is
@@ -232,6 +239,25 @@ class Layout_Spec extends Specification
             panel.getComponent(1).getBounds() == new Rectangle(25, 20, 5, 20)
             panel.getComponent(2).getBounds() == new Rectangle(15, 60, 10, 20)
             panel.getComponent(3).getBounds() == new Rectangle(10, 100, 20, 20)
+        and : 'The parent container has the correct static and dynamic preferred size:'
+            panel.getPreferredSize() == new Dimension(120, 100)
+            panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 140)
+
+        when : """
+            We now target the very small size of the parent container, which is
+            defined as having a width that is less than 1/5 of the preferred
+            width of the parent container.
+        """
+            panel.setSize(24, 200)
+            panel.doLayout()
+        then : 'The components span the correct number of cells in the grid.'
+            panel.getComponent(0).getBounds() == new Rectangle(10, 20, 4, 20)
+            panel.getComponent(1).getBounds() == new Rectangle(10, 60, 4, 20)
+            panel.getComponent(2).getBounds() == new Rectangle(10, 100, 4, 20)
+            panel.getComponent(3).getBounds() == new Rectangle(10, 140, 4, 20)
+        and : 'The parent container has the correct static and dynamic preferred size:'
+            panel.getPreferredSize() == new Dimension(120, 100)
+            panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 180)
     }
 
     def 'You can configure how the cell of a responsive flow layout is used vertically.'(
@@ -254,9 +280,9 @@ class Layout_Spec extends Specification
         given : 'A panel with components that have responsive cell span constraints.'
             var ui =
                           UI.panel("ins 0").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)
-                          .withPrefSize(120, 200)
+                          .withPrefSize(120, 100)
                           .add(UI.AUTO_SPAN({it.small(6).medium(3).large(2).fill(isFill).align(alignInCell)}),
-                                UI.box().withPrefHeight(10)
+                              UI.box().withPrefHeight(10)
                           )
                           .add(UI.AUTO_SPAN({it.small(6).large(2).veryLarge(1).fill(isFill).align(alignInCell)}),
                               UI.box().withPrefHeight(20)
@@ -282,19 +308,22 @@ class Layout_Spec extends Specification
             panel.getComponent(1).getBounds() == bounds2
             panel.getComponent(2).getBounds() == bounds3
             panel.getComponent(3).getBounds() == bounds4
+        and : 'The parent container has the correct static and dynamic preferred size:'
+            panel.getPreferredSize() == new Dimension(120, 100)
+            panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 100)
 
         where :
             layoutSize       | isFill | alignInCell                    || expectedBounds
 
-            Size.of(120,200) | false  | UI.VerticalAlignment.UNDEFINED || [[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]
-            Size.of(120,200) | false  | UI.VerticalAlignment.CENTER    || [[14, 25, 15, 10],[34, 20, 7, 20],[46, 15, 31, 30],[82, 10, 23, 40]]
-            Size.of(120,200) | false  | UI.VerticalAlignment.TOP       || [[14, 10, 15, 10],[34, 10, 7, 20],[46, 10, 31, 30],[82, 10, 23, 40]]
-            Size.of(120,200) | false  | UI.VerticalAlignment.BOTTOM    || [[14, 40, 15, 10],[34, 30, 7, 20],[46, 20, 31, 30],[82, 10, 23, 40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.UNDEFINED || [[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.CENTER    || [[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.TOP       || [[14,10,15,10],[34,10,7,20],[46,10,31,30],[82,10,23,40]]
+            Size.of(120,200) | false  | UI.VerticalAlignment.BOTTOM    || [[14,40,15,10],[34,30,7,20],[46,20,31,30],[82,10,23,40]]
 
-            Size.of(120,200) | true   | UI.VerticalAlignment.UNDEFINED || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
-            Size.of(120,200) | true   | UI.VerticalAlignment.CENTER    || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
-            Size.of(120,200) | true   | UI.VerticalAlignment.TOP       || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
-            Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[14, 10, 15, 40],[34, 10, 7, 40],[46, 10, 31, 40],[82, 10, 23, 40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.UNDEFINED || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.CENTER    || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.TOP       || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+            Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
     }
 
 }

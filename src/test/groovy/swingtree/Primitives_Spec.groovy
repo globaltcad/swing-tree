@@ -213,4 +213,54 @@ class Primitives_Spec extends Specification
             bounds3.hashCode() == bounds4.hashCode()
             bounds1.hashCode() != bounds3.hashCode()
     }
+
+    def 'Two `Size` objects can be added together using the `plus(Size)` method.'(
+        float width, float height, float width2, float height2, float sumWidth, float sumHeight
+    ) {
+        given:
+            var size1 = Size.of(width, height)
+            var size2 = Size.of(width2, height2)
+        when:
+            var sum = size1.plus(size2)
+        then:
+            sumWidth  < 0 ? !sum.width().isPresent()  : sum.width().get()  == sumWidth
+            sumHeight < 0 ? !sum.height().isPresent() : sum.height().get() == sumHeight
+        where :
+            width | height | width2 | height2 | sumWidth | sumHeight
+             10   |  20    |  30    |  40     | 40       |  60
+             10   |  20    |  30    | -40     | 40       |  20
+             10   |  20    | -1     |  40     | 10       |  60
+             10   |  20    | -1     | -1      | 10       |  20
+    }
+
+    def 'Two `Size` objects can be added together using the `plus(double, double)` method.'(
+        float width, float height, float width2, float height2, float sumWidth, float sumHeight
+    ) {
+        given:
+            var size1 = Size.of(width, height)
+        when:
+            var sum = size1.plus(width2, height2)
+        then:
+            sumWidth  < 0 ? !sum.width().isPresent()  : sum.width().get()  == sumWidth
+            sumHeight < 0 ? !sum.height().isPresent() : sum.height().get() == sumHeight
+        where :
+            width | height | width2 | height2 | sumWidth | sumHeight
+             10   |  20    |  30    |  40     |  40      |  60
+             10   |  20    |  30    | -40     |  40      |  -1
+             10   |  20    | -5     |  40     |   5      |  60
+             10   |  20    | -5     | -5      |   5      |  15
+    }
+
+    def 'Two `Size` objects can be subtracted using the `minus(Size)` method.'()
+    {
+        given:
+            var size1 = Size.of(50, 20)
+            var size2 = Size.of(30, 40)
+        when:
+            var diff = size1.minus(size2)
+        then:
+            diff.width().get() == 20
+            !diff.height().isPresent()
+    }
+
 }
