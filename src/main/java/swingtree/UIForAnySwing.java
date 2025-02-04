@@ -19,8 +19,10 @@ import swingtree.animation.AnimationDispatcher;
 import swingtree.animation.AnimationStatus;
 import swingtree.animation.LifeTime;
 import swingtree.api.*;
+import swingtree.api.mvvm.BoundViewSupplier;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JBox;
+import swingtree.components.JScrollPanels;
 import swingtree.input.Keyboard;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.LayoutConstraint;
@@ -39,11 +41,12 @@ import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -5121,6 +5124,35 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    //---
+
+    public final <M extends HasId<?>> I addAll( Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
+        return _with( thisComponent -> {
+                    _bindTo( models, null, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    public final <M extends HasId<?>> I addAll( String attr, Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        return _with( thisComponent -> {
+                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    public final <M extends HasId<?>> I addAll( AddConstraint attr, Var<Tuple<M>> viewables, BoundViewSupplier<M> viewSupplier ) {
+        return _with( thisComponent -> {
+                    _bindTo( viewables, attr, viewSupplier, thisComponent );
+                })
+                ._this();
+    }
+
+    //---
+
     private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
                 log.error("Error while creating view for '"+model+"'.", exception);
@@ -5128,6 +5160,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             }), thisComponent);
     }
 
+    // Overridden in UIForScrollPanels
     protected <M> void _addViewableProps( Vals<M> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
         _onShow( models, thisComponent, (innerComponent, delegate) -> {
             viewSupplier.rememberCurrentViewsForReuse();
@@ -5227,7 +5260,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }), thisComponent);
     }
 
-    protected <M> void _addViewableProps( Val<Tuple<M>> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, C thisComponent ) {
+    private <M extends HasId<?>> void _bindTo(Var<Tuple<M>> models, @Nullable AddConstraint attr, BoundViewSupplier<M> viewSupplier, C thisComponent ) {
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, (ViewHandle<M> handle)->viewSupplier.createViewFor(handle.property()), (model, exception)->{
+            log.error("Error while creating view for '"+model+"'.", exception);
+            return UI.box().get(JBox.class);
+        }), thisComponent);
+    }
+
+    // Overridden in UIForScrollPanels
+    protected <M> void _addViewableProps(
+        Val<Tuple<M>> models,
+        @Nullable AddConstraint attr,
+        ModelToViewConverter<M> viewSupplier,
+        C thisComponent
+    ) {
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
@@ -5238,6 +5284,99 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
         Tuple<M> tupleOfModels = models.get();
         _addAllFromTuple(tupleOfModels, attr, viewSupplier, thisComponent);
+    }
+
+    static class ViewHandle<M> {
+        private @Nullable Var<M> property;
+        private final WeakReference<JComponent> parent;
+        private @Nullable WeakReference<JComponent> child = null;
+
+        ViewHandle( JComponent parent ) {
+            this.parent = new WeakReference<>(parent);
+        }
+        static <M> ViewHandle<M> of( Var<Tuple<M>> models, int initialIndex, JComponent parent ) {
+            ViewHandle<M> handle = new ViewHandle<>(Objects.requireNonNull(parent));
+            AtomicReference<M> lastFetchedItem = new AtomicReference<>(null);
+            Supplier<Integer> indexSupplier = ()->UI.runAndGet(()->{
+                JComponent currentParent = handle.parent.get();
+                JComponent currentSubView = handle.child();
+                if ( currentParent instanceof JScrollPanels) {
+                    currentParent = ((JScrollPanels) currentParent).getContentPanel();
+                }
+                if ( currentSubView == null || currentParent == null ) {
+                    return initialIndex;
+                }
+                for ( int i = 0; i < currentParent.getComponentCount(); i++ ) {
+                    try {
+                        Component child = currentParent.getComponent(i);
+                        if (child instanceof JScrollPanels.EntryPanel) {
+                            child = ((JScrollPanels.EntryPanel) child).getComponent(0);
+                        }
+                        if (child == currentSubView)
+                            return i;
+                    } catch (Exception e) {
+                        log.error("Failed to check if child component is current.", e);
+                    }
+                }
+                return -1;
+            });
+            handle.property =
+                models.zoomToNullable(models.orElseThrowUnchecked().type(), it -> {
+                    try {
+                        // We get the index of the subview in the parent:
+                        int index = indexSupplier.get();
+                        if ( index < 0 ) {
+                            return lastFetchedItem.get();
+                        }
+                        M currentItemAtIndex = it.get(index);
+                        lastFetchedItem.set(currentItemAtIndex);
+                        return currentItemAtIndex;
+                    } catch (Exception ignored) {
+                        /*
+                            Lenses on a position in a tuple are a tricky thing!
+                            They can very easily break. Do we care? No, why should we?
+                            This lens may still be bound to an old GUI, which we do not want to disturb.
+                        */
+                        return lastFetchedItem.get();
+                    }
+                }, (it, m) -> {
+                    try {
+                        // We get the index of the subview in the parent:
+                        int index = indexSupplier.get();
+                        if ( index < 0 ) {
+                            return it;
+                        }
+                        return it.setAt(index, m);
+                    } catch (Exception ignored) {
+                        // The lens is no longer relevant! We do not care.
+                    }
+                    return it;
+                });
+            return handle;
+        }
+        public Var<M> property() {return Objects.requireNonNull(property);}
+        public @Nullable JComponent parent() {return parent.get();}
+        public @Nullable JComponent child() {return child == null ? null : child.get();}
+        public void setChild( JComponent child ) {this.child = new WeakReference<>(child);}
+
+    }
+
+    // Overridden in UIForScrollPanels
+    protected <M> void _addViewableProps(
+        Var<Tuple<M>> models,
+        @Nullable AddConstraint attr,
+        ModelToViewConverter<ViewHandle<M>> viewSupplier,
+        C thisComponent
+    ) {
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
+        if (models.get() instanceof SequenceDiffOwner)
+            lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
+        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+            viewSupplier.rememberCurrentViewsForReuse();
+            _updateSubViews(c, tupleOfModels, models, attr, lastDiffRef, viewSupplier);
+            viewSupplier.clearCurrentViews();
+        });
+        _addAllFromTuple(models, attr, viewSupplier, thisComponent);
     }
 
     private <M> void _updateSubViews(C c, Tuple<M> tupleOfModels, @Nullable AddConstraint attr, AtomicReference<@Nullable SequenceDiff> lastDiffRef, ModelToViewConverter<M> viewSupplier) {
@@ -5307,6 +5446,80 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             }
     }
 
+    private <M> void _updateSubViews(
+            C c,
+            Tuple<M> currentValue,
+            Var<Tuple<M>> tupleOfModels,
+            @Nullable AddConstraint attr,
+            AtomicReference<@Nullable SequenceDiff> lastDiffRef,
+            ModelToViewConverter<ViewHandle<M>> viewSupplier
+    ) {
+            SequenceDiff diff = null;
+            SequenceDiff lastDiff = lastDiffRef.get();
+            if (currentValue instanceof SequenceDiffOwner)
+                diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
+            lastDiffRef.set(diff);
+
+            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            } else {
+                int index = diff.index().orElse(-1);
+                int count = diff.size();
+                switch (diff.change()) {
+                    case SET:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = index; i < (index + count); i++ )
+                                _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                        }
+                        break;
+                    case ADD:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = index; i < (index + count); i++ )
+                                _addComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                        }
+                        break;
+                    case REMOVE:
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            for ( int i = (index + count - 1); i >= index; i-- )
+                                _removeComponentAt(i, c);
+                        }
+                        break;
+                    case RETAIN: // Only keep the elements in the range.
+                        if ( index < 0 ) {
+                            _clearComponentsOf(c); // We do a simple re-build
+                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                        } else {
+                            // Remove trailing components:
+                            for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
+                                _removeComponentAt(i, c);
+                            // Remove leading components:
+                            for ( int i = (index - 1); i >= 0; i-- )
+                                _removeComponentAt(i, c);
+                        }
+                        break;
+                    case CLEAR: _clearComponentsOf(c); break;
+                    case REVERSE: _reverseComponentsOf(c); break;
+                    case NONE:
+                        break;
+                    default:
+                        log.error("Unknown change type: {}", diff.change(), new Throwable());
+                        // We do a simple rebuild:
+                        _clearComponentsOf(c);
+                        _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                }
+            }
+    }
+
     private <M> void _addAllFromTuple( Tuple<M> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         for ( int i = 0; i < tupleOfModels.size(); i++ ) {
             UIForAnySwing<?, ?> view = null;
@@ -5314,6 +5527,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 view = viewSupplier.createViewFor(tupleOfModels.get(i));
             } catch ( Exception e ) {
                 log.error("Error while creating view for '"+tupleOfModels.get(i)+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            if ( attr == null )
+                _addBuildersTo( thisComponent, view );
+            else
+                _addBuildersTo( thisComponent, attr, view );
+        }
+    }
+
+    private <M> void _addAllFromTuple( Var<Tuple<M>> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<ViewHandle<M>> viewSupplier, C thisComponent ) {
+        for ( int i = 0; i < tupleOfModels.get().size(); i++ ) {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(ViewHandle.of(tupleOfModels, i, thisComponent));
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+tupleOfModels.get().get(i)+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -5393,6 +5624,36 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         c.repaint();
     }
 
+    private <M> void _updateComponentAt(
+        int index, Var<Tuple<M>> v, ViewSupplier<ViewHandle<M>> viewSupplier, @Nullable AddConstraint attr, C c
+    ) {
+        JComponent newComponent;
+        if ( v == null ) {
+            newComponent = new JBox();
+        } else {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(ViewHandle.of(v, index, c));
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+v+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            newComponent = view.get((Class)view.getType());
+        }
+        // We remove the old component.
+        c.remove(c.getComponent(index));
+        // We add the new component.
+        if ( attr == null )
+            c.add(newComponent, index);
+        else
+            c.add(newComponent, attr.toConstraintForLayoutManager(), index);
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
+    }
+
     private <M> void _addComponentAt(
         int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C thisComponent
     ) {
@@ -5403,6 +5664,34 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             UIForAnySwing<?, ?> view = null;
             try {
                 view = viewSupplier.createViewFor(v);
+            } catch ( Exception e ) {
+                log.error("Error while creating view for '"+v+"'.", e);
+            }
+            if ( view == null )
+                view = UI.box(); // We add a dummy component to the list of children.
+
+            newComponent = view.get((Class)view.getType());
+        }
+        // We add the new component.
+        if ( attr == null )
+            thisComponent.add(newComponent, index);
+        else
+            thisComponent.add(newComponent, attr.toConstraintForLayoutManager(), index);
+        // We update the layout.
+        thisComponent.revalidate();
+        thisComponent.repaint();
+    }
+
+    private <M> void _addComponentAt(
+        int index, Var<Tuple<M>> v, ViewSupplier<ViewHandle<M>> viewSupplier, @Nullable AddConstraint attr, C thisComponent
+    ) {
+        JComponent newComponent;
+        if ( v.isEmpty() || v.get().isEmpty() ) {
+            newComponent = new JBox();
+        } else {
+            UIForAnySwing<?, ?> view = null;
+            try {
+                view = viewSupplier.createViewFor(ViewHandle.of(v, index, thisComponent));
             } catch ( Exception e ) {
                 log.error("Error while creating view for '"+v+"'.", e);
             }

@@ -6,8 +6,8 @@ import sprouts.Var;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
 
-import javax.swing.JComponent;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +72,12 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
                 return existingView;
             else {
                 UIForAnySwing<?,?> newView = viewCreator.createViewFor(model);
+                Objects.requireNonNull(newView);
                 JComponent viewComponent = newView.get((Class) newView.getType());
+                if ( model instanceof UIForAnySwing.ViewHandle ) {
+                    UIForAnySwing.ViewHandle handle = (UIForAnySwing.ViewHandle) model;
+                    handle.setChild(viewComponent);
+                }
                 viewComponent.putClientProperty(UNIQUE_VIEW_CACHE_KEY, _idFrom(model));
                 return viewComponent;
             }
@@ -101,7 +106,7 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
                     Object foundId = actualView.getClientProperty(UNIQUE_VIEW_CACHE_KEY);
                     if ( Objects.equals(id, foundId) ) {
                         actualView.putClientProperty(UNIQUE_VIEW_CACHE_KEY, id);
-                        return existingSubView;
+                        return (JComponent) existingSubView.getComponent(0);
                     }
                 } else {
                     Object foundId = existingSubView.getClientProperty(UNIQUE_VIEW_CACHE_KEY);
@@ -116,8 +121,10 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
     }
 
     private @Nullable Object _idFrom( Object model ) {
-        if ( model instanceof Var )
+        if (model instanceof Var)
             model = ((Var<?>) model).orElseNull();
+        if ( model instanceof UIForAnySwing.ViewHandle )
+            model = ((UIForAnySwing.ViewHandle<?>) model).property().orElseNull();
 
         Object id = model;
         if ( model instanceof HasId ) {

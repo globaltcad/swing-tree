@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.With;
 import lombok.experimental.Accessors;
 import org.jspecify.annotations.Nullable;
+import sprouts.HasId;
 import sprouts.Tuple;
 
 import java.time.DayOfWeek;
+import java.util.UUID;
 
 @With @Getter @Accessors(fluent = true)
 public final class TasksViewModel
@@ -51,12 +53,13 @@ public final class TasksViewModel
     }
 
     @With @Getter @Accessors(fluent = true) @AllArgsConstructor
-    public final static class TaskViewModel
+    public final static class TaskViewModel implements HasId<UUID>
     {
+        private final UUID id;
         private final String task;
         private final DayOfWeek dueTo;
 
-        public TaskViewModel() {this("", DayOfWeek.MONDAY);}
+        public TaskViewModel() {this(UUID.randomUUID(), "", DayOfWeek.MONDAY);}
     }
 
     @With @Getter @Accessors(fluent = true) @AllArgsConstructor
