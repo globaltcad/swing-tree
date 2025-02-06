@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -4958,7 +4959,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  and is then expected to return a {@link JComponent} instance which will be added to the
      *  wrapped {@link JComponent} type of this builder.
      *
-     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param attr The {@link String} based {@link MigLayout} layout information
+     *             which should be used as layout constraints for each generated view.
      * @param model A {@link sprouts.Val} property holding null or any other type of value,
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
@@ -5007,7 +5009,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
      *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
      *      instead of {@link Vals} lists. <br>
-     *      <u>See {@link #addAll(Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *      <u>
+     *          See {@link #addAll(Val, ViewSupplier)} and {@link #addAll(Var, BoundViewSupplier)}
+     *          as the recommended alternative to this method.
+     *      </u>
      *  </b>
      *
      * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
@@ -5037,10 +5042,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
      *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
      *      instead of {@link Vals} lists. <br>
-     *      <u>See {@link #addAll(String, Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *      <u>
+     *          See {@link #addAll(String, Val, ViewSupplier)} and {@link #addAll(AddConstraint, Val, ViewSupplier)}
+     *          as the recommended alternative to this method.
+     *      </u>
      *  </b>
      *
-     * @param attr The layout information which should be used as layout constraints for the generated views.
+     * @param attr The {@link String} based {@link MigLayout} layout information
+     *             which should be used as layout constraints for each generated view.
      * @param models A {@link sprouts.Vals} list of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
@@ -5068,7 +5077,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      to be based on place oriented programming practices. Although SwingTree offers API for this style of
      *      programming, we strongly recommend using value objects for your view models and {@link Tuple}s
      *      instead of {@link Vals} lists. <br>
-     *      <u>See {@link #addAll(AddConstraint, Val, ViewSupplier)} as the recommended alternative to this method.</u>
+     *      <u>
+     *          See {@link #addAll(AddConstraint, Val, ViewSupplier)} and {@link #addAll(Var, BoundViewSupplier)}
+     *          as the recommended alternative to this method.
+     *      </u>
      *  </b>
      *
      * @param attr The layout information which should be used as layout constraints for the generated views.
@@ -5087,12 +5099,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Dynamically generate views for the items in a {@link Tuple} of items,
-     *  and automatically regenerate the view when any of the items in the tuple change.
-     *  The type of item can be anything, but it is usually value based view models.
+     *  and automatically regenerate the view when the tuple in the specified property changes.
+     *  The type of individual items in the tuple can be anything, but it is usually value
+     *  based view models.<br>
      *  The {@link ViewSupplier} lambda passed to this method will be invoked with
      *  each item in the tuple and is expected to return a {@link JComponent} instance
      *  which will either be added to this UI component or replace an existing view.<br>
-     *
+     *  <p>
+     *      If you want to bind individual items of a {@link Tuple} property
+     *      <b>bi-directionally</b> instead of just rendering them,
+     *      use the {@link #addAll(Var, BoundViewSupplier)} method.
+     *  </p>
      *
      * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
@@ -5108,6 +5125,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    /**
+     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  and automatically regenerate the view when the tuple in the specified property changes.
+     *  The type of individual items in the tuple can be anything, but it is usually value
+     *  based view models.<br>
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will either be added to this UI component or replace an existing view.<br>
+     *  <p>
+     *      If you want to bind individual items of a {@link Tuple} property
+     *      <b>bi-directionally</b> instead of just rendering them,
+     *      use the {@link #addAll(Var, BoundViewSupplier)} method.
+     *  </p>
+     *
+     * @param attr The {@link String} based {@link MigLayout} layout information
+     *             which should be used as layout constraints for the generated views.
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
     public final <M> I addAll( String attr, Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
@@ -5117,15 +5155,55 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
-    public final <M> I addAll( AddConstraint attr, Val<Tuple<M>> viewables, ViewSupplier<M> viewSupplier ) {
+    /**
+     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  and automatically regenerate the view when the tuple in the specified property changes.
+     *  The type of individual items in the tuple can be anything, but it is usually value
+     *  based view models.<br>
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will either be added to this UI component or replace an existing view.<br>
+     *  <p>
+     *      If you want to bind individual items of a {@link Tuple} property
+     *      <b>bi-directionally</b> instead of just rendering them,
+     *      use the {@link #addAll(Var, BoundViewSupplier)} method.
+     *  </p>
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated views.
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
+    public final <M> I addAll( AddConstraint attr, Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
         return _with( thisComponent -> {
-                    _bindTo( viewables, attr, viewSupplier, thisComponent );
+                    _bindTo( models, attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
 
-    //---
-
+    /**
+     *  Dynamically generate views bi-directionally bound to {@link HasId} based items
+     *  in a {@link Tuple} of items, and automatically regenerate a view if the {@link HasId#id()}
+     *  of any item in the tuple changes.<br>
+     *  If items change in terms of other properties, the view will not be updated,
+     *  but individually bound properties in the view may update themselves.<br>
+     *  The {@link BoundViewSupplier} lambda passed to this method will be invoked with
+     *  a {@link Var} property lens onto each item in the tuple and is expected to return
+     *  a {@link JComponent} instance which will either be added to this UI component or replace an existing view.<br>
+     *  Use the {@link Var#zoomTo(Function, BiFunction)} method on the item lens to zoom further
+     *  into the properties of your items (which are typically view models) and bind them to the view components.<br>
+     *  <p>
+     *      This method is the recommended way to bind views to value objects (like records),
+     *      with a custom identity (that is not based on the object reference).
+     *      If you want to bind views to mutable objects, use the {@link #addAll(Vals, ViewSupplier)} method.
+     *  </p>
+     *
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
     public final <M extends HasId<?>> I addAll( Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
         Objects.requireNonNull(viewSupplier, "viewSupplier");
@@ -5135,6 +5213,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    /**
+     *  Dynamically generate views bi-directionally bound to {@link HasId} based items
+     *  in a {@link Tuple} of items, and automatically regenerate a view if the {@link HasId#id()}
+     *  of any item in the tuple changes.<br>
+     *  If items change in terms of other properties, the view will not be updated,
+     *  but individually bound properties in the view may update themselves.<br>
+     *  The {@link BoundViewSupplier} lambda passed to this method will be invoked with
+     *  a {@link Var} property lens onto each item in the tuple and is expected to return
+     *  a {@link JComponent} instance which will either be added to this UI component or replace an existing view.<br>
+     *  Use the {@link Var#zoomTo(Function, BiFunction)} method on the item lens to zoom further
+     *  into the properties of your items (which are typically view models) and bind them to the view components.<br>
+     *  <p>
+     *      This method is the recommended way to bind views to value objects (like records),
+     *      with a custom identity (that is not based on the object reference).
+     *      If you want to bind views to mutable objects, use the {@link #addAll(String, Vals, ViewSupplier)} method.
+     *  </p>
+     *
+     * @param attr The {@link String} based {@link MigLayout} layout information
+     *             which should be used as layout constraints for the generated views.
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
     public final <M extends HasId<?>> I addAll( String attr, Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(models, "viewables", Vals.class);
@@ -5144,14 +5246,35 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
-    public final <M extends HasId<?>> I addAll( AddConstraint attr, Var<Tuple<M>> viewables, BoundViewSupplier<M> viewSupplier ) {
+    /**
+     *  Dynamically generate views bi-directionally bound to {@link HasId} based items
+     *  in a {@link Tuple} of items, and automatically regenerate a view if the {@link HasId#id()}
+     *  of any item in the tuple changes.<br>
+     *  If items change in terms of other properties, the view will not be updated,
+     *  but individually bound properties in the view may update themselves.<br>
+     *  The {@link BoundViewSupplier} lambda passed to this method will be invoked with
+     *  a {@link Var} property lens onto each item in the tuple and is expected to return
+     *  a {@link JComponent} instance which will either be added to this UI component or replace an existing view.<br>
+     *  Use the {@link Var#zoomTo(Function, BiFunction)} method on the item lens to zoom further
+     *  into the properties of your items (which are typically view models) and bind them to the view components.<br>
+     *  <p>
+     *      This method is the recommended way to bind views to value objects (like records),
+     *      with a custom identity (that is not based on the object reference).
+     *      If you want to bind views to mutable objects, use the {@link #addAll(AddConstraint, Vals, ViewSupplier)} method.
+     *  </p>
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated views.
+     * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     */
+    public final <M extends HasId<?>> I addAll( AddConstraint attr, Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
         return _with( thisComponent -> {
-                    _bindTo( viewables, attr, viewSupplier, thisComponent );
+                    _bindTo( models, attr, viewSupplier, thisComponent );
                 })
                 ._this();
     }
-
-    //---
 
     private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
