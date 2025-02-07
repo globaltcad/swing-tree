@@ -4943,9 +4943,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
+     * @throws NullPointerException If either the {@code model} or the {@code viewSupplier} is null.
      */
     public final <M> I add( Val<M> model, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(model, "viewable", Val.class);
+        Objects.requireNonNull(model, "model");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                    _addViewablePropTo(thisComponent, model, null, viewSupplier);
                })
@@ -4966,10 +4968,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
+     * @throws NullPointerException If either the {@code attr}, the {@code model} or the {@code viewSupplier} is null.
      */
     public final <M> I add( String attr, Val<M> model, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(model, "viewable", Val.class);
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(model, "model");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
             _addViewablePropTo(thisComponent, model, ()->attr, viewSupplier);
         })
@@ -4989,8 +4993,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code model} or the {@code viewSupplier} is null.
      */
     public final <M> I add( AddConstraint attr, Val<M> model, ViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(model, "model");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return  _with( thisComponent -> {
             _addViewablePropTo(thisComponent, model, attr, viewSupplier);
         })
@@ -5020,9 +5028,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
+     * @throws NullPointerException If either the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M> I addAll( Vals<M> models, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, null, viewSupplier, thisComponent );
@@ -5055,10 +5064,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M> I addAll( String attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
         return _with( thisComponent -> {
                     _bindTo( models, ()->attr, viewSupplier, thisComponent );
                 })
@@ -5089,8 +5099,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M> I addAll( AddConstraint attr, Vals<M> models, ViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, attr, viewSupplier, thisComponent );
                 })
@@ -5115,9 +5129,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M> I addAll( Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, null, viewSupplier, thisComponent );
@@ -5145,10 +5160,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M> I addAll( String attr, Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, ()->attr, viewSupplier, thisComponent );
                 })
@@ -5174,8 +5191,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M> I addAll( AddConstraint attr, Val<Tuple<M>> models, ViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, attr, viewSupplier, thisComponent );
                 })
@@ -5203,9 +5224,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M extends HasId<?>> I addAll( Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, null, viewSupplier, thisComponent );
@@ -5236,10 +5258,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M extends HasId<?>> I addAll( String attr, Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(models, "viewables", Vals.class);
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, ()->attr, viewSupplier, thisComponent );
                 })
@@ -5268,8 +5292,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final <M extends HasId<?>> I addAll( AddConstraint attr, Var<Tuple<M>> models, BoundViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     _bindTo( models, attr, viewSupplier, thisComponent );
                 })
