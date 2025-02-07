@@ -1043,6 +1043,8 @@ class MVVM_Example_Spec extends Specification
             Tuple.of("a", "b")           | { it.removeLast(1) }
             Tuple.of(1, 2, 3)            | { it.removeLast(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
     }
 
     def 'Views bound to a property list will be reused efficiently.'(
@@ -1073,6 +1075,9 @@ class MVVM_Example_Spec extends Specification
             var whichModelsReused = initialModels.collect({models.contains(it)})
         then: 'The tabbed pane is updated.'
             whichModelsReused == whichViewReused
+        and : 'The new components are buttons with the expected text.'
+            newComponents.collect({it.text}) == models.mapTo(String, it -> Objects.toString(it)).toList()
+
 
         where : 'We test the following operations:'
             models                      | operation
@@ -1088,6 +1093,8 @@ class MVVM_Example_Spec extends Specification
             Vars.of("a", "b")           | { it.removeLast(1) }
             Vars.of(1, 2, 3)            | { it.removeLast(1) }
             Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
     }
 
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {
