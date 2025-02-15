@@ -560,33 +560,33 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     /**
-     *  Uses the given selection property as well as a property of an array of elements as a basis
+     *  Uses the given selection property as well as a property of a {@link Tuple} of elements as a basis
      *  for a new combo box model and sets it as the new model for the combo box state.
-     *  This means that whenever the state of the selection property or the property of an array of elements changes,
+     *  This means that whenever the state of the selection property or the property of tuple of elements changes,
      *  then combo box will be updated and rendered according to said changes.
      *
      * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
-     * @param options The property of an array of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @param options The property of a tuple of elements to be used as the basis for modelling the available options in a new combo box model.
      * @return This builder node, which allows for builder-style method chaining.
      * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
      */
-    public final UIForCombo<E,C> withItems( Var<E> selection, Var<E[]> options ) {
+    public final UIForCombo<E,C> withItems( Var<E> selection, Var<Tuple<E>> options ) {
         return this.withModel(new ArrayPropertyComboModel<>(selection, options));
     }
 
     /**
-     *  Uses the given selection property as well as a read only property of an array of elements as a basis
+     *  Uses the given selection property as well as a read only property of a {@link Tuple} of elements as a basis
      *  for a new combo box model and sets it as the new model for the combo box state.
-     *  This means that whenever the state of the selection property or the read only property of an array of elements changes,
+     *  This means that whenever the state of the selection property or the read only property of a tuple of elements changes,
      *  then combo box will be updated and rendered according to said changes.
      *  Due to the list of options being read only, changes to it can only come from the view model.
      *
      * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
-     * @param options The read only property of an array of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @param options The read only property of a tuple of elements to be used as the basis for modelling the available options in a new combo box model.
      * @return This builder node, which allows for builder-style method chaining.
      * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
      */
-    public final UIForCombo<E,C> withItems( Var<E> selection, Val<E[]> options ) {
+    public final UIForCombo<E,C> withItems( Var<E> selection, Val<Tuple<E>> options ) {
         return this.withModel(new ArrayPropertyComboModel<>(selection, options));
     }
 

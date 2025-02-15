@@ -1,22 +1,16 @@
 package swingtree
 
-import sprouts.Val
-import sprouts.Vals
-import swingtree.threading.EventProcessor
-import sprouts.Var
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import sprouts.Vars
+import sprouts.*
+import swingtree.threading.EventProcessor
 
-import javax.swing.DefaultComboBoxModel
-import javax.swing.JComboBox
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.JTextField
-import java.awt.Color
+import javax.swing.*
+import java.awt.*
 import java.time.DayOfWeek
+import java.util.List
 import java.util.function.Supplier
 
 import static swingtree.UI.comboBox
@@ -283,7 +277,7 @@ class Combo_Box_Spec extends Specification
         """
         given : 'We create our "model", 2 properties.'
             var selection = Var.of(42)
-            var options = Var.of([73, 42, 17] as Integer[])
+            var options = Var.of(Tuple.of(73, 42, 17))
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
         and : 'We get the combo box.'
@@ -304,7 +298,45 @@ class Combo_Box_Spec extends Specification
             combo.getSelectedItem() == 17
 
         when : 'We change the options property.'
-            options.set([99, 17] as Integer[])
+            options.set(Tuple.of(99, 17))
+        then : 'The combo box options are updated.'
+            combo.itemCount == 2
+            combo.getItemAt(0) == 99
+            combo.getItemAt(1) == 17
+    }
+
+    def 'You can model the selection state and options of your combo box using 2 properties and a display function.'()
+    {
+        reportInfo """
+           In essence, the state of a combo box consists of the current selection, and
+           the options that are available for selection. You can model both of these
+           aspects using 2 properties. One modelling the current selection, and another one
+           storing an array to model all available options. 
+        """
+        given : 'We create our "model", 2 properties.'
+            var selection = Var.of(42)
+            var options = Var.of(Tuple.of(73, 42, 17))
+        and : 'We create a combo box that is bound to the property and the list.'
+            var ui = UI.comboBox(selection, options, it -> "Value: " + it)
+        and : 'We get the combo box.'
+            var combo = ui.get(JComboBox)
+        expect : 'The combo box is initialized with the current selection.'
+            combo.getSelectedItem() == 42
+        and : 'It also reports the correct selection index.'
+            combo.getSelectedIndex() == 1
+        and : 'The there are all 3 options available.'
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
+
+        when : 'We change the selection.'
+            selection.set(17)
+        then : 'This change translates from the property to the UI element.'
+            combo.getSelectedItem() == 17
+
+        when : 'We change the options property.'
+            options.set(Tuple.of(99, 17))
         then : 'The combo box options are updated.'
             combo.itemCount == 2
             combo.getItemAt(0) == 99
@@ -551,10 +583,11 @@ class Combo_Box_Spec extends Specification
                 { UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
                 { UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
                 { UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Animal.values(), a -> a.name().toLowerCase()) },
                 { UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
                 { UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
-                { UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) },
-                { UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }
+                { UI.comboBox(Var.of(Animal.CAT), Var.of(Tuple.of(Animal, Animal.values())), a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Val.of(Tuple.of(Animal, Animal.values())), a -> a.name().toLowerCase()) }
             ]
     }
 
