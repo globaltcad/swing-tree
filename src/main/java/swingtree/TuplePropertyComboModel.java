@@ -6,19 +6,19 @@ import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
 
-final class ArrayPropertyComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
+final class TuplePropertyComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
 	private final Val<Tuple<E>> _items;
 	private final boolean _mutable;
 
-	ArrayPropertyComboModel( Var<E> selection, Val<Tuple<E>> items ) {
+	TuplePropertyComboModel(Var<E> selection, Val<Tuple<E>> items ) {
 		super(selection);
 		_items = items;
 		_selectedIndex = _indexOf(_getSelectedItemSafely());
 		_mutable = false;
 	}
 
-	ArrayPropertyComboModel( Var<E> selection, Var<Tuple<E>> items ) {
+	TuplePropertyComboModel(Var<E> selection, Var<Tuple<E>> items ) {
 		super(selection);
 		_items = items;
 		_selectedIndex = _indexOf(_getSelectedItemSafely());
@@ -27,7 +27,7 @@ final class ArrayPropertyComboModel<E extends @Nullable Object> extends Abstract
 
 	@Override
 	public AbstractComboModel<E> withVar( Var<E> newVar ) {
-		return new ArrayPropertyComboModel<>(newVar, _items);
+		return new TuplePropertyComboModel<>(newVar, _items);
 	}
 
 	@Override protected void setAt(int index, @Nullable E element) {

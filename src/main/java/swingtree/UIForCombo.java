@@ -571,7 +571,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
      */
     public final UIForCombo<E,C> withItems( Var<E> selection, Var<Tuple<E>> options ) {
-        return this.withModel(new ArrayPropertyComboModel<>(selection, options));
+        return this.withModel(new TuplePropertyComboModel<>(selection, options));
     }
 
     /**
@@ -587,7 +587,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
      */
     public final UIForCombo<E,C> withItems( Var<E> selection, Val<Tuple<E>> options ) {
-        return this.withModel(new ArrayPropertyComboModel<>(selection, options));
+        return this.withModel(new TuplePropertyComboModel<>(selection, options));
     }
 
     /**
