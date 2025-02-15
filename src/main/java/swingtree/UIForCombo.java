@@ -513,7 +513,12 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  Uses the given selection property as well as a property list of elements as a basis
      *  for a new combo box model and sets it as the new model for the combo box state.
      *  This means that whenever the state of the selection property or the property list of elements changes,
-     *  then combo box will be updated and rendered accordingly.
+     *  then combo box will be updated and rendered accordingly.<br>
+     *  <b>
+     *      Note that we recommend using the {@link Tuple} property based {@link #withItems(Var, Var)} method instead
+     *      of this method, as it requires less state to be managed in your application and allows for a more
+     *      data-oriented programming style.
+     *  </b>
      *
      * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
      * @param options The property list of elements to be used as the basis for modelling the available options in a new combo box model.
@@ -529,7 +534,12 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  for a new combo box model and sets it as the new model for the combo box state.
      *  This means that whenever the state of the selection property or the read only property list of elements changes,
      *  then combo box will be updated and rendered according to said changes.
-     *  Due to the list of options being read only, changes to it can only come from the view model.
+     *  Due to the list of options being read only, changes to it can only come from the view model.<br>
+     *  <b>
+     *      Note that we recommend using the {@link Tuple} property based {@link #withItems(Var, Val)} method instead
+     *      of this method, as it requires less state to be managed in your application and allows for a more
+     *      data-oriented programming style.
+     *  </b>
      *
      * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
      * @param options The read only property list of elements to be used as the basis for modelling the available options in a new combo box model.
