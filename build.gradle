@@ -51,7 +51,7 @@ dependencies {
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '08ab256cba5e154222ea75a7d67683852dc7565b'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M15'
     api group: 'com.github.weisj',     name: 'jsvg',            version: '1.7.0'
 
     // Logging :
