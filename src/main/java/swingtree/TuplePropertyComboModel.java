@@ -32,7 +32,7 @@ final class TuplePropertyComboModel<E extends @Nullable Object> extends Abstract
 
 	@Override protected void setAt(int index, @Nullable E element) {
 		if ( _mutable && _items instanceof Var )
-			((Var<Tuple<E>>)_items).update(From.VIEW, tuple -> tuple.setAt(index, element));
+			((Var<Tuple<E>>)_items).update(From.VIEW, tuple -> tuple.setAt(index, NullUtil.fakeNonNull(element)));
 	}
 
 	@Override public int getSize() {
