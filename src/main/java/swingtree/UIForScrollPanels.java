@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -155,6 +156,24 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         }
     }
 
+    private <M> void _addAllEntriesAt(
+            @Nullable AddConstraint attr,
+            JScrollPanels thisComponent,
+            int index,
+            Tuple<M> models,
+            Function<Integer, ViewHandle<M>> lensSupplier,
+            ViewSupplier<ViewHandle<M>> viewSupplier
+    ) {
+        for ( int i = 0; i< models.size(); i++ ) {
+            ViewHandle<M> viewable = lensSupplier.apply(index+i);
+            thisComponent.addEntryAt(
+                    i + index, attr,
+                    _entryModel(),
+                    m -> viewSupplier.createViewFor(viewable)
+            );
+        }
+    }
+
     private <M> void _setAllEntriesAt(
         @Nullable AddConstraint attr,
         JScrollPanels thisComponent,
@@ -179,7 +198,25 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             }
         }
     }
-    
+
+    private <M> void _setAllEntriesAt(
+            @Nullable AddConstraint attr,
+            JScrollPanels thisComponent,
+            int index,
+            int size,
+            Function<Integer, ViewHandle<M>> lensSupplier,
+            ViewSupplier<ViewHandle<M>> viewSupplier
+    ) {
+        for (int i = 0; i < size; i++) {
+            ViewHandle<M> viewable = lensSupplier.apply(index+i);
+            thisComponent.setEntryAt(
+                    i + index, attr,
+                    _entryModel(),
+                    m -> viewSupplier.createViewFor(viewable)
+            );
+        }
+    }
+
     @Override
     protected <M> void _addViewableProps(
             Val<Tuple<M>> models, 
@@ -214,6 +251,44 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         });
     }
 
+    @Override
+    protected <M> void _addViewableProps(
+            Var<Tuple<M>> propertyOfModels,
+            @Nullable AddConstraint attr,
+            ModelToViewConverter<ViewHandle<M>> viewSupplier,
+            P scrollPanels
+    ) {
+        Function<Integer, ViewHandle<M>> lensSupplier = index -> ViewHandle.of(propertyOfModels, index, scrollPanels);
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
+        if (propertyOfModels.get() instanceof SequenceDiffOwner)
+            lastDiffRef.set(((SequenceDiffOwner)propertyOfModels.get()).differenceFromPrevious().orElse(null));
+        _onShowDelegated( propertyOfModels, scrollPanels, (thisComponent, delegate) -> {
+            Tuple<M> oldModels = delegate.oldValue().orElseThrowUnchecked();
+            Tuple<M> newModels = delegate.currentValue().orElseThrowUnchecked();
+            viewSupplier.rememberCurrentViewsForReuse();
+            SequenceDiff diff = null;
+            SequenceDiff lastDiff = lastDiffRef.get();
+            if (newModels instanceof SequenceDiffOwner && oldModels instanceof SequenceDiffOwner) {
+                diff = ((SequenceDiffOwner)newModels).differenceFromPrevious().orElse(null);
+            }
+            lastDiffRef.set(diff);
+
+            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+                thisComponent.removeAllEntries();
+                _addAllEntriesAt(attr, thisComponent, 0, newModels, lensSupplier, viewSupplier);
+            } else {
+                int index = diff.index().orElse(-1);
+                int count = diff.size();
+                _update(thisComponent, attr, diff.change(), index, count, newModels, lensSupplier, viewSupplier);
+            }
+            viewSupplier.clearCurrentViews();
+        });
+        propertyOfModels.ifPresent( (tupleOfModels) -> {
+            scrollPanels.removeAllEntries();
+            _addAllEntriesAt(attr, scrollPanels, 0, tupleOfModels, lensSupplier, viewSupplier);
+        });
+    }
+
     private <M> void _update(
             P c,
             @Nullable AddConstraint attr,
@@ -230,11 +305,11 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         } else {
             switch (change) {
                 case SET:
-                    Tuple<M> slice = tupleOfModels.slice(index, index+count);
+                    Tuple<M> slice = tupleOfModels.sliceAt(index, count);
                     _setAllEntriesAt(attr, c, index, slice, viewSupplier);
                     break;
                 case ADD:
-                    _addAllEntriesAt(attr, c, index, tupleOfModels.slice(index, index+count), viewSupplier);
+                    _addAllEntriesAt(attr, c, index, tupleOfModels.sliceAt(index, count), viewSupplier);
                     break;
                 case REMOVE:
                     c.removeEntriesAt(index, count);
@@ -255,6 +330,51 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
                     // We do a simple rebuild:
                     c.removeAllEntries();
                     _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
+            }
+        }
+    }
+
+    private <M> void _update(
+            P c,
+            @Nullable AddConstraint attr,
+            SequenceChange change,
+            int index,
+            int count,
+            Tuple<M> newModels,
+            Function<Integer, ViewHandle<M>> lensSupplier,
+            ModelToViewConverter<ViewHandle<M>> viewSupplier
+    ) {
+        if ( index < 0 ) {
+            // We do a simple re-build
+            c.removeAllEntries();
+            _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);
+        } else {
+            switch (change) {
+                case SET:
+                    _setAllEntriesAt(attr, c, index, count, lensSupplier, viewSupplier);
+                    break;
+                case ADD:
+                    _addAllEntriesAt(attr, c, index, newModels.sliceAt(index, count), lensSupplier, viewSupplier);
+                    break;
+                case REMOVE:
+                    c.removeEntriesAt(index, count);
+                    break;
+                case RETAIN: // Only keep the elements in the range.
+                    // Remove trailing components:
+                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));
+                    // Remove leading components:
+                    c.removeEntriesAt(0, index);
+                    break;
+                case CLEAR:
+                    c.removeAllEntries();
+                    break;
+                case NONE:
+                    break;
+                default:
+                    log.error("Unknown change type: {}", change, new Throwable());
+                    // We do a simple rebuild:
+                    c.removeAllEntries();
+                    _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);
             }
         }
     }

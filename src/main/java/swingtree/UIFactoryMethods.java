@@ -3518,17 +3518,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Creates a combo box UI builder node with a {@link Var} property as the model
-     *  for the current selection and an array property of items as a selectable items model
-     *  of variable length.
-     *  <p>
-     *  Note that the provided array may be mutated by the combo box UI component
+     *  for the current selection and a tuple property of items as a selectable items model
+     *  which may be modified by the user or change dynamically in your code.
+     *  So whenever the tuple property changes, the combo box will be updated
+     *  with the new selectable items. <br>
      *
      * @param var The property holding the current selection.
-     * @param items The property holding an array of selectable items which can be mutated by the combo box.
+     * @param items The property holding a tuple of selectable items which can be mutated by the combo box.
      * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
      * @param <E> The type of the elements in the combo box.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items ) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<Tuple<E>> items ) {
         NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         return ((UIForCombo)comboBox()).withItems(var, items);
     }
@@ -3563,7 +3563,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
      * @param <E> The type of the elements in the list.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items, Function<E, String> renderer ) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<Tuple<E>> items, Function<E, String> renderer ) {
         NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(var, "var", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
@@ -3573,17 +3573,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Creates a combo box UI builder node with a {@link Var} property as the model
-     *  for the current selection and an array property of items as a selectable items model
-     *  of variable length.
+     *  for the current selection and a tuple property of items as a selectable items model
+     *  that may change dynamically. So when the tuple in the property changes, the selectable
+     *  items in the combo box will be updated accordingly.
      *  <p>
-     *  Note that the provided array may be mutated by the combo box UI component
+     *  Note that the supplied tuple property may not be modified by the user.
+     *  If you want the user to be able to modify the items, use {@link #comboBox(Var, Var)}.
      *
      * @param selectedItem The property holding the current selection.
-     * @param items The property holding an array of selectable items which may not be modified by the user.
+     * @param items The property holding a tuple of selectable items which may not be modified by the user.
      * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
      * @param <E> The type of the elements in the combo box.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items ) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<Tuple<E>> items ) {
         NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
         return ((UIForCombo)comboBox()).withItems(selectedItem, items);
@@ -3619,7 +3621,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
      * @param <E> The type of the elements in the list.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items, Function<E, String> renderer ) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<Tuple<E>> items, Function<E, String> renderer ) {
         NullUtil.nullArgCheck(items, "items", UI.ListView.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);

@@ -296,14 +296,30 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public <M extends EntryViewModel> void setEntryAt( int index, @Nullable AddConstraint attr, M entryViewModel, ViewSupplier<M> viewSupplier ) {
         Objects.requireNonNull(entryViewModel);
-        EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);
+        EntryPanel newEntryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);
+        Component existing = _internal.getComponent(index);
+        if ( existing instanceof EntryPanel ) {
+            EntryPanel existingEntry = (EntryPanel) existing;
+            if ( existingEntry.getComponentCount() == 0 ) {
+                log.error("The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.", existingEntry, newEntryPanel, JScrollPanels.class, new Throwable());
+            } else if ( newEntryPanel.getComponentCount() == 0 ) {
+                log.error("The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.", newEntryPanel, existingEntry, JScrollPanels.class, new Throwable());
+            } else {
+                Component existingView = ((EntryPanel) existing).getComponent(0);
+                Component newView = newEntryPanel.getComponent(0);
+                if ( existingView == newView )
+                    return; // The view is already there
+            }
+        } else {
+            log.error("Encountered illegal type of entry panel in {}.", JScrollPanels.class, new Throwable());
+        }
         // We first remove the old entry panel and then add the new one.
         // This is necessary because the layout manager does not allow to replace
         // a component at a certain index.
         _internal.remove(index);
         // We have to re-add the entry panel at the same index
         // because the layout manager will otherwise add it at the end.
-        _internal.add(entryPanel, index);
+        _internal.add(newEntryPanel, index);
         this.validate();
     }
 
@@ -388,16 +404,36 @@ public class JScrollPanels extends UI.ScrollPane
 
     private <M extends EntryViewModel> EntryPanel _createEntryPanel(
         @Nullable AddConstraint constraints,
-        M entryProvider,
+        M viewModel,
         ViewSupplier<M> viewSupplier,
         int index
     ) {
-        Objects.requireNonNull(entryProvider);
+        Function<Boolean, JComponent> indexedViewSupplier = EntryPanel.providerFrom(index, viewModel, viewSupplier);
+        JComponent initialView = indexedViewSupplier.apply(false);
+        // Let's see if we can avoid recreating an entry:
+        int numberOfExistingComponents = _internal.getComponentCount();
+        if ( numberOfExistingComponents > 0 && numberOfExistingComponents > index ) {
+            Component found = _internal.getComponent(index);
+            if ( !(found instanceof EntryPanel) ) {
+                log.error("Encountered illegal child component '{}' in '{}'.", found, JScrollPanels.class, new Throwable());
+            } else {
+                EntryPanel existingEntry = (EntryPanel) found;
+                if ( existingEntry.getComponentCount() == 0 ) {
+                    log.error("Existing entry panel '{}' about to be replaced by new view '{}' in '{}' is missing its view.", existingEntry, initialView, JScrollPanels.class, new Throwable());
+                } else {
+                    Component existingView = existingEntry.getComponent(0);
+                    if ( existingView == initialView )
+                        return existingEntry; // The view is already there
+                }
+            }
+        }
+        Supplier<List<EntryPanel>> components = ()-> _entriesIn(_internal.getComponents());
         return new EntryPanel(
-                        ()-> _entriesIn(_internal.getComponents()),
+                        components,
                         index,
-                        entryProvider,
-                        viewSupplier,
+                        viewModel,
+                        initialView,
+                        indexedViewSupplier,
                         constraints
                     );
     }
@@ -522,11 +558,65 @@ public class JScrollPanels extends UI.ScrollPane
         private JComponent _lastState;
 
 
+        static <M extends EntryViewModel> Function<Boolean, JComponent> providerFrom(
+            int position,
+            M viewModel,
+            ViewSupplier<M> viewSupplier
+        ) {
+            return (Boolean isSelected) -> {
+                viewModel.position().set(From.VIEW, position);
+                viewModel.isSelected().set(From.VIEW, isSelected);
+                UIForAnySwing<?,?> view = null;
+                try {
+                    view = viewSupplier.createViewFor(viewModel);
+                } catch (Exception e) {
+                    log.error("Failed to create view for entry " + viewModel, e);
+                }
+                if ( view == null )
+                    view = UI.box(); // We return an empty box if the view is null.
+                return view.get((Class) view.getType());
+            };
+        }
+
+        private <M extends EntryViewModel> EntryPanel(
+            Supplier<List<EntryPanel>> components,
+            int position,
+            M viewModel,
+            ViewSupplier<M> viewSupplier,
+            @Nullable AddConstraint constraints
+        ) {
+            this(
+                Objects.requireNonNull(components),
+                position,
+                Objects.requireNonNull(viewModel),
+                providerFrom(position, viewModel, viewSupplier),
+                constraints
+            );
+        }
+
         private <M extends EntryViewModel> EntryPanel(
             Supplier<List<EntryPanel>> components,
             int position,
             M provider,
-            ViewSupplier<M> viewSupplier,
+            Function<Boolean, JComponent> viewSupplier,
+            @Nullable AddConstraint constraints
+        ) {
+            this(
+                components,
+                position,
+                provider,
+                viewSupplier.apply(false),
+                viewSupplier,
+                constraints
+            );
+        }
+
+        private <M extends EntryViewModel> EntryPanel(
+            Supplier<List<EntryPanel>> components,
+            int position,
+            M provider,
+            JComponent lastState,
+            Function<Boolean, JComponent> viewSupplier,
             @Nullable AddConstraint constraints
         ) {
             Objects.requireNonNull(components);
@@ -534,20 +624,15 @@ public class JScrollPanels extends UI.ScrollPane
             // We make the entry panel fit the outer (public) scroll panel.
             this.setLayout(new MigLayout("fill, insets 0", "[grow]"));
             _viewable = provider;
-            _provider = isSelected -> {
-                                provider.position().set(From.VIEW, position);
-                                provider.isSelected().set(From.VIEW, isSelected);
-                                UIForAnySwing<?,?> view = null;
-                                try {
-                                    view = viewSupplier.createViewFor(provider);
-                                } catch (Exception e) {
-                                    log.error("Failed to create view for entry: " + this, e);
-                                }
-                                if ( view == null )
-                                    view = UI.box(); // We return an empty box if the view is null.
-                                return (JComponent) view.get((Class) view.getType());
-                            };
-            _lastState = _provider.apply(false);
+            _provider = viewSupplier;
+            _lastState = lastState;
+            if ( _lastState.getParent() != null ) {
+                Container parent = _lastState.getParent();
+                log.error(
+                            "View supplier in {} class supplied a view which is already tied to another parent {}.",
+                            JScrollPanels.class.getSimpleName(), parent, new Throwable()
+                        );
+            }
             this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : "grow" );
             Viewable.cast(_viewable.isSelected()).onChange(From.VIEW_MODEL, it -> _selectThis(components) );
             if ( _viewable.isSelected().is(true) )

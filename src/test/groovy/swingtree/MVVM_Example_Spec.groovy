@@ -9,6 +9,7 @@ import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
 import sprouts.Vars
+import swingtree.api.mvvm.BoundViewSupplier
 import swingtree.api.mvvm.ViewSupplier
 import swingtree.threading.EventProcessor
 import utility.Utility
@@ -896,6 +897,60 @@ class MVVM_Example_Spec extends Specification
             [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
     }
 
+    def 'A tuple property can be bound to a panel bi-directionally and compute efficiently.'(
+        List<Integer> diff, Closure<Tuple> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
+            var models = Var.of(tuple)
+            BoundViewSupplier<String> supplier = (Var<String> title) -> UI.button(title)
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We unpack the pane and the expected differences:'
+            var iniComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We unpack the updated components:'
+            var updatedComps = (0..<panel.getComponentCount()).collect({panel.getComponent(it)})
+        then: 'The tabbed pane is updated.'
+            panel.getComponentCount() == models.get().size()
+            panel.getComponentCount() == diff.findAll( it -> it == _ || it >= 0 ).size()
+        and :
+            diff.findAll({it == _ || it >= 0}).indexed().every({
+                it.value == _ || iniComps[it.value] === updatedComps[it.key]
+            })
+        and : 'The components at `-1` are totally new.'
+            diff.indexed().every({
+                it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)
+            })
+
+        where : 'We test the following operations:'
+            diff                 | operation
+            [0,-1, 2, 3, 4]      | { it.removeAt(1) }
+            [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
+            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
+            [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
+            [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
+            [-1, -1, -1, -1, -1] | { it.clear() }
+            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
+            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+    }
+
     def 'Views bound to a tuple property will be reused efficiently.'(
         Tuple<Object> initialModels, Closure<Tuple<Object>> operation
     ) {
@@ -924,6 +979,8 @@ class MVVM_Example_Spec extends Specification
             var whichModelsReused = initialModels.collect({models.get().contains(it)})
         then: 'The tabbed pane is updated.'
             whichModelsReused == whichViewReused
+        and : 'The new components are buttons with the expected text.'
+            newComponents.collect({it.text}) == models.get().mapTo(String, it -> Objects.toString(it)).toList()
 
         where : 'We test the following operations:'
             initialModels                | operation
@@ -939,6 +996,55 @@ class MVVM_Example_Spec extends Specification
             Tuple.of("a", "b")           | { it.removeLast(1) }
             Tuple.of(1, 2, 3)            | { it.removeLast(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+    }
+
+    def 'Views bound to a tuple property bi-directionally, will be reused efficiently.'(
+        Tuple<Object> initialModels, Closure<Tuple<Object>> operation
+    ) {
+        reportInfo """
+            You can bind a string based tuple property and a view supplier 
+            to dynamically add or remove sub views. The GUI will only update the
+            views that have changed and it will reuse views for items that
+            existed in the previous tuple.
+        """
+        given: 'A string tuple property, a view supplier and a panel UI node.'
+            var models = Var.of(initialModels)
+            BoundViewSupplier<Object> supplier = (Var<Object> aThing) -> UI.button(aThing.itemAsString())
+            def panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+        and : 'We get a list of the current views.'
+            var initialComponents = panel.components as List<JComponent>
+
+        when: 'We run the operation on the tuple...'
+            models.update( it -> operation(it) )
+            UI.sync()
+        and : 'We evaluate the situation after the change:'
+            var newComponents = panel.components as List<JComponent>
+            var whichViewReused = initialComponents.collect({newComponents.contains(it)})
+            var whichModelsReused = initialModels.collect({models.get().contains(it)})
+        then: 'The tabbed pane is updated.'
+            whichModelsReused == whichViewReused
+        and : 'The new components are buttons with the expected text.'
+            newComponents.collect({it.text}) == models.get().mapTo(String, it -> Objects.toString(it)).toList()
+
+        where : 'We test the following operations:'
+            initialModels                | operation
+            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z") }
+            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42) }
+            Tuple.of("a", "b")           | { it.reversed() }
+            Tuple.of(1, 2, 3)            | { it.reversed() }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
+            Tuple.of("a", "b")           | { it.removeFirst(1) }
+            Tuple.of(1, 2, 3)            | { it.removeFirst(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeFirst(1) }
+            Tuple.of("a", "b")           | { it.removeLast(1) }
+            Tuple.of(1, 2, 3)            | { it.removeLast(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
     }
 
     def 'Views bound to a property list will be reused efficiently.'(
@@ -969,6 +1075,9 @@ class MVVM_Example_Spec extends Specification
             var whichModelsReused = initialModels.collect({models.contains(it)})
         then: 'The tabbed pane is updated.'
             whichModelsReused == whichViewReused
+        and : 'The new components are buttons with the expected text.'
+            newComponents.collect({it.text}) == models.mapTo(String, it -> Objects.toString(it)).toList()
+
 
         where : 'We test the following operations:'
             models                      | operation
@@ -984,6 +1093,8 @@ class MVVM_Example_Spec extends Specification
             Vars.of("a", "b")           | { it.removeLast(1) }
             Vars.of(1, 2, 3)            | { it.removeLast(1) }
             Vars.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
+            Vars.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
     }
 
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {

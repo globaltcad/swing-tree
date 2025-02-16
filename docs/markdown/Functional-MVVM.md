@@ -222,8 +222,8 @@ you can use the observable `Vars` type to represent
 a list of items that can be updated and observed.
 But when you want to go functional, you don't need
 observable lists, you can simply have a property lens
-which focuses on a list field on the view model
-and updates it through a *wither* for the list field.
+which focuses on a `sprouts.Tuple` type based field on 
+the view model class and then update it through a *wither*.
 In your view you can then use this lens to create
 sub-views for each item in the list and
 register change listeners on the lens to react
@@ -231,32 +231,153 @@ to changes in the list. You may then repeat this
 pattern for the sub-views 
 (in case of the list also containing view models).
 
-**Simple right? But there is a catch:**
+**Let's look at an example:**
 
-You can't react to **specific changes** in the list
-like you can with observable lists.
-So when the list change listener in classical MVVM
-reports a removal between the item at index `x` and 
-the item at index `y`, SwingTree can update the view 
-efficiently by only removing the sub-views for the items 
-at index `x` to `y`. <br>
-But when doing this with a lens on a list field,
-you would have to rebuild all sub-views for the list
-from scratch, which is not very efficient.
+```java
+public record ChatViewModel(
+    Tuple<Message> allMessages, 
+    String currentMessage
+) {
+    public ChatViewModel() { this(Tuple.of(Message.class), ""); }
 
-**Does that matter?**
+    public record Message(
+        UUID id,
+        String text,
+        LocalDateTime sentAt,
+        boolean isEditing
+    ) implements HasId<UUID> {
+        public Message() { this(UUID.randomUUID(), "", LocalDateTime.now(), false); }
+    }
+}
+```
 
-It depends on the size of the list
-and the complexity of the sub-views.
-But in general, the performance of the lens approach
-is good enough for the absolut vast majority of use cases,
-and **the gained benefits of immutability and
-functional programming are well worth it.**
-And also don't forget that besides better maintainability
-and testability, these benefits also encompass
-opportunities for performance optimizations
-through parallelism, lazy evaluation, structural sharing
-and caching.
+To demonstrate how to dynamically create multiple sub-views
+for a collection of items we are using the above `ChatViewModel`
+record class to model a super simple chat application.
+
+Before we look at the view code, note that there is a nested
+record class `Message` inside the `ChatViewModel` record class.
+This is the model for individual chat messages. <br>
+What is interesting about this class is that it implements
+the `HasId` interface, which is a very simple interface that
+is used as a marker interface to give each message an id
+that can be used by the sub-views to update themselves
+correctly when the message is updated or removed from the list.
+This is necessary because otherwise an individual sub-view
+would not know which message it is supposed to represent
+and when it should rebuild itself entirely or just update 
+some of its widgets.<br>
+For mutable objects, this is typically done by using the object's
+memory address as an id, but since we are using records, which
+define their identity by their values, we need to assign a 
+unique id for each message when it is created.
+
+But enough theory!
+Let's look at the view code:
+
+```java
+
+import static swingtree.UI.*;
+
+public final class ChatView extends Panel
+{
+    public static void main( String[] args ) {
+        Var<ChatViewModel> vm = Var.of(new ChatViewModel().withAllMessages(Tuple.of(
+            new ChatViewModel.Message().withText("Hey, how are you?").withSentAt(LocalDateTime.now().minusDays(1)),
+            new ChatViewModel.Message().withText("Good! :)").withSentAt(LocalDateTime.now())
+        )));
+        UI.show(frame -> new ChatView(vm));
+        EventProcessor.DECOUPLED.join();
+    }
+    
+    ChatView( Var<ChatViewModel> vm ) {
+        Var<Tuple<ChatViewModel.Message>> sentMessages = vm.zoomTo(ChatViewModel::allMessages, ChatViewModel::withAllMessages);
+        Var<String> currentMessage = vm.zoomTo(ChatViewModel::currentMessage, ChatViewModel::withCurrentMessage);
+        of(this).withLayout(FILL.and(INS(16)).and(WRAP(1)))
+        .withPrefSize(425, 550)
+        .add(GROW.and(PUSH),
+            scrollPane(it->it.fitWidth(true))
+            .add(
+                panel().withFlowLayout().withPrefSize(750,200)
+                .add(AUTO_SPAN(it->it.oversize(6).veryLarge(8).large(10).medium(12)),
+                    chatListPanel(sentMessages, currentMessage)
+                )
+            )
+        );
+    }
+
+    private static UIForAnySwing<?,?> chatListPanel(
+        Var<Tuple<ChatViewModel.Message>> sentMessages,
+        Var<String> messageText
+    ) {
+        return
+            panel(FILL.and(WRAP(1)))
+            .add(CENTER.and(SPAN), html("<h2>Chat</h2>"))
+            .add(GROW.and(PUSH),
+                 scrollPanels().withPrefHeight(350)
+                 .addAll(sentMessages, (Var<ChatViewModel.Message> entry) -> {
+                     Var<Boolean> isEditing = entry.zoomTo(ChatViewModel.Message::isEditing, ChatViewModel.Message::withEditing);
+                     String dateMark = entry.get().sentAt().format(DateTimeFormatter.ofPattern("MM-dd | HH:mm:ss"));
+                     return
+                         panel(FILL)
+                         .add(GROW_X.and(PUSH_X).and(WRAP).and(SPAN),
+                              textArea(entry.zoomTo(ChatViewModel.Message::text, ChatViewModel.Message::withText))
+                              .isEditableIf(isEditing)
+                         )
+                         .add(label(dateMark))
+                         .add(RIGHT, checkBox("✎", isEditing))
+                         .add(RIGHT,
+                             button("✕").makePlain()
+                             .onClick(it -> {
+                                 sentMessages.update(tuple->tuple.remove(entry));
+                             })
+                         );
+                 })
+            )
+            .add(GROW_X.and(PUSH_X).and(SPAN),
+                panel(FILL.and(WRAP(1)))
+                .add(GROW.and(PUSH),
+                    textArea(messageText)
+                )
+                .add(RIGHT,
+                    button("Send ➤").onClick(it -> {
+                        sentMessages.update(tuple-> tuple.add(
+                            new ChatViewModel.Message()
+                                .withText(messageText.get())
+                                .withSentAt(LocalDateTime.now())
+                        ));
+                        messageText.set("");
+                    })
+                )
+            );
+    }
+}
+```
+
+When executed, this code will summon a chat window
+that looks like this:
+
+![Chat](../img/tutorial/chat-example-view.png)
+
+The important parts of they are the usage of the lens pattern
+to focus on the `allMessages` field of the view model:
+
+`sentMessages = vm.zoomTo(ChatViewModel::allMessages, ChatViewModel::withAllMessages);`
+
+This lens is then used to create a sub-view for each message
+in the list of messages. <br>
+
+`.addAll(sentMessages, (Var<ChatViewModel.Message> entry) -> { ... })`
+
+The `addAll` method is a utility method that automatically bind the
+sub-views to the tuple lens property of message items and then also
+creates lens properties for each individual message item in the tuple. <br>
+These per-item lens properties can then be used to bind fields of the
+message item to UI components, like text fields, labels, buttons etc. <br>
+
+Note that we managed to do all of this while still maintaining
+a fully immutable and value-based view model. <br>
+
 
 ### More Code Please! ###
 
@@ -264,6 +385,8 @@ If you want to see some fully executable examples
 of the SwingTree based MVI/MVL architecture in action,
 check out the following in this project:
 
+- [A Chat App](../../src/test/java/examples/chat/mvi/ChatView.java)
+- [A Task Manager](../../src/test/java/examples/tasks/mvi/TasksView.java)
 - [A Calculator](../../src/test/java/examples/calculator/mvi/CalculatorView.java)
 - [A Style Picker](../../src/test/java/examples/stylepicker/mvi/BoxShadowPickerView.java)
 - [Team View](../../src/test/java/examples/team/mvi/TeamView.java)

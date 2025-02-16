@@ -9,6 +9,7 @@ import swingtree.threading.EventProcessor;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DropTargetDropEvent;
+import java.util.Locale;
 
 import static swingtree.UI.*;
 
@@ -75,16 +76,16 @@ public final class TasksView extends Panel
                )
                .add(GROW.and(PUSH),
                     scrollPanels().id(id).withPrefHeight(200)
-                    .addAll(entries, entry ->
+                    .addAll(entries, (Var<TasksViewModel.TaskViewModel> entry) ->
                         panel(FILL)
-                        .add(GROW_X.and(PUSH_X), textField(entry.task()))
-                        .add(comboBox(entry.dueTo(), entry.dueTo().name().toLowerCase()))
+                        .add(GROW_X.and(PUSH_X), textField(entry.zoomTo(TasksViewModel.TaskViewModel::task, TasksViewModel.TaskViewModel::withTask)))
+                        .add(comboBox(entry.zoomTo(TasksViewModel.TaskViewModel::dueTo, TasksViewModel.TaskViewModel::withDueTo), it -> it.name().toLowerCase(Locale.ROOT)))
                         .add(button("✕").onClick(it -> entries.update(tuple->tuple.remove(entry))))
                         .add(button("⨮").onClick(it -> {
                             entries.update(tuple-> tuple.add(
                                 new TasksViewModel.TaskViewModel()
-                                    .withTask(entry.task())
-                                    .withDueTo(entry.dueTo())
+                                    .withTask(entry.get().task())
+                                    .withDueTo(entry.get().dueTo())
                             ));
                         }))
                         .withDragAway( conf -> conf
@@ -116,7 +117,7 @@ public final class TasksView extends Panel
     public static void main(String[] args)
     {
         Var<TasksViewModel> vm = Var.of(new TasksViewModel());
-        UI.showUsing(EventProcessor.DECOUPLED, frame -> new TasksView(vm));
+        UI.show(frame -> new TasksView(vm));
         EventProcessor.DECOUPLED.join();
     }
 }
