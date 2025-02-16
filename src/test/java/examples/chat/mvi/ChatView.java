@@ -77,7 +77,7 @@ public final class ChatView extends Panel
         Var<Tuple<ChatViewModel.Message>> sentMessages = vm.zoomTo(ChatViewModel::allMessages, ChatViewModel::withAllMessages);
         Var<String> currentMessage = vm.zoomTo(ChatViewModel::currentMessage, ChatViewModel::withCurrentMessage);
         of(this).withLayout(FILL.and(INS(16)).and(WRAP(1)))
-        .withPrefSize(550, 600)
+        .withPrefSize(425, 550)
         .add(GROW.and(PUSH),
             scrollPane(it->it.fitWidth(true))
             .add(

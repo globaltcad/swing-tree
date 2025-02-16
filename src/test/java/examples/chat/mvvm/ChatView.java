@@ -73,7 +73,7 @@ public final class ChatView extends Panel
         Vars<ChatViewModel.Message> sentMessages = vm.allMessages();
         Var<String> currentMessage = vm.currentMessage();
         of(this).withLayout(FILL.and(INS(16)).and(WRAP(1)))
-        .withPrefSize(550, 600)
+        .withPrefSize(425, 550)
         .add(GROW.and(PUSH),
             scrollPane(it->it.fitWidth(true))
             .add(
