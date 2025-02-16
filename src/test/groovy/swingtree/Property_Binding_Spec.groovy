@@ -224,6 +224,64 @@ class Property_Binding_Spec extends Specification
             panel.components[1].text == "Goodbye World"
     }
 
+    def 'We can bind to the `isEditable` flag of a text component.'()
+    {
+        given : 'We create a property representing the editable state of a component.'
+            Val<Boolean> property = Var.of(true)
+        and : 'We create a UI to which we want to bind:'
+            var ui =
+                        UI.panel("fill, wrap 1")
+                        .add(UI.button("Click Me!"))
+                        .add(UI.textField("Hello World").isEditableIf(property))
+                        .add(UI.textArea("Hello World").isEditableIfNot(property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
+
+        expect : 'The text field will be editable.'
+            panel.components[1].editable == true
+        and : 'The text area will be non-editable.'
+            panel.components[2].editable == false
+
+        when : 'We change the value of the property.'
+            property.set(false)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The text field will be non-editable.'
+            panel.components[1].editable == false
+        and : 'The text area will be editable.'
+            panel.components[2].editable == true
+    }
+
+
+    def 'We can bind to the `Font` property of a text component.'()
+    {
+        given : 'We create a property representing the font of a component.'
+            Val<Font> property = Var.of(new Font("Arial", Font.PLAIN, 12))
+        and : 'We create a UI to which we want to bind:'
+            var ui = UI.panel("fill, wrap 1")
+                        .add(UI.button("Click Me!"))
+                        .add(UI.textField("Hello World").withFont(property))
+                        .add(UI.textArea("Hello World").withFont(property.view(f->f.deriveFont(Font.ITALIC))))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
+
+        expect : 'The text field will have the font of the property.'
+            panel.components[1].font == new Font("Arial", Font.PLAIN, 12)
+        and : 'The text area will have the slightly derived font from the property.'
+            panel.components[2].font == new Font("Arial", Font.ITALIC, 12)
+
+        when : 'We change the value of the property.'
+            property.set(new Font("Times New Roman", Font.BOLD, 16))
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The text field will have the new font.'
+            panel.components[1].font == new Font("Times New Roman", Font.BOLD, 16)
+        and : 'The text area will again have the slightly derived font from the property.'
+            panel.components[2].font == new Font("Times New Roman", Font.ITALIC, 16)
+    }
+
     def 'We can enable and disable a UI component dynamically through property binding.'()
     {
         given : 'We create a property representing the enabled state of a component.'

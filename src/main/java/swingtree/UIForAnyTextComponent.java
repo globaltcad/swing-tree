@@ -220,6 +220,48 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                 ._this();
     }
 
+    /**
+     *  Use this to dynamically set the modifiability flag of the wrapped {@link JTextComponent}
+     *  through the provided {@link Boolean} based view model property.
+     *  When the modifiability flag wrapped by the provided property changes,
+     *  then this change will automatically be translated to the
+     *  {@link JTextComponent#setEditable(boolean)} method of the wrapped text component.
+     *
+     * @param isEditable The boolean property to bind the modifiability flag of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if the specified property is <code>null</code>.
+     * @throws IllegalArgumentException if the specified property allows <code>null</code> values.
+     */
+    public final I isEditableIf( Val<Boolean> isEditable ) {
+        Objects.requireNonNull(isEditable, "isEditable");
+        NullUtil.nullPropertyCheck(isEditable, "isEditable", "Use a boolean property instead of null!");
+        return _withOnShow( isEditable, (c,v) -> c.setEditable(v) )
+                ._with( thisComponent -> thisComponent.setEditable(isEditable.orElseThrowUnchecked()) )
+                ._this();
+    }
+
+    /**
+     *  Use this to dynamically set the modifiability flag of the wrapped {@link JTextComponent}
+     *  through the inverse of the supplied {@link Boolean} based view model property.
+     *  When the modifiability flag wrapped by the provided property changes,
+     *  then this change will automatically be translated to the
+     *  {@link JTextComponent#setEditable(boolean)} method of the wrapped text component.<br>
+     *  <b>
+     *      This method is the inverse of {@link #isEditableIf(Val)}.
+     *  </b>
+     *
+     * @param isNotEditable The boolean property to bind the non-modifiability of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if the specified property is <code>null</code>.
+     * @throws IllegalArgumentException if the specified property allows <code>null</code> values.
+     */
+    public final I isEditableIfNot( Val<Boolean> isNotEditable ) {
+        Objects.requireNonNull(isNotEditable, "isNotEditable");
+        NullUtil.nullPropertyCheck(isNotEditable, "isNotEditable", "Use a boolean property instead of null!");
+        return _withOnShow( isNotEditable, (c,v) -> c.setEditable(!v) )
+                ._with( thisComponent -> thisComponent.setEditable(!isNotEditable.orElseThrowUnchecked()) )
+                ._this();
+    }
 
     /**
      *  Use this to register any change in the contents of the text component including both
