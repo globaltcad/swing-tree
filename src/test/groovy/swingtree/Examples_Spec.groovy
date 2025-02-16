@@ -608,4 +608,12 @@ class Examples_Spec extends Specification
             noExceptionThrown()
     }
 
+    def 'The chat UI examples can be created error free.'() {
+        when :
+            new examples.chat.mvvm.ChatView(new examples.chat.mvvm.ChatViewModel())
+            new examples.chat.mvi.ChatView(Var.of(new examples.chat.mvi.ChatViewModel()))
+        then :
+            noExceptionThrown()
+    }
+
 }

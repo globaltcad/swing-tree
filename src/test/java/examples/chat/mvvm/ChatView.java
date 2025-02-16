@@ -1,0 +1,142 @@
+package examples.chat.mvvm;
+
+import sprouts.Var;
+import sprouts.Vars;
+import swingtree.UI;
+import swingtree.UIForAnySwing;
+import swingtree.threading.EventProcessor;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static swingtree.UI.*;
+
+/**
+ * The {@code ChatView} class represents a simple proof of concept
+ * chat application user interface with an intuitive and minimalistic layout,
+ * designed to facilitate text-based messaging with some very
+ * basic message management features.<br>
+ * <b>Here a visual description of the layout:</b>
+ *
+ * <h2>Layout Overview</h2>
+ * The interface is structured vertically, with distinct sections for displaying messages,
+ * composing new messages, and interacting with individual messages.
+ *
+ * <h3>1. Header</h3>
+ * - At the top of the application window, below the window title bar, a centered "Chat" heading is displayed
+ *   in a larger font to indicate the application's purpose.
+ * - The window does not have a title in the title bar.
+ *
+ * <h3>2. Message Display Area</h3>
+ * - Directly below the header is a scrollable panel displaying sent messages.
+ *   At the beginning, it contains two example messages,
+ *   one saying "Hey, how are you?" and the other "Good! :)".
+ * - Messages are arranged vertically in chronological order, with the most recent message at the bottom.
+ * - Each message entry is a separate panel which starts with a
+ *   bordered text area which spans the full width of the scrollable panel.
+ * - Each message entry panel includes:
+ *   - The message text (editable if the "edit" checkbox is selected) above.
+ *   - Below and to the left of the entry is a timestamp of the message in the format "MM-dd | HH:mm:ss".
+ *   - In the same row but to the left is a checkbox with a pencil icon (✎) to toggle editing mode.
+ *   - After that is a delete button (✕) for removing the message, which is fully aligned to the right.
+ *
+ * <h3>3. Message Input Area</h3>
+ * - Below the message display panel, there is a text area for writing new messages.
+ * - Below the input text area is a "Send ➤" button, it is fully aligned to the right.
+ * - Pressing the "Send" button adds the current message to the display panel with the current timestamp,
+ *   then clears the input field for the next message.
+ *
+ * <h3>4. Layout Details</h3>
+ * - The scrollable chat area, input field and title are always centered in a
+ *   common scroll pane that fills the whole window.
+ * - The entire chat area has a responsive width that adjusts to the window size.
+ * - The layout uses vertical stacking with spacing and padding for clarity.
+ * - The message display area takes up most of the window's height.
+ * - The input field and send button are grouped closely together near the bottom.
+ *
+ * <h3>5. Look and Feel</h3>
+ * - The interface is instantiated with the default
+ *   metal look and feel, which provides a clean and simple appearance.
+ *
+ * <h3>6. Architecture</h3>
+ * - The chat view is bound to a {@link ChatViewModel} instance
+ *   using the MVVM architectural pattern.
+ * - The state of individual GUI widget is directly bound to
+ *   individual properties of the view model.
+ *   When the view model changes, the GUI is automatically updated.
+ *   And when the user interacts with the GUI, the state of the
+ *   properties in the view model is updated.
+ */
+public final class ChatView extends Panel
+{
+    ChatView(ChatViewModel vm) {
+        Vars<ChatViewModel.Message> sentMessages = vm.allMessages();
+        Var<String> currentMessage = vm.currentMessage();
+        of(this).withLayout(FILL.and(INS(16)).and(WRAP(1)))
+        .withPrefSize(550, 600)
+        .add(GROW.and(PUSH),
+            scrollPane(it->it.fitWidth(true))
+            .add(
+                panel().withFlowLayout().withPrefSize(750,200)
+                .add(AUTO_SPAN(it->it.oversize(6).veryLarge(8).large(10).medium(12)),
+                    chatListPanel(sentMessages, currentMessage)
+                )
+            )
+        );
+    }
+
+    private static UIForAnySwing<?,?> chatListPanel(
+        Vars<ChatViewModel.Message> sentMessages,
+        Var<String> messageText
+    ) {
+        return
+            panel(FILL.and(WRAP(1)))
+            .add(CENTER.and(SPAN), html("<h2>Chat</h2>"))
+            .add(GROW.and(PUSH),
+                 scrollPanels().withPrefHeight(350)
+                 .addAll(sentMessages, (ChatViewModel.Message entry) -> {
+                     Var<Boolean> isEditing = entry.isEditing();
+                     String dateMark = entry.sentAt().format(DateTimeFormatter.ofPattern("MM-dd | HH:mm:ss"));
+                     return
+                         panel(FILL)
+                         .add(GROW_X.and(PUSH_X).and(WRAP).and(SPAN),
+                              textArea(entry.text())
+                              .isEditableIf(isEditing)
+                         )
+                         .add(label(dateMark))
+                         .add(RIGHT, checkBox("✎", isEditing))
+                         .add(RIGHT,
+                             button("✕").makePlain()
+                             .onClick(it -> {
+                                 sentMessages.remove(entry);
+                             })
+                         );
+                 })
+            )
+            .add(GROW_X.and(PUSH_X).and(SPAN),
+                panel(FILL.and(WRAP(1)))
+                .add(GROW.and(PUSH),
+                    textArea(messageText)
+                )
+                .add(RIGHT,
+                    button("Send ➤").onClick(it -> {
+                        sentMessages.add(
+                            new ChatViewModel.Message(messageText.get(), LocalDateTime.now())
+                        );
+                        messageText.set("");
+                    })
+                )
+            );
+    }
+
+    public static void main(String[] args)
+    {
+        ChatViewModel vm = new ChatViewModel();
+        vm.allMessages().addAll(
+            new ChatViewModel.Message("Hey, how are you?", LocalDateTime.now().minusDays(1)),
+            new ChatViewModel.Message("Good! :)", LocalDateTime.now())
+        );
+        UI.show(frame -> new ChatView(vm));
+        EventProcessor.DECOUPLED.join();
+    }
+}
