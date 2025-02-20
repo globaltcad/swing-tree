@@ -105,7 +105,7 @@ public interface BasicTableModel extends TableModel
              );
          }
 
-         public Builder(
+         private Builder(
              Class<E>                 commonEntryType,
              @Nullable RowCount       rowCount,
              @Nullable ColumnCount    colCount,
