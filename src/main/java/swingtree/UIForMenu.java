@@ -9,6 +9,8 @@ import java.util.Objects;
  *  A SwingTree builder node designed for configuring {@link JMenu} instances.
  *  This class is not meant to be instantiated directly, but rather through
  *  the {@link UI#menu()} or {@link UI#menu(String)} methods among others.
+ *
+ * @param <M> The type of the {@link JMenu} being built.
  */
 public final class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu<M>, M>
 {
