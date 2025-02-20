@@ -614,17 +614,6 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
     }
 
-    private <T> void _onShow(
-        Ref<Val<T>>       propertyRef,
-        WeakReference<C>  weakComponent,
-        BiConsumer<C, T>  displayAction
-    ) {
-        Objects.requireNonNull(propertyRef);
-        Objects.requireNonNull(weakComponent);
-        Objects.requireNonNull(displayAction);
-        _onShowDelegated(propertyRef, weakComponent, (component, delegate) -> displayAction.accept(component, delegate.currentValue().orElseNull()));
-    }
-
     private <T> void _onShowDelegated(
         Ref<Val<T>>       propertyRef,
         WeakReference<C>  weakComponent,
