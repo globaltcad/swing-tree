@@ -5,6 +5,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JComponent} types.
+ *
+ * @param <C> The type of the {@link JComponent} being built.
  */
 public final class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForSwing<C>, C>
 {
