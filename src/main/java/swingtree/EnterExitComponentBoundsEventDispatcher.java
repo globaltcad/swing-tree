@@ -24,6 +24,7 @@ import java.util.WeakHashMap;
  *  which also has a listener for these events. So using this we try to
  *  make the behavior more predictable, reliable and intuitive.
  */
+@SuppressWarnings("EnumOrdinal")
 final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
