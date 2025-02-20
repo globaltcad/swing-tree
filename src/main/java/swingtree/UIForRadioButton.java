@@ -5,6 +5,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JRadioButton} instances.
+ *
+ * @param <R> The type of {@link JRadioButton} being built by this builder.
  */
 public final class UIForRadioButton<R extends JRadioButton> extends UIForAnyToggleButton<UIForRadioButton<R>, R>
 {

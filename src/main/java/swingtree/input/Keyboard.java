@@ -124,7 +124,7 @@ public final class Keyboard
     }
 
 
-    public Keyboard() {
+    private Keyboard() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {

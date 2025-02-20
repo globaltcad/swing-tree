@@ -21,6 +21,8 @@ import java.util.function.Function;
 /**
  *  A SwingTree declarative builder designed for configuring {@link JTable} instances allowing
  *  for a fluent API to build tables in a declarative way.
+ *
+ * @param <T> The type of {@link JTable} being built by this builder.
  */
 public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T>
 {
