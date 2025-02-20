@@ -213,7 +213,7 @@ public final class DragDropComponentConf<C extends JComponent>
      * {@link DropTargetDropEvent#isLocalTransfer} returns
      * <code>true</code>. Otherwise, the behavior of the call is
      * implementation-dependent.
-     * <P>
+     *
      * @param action An {@link Action} with a {@link DropTargetDropEvent}
      *               wrapped in a {@link ComponentDelegate} passed to it.
      * @return A new {@link DragDropComponentConf} updated with the supplied action.

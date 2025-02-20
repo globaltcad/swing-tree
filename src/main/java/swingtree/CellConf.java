@@ -497,7 +497,7 @@ public final class CellConf<C extends JComponent, V>
         return this;
     }
 
-    public CellConf<C, V> _withRenderer(@Nullable Component component ) {
+    private CellConf<C, V> _withRenderer(@Nullable Component component ) {
         return new CellConf<>(
             jListIfInvolved,
             parent,
