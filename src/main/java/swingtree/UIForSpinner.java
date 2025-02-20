@@ -21,6 +21,8 @@ import java.util.function.Consumer;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSpinner} instances.
+ *
+ * @param <S> The type of {@link JSpinner} being built by this builder.
  */
 public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
 {

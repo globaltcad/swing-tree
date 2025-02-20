@@ -7,6 +7,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JCheckBox} instances.
+ *
+ * @param <B> The type of {@link JCheckBox} being built by this builder.
  */
 public final class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForCheckBox<B>, B>
 {
