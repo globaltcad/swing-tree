@@ -5428,9 +5428,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
-        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+        _onShowDelegated( models, thisComponent, (component, delegate) -> {
             viewSupplier.rememberCurrentViewsForReuse();
-            _updateSubViews(c, tupleOfModels, attr, lastDiffRef, viewSupplier);
+            _updateSubViews(component, delegate, attr, lastDiffRef, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
         Tuple<M> tupleOfModels = models.get();
@@ -5522,46 +5522,47 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
-        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+        _onShowDelegated( models, thisComponent, (component, delegate) -> {
             viewSupplier.rememberCurrentViewsForReuse();
-            _updateSubViews(c, tupleOfModels, models, attr, lastDiffRef, viewSupplier);
+            _updateSubViews(component, delegate, models, attr, lastDiffRef, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
         _addAllFromTuple(models, attr, viewSupplier, thisComponent);
     }
 
     private <M> void _updateSubViews(
-            C c,
-            Tuple<M> tupleOfModels,
-            @Nullable AddConstraint attr,
-            AtomicReference<@Nullable SequenceDiff> lastDiffRef,
-            ModelToViewConverter<M> viewSupplier
+        C c,
+        ValDelegate<Tuple<M>> changeDelegate,
+        @Nullable AddConstraint attr,
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef,
+        ModelToViewConverter<M> viewSupplier
     ) {
-            SequenceDiff diff = null;
-            SequenceDiff lastDiff = lastDiffRef.get();
-            if (tupleOfModels instanceof SequenceDiffOwner)
-                diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
-            lastDiffRef.set(diff);
+        Tuple<M> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
+        SequenceDiff diff = null;
+        SequenceDiff lastDiff = lastDiffRef.get();
+        if (tupleOfModels instanceof SequenceDiffOwner)
+            diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+        lastDiffRef.set(diff);
 
-            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-                _clearComponentsOf(c);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-            } else {
-                int index = diff.index().orElse(-1);
-                int count = diff.size();
-                SequenceChange change = diff.change();
-                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
-            }
+        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+            _clearComponentsOf(c);
+            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+        } else {
+            int index = diff.index().orElse(-1);
+            int count = diff.size();
+            SequenceChange change = diff.change();
+            _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+        }
     }
 
     private <M> void _doInformedSubViewUpdate(
-            int index,
-            int count,
-            SequenceChange change,
-            C c,
-            Tuple<M> tupleOfModels,
-            @Nullable AddConstraint attr,
-            ModelToViewConverter<M> viewSupplier
+        int index,
+        int count,
+        SequenceChange change,
+        C c,
+        Tuple<M> tupleOfModels,
+        @Nullable AddConstraint attr,
+        ModelToViewConverter<M> viewSupplier
     ) {
         switch (change) {
             case SET:
@@ -5617,38 +5618,39 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateSubViews(
-            C c,
-            Tuple<M> currentValue,
-            Var<Tuple<M>> tupleOfModels,
-            @Nullable AddConstraint attr,
-            AtomicReference<@Nullable SequenceDiff> lastDiffRef,
-            ModelToViewConverter<ViewHandle<M>> viewSupplier
+        C c,
+        ValDelegate<Tuple<M>> changeDelegate,
+        Var<Tuple<M>> tupleOfModels,
+        @Nullable AddConstraint attr,
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef,
+        ModelToViewConverter<ViewHandle<M>> viewSupplier
     ) {
-            SequenceDiff diff = null;
-            SequenceDiff lastDiff = lastDiffRef.get();
-            if (currentValue instanceof SequenceDiffOwner)
-                diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
-            lastDiffRef.set(diff);
+        Tuple<M> currentValue = changeDelegate.currentValue().orElseNull();
+        SequenceDiff diff = null;
+        SequenceDiff lastDiff = lastDiffRef.get();
+        if (currentValue instanceof SequenceDiffOwner)
+            diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
+        lastDiffRef.set(diff);
 
-            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-                _clearComponentsOf(c);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-            } else {
-                int index = diff.index().orElse(-1);
-                int count = diff.size();
-                SequenceChange change = diff.change();
-                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
-            }
+        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+            _clearComponentsOf(c);
+            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+        } else {
+            int index = diff.index().orElse(-1);
+            int count = diff.size();
+            SequenceChange change = diff.change();
+            _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+        }
     }
 
     private <M> void _doInformedSubViewUpdate(
-            int index,
-            int count,
-            SequenceChange change,
-            C c,
-            Var<Tuple<M>> tupleOfModels,
-            @Nullable AddConstraint attr,
-            ModelToViewConverter<ViewHandle<M>> viewSupplier
+        int index,
+        int count,
+        SequenceChange change,
+        C c,
+        Var<Tuple<M>> tupleOfModels,
+        @Nullable AddConstraint attr,
+        ModelToViewConverter<ViewHandle<M>> viewSupplier
     ) {
         switch (change) {
             case SET:
