@@ -5763,16 +5763,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        // We remove the old component.
-        c.remove(c.getComponent(index));
-        // We add the new component.
-        if ( attr == null )
-            c.add(newComponent, index);
-        else
-            c.add(newComponent, attr.toConstraintForLayoutManager(), index);
-        // We update the layout.
-        c.revalidate();
-        c.repaint();
+        Component currentComponentAtIndex = c.getComponent(index);
+        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
+            // We remove the old component.
+            c.remove(currentComponentAtIndex);
+            // We add the new component:
+            if ( attr == null )
+                c.add(newComponent, index);
+            else
+                c.add(newComponent, attr.toConstraintForLayoutManager(), index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        }
     }
 
     private <M> void _updateComponentAt(
@@ -5793,16 +5796,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        // We remove the old component.
-        c.remove(c.getComponent(index));
-        // We add the new component.
-        if ( attr == null )
-            c.add(newComponent, index);
-        else
-            c.add(newComponent, attr.toConstraintForLayoutManager(), index);
-        // We update the layout.
-        c.revalidate();
-        c.repaint();
+        Component currentComponentAtIndex = c.getComponent(index);
+        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
+            // We remove the old component.
+            c.remove(currentComponentAtIndex);
+            // We add the new component:
+            if ( attr == null )
+                c.add(newComponent, index);
+            else
+                c.add(newComponent, attr.toConstraintForLayoutManager(), index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        }
     }
 
     private <M> void _addComponentAt(
