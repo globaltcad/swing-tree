@@ -5545,8 +5545,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         lastDiffRef.set(diff);
 
         if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-            _clearComponentsOf(c);
-            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), tupleOfModels);
+            if ( customDiff != null ) {
+                int index = customDiff.index().orElse(-1);
+                int count = customDiff.size();
+                SequenceChange change = customDiff.change();
+                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+            } else {
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            }
         } else {
             int index = diff.index().orElse(-1);
             int count = diff.size();
@@ -5633,8 +5641,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         lastDiffRef.set(diff);
 
         if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-            _clearComponentsOf(c);
-            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), currentValue);
+            if ( customDiff != null ) {
+                int index = customDiff.index().orElse(-1);
+                int count = customDiff.size();
+                SequenceChange change = customDiff.change();
+                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+            } else {
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+            }
         } else {
             int index = diff.index().orElse(-1);
             int count = diff.size();
@@ -5969,4 +5985,75 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                BorderLayout.NORTH.equals(o)      ||
                BorderLayout.SOUTH.equals(o);
     }
+
+
+    protected static @Nullable SequenceDiff _tryCalculatingDiffBetween(@Nullable Tuple<?> previous, @Nullable Tuple<?> current) {
+        if ( previous == null || current == null )
+            return null;
+
+        final int MAX_SIZE = 256;
+        if (previous.size() > MAX_SIZE || current.size() > MAX_SIZE) {
+            return null;
+        }
+
+        if (previous.equals(current)) {
+            return SequenceDiff.of(previous, SequenceChange.NONE, 0, 0);
+        }
+
+        if (current.isEmpty()) {
+            return SequenceDiff.of(previous, SequenceChange.CLEAR, 0, previous.size());
+        }
+
+        if (previous.isEmpty()) {
+            return SequenceDiff.of(previous, SequenceChange.ADD, 0, current.size());
+        }
+
+        // Check for set sequence:
+        boolean foundAllLeading = false;
+        int numberOfLeadingEqual = 0;
+        boolean foundAllTrailing = false;
+        int numberOfTrailingEqual = 0;
+        int commonSize = Math.min(previous.size(), current.size());
+        for ( int i = 0; i < commonSize; i++ ) {
+            if ( !foundAllLeading ) {
+                Object leadingPrevious = previous.get(i);
+                Object leadingCurrent = current.get(i);
+                if ( Objects.equals(leadingPrevious, leadingCurrent) )
+                    numberOfLeadingEqual++;
+                else
+                    foundAllLeading = true;
+            }
+            if ( !foundAllTrailing ) {
+                Object trailingPrevious = previous.get(previous.size() - 1 - i);
+                Object trailingCurrent = current.get(current.size() - 1 - i);
+                if ( Objects.equals(trailingPrevious, trailingCurrent) )
+                    numberOfTrailingEqual++;
+                else
+                    foundAllTrailing = true;
+            }
+        }
+
+        // Check if current is the reverse of previous or if there is a set between the two
+        if (previous.size() == current.size()) {
+            if (numberOfLeadingEqual != 0 || numberOfTrailingEqual != 0) {
+                int changesInTheMiddle = (commonSize - numberOfLeadingEqual - numberOfTrailingEqual);
+                return SequenceDiff.of(previous, SequenceChange.SET, numberOfLeadingEqual, changesInTheMiddle);
+            }
+
+            // Check for reverse:
+            boolean isReverse = true;
+            for (int i = 0; i < previous.size(); i++) {
+                if (!previous.get(i).equals(current.get(previous.size() - 1 - i))) {
+                    isReverse = false;
+                    break;
+                }
+            }
+            if (isReverse) {
+                return SequenceDiff.of(previous, SequenceChange.REVERSE, 0, previous.size());
+            }
+        }
+
+        return null;
+    }
+
 }
