@@ -8,11 +8,11 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.*;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.Observable;
 import sprouts.Observer;
-import sprouts.*;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.animation.AnimationDispatcher;
@@ -30,8 +30,8 @@ import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
-import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
@@ -41,8 +41,8 @@ import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.event.*;
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -5428,9 +5428,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
-        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+        _onShowDelegated( models, thisComponent, (component, delegate) -> {
             viewSupplier.rememberCurrentViewsForReuse();
-            _updateSubViews(c, tupleOfModels, attr, lastDiffRef, viewSupplier);
+            _updateSubViews(component, delegate, attr, lastDiffRef, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
         Tuple<M> tupleOfModels = models.get();
@@ -5522,153 +5522,203 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
-        _onShow( models, thisComponent, (c, tupleOfModels) -> {
+        _onShowDelegated( models, thisComponent, (component, delegate) -> {
             viewSupplier.rememberCurrentViewsForReuse();
-            _updateSubViews(c, tupleOfModels, models, attr, lastDiffRef, viewSupplier);
+            _updateSubViews(component, delegate, models, attr, lastDiffRef, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
         _addAllFromTuple(models, attr, viewSupplier, thisComponent);
     }
 
-    private <M> void _updateSubViews(C c, Tuple<M> tupleOfModels, @Nullable AddConstraint attr, AtomicReference<@Nullable SequenceDiff> lastDiffRef, ModelToViewConverter<M> viewSupplier) {
-            SequenceDiff diff = null;
-            SequenceDiff lastDiff = lastDiffRef.get();
-            if (tupleOfModels instanceof SequenceDiffOwner)
-                diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
-            lastDiffRef.set(diff);
+    private <M> void _updateSubViews(
+        C c,
+        ValDelegate<Tuple<M>> changeDelegate,
+        @Nullable AddConstraint attr,
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef,
+        ModelToViewConverter<M> viewSupplier
+    ) {
+        Tuple<M> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
+        SequenceDiff diff = null;
+        SequenceDiff lastDiff = lastDiffRef.get();
+        if (tupleOfModels instanceof SequenceDiffOwner)
+            diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
+        lastDiffRef.set(diff);
 
-            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+            @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), tupleOfModels);
+            if ( customDiff != null ) {
+                int index = customDiff.index().orElse(-1);
+                int count = customDiff.size();
+                SequenceChange change = customDiff.change();
+                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+            } else {
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-            } else {
-                int index = diff.index().orElse(-1);
-                int count = diff.size();
-                switch (diff.change()) {
-                    case SET:
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            for ( int i = index; i < (index + count); i++ )
-                                _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
-                        }
-                        break;
-                    case ADD:
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            for ( int i = index; i < (index + count); i++ )
-                                _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
-                        }
-                        break;
-                    case REMOVE:
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            for ( int i = (index + count - 1); i >= index; i-- )
-                                _removeComponentAt(i, c);
-                        }
-                        break;
-                    case RETAIN: // Only keep the elements in the range.
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            // Remove trailing components:
-                            for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
-                                _removeComponentAt(i, c);
-                            // Remove leading components:
-                            for ( int i = (index - 1); i >= 0; i-- )
-                                _removeComponentAt(i, c);
-                        }
-                        break;
-                    case CLEAR: _clearComponentsOf(c); break;
-                    case REVERSE: _reverseComponentsOf(c); break;
-                    case NONE:
-                        break;
-                    default:
-                        log.error("Unknown change type: {}", diff.change(), new Throwable());
-                        // We do a simple rebuild:
-                        _clearComponentsOf(c);
-                        _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                }
             }
+        } else {
+            int index = diff.index().orElse(-1);
+            int count = diff.size();
+            SequenceChange change = diff.change();
+            _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+        }
+    }
+
+    private <M> void _doInformedSubViewUpdate(
+        int index,
+        int count,
+        SequenceChange change,
+        C c,
+        Tuple<M> tupleOfModels,
+        @Nullable AddConstraint attr,
+        ModelToViewConverter<M> viewSupplier
+    ) {
+        switch (change) {
+            case SET:
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    for ( int i = index; i < (index + count); i++ )
+                        _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                }
+                break;
+            case ADD:
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    for ( int i = index; i < (index + count); i++ )
+                        _addComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                }
+                break;
+            case REMOVE:
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    for ( int i = (index + count - 1); i >= index; i-- )
+                        _removeComponentAt(i, c);
+                }
+                break;
+            case RETAIN: // Only keep the elements in the range.
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    // Remove trailing components:
+                    for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
+                        _removeComponentAt(i, c);
+                    // Remove leading components:
+                    for ( int i = (index - 1); i >= 0; i-- )
+                        _removeComponentAt(i, c);
+                }
+                break;
+            case CLEAR: _clearComponentsOf(c); break;
+            case REVERSE: _reverseComponentsOf(c); break;
+            case NONE:
+                break;
+            default:
+                log.error("Unknown change type: {}", change, new Throwable());
+                // We do a simple rebuild:
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+        }
     }
 
     private <M> void _updateSubViews(
-            C c,
-            Tuple<M> currentValue,
-            Var<Tuple<M>> tupleOfModels,
-            @Nullable AddConstraint attr,
-            AtomicReference<@Nullable SequenceDiff> lastDiffRef,
-            ModelToViewConverter<ViewHandle<M>> viewSupplier
+        C c,
+        ValDelegate<Tuple<M>> changeDelegate,
+        Var<Tuple<M>> tupleOfModels,
+        @Nullable AddConstraint attr,
+        AtomicReference<@Nullable SequenceDiff> lastDiffRef,
+        ModelToViewConverter<ViewHandle<M>> viewSupplier
     ) {
-            SequenceDiff diff = null;
-            SequenceDiff lastDiff = lastDiffRef.get();
-            if (currentValue instanceof SequenceDiffOwner)
-                diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
-            lastDiffRef.set(diff);
+        Tuple<M> currentValue = changeDelegate.currentValue().orElseNull();
+        SequenceDiff diff = null;
+        SequenceDiff lastDiff = lastDiffRef.get();
+        if (currentValue instanceof SequenceDiffOwner)
+            diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
+        lastDiffRef.set(diff);
 
-            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+            @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), currentValue);
+            if ( customDiff != null ) {
+                int index = customDiff.index().orElse(-1);
+                int count = customDiff.size();
+                SequenceChange change = customDiff.change();
+                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+            } else {
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-            } else {
-                int index = diff.index().orElse(-1);
-                int count = diff.size();
-                switch (diff.change()) {
-                    case SET:
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            for ( int i = index; i < (index + count); i++ )
-                                _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c);
-                        }
-                        break;
-                    case ADD:
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            for ( int i = index; i < (index + count); i++ )
-                                _addComponentAt(i, tupleOfModels, viewSupplier, attr, c);
-                        }
-                        break;
-                    case REMOVE:
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            for ( int i = (index + count - 1); i >= index; i-- )
-                                _removeComponentAt(i, c);
-                        }
-                        break;
-                    case RETAIN: // Only keep the elements in the range.
-                        if ( index < 0 ) {
-                            _clearComponentsOf(c); // We do a simple re-build
-                            _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                        } else {
-                            // Remove trailing components:
-                            for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
-                                _removeComponentAt(i, c);
-                            // Remove leading components:
-                            for ( int i = (index - 1); i >= 0; i-- )
-                                _removeComponentAt(i, c);
-                        }
-                        break;
-                    case CLEAR: _clearComponentsOf(c); break;
-                    case REVERSE: _reverseComponentsOf(c); break;
-                    case NONE:
-                        break;
-                    default:
-                        log.error("Unknown change type: {}", diff.change(), new Throwable());
-                        // We do a simple rebuild:
-                        _clearComponentsOf(c);
-                        _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
-                }
             }
+        } else {
+            int index = diff.index().orElse(-1);
+            int count = diff.size();
+            SequenceChange change = diff.change();
+            _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+        }
+    }
+
+    private <M> void _doInformedSubViewUpdate(
+        int index,
+        int count,
+        SequenceChange change,
+        C c,
+        Var<Tuple<M>> tupleOfModels,
+        @Nullable AddConstraint attr,
+        ModelToViewConverter<ViewHandle<M>> viewSupplier
+    ) {
+        switch (change) {
+            case SET:
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    for ( int i = index; i < (index + count); i++ )
+                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                }
+                break;
+            case ADD:
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    for ( int i = index; i < (index + count); i++ )
+                        _addComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                }
+                break;
+            case REMOVE:
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    for ( int i = (index + count - 1); i >= index; i-- )
+                        _removeComponentAt(i, c);
+                }
+                break;
+            case RETAIN: // Only keep the elements in the range.
+                if ( index < 0 ) {
+                    _clearComponentsOf(c); // We do a simple re-build
+                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                } else {
+                    // Remove trailing components:
+                    for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
+                        _removeComponentAt(i, c);
+                    // Remove leading components:
+                    for ( int i = (index - 1); i >= 0; i-- )
+                        _removeComponentAt(i, c);
+                }
+                break;
+            case CLEAR: _clearComponentsOf(c); break;
+            case REVERSE: _reverseComponentsOf(c); break;
+            case NONE:
+                break;
+            default:
+                log.error("Unknown change type: {}", change, new Throwable());
+                // We do a simple rebuild:
+                _clearComponentsOf(c);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+        }
     }
 
     private <M> void _addAllFromTuple( Tuple<M> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
@@ -5763,16 +5813,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        // We remove the old component.
-        c.remove(c.getComponent(index));
-        // We add the new component.
-        if ( attr == null )
-            c.add(newComponent, index);
-        else
-            c.add(newComponent, attr.toConstraintForLayoutManager(), index);
-        // We update the layout.
-        c.revalidate();
-        c.repaint();
+        Component currentComponentAtIndex = c.getComponent(index);
+        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
+            // We remove the old component.
+            c.remove(currentComponentAtIndex);
+            // We add the new component:
+            if ( attr == null )
+                c.add(newComponent, index);
+            else
+                c.add(newComponent, attr.toConstraintForLayoutManager(), index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        }
     }
 
     private <M> void _updateComponentAt(
@@ -5793,16 +5846,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        // We remove the old component.
-        c.remove(c.getComponent(index));
-        // We add the new component.
-        if ( attr == null )
-            c.add(newComponent, index);
-        else
-            c.add(newComponent, attr.toConstraintForLayoutManager(), index);
-        // We update the layout.
-        c.revalidate();
-        c.repaint();
+        Component currentComponentAtIndex = c.getComponent(index);
+        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
+            // We remove the old component.
+            c.remove(currentComponentAtIndex);
+            // We add the new component:
+            if ( attr == null )
+                c.add(newComponent, index);
+            else
+                c.add(newComponent, attr.toConstraintForLayoutManager(), index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        }
     }
 
     private <M> void _addComponentAt(
@@ -5929,4 +5985,65 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                BorderLayout.NORTH.equals(o)      ||
                BorderLayout.SOUTH.equals(o);
     }
+
+
+    protected static @Nullable SequenceDiff _tryCalculatingDiffBetween(@Nullable Tuple<?> previous, @Nullable Tuple<?> current) {
+        if ( previous == null || current == null )
+            return null;
+
+        final int MAX_SIZE = 256;
+        if (previous.size() > MAX_SIZE || current.size() > MAX_SIZE) {
+            if (previous.size() == current.size()) {
+                // We do a basic set across the entire range:
+                return SequenceDiff.of(previous, SequenceChange.SET, 0, current.size());
+            }
+            return null;
+        }
+
+        if (previous.equals(current)) {
+            return SequenceDiff.of(previous, SequenceChange.NONE, 0, 0);
+        }
+
+        if (current.isEmpty()) {
+            return SequenceDiff.of(previous, SequenceChange.CLEAR, 0, previous.size());
+        }
+
+        if (previous.isEmpty()) {
+            return SequenceDiff.of(previous, SequenceChange.ADD, 0, current.size());
+        }
+
+        // Check for set sequence:
+        boolean foundAllLeading = false;
+        int numberOfLeadingEqual = 0;
+        boolean foundAllTrailing = false;
+        int numberOfTrailingEqual = 0;
+        int commonSize = Math.min(previous.size(), current.size());
+        for ( int i = 0; i < commonSize; i++ ) {
+            if ( !foundAllLeading ) {
+                Object leadingPrevious = previous.get(i);
+                Object leadingCurrent = current.get(i);
+                if ( Objects.equals(leadingPrevious, leadingCurrent) )
+                    numberOfLeadingEqual++;
+                else
+                    foundAllLeading = true;
+            }
+            if ( !foundAllTrailing ) {
+                Object trailingPrevious = previous.get(previous.size() - 1 - i);
+                Object trailingCurrent = current.get(current.size() - 1 - i);
+                if ( Objects.equals(trailingPrevious, trailingCurrent) )
+                    numberOfTrailingEqual++;
+                else
+                    foundAllTrailing = true;
+            }
+        }
+
+        if (previous.size() == current.size()) {
+            // We swap out changes in the middle!
+            int changesInTheMiddle = (commonSize - numberOfLeadingEqual - numberOfTrailingEqual);
+            return SequenceDiff.of(previous, SequenceChange.SET, numberOfLeadingEqual, changesInTheMiddle);
+        }
+
+        return null;
+    }
+
 }
