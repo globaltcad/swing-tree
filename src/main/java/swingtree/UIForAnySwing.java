@@ -5993,6 +5993,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
         final int MAX_SIZE = 256;
         if (previous.size() > MAX_SIZE || current.size() > MAX_SIZE) {
+            if (previous.size() == current.size()) {
+                // We do a basic set across the entire range:
+                return SequenceDiff.of(previous, SequenceChange.SET, 0, current.size());
+            }
             return null;
         }
 
@@ -6033,24 +6037,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             }
         }
 
-        // Check if current is the reverse of previous or if there is a set between the two
         if (previous.size() == current.size()) {
-            if (numberOfLeadingEqual != 0 || numberOfTrailingEqual != 0) {
-                int changesInTheMiddle = (commonSize - numberOfLeadingEqual - numberOfTrailingEqual);
-                return SequenceDiff.of(previous, SequenceChange.SET, numberOfLeadingEqual, changesInTheMiddle);
-            }
-
-            // Check for reverse:
-            boolean isReverse = true;
-            for (int i = 0; i < previous.size(); i++) {
-                if (!previous.get(i).equals(current.get(previous.size() - 1 - i))) {
-                    isReverse = false;
-                    break;
-                }
-            }
-            if (isReverse) {
-                return SequenceDiff.of(previous, SequenceChange.REVERSE, 0, previous.size());
-            }
+            // We swap out changes in the middle!
+            int changesInTheMiddle = (commonSize - numberOfLeadingEqual - numberOfTrailingEqual);
+            return SequenceDiff.of(previous, SequenceChange.SET, numberOfLeadingEqual, changesInTheMiddle);
         }
 
         return null;
