@@ -89,7 +89,7 @@ public final class TasksView extends Panel
                             ));
                         }))
                         .withDragAway( conf -> conf
-                            .payload(id.toOther().toString()+"|"+entries.get().indexOf(entry))
+                            .payload(id.toOther().toString()+"|"+entries.get().firstIndexOf(entry))
                         )
                     )
                     .withDropSite( conf -> conf
