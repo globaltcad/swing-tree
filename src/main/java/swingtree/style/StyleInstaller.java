@@ -813,7 +813,13 @@ final class StyleInstaller<C extends JComponent>
         if ( other != null ) {
             defaultBackgroundColor = other.getBackground();
         }
-        owner.setBackground(defaultBackgroundColor);
+        if ( defaultBackgroundColor == null ) {
+            if ( owner.isBackgroundSet() ) // is this is false then the component already has it set to null!
+                owner.setBackground(defaultBackgroundColor);
+        } else {
+            if ( !Objects.equals(owner.getBackground(), defaultBackgroundColor) )
+                owner.setBackground(defaultBackgroundColor);
+        }
     }
 
 }
