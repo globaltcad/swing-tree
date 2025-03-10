@@ -37,31 +37,31 @@ public class ScrollPanelsView extends Panel
 				.add(UI.label(evm.position().viewAs(String.class, s -> "Selected: " + s)))
 				.add(UI.button("Delete me!").onClick(it -> {
 					System.out.println("Deleting " + evm.text().get());
-					int i = evm.entries().indexOf(evm);
+					int i = evm.entries().firstIndexOf(evm);
 					evm.entries().removeAt(i);
 					if ( i != evm.position().get() )
 						throw new IllegalStateException("Index mismatch: " + i + " != " + evm.position().get());
 				}))
 				.add(UI.button("Duplicate").onClick( it -> {
-					int i = evm.entries().indexOf(evm);
+					int i = evm.entries().firstIndexOf(evm);
 					evm.entries().addAt(i, evm.createNew(evm.text().get() + " (copy)"));
 				}))
 				.add(UI.button("up").onClick( it -> {
-					int i = evm.entries().indexOf(evm);
+					int i = evm.entries().firstIndexOf(evm);
 					if ( i > 0 ) {
 						evm.entries().removeAt(i);
 						evm.entries().addAt(i - 1, evm);
 					}
 				}))
 				.add(UI.button("down").onClick( it -> {
-					int i = evm.entries().indexOf(evm);
+					int i = evm.entries().firstIndexOf(evm);
 					if ( i < evm.entries().size() - 1 ) {
 						evm.entries().removeAt(i);
 						evm.entries().addAt(i + 1, evm);
 					}
 				}))
 				.add(UI.button("replace").onClick( it -> {
-					int i = evm.entries().indexOf(evm);
+					int i = evm.entries().firstIndexOf(evm);
 					evm.entries().setAt(i, evm.createNew("Replaced!"));
 				}))
 			)

@@ -83,7 +83,7 @@ public final class TasksView extends Panel
                             entries.add(newEntry);
                         }))
                         .withDragAway( conf -> conf
-                            .payload(id.toOther().toString()+"|"+entries.indexOf(entry))
+                            .payload(id.toOther().toString()+"|"+entries.firstIndexOf(entry))
                         )
                     )
                     .withDropSite( conf -> conf
