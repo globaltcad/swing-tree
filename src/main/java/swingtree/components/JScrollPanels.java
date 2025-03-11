@@ -205,7 +205,9 @@ public class JScrollPanels extends UI.ScrollPane
             );
             i++;
         }
-        entryPanels.forEach(e -> _internal.add(e, index));
+        for ( int j = 0; j < entryPanels.size(); j++ ) {
+            _internal.add(entryPanels.get(j), index + j);
+        }
         this.validate();
     }
 
