@@ -4554,6 +4554,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    })
      *  )
      *  }</pre>
+     *  Use {@link #on(Observable, Action)} if you want to bind to a custom event system
+     *  executed on the application thread, instead of this method, which runs on the UI thread.
      *
      * @param observableEvent The {@link Observable} event to which the {@link Action} should be attached
      *                        and called on the UI thread when the event is fired in the view model.
@@ -4599,10 +4601,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  how one could easily integrate a custom event system into SwingTree UIs.
      *  <br><br>
      *  <b>
-     *      Note that the provided {@link Observable} event is NOT expected to be part of the view model,
+     *      Note that the provided {@link Observable} event should NOT be part of the view model,
      *      but rather part of a custom event system that captures user input or other input
      *      which is not directly related to the business logic of the view model.
      *  </b>
+     *  Use {@link #onView(Observable, Action)} if you want to bind to a view model event,
+     *  which ensures that the event is being run in the UI thread, instead of this method,
+     *  which runs on the application thread.
      *
      * @param observableEvent The {@link Observable} event to which the {@link Action} should be attached.
      * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
