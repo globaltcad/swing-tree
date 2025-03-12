@@ -29,6 +29,20 @@ import javax.swing.JPanel
 @Subject([JScrollPanels])
 class Scroll_Panels_Spec extends Specification
 {
+
+    public class SimpleEntry implements swingtree.api.mvvm.EntryViewModel {
+        private final Var<Boolean> selected = Var.of(false);
+        private final Var<Integer> position = Var.of(0);
+        private final Var<String> text = Var.of("Hello world!");
+
+        public SimpleEntry(String text) { this.text.set(text); }
+
+        public Var<String> text() { return text; }
+        @Override public Var<Boolean> isSelected() { return selected; }
+        @Override public Var<Integer> position() { return position; }
+        @Override public String toString() { return "Entry@"+Integer.toHexString(this.hashCode())+"["+this.text.get()+"]"; }
+    }
+
     def setupSpec() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // In this specification we are using the strict event processor
@@ -340,6 +354,128 @@ class Scroll_Panels_Spec extends Specification
             [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
             [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
             [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+    }
+
+    def 'A scroll panels widget maintains the correct state after a series of operations applied to a bound property list.'()
+    {
+        reportInfo """
+            This unit test demonstrates a scenario where a `Vars` based property list
+            bound to a scroll panels widget goes through a series of operations.
+            After every operation, the state of the scroll panels widget changes
+            accordingly and we also observe that sub-views are also re-used
+            when possible.
+            
+            We are going to use the following class declaration as
+            property list item type:
+            ```java
+                public class SimpleEntry implements swingtree.api.mvvm.EntryViewModel {
+                    private final Var<Boolean> selected = Var.of(false);
+                    private final Var<Integer> position = Var.of(0);
+                    private final Var<String> text = Var.of("Hello world!");
+            
+                    public SimpleEntry(String text) { this.text.set(text); }
+            
+                    public Var<String> text() { return text; }
+                    @Override public Var<Boolean> isSelected() { return selected; }
+                    @Override public Var<Integer> position() { return position; }
+                    @Override public String toString() { return "Entry@"+Integer.toHexString(this.hashCode())+"["+this.text.get()+"]"; }
+                }
+            ```
+        """
+        given : 'We create some constants for the test.'
+            final var ABURAAGE = new SimpleEntry("Aburaage")
+            final var TEMPEH = new SimpleEntry("Tempeh")
+            final var TOFU = new SimpleEntry("Tofu")
+            final var SEITAN = new SimpleEntry("Seitan")
+            final var MISO = new SimpleEntry("Miso")
+        and : 'A property list of strings and a scroll panels widget.'
+            var list = Vars.of(ABURAAGE, TEMPEH, TOFU, SEITAN, MISO)
+            var panels = UI.scrollPanels().addAll(list, it -> UI.label(it.text())).get(JScrollPanels)
+        and : 'We unpack the content panel and the initial components:'
+            var contentPanel = panels.getContentPanel()
+            var iniComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        and :
+            final var ABURAAGE_LABEL = iniComps[0]
+            final var TEMPEH_LABEL = iniComps[1]
+            final var TOFU_LABEL = iniComps[2]
+            final var SEITAN_LABEL = iniComps[3]
+            final var MISO_LABEL = iniComps[4]
+
+        expect : 'The initial components are correctly displayed.'
+            iniComps.collect({it.text}) == [ABURAAGE, TEMPEH, TOFU, SEITAN, MISO].collect({it.text().get()})
+
+        when : 'We remove the third item from the list.'
+            list.removeAt(2)
+            UI.sync()
+            var updatedComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        then : 'The third component is removed from the view.'
+            updatedComps.collect({it.text}) == [ABURAAGE, TEMPEH, SEITAN, MISO].collect({it.text().get()})
+        and : 'The labels are re-used.'
+            updatedComps[0] === ABURAAGE_LABEL
+            updatedComps[1] === TEMPEH_LABEL
+            updatedComps[2] === SEITAN_LABEL
+            updatedComps[3] === MISO_LABEL
+
+        when : 'We now re-add the third item to the list to be at an earlier position.'
+            list.addAt(1, TOFU)
+            UI.sync()
+            updatedComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        then : 'The third component is re-added to the view.'
+            updatedComps.collect({it.text}) == [ABURAAGE, TOFU, TEMPEH, SEITAN, MISO].collect({it.text().get()})
+        and : 'The labels are re-used, except for the new one.'
+            updatedComps[0] === ABURAAGE_LABEL
+            updatedComps[1] !== TOFU_LABEL
+            updatedComps[2] === TEMPEH_LABEL
+            updatedComps[3] === SEITAN_LABEL
+            updatedComps[4] === MISO_LABEL
+
+        when : 'We now replace a single item with itself.'
+            list.setAt(2, TEMPEH)
+            UI.sync()
+            updatedComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        then : 'Nothing changes in the view.'
+            updatedComps.collect({it.text}) == [ABURAAGE, TOFU, TEMPEH, SEITAN, MISO].collect({it.text().get()})
+        and : 'The labels are re-used except for the tofu label, which remains a new one.'
+            updatedComps[0] === ABURAAGE_LABEL
+            updatedComps[1] !== TOFU_LABEL
+            updatedComps[2] === TEMPEH_LABEL
+            updatedComps[3] === SEITAN_LABEL
+            updatedComps[4] === MISO_LABEL
+
+        when : 'We now replace all the items with themselves.'
+            list.setAllAt(0, ABURAAGE, TOFU, TEMPEH, SEITAN, MISO)
+            UI.sync()
+            updatedComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        then : 'Nothing changes in the view.'
+            updatedComps.collect({it.text}) == [ABURAAGE, TOFU, TEMPEH, SEITAN, MISO].collect({it.text().get()})
+        and : 'The labels are re-used except for the tofu label, which remains a new one.'
+            updatedComps[0] === ABURAAGE_LABEL
+            updatedComps[1] !== TOFU_LABEL
+            updatedComps[2] === TEMPEH_LABEL
+            updatedComps[3] === SEITAN_LABEL
+            updatedComps[4] === MISO_LABEL
+
+        when : 'We now add a completely new item to the list.'
+            var natto = new SimpleEntry("Natto")
+            list.add(natto)
+            UI.sync()
+            updatedComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        then : 'The new item is added to the view.'
+            updatedComps.collect({it.text}) == [ABURAAGE, TOFU, TEMPEH, SEITAN, MISO, natto].collect({it.text().get()})
+        and : 'The labels are re-used except for the new one.'
+            updatedComps[0] === ABURAAGE_LABEL
+            updatedComps[1] !== TOFU_LABEL
+            updatedComps[2] === TEMPEH_LABEL
+            updatedComps[3] === SEITAN_LABEL
+            updatedComps[4] === MISO_LABEL
+            updatedComps[5].text == "Natto"
+
+        when : 'We now reverse the order of the list.'
+            list.reversed()
+            UI.sync()
+            updatedComps = (0..<contentPanel.getComponentCount()).collect({contentPanel.getComponent(it).getComponent(0)})
+        then : 'The list is reversed in the view.'
+            updatedComps.collect({it.text}) == [natto, MISO, SEITAN, TEMPEH, TOFU, ABURAAGE].collect({it.text().get()})
     }
 
 }
