@@ -4545,7 +4545,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Here an example:
      *  <pre>{@code
      *  UI.label("I have a color animation!")
-     *  .on(viewModel.someEvent(), it ->
+     *  .onView(viewModel.someEvent(), it ->
      *    it.animateFor(3, TimeUnit.SECONDS, status -> {
      *      double r = status.progress();
      *      double g = 1 - status.progress();
