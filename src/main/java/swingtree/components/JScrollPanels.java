@@ -222,25 +222,44 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public <M extends EntryViewModel> void setAllEntriesAt( int index, @Nullable AddConstraint constraints, Iterable<M> entryViewModels, ViewSupplier<M> viewSupplier ) {
         Objects.requireNonNull(entryViewModels);
-        List<EntryPanel> entryPanels = new ArrayList<>();
+        boolean somethingChanged = false;
         int i = 0;
         for ( M model : entryViewModels ) {
-            entryPanels.add(
-                    _createEntryPanel(
-                            constraints,
-                            model,
-                            viewSupplier,
-                            index + i
-                    )
-            );
+            int localIndex = index + i;
             i++;
+            EntryPanel entry = _createEntryPanel(
+                                    constraints,
+                                    model,
+                                    viewSupplier,
+                                    localIndex
+                                );
+            try {
+                Component existing = _internal.getComponent(localIndex);
+                if ( existing instanceof EntryPanel ) {
+                    EntryPanel existingEntry = (EntryPanel) existing;
+                    if ( existingEntry.getComponentCount() == 0 ) {
+                        log.error("The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.", existingEntry, entry, JScrollPanels.class, new Throwable());
+                    } else if ( entry.getComponentCount() == 0 ) {
+                        log.error("The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.", entry, existingEntry, JScrollPanels.class, new Throwable());
+                    } else {
+                        Component existingView = existingEntry.getComponent(0);
+                        Component newView = entry.getComponent(0);
+                        if ( existingView == newView )
+                            continue; // The view is already there
+                    }
+                } else {
+                    log.error("Encountered illegal type of entry panel in {}.", JScrollPanels.class, new Throwable());
+                }
+                _internal.remove(localIndex);
+                _internal.add(entry, localIndex);
+                somethingChanged = true;
+            } catch (Exception e) {
+                log.error("Encountered an exception while trying to update the component at index '{}'.", localIndex, e);
+            }
         }
-        // We override the old entries with the new ones.
-        entryPanels.forEach(e -> {
-            _internal.remove(index);
-            _internal.add(e, index);
-        });
-        this.validate();
+        if ( somethingChanged ) {
+            this.validate();
+        }
     }
 
     /**
