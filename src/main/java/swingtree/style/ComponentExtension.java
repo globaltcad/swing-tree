@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Tuple;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
@@ -178,7 +179,7 @@ public final class ComponentExtension<C extends JComponent>
 
     /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)}
-     *   to attach so called <i>group tags</i> to a component. <br>
+     *   to attach so-called <i>group tags</i> to a component. <br>
      *   They are used by the SwingTree style engine to apply
      *   styles with the same tags, which
      *   is conceptually similar to CSS classes. <br>
@@ -283,9 +284,9 @@ public final class ComponentExtension<C extends JComponent>
      *  This method returns the group tags associated with the component.
      *
      * @return The group tags associated with the component
-     *         in the form of an unmodifiable list of {@link String}s.
+     *         in the form of an unmodifiable tuple of {@link String}s.
      */
-    public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
+    public Tuple<String> getStyleGroups() { return Tuple.of(String.class, _styleGroups); }
 
     /**
      *  A style group is a tag which is used by the SwingTree style engine

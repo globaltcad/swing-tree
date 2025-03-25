@@ -155,8 +155,7 @@ public final class StyleTrait<C extends JComponent>
         boolean idIsCompatible   = _id.isEmpty() || _id.equals(component.getName());
         boolean belongsToApplicableGroup = ComponentExtension.from(component)
                                               .getStyleGroups()
-                                              .stream()
-                                              .anyMatch( sg -> sg.equals(_group));
+                                              .any( sg -> sg.equals(_group));
 
         boolean nameIsCompatible = _group.isEmpty() || belongsToApplicableGroup;
         return typeIsCompatible && idIsCompatible && nameIsCompatible;
