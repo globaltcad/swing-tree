@@ -3,6 +3,7 @@ package swingtree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.*;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
@@ -134,8 +135,10 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
     }
 
     /**
-     *  Effectively bind this text field to a numeric {@link Var} property
-     *  which will only accept numbers as input.
+     *  Effectively binds this text field to a numeric {@link Var} property
+     *  which will only accept numbers as input. When the user types in a number,
+     *  the {@link Var} property will be updated accordingly. Conversely, when the
+     *  {@link Var} property changes, the text of the text field will display the new value.
      *
      * @param number The numeric {@link Var} property to bind to.
      * @param isValid A {@link Var} property which will be set to {@code true} if the input is valid, and {@code false} otherwise.
@@ -152,35 +155,37 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         Var<String> text = Var.of( formatter.apply(number.get()) );
         return ((UIForTextField<F>)_with( thisComponent -> {
                     _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, formatter.apply(n) ) );
-                    Viewable.cast(text).onChange(From.VIEW, s -> {
-                        try {
-                            if ( number.type() == Integer.class )
-                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.currentValue().orElseThrowUnchecked())) );
-                            else if ( number.type() == Long.class )
-                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.currentValue().orElseThrowUnchecked())) );
-                            else if ( number.type() == Float.class )
-                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.currentValue().orElseThrowUnchecked())) );
-                            else if ( number.type() == Double.class )
-                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.currentValue().orElseThrowUnchecked())) );
-                            else if ( number.type() == Short.class )
-                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.currentValue().orElseThrowUnchecked())) );
-                            else if ( number.type() == Byte.class )
-                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.currentValue().orElseThrowUnchecked())) );
-                            else
-                                throw new IllegalStateException("Unsupported number type: " + number.type());
+                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                        text.view().onChange(From.VIEW, s -> {
+                            try {
+                                if ( number.type() == Integer.class )
+                                    number.set(From.VIEW,  number.type().cast(Integer.parseInt(s.currentValue().orElseThrowUnchecked())) );
+                                else if ( number.type() == Long.class )
+                                    number.set(From.VIEW,  number.type().cast(Long.parseLong(s.currentValue().orElseThrowUnchecked())) );
+                                else if ( number.type() == Float.class )
+                                    number.set(From.VIEW,  number.type().cast(Float.parseFloat(s.currentValue().orElseThrowUnchecked())) );
+                                else if ( number.type() == Double.class )
+                                    number.set(From.VIEW,  number.type().cast(Double.parseDouble(s.currentValue().orElseThrowUnchecked())) );
+                                else if ( number.type() == Short.class )
+                                    number.set(From.VIEW,  number.type().cast(Short.parseShort(s.currentValue().orElseThrowUnchecked())) );
+                                else if ( number.type() == Byte.class )
+                                    number.set(From.VIEW,  number.type().cast(Byte.parseByte(s.currentValue().orElseThrowUnchecked())) );
+                                else
+                                    throw new IllegalStateException("Unsupported number type: " + number.type());
 
-                            if ( isValid.is(false) ) {
-                                isValid.set(true);
-                                isValid.fireChange(From.VIEW);
+                                if ( isValid.is(false) ) {
+                                    isValid.set(true);
+                                    isValid.fireChange(From.VIEW);
+                                }
+                            } catch (NumberFormatException e) {
+                                // ignore
+                                if ( isValid.is(true) ) {
+                                    isValid.set(false);
+                                    isValid.fireChange(From.VIEW);
+                                }
                             }
-                        } catch (NumberFormatException e) {
-                            // ignore
-                            if ( isValid.is(true) ) {
-                                isValid.set(false);
-                                isValid.fireChange(From.VIEW);
-                            }
-                        }
-                    });
+                        })
+                    );
                 }))
                 .withText( text )
                 ._this();
