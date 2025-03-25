@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.From;
 import sprouts.Val;
-import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
@@ -78,11 +77,13 @@ public class JIcon extends JLabel implements StylableComponent
     }
 
     public JIcon( Val<IconDeclaration> declaration ) {
-        Viewable.cast(declaration).onChange(From.ALL, it -> {
-            UI.runNow(()->{
-                setIcon(_getFromCacheOrLoadFrom(it.currentValue().orElseThrowUnchecked()));
-            });
-        });
+        ComponentExtension.from(this).storeBoundObservable(
+                declaration.view().onChange(From.ALL, it -> {
+                    UI.runNow(()->{
+                        setIcon(_getFromCacheOrLoadFrom(it.currentValue().orElseThrowUnchecked()));
+                    });
+                })
+        );
         declaration.ifPresent( it -> setIcon(_getFromCacheOrLoadFrom(it)) );
         updateUI();
         dynamicIcon = declaration;
