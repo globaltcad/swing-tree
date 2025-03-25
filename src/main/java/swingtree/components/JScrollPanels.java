@@ -4,13 +4,13 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
-import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.layout.AddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import java.awt.*;
@@ -655,7 +655,10 @@ public class JScrollPanels extends UI.ScrollPane
                         );
             }
             this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : "grow" );
-            Viewable.cast(_viewable.isSelected()).onChange(From.VIEW_MODEL, it -> _selectThis(components) );
+
+            ComponentExtension.from(this).storeBoundObservable(
+                    _viewable.isSelected().view().onChange(From.VIEW_MODEL, it -> _selectThis(components) )
+                );
             if ( _viewable.isSelected().is(true) )
                 _selectThis(components);
             _viewable.position().set(From.VIEW, position);
