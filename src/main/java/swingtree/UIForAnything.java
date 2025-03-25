@@ -654,7 +654,12 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
             );
         });
         Optional.ofNullable(propertyRef.get()).ifPresent(
-            property -> Viewable.cast(property).onChange(From.ALL, action)
+            property -> {
+                JComponent component = (JComponent) Objects.requireNonNull(weakComponent.get());
+                ComponentExtension.from(component).storeBoundObservable(
+                        property.view().onChange(From.ALL, action)
+                    );
+            }
         );
     }
 
