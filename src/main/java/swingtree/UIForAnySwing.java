@@ -80,19 +80,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
-        event.subscribe( () -> _runInUI( thisComponent::repaint ) );
+        ComponentExtension.from(thisComponent).storeBoundObservable(
+                event.subscribe( () -> _runInUI( thisComponent::repaint ) )
+            );
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Event event ) {
-        Observable.cast(event).subscribe(
-            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
-        );
+        ComponentExtension.from(thisComponent).storeBoundObservable(
+                event.observable().subscribe( () -> _runInUI(thisComponent::repaint) )
+            );
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Val<?> event ) {
-        Viewable.cast(event).subscribe(
-            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
-        );
+        ComponentExtension.from(thisComponent).storeBoundObservable(
+                event.view().subscribe( () -> _runInUI(thisComponent::repaint) )
+            );
     }
 
     /**
@@ -4568,15 +4570,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   observableEvent.subscribe(() -> {
-                       _runInUI(() -> {
-                           try {
-                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
-                           } catch ( Exception ex ) {
-                               log.error("Error in view event action handler!", ex);
-                           }
-                       });
-                   });
+                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                        observableEvent.subscribe(() -> {
+                            _runInUI(() -> {
+                                try {
+                                    action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in view event action handler!", ex);
+                                }
+                            });
+                        })
+                    );
                })
                ._this();
     }
@@ -4619,15 +4623,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   observableEvent.subscribe(() -> {
-                       _runInApp(() -> {
-                           try {
-                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
-                           } catch ( Exception ex ) {
-                               log.error("Error in custom event action handler!", ex);
-                           }
-                       });
-                   });
+                   ComponentExtension.from(thisComponent).storeBoundObservable(
+                       observableEvent.subscribe(() -> {
+                           _runInApp(() -> {
+                               try {
+                                   action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in custom event action handler!", ex);
+                               }
+                           });
+                       })
+                   );
                })
                ._this();
     }
@@ -4675,15 +4681,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    E observableEvent = eventSource.apply(thisComponent);
-                   observableEvent.subscribe(() -> {
-                       _runInApp(() -> {
-                           try {
-                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
-                           } catch ( Exception ex ) {
-                               log.error("Error in custom event action handler!", ex);
-                           }
-                       });
-                   });
+                   ComponentExtension.from(thisComponent).storeBoundObservable(
+                       observableEvent.subscribe(() -> {
+                           _runInApp(() -> {
+                               try {
+                                   action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in custom event action handler!", ex);
+                               }
+                           });
+                       })
+                   );
                })
                ._this();
     }
