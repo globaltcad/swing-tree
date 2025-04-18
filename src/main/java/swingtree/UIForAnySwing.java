@@ -5542,31 +5542,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     ) {
         boolean isCurrentStateValid = _checkForTupleBindingConsistencyBeforeUpdate(innerComponent, changeDelegate);
         Tuple<M> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
-        SequenceDiff diff = null;
-        SequenceDiff lastDiff = lastDiffRef.get();
-        if (tupleOfModels instanceof SequenceDiffOwner)
-            diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
-        lastDiffRef.set(diff);
-
-        if ( !isCurrentStateValid ) {
-            _clearComponentsOf(innerComponent);
-            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
-        } else if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-            @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), tupleOfModels);
-            if ( customDiff != null ) {
-                int index = customDiff.index().orElse(-1);
-                int count = customDiff.size();
-                SequenceChange change = customDiff.change();
-                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
-            } else {
-                _clearComponentsOf(innerComponent);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
-            }
-        } else {
+        SequenceDiff diff = !isCurrentStateValid ? null : _diffFrom(changeDelegate, lastDiffRef);
+        if ( diff != null ) {
             int index = diff.index().orElse(-1);
             int count = diff.size();
             SequenceChange change = diff.change();
             _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
+        } else {
+            _clearComponentsOf(innerComponent);
+            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
         }
         _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);
     }
@@ -5642,34 +5626,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         ModelToViewConverter<ViewHandle<M>> viewSupplier
     ) {
         boolean isCurrentStateValid = _checkForTupleBindingConsistencyBeforeUpdate(innerComponent, changeDelegate);
-        Tuple<M> currentValue = changeDelegate.currentValue().orElseNull();
-        SequenceDiff diff = null;
-        SequenceDiff lastDiff = lastDiffRef.get();
-        if (currentValue instanceof SequenceDiffOwner)
-            diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
-        lastDiffRef.set(diff);
-
-        if ( !isCurrentStateValid ) {
-            _clearComponentsOf(innerComponent);
-            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
-        } else if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
-            @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), currentValue);
-            if ( customDiff != null ) {
-                int index = customDiff.index().orElse(-1);
-                int count = customDiff.size();
-                SequenceChange change = customDiff.change();
-                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
-            } else {
-                _clearComponentsOf(innerComponent);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
-            }
-        } else {
+        SequenceDiff diff = !isCurrentStateValid ? null : _diffFrom(changeDelegate, lastDiffRef);
+        if ( diff != null ) {
             int index = diff.index().orElse(-1);
             int count = diff.size();
             SequenceChange change = diff.change();
             _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
+        } else {
+            _clearComponentsOf(innerComponent);
+            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
         }
         _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);
+    }
+
+    private static <T> @Nullable SequenceDiff _diffFrom(ValDelegate<Tuple<T>> delegate, AtomicReference<@Nullable SequenceDiff> lastDiffRef) {
+        @Nullable Tuple<T> oldValue = delegate.oldValue().orElseNull();
+        Tuple<T> currentValue = delegate.currentValue().orElseThrowUnchecked();
+        SequenceDiff diff = null;
+        SequenceDiff lastDiff = lastDiffRef.get();
+        if (currentValue instanceof SequenceDiffOwner)
+            diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
+        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) )
+            diff = _tryCalculatingDiffBetween(oldValue, currentValue);
+        lastDiffRef.set(diff);
+        return diff;
     }
 
     private <M> void _doInformedSubViewUpdate(
