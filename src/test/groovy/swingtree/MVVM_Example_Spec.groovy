@@ -1158,6 +1158,7 @@ class MVVM_Example_Spec extends Specification
 
             when :
                 trace[team.get().members().get(0).id()].forename.set("Eddy")
+                UI.sync()
             then :
                 initialComponents == view.components as List
                 view.components[0].components.collect({ it.text }) == ["Name:", "Eddy", "Smith", "Address:", "street 1", "1"]
@@ -1168,6 +1169,7 @@ class MVVM_Example_Spec extends Specification
             when :
                 trace[team.get().members().get(1).id()].surname.set("Goodman")
                 trace[team.get().members().get(2).id()].street.set("cherry-alley")
+                UI.sync()
             then :
                 initialComponents == view.components as List
                 view.components[0].components.collect({ it.text }) == ["Name:", "Eddy", "Smith", "Address:", "street 1", "1"]
@@ -1177,6 +1179,7 @@ class MVVM_Example_Spec extends Specification
 
             when :
                 trace[team.get().members().get(2).id()].id.set(UUID.randomUUID())
+                UI.sync()
             then :
                 initialComponents != view.components as List
                 view.components[0] === initialComponents[0]
