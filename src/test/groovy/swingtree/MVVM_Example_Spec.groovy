@@ -1,14 +1,13 @@
 package swingtree
 
+
 import examples.mvvm.LoginViewModel
+import groovy.transform.ImmutableOptions
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import sprouts.From
-import sprouts.Tuple
-import sprouts.Var
-import sprouts.Vars
+import sprouts.*
 import swingtree.api.mvvm.BoundViewSupplier
 import swingtree.api.mvvm.ViewSupplier
 import swingtree.threading.EventProcessor
@@ -36,6 +35,24 @@ import java.util.List
 ''')
 class MVVM_Example_Spec extends Specification
 {
+    static record Address(String street, int postalCode) {
+        public Address withStreet(String street) { return new Address(street, postalCode) }
+        public Address withPostalCode(int postalCode) { return new Address(street, postalCode) }
+    }
+    @ImmutableOptions(knownImmutableClasses=[Address])
+    static record Person(UUID id, String forename, String surname, Address address) implements HasId<UUID> {
+        public Person withId(UUID id) { return new Person(id, forename, surname, address) }
+        public Person withForename(String forename) { return new Person(id, forename, surname, address) }
+        public Person withSurname(String surname) { return new Person(id, forename, surname, address) }
+        public Person withAddress(Address address) { return new Person(id, forename, surname, address) }
+    }
+    @ImmutableOptions(knownImmutableClasses=[Tuple])
+    static record Team(String name, Tuple<Person> members) {
+        public Team withName(String name) { return new Team(name, members) }
+        public Team withMembers(Tuple<Person> members) { return new Team(name, members) }
+    }
+
+
     def setupSpec() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
@@ -1045,6 +1062,134 @@ class MVVM_Example_Spec extends Specification
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
+    }
+
+    def 'Binding a tuple property through `addAll` assumes full ownership over all sub-components.'() {
+        reportInfo """
+            Binding multiple sub-views to a component using the tuple property `addAll(..)`
+            method assumes full ownership over all sub-components. This means that you may not add
+            anything else to the bound component.
+        """
+        given :
+            Var<Team> team = Var.of(new Team("My Team",
+                    Tuple.of(
+                        new Person(UUID.randomUUID(), "", "", new Address("", 0)),
+                        new Person(UUID.randomUUID(), "", "", new Address("", 0)),
+                        new Person(UUID.randomUUID(), "", "", new Address("", 0)),
+                        new Person(UUID.randomUUID(), "", "", new Address("", 0))
+                    )
+                ))
+        and :
+            Var<String>        name    = team.zoomTo(Team::name,    Team::withName);
+            Var<Tuple<Person>> members = team.zoomTo(Team::members, Team::withMembers);
+        and :
+            var view =
+                    UI.panel().withLayout(UI.FILL.and(UI.WRAP(2)))
+                    .add(UI.GROW,
+                        UI.label("Team - "),
+                        UI.textField(name)
+                    )
+                    .addAll(UI.GROW, members, (Var<Person> person)->{
+                        Var<String>  forename   = person.zoomTo(Person::forename, Person::withForename);
+                        Var<String>  surname    = person.zoomTo(Person::surname,  Person::withSurname);
+                        Var<Address> address    = person.zoomTo(Person::address,  Person::withAddress);
+                        Var<String>  street     = address.zoomTo(Address::street,     Address::withStreet);
+                        Var<Integer> postalCode = address.zoomTo(Address::postalCode, Address::withPostalCode);
+                        return UI.panel().withLayout(UI.FILL.and(UI.WRAP(2)))
+                                .add(UI.SPAN, UI.label("Name:"))
+                                .add(UI.GROW, UI.textField(forename), UI.textField(surname))
+                                .add(UI.SPAN, UI.label("Address:"))
+                                .add(UI.GROW, UI.textField(street), UI.numericTextField(postalCode));
+                    })
+                    .get(JPanel);
+            expect : 'It is only 4 sub-components because the first two were removed!'
+                view.getComponentCount() == 4
+            and : 'They are all JPanel instances (No team name or label).'
+                view.components.every({it instanceof JPanel})
+
+    }
+
+    def 'Views bound to a tuple property can zoom further into its elements.'() {
+        given :
+            var trace = [:]
+        and :
+            Var<Team> team = Var.of(new Team("Awesome-Crew",
+                    Tuple.of(
+                        new Person(UUID.randomUUID(), "Ed", "Smith", new Address("street 1", 1)),
+                        new Person(UUID.randomUUID(), "Sal", "Colin", new Address("street 2", 2)),
+                        new Person(UUID.randomUUID(), "Cel", "Doe", new Address("street 3", 3)),
+                        new Person(UUID.randomUUID(), "Sam", "Mill", new Address("street 4", 4))
+                    )
+                ))
+        and :
+            Var<String>        name    = team.zoomTo(Team::name,    Team::withName);
+            Var<Tuple<Person>> members = team.zoomTo(Team::members, Team::withMembers);
+        and :
+            var view =
+                    UI.panel().withLayout(UI.FILL.and(UI.WRAP(2)))
+                    .addAll(UI.GROW, members, (Var<Person> person)->{
+                        Var<String>  forename   = person.zoomTo(Person::forename, Person::withForename);
+                        Var<String>  surname    = person.zoomTo(Person::surname,  Person::withSurname);
+                        Var<Address> address    = person.zoomTo(Person::address,  Person::withAddress);
+                        Var<String>  street     = address.zoomTo(Address::street,     Address::withStreet);
+                        Var<Integer> postalCode = address.zoomTo(Address::postalCode, Address::withPostalCode);
+                        trace[person.get().id()] = [
+                                id: person.zoomTo(Person::id, Person::withId),
+                                forename: forename, // We track this for simulating user input programmatically
+                                surname: surname,
+                                street: street,
+                                postalCode: postalCode
+                            ]
+                        return UI.panel().withLayout(UI.FILL.and(UI.WRAP(2)))
+                                .add(UI.SPAN, UI.label("Name:"))
+                                .add(UI.GROW, UI.textField(forename), UI.textField(surname))
+                                .add(UI.SPAN, UI.label("Address:"))
+                                .add(UI.GROW, UI.textField(street), UI.numericTextField(postalCode));
+                    })
+                    .get(JPanel);
+                    var initialComponents = view.components as List
+            expect :
+                view.getComponentCount() == 4
+            and :
+                view.components[0].components.collect({ it.text }) == ["Name:", "Ed", "Smith", "Address:", "street 1", "1"]
+                view.components[1].components.collect({ it.text }) == ["Name:", "Sal", "Colin", "Address:", "street 2", "2"]
+                view.components[2].components.collect({ it.text }) == ["Name:", "Cel", "Doe", "Address:", "street 3", "3"]
+                view.components[3].components.collect({ it.text }) == ["Name:", "Sam", "Mill", "Address:", "street 4", "4"]
+
+            when :
+                trace[team.get().members().get(0).id()].forename.set("Eddy")
+                UI.sync()
+            then :
+                initialComponents == view.components as List
+                view.components[0].components.collect({ it.text }) == ["Name:", "Eddy", "Smith", "Address:", "street 1", "1"]
+                view.components[1].components.collect({ it.text }) == ["Name:", "Sal", "Colin", "Address:", "street 2", "2"]
+                view.components[2].components.collect({ it.text }) == ["Name:", "Cel", "Doe", "Address:", "street 3", "3"]
+                view.components[3].components.collect({ it.text }) == ["Name:", "Sam", "Mill", "Address:", "street 4", "4"]
+
+            when :
+                trace[team.get().members().get(1).id()].surname.set("Goodman")
+                trace[team.get().members().get(2).id()].street.set("cherry-alley")
+                UI.sync()
+            then :
+                initialComponents == view.components as List
+                view.components[0].components.collect({ it.text }) == ["Name:", "Eddy", "Smith", "Address:", "street 1", "1"]
+                view.components[1].components.collect({ it.text }) == ["Name:", "Sal", "Goodman", "Address:", "street 2", "2"]
+                view.components[2].components.collect({ it.text }) == ["Name:", "Cel", "Doe", "Address:", "cherry-alley", "3"]
+                view.components[3].components.collect({ it.text }) == ["Name:", "Sam", "Mill", "Address:", "street 4", "4"]
+
+            when :
+                trace[team.get().members().get(2).id()].id.set(UUID.randomUUID())
+                UI.sync()
+            then :
+                initialComponents != view.components as List
+                view.components[0] === initialComponents[0]
+                view.components[1] === initialComponents[1]
+                view.components[2] !== initialComponents[2]
+                view.components[3] === initialComponents[3]
+                view.components[0].components.collect({ it.text }) == ["Name:", "Eddy", "Smith", "Address:", "street 1", "1"]
+                view.components[1].components.collect({ it.text }) == ["Name:", "Sal", "Goodman", "Address:", "street 2", "2"]
+                view.components[2].components.collect({ it.text }) == ["Name:", "Cel", "Doe", "Address:", "cherry-alley", "3"]
+                view.components[3].components.collect({ it.text }) == ["Name:", "Sam", "Mill", "Address:", "street 4", "4"]
     }
 
     def 'Views bound to a property list will be reused efficiently.'(
