@@ -5540,20 +5540,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         AtomicReference<@Nullable SequenceDiff> lastDiffRef,
         ModelToViewConverter<M> viewSupplier
     ) {
-        boolean isCurrentStateValid = true;
-        int currentComponentCount = innerComponent.getComponentCount();
-        int expectedComponentCount = changeDelegate.oldValue().mapTo(Integer.class, Tuple::size).orElse(currentComponentCount);
-        if ( currentComponentCount != expectedComponentCount ) {
-            log.error(
-                "Trying to update 'addAll' tuple property based binding to component '{}' \n" +
-                "with an unexpected number of '{}' sub-components despite the previous tuple \n" +
-                "implying a number of '{}' components instead!\n" +
-                "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
-                "add sub-views through a regular 'add' or any other way. Clearing component now...",
-                innerComponent, currentComponentCount, expectedComponentCount, new Throwable()
-            );
-            isCurrentStateValid = false;
-        }
+        boolean isCurrentStateValid = _checkForTupleBindingConsistencyBeforeUpdate(innerComponent, changeDelegate);
         Tuple<M> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
         SequenceDiff diff = null;
         SequenceDiff lastDiff = lastDiffRef.get();
@@ -5581,18 +5568,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             SequenceChange change = diff.change();
             _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
         }
-        if ( innerComponent.getComponentCount() != tupleOfModels.size() )
-            log.warn(
-                    "Broken binding to view model tuple detected! \n" +
-                    "UI sub-component count '{}' does not match the bound tuple of size '{}'. \n" +
-                    "A possible cause for this is that components were {} to this '{}' \n" +
-                    "directly, instead of through the property tuple binding. \n" +
-                    "However, this could also be a bug in the UI framework.",
-                    innerComponent.getComponentCount(), tupleOfModels.size(),
-                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added" : "removed",
-                    innerComponent,
-                    new Throwable()
-                );
+        _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);
     }
 
     private <M> void _doInformedSubViewUpdate(
@@ -5658,13 +5634,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateSubViews(
-        C c,
+        C innerComponent,
         ValDelegate<Tuple<M>> changeDelegate,
         Var<Tuple<M>> tupleOfModels,
         @Nullable AddConstraint attr,
         AtomicReference<@Nullable SequenceDiff> lastDiffRef,
         ModelToViewConverter<ViewHandle<M>> viewSupplier
     ) {
+        boolean isCurrentStateValid = _checkForTupleBindingConsistencyBeforeUpdate(innerComponent, changeDelegate);
         Tuple<M> currentValue = changeDelegate.currentValue().orElseNull();
         SequenceDiff diff = null;
         SequenceDiff lastDiff = lastDiffRef.get();
@@ -5672,23 +5649,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);
         lastDiffRef.set(diff);
 
-        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+        if ( !isCurrentStateValid ) {
+            _clearComponentsOf(innerComponent);
+            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
+        } else if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
             @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), currentValue);
             if ( customDiff != null ) {
                 int index = customDiff.index().orElse(-1);
                 int count = customDiff.size();
                 SequenceChange change = customDiff.change();
-                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
             } else {
-                _clearComponentsOf(c);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                _clearComponentsOf(innerComponent);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
             }
         } else {
             int index = diff.index().orElse(-1);
             int count = diff.size();
             SequenceChange change = diff.change();
-            _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+            _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
         }
+        _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);
     }
 
     private <M> void _doInformedSubViewUpdate(
@@ -6000,6 +5981,44 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             );
             _clearComponentsOf(contentComponent);
         }
+    }
+
+    private static <T> boolean _checkForTupleBindingConsistencyBeforeUpdate(
+        JComponent innerComponent, ValDelegate<Tuple<T>> changeDelegate
+    ) {
+        boolean isCurrentStateValid = true;
+        int currentComponentCount = innerComponent.getComponentCount();
+        int expectedComponentCount = changeDelegate.oldValue().mapTo(Integer.class, Tuple::size).orElse(currentComponentCount);
+        if ( currentComponentCount != expectedComponentCount ) {
+            log.error(
+                "Trying to update 'addAll' tuple property based binding to component '{}' \n" +
+                "with an unexpected number of '{}' sub-components despite the previous tuple \n" +
+                "implying a number of '{}' components instead!\n" +
+                "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
+                "add sub-views through a regular 'add' or any other way. Clearing component now...",
+                innerComponent, currentComponentCount, expectedComponentCount, new Throwable()
+            );
+            isCurrentStateValid = false;
+        }
+        return isCurrentStateValid;
+    }
+
+    private static <T> void _checkForTupleBindingConsistencyAfterUpdate(
+        JComponent innerComponent, ValDelegate<Tuple<T>> changeDelegate
+    ) {
+        Tuple<T> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
+        if ( innerComponent.getComponentCount() != tupleOfModels.size() )
+            log.warn(
+                    "Broken binding to view model tuple detected! \n" +
+                    "UI sub-component count '{}' does not match the bound tuple of size '{}'. \n" +
+                    "A possible cause for this is that components were {} to this '{}' \n" +
+                    "directly, instead of through the property tuple binding. \n" +
+                    "However, this could also be a bug in the UI framework.",
+                    innerComponent.getComponentCount(), tupleOfModels.size(),
+                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added" : "removed",
+                    innerComponent,
+                    new Throwable()
+                );
     }
 
     private void _clearComponentsOf( JComponent thisComponent ) {
