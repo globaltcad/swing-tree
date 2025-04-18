@@ -5305,6 +5305,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _checkComponentStateBeforeBinding(thisComponent);
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
                 log.error("Error while creating view for '"+model+"'.", exception);
                 return UI.box().get(JBox.class);
@@ -5405,6 +5406,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _bindTo( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _checkComponentStateBeforeBinding(thisComponent);
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
             log.error("Error while creating view for '"+model+"'.", exception);
             return UI.box().get(JBox.class);
@@ -5412,6 +5414,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M extends HasId<?>> void _bindTo(Var<Tuple<M>> models, @Nullable AddConstraint attr, BoundViewSupplier<M> viewSupplier, C thisComponent ) {
+        _checkComponentStateBeforeBinding(thisComponent);
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, (ViewHandle<M> handle)->viewSupplier.createViewFor(handle.property()), (model, exception)->{
             log.error("Error while creating view for '"+model+"'.", exception);
             return UI.box().get(JBox.class);
@@ -5531,12 +5534,26 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateSubViews(
-        C c,
+        C innerComponent,
         ValDelegate<Tuple<M>> changeDelegate,
         @Nullable AddConstraint attr,
         AtomicReference<@Nullable SequenceDiff> lastDiffRef,
         ModelToViewConverter<M> viewSupplier
     ) {
+        boolean isCurrentStateValid = true;
+        int currentComponentCount = innerComponent.getComponentCount();
+        int expectedComponentCount = changeDelegate.oldValue().mapTo(Integer.class, Tuple::size).orElse(currentComponentCount);
+        if ( currentComponentCount != expectedComponentCount ) {
+            log.error(
+                "Trying to update 'addAll' tuple property based binding to component '{}' \n" +
+                "with an unexpected number of '{}' sub-components despite the previous tuple \n" +
+                "implying a number of '{}' components instead!\n" +
+                "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
+                "add sub-views through a regular 'add' or any other way. Clearing component now...",
+                innerComponent, currentComponentCount, expectedComponentCount, new Throwable()
+            );
+            isCurrentStateValid = false;
+        }
         Tuple<M> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
         SequenceDiff diff = null;
         SequenceDiff lastDiff = lastDiffRef.get();
@@ -5544,23 +5561,38 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             diff = ((SequenceDiffOwner)tupleOfModels).differenceFromPrevious().orElse(null);
         lastDiffRef.set(diff);
 
-        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
+        if ( !isCurrentStateValid ) {
+            _clearComponentsOf(innerComponent);
+            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
+        } else if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {
             @Nullable SequenceDiff customDiff = _tryCalculatingDiffBetween(changeDelegate.oldValue().orElseNull(), tupleOfModels);
             if ( customDiff != null ) {
                 int index = customDiff.index().orElse(-1);
                 int count = customDiff.size();
                 SequenceChange change = customDiff.change();
-                _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
             } else {
-                _clearComponentsOf(c);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                _clearComponentsOf(innerComponent);
+                _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
             }
         } else {
             int index = diff.index().orElse(-1);
             int count = diff.size();
             SequenceChange change = diff.change();
-            _doInformedSubViewUpdate(index, count, change, c, tupleOfModels, attr, viewSupplier);
+            _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
         }
+        if ( innerComponent.getComponentCount() != tupleOfModels.size() )
+            log.warn(
+                    "Broken binding to view model tuple detected! \n" +
+                    "UI sub-component count '{}' does not match the bound tuple of size '{}'. \n" +
+                    "A possible cause for this is that components were {} to this '{}' \n" +
+                    "directly, instead of through the property tuple binding. \n" +
+                    "However, this could also be a bug in the UI framework.",
+                    innerComponent.getComponentCount(), tupleOfModels.size(),
+                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added" : "removed",
+                    innerComponent,
+                    new Throwable()
+                );
     }
 
     private <M> void _doInformedSubViewUpdate(
@@ -5954,7 +5986,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }
     }
 
-    private void _clearComponentsOf( C thisComponent ) {
+    private void _checkComponentStateBeforeBinding(C thisComponent) {
+        JComponent contentComponent = (thisComponent instanceof JScrollPanels
+                                        ? ((JScrollPanels)thisComponent).getContentPanel()
+                                        : thisComponent);
+        if ( contentComponent.getComponentCount() > 0 ) {
+            log.error(
+                "Trying to bind multiple sub-views to component '{}' despite it already being \n" +
+                "the owner of '{}' sub-components added before the 'addAll' binding call! \n" +
+                "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
+                "add sub-views through a regular 'add' or any other way. Clearing component now...",
+                    contentComponent, contentComponent.getComponentCount(), new Throwable()
+            );
+            _clearComponentsOf(contentComponent);
+        }
+    }
+
+    private void _clearComponentsOf( JComponent thisComponent ) {
         // We remove all components.
         thisComponent.removeAll();
         // We update the layout.
