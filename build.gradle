@@ -73,8 +73,8 @@ dependencies {
     testImplementation 'com.formdev:flatlaf-intellij-themes:3.4'
     testImplementation 'com.formdev:flatlaf:3.4' // Looks better than regular swing :)
 
-    // https://mvnrepository.com/artifact/org.projectlombok/lombok
-    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok// https://mvnrepository.com/artifact/org.projectlombok/lombok
+    testCompileOnly 'org.projectlombok:lombok:1.18.38'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 
 }
