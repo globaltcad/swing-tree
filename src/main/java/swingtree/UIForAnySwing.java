@@ -5123,7 +5123,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      If you want to bind individual items of a {@link Tuple} property
      *      <b>bi-directionally</b> instead of just rendering them,
      *      use the {@link #addAll(Var, BoundViewSupplier)} method.
-     *  </p>
+     *  </p><br>
+     *  <b>
+     *      WARNING: The binding established by this method assumes full ownership over
+     *      all subcomponents referenced by this component. You must not add or remove
+     *      components other than through the bound {@link Val}. Otherwise, your GUI may break!
+     *  </b><br>
      *
      * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
@@ -5152,7 +5157,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      If you want to bind individual items of a {@link Tuple} property
      *      <b>bi-directionally</b> instead of just rendering them,
      *      use the {@link #addAll(Var, BoundViewSupplier)} method.
-     *  </p>
+     *  </p><br>
+     *  <b>
+     *      WARNING: The binding established by this method assumes full ownership over
+     *      all subcomponents referenced by this component. You must not add or remove
+     *      components other than through the bound {@link Val}. Otherwise, your GUI may break!
+     *  </b><br>
      *
      * @param attr The {@link String} based {@link MigLayout} layout information
      *             which should be used as layout constraints for the generated views.
@@ -5184,7 +5194,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      If you want to bind individual items of a {@link Tuple} property
      *      <b>bi-directionally</b> instead of just rendering them,
      *      use the {@link #addAll(Var, BoundViewSupplier)} method.
-     *  </p>
+     *  </p><br>
+     *  <b>
+     *      WARNING: The binding established by this method assumes full ownership over
+     *      all subcomponents referenced by this component. You must not add or remove
+     *      components other than through the bound {@link Val}. Otherwise, your GUI may break!
+     *  </b><br>
      *
      * @param attr The layout information which should be used as layout constraints for the generated views.
      * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
@@ -5218,7 +5233,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      This method is the recommended way to bind views to value objects (like records),
      *      with a custom identity (that is not based on the object reference).
      *      If you want to bind views to mutable objects, use the {@link #addAll(Vals, ViewSupplier)} method.
-     *  </p>
+     *  </p><br>
+     *  <b>
+     *      WARNING: The binding established by this method assumes full ownership over
+     *      all subcomponents referenced by this component. You must not add or remove
+     *      components other than through the bound {@link Var}. Otherwise, your GUI may break!
+     *  </b><br>
      *
      * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
      * @param viewSupplier A {@link BoundViewSupplier} instance which will be used to generate the view for each item in the tuple.
@@ -5250,7 +5270,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      This method is the recommended way to bind views to value objects (like records),
      *      with a custom identity (that is not based on the object reference).
      *      If you want to bind views to mutable objects, use the {@link #addAll(String, Vals, ViewSupplier)} method.
-     *  </p>
+     *  </p><br>
+     *  <b>
+     *      WARNING: The binding established by this method assumes full ownership over
+     *      all subcomponents referenced by this component. You must not add or remove
+     *      components other than through the bound {@link Var}. Otherwise, your GUI may break!
+     *  </b><br>
      *
      * @param attr The {@link String} based {@link MigLayout} layout information
      *             which should be used as layout constraints for the generated views.
@@ -5285,7 +5310,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      This method is the recommended way to bind views to value objects (like records),
      *      with a custom identity (that is not based on the object reference).
      *      If you want to bind views to mutable objects, use the {@link #addAll(AddConstraint, Vals, ViewSupplier)} method.
-     *  </p>
+     *  </p><br>
+     *  <b>
+     *      WARNING: The binding established by this method assumes full ownership over
+     *      all subcomponents referenced by this component. You must not add or remove
+     *      components other than through the bound {@link Var}. Otherwise, your GUI may break!
+     *  </b><br>
      *
      * @param attr The layout information which should be used as layout constraints for the generated views.
      * @param models A property of a {@link Tuple} of items of any type but preferably view model instances.
