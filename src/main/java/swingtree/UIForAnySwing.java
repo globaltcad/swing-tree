@@ -5572,13 +5572,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     ) {
         boolean isCurrentStateValid = _checkForTupleBindingConsistencyBeforeUpdate(innerComponent, changeDelegate);
         Tuple<M> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
-        SequenceDiff diff = !isCurrentStateValid ? null : _diffFrom(changeDelegate, lastDiffRef);
+        @Nullable SequenceDiff diff = !isCurrentStateValid ? null : _diffFrom(changeDelegate, lastDiffRef);
+        boolean success = diff != null;
         if ( diff != null ) {
-            int index = diff.index().orElse(-1);
-            int count = diff.size();
-            SequenceChange change = diff.change();
-            _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
-        } else {
+            try {
+                int index = diff.index().orElse(-1);
+                int count = diff.size();
+                SequenceChange change = diff.change();
+                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
+            } catch (Exception e) {
+                log.error(
+                    "Failed to perform an informed tuple bound view update, \n" +
+                    "using sequence diff '{}' and models '{}'.",
+                    tupleOfModels, e
+                );
+                success = false;
+            }
+        }
+        if ( !success ) {
             _clearComponentsOf(innerComponent);
             _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
         }
@@ -5656,13 +5667,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         ModelToViewConverter<ViewHandle<M>> viewSupplier
     ) {
         boolean isCurrentStateValid = _checkForTupleBindingConsistencyBeforeUpdate(innerComponent, changeDelegate);
-        SequenceDiff diff = !isCurrentStateValid ? null : _diffFrom(changeDelegate, lastDiffRef);
+        @Nullable SequenceDiff diff = !isCurrentStateValid ? null : _diffFrom(changeDelegate, lastDiffRef);
+        boolean success = diff != null;
         if ( diff != null ) {
-            int index = diff.index().orElse(-1);
-            int count = diff.size();
-            SequenceChange change = diff.change();
-            _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
-        } else {
+            try {
+                int index = diff.index().orElse(-1);
+                int count = diff.size();
+                SequenceChange change = diff.change();
+                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
+            } catch (Exception e) {
+                log.error(
+                    "Failed to perform an informed tuple bound view update, \n" +
+                    "using sequence diff '{}' and models '{}'.",
+                    tupleOfModels, e
+                );
+                success = false;
+            }
+        }
+        if ( !success ) {
             _clearComponentsOf(innerComponent);
             _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
         }
