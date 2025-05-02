@@ -80,7 +80,7 @@ public final class TasksView extends Panel
                         panel(FILL)
                         .add(GROW_X.and(PUSH_X), textField(entry.zoomTo(TasksViewModel.TaskViewModel::task, TasksViewModel.TaskViewModel::withTask)))
                         .add(comboBox(entry.zoomTo(TasksViewModel.TaskViewModel::dueTo, TasksViewModel.TaskViewModel::withDueTo), it -> it.name().toLowerCase(Locale.ROOT)))
-                        .add(button("✕").onClick(it -> entries.update(tuple->tuple.remove(entry))))
+                        .add(button("✕").onClick(it -> entries.update(tuple->tuple.maybeRemove(entry))))
                         .add(button("⨮").onClick(it -> {
                             entries.update(tuple-> tuple.add(
                                 new TasksViewModel.TaskViewModel()

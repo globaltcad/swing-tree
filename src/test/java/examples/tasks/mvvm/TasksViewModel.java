@@ -3,6 +3,7 @@ package examples.tasks.mvvm;
 import sprouts.Val;
 import sprouts.Var;
 import sprouts.Vars;
+import sprouts.Viewable;
 
 import java.time.DayOfWeek;
 
@@ -59,7 +60,7 @@ public final class TasksViewModel
         public SummaryViewModel(Vars<TaskViewModel> tasksInProgress, Vars<TaskViewModel> tasksDone) {
             this.numberOfTasksInProgress = tasksInProgress.viewSize();
             this.numberOfTasksDone = tasksDone.viewSize();
-            this.numberOfTasksInTotal = Val.viewOf(this.numberOfTasksInProgress, this.numberOfTasksDone, (a, b) -> a + b);
+            this.numberOfTasksInTotal = Viewable.of(this.numberOfTasksInProgress, this.numberOfTasksDone, (a, b) -> a + b);
         }
 
         public Val<Integer> numberOfTasksInProgress() { return numberOfTasksInProgress; }

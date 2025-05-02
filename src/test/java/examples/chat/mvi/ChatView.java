@@ -112,7 +112,7 @@ public final class ChatView extends Panel
                          .add(RIGHT,
                              button("✕").makePlain()
                              .onClick(it -> {
-                                 sentMessages.update(tuple->tuple.remove(entry));
+                                 sentMessages.update(tuple->tuple.maybeRemove(entry));
                              })
                          );
                  })
