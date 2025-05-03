@@ -1139,16 +1139,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
      *  <p>
-     *  The reason for this distinction is the fact that traditional Swing icons
-     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  The reason for this distinction is that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
      *  lightweight value object that merely models the resource location of the icon
      *  even if it is not yet loaded or even does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
+     *  This is especially useful in the case of unit tests for your view model,
      *  where the icon may not be available at all, but you still want to test
-     *  the behaviour of your view model.
+     *  the behavior of your view model.
      *
      * @param icon The icon property whose value ought to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
@@ -1959,8 +1959,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
      *  <p>
-     *  The reason for this distinction is the fact that traditional Swing icons
-     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  The reason for this distinction is that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
      *  lightweight and error tolerant value based object that merely
@@ -1969,7 +1969,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <p>
      *  This is especially useful when writing unit tests for your view models,
      *  where the icon resources may not be available, but you still want to test
-     *  the behaviour of your view model.
+     *  the behavior of your view model.
      *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
@@ -1992,8 +1992,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
      *  <p>
-     *  The reason for this distinction is the fact that traditional Swing icons
-     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  The reason for this distinction is that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
      *  lightweight and error tolerant value based object that merely
@@ -2002,7 +2002,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <p>
      *  This is especially useful when writing unit tests for your view models,
      *  where the icon resources may not be available, but you still want to test
-     *  the behaviour of your view model.
+     *  the behavior of your view model.
      *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
@@ -3860,16 +3860,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
      *  <p>
-     *  The reason for this distinction is the fact that traditional Swing icons
-     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  The reason for this distinction is that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
      *  lightweight value object that merely models the resource location of the icon
      *  even if it is not yet loaded or even does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
+     *  This is especially useful in the case of unit tests for your view model,
      *  where the icon may not be available at all, but you still want to test
-     *  the behaviour of your view model.
+     *  the behavior of your view model.
      *
      * @param icon The icon property which should dynamically provide a desired icon for the {@link JLabel}.
      * @return A builder instance for the label, which enables fluent method chaining.
@@ -4587,16 +4587,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
      *  <p>
-     *  The reason for this distinction is the fact that traditional Swing icons
-     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  The reason for this distinction is that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
      *  lightweight value object that merely models the resource location of the icon
      *  even if it is not yet loaded or even does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
+     *  This is especially useful in the case of unit tests for your view model,
      *  where the icon may not be available at all, but you still want to test
-     *  the behaviour of your view model.
+     *  the behavior of your view model.
      *
      *
      * @param icon The icon property which should be bound to the toggle button.
@@ -4620,16 +4620,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
      *  <p>
-     *  The reason for this distinction is the fact that traditional Swing icons
-     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  The reason for this distinction is that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
      *  lightweight value object that merely models the resource location of the icon
      *  even if it is not yet loaded or even does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
+     *  This is especially useful in the case of unit tests for your view model,
      *  where the icon may not be available at all, but you still want to test
-     *  the behaviour of your view model.
+     *  the behavior of your view model.
      *
      * @param icon The icon property which should be bound to the toggle button.
      * @param isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
