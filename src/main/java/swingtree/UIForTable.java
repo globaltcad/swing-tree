@@ -10,10 +10,12 @@ import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.Component;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.Function;
 
@@ -713,20 +715,26 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     public final UIForTable<T> updateTableOn( Event event ) {
         NullUtil.nullArgCheck(event, "event", Event.class);
         return _with( thisComponent -> {
-                    Observable.cast(event).subscribe(Observer.ofWeak(thisComponent, innerComponent->
-                        _runInUI(()->{
-                            TableModel model = innerComponent.getModel();
-                            if ( model instanceof AbstractTableModel ) {
-                                // We want the table model update to be as thorough as possible, so we
-                                // will fire a table structure changed event, followed by a table data
-                                // changed event.
-                                ((AbstractTableModel)model).fireTableStructureChanged();
-                                ((AbstractTableModel)model).fireTableDataChanged();
-                            }
-                            else
-                                throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
-                        })
-                    ));
+                    WeakReference<T> thisComponentRef = new WeakReference<>(thisComponent);
+                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                        event.observable().subscribe(()->
+                            _runInUI(()->{
+                                T innerComponent = thisComponentRef.get();
+                                if (innerComponent == null)
+                                    return;
+                                TableModel model = innerComponent.getModel();
+                                if ( model instanceof AbstractTableModel ) {
+                                    // We want the table model update to be as thorough as possible, so we
+                                    // will fire a table structure changed event, followed by a table data
+                                    // changed event.
+                                    ((AbstractTableModel)model).fireTableStructureChanged();
+                                    ((AbstractTableModel)model).fireTableDataChanged();
+                                }
+                                else
+                                    throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
+                            })
+                        )
+                    );
                 })
                 ._this();
     }

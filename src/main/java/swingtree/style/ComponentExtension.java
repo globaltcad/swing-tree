@@ -2,6 +2,8 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Observable;
+import sprouts.Tuple;
 import swingtree.DragAwayComponentConf;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
@@ -63,22 +65,16 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private final C _owner;
-
-    private final List<Object> _extraState = new ArrayList<>(0);
-
-    private final List<String> _styleGroups = new ArrayList<>(0);
-
+    private final List<Observable>  _boundProps = new ArrayList<>(0);
+    private final List<Object>      _extraState = new ArrayList<>(0);
+    private final List<String>      _styleGroups = new ArrayList<>(0);
     private final StyleInstaller<C> _styleInstaller = new StyleInstaller<>();
-
 
     private StyleEngine     _styleEngine = StyleEngine.create();
     private StyleSource<C>  _styleSource  = StyleSource.create();
-
     private @Nullable Shape _outerBaseClip = null;
-
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
     private @Nullable BufferedImage _bufferedImage = null;
-
     private @Nullable Function<Position, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
 
 
@@ -87,6 +83,28 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     C getOwner() { return _owner; }
+
+    /**
+     *  Stores the given observable in the extension in order to ensure that
+     *  it is not garbage collected before the component is garbage collected.
+     *  The Sprouts library is based on the idea of event systems being weakly referenced
+     *  by theirs event sources, which means that if the observable is not stored in the extension,
+     *  the binding will be lost when the observable is garbage collected.
+     * @param observable The observable to store using a strong reference
+     *                   to ensure it is not garbage collected.
+     */
+    public void storeBoundObservable(Observable observable ) {
+        _boundProps.add(observable);
+    }
+
+    /**
+     *  Frees all bound observables from the extension.
+     *  This is useful when the component is no longer needed and is about to be garbage collected.
+     */
+    public void freeBoundObservables() {
+        _boundProps.forEach(Observable::unsubscribeAll);
+        _boundProps.clear();
+    }
 
     BoxModelConf getBoxModelConf() {
         return _styleEngine.getBoxModelConf();
@@ -178,7 +196,7 @@ public final class ComponentExtension<C extends JComponent>
 
     /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)}
-     *   to attach so called <i>group tags</i> to a component. <br>
+     *   to attach so-called <i>group tags</i> to a component. <br>
      *   They are used by the SwingTree style engine to apply
      *   styles with the same tags, which
      *   is conceptually similar to CSS classes. <br>
@@ -283,9 +301,9 @@ public final class ComponentExtension<C extends JComponent>
      *  This method returns the group tags associated with the component.
      *
      * @return The group tags associated with the component
-     *         in the form of an unmodifiable list of {@link String}s.
+     *         in the form of an unmodifiable tuple of {@link String}s.
      */
-    public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
+    public Tuple<String> getStyleGroups() { return Tuple.of(String.class, _styleGroups); }
 
     /**
      *  A style group is a tag which is used by the SwingTree style engine

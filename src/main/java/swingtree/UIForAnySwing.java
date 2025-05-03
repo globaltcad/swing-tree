@@ -80,19 +80,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
-        event.subscribe( () -> _runInUI( thisComponent::repaint ) );
+        ComponentExtension.from(thisComponent).storeBoundObservable(
+                event.subscribe( () -> _runInUI( thisComponent::repaint ) )
+            );
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Event event ) {
-        Observable.cast(event).subscribe(
-            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
-        );
+        ComponentExtension.from(thisComponent).storeBoundObservable(
+                event.observable().subscribe( () -> _runInUI(thisComponent::repaint) )
+            );
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Val<?> event ) {
-        Viewable.cast(event).subscribe(
-            Observer.ofWeak(thisComponent, innerComponent -> _runInUI(innerComponent::repaint) )
-        );
+        ComponentExtension.from(thisComponent).storeBoundObservable(
+                event.view().subscribe( () -> _runInUI(thisComponent::repaint) )
+            );
     }
 
     /**
@@ -2424,12 +2426,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
-                    Observable.cast(styleEvent).subscribe(Observer.ofWeak(thisComponent, (innerComponent)->{
-                        AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
-                            ComponentExtension.from(thisComponent)
-                                .addAnimatedStyler(status, conf -> styler.style(status, conf))
-                        );
-                    }));
+                    WeakReference<C> thisComponentRef = new WeakReference<>(thisComponent);
+                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                            styleEvent.observable().subscribe(()->{
+                                C innerComponent = thisComponentRef.get();
+                                if (innerComponent == null)
+                                    return;
+                                AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
+                                        ComponentExtension.from(thisComponent)
+                                                .addAnimatedStyler(status, conf -> styler.style(status, conf))
+                                );
+                            })
+                    );
+                    Observable.cast(styleEvent);
                 })
                 ._this();
     }
@@ -4545,7 +4554,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Here an example:
      *  <pre>{@code
      *  UI.label("I have a color animation!")
-     *  .on(viewModel.someEvent(), it ->
+     *  .onView(viewModel.someEvent(), it ->
      *    it.animateFor(3, TimeUnit.SECONDS, status -> {
      *      double r = status.progress();
      *      double g = 1 - status.progress();
@@ -4554,6 +4563,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    })
      *  )
      *  }</pre>
+     *  Use {@link #on(Observable, Action)} if you want to bind to a custom event system
+     *  executed on the application thread, instead of this method, which runs on the UI thread.
      *
      * @param observableEvent The {@link Observable} event to which the {@link Action} should be attached
      *                        and called on the UI thread when the event is fired in the view model.
@@ -4566,15 +4577,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   observableEvent.subscribe(() -> {
-                       _runInUI(() -> {
-                           try {
-                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
-                           } catch ( Exception ex ) {
-                               log.error("Error in view event action handler!", ex);
-                           }
-                       });
-                   });
+                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                        observableEvent.subscribe(() -> {
+                            _runInUI(() -> {
+                                try {
+                                    action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                                } catch ( Exception ex ) {
+                                    log.error("Error in view event action handler!", ex);
+                                }
+                            });
+                        })
+                    );
                })
                ._this();
     }
@@ -4599,10 +4612,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  how one could easily integrate a custom event system into SwingTree UIs.
      *  <br><br>
      *  <b>
-     *      Note that the provided {@link Observable} event is NOT expected to be part of the view model,
+     *      Note that the provided {@link Observable} event should NOT be part of the view model,
      *      but rather part of a custom event system that captures user input or other input
      *      which is not directly related to the business logic of the view model.
      *  </b>
+     *  Use {@link #onView(Observable, Action)} if you want to bind to a view model event,
+     *  which ensures that the event is being run in the UI thread, instead of this method,
+     *  which runs on the application thread.
      *
      * @param observableEvent The {@link Observable} event to which the {@link Action} should be attached.
      * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
@@ -4614,15 +4630,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   observableEvent.subscribe(() -> {
-                       _runInApp(() -> {
-                           try {
-                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
-                           } catch ( Exception ex ) {
-                               log.error("Error in custom event action handler!", ex);
-                           }
-                       });
-                   });
+                   ComponentExtension.from(thisComponent).storeBoundObservable(
+                       observableEvent.subscribe(() -> {
+                           _runInApp(() -> {
+                               try {
+                                   action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in custom event action handler!", ex);
+                               }
+                           });
+                       })
+                   );
                })
                ._this();
     }
@@ -4670,15 +4688,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    E observableEvent = eventSource.apply(thisComponent);
-                   observableEvent.subscribe(() -> {
-                       _runInApp(() -> {
-                           try {
-                               action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
-                           } catch ( Exception ex ) {
-                               log.error("Error in custom event action handler!", ex);
-                           }
-                       });
-                   });
+                   ComponentExtension.from(thisComponent).storeBoundObservable(
+                       observableEvent.subscribe(() -> {
+                           _runInApp(() -> {
+                               try {
+                                   action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
+                               } catch ( Exception ex ) {
+                                   log.error("Error in custom event action handler!", ex);
+                               }
+                           });
+                       })
+                   );
                })
                ._this();
     }
@@ -6043,11 +6063,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             log.warn(
                     "Broken binding to view model tuple detected! \n" +
                     "UI sub-component count '{}' does not match the bound tuple of size '{}'. \n" +
-                    "A possible cause for this is that components were {} to this '{}' \n" +
+                    "A possible cause for this is that components were {} this '{}' \n" +
                     "directly, instead of through the property tuple binding. \n" +
                     "However, this could also be a bug in the UI framework.",
                     innerComponent.getComponentCount(), tupleOfModels.size(),
-                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added" : "removed",
+                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added to" : "removed from",
                     innerComponent,
                     new Throwable()
                 );
