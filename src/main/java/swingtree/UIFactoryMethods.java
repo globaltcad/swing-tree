@@ -4490,6 +4490,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         return toggleButton().withIcon(icon);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance with
+     *  an {@link ImageIcon} displayed on it and the supplied {@link UI.FitComponent}
+     *  determining how the icon should be fit the content bounds of the button.
+     *
+     * @param icon The icon which should be displayed on the toggle button.
+     * @param fit The {@link UI.FitComponent} which determines how the icon should be fitted into the button.
+     * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButton( ImageIcon icon, UI.FitComponent fit ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         NullUtil.nullArgCheck(fit, "fit", UI.FitComponent.class);
@@ -4500,8 +4509,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use this to create a builder for the {@link JToggleButton} UI component
      *  with an icon displayed on it scaled according to the provided width and height.
      *
-     * @param width The width the icon should be scaled to.
-     * @param height The height the icon should be scaled to.
+     * @param width The width to which the icon should be scaled to.
+     * @param height The height to which the icon should be scaled to.
      * @param icon The icon to be displayed on top of the button.
      * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
      */
@@ -4514,8 +4523,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use this to create a builder for the {@link JToggleButton} UI component
      *  with an icon displayed on it scaled according to the provided width and height.
      *
-     * @param width The width the icon should be scaled to.
-     * @param height The height the icon should be scaled to.
+     * @param width The width to which the icon should be scaled to.
+     * @param height The height to which the icon should be scaled to.
      * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
      * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
      */
@@ -4529,8 +4538,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  displaying the provided icon
      *  scaled to fit the desired size and {@link UI.FitComponent} policy.
      *
-     * @param width The width the icon should be scaled to.
-     * @param height The height the icon should be scaled to.
+     * @param width The width to which the icon should be scaled to.
+     * @param height The height to which the icon should be scaled to.
      * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
      * @param fit The {@link UI.FitComponent} which determines how the icon should be fitted into the button.
      * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
@@ -4773,7 +4782,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param text The new text to be set for the wrapped text component type.
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
-    public static UIForTextField<JTextField> textField(UI.HorizontalAlignment orientation, String text ) {
+    public static UIForTextField<JTextField> textField( UI.HorizontalAlignment orientation, String text ) {
         NullUtil.nullArgCheck(orientation, "orientation", UI.HorizontalAlignment.class);
         return textField().withTextOrientation(orientation).withText(text);
     }
