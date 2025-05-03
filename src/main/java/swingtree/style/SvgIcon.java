@@ -1,9 +1,10 @@
 package swingtree.style;
 
 import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.attributes.ViewBox;
-import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
@@ -151,7 +152,7 @@ public final class SvgIcon extends ImageIcon
         SVGDocument tempSVGDocument = null;
         try {
             SVGLoader loader = new SVGLoader();
-            tempSVGDocument = loader.load(stream);
+            tempSVGDocument = loader.load(stream, null, LoaderContext.createDefault());
         } catch (Exception e) {
             log.error("Failed to load SVG document from stream: " + stream, e);
         }
@@ -362,13 +363,14 @@ public final class SvgIcon extends ImageIcon
      *  The underlying SVG document contains a size object, which
      *  is the width and height of the root SVG element inside the document.
      *
-     * @return The size of the SVG document in the form of a {@link FloatSize},
+     * @return The size of the SVG document in the form of a {@link Size},
      *         a subclass of {@link java.awt.geom.Dimension2D}.
      */
-    public FloatSize getSvgSize() {
+    public Size getSvgSize() {
         if ( _svgDocument == null )
-            return new FloatSize(0, 0);
-        return _svgDocument.size();
+            return Size.unknown();
+        FloatSize svgSize = _svgDocument.size();
+        return Size.of(svgSize.width, svgSize.height);
     }
 
     /**
