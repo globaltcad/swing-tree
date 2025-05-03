@@ -2426,12 +2426,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
-                    Observable.cast(styleEvent).subscribe(Observer.ofWeak(thisComponent, (innerComponent)->{
-                        AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
-                            ComponentExtension.from(thisComponent)
-                                .addAnimatedStyler(status, conf -> styler.style(status, conf))
-                        );
-                    }));
+                    WeakReference<C> thisComponentRef = new WeakReference<>(thisComponent);
+                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                            styleEvent.observable().subscribe(()->{
+                                C innerComponent = thisComponentRef.get();
+                                if (innerComponent == null)
+                                    return;
+                                AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
+                                        ComponentExtension.from(thisComponent)
+                                                .addAnimatedStyler(status, conf -> styler.style(status, conf))
+                                );
+                            })
+                    );
+                    Observable.cast(styleEvent);
                 })
                 ._this();
     }
