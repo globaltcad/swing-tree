@@ -5530,7 +5530,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a new {@link JTable} with a table model whose data can be represented based
-     *  on a list of lists of entries.  <br>
+     *  on a {@link java.util.List} of {@link java.util.List}s of entries.  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
      *  <p>
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
@@ -5558,7 +5558,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
      *
      * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
-     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @param dataSource The {@link TableMapDataSource} returning a column major map-based matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
@@ -5584,7 +5584,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * Instead, you can use ths fluent API provided by the {@link BasicTableModel.Builder} to create
      * a general purpose table model for your table.
      *
-     * @param tableModelBuildable A lambda function which takes in model builder
+     * @param tableModelBuildable A lambda function which takes in a model builder
      *                            and then returns a fully configured model builder
      *                            used as a basis for the table model.
      * @return This builder instance, to allow for further method chaining.
@@ -5621,7 +5621,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * receiving the fluent builder API provided by the {@link BasicTableModel.Builder}.
      *
      * @param itemType The type of the items in the entries of the table model.
-     * @param tableModelBuildable A lambda function which takes in model builder
+     * @param tableModelBuildable A lambda function which takes in a model builder
      *                            and then returns a fully configured model builder
      *                            used as a basis for the table model.
      * @return This builder instance, to allow for further method chaining.
@@ -5806,7 +5806,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use this to animate the contents of a property through using an {@link Animatable}
      *  instance holding a transformational function for the intended {@link AnimationStatus}
      *  based changes and a {@link LifeTime} defining the duration of the animation. <br>
-     *  Here how this method is may be used as part of a UI declaration: <br>
+     *  Here how this method can be used as part of a UI declaration: <br>
      *  <pre>{@code
      *    UI.button("Login").onClick( it -> {
      *      UI.animate(vm, LoginViewModel::withLoginAnimation);
@@ -6103,7 +6103,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  and the property will not be changed.
      *
      * @param question The message to show in the dialog.
-     * @param selected The enum based property to store the selected value in.
+     * @param selected The enum-based property to store the selected value in.
      * @param <E> The enum type.
      * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
@@ -6141,7 +6141,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param title    The title of the dialog.
      * @param message  The message to show in the dialog.
      * @param icon     The icon to show in the dialog.
-     * @param selected The enum based property to store the selected value in.
+     * @param selected The enum-based property to store the selected value in.
      * @param <E> The type parameter defining the concrete enum type.
      */
     public static <E extends Enum<E>> void ask( String title, String message, Icon icon, Var<E> selected ) {
@@ -6174,7 +6174,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  that allows the user to select and set a value from the provided enum based property.
      *
      * @param offer The message to show in the dialog.
-     * @param selectable The enum based property to store the selected value in.
+     * @param selectable The enum-based property to store the selected value in.
      * @param <E> The enum type.
      * @return A builder for creating a question dialog with a set of selectable enum values
      *         based on the provided array of enum values.
@@ -6223,7 +6223,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( UIForAnySwing<?, C> ui ) {
-        new TestWindow( "", f -> ui.getComponent() );
+        new TestWindow( "", f -> ui.get(ui.getType()) );
     }
 
     /**
@@ -6238,7 +6238,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( String title, UIForAnySwing<?, C> ui ) {
-        new TestWindow( title, f -> ui.getComponent() );
+        new TestWindow( title, f -> ui.get(ui.getType()) );
     }
 
     /**
