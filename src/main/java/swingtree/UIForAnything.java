@@ -614,17 +614,6 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
     }
 
-    private <T> void _onShow(
-        Ref<Val<T>>       propertyRef,
-        WeakReference<C>  weakComponent,
-        BiConsumer<C, T>  displayAction
-    ) {
-        Objects.requireNonNull(propertyRef);
-        Objects.requireNonNull(weakComponent);
-        Objects.requireNonNull(displayAction);
-        _onShowDelegated(propertyRef, weakComponent, (component, delegate) -> displayAction.accept(component, delegate.currentValue().orElseNull()));
-    }
-
     private <T> void _onShowDelegated(
         Ref<Val<T>>       propertyRef,
         WeakReference<C>  weakComponent,
@@ -633,26 +622,28 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         Objects.requireNonNull(propertyRef);
         Objects.requireNonNull(weakComponent);
         Objects.requireNonNull(displayAction);
-        Action<ValDelegate<T>> action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)->{
-            _runInUI(() ->
-                UI.run( () -> {
-                    try {
-                        displayAction.accept(localComponent, delegate); // Here the captured value is used. This is extremely important!
-                        /*
-                             Since this is happening in another thread we are using the captured property item/value.
-                             The property might have changed in the meantime, but we don't care about that,
-                             we want things to happen in the order they were triggered.
-                         */
-                    } catch ( Exception e ) {
-                        throw new RuntimeException(
-                            "Failed to apply state of property '" + propertyRef.get() + "' to " +
-                            "component '" + localComponent + "'.",
-                            e
-                        );
-                    }
-                })
-            );
-        });
+        Action<ValDelegate<T>> action = (delegate)->{
+            C localComponent = weakComponent.get();
+            if ( localComponent == null ) {
+                return;
+            }
+            _runInUI(() -> {
+                try {
+                    displayAction.accept(localComponent, delegate); // Here the captured delegate (and its value) is used. This is extremely important!
+                    /*
+                         Since this may be happening in another thread, we are using the captured property item/value.
+                         The property might have changed in the meantime, but we don't care about that,
+                         we want things to happen in the order they were triggered.
+                     */
+                } catch ( Exception e ) {
+                    throw new RuntimeException(
+                        "Failed to apply state of property '" + propertyRef.get() + "' to " +
+                        "component '" + localComponent + "'.",
+                        e
+                    );
+                }
+            });
+        };
         Optional.ofNullable(propertyRef.get()).ifPresent(
             property -> {
                 JComponent component = (JComponent) Objects.requireNonNull(weakComponent.get());
@@ -694,7 +685,11 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
     ) {
         Objects.requireNonNull(properties);
         Objects.requireNonNull(displayAction);
-        Action<ValsDelegate<T>> action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)->{
+        Action<ValsDelegate<T>> action = (delegate)->{
+            C localComponent = weakComponent.get();
+            if ( localComponent == null ) {
+                return;
+            }
             _runInUI(() ->{
                 displayAction.accept(localComponent, delegate);
                 /*
@@ -703,8 +698,15 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                     access the component, and we don't want to get a NPE.
                 */
             });
-        });
-        Viewables.cast(properties).onChange(action);
+        };
+        C component = weakComponent.get();
+        if (!(component instanceof JComponent)) {
+            log.error("Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ", new Throwable());
+            return;
+        }
+        Viewables<T> viewables = properties.view();
+        viewables.onChange(action);
+        ComponentExtension.from((JComponent) component).storeBoundObservable(viewables);
     }
 
     /**
