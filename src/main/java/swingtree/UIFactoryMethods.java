@@ -56,8 +56,8 @@ import java.util.function.Supplier;
  *      by the {@link UI} namespace class ONLY!
  *      <br>
  *      Please do not inherit or import this class
- *      in your own code, as it is not intended to be
- *      used outside of the {@link UI} namespace.
+ *      in your own code directly, as it is not intended
+ *      to be used outside the {@link UI} namespace.
  *  </b>
  */
 public abstract class UIFactoryMethods extends UILayoutConstants
@@ -134,12 +134,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * Returns the {@code Font} that the {@code fontString}
+     * Returns the {@code UI.Font} that the {@code fontString}
      * argument describes.
      * To ensure that this method returns the desired Font,
      * format the {@code fontString} parameter in
-     * one of these ways
-     *
+     * one of these ways:
      * <ul>
      * <li><em>fontname-style-pointsize</em>
      * <li><em>fontname-pointsize</em>
@@ -153,7 +152,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * in which <i>style</i> is one of the four
      * case-insensitive strings:
      * {@code "PLAIN"}, {@code "BOLD"}, {@code "BOLDITALIC"}, or
-     * {@code "ITALIC"}, and pointsize is a positive decimal integer
+     * {@code "ITALIC"}, and {@code pointsize} is a positive decimal integer
      * representation of the point size.
      * For example, if you want a font that is Arial, bold, with
      * a point size of 18, you would call this method with:
@@ -163,14 +162,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * and the values are interpreted as specified by that constructor.
      * <p>
      * A valid trailing decimal field is always interpreted as the pointsize.
-     * Therefore a fontname containing a trailing decimal value should not
-     * be used in the fontname only form.
+     * Therefore, a {@code fontname} containing a trailing decimal value should not
+     * be used in the {@code fontname} only form.
      * <p>
      * If a style name field is not one of the valid style strings, it is
      * interpreted as part of the font name, and the default style is used.
      * <p>
      * Only one of ' ' or '-' may be used to separate fields in the input.
-     * The identified separator is the one closest to the end of the string
+     * The identified separator is the one closest to the end of the string,
      * which separates a valid pointsize, or a valid style name from
      * the rest of the string.
      * Null (empty) pointsize and style fields are treated
@@ -183,7 +182,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * character determined to be the separator character
      * then these characters where they appear as intended to be part of
      * {@code fontname} may instead be interpreted as separators
-     * so the font name may not be properly recognised.
+     * so the font name may not be properly recognized.
      *
      * <p>
      * The default size is 12 and the default style is PLAIN.
@@ -553,7 +552,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  }</pre>
      *  <br>
      *  ... or as part of a UI declaration, where the custom {@link JBox} type
-     *  is added to the components tree, like so: <br>
+     *  is added to the component tree, like so: <br>
      *  <pre>{@code
      *  UI.show(
      *      UI.panel()
@@ -694,7 +693,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  and a {@link MigLayout} constructed using the provided constraints. <br>
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
-     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  is to tightly store and wrap other subcomponents seamlessly...</b>
      *  <p>
      *  <br>
      *  This method allows you to pass a {@link LayoutConstraint} constants as the layout attributes,
@@ -729,7 +728,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  and a {@link MigLayout} constructed using the provided constraints. <br>
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
-     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  is to tightly store and wrap other subcomponents seamlessly...</b>
      *  <p>
      *  This method allows you to pass a {@link LayoutConstraint} constants as the layout attributes,
      *  which is an instance typically chosen from the {@link UI} class constants
@@ -740,7 +739,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *      .add(..)
      *      .add(..)
      *  }</pre>
-     *  In this code snippet the creates a {@link JBox} with a {@link MigLayout} as its layout manager
+     *  In this code snippet that creates a {@link JBox} with a {@link MigLayout} as its layout manager
      *  where the box will fill the parent component horizontally and vertically
      *  and the first column of components will be shrunk to their preferred size
      *  and the second column will grow to fill the available space.
@@ -768,7 +767,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <br>
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
-     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  is to tightly store and wrap other subcomponents seamlessly...</b>
      *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
@@ -809,14 +808,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is conceptually the same as a
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This is essentially a convenience method which may also be expressed as: <br>
+     *  This is essentially a convenience method that can also be expressed as: <br>
      *  <pre>{@code
      *      UI.of(new JBox(new MigLayout(attr, colConstraints)))
      *  }</pre>
      *  <br>
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
-     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  is to tightly store and wrap other subcomponents seamlessly...</b>
      *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
@@ -1177,7 +1176,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use this to create a builder for the {@link JButton} UI component
      *  with a default icon as well as a hover icon displayed on top.
      *  The icons are determined based on the provided {@link IconDeclaration}
-     *  instances which is conceptually merely a resource paths to the icons.
+     *  instances which is conceptually merely a resource path to the icons.
      *
      * @param icon The default icon to be displayed on top of the button.
      * @param onHover The hover icon to be displayed on top of the button.
@@ -1232,7 +1231,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  with a default icon as well as a hover icon displayed on top
      *  which should both be scaled to the provided dimensions.
      *  The icons are determined based on the provided {@link IconDeclaration}
-     *  instances which is conceptually merely a resource paths to the icons.
+     *  instances which is conceptually merely a resource path to the icons.
      *
      * @param width The width the icons should be scaled to.
      * @param height The height the icons should be scaled to.
@@ -1383,7 +1382,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * <p>
      * Note that the text displayed on the split button is based on the
      * supplied {@link Function} which converts the enum instances to strings.
-     * In this function you may for example convert 'Size.LARGE' to 'Large' instead of 'LARGE'.
+     * In this function you may, for example, convert 'Size.LARGE' to 'Large' instead of 'LARGE'.
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -1480,7 +1479,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to add property bound entries to the {@link JSplitButton} by
+     *  Use this to add property-bound entries to the {@link JSplitButton} by
      *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
      *  <pre>{@code
      *      UI.splitButton("Button")
@@ -1536,7 +1535,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JTabbedPane())}.
-     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *
      *  <pre>{@code
@@ -1580,7 +1579,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
      *  with the provided {@link UI.OverflowPolicy} and {@link UI.Side} applied to the tab buttons
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)} and {@link JTabbedPane#setTabPlacement(int)}).
-     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *  <pre>{@code
      *      UI.tabbedPane(UI.Side.LEFT, UI.OverflowPolicy.WRAP)
@@ -1603,7 +1602,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
      *  with the provided {@link UI.OverflowPolicy} applied to the tab buttons (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
-     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
      *  <pre>{@code
      *      UI.tabbedPane(UI.OverflowPolicy.SCROLL)
@@ -1963,7 +1962,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  are heavy objects whose loading may or may not succeed. Therefore, they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
-     *  lightweight and error tolerant value based object that merely
+     *  lightweight and error tolerant value-based object that merely
      *  models the resource location of the icon. It can exist even if the target
      *  icon is not yet loaded or does not exist at all.
      *  <p>
@@ -2154,7 +2153,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  A factory method to create a {@link JRadioButtonMenuItem} with some custom text and a boolean property,
-     *  dynamically determining whether the radio button based menu item is selected or not. <br>
+     *  dynamically determining whether the radio-button-based menu item is selected or not. <br>
      *  Here an example demonstrating the usage of this method: <br>
      *  <pre>{@code
      *    // inside your view model class:
@@ -2181,7 +2180,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  A factory method to create a {@link JRadioButtonMenuItem} with some custom text and a boolean property,
-     *  dynamically determining whether the radio button based menu item is selected or not. <br>
+     *  dynamically determining whether the radio-button-based menu item is selected or not. <br>
      *  Here an example demonstrating the usage of this method: <br>
      *  <pre>{@code
      *    // inside your view model class:
@@ -2311,7 +2310,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @param text The text which should be displayed on the wrapped {@link JCheckBoxMenuItem}.
      * @param isSelected The boolean property which will be bound to the menu item to dynamically
-     *                   determines whether the menu item is selected or not.
+     *                   determine whether the menu item is selected or not.
      * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
      */
     public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( String text, Var<Boolean> isSelected ) {
@@ -2372,7 +2371,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for the provided {@link JToolBar} instance.
-     *  Using method chaining you can populate the {@link JToolBar} by like so: <br>
+     *  Using method chaining, you can populate the {@link JToolBar} by like so: <br>
      *  <pre>{@code
      *    UI.of(myToolBar)
      *    .add(UI.button("X"))
