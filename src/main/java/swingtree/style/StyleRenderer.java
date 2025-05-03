@@ -1,6 +1,6 @@
 package swingtree.style;
 
-import com.github.weisj.jsvg.geometry.size.FloatSize;
+import com.github.weisj.jsvg.view.FloatSize;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
@@ -8,7 +8,6 @@ import swingtree.api.Painter;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
-import javax.swing.ImageIcon;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.AffineTransformOp;
@@ -1142,9 +1141,9 @@ final class StyleRenderer
             }
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon   svgIcon = (SvgIcon) imageIcon;
-                FloatSize size    = svgIcon.getSvgSize();
-                imgWidth  = imgWidth  >= 0 ? imgWidth  : (int) size.width;
-                imgHeight = imgHeight >= 0 ? imgHeight : (int) size.height;
+                Size size = svgIcon.getSvgSize();
+                imgWidth  = imgWidth  >= 0 ? imgWidth  : size.width().map(Number::intValue).orElse(0);
+                imgHeight = imgHeight >= 0 ? imgHeight : size.height().map(Number::intValue).orElse(0);
             }
             int x = style.horizontalOffset();
             int y = style.verticalOffset();
