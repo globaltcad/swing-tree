@@ -7,8 +7,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.Event;
 import sprouts.*;
+import sprouts.Event;
 import swingtree.animation.*;
 import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
@@ -2698,7 +2698,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JTextPane}, which enables fluent method chaining.
      */
     public static UIForTextPane<JTextPane> textPane() {
-        return new UIForTextPane<>(new BuilderState<>(UI.TextPane.class, ()->new UI.TextPane()));
+        return new UIForTextPane<>(new BuilderState<>(UI.TextPane.class, UI.TextPane::new));
     }
 
     /**
@@ -5386,7 +5386,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Creates a new {@link JList} instance builder
-     *  with the provided array as data model.
+     *  with the provided array as a data model.
      *  This is functionally equivalent to {@link #listOf(Object...)}.
      *
      * @param elements The elements which should be used as model data for the new {@link JList}.
@@ -5396,7 +5396,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     @SafeVarargs
     public static <E> UIForList<E, JList<E>> list( E... elements ) {
         NullUtil.nullArgCheck(elements, "elements", Object[].class);
-        return new UIForList<>(new BuilderState<JList<E>>(UI.ListView.class, ()->new UI.ListView<E>()))
+        return new UIForList<>(new BuilderState<JList<E>>(UI.ListView.class, UI.ListView::new))
                 .withEntries( elements );
     }
 
@@ -6251,7 +6251,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static void show( Function<JFrame, java.awt.Component> uiSupplier ) {
         Objects.requireNonNull( uiSupplier );
-        new TestWindow( "", frame -> uiSupplier.apply(frame) );
+        new TestWindow( "", uiSupplier);
     }
 
     /**
@@ -6265,7 +6265,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static void show( String title, Function<JFrame, java.awt.Component> uiSupplier ) {
         Objects.requireNonNull( uiSupplier );
-        new TestWindow( title, frame -> uiSupplier.apply(frame) );
+        new TestWindow( title, uiSupplier);
     }
 
     /**
@@ -6343,9 +6343,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             T result = scope.get();
             if ( result instanceof JComponent )
                 ComponentExtension.from((JComponent) result).gatherApplyAndInstallStyle(true);
-            if ( result instanceof UIForAnySwing )
-                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).gatherApplyAndInstallStyle(true);
-
+            if ( result instanceof UIForAnySwing ) {
+                UIForAnySwing<?,JComponent> resultSwing = (UIForAnySwing) result;
+                ComponentExtension.from(resultSwing.get(resultSwing.getType()))
+                        .gatherApplyAndInstallStyle(true);
+            }
             return result;
         } finally {
             swingTreeContext.setStyleSheet(oldStyleSheet);
@@ -6679,7 +6681,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 }
         }
         if ( path.endsWith(".svg") ) {
-            SVGDocument tempSVGDocument = null;
+            SVGDocument tempSVGDocument;
             try {
                 SVGLoader loader = new SVGLoader();
                 tempSVGDocument = Objects.requireNonNull(loader.load(url));
