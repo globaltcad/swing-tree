@@ -6063,11 +6063,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             log.warn(
                     "Broken binding to view model tuple detected! \n" +
                     "UI sub-component count '{}' does not match the bound tuple of size '{}'. \n" +
-                    "A possible cause for this is that components were {} to this '{}' \n" +
+                    "A possible cause for this is that components were {} this '{}' \n" +
                     "directly, instead of through the property tuple binding. \n" +
                     "However, this could also be a bug in the UI framework.",
                     innerComponent.getComponentCount(), tupleOfModels.size(),
-                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added" : "removed",
+                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added to" : "removed from",
                     innerComponent,
                     new Throwable()
                 );
