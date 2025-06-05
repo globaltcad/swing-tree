@@ -5442,13 +5442,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 for ( int i = 0; i < currentValues.size(); i++ )
                     _addComponentAt( i, currentValues.at(i).orElseNull(), viewSupplier, attr, innerComponent );
         }
-        if ( innerComponent.getComponentCount() != delegate.currentValues().size() )
+        int componentCount = InternalUtil._actualComponentCountFrom(innerComponent);
+        if ( componentCount != delegate.currentValues().size() )
             log.warn(
                     "Broken binding to view model list detected! \n" +
-                    "UI sub-component count '"+innerComponent.getComponentCount()+"' " +
+                    "UI sub-component count '"+componentCount+"' " +
                     "does not match viewable models list of size '"+delegate.currentValues().size()+"'. \n" +
                     "A possible cause for this is that components " +
-                    "were " + ( innerComponent.getComponentCount() > delegate.currentValues().size() ? "added" : "removed" ) + " " +
+                    "were " + ( componentCount > delegate.currentValues().size() ? "added" : "removed" ) + " " +
                     "to this '" + innerComponent + "' \ndirectly, instead of through the property list binding. \n" +
                     "However, this could also be a bug in the UI framework.",
                     new Throwable()
@@ -5510,9 +5511,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 if ( currentSubView == null || currentParent == null ) {
                     return initialIndex;
                 }
-                for ( int i = 0; i < currentParent.getComponentCount(); i++ ) {
+                int componentCount = InternalUtil._actualComponentCountFrom(currentParent);
+                for ( int i = 0; i < componentCount; i++ ) {
                     try {
-                        Component child = currentParent.getComponent(i);
+                        Component child = InternalUtil._actualGetComponentAt(i, currentParent);
                         if (child instanceof JScrollPanels.EntryPanel) {
                             child = ((JScrollPanels.EntryPanel) child).getComponent(0);
                         }
@@ -5659,7 +5661,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 } else {
                     // Remove trailing components:
-                    for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
+                    int componentCount = InternalUtil._actualComponentCountFrom(c);
+                    for ( int i = (componentCount - 1); i >= (index + count); i-- )
                         _removeComponentAt(i, c);
                     // Remove leading components:
                     for ( int i = (index - 1); i >= 0; i-- )
@@ -5767,7 +5770,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 } else {
                     // Remove trailing components:
-                    for ( int i = (c.getComponentCount() - 1); i >= (index + count); i-- )
+                    int componentCount = InternalUtil._actualComponentCountFrom(c);
+                    for ( int i = (componentCount - 1); i >= (index + count); i-- )
                         _removeComponentAt(i, c);
                     // Remove leading components:
                     for ( int i = (index - 1); i >= 0; i-- )
@@ -5826,7 +5830,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         C thisComponent, Val<M> viewable, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = thisComponent.getComponentCount();
+        final int index = InternalUtil._actualComponentCountFrom(thisComponent);
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() ) {
@@ -5878,7 +5882,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = c.getComponent(index);
+        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
             // We remove the old component.
             c.remove(currentComponentAtIndex);
@@ -5911,7 +5915,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = c.getComponent(index);
+        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);;
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
             // We remove the old component.
             c.remove(currentComponentAtIndex);
@@ -5991,7 +5995,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 new Throwable()
             );
         } else {
-            int numberOfExistingComponents = thisComponent.getComponentCount();
+            int numberOfExistingComponents = InternalUtil._actualComponentCountFrom(thisComponent);
             if (index >= numberOfExistingComponents) {
                 log.error(
                     "Cannot remove sub-component of '" + thisComponent + "' \n" +
@@ -6001,7 +6005,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 );
             } else {
                 // We get the component at the specified index.
-                Component component = thisComponent.getComponent(index);
+                Component component = InternalUtil._actualGetComponentAt(index, thisComponent);
                 if ( component == null ) {
                     log.error(
                         "Cannot remove sub-component of '" + thisComponent + "' \n" +
@@ -6023,13 +6027,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         JComponent contentComponent = (thisComponent instanceof JScrollPanels
                                         ? ((JScrollPanels)thisComponent).getContentPanel()
                                         : thisComponent);
-        if ( contentComponent.getComponentCount() > 0 ) {
+        int componentCount = InternalUtil._actualComponentCountFrom(contentComponent);
+        if ( componentCount > 0 ) {
             log.error(
                 "Trying to bind multiple sub-views to component '{}' despite it already being \n" +
                 "the owner of '{}' sub-components added before the 'addAll' binding call! \n" +
                 "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
                 "add sub-views through a regular 'add' or any other way. Clearing component now...",
-                    contentComponent, contentComponent.getComponentCount(), new Throwable()
+                    contentComponent, componentCount, new Throwable()
             );
             _clearComponentsOf(contentComponent);
         }
@@ -6039,7 +6044,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         JComponent innerComponent, ValDelegate<Tuple<T>> changeDelegate
     ) {
         boolean isCurrentStateValid = true;
-        int currentComponentCount = innerComponent.getComponentCount();
+        int currentComponentCount = InternalUtil._actualComponentCountFrom(innerComponent);
         int expectedComponentCount = changeDelegate.oldValue().mapTo(Integer.class, Tuple::size).orElse(currentComponentCount);
         if ( currentComponentCount != expectedComponentCount ) {
             log.error(
@@ -6059,15 +6064,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         JComponent innerComponent, ValDelegate<Tuple<T>> changeDelegate
     ) {
         Tuple<T> tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();
-        if ( innerComponent.getComponentCount() != tupleOfModels.size() )
+        int currentComponentCount = InternalUtil._actualComponentCountFrom(innerComponent);
+        if ( currentComponentCount != tupleOfModels.size() )
             log.warn(
                     "Broken binding to view model tuple detected! \n" +
                     "UI sub-component count '{}' does not match the bound tuple of size '{}'. \n" +
                     "A possible cause for this is that components were {} this '{}' \n" +
                     "directly, instead of through the property tuple binding. \n" +
                     "However, this could also be a bug in the UI framework.",
-                    innerComponent.getComponentCount(), tupleOfModels.size(),
-                    innerComponent.getComponentCount() > tupleOfModels.size() ? "added to" : "removed from",
+                    currentComponentCount, tupleOfModels.size(),
+                    currentComponentCount > tupleOfModels.size() ? "added to" : "removed from",
                     innerComponent,
                     new Throwable()
                 );
@@ -6084,7 +6090,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private void _reverseComponentsOf(C thisComponent ) {
         // save to a list
         List<Component> components = new ArrayList<>();
-        Collections.addAll(components, thisComponent.getComponents());
+        Collections.addAll(components, InternalUtil._actualComponentsFrom(thisComponent));
         // We remove all components.
         thisComponent.removeAll();
         // Reverse the list
