@@ -6403,12 +6403,18 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 try {
                     c = UI.runAndGet(() -> uiSupplier.apply(frame));
                 } catch (Exception e) {
-                    log.error("Error trying to create a UI component for a new JFrame.", e);
+                    log.error("Error trying to create UI component for display in new JFrame, using supplier function '{}'.", uiSupplier, e);
                 }
             }
             else
                 c = uiSupplier.apply(frame);
 
+            if ( c == null ) {
+                log.error(
+                        "Failed to create a UI component for a new JFrame using supplier function '{}'.", uiSupplier,
+                        new Throwable()
+                    );
+            }
             this.component = c;
             UI.runNow(()->{
                 frame.add(component);
