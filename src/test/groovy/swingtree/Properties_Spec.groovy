@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.MissingItemRuntimeException
 import sprouts.Val
 import sprouts.Var
 
@@ -168,8 +169,8 @@ class Properties_Spec extends Specification
             Val<Long> property = Val.ofNullable(Long, null)
         when : 'We try to access the value of the property.'
             property.get()
-        then : 'The property will throw an exception.'
-            thrown(NoSuchElementException)
+        then : 'The property will throw an exception indicating that the item is missing.'
+            thrown(MissingItemRuntimeException)
     }
 
     def 'The equality and hash code of a mutable property is based on its identity!'()
