@@ -9,6 +9,27 @@ final class InternalUtil
 {
     private InternalUtil() {}
 
+    static int _actualComponentCountFrom(Container container) {
+        if ( container instanceof JMenu ) {
+            return ((JMenu) container).getMenuComponentCount();
+        }
+        return container.getComponentCount();
+    }
+
+    static Component[] _actualComponentsFrom(Container container) {
+        if ( container instanceof JMenu ) {
+            return ((JMenu) container).getMenuComponents();
+        }
+        return container.getComponents();
+    }
+
+    static Component _actualGetComponentAt(int index, Container container) {
+        if ( container instanceof JMenu ) {
+            return ((JMenu) container).getMenuComponent(index);
+        }
+        return container.getComponent(index);
+    }
+
     static void _traverseEnable(Component c, boolean isEnabled ) {
         c.setEnabled( isEnabled );
         if ( JPanel.class.isAssignableFrom( c.getClass() ) || JBox.class.isAssignableFrom( c.getClass() ) )

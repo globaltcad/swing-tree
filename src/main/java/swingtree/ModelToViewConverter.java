@@ -47,8 +47,8 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
     void rememberCurrentViewsForReuse() {
         JComponent parent = _subViewParent();
         if ( parent != null ) {
-            for ( int vi = 0; vi < parent.getComponentCount(); vi++ ) {
-                Component child = parent.getComponent(vi);
+            for ( int vi = 0; vi < InternalUtil._actualComponentCountFrom(parent); vi++ ) {
+                Component child = InternalUtil._actualGetComponentAt(vi, parent);
                 if ( child instanceof JComponent ) {
                     childComponents.add((JComponent) child);
                 }
@@ -102,14 +102,14 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
             for ( JComponent existingSubView : this.childComponents ) {
                 if ( existingSubView instanceof JScrollPanels.EntryPanel ) {
                     JScrollPanels.EntryPanel entryPanel = (JScrollPanels.EntryPanel) existingSubView;
-                    Component[] components = entryPanel.getComponents();
+                    Component[] components = InternalUtil._actualComponentsFrom(entryPanel);
                     if ( components.length == 0 || !(components[0] instanceof JComponent) )
                         continue;
                     JComponent actualView = (JComponent) components[0];
                     Object foundId = actualView.getClientProperty(UNIQUE_VIEW_CACHE_KEY);
                     if ( Objects.equals(id, foundId) ) {
                         actualView.putClientProperty(UNIQUE_VIEW_CACHE_KEY, id);
-                        return (JComponent) existingSubView.getComponent(0);
+                        return (JComponent) InternalUtil._actualGetComponentAt(0, existingSubView);
                     }
                 } else {
                     Object foundId = existingSubView.getClientProperty(UNIQUE_VIEW_CACHE_KEY);
