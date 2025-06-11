@@ -12,8 +12,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- *  A library internal object for modelling the state of a builder node,
+ *  A library internal object for modeling the state of a builder node,
  *  in particular the component wrapped by the builder node.
+ *  This is a short-lived object only intended to be used
+ *  during the building of a component, but never after.
  *
  * @param <C> The type of the component wrapped by the builder node.
  */
@@ -39,19 +41,19 @@ final class BuilderState<C extends java.awt.Component>
          */
         FUNCTIONAL_FACTORY_BUILDER,
         /**
-         *  Builder states get disposed after being used for building.
+         *  Builder states get disposed of after being used for building.
          */
         DECLARATIVE_ONLY,
         /**
-         *  Builder states do not get disposed after being used for building.
+         *  Builder states do not get disposed of after being used for building.
          */
         PROCEDURAL_OR_DECLARATIVE
     }
 
     /**
      *  A builder can either be used in declarative or procedural mode.
-     *  In declarative mode, builder nodes get disposed after being used for building.
-     *  In procedural mode, builder nodes do not get disposed after being used for building,
+     *  In declarative mode, builder nodes get disposed of after being used for building.
+     *  In procedural mode, builder nodes do not get disposed of after being used for building,
      *  meaning that a builder node can be reused for component mutations.
      */
     private final Mode _mode;
@@ -177,9 +179,9 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
-     *  A builder may be disposed, which means that it is no longer usable for building
+     *  A builder may be disposed of, which means that it is no longer usable for building
      *  as it no longer has a reference to the component or built steps. <br>
-     *  @return True if this builder node has already been disposed.
+     *  @return True if this builder node has already been disposed of.
      */
     boolean isDisposed() {
         return _componentFetcher == null;
@@ -194,7 +196,7 @@ final class BuilderState<C extends java.awt.Component>
      * @param componentMutator A consumer which mutates the component managed by this builder.
      * @return In procedural mode, this very builder node is returned.
      *         In declarative mode, a new builder node is returned which is a copy of this builder node,
-     *         and this builder node is disposed.
+     *         and this builder node is disposed of.
      *         Either way, the component managed by this builder is mutated by the provided consumer.
      */
     BuilderState<C> withMutator( Consumer<C> componentMutator )
@@ -212,9 +214,7 @@ final class BuilderState<C extends java.awt.Component>
                     componentMutator.accept(_componentFetcher.get());
             } catch ( Exception e ) {
                 e.printStackTrace();
-                log.error(
-                    "Exception while building component of type '" + _componentType.getSimpleName() + "'.", e
-                );
+                log.error("Exception while building component of type '{}'.", _componentType.getSimpleName(), e);
                 /*
                     If individual steps in the builder chain throw exceptions,
                     we do not want the entire GUI declaration to fail

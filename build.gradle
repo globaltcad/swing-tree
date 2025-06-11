@@ -51,8 +51,8 @@ dependencies {
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M18'
-    api group: 'com.github.weisj',     name: 'jsvg',            version: '1.7.0'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M19'
+    api group: 'com.github.weisj',     name: 'jsvg',            version: '2.0.0'
 
     // Logging :
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '[1+, )'
