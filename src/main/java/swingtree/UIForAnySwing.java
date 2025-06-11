@@ -5054,7 +5054,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a property list not supported.", new Throwable());
+                    } else {
                     _bindTo( models, null, viewSupplier, thisComponent );
+                    }
                 })
                 ._this();
     }
@@ -5090,7 +5094,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(attr, "attr");
         Objects.requireNonNull(models, "models");
         return _with( thisComponent -> {
-                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a property list not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, () -> attr, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5126,7 +5134,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, attr, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a property list not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, attr, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5160,7 +5172,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, null, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, null, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5197,7 +5213,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, () -> attr, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5233,7 +5253,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, attr, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, attr, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5270,7 +5294,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, null, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, null, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5310,7 +5338,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, ()->attr, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, () -> attr, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
@@ -5349,7 +5381,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
-                    _bindTo( models, attr, viewSupplier, thisComponent );
+                    if ( thisComponent instanceof JComboBox ) {
+                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                    } else {
+                        _bindTo(models, attr, viewSupplier, thisComponent);
+                    }
                 })
                 ._this();
     }
