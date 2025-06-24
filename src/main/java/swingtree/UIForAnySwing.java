@@ -12,7 +12,6 @@ import sprouts.*;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.Observable;
-import sprouts.Observer;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.animation.AnimationDispatcher;
@@ -5436,9 +5435,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     for ( int i = 0; i < delegate.currentValues().size(); i++ )
                         _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
                 } else {
+                    Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(innerComponent));
+                    List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = 0; i < newValues.size(); i++ ) {
                         int position = i + index;
-                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
+                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent, componentSnapshot, alreadyRemoved);
                     }
                 }
                 break;
@@ -5727,8 +5728,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _clearComponentsOf(c); // We do a simple re-build
                     _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 } else {
+                    Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
+                    List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = index; i < (index + count); i++ )
-                        _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                        _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
                 }
                 break;
             case ADD:
@@ -5957,11 +5960,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
+        _onShow( viewable, thisComponent, (c,v) -> {
+            Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
+            List<Integer> alreadyRemoved = new ArrayList<>();
+            _updateComponentAt(index, v, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
+        });
     }
 
     private <M> void _updateComponentAt(
-        int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C c
+        int index,
+        @Nullable M v,
+        ViewSupplier<M> viewSupplier,
+        @Nullable AddConstraint attr, C c,
+        Tuple<Component> componentSnapshot,
+        List<Integer> alreadyRemoved
     ) {
         JComponent newComponent;
         if ( v == null ) {
@@ -5978,10 +5990,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);
+        Component currentComponentAtIndex = componentSnapshot.get(index);
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
-            // We remove the old component.
-            c.remove(currentComponentAtIndex);
+            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);
+            if ( indexOfNewComponent >= 0 ) {
+                // The component already exists! We remove it
+                c.remove(newComponent);
+                alreadyRemoved.add(indexOfNewComponent);
+            }
+            if ( !alreadyRemoved.contains(index) ) {
+                // We remove the old component.
+                c.remove(currentComponentAtIndex);
+            }
             // We add the new component:
             if ( attr == null )
                 c.add(newComponent, index);

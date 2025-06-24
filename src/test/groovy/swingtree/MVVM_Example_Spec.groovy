@@ -988,7 +988,10 @@ class MVVM_Example_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
-            //[0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
@@ -1043,7 +1046,10 @@ class MVVM_Example_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
-            //[0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
@@ -1099,6 +1105,9 @@ class MVVM_Example_Spec extends Specification
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
             [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
@@ -1154,6 +1163,9 @@ class MVVM_Example_Spec extends Specification
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
             [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
