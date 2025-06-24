@@ -5951,8 +5951,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);;
+        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
+            final int initialComponentCount = InternalUtil._actualComponentCountFrom(c);
             // We remove the old component.
             c.remove(currentComponentAtIndex);
             // We add the new component:
@@ -5963,6 +5964,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             // We update the layout.
             c.revalidate();
             c.repaint();
+            final int componentCountAfter = InternalUtil._actualComponentCountFrom(c);
+            if ( initialComponentCount != componentCountAfter ) {
+                throw new IllegalStateException(
+                    "Failed to update component at index '"+index+"' on component '"+c+"'.\n" +
+                    "There should be '"+initialComponentCount+"' components, but now there are '"+componentCountAfter+"'!"
+                );
+            }
         }
     }
 
