@@ -5836,8 +5836,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _clearComponentsOf(c); // We do a simple re-build
                     _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 } else {
+                    Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
+                    List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = index; i < (index + count); i++ )
-                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
                 }
                 break;
             case ADD:
@@ -5992,7 +5994,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateComponentAt(
-        int index, Var<Tuple<M>> v, ViewSupplier<ViewHandle<M>> viewSupplier, @Nullable AddConstraint attr, C c
+        int index,
+        Var<Tuple<M>> v,
+        ViewSupplier<ViewHandle<M>> viewSupplier,
+        @Nullable AddConstraint attr,
+        C c,
+        Tuple<Component> componentSnapshot,
+        List<Integer> alreadyRemoved
     ) {
         JComponent newComponent;
         if ( v == null ) {
@@ -6009,11 +6017,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);
+        Component currentComponentAtIndex = componentSnapshot.get(index);
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
-            final int initialComponentCount = InternalUtil._actualComponentCountFrom(c);
-            // We remove the old component.
-            c.remove(currentComponentAtIndex);
+            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);
+            if ( indexOfNewComponent >= 0 ) {
+                // The component already exists! We remove it
+                c.remove(newComponent);
+                alreadyRemoved.add(indexOfNewComponent);
+            }
+            if ( !alreadyRemoved.contains(index) ) {
+                // We remove the old component.
+                c.remove(currentComponentAtIndex);
+            }
             // We add the new component:
             if ( attr == null )
                 c.add(newComponent, index);
@@ -6022,13 +6037,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             // We update the layout.
             c.revalidate();
             c.repaint();
-            final int componentCountAfter = InternalUtil._actualComponentCountFrom(c);
-            if ( initialComponentCount != componentCountAfter ) {
-                throw new IllegalStateException(
-                    "Failed to update component at index '"+index+"' on component '"+c+"'.\n" +
-                    "There should be '"+initialComponentCount+"' components, but now there are '"+componentCountAfter+"'!"
-                );
-            }
         }
     }
 
