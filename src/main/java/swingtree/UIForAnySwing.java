@@ -5642,7 +5642,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 log.error(
                     "Failed to perform an informed tuple bound view update, \n" +
                     "using sequence diff '{}' and models '{}'.",
-                    tupleOfModels, e
+                    diff, tupleOfModels, e
                 );
                 success = false;
             }
@@ -5738,7 +5738,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 log.error(
                     "Failed to perform an informed tuple bound view update, \n" +
                     "using sequence diff '{}' and models '{}'.",
-                    tupleOfModels, e
+                    diff, tupleOfModels, e
                 );
                 success = false;
             }
