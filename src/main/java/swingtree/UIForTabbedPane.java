@@ -19,9 +19,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -890,8 +888,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         Supplier<Integer> indexFinder = _indexFinderFor(paneRef, contentRef);
 
         tab.onSelection()
-            .ifPresent(onSelection ->
-                p.addChangeListener(e -> {
+            .ifPresent(onSelection -> {
+                OnSelectionMultiplexer.of(p).set(p, index, e -> {
                     JTabbedPane tabbedPane = paneRef.get();
                     if (tabbedPane == null) return;
                     int i = indexFinder.get();
@@ -903,8 +901,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                 log.error("Error while executing action on tab selection!", ex);
                             }
                         });
-                })
-            );
+                });
+            });
 
         TabMouseClickListener mouseListener = new TabMouseClickListener(p, indexFinder, tab.onMouseClick().orElse(null));
 
@@ -941,6 +939,45 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         tab.isSelected().ifPresent(isSelected -> _onShow(isSelected, p, (c, s) -> _selectTab(c, indexFinder.get(), s)));
 
         tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));
+    }
+
+    private static final class OnSelectionMultiplexer implements ChangeListener {
+        static OnSelectionMultiplexer of(JTabbedPane pane) {
+            ComponentExtension<JTabbedPane> extension = ComponentExtension.from(pane);
+            OnSelectionMultiplexer found = extension.getOrSet(OnSelectionMultiplexer.class, ()->new OnSelectionMultiplexer(pane));
+            return found;
+        }
+
+        private final Map<Integer, ChangeListener> _subListeners = new HashMap<>();
+
+        private OnSelectionMultiplexer(JTabbedPane pane) {
+            pane.addChangeListener(this);
+        }
+
+        void set(JTabbedPane pane, int index, ChangeListener listener) {
+            _subListeners.put(index, listener);
+        }
+
+        private void _cleanup(JTabbedPane pane) {
+            int numberOfTabs = pane.getTabCount();
+            for ( int i : _subListeners.keySet()) {
+                if ( i < 0 || i >= numberOfTabs ) {
+                    _subListeners.remove(i);
+                }
+            }
+        }
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            _cleanup((JTabbedPane)e.getSource());
+            for ( ChangeListener listener : _subListeners.values() ) {
+                try {
+                    listener.stateChanged(e);
+                } catch (Exception ex) {
+                    log.error("Error while executing action on tab selection!", ex);
+                }
+            }
+        }
     }
 
     private static boolean _isSuppliedTabIndexSelected(Supplier<Integer> indexOfCurrent, int newIndex) {
