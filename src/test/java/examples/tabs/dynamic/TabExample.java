@@ -1,5 +1,6 @@
 package examples.tabs.dynamic;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import org.jspecify.annotations.NullMarked;
 import sprouts.Vars;
 import swingtree.Tab;
@@ -73,6 +74,7 @@ public class TabExample extends JPanel {
     }
 
     public static void main(String[] args) {
+        FlatLightLaf.setup();
         UI.show(f -> new TabExample());
     }
 
@@ -91,6 +93,9 @@ public class TabExample extends JPanel {
 
         public Tab createTab() {
             return tab(title)
+                .onSelection(e -> {
+                    System.out.println("Selected tab: " + title);
+                })
                 .withHeader(
                     button("x").onClick((a) -> onClose.accept(this))
                         .withStyle(style -> style.padding(0, 5, 0, 5))

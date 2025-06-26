@@ -16,6 +16,7 @@ import utility.Utility
 import javax.swing.*
 import javax.swing.border.TitledBorder
 import java.awt.*
+import java.time.DayOfWeek
 import java.util.List
 
 @Title("MVVM Introduction")
@@ -860,6 +861,92 @@ class MVVM_Example_Spec extends Specification
             layout.constraintMap.size() == 0
     }
 
+    def 'A panel bound tuple property will be zoomed into correctly.'(
+        Tuple<Object> tuple
+    ) {
+        reportInfo """
+            You can bind any kind of tuple property and a view supplier 
+            to dynamically bind to sub-views. These sub views will
+            be bound to a zoomed in property bound to a specific index in
+            the tuple of the parent property...
+        """
+        given: 'A tuple property, a view supplier and a panel UI node.'
+            var trace = []
+            var models = Var.of(tuple)
+            BoundViewSupplier<Object> supplier = { Var<Object> property ->
+                trace.add(property)
+                return UI.label("I am the sub view bound to: "+property.type().getSimpleName())
+            }
+            var panel =
+                        UI.panel()
+                        .addAll(models, supplier)
+                        .get(JPanel)
+
+        expect:
+            trace.size() == tuple.size()
+            trace.every({it.type() == tuple.type()})
+            trace.every({it.allowsNull() == tuple.allowsNull()})
+        and :
+            panel.components.every({it.text == "I am the sub view bound to: "+tuple.type().getSimpleName()})
+
+        where : 'We test the following operations:'
+            tuple << [
+                Tuple.of("A", "B", "C"),
+                Tuple.of("watch", "dominion", "or" ,"earthlings"),
+                Tuple.of(2, 3, 5, 7, 11),
+                Tuple.of(0.47d, 3.5d, -2.22d, 84.3d),
+                Tuple.of(DayOfWeek.MONDAY, DayOfWeek.SATURDAY, DayOfWeek.THURSDAY, DayOfWeek.WEDNESDAY),
+                Tuple.ofNullable(String, "A", null, "B", "C", null),
+                Tuple.ofNullable(String, "watch", "dominion", "or" ,"earthlings"),
+                Tuple.ofNullable(Integer, null, 2, 3, 5, null, 7, 11),
+                Tuple.ofNullable(Double, 0.47d, null, 3.5d, null, -2.22d, 84.3d),
+                Tuple.ofNullable(DayOfWeek, DayOfWeek.MONDAY, null, DayOfWeek.SATURDAY, null),
+            ]
+    }
+
+    def 'A menu bound tuple property will be zoomed into correctly.'(
+        Tuple<Object> tuple
+    ) {
+        reportInfo """
+            You can bind any kind of tuple property and a view supplier 
+            to dynamically bind to sub-views. These sub views will
+            be bound to a zoomed in property bound to a specific index in
+            the tuple of the parent property...
+        """
+        given: 'A tuple property, a view supplier and a panel UI node.'
+            var trace = []
+            var models = Var.of(tuple)
+            BoundViewSupplier<Object> supplier = { Var<Object> property ->
+                trace.add(property)
+                return UI.label("I am the sub menu bound to: "+property.type().getSimpleName())
+            }
+            var menu =
+                        UI.menu()
+                        .addAll(models, supplier)
+                        .get(JMenu)
+
+        expect:
+            trace.size() == tuple.size()
+            trace.every({it.type() == tuple.type()})
+            trace.every({it.allowsNull() == tuple.allowsNull()})
+        and :
+            menu.menuComponents.every({it.text == "I am the sub menu bound to: "+tuple.type().getSimpleName()})
+
+        where : 'We test the following operations:'
+            tuple << [
+                Tuple.of("A", "B", "C"),
+                Tuple.of("watch", "dominion", "or" ,"earthlings"),
+                Tuple.of(2, 3, 5, 7, 11),
+                Tuple.of(0.47d, 3.5d, -2.22d, 84.3d),
+                Tuple.of(DayOfWeek.MONDAY, DayOfWeek.SATURDAY, DayOfWeek.THURSDAY, DayOfWeek.WEDNESDAY),
+                Tuple.ofNullable(String, "A", null, "B", "C", null),
+                Tuple.ofNullable(String, "watch", "dominion", "or" ,"earthlings"),
+                Tuple.ofNullable(Integer, null, 2, 3, 5, null, 7, 11),
+                Tuple.ofNullable(Double, 0.47d, null, 3.5d, null, -2.22d, 84.3d),
+                Tuple.ofNullable(DayOfWeek, DayOfWeek.MONDAY, null, DayOfWeek.SATURDAY, null),
+            ]
+    }
+
     def 'A tuple property is bound to a panel compute efficiently.'(
         List<Integer> diff, Closure<Tuple> operation
     ) {
@@ -901,6 +988,10 @@ class MVVM_Example_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
@@ -955,6 +1046,10 @@ class MVVM_Example_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
@@ -1009,6 +1104,10 @@ class MVVM_Example_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
@@ -1063,6 +1162,10 @@ class MVVM_Example_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
             [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }

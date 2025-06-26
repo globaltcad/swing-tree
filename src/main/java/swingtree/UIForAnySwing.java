@@ -12,7 +12,6 @@ import sprouts.*;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.Observable;
-import sprouts.Observer;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.animation.AnimationDispatcher;
@@ -5436,9 +5435,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     for ( int i = 0; i < delegate.currentValues().size(); i++ )
                         _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
                 } else {
+                    Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(innerComponent));
+                    List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = 0; i < newValues.size(); i++ ) {
                         int position = i + index;
-                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent);
+                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, innerComponent, componentSnapshot, alreadyRemoved);
                     }
                 }
                 break;
@@ -5537,7 +5538,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }
         static <M> ViewHandle<M> of( Var<Tuple<M>> models, int initialIndex, JComponent parent ) {
             ViewHandle<M> handle = new ViewHandle<>(Objects.requireNonNull(parent));
-            AtomicReference<M> lastFetchedItem = new AtomicReference<>(null);
             Supplier<Integer> indexSupplier = ()->UI.runAndGet(()->{
                 JComponent currentParent = handle.parent.get();
                 JComponent currentSubView = handle.child();
@@ -5562,38 +5562,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 }
                 return -1;
             });
-            handle.property =
-                models.zoomToNullable(models.orElseThrowUnchecked().type(), it -> {
-                    try {
-                        // We get the index of the subview in the parent:
-                        int index = indexSupplier.get();
-                        if ( index < 0 ) {
-                            return lastFetchedItem.get();
-                        }
-                        M currentItemAtIndex = it.get(index);
-                        lastFetchedItem.set(currentItemAtIndex);
-                        return currentItemAtIndex;
-                    } catch (Exception ignored) {
-                        /*
-                            Lenses on a position in a tuple are a tricky thing!
-                            They can very easily break. Do we care? No, why should we?
-                            This lens may still be bound to an old GUI, which we do not want to disturb.
-                        */
-                        return lastFetchedItem.get();
-                    }
-                }, (it, m) -> {
-                    try {
-                        // We get the index of the subview in the parent:
-                        int index = indexSupplier.get();
-                        if ( index < 0 ) {
-                            return it;
-                        }
-                        return it.setAt(index, m);
-                    } catch (Exception ignored) {
-                        // The lens is no longer relevant! We do not care.
-                    }
-                    return it;
-                });
+            TupleLens<M> lens = new TupleLens<>(models, indexSupplier, initialIndex);
+            if ( lens.allowsNull() )
+                handle.property = models.zoomToNullable(models.orElseThrowUnchecked().type(), lens);
+            else
+                handle.property = models.zoomTo(lens);
             return handle;
         }
         public Var<M> property() {return Objects.requireNonNull(property);}
@@ -5601,6 +5574,92 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         public @Nullable JComponent child() {return child == null ? null : child.get();}
         public void setChild( JComponent child ) {this.child = new WeakReference<>(child);}
 
+    }
+
+    private static class TupleLens<M> implements Lens<Tuple<M>, M> {
+
+        private final Supplier<Integer> indexSupplier;
+        private final AtomicReference<M> lastFetchedItem;
+        private final boolean allowsNull;
+        private final Class<M> type;
+
+        public TupleLens(
+            Var<Tuple<M>> models,
+            Supplier<Integer> indexSupplier,
+            int initialIndex
+        ) {
+            Tuple<M> tuple = models.orElseThrowUnchecked();
+            this.indexSupplier = indexSupplier;
+            this.lastFetchedItem = new AtomicReference<>(null);
+            this.allowsNull = tuple.allowsNull();
+            this.type = tuple.type();
+            if ( initialIndex >= 0 && initialIndex < tuple.size() ) {
+                lastFetchedItem.set(tuple.get(initialIndex));
+            }
+        }
+
+        public boolean allowsNull() {
+            return allowsNull;
+        }
+
+        @Override
+        public M getter(Tuple<M> parentValue) throws Exception {
+            try {
+                // We get the index of the subview in the parent:
+                int index = indexSupplier.get();
+                if ( index < 0 ) {
+                    return tryAvoidNull(lastFetchedItem.get());
+                }
+                M currentItemAtIndex = parentValue.get(index);
+                lastFetchedItem.set(currentItemAtIndex);
+                return tryAvoidNull(currentItemAtIndex);
+            } catch (Exception ignored) {
+                /*
+                    Lenses on a position in a tuple are a tricky thing!
+                    They can very easily break. Do we care? No, why should we?
+                    This lens may still be bound to an old GUI, which we do not want to disturb.
+                */
+                return tryAvoidNull(lastFetchedItem.get());
+            }
+        }
+
+        @Override
+        public Tuple<M> wither(Tuple<M> parentValue, M newValue) throws Exception {
+            try {
+                // We get the index of the subview in the parent:
+                int index = indexSupplier.get();
+                if ( index < 0 ) {
+                    return parentValue;
+                }
+                return parentValue.setAt(index, newValue);
+            } catch (Exception ignored) {
+                // The lens is no longer relevant! We do not care.
+            }
+            return parentValue;
+        }
+
+        private M tryAvoidNull(@Nullable M item) {
+            if ( item != null || allowsNull ) {
+                return NullUtil.fakeNonNull(item);
+            } else if ( type == String.class ) {
+                return type.cast("");
+            } else if ( type == Integer.class ) {
+                return type.cast(0);
+            } else if ( type == Boolean.class ) {
+                return type.cast(false);
+            } else if ( type == Double.class ) {
+                return type.cast(0.0);
+            } else if ( type == Float.class ) {
+                return type.cast(0.0F);
+            } else if ( type == Short.class ) {
+                return type.cast((short)0);
+            } else if ( type == Byte.class ) {
+                return type.cast((byte)0);
+            }  else if ( type == Character.class ) {
+                return type.cast((char)0);
+            }
+            return NullUtil.fakeNonNull(item);
+        }
     }
 
     // Overridden in UIForScrollPanels
@@ -5642,7 +5701,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 log.error(
                     "Failed to perform an informed tuple bound view update, \n" +
                     "using sequence diff '{}' and models '{}'.",
-                    tupleOfModels, e
+                    diff, tupleOfModels, e
                 );
                 success = false;
             }
@@ -5669,8 +5728,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _clearComponentsOf(c); // We do a simple re-build
                     _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 } else {
+                    Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
+                    List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = index; i < (index + count); i++ )
-                        _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c);
+                        _updateComponentAt(i, tupleOfModels.get(i), viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
                 }
                 break;
             case ADD:
@@ -5738,7 +5799,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 log.error(
                     "Failed to perform an informed tuple bound view update, \n" +
                     "using sequence diff '{}' and models '{}'.",
-                    tupleOfModels, e
+                    diff, tupleOfModels, e
                 );
                 success = false;
             }
@@ -5778,8 +5839,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _clearComponentsOf(c); // We do a simple re-build
                     _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
                 } else {
+                    Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
+                    List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = index; i < (index + count); i++ )
-                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
                 }
                 break;
             case ADD:
@@ -5897,11 +5960,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
+        _onShow( viewable, thisComponent, (c,v) -> {
+            Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
+            List<Integer> alreadyRemoved = new ArrayList<>();
+            _updateComponentAt(index, v, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
+        });
     }
 
     private <M> void _updateComponentAt(
-        int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable AddConstraint attr, C c
+        int index,
+        @Nullable M v,
+        ViewSupplier<M> viewSupplier,
+        @Nullable AddConstraint attr, C c,
+        Tuple<Component> componentSnapshot,
+        List<Integer> alreadyRemoved
     ) {
         JComponent newComponent;
         if ( v == null ) {
@@ -5918,10 +5990,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);
+        Component currentComponentAtIndex = componentSnapshot.get(index);
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
-            // We remove the old component.
-            c.remove(currentComponentAtIndex);
+            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);
+            if ( indexOfNewComponent >= 0 ) {
+                // The component already exists! We remove it
+                c.remove(newComponent);
+                alreadyRemoved.add(indexOfNewComponent);
+            }
+            if ( !alreadyRemoved.contains(index) ) {
+                // We remove the old component.
+                c.remove(currentComponentAtIndex);
+            }
             // We add the new component:
             if ( attr == null )
                 c.add(newComponent, index);
@@ -5934,7 +6014,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateComponentAt(
-        int index, Var<Tuple<M>> v, ViewSupplier<ViewHandle<M>> viewSupplier, @Nullable AddConstraint attr, C c
+        int index,
+        Var<Tuple<M>> v,
+        ViewSupplier<ViewHandle<M>> viewSupplier,
+        @Nullable AddConstraint attr,
+        C c,
+        Tuple<Component> componentSnapshot,
+        List<Integer> alreadyRemoved
     ) {
         JComponent newComponent;
         if ( v == null ) {
@@ -5951,10 +6037,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
             newComponent = view.get((Class)view.getType());
         }
-        Component currentComponentAtIndex = InternalUtil._actualGetComponentAt(index, c);;
+        Component currentComponentAtIndex = componentSnapshot.get(index);
         if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes
-            // We remove the old component.
-            c.remove(currentComponentAtIndex);
+            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);
+            if ( indexOfNewComponent >= 0 ) {
+                // The component already exists! We remove it
+                c.remove(newComponent);
+                alreadyRemoved.add(indexOfNewComponent);
+            }
+            if ( !alreadyRemoved.contains(index) ) {
+                // We remove the old component.
+                c.remove(currentComponentAtIndex);
+            }
             // We add the new component:
             if ( attr == null )
                 c.add(newComponent, index);

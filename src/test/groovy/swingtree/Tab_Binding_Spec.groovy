@@ -688,6 +688,10 @@ class Tab_Binding_Spec extends Specification
             [0, -1, 2, 3, 4]     | { it.removeAt(1) }
             [0, -1, -1, 3, 4]    | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Tab X") }
+            [0, _, _, 3, 4]      | { it.setAllAt(1, "Tab 3", "Tab 2") }
+            [_, _, _, _, 4]      | { it.setAllAt(0, "Tab 4", "Tab 3", "Tab 2", "Tab 1") }
+            [0, _, _, _, _]      | { it.setAllAt(1, "Tab 4", "Tab 3", "Tab 2", "Tab 5") }
+            [0, 1, 2, _, _]      | { it.setAllAt(3, "Tab 5", "Tab 4") }
             [0, 1, 2, 3, 4, _]   | { it.add("Tab X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Tab X", "Tab Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Tab X") }
@@ -807,6 +811,10 @@ class Tab_Binding_Spec extends Specification
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
             [0, _, 2, 3, 4]      | { it.setAt(1, "Tab X") }
+            [0, _, _, 3, 4]      | { it.setAllAt(1, "Tab 3", "Tab 2") }
+            [_, _, _, _, 4]      | { it.setAllAt(0, "Tab 4", "Tab 3", "Tab 2", "Tab 1") }
+            [0, _, _, _, _]      | { it.setAllAt(1, "Tab 4", "Tab 3", "Tab 2", "Tab 5") }
+            [0, 1, 2, _, _]      | { it.setAllAt(3, "Tab 5", "Tab 4") }
             [0, 1, 2, 3, 4, _]   | { it.add("Tab X") }
             [0, 1, 2, 3, 4, _, _]| { it.addAll("Tab X", "Tab Y") }
             [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Tab X") }
