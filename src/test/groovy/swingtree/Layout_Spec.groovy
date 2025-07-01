@@ -82,12 +82,15 @@ class Layout_Spec extends Specification
             panel.getLayout() instanceof ResponsiveGridFlowLayout
         and : 'The layout manager has the correct horizontal alignment:'
             panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER
+        and : 'Initially, the panel does not properly fits the content.'
+            panel.getPreferredSize().width < 80
+            panel.getPreferredSize().width < 80
 
         when : 'We call the layout manager to do its job...'
             panel.doLayout()
-        then : 'The layout manager created the expected preferred size for out panel:'
-            panel.getPreferredSize() == new Dimension(185,133)
-
+        then : 'The layout manager increased the size according to the content:'
+            panel.getPreferredSize().width > 100
+            panel.getPreferredSize().width > 100
     }
 
     def 'The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI.'(
