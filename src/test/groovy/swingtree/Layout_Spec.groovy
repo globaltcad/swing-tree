@@ -47,6 +47,52 @@ class Layout_Spec extends Specification
         SwingTree.clear()
     }
 
+    def 'The `.withFlowLayout()` method creates a responsive flow layout with good defaults.'()
+    {
+        reportInfo """
+            The SwingTree UI builder API has a convenience method called `withFlowLayout()`,
+            which attaches a `ResponsiveGridFlowLayout` to the UI component.
+            This `ResponsiveGridFlowLayout` and it's behavior is
+            derived from the `FlowLayout` layout manager, which means that
+            it has the same default behavior.
+            
+            In SwingTree, the `ResponsiveGridFlowLayout` is considered the successor
+            and replacement for the `FlowLayout` layout manager, as it also
+            responsive layouts, high DPI scaling of gutter gaps, and cell size scaling.
+        """
+        given : 'Before we build the UI, we set the UI scale factor to ensure test consistency:'
+            SwingTree.get().setUiScaleFactor(1)
+        and :
+            var panel =
+                UI.panel().withFlowLayout()
+                .add(
+                    UI.button("↑").onClick( e -> {})
+                )
+                .add(
+                    UI.button("↓").onClick( it -> {})
+                )
+                .add(
+                    UI.button("+").onClick(e -> {})
+                )
+                .add(
+                    UI.button("−").onClick( e -> {})
+                )
+                .get(JPanel.class)
+        expect: 'The panel has a `ResponsiveGridFlowLayout` layout manager attached:'
+            panel.getLayout() instanceof ResponsiveGridFlowLayout
+        and : 'The layout manager has the correct horizontal alignment:'
+            panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER
+        and : 'Initially, the panel does not properly fits the content.'
+            panel.getPreferredSize().width < 80
+            panel.getPreferredSize().width < 80
+
+        when : 'We call the layout manager to do its job...'
+            panel.doLayout()
+        then : 'The layout manager increased the size according to the content:'
+            panel.getPreferredSize().width > 100
+            panel.getPreferredSize().width > 100
+    }
+
     def 'The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI.'(
         float uiScaleFactor
     ) {

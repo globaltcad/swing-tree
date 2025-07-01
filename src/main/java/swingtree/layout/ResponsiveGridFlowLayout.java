@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import swingtree.UI;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,9 +55,9 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * and the indicated horizontal and vertical gaps.
      * <p>
      * The value of the alignment argument must be one of
-     * {@code FlowLayout.LEFT}, {@code FlowLayout.RIGHT},
-     * {@code FlowLayout.CENTER}, {@code FlowLayout.LEADING},
-     * or {@code FlowLayout.TRAILING}.
+     * {@link UI.HorizontalAlignment#LEFT}, {@link UI.HorizontalAlignment#RIGHT},
+     * {@link UI.HorizontalAlignment#CENTER}, {@link UI.HorizontalAlignment#LEADING},
+     * or {@link UI.HorizontalAlignment#TRAILING}.
      *
      * @param align the alignment value
      * @param horizontalGapSize  the horizontal gap between components
@@ -79,10 +79,10 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     /**
      * Gets the alignment for this layout.
-     * Possible values are {@code UI.HorizontalAlignment.LEFT},
-     * {@code UI.HorizontalAlignment.RIGHT}, {@code UI.HorizontalAlignment.CENTER},
-     * {@code UI.HorizontalAlignment.LEADING},
-     * or {@code UI.HorizontalAlignment.TRAILING}.
+     * Possible values are {@link UI.HorizontalAlignment#LEFT},
+     * {@link UI.HorizontalAlignment#RIGHT}, {@link UI.HorizontalAlignment#CENTER},
+     * {@link UI.HorizontalAlignment#LEADING},
+     * or {@link UI.HorizontalAlignment#TRAILING}.
      *
      * @return the alignment value for this layout
      * @see #setAlignment
@@ -95,11 +95,11 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * Sets the alignment for this layout.
      * Possible values are
      * <ul>
-     * <li>{@code UI.HorizontalAlignment.LEFT}
-     * <li>{@code UI.HorizontalAlignment.RIGHT}
-     * <li>{@code UI.HorizontalAlignment.CENTER}
-     * <li>{@code UI.HorizontalAlignment.LEADING}
-     * <li>{@code UI.HorizontalAlignment.TRAILING}
+     * <li>{@link UI.HorizontalAlignment#LEFT}
+     * <li>{@link UI.HorizontalAlignment#RIGHT}
+     * <li>{@link UI.HorizontalAlignment#CENTER}
+     * <li>{@link UI.HorizontalAlignment#LEADING}
+     * <li>{@link UI.HorizontalAlignment#TRAILING}
      * </ul>
      *
      * @param align one of the alignment values shown above
@@ -232,7 +232,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             int hgap = UI.scale(_horizontalGapSize);
             int vgap = UI.scale(_verticalGapSize);
 
-            Bounds bounds = Bounds.of(Position.of(0,0), Size.of(target.getPreferredSize()));
+            Bounds bounds = Bounds.of(Position.of(0,0), recursionSafePreferredSizeOf(target));
             for (int i = 0; i < nmembers; i++) {
                 Component m = target.getComponent(i);
                 if (m.isVisible()) {
@@ -265,6 +265,17 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             dim.height += insets.top  + insets.bottom;
             return dim;
         }
+    }
+
+    private static Size recursionSafePreferredSizeOf( Container target ) {
+        if ( target.isPreferredSizeSet() )
+            return Size.of(target.getPreferredSize());
+        else if ( target.isMaximumSizeSet() )
+            return Size.of(target.getMaximumSize()); // Good enough fall back 1.
+        else if  ( target.isMinimumSizeSet() )
+            return Size.of(target.getMinimumSize()); // Good enough fall back 2.
+        else
+            return Size.of(target.getSize()); // Good enough fallback 3.
     }
 
     /**
