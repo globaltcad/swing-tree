@@ -51,7 +51,7 @@ dependencies {
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M20'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M22'
     api group: 'com.github.weisj',     name: 'jsvg',            version: '2.0.0'
 
     // Logging :
@@ -128,12 +128,28 @@ task deploy() {
     dependsOn 'jar'
     dependsOn 'releaseJDocs'
     dependsOn 'check'
+    dependsOn 'publishToSonatype'
+    finalizedBy 'closeAndReleaseSonatypeStagingRepository'
 }
 /*
-    2:
-       execute publishToSonatype
-       go to https://s01.oss.sonatype.org/#stagingRepositories
-       close and release the repository
+      Note that you need the correct gradle.properties file in
+      your home directory (~/.gradle/gradle.properties)
+      It should look something like this:
+      ```
+            signing.keyId=<my-key-id>
+            signing.password=<my-key-password>
+            signing.secretKeyRingFile=<my/path/to/my/.gnupg-keyring/secring.gpg>
+
+            sonatypeUsername=<my-token-name>
+            sonatypePassword=<my-publish-token>
+
+            ossrhUsername=<my-username>
+            ossrhPassword=<my-password>
+
+            # https://central.sonatype.com/publishing/deployments
+            ossrhToken=<my-token-name>
+            ossrhTokenPassword=<my-publish-token>
+      ```
 */
 
 task releaseJDocs(type: Copy) {
@@ -200,9 +216,9 @@ signing {
 nexusPublishing {
     packageGroup = GROUP_ID
     repositories {
-        sonatype {  //only for projects registered in Sonatype after 24 Feb 2021
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         }
     }
     transitionCheckOptions {
@@ -216,11 +232,11 @@ publishing {
 
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/globaltcad/" + PROJECT
+            name = 'ossrh-staging-api'
+            url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = findProperty("ossrhToken") as String
+                password = findProperty("ossrhTokenPassword") as String
             }
         }
     }
@@ -250,6 +266,11 @@ publishing {
                         id = "dnepp"
                         name = "Daniel Nepp"
                         email = "d.nepp@globaltcad.com"
+                    }
+                    developer {
+                        id = "mschwengerer"
+                        name = "Mathias Schwengerer"
+                        email = "m.schwengerer@globaltcad.com"
                     }
                     developer {
                         id = "hdemel"
