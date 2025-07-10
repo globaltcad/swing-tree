@@ -1,8 +1,11 @@
 
 # MVVM / MVI / MVL # 
 
-> This guide is strongly related to the [Advanced MVVM](Advanced-MVVM.md) guide.
-> You may want to check it out later if you are not familiar with the MVVM pattern.
+> This guide is strongly related to the [Data-Oriented SwingTree](Data-Oriented-SwingTree.md) guide.
+> You may want to check it out to know more about the *"why"* instead of purely *"how"*.
+> 
+> You may also want to read the [Advanced MVVM](Advanced-MVVM.md) guide.
+> Which covers how to implement the classical MVVM pattern in SwingTree.
 > But, you do not need to know about MVVM to understand this guide.
 
 <img src="../img/tutorial/the-MVI-cycle.png" style = "float: right; width: 33%; margin: 2em;">
@@ -15,7 +18,7 @@ pattern and the age-old MVC (Model-View-Controller).
 
 In this guide we will focus on two new patterns that are specifically
 recommended to be used when writing SwingTree applications.
-These two architecture pattern are derived from MVVM
+These two architecture patterns are derived from the MVVM
 architecture and therefore very similar to it, but with one big
 difference: immutable view models.
 
@@ -29,7 +32,7 @@ where large nested immutable data structures are used to model
 all kinds of complex systems, the problem of updating 
 these data structures effectively has long been solved by
 using techniques such as *structural sharing*, *withers*, *event sourcing*
-and *lenses*. 
+and *__lenses__*. 
 
 Applying these patterns to the MVVM architecture gives rise
 to a new kind of MVVM architecture that is also known as

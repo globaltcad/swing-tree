@@ -38,6 +38,7 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
   for [MVVM](docs/markdown/Advanced-MVVM.md) and [MVI](docs/markdown/Functional-MVVM.md) architecture
   (for decoupling UI and business logic)
 - user friendly [stability oriented error handling](docs/markdown/Sane-Error-Handling.md)
+- support for [Data-Oriented programming](Data-Oriented-SwingTree.md)
 - tried, tested and used extensively in production
 
 </td>
@@ -111,8 +112,8 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
 );
 ```
 
-As you can see, swing tree has a very simple API, which only requires a
-single class to be imported, the `UI` class which can even be imported
+As you can see, SwingTree has a very simple API. It only requires a
+single class to be imported, the `UI` class, which can also be imported
 statically to remove any `UI.` prefixes.
 
 Also, note that there are usually 2 arguments
