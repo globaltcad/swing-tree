@@ -6,14 +6,12 @@ import swingtree.api.Styler;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.ImageConf;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.function.Function;
 
 /**
- *  An immutable value object that represents a size in the form of a width and height or lack thereof.
+ *  An immutable value object that represents a size in the form of float based width and height or lack thereof.
  *  This is used to represent the size and layout dimensions of components in the SwingTree style API,
  *  as well as the size of icons as part of {@link swingtree.api.IconDeclaration}s.
  *  See {@link swingtree.UIForAnySwing#withStyle(Styler)},

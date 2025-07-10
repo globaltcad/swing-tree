@@ -52,7 +52,7 @@ public final class Bounds
      *  @param size the size of the bounds object.
      *  @return a bounds object with the specified location and size.
      */
-    public static Bounds of(Position position, Size size ) {
+    public static Bounds of( Position position, Size size ) {
         Objects.requireNonNull(position);
         Objects.requireNonNull(size);
         if ( position.equals(Position.origin()) && size.equals(Size.unknown()) )
@@ -104,6 +104,27 @@ public final class Bounds
     }
 
     /**
+     *  Returns a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     *  <p>
+     *  If the width or height is less than zero then the {@link #none()}
+     *  object is returned.
+     *
+     *  @param x the x coordinate of the location of the bounds object.
+     *  @param y the y coordinate of the location of the bounds object.
+     *  @param width the width of the bounds object.
+     *  @param height the height of the bounds object.
+     *  @return a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     */
+    public static Bounds of( double x, double y, double width, double height ) {
+        if ( width < 0 || height < 0 )
+            return EMPTY;
+
+        return new Bounds(Position.of(x, y), Size.of(width, height));
+    }
+
+    /**
      *  Creates a bounds object from an AWT {@link Rectangle} object.
      *  <p>
      *  If the width or height is less than zero then the {@link #none()}
@@ -119,6 +140,25 @@ public final class Bounds
     private Bounds(Position position, Size size ) {
         _position = Objects.requireNonNull(position);
         _size     = Objects.requireNonNull(size);
+    }
+
+    /**
+     *  Use this to check if a coordinate defined by the two
+     *  arguments {@code x} and {@code y} is geometrically inside this 2D bounds object.
+     *
+     * @param x The {@code x} position of the point which may or may not be inside the 2D bounds.
+     * @param y The {@code y} position of the point which may or may not be inside the 2D bounds.
+     * @return {@code true}, if the supplied point of {@code x} and {@code y} is located inside
+     *         rectangular space of this bounds object, {@code false} otherwise.
+     */
+    public boolean contains( double x, double y ) {
+        if ( !this.hasWidth() || ! this.hasHeight() )
+            return false;
+        double top = _position._y;
+        double left = _position._x;
+        double bottom = _position._y + _size._height;
+        double right = _position._x + _size._width;
+        return ( left <= x && x < right && top <= y && y < bottom );
     }
 
     /**
@@ -172,61 +212,61 @@ public final class Bounds
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified x-coordinate and the same y-coordinate and size as this bounds instance.
-     *  See also {@link #withY(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *  See also {@link #withY(double)}, {@link #withWidth(double)}, and {@link #withHeight(double)}.
      *
      * @param x A new x coordinate for the location of this bounds object.
      * @return A new bounds object with a new location that has the specified x coordinate.
      */
-    public Bounds withX( int x ) {
+    public Bounds withX( double x ) {
         return new Bounds(_position.withX(x), _size);
     }
 
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified y-coordinate and the same x-coordinate and size as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *  See also {@link #withX(double)}, {@link #withWidth(double)}, and {@link #withHeight(double)}.
      *
      * @param y A new y coordinate for the location of this bounds object.
      * @return A new bounds object with a new location that has the specified y coordinate.
      */
-    public Bounds withY( int y ) {
+    public Bounds withY( double y ) {
         return new Bounds(_position.withY(y), _size);
     }
 
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified width and the same x and y coordinates as well as height as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}, and {@link #withSize(int, int)}.
+     *  See also {@link #withX(double)}, {@link #withY(double)}, and {@link #withHeight(double)}, and {@link #withSize(double, double)}.
      *
      * @param width A new width for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width.
      */
-    public Bounds withWidth( int width ) {
+    public Bounds withWidth( double width ) {
         return new Bounds(_position, _size.withWidth(width));
     }
 
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified height and the same x and y coordinates as well as width as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}, and {@link #withSize(int, int)}.
+     *  See also {@link #withX(double)}, {@link #withY(double)}, and {@link #withWidth(double)}, and {@link #withSize(double, double)}.
      *
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified height.
      */
-    public Bounds withHeight( int height ) {
+    public Bounds withHeight( double height ) {
         return new Bounds(_position, _size.withHeight(height));
     }
 
     /**
      *  Allows you to create an updated version of this bounds object with the
      *  specified width and height and the same x and y coordinates as this bounds instance.
-     *  See also {@link #withX(int)}, {@link #withY(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *  See also {@link #withX(double)}, {@link #withY(double)}, {@link #withWidth(double)}, and {@link #withHeight(double)}.
      *
      * @param width A new width for the size of this bounds object.
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width and height.
      */
-    public Bounds withSize( int width, int height ) {
+    public Bounds withSize( double width, double height ) {
         return new Bounds(_position, Size.of(width, height));
     }
 
@@ -272,7 +312,7 @@ public final class Bounds
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width and height.
      */
-    public boolean hasSize( int width, int height ) {
+    public boolean hasSize( double width, double height ) {
         return _size._width == width && _size._height == height;
     }
 
@@ -284,7 +324,7 @@ public final class Bounds
      * @param width An integer value to compare to the width of this bounds object.
      * @return The truth value of whether the specified width is equal to the width of this bounds object.
      */
-    public boolean hasWidth( int width ) {
+    public boolean hasWidth( double width ) {
         return _size._width == width;
     }
 
@@ -296,7 +336,7 @@ public final class Bounds
      * @param height An integer value to compare to the height of this bounds object.
      * @return The truth value of whether the specified height is equal to the height of this bounds object.
      */
-    public boolean hasHeight( int height ) {
+    public boolean hasHeight( double height ) {
         return _size._height == height;
     }
 
@@ -320,14 +360,6 @@ public final class Bounds
         return new Rectangle((int) _position.x(), (int) _position.y(), (int) _size._width, (int) _size._height);
     }
 
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName()+"[" +
-                    "location=" + _position + ", "+
-                    "size="     + _size     +
-                "]";
-    }
-
     /**
      *  A convent method to check if the specified x and y coordinates and width and height
      *  are equal to the location and size of this bounds object.
@@ -346,6 +378,24 @@ public final class Bounds
         return _position.x() == x && _position.y() == y && _size._width == width && _size._height == height;
     }
 
+    /**
+     *  A convent method to check if the specified x and y coordinates and width and height
+     *  are equal to the location and size of this bounds object.
+     *  This is equivalent to calling {@link #equals(Object)} with
+     *  a new bounds object created with the specified x and y coordinates and width and height
+     *  like so: {@code equals(Bounds.of(x, y, width, height))}.
+     *
+     * @param x A double value to compare to the x coordinate of the location of this bounds object.
+     * @param y A double value to compare to the y coordinate of the location of this bounds object.
+     * @param width A double value to compare to the width of this bounds object.
+     * @param height A double value to compare to the height of this bounds object.
+     * @return The truth value of whether the specified x and y coordinates and width and height
+     *        are equal to the location and size of this bounds object.
+     */
+    public boolean equals( double x, double y, double width, double height ) {
+        return _position.x() == x && _position.y() == y && _size._width == width && _size._height == height;
+    }
+
     @Override
     public boolean equals( Object o ) {
         if ( o == this ) return true;
@@ -360,4 +410,13 @@ public final class Bounds
     public int hashCode() {
         return Objects.hash(_position, _size);
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"[" +
+                    "location=" + _position + ", "+
+                    "size="     + _size     +
+                "]";
+    }
+
 }

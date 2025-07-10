@@ -6,14 +6,14 @@ import java.awt.Point;
 import java.util.Objects;
 
 /**
- *  An immutable value based class that represents a location in a two-dimensional
+ *  An immutable value based class that represents a location in float based two-dimensional
  *  coordinate system specified in float precision and specifically designed
  *  for Swing components.
  *  It can be used as an alternative to the AWT {@link Point} class,
  *  but in situations where immutability is desired (which should be most cases).
  *  <p>
- *  Use the {@link #of(float, float)} factory method to create a new instance
- *  or {@link #withX(int)} and {@link #withY(int)} to create a new instance
+ *  Use the {@link #of(double, double)} factory method to create a new instance
+ *  or {@link #withX(double)} and {@link #withY(double)} to create a new instance
  *  with a modified value.
  */
 @Immutable
@@ -30,11 +30,11 @@ public final class Position
      * @return A new location with the specified x- and y-coordinates.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Position of( float x, float y ) {
+    public static Position of( double x, double y ) {
         if ( x == 0 && y == 0 )
             return ORIGIN;
 
-        return new Position(x, y);
+        return new Position((float) x, (float) y);
     }
 
     /**
@@ -45,7 +45,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of the specified point.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Position of(Point p ) {
+    public static Position of( Point p ) {
         Objects.requireNonNull(p);
         return of( p.x, p.y );
     }
@@ -94,7 +94,7 @@ public final class Position
      * @return A new location with the same x-coordinate as this location
      *         and the specified y-coordinate.
      */
-    public Position withY(int y ) {
+    public Position withY( double y ) {
         return of( _x, y );
     }
 
@@ -107,7 +107,7 @@ public final class Position
      * @return A new location with the same y-coordinate as this location
      *         and the specified x-coordinate.
      */
-    public Position withX(int x ) {
+    public Position withX( double x ) {
         return of( x, _y );
     }
 
@@ -120,7 +120,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of this location
      *         increased by the specified values.
      */
-    public Position plus(float dx, float dy ) {
+    public Position plus( double dx, double dy ) {
         return of( _x + dx, _y + dy );
     }
 
@@ -132,7 +132,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of this location
      *         increased by the x- and y-coordinates of the specified location.
      */
-    public Position plus(Position other ) {
+    public Position plus( Position other ) {
         return of( _x + other._x, _y + other._y );
     }
 
@@ -145,7 +145,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of this location
      *         decreased by the specified values.
      */
-    public Position minus(float dx, float dy ) {
+    public Position minus( double dx, double dy ) {
         return of( _x - dx, _y - dy );
     }
 
