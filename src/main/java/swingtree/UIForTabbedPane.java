@@ -3,8 +3,8 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.Action;
 import sprouts.*;
+import sprouts.Action;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.api.mvvm.TabSupplier;
@@ -13,13 +13,12 @@ import swingtree.style.ComponentExtension;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -889,7 +888,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         tab.onSelection()
             .ifPresent(onSelection -> {
-                OnSelectionMultiplexer.of(p).set(p, index, e -> {
+                OnSelectionMultiplexer.of(p).set(index, e -> {
                     JTabbedPane tabbedPane = paneRef.get();
                     if (tabbedPane == null) return;
                     int i = indexFinder.get();
@@ -954,13 +953,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             pane.addChangeListener(this);
         }
 
-        void set(JTabbedPane pane, int index, ChangeListener listener) {
+        void set(int index, ChangeListener listener) {
             _subListeners.put(index, listener);
         }
 
         private void _cleanup(JTabbedPane pane) {
             int numberOfTabs = pane.getTabCount();
-            for ( int i : _subListeners.keySet()) {
+            for ( int i : new ArrayList<>(_subListeners.keySet()) ) {
                 if ( i < 0 || i >= numberOfTabs ) {
                     _subListeners.remove(i);
                 }
