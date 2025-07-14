@@ -214,6 +214,48 @@ class Primitives_Spec extends Specification
             bounds1.hashCode() != bounds3.hashCode()
     }
 
+    def 'You can check if a location is inside a `Bounds` object.'()
+    {
+        given :
+            var bounds1 = Bounds.of(1,  2, 15, 20)
+            var bounds2 = Bounds.of(1,  2, 0, 20)
+            var bounds3 = Bounds.of(1,  2, 15, 0)
+        expect :
+            bounds1.contains(1, 2)
+            !bounds1.contains(0.99, 2)
+            !bounds1.contains(1, 1.999)
+            bounds1.contains(15.999, 21.999)
+            !bounds1.contains(16, 21.999)
+            !bounds1.contains(15.999, 22)
+        and :
+            !bounds2.contains(1, 2)
+            !bounds2.contains(0.99, 2)
+            !bounds2.contains(1, 1.999)
+            !bounds2.contains(1, 21.999)
+            !bounds2.contains(16, 21.999)
+            !bounds2.contains(1, 22)
+        and :
+            !bounds3.contains(1, 2)
+            !bounds3.contains(0.99, 2)
+            !bounds3.contains(1, 1.999)
+            !bounds3.contains(15.999, 2)
+            !bounds3.contains(16, 2)
+            !bounds3.contains(15.999, 2)
+    }
+
+    def 'Use `equal(double,double,double,double)` to check if a bounds instance is equal to the supplied arguments.'()
+    {
+        given:
+            var bounds = Bounds.of(3, -6, 70, 7)
+        expect:
+            bounds.equals(3, -6, 70, 7)
+            !bounds.equals(4, -6, 70, 7)
+            !bounds.equals(3.003, -6, 70, 7)
+            !bounds.equals(3, -5.99, 70, 7)
+            !bounds.equals(3, -6, 70.023, 7)
+            !bounds.equals(3, -6, 70, 6.999)
+    }
+
     def 'Two `Size` objects can be added together using the `plus(Size)` method.'(
         float width, float height, float width2, float height2, float sumWidth, float sumHeight
     ) {
