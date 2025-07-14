@@ -253,7 +253,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * which will be called when a selection has been made. If the combo box is editable, then
      * an {@link ActionEvent} will be fired when editing has stopped.
      * For more information see {@link JComboBox#addActionListener(ActionListener)}.
-     * <p>
+     *
      * @param action The {@link Action} that will be notified.
      * @return This very builder instance, which allows for method chaining.
      **/

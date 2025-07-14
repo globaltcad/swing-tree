@@ -19,9 +19,11 @@ import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JTextField} instances.
- * 	<p>
- * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
- * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.</b>
+ *  <p>
+ *  <b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ *  where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.</b>
+ *
+ * @param <F> The type of text field that is being assembled by this declarative builder/
  */
 public final class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<UIForTextField<F>, F>
 {

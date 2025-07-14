@@ -52,6 +52,12 @@ public final class FlowCell implements AddConstraint
     private static final Logger log = LoggerFactory.getLogger(FlowCell.class);
     private final Configurator<FlowCellConf> _configurator;
 
+    /**
+     *  The public constructor for the flow-cell layout configuration.
+     *  <b>Please use {@link UI#AUTO_SPAN(Configurator)} instead of calling this
+     *  constructor directly, because this constructor may change between versions!</b>
+     * @param configurator A functional configurator for the cell.
+     */
     public FlowCell(Configurator<FlowCellConf> configurator) {
         Objects.requireNonNull(configurator);
         _configurator = configurator;

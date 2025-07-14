@@ -17,6 +17,9 @@ import swingtree.layout.AddConstraint;
  *  {@link swingtree.UIForAnySwing#addAll(String, Vals, ViewSupplier)}, <br>
  *  {@link swingtree.UIForAnySwing#add(AddConstraint, Val, ViewSupplier)},  <br>
  *  {@link swingtree.UIForAnySwing#addAll(AddConstraint, Vals, ViewSupplier)}, <br>
+ *
+ * @param <M> The type of model for which a view declaration is created
+ *           upon an invocation to {{@link #createViewFor(Object)}}.
  */
 @FunctionalInterface
 public interface ViewSupplier<M>
