@@ -60,7 +60,8 @@ final class BuiltCells<C extends JComponent, E> {
             if ( !rendererLookup.containsKey(entry.first()) )
                 rendererLookup = rendererLookup.put(entry.first(), entry.second());
             else {
-                log.warn("Duplicate renderer lookup found for " + rendererLookup);
+                CellBuilder.CellView<C> existing = rendererLookup.get(entry.first()).get();
+                existing._configurators.addAll(0, entry.second()._configurators);
             }
         }
         Optional<CellBuilder.CellView<C>> forObject = rendererLookup.get(Object.class);
