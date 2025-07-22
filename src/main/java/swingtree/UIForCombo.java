@@ -2,8 +2,8 @@ package swingtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.Action;
 import sprouts.*;
+import sprouts.Action;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
@@ -12,7 +12,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
@@ -317,6 +317,62 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                     cellBuilder.buildForCombo((C)thisComponent, true);
                 })
                 ._this();
+    }
+
+    /**
+     *  Use this to set a helpful tool tip text for each menu item
+     *  in the drop-down menu of the {@link JComboBox} UI declaration.
+     *  The tool tip text will be displayed when the mouse hovers on a
+     *  menu item for some time. <br>
+     *  This is in essence a convenience method and abstraction over
+     *  the {@link #withCell(Configurator)} method, which avoid dealing
+     *  with the complexity of dealing with a more customized approach
+     *  to configuring you combo-box cell renderer and cell editors...<br>
+     *  <p><
+     *  Here an example demonstrating how to configure a
+     *  tooltip for each available option of a combo-box individually: <br>
+     *  <pre>{@code
+     *  UI.comboBox(DayOfWeek.values())
+     *  .withTooltips( day -> {
+     *    return switch (day) {
+     *      case MONDAY -> "Monday";
+     *      case TUESDAY -> "Tuesday";
+     *      case WEDNESDAY -> "Wednesday";
+     *      case THURSDAY -> "Thursday";
+     *      case FRIDAY -> "Friday";
+     *      case SATURDAY -> "Saturday";
+     *      case SUNDAY -> "Sunday";
+     *    };
+     *  })
+     *  }</pre>
+     *
+     * @param tooltips A function which returns a tooltip for a specific item.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForCombo<E,C> withTooltips(
+        Function<E, String> tooltips
+    ) {
+        return withCell( it -> it
+                .updateView(view -> view
+                    .update( comp -> {
+                        if ( comp instanceof JComponent && it.entry().isPresent() ) {
+                            JComponent jcomp =  (JComponent) comp;
+                            String toolTip = null;
+                            try {
+                                toolTip = tooltips.apply(it.entry().get());
+                                toolTip = toolTip == null || "".equals(toolTip) ? null : toolTip;
+                            } catch (Exception ex) {
+                                log.error("Error while fetching tooltip for cell '{}'.", it, ex);
+                            }
+                            if ( !Objects.equals(toolTip, jcomp.getToolTipText()) ) {
+                                jcomp.setToolTipText(toolTip);
+                            }
+                            return jcomp;
+                        }
+                        return comp;
+                    })
+                 )
+            );
     }
 
     /**
