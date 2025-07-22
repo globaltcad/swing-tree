@@ -486,18 +486,32 @@ public final class CellBuilder<C extends JComponent, E> {
         }
     }
 
-    private class SimpleListCellRenderer<O extends C> implements ListCellRenderer<Object>
+    private static class SimpleListCellRenderer<O extends JComponent, E> implements ListCellRenderer<Object>
     {
         private final O _component;
         private final ListCellRenderer<Object> _defaultRenderer;
+        private BuiltCells<O, E> _state;
 
 
-        private SimpleListCellRenderer(O component) {
+        private SimpleListCellRenderer(O component, BuiltCells<O, E> state) {
+            _state = state;
             _component = Objects.requireNonNull(component);
             if ( component instanceof JComboBox )
                 _defaultRenderer = new BasicComboBoxRenderer.UIResource();
             else
                 _defaultRenderer = new DefaultListCellRenderer.UIResource();
+        }
+
+        private @Nullable Component findRenderer(@Nullable Object value) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            return _state.rendererLookup().get(type).get()._renderer;
+        }
+
+        private void safeRenderer(@Nullable Object value, @Nullable Component renderer) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            _state.rendererLookup().get(type).get()._renderer = renderer;
         }
 
         @Override
@@ -509,7 +523,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean hasFocus
         ) {
             _state.checkTypeValidity(value);
-            List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _state.rendererLookup());
+            List<Configurator<CellConf<O, ?>>> interpreter = _find(value, _state.rendererLookup());
             if (interpreter.isEmpty())
                 return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
@@ -521,7 +535,7 @@ public final class CellBuilder<C extends JComponent, E> {
                                                         ()->_defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
-                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                for ( Configurator<CellConf<O,?>> configurator : interpreter ) {
                     CellConf newCell = cell;
                     try {
                         newCell = configurator.configure(newCell);
@@ -563,11 +577,11 @@ public final class CellBuilder<C extends JComponent, E> {
             CellConf<JComboBox<?>, Object> cell = CellConf.of(
                 null, null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
             );
-            List<Configurator<CellConf<C, ?>>> interpreter = _findAll(_state.rendererLookup());
+            List<Configurator<CellConf<O, ?>>> interpreter = _findAll(_state.rendererLookup());
             if (interpreter.isEmpty())
                 return Optional.empty();
             else {
-                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                for ( Configurator<CellConf<O,?>> configurator : interpreter ) {
                     CellConf<JComboBox<?>,Object> newCell = cell;
                     try {
                         newCell = configurator.configure((CellConf)newCell);
@@ -661,7 +675,7 @@ public final class CellBuilder<C extends JComponent, E> {
     void buildForList( C list ) {
         _addDefaultRendering();
         if (JList.class.isAssignableFrom(_state.componentType())) {
-            SimpleListCellRenderer<C> renderer = new SimpleListCellRenderer<>(list);
+            SimpleListCellRenderer<C,E> renderer = new SimpleListCellRenderer<>(list, _state);
             JList<E> jList = (JList<E>) list;
             jList.setCellRenderer(renderer);
         } else if (JComboBox.class.isAssignableFrom(_state.componentType()))
@@ -679,7 +693,7 @@ public final class CellBuilder<C extends JComponent, E> {
     void buildForCombo(C comboBox, boolean establishEditorAlso) {
         _addDefaultRendering();
         if (JComboBox.class.isAssignableFrom(_state.componentType())) {
-            SimpleListCellRenderer<C> renderer = new SimpleListCellRenderer<>(comboBox);
+            SimpleListCellRenderer<C, E> renderer = new SimpleListCellRenderer<>(comboBox, _state);
             JComboBox<E> combo = (JComboBox<E>) comboBox;
             combo.setRenderer(renderer);
             if (establishEditorAlso) {
