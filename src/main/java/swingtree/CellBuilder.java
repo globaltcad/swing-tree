@@ -157,13 +157,14 @@ public final class CellBuilder<C extends JComponent, E> {
         });
     }
 
-    public <T extends JComponent> Component _updateAndGetComponent(
+    static <C extends JComponent, E, T extends JComponent> Component _updateAndGetComponent(
+            BuiltCells<C,E> state,
             Function<@Nullable Object, Component> defaultRenderer,
             BiConsumer<@Nullable Component, CellConf<?,?>> saveComponent,
             CellConf<T, Object> cell
     ) {
         @Nullable Object value = cell.entry().orElse(null);
-        List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _state.rendererLookup());
+        List<Configurator<CellConf<C, ?>>> interpreter = _find(value, state.rendererLookup());
         if ( interpreter.isEmpty() )
             return defaultRenderer.apply(value);
         else {
@@ -208,7 +209,7 @@ public final class CellBuilder<C extends JComponent, E> {
         }
     }
 
-    private CellConf _initializeViewIfPresent(CellConf<?, Object> cell) {
+    private static CellConf _initializeViewIfPresent(CellConf<?, Object> cell) {
         if ( cell.view().isPresent() ) {
             Component view = cell.view().orElseThrow();
             @Nullable Object value = cell.entry().orElse(null);
@@ -366,6 +367,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _state.checkTypeValidity(entryFromModel);
             return _fit(table, row, column,
                         _updateAndGetComponent(
+                            _state,
                              localEntry -> _defaultRenderer.getTableCellRendererComponent(table, localEntry, isSelected, hasFocus, row, column),
                              (choice, newRenderer) -> _setRenderer(choice, entryFromModel, newRenderer),
                              CellConf.of(
@@ -391,6 +393,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _basicEditor.setEntry(entryFromModel, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
             return _fit(table, row, column,
                         _updateAndGetComponent(
+                            _state,
                              localEntry -> _basicEditor.getTableCellEditorComponent(table, localEntry, isSelected, row, column),
                              (choice, newEditor) -> _setEditor(choice, entryFromModel, newEditor),
                              CellConf.of(
@@ -417,6 +420,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _basicEditor.ini(tree, row, 0);
             _basicEditor.setEntry(entryAsString, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
             return _updateAndGetComponent(
+                         _state,
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          (choice, newRenderer) -> _setRenderer(choice, entryFromModel, newRenderer),
                          CellConf.of(
@@ -439,6 +443,7 @@ public final class CellBuilder<C extends JComponent, E> {
             _state.checkTypeValidity(entryFromModel);
             _basicEditor.ini(tree, row, 0);
             return _updateAndGetComponent(
+                         _state,
                          localEntry -> _basicEditor.getTreeCellEditorComponent(tree, localEntry, isSelected, expanded, leaf, row),
                         (choice, newEditor) -> _setEditor(choice, entryFromModel, newEditor),
                          CellConf.of(
