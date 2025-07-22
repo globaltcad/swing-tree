@@ -119,17 +119,27 @@ public final class CellBuilder<C extends JComponent, E> {
         Predicate predicate,
         Configurator<CellConf<C, V>> valueInterpreter
     ) {
+        _state = _store(_state, valueType, predicate, valueInterpreter);
+    }
+
+    static <C extends JComponent, E, V> BuiltCells<C,E> _store(
+            BuiltCells<C,E> state,
+            Class valueType,
+            Predicate predicate,
+            Configurator<CellConf<C, V>> valueInterpreter
+    ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
         NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Configurator.class);
-        _state = _state.computeIfAbsent(valueType, CellView::new);
-        List<Configurator<CellConf<C, ?>>> found = _state.rendererLookup().get(valueType).get()._configurators;
+        state = state.computeIfAbsent(valueType, CellView::new);
+        List<Configurator<CellConf<C, ?>>> found = state.rendererLookup().get(valueType).get()._configurators;
         found.add(cell -> {
             if (predicate.test(cell))
                 return valueInterpreter.configure((CellConf<C, V>) cell);
             else
                 return cell;
         });
+        return state;
     }
 
     static <C extends JComponent, E, T extends JComponent> Component _updateAndGetComponent(
@@ -653,19 +663,21 @@ public final class CellBuilder<C extends JComponent, E> {
     }
 
     SimpleTableCellRenderer getForTable() {
-        _addDefaultRendering();
-        if (JTable.class.isAssignableFrom(_state.componentType())) {
-            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(_state.componentType(), (BuiltCells) _state);
+        BuiltCells<C,E> state = _state;
+        if (JTable.class.isAssignableFrom(state.componentType())) {
+            state = _addDefaultRendering(state);
+            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
             return renderer;
         } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
     }
 
     TreeCellRenderer getForTree() {
-        _addDefaultRendering();
-        if (JTree.class.isAssignableFrom(_state.componentType()))
-            return new SimpleTableCellRenderer(_state.componentType(), (BuiltCells) _state);
-        else
+        BuiltCells<C,E> state = _state;
+        if (JTree.class.isAssignableFrom(state.componentType())) {
+            state = _addDefaultRendering(state);
+            return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
+        } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
     }
 
@@ -679,27 +691,29 @@ public final class CellBuilder<C extends JComponent, E> {
      * @param list The list for which the renderer is to be built.
      */
     void buildForList( C list ) {
-        _addDefaultRendering();
-        if (JList.class.isAssignableFrom(_state.componentType())) {
-            SimpleListCellRenderer<C,E> renderer = new SimpleListCellRenderer<>(list, _state);
+        BuiltCells<C,E> state = _state;
+        if (JList.class.isAssignableFrom(state.componentType())) {
+            state = _addDefaultRendering(state);
+            SimpleListCellRenderer<C,E> renderer = new SimpleListCellRenderer<>(list, state);
             JList<E> jList = (JList<E>) list;
             jList.setCellRenderer(renderer);
-        } else if (JComboBox.class.isAssignableFrom(_state.componentType()))
+        } else if (JComboBox.class.isAssignableFrom(state.componentType()))
             throw new IllegalArgumentException(
                 "Renderer was set up to be used for a JList! " +
-                "(not " + _state.componentType().getSimpleName() + ")"
+                "(not " + state.componentType().getSimpleName() + ")"
             );
         else
             throw new IllegalArgumentException(
                 "Renderer was set up to be used for an unknown component type! " +
-                "(cannot handle '" + _state.componentType().getSimpleName() + "')"
+                "(cannot handle '" + state.componentType().getSimpleName() + "')"
             );
     }
 
     void buildForCombo(C comboBox, boolean establishEditorAlso) {
-        _addDefaultRendering();
-        if (JComboBox.class.isAssignableFrom(_state.componentType())) {
-            SimpleListCellRenderer<C, E> renderer = new SimpleListCellRenderer<>(comboBox, _state);
+        BuiltCells<C,E> state = _state;
+        if (JComboBox.class.isAssignableFrom(state.componentType())) {
+            state = _addDefaultRendering(state);
+            SimpleListCellRenderer<C, E> renderer = new SimpleListCellRenderer<>(comboBox, state);
             JComboBox<E> combo = (JComboBox<E>) comboBox;
             combo.setRenderer(renderer);
             if (establishEditorAlso) {
@@ -708,13 +722,13 @@ public final class CellBuilder<C extends JComponent, E> {
         } else
             throw new IllegalArgumentException(
                 "Renderer was set up to be used for a JComboBox! " +
-                "(not " + _state.componentType().getSimpleName() + ")"
+                "(not " + state.componentType().getSimpleName() + ")"
             );
     }
 
-    private void _addDefaultRendering() {
+    private static <C extends JComponent,E> BuiltCells<C,E> _addDefaultRendering(BuiltCells<C,E> state) {
         // We use the default text renderer for objects
-        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString()));
+        return _store(state, Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString()));
     }
 
     static class InternalLabelForRendering extends DefaultListCellRenderer {
