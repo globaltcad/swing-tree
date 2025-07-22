@@ -59,7 +59,7 @@ class Style_Animations_Spec extends Specification
             var cycles = []
         and : 'We create a simple `JTogglButton` UI component with a style animation.'
             var ui = UI.toggleButton("Click me!")
-                            .withTransitoryStyle(event, LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {
+                            .withTransitoryStyle(event.observable(), LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {
                                 proresses << state.progress()
                                 cycles << state.cycle()
                                 return conf;

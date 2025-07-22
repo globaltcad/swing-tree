@@ -198,7 +198,7 @@ public class NamedFieldsView extends JPanel {
             .add("center",
                 UI.label("Hello!")
                 .onMouseEnter( it -> highlight.fire() )
-                .withTransitoryStyle(highlight, LifeTime.of(1, TimeUnit.SECONDS), (state, conf)->conf
+                .withTransitoryStyle(highlight.observable(), LifeTime.of(1, TimeUnit.SECONDS), (state, conf)->conf
                     .shadowSpreadRadius(-10 + 20 * state.cycle())
                     .shadowColor(Color.RED)
                     .shadowBlurRadius( 6 * state.cycle() )
