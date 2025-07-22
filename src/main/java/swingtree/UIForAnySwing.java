@@ -2372,7 +2372,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
-     * @see #withTransitoryStyle(Event, LifeTime, AnimatedStyler)
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler)
      */
     public final I withTransitionalStyle(
         Val<Boolean>      transitionToggle,
@@ -2392,9 +2392,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *    Allows you to configure a style which will be applied to the component temporarily
-     *    when the provided {@link Event} is fired. The style will be applied for the provided
-     *    {@link LifeTime} and then removed again.
-     *    Here an example demonstrating how an event based style animation which temporarily
+     *    when the provided {@link Observable} reports a state change. This {@link Observable}
+     *    may be a {@link Event#observable()}, {@link Var#view()} or {@link Vars#view()} among
+     *    other things which can be observed reactively.<br>
+     *    <p>
+     *    The desired style, defined by the supplied {@link AnimatedStyler}, will be applied
+     *    according to the specified {@link LifeTime} and then removed afterward.
+     *    Here an example demonstrating how an event based style animation temporarily
      *    defines a custom background and border color on a label:
      *    <pre>{@code
      *      UI.label("I have a highlight animation!")
@@ -2404,7 +2408,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      )
      *    }</pre>
      *
-     * @param styleEvent The {@link Event} which should trigger the style animation.
+     * @param styleTrigger The {@link Observable} which should trigger the style animation.
      * @param styleLifeTime The {@link LifeTime} of the style animation.
      * @param styler An {@link AnimatedStyler} lambda can define a set of style rules for the component wrapped by this builder
      *               by receiving an {@link AnimationStatus} and a {@link swingtree.style.ComponentStyleDelegate} and returning
@@ -2417,17 +2421,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler)
      */
     public final I withTransitoryStyle(
-        Event             styleEvent,
+        Observable        styleTrigger,
         LifeTime          styleLifeTime,
         AnimatedStyler<C> styler
     ){
-        NullUtil.nullArgCheck(styleEvent, "styleEvent", Event.class);
+        NullUtil.nullArgCheck(styleTrigger, "styleTrigger", Observable.class);
         NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
                     WeakReference<C> thisComponentRef = new WeakReference<>(thisComponent);
                     ComponentExtension.from(thisComponent).storeBoundObservable(
-                            styleEvent.observable().subscribe(()->{
+                            styleTrigger.subscribe(()->{
                                 C innerComponent = thisComponentRef.get();
                                 if (innerComponent == null)
                                     return;
@@ -2437,7 +2441,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 );
                             })
                     );
-                    Observable.cast(styleEvent);
                 })
                 ._this();
     }
