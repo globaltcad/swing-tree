@@ -4,10 +4,13 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Association;
+import sprouts.Pair;
 
 import javax.swing.*;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 final class BuiltCells<C extends JComponent, E> {
@@ -49,6 +52,24 @@ final class BuiltCells<C extends JComponent, E> {
         _componentType = componentType;
         _elementType = elementType;
         _rendererLookup = rendererLookup;
+    }
+
+    public BuiltCells<C,E> addRenderLookups(Association<Class<?>, CellBuilder.CellView<C>> additionalLookups) {
+        Association<Class<?>, CellBuilder.CellView<C>> rendererLookup = _rendererLookup;
+        for ( Pair<Class<?>, CellBuilder.CellView<C>> entry : additionalLookups.entrySet() ) {
+            if ( !rendererLookup.containsKey(entry.first()) )
+                rendererLookup = rendererLookup.put(entry.first(), entry.second());
+            else {
+                log.warn("Duplicate renderer lookup found for " + rendererLookup);
+            }
+        }
+        Optional<CellBuilder.CellView<C>> forObject = rendererLookup.get(Object.class);
+        if ( forObject.isPresent() ) {
+            rendererLookup = rendererLookup.remove(Object.class);
+            rendererLookup = rendererLookup.put(Object.class, forObject.get());
+            // The 'Object' type always needs to be last when rendering!
+        }
+        return new BuiltCells<>(_componentType, _elementType, rendererLookup);
     }
 
     public Class<C> componentType() {

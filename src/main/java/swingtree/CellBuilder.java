@@ -238,6 +238,10 @@ public final class CellBuilder<C extends JComponent, E> {
             _state = state;
         }
 
+        BuiltCells<JTable,Object> getState(){
+            return _state;
+        }
+
         private @Nullable Component findEditor(@Nullable Object value) {
             Class type = (value == null ? Object.class : value.getClass());
             _state = _state.computeIfAbsent(type, CellView::new);
@@ -518,6 +522,10 @@ public final class CellBuilder<C extends JComponent, E> {
                 _defaultRenderer = new DefaultListCellRenderer.UIResource();
         }
 
+        BuiltCells<O,E> getState(){
+            return _state;
+        }
+
         private @Nullable Component findRenderer(@Nullable Object value) {
             Class type = (value == null ? Object.class : value.getClass());
             _state = _state.computeIfAbsent(type, CellView::new);
@@ -662,20 +670,32 @@ public final class CellBuilder<C extends JComponent, E> {
         return cellRenderer;
     }
 
-    SimpleTableCellRenderer getForTable() {
+    SimpleTableCellRenderer getForTable(@Nullable TableCellRenderer oldTableRenderer) {
         BuiltCells<C,E> state = _state;
         if (JTable.class.isAssignableFrom(state.componentType())) {
-            state = _addDefaultRendering(state);
+            if ( oldTableRenderer instanceof SimpleTableCellRenderer ) {
+                SimpleTableCellRenderer oldRenderer = (SimpleTableCellRenderer) oldTableRenderer;
+                BuiltCells<JTable,Object> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups((Association) state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
             SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
             return renderer;
         } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
     }
 
-    TreeCellRenderer getForTree() {
+    TreeCellRenderer getForTree(@Nullable TableCellRenderer oldTableRenderer) {
         BuiltCells<C,E> state = _state;
         if (JTree.class.isAssignableFrom(state.componentType())) {
-            state = _addDefaultRendering(state);
+            if ( oldTableRenderer instanceof SimpleTableCellRenderer ) {
+                SimpleTableCellRenderer oldRenderer = (SimpleTableCellRenderer) oldTableRenderer;
+                BuiltCells<JTable,Object> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups((Association) state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
             return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
         } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
@@ -693,9 +713,15 @@ public final class CellBuilder<C extends JComponent, E> {
     void buildForList( C list ) {
         BuiltCells<C,E> state = _state;
         if (JList.class.isAssignableFrom(state.componentType())) {
-            state = _addDefaultRendering(state);
-            SimpleListCellRenderer<C,E> renderer = new SimpleListCellRenderer<>(list, state);
             JList<E> jList = (JList<E>) list;
+            if ( jList.getCellRenderer() instanceof SimpleListCellRenderer ) {
+                SimpleListCellRenderer<C,E> oldRenderer = (SimpleListCellRenderer) jList.getCellRenderer();
+                BuiltCells<C,E> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups(state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
+            SimpleListCellRenderer<C,E> renderer = new SimpleListCellRenderer<>(list, state);
             jList.setCellRenderer(renderer);
         } else if (JComboBox.class.isAssignableFrom(state.componentType()))
             throw new IllegalArgumentException(
@@ -712,9 +738,15 @@ public final class CellBuilder<C extends JComponent, E> {
     void buildForCombo(C comboBox, boolean establishEditorAlso) {
         BuiltCells<C,E> state = _state;
         if (JComboBox.class.isAssignableFrom(state.componentType())) {
-            state = _addDefaultRendering(state);
-            SimpleListCellRenderer<C, E> renderer = new SimpleListCellRenderer<>(comboBox, state);
             JComboBox<E> combo = (JComboBox<E>) comboBox;
+            if ( combo.getRenderer() instanceof SimpleListCellRenderer ) {
+                SimpleListCellRenderer<C,E> oldRenderer = (SimpleListCellRenderer) combo.getRenderer();
+                BuiltCells<C,E> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups(state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
+            SimpleListCellRenderer<C, E> renderer = new SimpleListCellRenderer<>(comboBox, state);
             combo.setRenderer(renderer);
             if (establishEditorAlso) {
                 renderer.establishEditor().ifPresent(combo::setEditor);

@@ -3,8 +3,6 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
-import sprouts.Observable;
-import sprouts.Observer;
 import swingtree.api.Buildable;
 import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
@@ -14,9 +12,10 @@ import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import javax.swing.table.*;
-import java.awt.Component;
+import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -129,7 +128,13 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             log.error("Error while building table renderer.", e);
             return this;
         }
-        return _withCellRendererForColumn(columnName, builder.getForTable());
+        CellBuilder<T, Object> finalBuilder = builder;
+        return _with(thisComponent -> {
+                        CellBuilder.SimpleTableCellRenderer renderer = finalBuilder.getForTable(thisComponent.getColumn(columnName).getCellRenderer());
+                        thisComponent.getColumn(columnName).setCellRenderer(renderer);
+                        thisComponent.getColumn(columnName).setCellEditor(renderer);
+                    })
+                    ._this();
     }
 
     /**
@@ -234,7 +239,13 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             log.error("Error while building table renderer.", e);
             return this;
         }
-        return _withCellRendererForColumn(columnIndex, builder.getForTable());
+        CellBuilder<T, Object> finalBuilder = builder;
+        return _with( thisComponent -> {
+            CellBuilder.SimpleTableCellRenderer renderer = finalBuilder.getForTable(thisComponent.getColumnModel().getColumn(columnIndex).getCellRenderer());
+                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
+                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(renderer);
+                })
+                ._this();
     }
 
     /**
@@ -313,16 +324,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
     }
 
-    private final UIForTable<T> _withCellRendererForColumn( String columnName, CellBuilder.SimpleTableCellRenderer renderer ) {
-        NullUtil.nullArgCheck(columnName, "columnName", String.class);
-        NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        return _with( thisComponent -> {
-                    thisComponent.getColumn(columnName).setCellRenderer(renderer);
-                    thisComponent.getColumn(columnName).setCellEditor(renderer);
-                })
-                ._this();
-    }
-
     /**
      * Use this to register a table cell renderer for a particular column. <br>
      * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
@@ -343,15 +344,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
     }
 
-    private final UIForTable<T> _withCellRendererForColumn( int columnIndex, CellBuilder.SimpleTableCellRenderer renderer ) {
-        NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        return _with( thisComponent -> {
-                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
-                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(renderer);
-                })
-                ._this();
-    }
-
     /**
      *  Use this to register a {@link TableCellRenderer} for all columns of this table.<br>
      *  A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
@@ -367,15 +359,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         return _with( thisComponent -> {
                     thisComponent.setDefaultRenderer(Object.class, renderer);
-                })
-                ._this();
-    }
-
-    private final UIForTable<T> _withCellRenderer( CellBuilder.SimpleTableCellRenderer renderer ) {
-        NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        return _with( thisComponent -> {
-                    thisComponent.setDefaultRenderer(Object.class, renderer);
-                    thisComponent.setDefaultEditor(Object.class, renderer);
                 })
                 ._this();
     }
@@ -418,7 +401,13 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             return this;
         }
         Objects.requireNonNull(builder);
-        return _withCellRenderer(builder.getForTable());
+        CellBuilder<T, Object> finalBuilder = builder;
+        return _with(thisComponent -> {
+                    CellBuilder.SimpleTableCellRenderer renderer = finalBuilder.getForTable(thisComponent.getDefaultRenderer(Object.class));
+                    thisComponent.setDefaultRenderer(Object.class, renderer);
+                    thisComponent.setDefaultEditor(Object.class, renderer);
+                })
+                ._this();
     }
 
     /**
