@@ -77,33 +77,8 @@ public final class CellBuilder<C extends JComponent, E> {
         return (CellBuilder) new CellBuilder<>(JTable.class, elementType);
     }
 
-
     private CellBuilder(Class<C> componentType, Class<E> elementType) {
         _state = new BuiltCells<>(componentType, elementType);
-    }
-
-    private @Nullable Component findRenderer(@Nullable Object value) {
-        Class type = (value == null ? Object.class : value.getClass());
-        _state = _state.computeIfAbsent(type, CellView::new);
-        return _state.rendererLookup().get(type).get()._renderer;
-    }
-
-    private void safeRenderer(@Nullable Object value, @Nullable Component renderer) {
-        Class type = (value == null ? Object.class : value.getClass());
-        _state = _state.computeIfAbsent(type, CellView::new);
-        _state.rendererLookup().get(type).get()._renderer = renderer;
-    }
-
-    private @Nullable Component findEditor(@Nullable Object value) {
-        Class type = (value == null ? Object.class : value.getClass());
-        _state = _state.computeIfAbsent(type, CellView::new);
-        return _state.rendererLookup().get(type).get()._editor;
-    }
-
-    private void safeEditor(@Nullable Object value, @Nullable Component editor) {
-        Class type = (value == null ? Object.class : value.getClass());
-        _state = _state.computeIfAbsent(type, CellView::new);
-        _state.rendererLookup().get(type).get()._editor = editor;
     }
 
     /**
@@ -241,14 +216,40 @@ public final class CellBuilder<C extends JComponent, E> {
         return cell;
     }
 
-    class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
+    static class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
         private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
         private final InternalCellEditor _basicEditor;
+        private BuiltCells<JTable,Object> _state;
 
-        SimpleTableCellRenderer(Class<? extends JComponent> hostType) {
+        SimpleTableCellRenderer(Class<? extends JComponent> hostType, BuiltCells<JTable, Object> state) {
             _basicEditor = new InternalCellEditor(hostType);
+            _state = state;
+        }
+
+        private @Nullable Component findEditor(@Nullable Object value) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            return _state.rendererLookup().get(type).get()._editor;
+        }
+
+        private void safeEditor(@Nullable Object value, @Nullable Component editor) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            _state.rendererLookup().get(type).get()._editor = editor;
+        }
+
+        private void safeRenderer(@Nullable Object value, @Nullable Component renderer) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            _state.rendererLookup().get(type).get()._renderer = renderer;
+        }
+
+        private @Nullable Component findRenderer(@Nullable Object value) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            return _state.rendererLookup().get(type).get()._renderer;
         }
 
         public @Nullable Component getEditorComponent() {
@@ -654,7 +655,7 @@ public final class CellBuilder<C extends JComponent, E> {
     SimpleTableCellRenderer getForTable() {
         _addDefaultRendering();
         if (JTable.class.isAssignableFrom(_state.componentType())) {
-            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(_state.componentType());
+            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(_state.componentType(), (BuiltCells) _state);
             return renderer;
         } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
@@ -663,7 +664,7 @@ public final class CellBuilder<C extends JComponent, E> {
     TreeCellRenderer getForTree() {
         _addDefaultRendering();
         if (JTree.class.isAssignableFrom(_state.componentType()))
-            return new SimpleTableCellRenderer(_state.componentType());
+            return new SimpleTableCellRenderer(_state.componentType(), (BuiltCells) _state);
         else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
     }

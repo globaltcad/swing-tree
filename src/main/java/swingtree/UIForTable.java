@@ -313,7 +313,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
     }
 
-    private final UIForTable<T> _withCellRendererForColumn( String columnName, CellBuilder<?,?>.SimpleTableCellRenderer renderer ) {
+    private final UIForTable<T> _withCellRendererForColumn( String columnName, CellBuilder.SimpleTableCellRenderer renderer ) {
         NullUtil.nullArgCheck(columnName, "columnName", String.class);
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         return _with( thisComponent -> {
