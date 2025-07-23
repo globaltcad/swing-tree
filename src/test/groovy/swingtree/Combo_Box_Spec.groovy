@@ -660,6 +660,79 @@ class Combo_Box_Spec extends Specification
             rendered[6] == "Day: SUNDAY"
     }
 
+    def 'Multiple calls to `withCells(Configurator)` will not override each other!'()
+    {
+        reportInfo """
+            The `withCells(Configurator)` method is used to configure both
+            how the drop-down options of a combo box ought to be rendered,
+            and then also how the editor of a combo-box should behave and
+            look like (if the combo box is editable).
+            More specifically, the `withCells` method is different
+            to `withCell` in that it gives you an API for configuring
+            the cell for specific types of items.
+            
+            The `Configurator` lambda passed to the `withCells` method receives
+            a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+            
+            In this test however, we will focus on verifying that
+            this method can be called multiple times without
+            your configurations being lost. Instead, they accumulate.
+        """
+        given : 'We create a combo box for the days of the week and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(DayOfWeek.values())
+                        .withCells(it -> it
+                            .when(DayOfWeek.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                )
+                            )
+                        )
+                        .withCells(it -> it
+                            .when(DayOfWeek.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Day: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+            var editor = combo.editor
+        expect :
+            renderer != null
+            editor != null
+        and : 'The editor was initialized with the text field having a magenta background.'
+            editor.getEditorComponent() instanceof JTextField
+            editor.getEditorComponent().background == Color.MAGENTA
+        and : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<DayOfWeek>()
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.TUESDAY, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.WEDNESDAY, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.THURSDAY, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.FRIDAY, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
+            ])
+        and : 'The renderer returns the expected text representations.'
+            rendered[0] == "Day: MONDAY"
+            rendered[1] == "Day: TUESDAY"
+            rendered[2] == "Day: WEDNESDAY"
+            rendered[3] == "Day: THURSDAY"
+            rendered[4] == "Day: FRIDAY"
+            rendered[5] == "Day: SATURDAY"
+            rendered[6] == "Day: SUNDAY"
+    }
+
     def 'Use `withCell(Configurator)` to configure both a renderer and editor for your combobox.'()
     {
         reportInfo """
