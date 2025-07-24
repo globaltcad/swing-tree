@@ -2,6 +2,8 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Association;
+import sprouts.Pair;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
@@ -17,8 +19,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -57,11 +59,9 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(CellBuilder.class);
 
-    private final Class<C> _componentType;
-    private final Class<E> _elementType;
-    private final Map<Class<?>, CellView<C>> _rendererLookup = new LinkedHashMap<>(16);
+    private BuiltCells<C,E> _state;
 
-    private static class CellView<C extends JComponent> {
+    static class CellView<C extends JComponent> {
         @Nullable Component _renderer = null;
         @Nullable Component _editor = null;
         final List<Configurator<CellConf<C, ?>>> _configurators = new ArrayList<>();
@@ -77,41 +77,8 @@ public final class CellBuilder<C extends JComponent, E> {
         return (CellBuilder) new CellBuilder<>(JTable.class, elementType);
     }
 
-
     private CellBuilder(Class<C> componentType, Class<E> elementType) {
-        _componentType = componentType;
-        _elementType   = elementType;
-    }
-
-    private @Nullable Component findRenderer(@Nullable Object value) {
-        Class type = (value == null ? Object.class : value.getClass());
-        return _rendererLookup.computeIfAbsent(type, k -> new CellView<>())._renderer;
-    }
-
-    private void safeRenderer(@Nullable Object value, @Nullable Component renderer) {
-        Class type = (value == null ? Object.class : value.getClass());
-        _rendererLookup.computeIfAbsent(type, k -> new CellView<>())._renderer = renderer;
-    }
-
-    private @Nullable Component findEditor(@Nullable Object value) {
-        Class type = (value == null ? Object.class : value.getClass());
-        return _rendererLookup.computeIfAbsent(type, k -> new CellView<>())._editor;
-    }
-
-    private void safeEditor(@Nullable Object value, @Nullable Component editor) {
-        Class type = (value == null ? Object.class : value.getClass());
-        _rendererLookup.computeIfAbsent(type, k -> new CellView<>())._editor = editor;
-    }
-
-    private void _checkTypeValidity( @Nullable Object encounteredValue ) {
-        if ( encounteredValue != null ) {
-            if ( !_elementType.isAssignableFrom(encounteredValue.getClass()) )
-                log.debug(
-                    "Encountered an unusual cell entry in component '"+_componentType.getSimpleName()+"'. " +
-                    "Expected type '"+_elementType.getSimpleName()+"', but got '"+encounteredValue.getClass().getSimpleName()+"'."
-                );
-
-        }
+        _state = new BuiltCells<>(componentType, elementType);
     }
 
     /**
@@ -152,25 +119,37 @@ public final class CellBuilder<C extends JComponent, E> {
         Predicate predicate,
         Configurator<CellConf<C, V>> valueInterpreter
     ) {
+        _state = _store(_state, valueType, predicate, valueInterpreter);
+    }
+
+    static <C extends JComponent, E, V> BuiltCells<C,E> _store(
+            BuiltCells<C,E> state,
+            Class valueType,
+            Predicate predicate,
+            Configurator<CellConf<C, V>> valueInterpreter
+    ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
         NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Configurator.class);
-        List<Configurator<CellConf<C, ?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new CellView<>())._configurators;
+        state = state.computeIfAbsent(valueType, CellView::new);
+        List<Configurator<CellConf<C, ?>>> found = state.rendererLookup().get(valueType).get()._configurators;
         found.add(cell -> {
             if (predicate.test(cell))
                 return valueInterpreter.configure((CellConf<C, V>) cell);
             else
                 return cell;
         });
+        return state;
     }
 
-    public <T extends JComponent> Component _updateAndGetComponent(
+    static <C extends JComponent, E, T extends JComponent> Component _updateAndGetComponent(
+            BuiltCells<C,E> state,
             Function<@Nullable Object, Component> defaultRenderer,
             BiConsumer<@Nullable Component, CellConf<?,?>> saveComponent,
             CellConf<T, Object> cell
     ) {
         @Nullable Object value = cell.entry().orElse(null);
-        List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _rendererLookup);
+        List<Configurator<CellConf<C, ?>>> interpreter = _find(value, state.rendererLookup());
         if ( interpreter.isEmpty() )
             return defaultRenderer.apply(value);
         else {
@@ -215,7 +194,7 @@ public final class CellBuilder<C extends JComponent, E> {
         }
     }
 
-    private CellConf _initializeViewIfPresent(CellConf<?, Object> cell) {
+    private static CellConf _initializeViewIfPresent(CellConf<?, Object> cell) {
         if ( cell.view().isPresent() ) {
             Component view = cell.view().orElseThrow();
             @Nullable Object value = cell.entry().orElse(null);
@@ -247,14 +226,44 @@ public final class CellBuilder<C extends JComponent, E> {
         return cell;
     }
 
-    class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
+    static class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
         private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
         private final InternalCellEditor _basicEditor;
+        private BuiltCells<JTable,Object> _state;
 
-        SimpleTableCellRenderer(Class<? extends JComponent> hostType) {
+        SimpleTableCellRenderer(Class<? extends JComponent> hostType, BuiltCells<JTable, Object> state) {
             _basicEditor = new InternalCellEditor(hostType);
+            _state = state;
+        }
+
+        BuiltCells<JTable,Object> getState(){
+            return _state;
+        }
+
+        private @Nullable Component findEditor(@Nullable Object value) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            return _state.rendererLookup().get(type).get()._editor;
+        }
+
+        private void safeEditor(@Nullable Object value, @Nullable Component editor) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            _state.rendererLookup().get(type).get()._editor = editor;
+        }
+
+        private void safeRenderer(@Nullable Object value, @Nullable Component renderer) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            _state.rendererLookup().get(type).get()._renderer = renderer;
+        }
+
+        private @Nullable Component findRenderer(@Nullable Object value) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            return _state.rendererLookup().get(type).get()._renderer;
         }
 
         public @Nullable Component getEditorComponent() {
@@ -370,9 +379,10 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
-            _checkTypeValidity(entryFromModel);
+            _state.checkTypeValidity(entryFromModel);
             return _fit(table, row, column,
                         _updateAndGetComponent(
+                            _state,
                              localEntry -> _defaultRenderer.getTableCellRendererComponent(table, localEntry, isSelected, hasFocus, row, column),
                              (choice, newRenderer) -> _setRenderer(choice, entryFromModel, newRenderer),
                              CellConf.of(
@@ -392,12 +402,13 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
-            _checkTypeValidity(entryFromModel);
+            _state.checkTypeValidity(entryFromModel);
             _basicEditor.ini(table, row, column);
             _basicEditor.updateForTable(table, column);
             _basicEditor.setEntry(entryFromModel, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
             return _fit(table, row, column,
                         _updateAndGetComponent(
+                            _state,
                              localEntry -> _basicEditor.getTableCellEditorComponent(table, localEntry, isSelected, row, column),
                              (choice, newEditor) -> _setEditor(choice, entryFromModel, newEditor),
                              CellConf.of(
@@ -419,11 +430,12 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final boolean          hasFocus
         ) {
-            _checkTypeValidity(entryFromModel);
+            _state.checkTypeValidity(entryFromModel);
             String entryAsString = tree.convertValueToText(entryFromModel, selected, expanded, leaf, row, false);
             _basicEditor.ini(tree, row, 0);
             _basicEditor.setEntry(entryAsString, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
             return _updateAndGetComponent(
+                         _state,
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          (choice, newRenderer) -> _setRenderer(choice, entryFromModel, newRenderer),
                          CellConf.of(
@@ -443,9 +455,10 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean          leaf,
             final int              row
         ) {
-            _checkTypeValidity(entryFromModel);
+            _state.checkTypeValidity(entryFromModel);
             _basicEditor.ini(tree, row, 0);
             return _updateAndGetComponent(
+                         _state,
                          localEntry -> _basicEditor.getTreeCellEditorComponent(tree, localEntry, isSelected, expanded, leaf, row),
                         (choice, newEditor) -> _setEditor(choice, entryFromModel, newEditor),
                          CellConf.of(
@@ -493,18 +506,36 @@ public final class CellBuilder<C extends JComponent, E> {
         }
     }
 
-    private class SimpleListCellRenderer<O extends C> implements ListCellRenderer<Object>
+    private static class SimpleListCellRenderer<O extends JComponent, E> implements ListCellRenderer<Object>
     {
         private final O _component;
         private final ListCellRenderer<Object> _defaultRenderer;
+        private BuiltCells<O, E> _state;
 
 
-        private SimpleListCellRenderer(O component) {
+        private SimpleListCellRenderer(O component, BuiltCells<O, E> state) {
+            _state = state;
             _component = Objects.requireNonNull(component);
             if ( component instanceof JComboBox )
                 _defaultRenderer = new BasicComboBoxRenderer.UIResource();
             else
                 _defaultRenderer = new DefaultListCellRenderer.UIResource();
+        }
+
+        BuiltCells<O,E> getState(){
+            return _state;
+        }
+
+        private @Nullable Component findRenderer(@Nullable Object value) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            return _state.rendererLookup().get(type).get()._renderer;
+        }
+
+        private void safeRenderer(@Nullable Object value, @Nullable Component renderer) {
+            Class type = (value == null ? Object.class : value.getClass());
+            _state = _state.computeIfAbsent(type, CellView::new);
+            _state.rendererLookup().get(type).get()._renderer = renderer;
         }
 
         @Override
@@ -515,8 +546,8 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean isSelected,
             final boolean hasFocus
         ) {
-            _checkTypeValidity(value);
-            List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _rendererLookup);
+            _state.checkTypeValidity(value);
+            List<Configurator<CellConf<O, ?>>> interpreter = _find(value, _state.rendererLookup());
             if (interpreter.isEmpty())
                 return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
@@ -528,7 +559,7 @@ public final class CellBuilder<C extends JComponent, E> {
                                                         ()->_defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
-                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                for ( Configurator<CellConf<O,?>> configurator : interpreter ) {
                     CellConf newCell = cell;
                     try {
                         newCell = configurator.configure(newCell);
@@ -570,11 +601,11 @@ public final class CellBuilder<C extends JComponent, E> {
             CellConf<JComboBox<?>, Object> cell = CellConf.of(
                 null, null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
             );
-            List<Configurator<CellConf<C, ?>>> interpreter = _findAll(_rendererLookup);
+            List<Configurator<CellConf<O, ?>>> interpreter = _findAll(_state.rendererLookup());
             if (interpreter.isEmpty())
                 return Optional.empty();
             else {
-                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                for ( Configurator<CellConf<O,?>> configurator : interpreter ) {
                     CellConf<JComboBox<?>,Object> newCell = cell;
                     try {
                         newCell = configurator.configure((CellConf)newCell);
@@ -614,13 +645,13 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private static <C extends JComponent> List<Configurator<CellConf<C, ?>>> _find(
         @Nullable Object value,
-        Map<Class<?>, CellView<C>> rendererLookup
+        Association<Class<?>, CellView<C>> rendererLookup
     ) {
         Class<?> type = (value == null ? Object.class : value.getClass());
         List<Configurator<CellConf<C, ?>>> cellRenderer = new ArrayList<>();
-        for (Map.Entry<Class<?>, CellView<C>> e : rendererLookup.entrySet()) {
-            if (e.getKey().isAssignableFrom(type))
-                cellRenderer.addAll(e.getValue()._configurators);
+        for (Pair<Class<?>, CellView<C>> e : rendererLookup.entrySet()) {
+            if (e.first().isAssignableFrom(type))
+                cellRenderer.addAll(e.second()._configurators);
         }
         // We reverse the cell renderers, so that the most un-specific one is first
         Collections.reverse(cellRenderer);
@@ -628,7 +659,7 @@ public final class CellBuilder<C extends JComponent, E> {
     }
 
     private static <C extends JComponent> List<Configurator<CellConf<C,?>>> _findAll(
-            Map<Class<?>, CellView<C>> rendererLookup
+        Association<Class<?>, CellView<C>> rendererLookup
     ) {
         List<Configurator<CellConf<C, ?>>> cellRenderer = new ArrayList<>();
         for (CellView<C> e : rendererLookup.values()) {
@@ -639,20 +670,34 @@ public final class CellBuilder<C extends JComponent, E> {
         return cellRenderer;
     }
 
-    SimpleTableCellRenderer getForTable() {
-        _addDefaultRendering();
-        if (JTable.class.isAssignableFrom(_componentType)) {
-            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(_componentType);
+    SimpleTableCellRenderer getForTable(@Nullable TableCellRenderer oldTableRenderer) {
+        BuiltCells<C,E> state = _state;
+        if (JTable.class.isAssignableFrom(state.componentType())) {
+            if ( oldTableRenderer instanceof SimpleTableCellRenderer ) {
+                SimpleTableCellRenderer oldRenderer = (SimpleTableCellRenderer) oldTableRenderer;
+                BuiltCells<JTable,Object> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups((Association) state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
+            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
             return renderer;
         } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
     }
 
-    TreeCellRenderer getForTree() {
-        _addDefaultRendering();
-        if (JTree.class.isAssignableFrom(_componentType))
-            return new SimpleTableCellRenderer(_componentType);
-        else
+    TreeCellRenderer getForTree(@Nullable TableCellRenderer oldTableRenderer) {
+        BuiltCells<C,E> state = _state;
+        if (JTree.class.isAssignableFrom(state.componentType())) {
+            if ( oldTableRenderer instanceof SimpleTableCellRenderer ) {
+                SimpleTableCellRenderer oldRenderer = (SimpleTableCellRenderer) oldTableRenderer;
+                BuiltCells<JTable,Object> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups((Association) state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
+            return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
+        } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
     }
 
@@ -666,39 +711,56 @@ public final class CellBuilder<C extends JComponent, E> {
      * @param list The list for which the renderer is to be built.
      */
     void buildForList( C list ) {
-        _addDefaultRendering();
-        if (JList.class.isAssignableFrom(_componentType)) {
-            SimpleListCellRenderer<C> renderer = new SimpleListCellRenderer<>(list);
+        BuiltCells<C,E> state = _state;
+        if (JList.class.isAssignableFrom(state.componentType())) {
             JList<E> jList = (JList<E>) list;
+            if ( jList.getCellRenderer() instanceof SimpleListCellRenderer ) {
+                SimpleListCellRenderer<C,E> oldRenderer = (SimpleListCellRenderer) jList.getCellRenderer();
+                BuiltCells<C,E> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups(state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
+            SimpleListCellRenderer<C,E> renderer = new SimpleListCellRenderer<>(list, state);
             jList.setCellRenderer(renderer);
-        } else if (JComboBox.class.isAssignableFrom(_componentType))
+        } else if (JComboBox.class.isAssignableFrom(state.componentType()))
             throw new IllegalArgumentException(
-                    "Renderer was set up to be used for a JList! (not " + _componentType.getSimpleName() + ")"
+                "Renderer was set up to be used for a JList! " +
+                "(not " + state.componentType().getSimpleName() + ")"
             );
         else
             throw new IllegalArgumentException(
-                    "Renderer was set up to be used for an unknown component type! (cannot handle '" + _componentType.getSimpleName() + "')"
+                "Renderer was set up to be used for an unknown component type! " +
+                "(cannot handle '" + state.componentType().getSimpleName() + "')"
             );
     }
 
     void buildForCombo(C comboBox, boolean establishEditorAlso) {
-        _addDefaultRendering();
-        if (JComboBox.class.isAssignableFrom(_componentType)) {
-            SimpleListCellRenderer<C> renderer = new SimpleListCellRenderer<>(comboBox);
+        BuiltCells<C,E> state = _state;
+        if (JComboBox.class.isAssignableFrom(state.componentType())) {
             JComboBox<E> combo = (JComboBox<E>) comboBox;
+            if ( combo.getRenderer() instanceof SimpleListCellRenderer ) {
+                SimpleListCellRenderer<C,E> oldRenderer = (SimpleListCellRenderer) combo.getRenderer();
+                BuiltCells<C,E> oldState = oldRenderer.getState();
+                state = oldState.addRenderLookups(state.rendererLookup());
+            } else {
+                state = _addDefaultRendering(state);
+            }
+            SimpleListCellRenderer<C, E> renderer = new SimpleListCellRenderer<>(comboBox, state);
             combo.setRenderer(renderer);
             if (establishEditorAlso) {
                 renderer.establishEditor().ifPresent(combo::setEditor);
             }
         } else
             throw new IllegalArgumentException(
-                    "Renderer was set up to be used for a JComboBox! (not " + _componentType.getSimpleName() + ")"
+                "Renderer was set up to be used for a JComboBox! " +
+                "(not " + state.componentType().getSimpleName() + ")"
             );
     }
 
-    private void _addDefaultRendering() {
+    private static <C extends JComponent,E> BuiltCells<C,E> _addDefaultRendering(BuiltCells<C,E> state) {
         // We use the default text renderer for objects
-        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString()));
+        return _store(state, Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString()));
     }
 
     static class InternalLabelForRendering extends DefaultListCellRenderer {

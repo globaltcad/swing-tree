@@ -10,6 +10,7 @@ import swingtree.threading.EventProcessor
 import javax.swing.*
 import java.awt.*
 import java.time.DayOfWeek
+import java.time.Month
 import java.util.List
 import java.util.function.Supplier
 
@@ -660,6 +661,79 @@ class Combo_Box_Spec extends Specification
             rendered[6] == "Day: SUNDAY"
     }
 
+    def 'Multiple calls to `withCells(Configurator)` will not override each other!'()
+    {
+        reportInfo """
+            The `withCells(Configurator)` method is used to configure both
+            how the drop-down options of a combo box ought to be rendered,
+            and then also how the editor of a combo-box should behave and
+            look like (if the combo box is editable).
+            More specifically, the `withCells` method is different
+            to `withCell` in that it gives you an API for configuring
+            the cell for specific types of items.
+            
+            The `Configurator` lambda passed to the `withCells` method receives
+            a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+            
+            In this test however, we will focus on verifying that
+            this method can be called multiple times without
+            your configurations being lost. Instead, they accumulate.
+        """
+        given : 'We create a combo box for the days of the week and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(DayOfWeek.values())
+                        .withCells(it -> it
+                            .when(DayOfWeek.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                )
+                            )
+                        )
+                        .withCells(it -> it
+                            .when(DayOfWeek.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Day: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+            var editor = combo.editor
+        expect :
+            renderer != null
+            editor != null
+        and : 'The editor was initialized with the text field having a magenta background.'
+            editor.getEditorComponent() instanceof JTextField
+            editor.getEditorComponent().background == Color.MAGENTA
+        and : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<DayOfWeek>()
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.TUESDAY, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.WEDNESDAY, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.THURSDAY, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.FRIDAY, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
+            ])
+        and : 'The renderer returns the expected text representations.'
+            rendered[0] == "Day: MONDAY"
+            rendered[1] == "Day: TUESDAY"
+            rendered[2] == "Day: WEDNESDAY"
+            rendered[3] == "Day: THURSDAY"
+            rendered[4] == "Day: FRIDAY"
+            rendered[5] == "Day: SATURDAY"
+            rendered[6] == "Day: SUNDAY"
+    }
+
     def 'Use `withCell(Configurator)` to configure both a renderer and editor for your combobox.'()
     {
         reportInfo """
@@ -714,7 +788,7 @@ class Combo_Box_Spec extends Specification
         and : 'The editor was initialized with the text field having a magenta background.'
             editor.getEditorComponent() instanceof JTextField
             editor.getEditorComponent().background == Color.MAGENTA
-        and : 'The renderer was initialized with a label showing the day of the week.'
+        when : 'The renderer was initialized with a label showing the day of the week.'
             var fakeJList = new JList<DayOfWeek>()
             var rendered = UI.runAndGet(()->[
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
@@ -725,7 +799,7 @@ class Combo_Box_Spec extends Specification
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
             ])
-        and : 'The renderer returns the expected text representations.'
+        then : 'The renderer returns the expected text representations.'
             rendered[0] == "Day: MONDAY"
             rendered[1] == "Day: TUESDAY"
             rendered[2] == "Day: WEDNESDAY"
@@ -733,6 +807,233 @@ class Combo_Box_Spec extends Specification
             rendered[4] == "Day: FRIDAY"
             rendered[5] == "Day: SATURDAY"
             rendered[6] == "Day: SUNDAY"
+    }
+
+    def 'Multiple calls to `withCell(Configurator)` will not override each other!'()
+    {
+        reportInfo """
+            The `withCell(Configurator)` method is used to configure both
+            how the drop-down options of a combo box ought to be rendered,
+            and then also how the editor of a combo-box should behave and
+            look like (if the combo box is editable).
+            
+            The `Configurator` lambda passed to the `withCell` method receives
+            a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+            
+            In this test however, we will focus on verifying that
+            this method can be called multiple times without
+            your configurations being lost. Instead, they accumulate.
+        """
+        given : 'We create a combo box for the days of the week and multiple cell configurations.'
+            var ui =
+                        UI.comboBox(DayOfWeek.values())
+                        .withCell(cell -> cell
+                            .updateView( comp -> comp
+                                .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
+                                .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                            )
+                        )
+                        .withCell(cell -> cell
+                            .updateView( comp -> comp
+                                .updateIf(JLabel.class, label -> {
+                                    label.text = "Day: " + cell.entryAsString()
+                                    return label
+                                })
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+            var editor = combo.editor
+        expect :
+            renderer != null
+            editor != null
+        and : 'The editor was initialized with the text field having a magenta background.'
+            editor.getEditorComponent() instanceof JTextField
+            editor.getEditorComponent().background == Color.MAGENTA
+        when : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<DayOfWeek>()
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.TUESDAY, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.WEDNESDAY, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.THURSDAY, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.FRIDAY, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
+            ])
+        then : 'The renderer returns the expected text representations.'
+            rendered[0] == "Day: MONDAY"
+            rendered[1] == "Day: TUESDAY"
+            rendered[2] == "Day: WEDNESDAY"
+            rendered[3] == "Day: THURSDAY"
+            rendered[4] == "Day: FRIDAY"
+            rendered[5] == "Day: SATURDAY"
+            rendered[6] == "Day: SUNDAY"
+    }
+
+    def 'The `withCells(Configurator)` method allows you to configure cells for specific combo-box item types.'()
+    {
+        reportInfo """
+            The `withCells(Configurator)` method exposes a fluent API 
+            for configuring which kind of item
+            should be rendered using which kind of renderer and editor.
+            
+            The `Configurator` lambda passed to the `withCell` method receives
+            a fluent API for defining which kind of item should be rendered
+            using which kind of renderer and editor.
+            
+            So this may look like this:
+            ```java
+                .when(Rectangle.class).as( cell -> ... )
+                .when(Circle.class).as( cell -> ... )
+                .when(Line.class).as( cell -> ... )
+                //...
+            ```
+            And inside this inner `Configurator` lambda you are exposed
+            to a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+        """
+        given : 'We create a combo box for different kinds of numbers and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(Var.of(Number, 42), Var.of(Tuple.of(Number, 0.2f, 42, 54L, 6.9d, 3, 6 as Byte, 4f)))
+                        .withCells(it -> it
+                            .when(Float.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.textArea("").withBackground(Color.RED)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Float: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                            .when(Double.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.formattedTextField().withBackground(Color.BLUE)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Double: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                            .when(Number.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.GREEN)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Number: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+        when : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<Number>()
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, 0.2f, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 42, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 54L, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 6.9d, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 3, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 6 as Byte, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 4f, 6, false, false).text
+            ])
+        then : 'The renderer returns the expected text representations.'
+            rendered[0] == "Float: 0.2"
+            rendered[1] == "Number: 42"
+            rendered[2] == "Number: 54"
+            rendered[3] == "Double: 6.9"
+            rendered[4] == "Number: 3"
+            rendered[5] == "Number: 6"
+            rendered[6] == "Float: 4.0"
+    }
+
+    def 'Use `withTooltips(Function<E,String>)` to configure tooltips for individual combo-box options.'()
+    {
+        reportInfo """
+            The `withTooltips(Function<E,String>)` method maps each
+            available combo-box item to a tooltip string. When hovering over
+            the items in the drop-down, then the tooltips will be displayed
+            next to the mouse cursor after some time.
+        """
+        given : 'We create a combo box for all months of a year and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(Month.values(), month -> "Month: "+month)
+                        .withTooltips( month -> "Choose ${month.toString().toLowerCase(Locale.ENGLISH)}" )
+
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer supplier.'
+            var renderer = combo.renderer
+        expect :
+            renderer != null
+
+        when : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<Month>()
+            var tooltips = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, Month.JANUARY, 0, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.FEBRUARY, 1, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.MARCH, 2, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.APRIL, 3, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.MAY, 4, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.JUNE, 5, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.JULY, 6, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.AUGUST, 7, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.SEPTEMBER, 8, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.OCTOBER, 9, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.NOVEMBER, 10, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.DECEMBER, 11, false, false).getToolTipText()
+            ])
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, Month.JANUARY, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.FEBRUARY, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.MARCH, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.APRIL, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.MAY, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.JUNE, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.JULY, 6, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.AUGUST, 7, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.SEPTEMBER, 8, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.OCTOBER, 9, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.NOVEMBER, 10, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.DECEMBER, 11, false, false).text
+            ])
+        then :
+            tooltips[0] == "Choose january"
+            tooltips[1] == "Choose february"
+            tooltips[2] == "Choose march"
+            tooltips[3] == "Choose april"
+            tooltips[4] == "Choose may"
+            tooltips[5] == "Choose june"
+            tooltips[6] == "Choose july"
+            tooltips[7] == "Choose august"
+            tooltips[8] == "Choose september"
+            tooltips[9] == "Choose october"
+            tooltips[10] == "Choose november"
+            tooltips[11] == "Choose december"
+        and : 'The renderer returns the expected text representations.'
+            rendered[0] == "Month: JANUARY"
+            rendered[1] == "Month: FEBRUARY"
+            rendered[2] == "Month: MARCH"
+            rendered[3] == "Month: APRIL"
+            rendered[4] == "Month: MAY"
+            rendered[5] == "Month: JUNE"
+            rendered[6] == "Month: JULY"
+            rendered[7] == "Month: AUGUST"
+            rendered[8] == "Month: SEPTEMBER"
+            rendered[9] == "Month: OCTOBER"
+            rendered[10] == "Month: NOVEMBER"
+            rendered[11] == "Month: DECEMBER"
     }
 
 }

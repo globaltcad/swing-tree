@@ -127,7 +127,11 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
             return this;
         }
         Objects.requireNonNull(builder);
-        return withDefaultRenderer(builder.getForTable());
+        CellBuilder<H, Object> finalBuilder = builder;
+        return _with(thisComponent -> {
+                        thisComponent.setDefaultRenderer(finalBuilder.getForTable(thisComponent.getDefaultRenderer()));
+                    })
+                    ._this();
     }
 
     private static <T extends JTableHeader> CellBuilder<T, Object> _renderTable() {
