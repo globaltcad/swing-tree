@@ -968,16 +968,9 @@ class Combo_Box_Spec extends Specification
         """
         given : 'We create a combo box for all months of a year and a custom cell configuration.'
             var ui =
-                        UI.comboBox(Month.values())
+                        UI.comboBox(Month.values(), month -> "Month: "+month)
                         .withTooltips( month -> "Choose ${month.toString().toLowerCase(Locale.ENGLISH)}" )
-                        .withCell(cell -> cell
-                            .updateView( comp -> comp
-                                .updateIf(JLabel.class, label -> {
-                                    label.text = "Month: " + cell.entryAsString()
-                                    return label
-                                })
-                            )
-                        )
+
         and : 'We build the combo box.'
             var combo = ui.get(JComboBox)
         and : 'We get the renderer supplier.'
