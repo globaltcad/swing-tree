@@ -328,7 +328,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  the {@link #withCell(Configurator)} method, which avoid dealing
      *  with the complexity of dealing with a more customized approach
      *  to configuring you combo-box cell renderer and cell editors...<br>
-     *  <p><
+     *  <p>
      *  Here an example demonstrating how to configure a
      *  tooltip for each available option of a combo-box individually: <br>
      *  <pre>{@code
