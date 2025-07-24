@@ -10,6 +10,7 @@ import swingtree.threading.EventProcessor
 import javax.swing.*
 import java.awt.*
 import java.time.DayOfWeek
+import java.time.Month
 import java.util.List
 import java.util.function.Supplier
 
@@ -787,7 +788,7 @@ class Combo_Box_Spec extends Specification
         and : 'The editor was initialized with the text field having a magenta background.'
             editor.getEditorComponent() instanceof JTextField
             editor.getEditorComponent().background == Color.MAGENTA
-        and : 'The renderer was initialized with a label showing the day of the week.'
+        when : 'The renderer was initialized with a label showing the day of the week.'
             var fakeJList = new JList<DayOfWeek>()
             var rendered = UI.runAndGet(()->[
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
@@ -798,7 +799,7 @@ class Combo_Box_Spec extends Specification
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
             ])
-        and : 'The renderer returns the expected text representations.'
+        then : 'The renderer returns the expected text representations.'
             rendered[0] == "Day: MONDAY"
             rendered[1] == "Day: TUESDAY"
             rendered[2] == "Day: WEDNESDAY"
@@ -853,7 +854,7 @@ class Combo_Box_Spec extends Specification
         and : 'The editor was initialized with the text field having a magenta background.'
             editor.getEditorComponent() instanceof JTextField
             editor.getEditorComponent().background == Color.MAGENTA
-        and : 'The renderer was initialized with a label showing the day of the week.'
+        when : 'The renderer was initialized with a label showing the day of the week.'
             var fakeJList = new JList<DayOfWeek>()
             var rendered = UI.runAndGet(()->[
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
@@ -864,7 +865,7 @@ class Combo_Box_Spec extends Specification
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
                 renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
             ])
-        and : 'The renderer returns the expected text representations.'
+        then : 'The renderer returns the expected text representations.'
             rendered[0] == "Day: MONDAY"
             rendered[1] == "Day: TUESDAY"
             rendered[2] == "Day: WEDNESDAY"
@@ -872,7 +873,6 @@ class Combo_Box_Spec extends Specification
             rendered[4] == "Day: FRIDAY"
             rendered[5] == "Day: SATURDAY"
             rendered[6] == "Day: SUNDAY"
-
     }
 
     def 'The `withCells(Configurator)` method allows you to configure cells for specific combo-box item types.'()
@@ -937,7 +937,7 @@ class Combo_Box_Spec extends Specification
             var combo = ui.get(JComboBox)
         and : 'We get the renderer and editor supplier.'
             var renderer = combo.renderer
-        and : 'The renderer was initialized with a label showing the day of the week.'
+        when : 'The renderer was initialized with a label showing the day of the week.'
             var fakeJList = new JList<Number>()
             var rendered = UI.runAndGet(()->[
                 renderer.getListCellRendererComponent(fakeJList, 0.2f, 0, false, false).text,
@@ -948,7 +948,7 @@ class Combo_Box_Spec extends Specification
                 renderer.getListCellRendererComponent(fakeJList, 6 as Byte, 5, false, false).text,
                 renderer.getListCellRendererComponent(fakeJList, 4f, 6, false, false).text
             ])
-        and : 'The renderer returns the expected text representations.'
+        then : 'The renderer returns the expected text representations.'
             rendered[0] == "Float: 0.2"
             rendered[1] == "Number: 42"
             rendered[2] == "Number: 54"
@@ -956,6 +956,91 @@ class Combo_Box_Spec extends Specification
             rendered[4] == "Number: 3"
             rendered[5] == "Number: 6"
             rendered[6] == "Float: 4.0"
+    }
+
+    def 'Use `withTooltips(Function<E,String>)` to configure tooltips for individual combo-box options.'()
+    {
+        reportInfo """
+            The `withTooltips(Function<E,String>)` method maps each
+            available combo-box item to a tooltip string. When hovering over
+            the items in the drop-down, then the tooltips will be displayed
+            next to the mouse cursor after some time.
+        """
+        given : 'We create a combo box for all months of a year and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(Month.values())
+                        .withTooltips( month -> "Choose ${month.toString().toLowerCase(Locale.ENGLISH)}" )
+                        .withCell(cell -> cell
+                            .updateView( comp -> comp
+                                .updateIf(JLabel.class, label -> {
+                                    label.text = "Month: " + cell.entryAsString()
+                                    return label
+                                })
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer supplier.'
+            var renderer = combo.renderer
+        expect :
+            renderer != null
+
+        when : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<Month>()
+            var tooltips = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, Month.JANUARY, 0, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.FEBRUARY, 1, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.MARCH, 2, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.APRIL, 3, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.MAY, 4, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.JUNE, 5, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.JULY, 6, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.AUGUST, 7, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.SEPTEMBER, 8, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.OCTOBER, 9, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.NOVEMBER, 10, false, false).getToolTipText(),
+                renderer.getListCellRendererComponent(fakeJList, Month.DECEMBER, 11, false, false).getToolTipText()
+            ])
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, Month.JANUARY, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.FEBRUARY, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.MARCH, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.APRIL, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.MAY, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.JUNE, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.JULY, 6, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.AUGUST, 7, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.SEPTEMBER, 8, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.OCTOBER, 9, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.NOVEMBER, 10, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Month.DECEMBER, 11, false, false).text
+            ])
+        then :
+            tooltips[0] == "Choose january"
+            tooltips[1] == "Choose february"
+            tooltips[2] == "Choose march"
+            tooltips[3] == "Choose april"
+            tooltips[4] == "Choose may"
+            tooltips[5] == "Choose june"
+            tooltips[6] == "Choose july"
+            tooltips[7] == "Choose august"
+            tooltips[8] == "Choose september"
+            tooltips[9] == "Choose october"
+            tooltips[10] == "Choose november"
+            tooltips[11] == "Choose december"
+        and : 'The renderer returns the expected text representations.'
+            rendered[0] == "Month: JANUARY"
+            rendered[1] == "Month: FEBRUARY"
+            rendered[2] == "Month: MARCH"
+            rendered[3] == "Month: APRIL"
+            rendered[4] == "Month: MAY"
+            rendered[5] == "Month: JUNE"
+            rendered[6] == "Month: JULY"
+            rendered[7] == "Month: AUGUST"
+            rendered[8] == "Month: SEPTEMBER"
+            rendered[9] == "Month: OCTOBER"
+            rendered[10] == "Month: NOVEMBER"
+            rendered[11] == "Month: DECEMBER"
     }
 
 }

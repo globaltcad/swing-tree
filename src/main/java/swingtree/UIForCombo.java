@@ -359,7 +359,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                             JComponent jcomp =  (JComponent) comp;
                             String toolTip = null;
                             try {
-                                toolTip = tooltips.apply(it.entry().get());
+                                Object result = tooltips.apply(it.entry().get());
+                                toolTip = result == null ? null : result.toString();
                                 toolTip = toolTip == null || "".equals(toolTip) ? null : toolTip;
                             } catch (Exception ex) {
                                 log.error("Error while fetching tooltip for cell '{}'.", it, ex);
