@@ -875,4 +875,87 @@ class Combo_Box_Spec extends Specification
 
     }
 
+    def 'The `withCells(Configurator)` method allows you to configure cells for specific combo-box item types.'()
+    {
+        reportInfo """
+            The `withCells(Configurator)` method exposes a fluent API 
+            for configuring which kind of item
+            should be rendered using which kind of renderer and editor.
+            
+            The `Configurator` lambda passed to the `withCell` method receives
+            a fluent API for defining which kind of item should be rendered
+            using which kind of renderer and editor.
+            
+            So this may look like this:
+            ```java
+                .when(Rectangle.class).as( cell -> ... )
+                .when(Circle.class).as( cell -> ... )
+                .when(Line.class).as( cell -> ... )
+                //...
+            ```
+            And inside this inner `Configurator` lambda you are exposed
+            to a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+        """
+        given : 'We create a combo box for different kinds of numbers and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(Var.of(Number, 42), Var.of(Tuple.of(Number, 0.2f, 42, 54L, 6.9d, 3, 6 as Byte, 4f)))
+                        .withCells(it -> it
+                            .when(Float.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.textArea("").withBackground(Color.RED)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Float: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                            .when(Double.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.formattedTextField().withBackground(Color.BLUE)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Double: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                            .when(Number.class).as( cell -> cell
+                                .updateView( comp -> comp
+                                    .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.GREEN)})
+                                    .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                    .updateIf(JLabel.class, label -> {
+                                        label.text = "Number: " + cell.entryAsString()
+                                        return label
+                                    })
+                                )
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+        and : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<Number>()
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, 0.2f, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 42, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 54L, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 6.9d, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 3, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 6 as Byte, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, 4f, 6, false, false).text
+            ])
+        and : 'The renderer returns the expected text representations.'
+            rendered[0] == "Float: 0.2"
+            rendered[1] == "Number: 42"
+            rendered[2] == "Number: 54"
+            rendered[3] == "Double: 6.9"
+            rendered[4] == "Number: 3"
+            rendered[5] == "Number: 6"
+            rendered[6] == "Float: 4.0"
+    }
+
 }
