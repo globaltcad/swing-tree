@@ -122,6 +122,15 @@ check.dependsOn jacocoTestReport
 
 // CUSTOM DEPLOYMENT TASKS :
 
+// 0: Cleanup
+task cleanForDeployment(type: Delete) {
+    delete "$rootDir/build"
+    delete fileTree("$rootDir/docs/jdocs/") { include '**/*' }
+    delete fileTree("$rootDir/docs/spock/json/") { include '**/*' }
+    delete fileTree("$rootDir/docs/spock/reports/") { include '**/*' }
+    delete fileTree("$rootDir/docs/coverage/test/") { include '**/*' }
+}
+
 // 1:
 task deploy() {
     dependsOn 'clean'
