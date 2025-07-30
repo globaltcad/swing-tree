@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CellConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">CellConf.java</span></div><h1>CellConf.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
+import swingtree.layout.Size;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+/**
+ * This class models the state of an individual table/tree/list/drop down cell alongside
+ * various properties that a cell should have, like for example
+ * the value of the cell, its position within the component
+ * as well as a {@link CellConf#view()} (renderer/editor) in the form of an AWT {@link Component}
+ * which may or may not be replaced or modified.
+ * &lt;br&gt;
+ * The {@link CellConf} is exposed to the {@link RenderAs#as(Configurator)}
+ * method after a {@link CellBuilder#when(Class)} call as part of various
+ * cell builder APIs like: &lt;br&gt;
+ * &lt;ul&gt;
+ *     &lt;li&gt;{@link UIForTable#withCell(Configurator)}&lt;/li&gt;
+ *     &lt;li&gt;{@link UIForTable#withCells(Configurator)}&lt;/li&gt;
+ *     &lt;li&gt;{@link UIForTable#withCellForColumn(String, Configurator)} &lt;/li&gt;
+ *     &lt;li&gt;{@link UIForTable#withCellsForColumn(String, Configurator)} &lt;/li&gt;
+ *     &lt;li&gt;{@link UIForTable#withCellForColumn(int, Configurator)} &lt;/li&gt;
+ *     &lt;li&gt;{@link UIForTable#withCellsForColumn(int, Configurator)} &lt;/li&gt;
+ *     &lt;li&gt;{@link UIForList#withCell(Configurator)} &lt;/li&gt;
+ *     &lt;li&gt;{@link UIForList#withCells(Configurator)} &lt;/li&gt;
+ * &lt;/ul&gt;
+ * When configuring your cell, you may use methods like
+ * {@link CellConf#view(Component)} or {@link CellConf#renderer(Size,Consumer)}
+ * to define how the cell should be rendered.
+ * &lt;p&gt;
+ * Note that the {@link CellConf#isEditing()} flag determines
+ * two important modes in which this class is exposed to {@link RenderAs#as(Configurator)}.
+ * If the {@code isEditing()} is true, then you are expected to configure a
+ * cell editor component for the {@link CellConf#view()} property.
+ * If the {@code isEditing()} is false, then you are expected to configure a simple
+ * cell renderer component as the {@link CellConf#view()} property.&lt;br&gt;
+ * Note that for each state of the {@code isEditing()} flag, the view component
+ * is persisted across multiple calls to the {@link RenderAs#as(Configurator)} method.
+ * &lt;p&gt;
+ * This design allows you to easily define and continuously update both a
+ * renderer and an editor for a cell on a single call to the {@link RenderAs#as(Configurator)} method, and then
+ * to update the renderer or editor in every subsequent call to the same method.
+ *
+ * @param &lt;C&gt; The type of the parent component that contains this cell, typically a table, list or combo box.
+ * @param &lt;V&gt; The entry type of the entry of this {@link CellConf}.
+ */
+public final class CellConf&lt;C extends JComponent, V&gt;
+{
+<span class="fc" id="L59">    private static final Logger log = LoggerFactory.getLogger(CellConf.class);</span>
+
+    static &lt;C extends JComponent, V&gt; CellConf&lt;C, V&gt; of(
+        @Nullable JList     jListIfInvolved,
+        @Nullable Component lastRenderer,
+        C                   owner,
+        @Nullable V         entry,
+        boolean             isSelected,
+        boolean             hasFocus,
+        boolean             isEditing,
+        boolean             isExpanded,
+        boolean             isLeaf,
+        int                 row,
+        int                 column,
+        Supplier&lt;Component&gt; defaultRenderSource
+    ) {
+<span class="fc" id="L75">        List&lt;String&gt; toolTips = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L76">        return new CellConf&lt;&gt;(</span>
+            jListIfInvolved,
+            owner,
+            entry,
+            isSelected,
+            hasFocus,
+            isEditing,
+            isExpanded,
+            isLeaf,
+            row,
+            column,
+            lastRenderer,
+            toolTips,
+            null,
+            defaultRenderSource
+        );
+    }
+
+    private final @Nullable JList&lt;?&gt;  jListIfInvolved;
+    private final C                   parent;
+    private final @Nullable V         entry;
+    private final boolean             isSelected;
+    private final boolean             hasFocus;
+    private final boolean             isEditing;
+    private final boolean             isExpanded;
+    private final boolean             isLeaf;
+    private final int                 row;
+    private final int                 column;
+    private final @Nullable Component view;
+    private final List&lt;String&gt;        toolTips;
+    private final @Nullable Object    presentationEntry;
+    private final Supplier&lt;Component&gt; defaultRenderSource;
+
+
+    private CellConf(
+            @Nullable JList     jListIfInvolved,
+            C                   host,
+            @Nullable V         entry,
+            boolean             isSelected,
+            boolean             hasFocus,
+            boolean             isEditing,
+            boolean             isExpanded,
+            boolean             isLeaf,
+            int                 row,
+            int                 column,
+            @Nullable Component view,
+            List&lt;String&gt;        toolTips,
+            @Nullable Object    presentationEntry,
+            Supplier&lt;Component&gt; defaultRenderSource
+<span class="fc" id="L125">    ) {</span>
+<span class="fc" id="L126">        this.jListIfInvolved     = jListIfInvolved;</span>
+<span class="fc" id="L127">        this.parent              = Objects.requireNonNull(host);</span>
+<span class="fc" id="L128">        this.entry               = entry;</span>
+<span class="fc" id="L129">        this.isSelected          = isSelected;</span>
+<span class="fc" id="L130">        this.hasFocus            = hasFocus;</span>
+<span class="fc" id="L131">        this.isEditing           = isEditing;</span>
+<span class="fc" id="L132">        this.isExpanded          = isExpanded;</span>
+<span class="fc" id="L133">        this.isLeaf              = isLeaf;</span>
+<span class="fc" id="L134">        this.row                 = row;</span>
+<span class="fc" id="L135">        this.column              = column;</span>
+<span class="fc" id="L136">        this.view                = view;</span>
+<span class="fc" id="L137">        this.toolTips            = Objects.requireNonNull(toolTips);</span>
+<span class="fc" id="L138">        this.presentationEntry = presentationEntry;</span>
+<span class="fc" id="L139">        this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     *  Returns the parent/host of this cell, i.e. the component
+     *  which contains this cell,
+     *  like a {@link JComboBox}, {@link JTable} or {@link JList}
+     *
+     * @return The owner of this cell, typically a table, list or combo box.
+     */
+    public C getHost() {
+<span class="fc" id="L150">        return parent;</span>
+    }
+
+    /**
+     *  Some host components (see {@link #getHost()}, use a
+     *  {@link JList} in their look and feel to render cells.
+     *  This is the case for the {@link JComboBox} component, which
+     *  has a drop-down popup that is rendered through an internal
+     *  {@link JList} which you can access through this method.&lt;br&gt;
+     *  &lt;p&gt;
+     *      But note that this {@link JList} is returned through an {@link Optional}
+     *      because it may not exist for other host components like a {@link JTable} or {@link JTree}.
+     *      In case of this cell being directly used for a {@link JList}, through
+     *      {@link UIForList#withCell(Configurator)} or {@link UIForList#withCells(Configurator)},
+     *      then both {@link #getHost()} and this return the same {@link JList} instance.
+     *  &lt;/p&gt;
+     *
+     * @return An optional containing a {@link JList} used for rendering this cell
+     *          if this is called by a {@link ListCellRenderer}, and an {@link Optional#empty()} otherwise.
+     */
+    public Optional&lt;JList&lt;?&gt;&gt; getListView() {
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if ( parent instanceof JList )</span>
+<span class="nc" id="L172">            return Optional.of((JList&lt;?&gt;)parent);</span>
+        else
+<span class="fc" id="L174">            return Optional.ofNullable(jListIfInvolved);</span>
+    }
+
+    /**
+     *  Returns the entry of this cell, which is the data
+     *  that this cell represents. The entry is wrapped in an
+     *  {@link Optional} to indicate that the entry may be null.
+     *  A cell entry is typically a string, number or custom user object.
+     *
+     * @return An optional of the entry of this cell, or an empty optional if the entry is null.
+     */
+    public Optional&lt;V&gt; entry() {
+<span class="fc" id="L186">        return Optional.ofNullable(entry);</span>
+    }
+
+    /**
+     *  Returns the entry of this cell as a string. If the entry
+     *  is null, then an empty string is returned. This method is
+     *  useful when you want to display the entry of the cell as a string,
+     *  and do not have a special meaning assigned to null entries.
+     *  (Which is the preferred way to handle null entries)
+     *
+     * @return The entry of this cell as a string, or an empty string if the entry is null.
+     *        Note that the string representation of the entry is obtained by calling
+     *        the {@link Object#toString()} method on the entry.
+     */
+    public String entryAsString() {
+        try {
+<span class="fc" id="L202">            return entry().map(Object::toString).orElse(&quot;&quot;);</span>
+<span class="nc" id="L203">        } catch (Exception e) {</span>
+<span class="nc" id="L204">            log.error(&quot;Failed to convert entry to string!&quot;, e);</span>
+        }
+<span class="nc" id="L206">        return &quot;&quot;;</span>
+    }
+
+    /**
+     *  The flag returned by this method indicates whether this cell
+     *  is selected or not. A cell is selected when the user interacts
+     *  with it, like clicking on it or navigating to it using the keyboard.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is selected. For example, you may want to highlight the cell
+     *  by changing its background color.
+     *
+     * @return True if the cell is selected, false otherwise.
+     */
+    public boolean isSelected() {
+<span class="fc" id="L220">        return isSelected;</span>
+    }
+
+    /**
+     *  Just like any other component, a cell may have focus or not.
+     *  The focus is typically indicated by a border around the cell.
+     *  It is an important property to consider when designing your cell
+     *  renderer, as you may want to change the appearance of the cell
+     *  when it has focus.
+     *
+     *  @return True if the cell has focus, false otherwise.
+     */
+    public boolean hasFocus() {
+<span class="fc" id="L233">        return hasFocus;</span>
+    }
+
+    /**
+     *  This method returns true if the cell is currently being edited.
+     *  A cell is typically edited when the user double-clicks on it
+     *  or presses the F2 key. When a cell is being edited, then the cell
+     *  renderer wrapped by this cell will be used as an editor.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is being edited. For example, you may want to show a text
+     *  field instead of a label when the cell is being edited.
+     *
+     * @return True if the cell is being edited, false otherwise.
+     *         Note that you can reliably say that when this flag
+     *         is true, then the cell builder is being used to construct
+     *         or maintain an editor.
+     */
+    public boolean isEditing() {
+<span class="fc" id="L251">        return isEditing;</span>
+    }
+
+    /**
+     *  This method returns true if the cell is expanded, i.e. if it
+     *  is a parent cell in a {@link javax.swing.JTree}.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is expanded.You may, for example, want to show a different
+     *  icon when the cell is expanded.
+     *
+     * @return True if the cell is expanded, false otherwise.
+     */
+    public boolean isExpanded() {
+<span class="nc" id="L264">        return isExpanded;</span>
+    }
+
+    /**
+     *  This method returns true if the cell is a leaf, i.e. if it
+     *  is a child cell in a {@link javax.swing.JTree}.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is a leaf. You may, for example, want to show a different
+     *  icon when the cell is a leaf.
+     *
+     * @return True if the cell is a leaf, false otherwise.
+     */
+    public boolean isLeaf() {
+<span class="nc" id="L277">        return isLeaf;</span>
+    }
+
+    /**
+     *  Exposes a list of tool tips that should be shown when the user
+     *  hovers over the cell. The tool tips are strings that provide
+     *  additional information about the cell to the user.
+     *
+     * @return An unmodifiable list of tool tips that should be shown when the user hovers over the cell.
+     */
+    public List&lt;String&gt; toolTips() {
+<span class="fc" id="L288">        return Collections.unmodifiableList(toolTips);</span>
+    }
+
+    /**
+     *  Gives you the row index of the cell in the table, list or drop down.
+     *  It tells you the location of the cell in the vertical direction.
+     *
+     * @return The row index of the cell in the table, list or drop down.
+     */
+    public int row() {
+<span class="fc" id="L298">        return row;</span>
+    }
+
+    /**
+     *  Gives you the column index of the cell in the table, list or drop down.
+     *  It tells you the location of the cell in the horizontal direction.
+     *
+     * @return The column index of the cell in the table, list or drop down.
+     */
+    public int column() {
+<span class="nc" id="L308">        return column;</span>
+    }
+
+    /**
+     *  Returns the renderer/editor of this cell, which is the component
+     *  that is used to display the cell to the user. The view
+     *  is typically a label, text field or some other custom component.
+     *  It is wrapped in an {@link Optional} to clearly indicate
+     *  that it may be null.&lt;br&gt;
+     *  Note that in case of the {@link CellConf#isEditing()} method
+     *  returning true, the view component stored in this cell is used as an editor.
+     *  If the cell is not being edited, then the component is used as a renderer.&lt;br&gt;
+     *  Two components are persisted across multiple calls to the
+     *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method, one
+     *  for the renderer and one for the editor. (So technically there are two views)&lt;br&gt;
+     *  Also note that not all types of components are suitable to
+     *  be used as editors. For example, a label is not suitable to be used as an editor.
+     *  Instead, you should use a text field or a combo box as an editor.&lt;br&gt;
+     *  If a component is not suitable to be used as an editor, then it
+     *  will simply be ignored in exchange for a default editor.
+     *
+     * @return An optional of the view of this cell, or an empty optional if the view is null.
+     *         In case of the {@link CellConf#isEditing()} method returning true,
+     *         the component stored in this optional is used as an editor.
+     *         The cell will remember the renderer and editor components across multiple calls
+     *         to the {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
+     */
+    public OptionalUI&lt;Component&gt; view() {
+<span class="fc" id="L336">        return OptionalUI.ofNullable(view);</span>
+    }
+
+    /**
+     *  Allows you to configure the view of this cell by providing
+     *  a configurator lambda, which takes an {@link OptionalUI} of the
+     *  current renderer and returns a (potentially updated) {@link OptionalUI}
+     *  of the new renderer. &lt;br&gt;
+     *  The benefit of using this method is that you can easily initialize
+     *  the renderer with a new component through the {@link OptionalUI#orGetUi(Supplier)}
+     *  method, and then update it in every refresh coll inside the
+     *  {@link OptionalUI#update(java.util.function.Function)} method. &lt;br&gt;
+     *  This may look like the following:
+     *  &lt;pre&gt;{@code
+     *      UI.table()
+     *      .withCell(cell -&gt; cell
+     *          .updateView( comp -&gt; comp
+     *              .update( r -&gt; { r.setText(cell.entryAsString()); return r; } )
+     *              .orGetUi( () -&gt; UI.textField(cell.entryAsString()).withBackground(Color.CYAN) )
+     *          )
+     *      )
+     *      // ...
+     *  }&lt;/pre&gt;
+     *  In this example, the view is initialized with a text field
+     *  if it is not present, and then the text field is continuously updated
+     *  with the entry of the cell. &lt;br&gt;
+     *
+     * @param configurator The {@link Configurator} lambda which takes an {@link OptionalUI}
+     *                     of the current view and returns a (potentially updated or initialized)
+     *                     {@link OptionalUI} of the new view.
+     * @return An updated cell delegate object with the new view.
+     *        If the configurator returns an empty optional, then the view
+     *        of the cell will be reset to null.
+     */
+    public CellConf&lt;C,V&gt; updateView( Configurator&lt;OptionalUI&lt;Component&gt;&gt; configurator ) {
+<span class="fc" id="L371">        OptionalUI&lt;Component&gt; newRenderer = OptionalUI.empty();</span>
+        try {
+<span class="fc" id="L373">            newRenderer = configurator.configure(view());</span>
+<span class="nc" id="L374">        } catch (Exception e) {</span>
+<span class="nc" id="L375">            log.error(&quot;Failed to configure view!&quot;, e);</span>
+<span class="fc" id="L376">        }</span>
+<span class="fc" id="L377">        return _withRenderer(newRenderer.orElseNullable(null));</span>
+    }
+
+    /**
+     *  Creates an updated cell delegate object with the given component
+     *  as the view (renderer/editor) of the cell. view is the
+     *  component that is used to render the cell to the user. It is
+     *  typically a label, text field or some other custom component.
+     *  &lt;br&gt;
+     *  Note that in case of the {@link CellConf#isEditing()} method
+     *  returning true, this {@link CellConf} is used for constructing
+     *  or maintaining an editor. If the cell is not being edited, then
+     *  this {@link CellConf} is used for rendering.&lt;br&gt;
+     *  Either way, the component is memorized across multiple calls to the
+     *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method. &lt;br&gt;
+     *
+     *  A typical usage of this method may look something like this:
+     *  &lt;pre&gt;{@code
+     *      UI.table()
+     *      .withCell(cell -&gt; cell
+     *          .view(new JLabel(&quot;Hello, World!&quot; + cell.row()) )
+     *      )
+     *      // ...
+     *  }&lt;/pre&gt;
+     *  But keep in mind that in this example the label will be recreated
+     *  on every refresh call, which is not very efficient. It is better
+     *  to use the {@link CellConf#updateView(Configurator)} method to
+     *  initialize the view once and then update it in every refresh call.
+     *
+     * @param component The component to be used as the view of the cell.
+     * @return An updated cell delegate object with the new view to
+     *          serve as the renderer/editor of the cell.
+     */
+    public CellConf&lt;C, V&gt; view( Component component ) {
+<span class="fc" id="L411">        return _withRenderer(component);</span>
+    }
+
+    /**
+     *  Creates an updated cell delegate object with the supplied cell
+     *  size and painter as the view (renderer/editor) of the cell.
+     *  The painter is a lambda that takes a {@link Graphics2D} object
+     *  and paints the cell with it.
+     *  This method is useful when you want to
+     *  create a custom cell renderer that paints the cell in a
+     *  specific way. For example, you may want to paint the cell
+     *  with a gradient background or a custom border.
+     *  &lt;br&gt;
+     *  Note that in case of the {@link CellConf#isEditing()} method
+     *  returning true, this {@link CellConf} is used for constructing
+     *  or maintaining an editor. If the cell is not being edited, then
+     *  this {@link CellConf} is used for rendering.&lt;br&gt;
+     *  Either way, the component is memorized across multiple calls to the
+     *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
+     *
+     * @param cellSize The minimum and preferred size of the cell to be painted.
+     * @param painter The lambda that paints the cell with a {@link Graphics2D} object.
+     * @return An updated cell delegate object with the new view to
+     *          serve as the renderer/editor of the cell.
+     */
+    public CellConf&lt;C, V&gt; renderer( Size cellSize, Consumer&lt;Graphics2D&gt; painter ) {
+<span class="nc" id="L437">        Component component = new Component() {</span>
+            @Override
+            public void paint(Graphics g) {
+<span class="nc" id="L440">                super.paint(g);</span>
+<span class="nc" id="L441">                painter.accept((Graphics2D) g);</span>
+<span class="nc" id="L442">            }</span>
+            /*
+                 The following methods are overridden as a performance measure
+                 to prune code-paths are often called in the case of renders
+                 but which we know are unnecessary.  Great care should be taken
+                 when writing your own renderer to weigh the benefits and
+                 drawbacks of overriding methods like these.
+             */
+            @Override
+            public boolean isOpaque() {
+<span class="nc" id="L452">                Color back = getBackground();</span>
+<span class="nc" id="L453">                Component p = getParent();</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">                if (p != null) {</span>
+<span class="nc" id="L455">                    p = p.getParent();</span>
+                }
+                // p should now be the JTable.
+<span class="nc bnc" id="L458" title="All 4 branches missed.">                boolean colorMatch = (back != null) &amp;&amp; (p != null) &amp;&amp;</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">                        back.equals(p.getBackground()) &amp;&amp;</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                        p.isOpaque();</span>
+<span class="nc bnc" id="L461" title="All 4 branches missed.">                return !colorMatch &amp;&amp; super.isOpaque();</span>
+            }
+            @Override
+<span class="nc" id="L464">            public void invalidate() {}</span>
+            @Override
+<span class="nc" id="L466">            public void validate() {}</span>
+            @Override
+<span class="nc" id="L468">            public void revalidate() {}</span>
+            @Override
+<span class="nc" id="L470">            public void repaint(long tm, int x, int y, int width, int height) {}</span>
+            @Override
+<span class="nc" id="L472">            public void repaint() {}</span>
+            @Override
+<span class="nc" id="L474">            public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { }</span>
+        };
+<span class="nc" id="L476">        component.setMinimumSize(cellSize.toDimension());</span>
+<span class="nc" id="L477">        component.setPreferredSize(cellSize.toDimension());</span>
+<span class="nc" id="L478">        component.setSize(cellSize.toDimension());</span>
+<span class="nc" id="L479">        return _withRenderer(component);</span>
+    }
+
+    /**
+     *   Creates an updated cell delegate object with the default cell view / renderer
+     *   component based on the {@link javax.swing.DefaultListCellRenderer},
+     *   {@link javax.swing.table.DefaultTableCellRenderer} and {@link javax.swing.tree.DefaultTreeCellRenderer}
+     *   classes.
+     *
+     * @return An updated cell delegate object with the default view component.
+     *         This will override any custom view that was previously specified.
+     */
+    public CellConf&lt;C, V&gt; viewDefault() {
+        try {
+<span class="nc" id="L493">            return this.view(this.defaultRenderSource.get());</span>
+<span class="nc" id="L494">        } catch (Exception e) {</span>
+<span class="nc" id="L495">            log.error(&quot;Failed to create default renderer!&quot;, e);</span>
+        }
+<span class="nc" id="L497">        return this;</span>
+    }
+
+    private CellConf&lt;C, V&gt; _withRenderer(@Nullable Component component ) {
+<span class="fc" id="L501">        return new CellConf&lt;&gt;(</span>
+            jListIfInvolved,
+            parent,
+            entry,
+            isSelected,
+            hasFocus,
+            isEditing,
+            isExpanded,
+            isLeaf,
+            row,
+            column,
+            component,
+            toolTips,
+            presentationEntry,
+            defaultRenderSource
+        );
+    }
+
+    /**
+     *  Creates a cell with an additional tool tip to be shown
+     *  when the user hovers over the cell. The tool tips are strings
+     *  that provide additional information about the cell to the user.
+     *
+     * @param toolTip The tool tip to be added to the list of tool tips.
+     * @return An updated cell delegate object with the new tool tip.
+     */
+    public CellConf&lt;C, V&gt; toolTip( String toolTip ) {
+<span class="nc" id="L528">        ArrayList&lt;String&gt; newToolTips = new ArrayList&lt;&gt;(toolTips);</span>
+<span class="nc" id="L529">        newToolTips.add(toolTip);</span>
+<span class="nc" id="L530">        return new CellConf&lt;&gt;(</span>
+           jListIfInvolved,
+            parent,
+            entry,
+            isSelected,
+            hasFocus,
+            isEditing,
+            isExpanded,
+            isLeaf,
+            row,
+            column,
+            view,
+            newToolTips,
+            presentationEntry,
+            defaultRenderSource
+        );
+    }
+
+    /**
+     *  The presentation entry is the first choice of the
+     *  default cell view to be used for rendering and presentation
+     *  to the user. If it does not exist then the regular
+     *  cell entry is used for rendering by the default view.
+     *  Note that if you supply your own custom view/renderer component,
+     *  then the presentation entry is ignored.
+     *
+     * @return An optional of the presentation entry.
+     *         It may be an empty optional if no presentation entry was specified.
+     */
+    public Optional&lt;Object&gt; presentationEntry() {
+<span class="fc" id="L560">        return Optional.ofNullable(presentationEntry);</span>
+    }
+
+    /**
+     *  The presentation entry is the first choice of the
+     *  default cell view to be used for rendering and presentation
+     *  to the user.
+     *  By default, this entry is null,
+     *  in which case it does not exist the regular
+     *  cell entry is used for rendering by the default view.
+     *  Note that if you supply a presentation value, then SwingTree
+     *  will try to apply this value to the view component.
+     *  (Which includes the editor and renderer components)
+     *
+     * @param toBeShown The object which should be used by the renderer
+     *                  to present to the user, typically a String.
+     * @return An updated cell delegate object with the new presentation entry.
+     */
+    public CellConf&lt;C, V&gt; presentationEntry( @Nullable Object toBeShown ) {
+<span class="nc" id="L579">        return new CellConf&lt;&gt;(</span>
+           jListIfInvolved,
+            parent,
+            entry,
+            isSelected,
+            hasFocus,
+            isEditing,
+            isExpanded,
+            isLeaf,
+            row,
+            column,
+            view,
+            toolTips,
+            toBeShown,
+            defaultRenderSource
+        );
+    }
+
+    /**
+     *  The presentation entry is the first choice of the
+     *  default cell view to be used for rendering and presentation
+     *  to the user. A common use case is to convert the cell entry to
+     *  a presentation entry that is more suitable for the default view.
+     *  This method allows you to convert the cell entry to a presentation
+     *  entry by applying a function to it. The function takes the cell entry
+     *  as an argument and returns the presentation entry.
+     *  Note that if you supply a presentation value, then SwingTree
+     *  will try to apply this value to the view component.
+     *  (Which includes the editor and renderer components)
+     *
+     * @param presenter The function that converts the cell entry to a presentation entry.
+     * @return An updated cell delegate object with the new presentation entry.
+     * @throws NullPointerException If the presenter function is null.
+     */
+    public CellConf&lt;C, V&gt; entryToPresentation( Function&lt;@Nullable V, @Nullable Object&gt; presenter ) {
+<span class="nc" id="L614">        Objects.requireNonNull(presenter);</span>
+<span class="nc" id="L615">        @Nullable V entry = this.entry;</span>
+        try {
+<span class="nc" id="L617">            return presentationEntry(presenter.apply(entry));</span>
+<span class="nc" id="L618">        } catch (Exception e) {</span>
+<span class="nc" id="L619">            log.error(&quot;Failed to convert entry to presentation entry!&quot;, e);</span>
+        }
+<span class="nc" id="L621">        return this;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

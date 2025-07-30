@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnimationStatus.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">AnimationStatus.java</span></div><h1>AnimationStatus.java</h1><pre class="source lang-java linenums">package swingtree.animation;
+
+import org.slf4j.Logger;
+
+import java.awt.event.ActionEvent;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * The state of an animation at a given point in time describing how far the animation has progressed
+ * using a number between 0 and 1 (see {@link #progress()}).
+ * Use the numbers exposed by the methods of this value based class to define how
+ * your animation should progress over time.
+ */
+public final class AnimationStatus implements Progress
+{
+<span class="fc" id="L16">    private final static Logger log = org.slf4j.LoggerFactory.getLogger(AnimationStatus.class);</span>
+
+    public static AnimationStatus of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now ) {
+<span class="fc" id="L19">        return _of(lifeSpan, stride, event, now, false);</span>
+    }
+
+    public static AnimationStatus endOf( LifeSpan lifeSpan, Stride stride, ActionEvent event, long iteration ) {
+<span class="fc" id="L23">        return _of(lifeSpan, stride, event, lifeSpan.getEndTimeIn(TimeUnit.MILLISECONDS, iteration), true);</span>
+    }
+
+    public static AnimationStatus startOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
+<span class="fc" id="L27">        return _of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS), false);</span>
+    }
+
+    private static AnimationStatus _of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now, boolean isEnd ) {
+<span class="fc" id="L31">        long duration = lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L32">        long interval = lifeSpan.lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L33">        long howLongIsRunning = Math.max(0, now - lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        long howLongCurrentLoop = duration &lt;= 0 ? 0 : howLongIsRunning % duration;</span>
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if ( isEnd &amp;&amp; howLongCurrentLoop == 0 )</span>
+<span class="fc" id="L36">            howLongCurrentLoop = duration;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        long howManyLoops      = duration &lt;= 0 ? 0 : howLongIsRunning / duration;</span>
+        double progress;
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if ( duration &lt;= 0 ) {</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            howManyLoops = ( isEnd ? 1 : 0 );</span>
+        }
+<span class="pc bpc" id="L42" title="1 of 3 branches missed.">        switch ( stride ) {</span>
+            case PROGRESSIVE:
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                if ( duration &lt;= 0 )</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                    progress     = ( isEnd ? 1 : 0 );</span>
+                else
+<span class="fc" id="L47">                    progress = howLongCurrentLoop / (double) duration;</span>
+<span class="fc" id="L48">                break;</span>
+            case REGRESSIVE:
+<span class="fc bfc" id="L50" title="All 2 branches covered.">                if ( duration &lt;= 0 )</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">                    progress     = ( isEnd ? 0 : 1 );</span>
+                else
+<span class="fc" id="L53">                    progress = 1 - howLongCurrentLoop / (double) duration;</span>
+<span class="fc" id="L54">                break;</span>
+            default:
+<span class="nc" id="L56">                progress = howLongCurrentLoop / (double) duration;</span>
+<span class="nc" id="L57">                log.warn(&quot;Unknown stride: {}&quot;, stride);</span>
+        }
+<span class="fc" id="L59">        long steps = duration / interval;</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if ( steps &gt; 0 )</span>
+<span class="fc" id="L61">            progress = Math.round( progress * steps ) / (double) steps;</span>
+        /*
+            In the above line, we round the progress to the nearest step.
+            This makes animations more deterministic and cache friendly.
+        */
+<span class="fc" id="L66">        return new AnimationStatus(progress, howManyLoops, lifeSpan, event);</span>
+    }
+
+
+    private final double      progress;
+    private final long        howManyLoops;
+    private final LifeSpan    lifeSpan;
+    private final ActionEvent event;
+
+
+<span class="fc" id="L76">    private AnimationStatus(double progress, long howManyLoops, LifeSpan lifeSpan, ActionEvent event ) {</span>
+<span class="fc" id="L77">        this.progress     = progress;</span>
+<span class="fc" id="L78">        this.howManyLoops = howManyLoops;</span>
+<span class="fc" id="L79">        this.lifeSpan     = lifeSpan;</span>
+<span class="fc" id="L80">        this.event        = event;</span>
+<span class="fc" id="L81">    }</span>
+
+    /**
+     *  Exposes the progress of the animation state, which is a number between 0 and 1
+     *  that represents how far the animation has progressed between its start and end.
+     *  Note that an animation may also regress, in which case the states will
+     *  transition from 1 to 0 instead of from 0 to 1.
+     *  See {@link Stride} for more information.
+     *
+     * @return The animation progress in terms of a number between 0 and 1,
+     *         where 0.5 means the animation is halfway through, and 1 means the animation completed.
+     */
+    @Override
+    public double progress() {
+<span class="fc" id="L95">        return progress;</span>
+    }
+
+    /**
+     *  Slices the progress value of this animation state into a sub-{@link Progress} of the animation
+     *  which starts with a value of {@code 0.0} when the animation reaches the progress value {@code from}
+     *  and ends with a value of {@code 1.0} when the animation reaches the progress value {@code to}.
+     *  If the {@code from} and {@code to} values are invalid, this method will correct them.
+     *
+     * @param from The progress value at which the sub-progress should start.
+     *             This value must be between 0 and 1, otherwise it will be adjusted
+     *             and a warning will be logged.
+     * @param to The progress value at which the sub-progress should end.
+     *           This value must be between 0 and 1, otherwise it will be adjusted
+     *           and a warning will be logged.
+     *
+     * @return A {@link Progress} object that represents the sub-progress of the animation.
+     *         This sub-progress will start with a value of {@code 0.0} when the animation reaches
+     *         the progress value {@code from} and will end with a value of {@code 1.0} when the animation
+     *         reaches the progress value {@code to}.
+     */
+    public Progress slice( double from, double to ) {
+<span class="nc bnc" id="L117" title="All 4 branches missed.">        if ( from == 0 &amp;&amp; to == 1 ) {</span>
+<span class="nc" id="L118">            return this;</span>
+        }
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if ( from == to ) {</span>
+<span class="nc" id="L121">            log.warn(&quot;Invalid slice from '&quot;+from+&quot;' to '&quot;+to+&quot;'&quot;, new Throwable());</span>
+        }
+<span class="nc bnc" id="L123" title="All 8 branches missed.">        if ( from &lt; 0 || from &gt; 1 || to &lt; 0 || to &gt; 1 ) {</span>
+<span class="nc" id="L124">            log.warn(&quot;Invalid slice from '&quot;+from+&quot;' to '&quot;+to+&quot;'&quot;, new Throwable());</span>
+<span class="nc" id="L125">            from = Math.min(1, Math.max(0, from));</span>
+<span class="nc" id="L126">            to   = Math.min(1, Math.max(0, to));</span>
+        }
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if ( from &gt; to ) {</span>
+<span class="nc" id="L129">            log.warn(&quot;Invalid slice from '&quot;+from+&quot;' to '&quot;+to+&quot;'&quot;, new Throwable());</span>
+<span class="nc" id="L130">            double tmp = from;</span>
+<span class="nc" id="L131">            from = to;</span>
+<span class="nc" id="L132">            to = tmp;</span>
+        }
+<span class="nc" id="L134">        double subProgress = Math.max(from, Math.min(to, progress));</span>
+<span class="nc" id="L135">        return new Progress() {</span>
+            @Override
+            public double progress() {
+<span class="nc" id="L138">                return subProgress;</span>
+            }
+        };
+    }
+
+    /**
+     *  A single iteration of an animation consists of its progress going from 0 to 1
+     *  in case of it being progressive, or from 1 to 0 in case of it being regressive (see {@link Stride}).
+     *  This method returns the number of times the animation has been repeated.
+     *
+     * @return The number of times the animation has been repeated.
+     *         This number is guaranteed to be 0 at the beginning of the animation,
+     *         and for most animations it will be 0 at the end of the animation as well.
+     *         An animation may be repeated if it is explicitly scheduled to run for a longer time.
+     */
+<span class="fc" id="L153">    public long repeats() { return howManyLoops; }</span>
+
+    /**
+     *  Exposes the {@link LifeSpan} of the animation, which defines
+     *  when the animation starts, for how long it should run, how is should progress and
+     *  the refresh rate of the animation.
+     *
+     * @return The {@link LifeSpan} of the animation, i.e. the time when the animation started and how long it should run.
+     */
+<span class="fc" id="L162">    public LifeSpan lifeSpan() { return lifeSpan; }</span>
+
+    /**
+     *  Exposes the timer event that triggered the animation.
+     *  Note that under the hood, all animations with the same refresh rate will be
+     *  updated by the same timer and thus share the same event.
+     *
+     * @return The timer event that triggered the animation.
+     */
+<span class="fc" id="L171">    public ActionEvent event() { return event; }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L175">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+                &quot;progress=&quot;   + progress +
+                &quot;, repeats=&quot;  + howManyLoops +
+                &quot;, lifeSpan=&quot; + lifeSpan +
+                &quot;, event=&quot;    + event +
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L186" title="All 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
+
+<span class="nc" id="L188">        AnimationStatus that = (AnimationStatus) o;</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if ( Double.compare(that.progress, progress) != 0 ) return false;</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        if ( howManyLoops != that.howManyLoops ) return false;</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if ( !lifeSpan.equals(that.lifeSpan) ) return false;</span>
+<span class="nc" id="L193">        return event.equals(that.event);</span>
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+<span class="nc" id="L199">        result = Double.hashCode(progress);</span>
+<span class="nc" id="L200">        result = 31 * result + Long.hashCode(howManyLoops);</span>
+<span class="nc" id="L201">        result = 31 * result + lifeSpan.hashCode();</span>
+<span class="nc" id="L202">        result = 31 * result + event.hashCode();</span>
+<span class="nc" id="L203">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

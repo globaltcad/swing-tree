@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NoiseFunctions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">NoiseFunctions.java</span></div><h1>NoiseFunctions.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+/**
+ *  A collection of noise functions that can be used to generate procedural textures.
+ *  The functions in this class are also supposed to serve as an example
+ *  which demonstrates how to create procedural textures yourself.
+ */
+public final class NoiseFunctions
+{
+    private static final long PRIME_1 = 12055296811267L;
+    private static final long PRIME_2 = 53982894593057L;
+
+
+    private NoiseFunctions(){}
+
+
+    public static float stochastic( float xIn, float yIn ) {
+<span class="fc" id="L18">        int kernelSize = 8;</span>
+<span class="fc" id="L19">        double sum = _coordinateToGradValue(kernelSize, xIn, yIn);</span>
+<span class="fc" id="L20">        return (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);</span>
+    }
+
+    private static double _coordinateToGradValue( int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L24">        final int maxDistance  = kernelSize / 2;</span>
+<span class="fc" id="L25">        final int kernelPoints = kernelSize * kernelSize;</span>
+<span class="fc" id="L26">        final double sampleRate = 0.5;</span>
+<span class="fc" id="L27">        double sum = 0;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L29">            final int x = i % kernelSize;</span>
+<span class="fc" id="L30">            final int y = i / kernelSize;</span>
+<span class="fc" id="L31">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L32">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L33">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L34">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L35">            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">            final boolean takeSample = (255 * sampleRate -128) &lt; score;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            if ( takeSample ) {</span>
+<span class="fc" id="L38">                final double vx = rx - xIn;</span>
+<span class="fc" id="L39">                final double vy = ry - yIn;</span>
+<span class="fc" id="L40">                final double distance = Math.sqrt( vx * vx + vy * vy );</span>
+<span class="fc" id="L41">                final double relevance = Math.max(0, 1.0 - distance / maxDistance);</span>
+<span class="fc" id="L42">                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;</span>
+<span class="fc" id="L43">                sum += ( frac * (relevance*relevance) );</span>
+            }
+        }
+<span class="fc" id="L46">        return sum;</span>
+    }
+
+    public static float smoothTopology( float xIn, float yIn ) {
+<span class="fc" id="L50">        float scale = 6;</span>
+<span class="fc" id="L51">        return (float) ((Math.sin(stochastic(xIn/scale, yIn/scale) * 6 * Math.PI) + 1)/2);</span>
+    }
+
+    public static float hardTopology( float xIn, float yIn ) {
+<span class="fc" id="L55">        float scale = 6;</span>
+<span class="fc" id="L56">        return (stochastic(xIn/scale, yIn/scale)*6)%1;</span>
+    }
+
+    public static float hardSpots( float xIn, float yIn ) {
+<span class="fc" id="L60">        float scale = 4;</span>
+<span class="fc" id="L61">        return Math.round(stochastic(xIn/scale, yIn/scale));</span>
+    }
+
+    public static float smoothSpots( float xIn, float yIn ) {
+<span class="fc" id="L65">        float scale = 6;</span>
+<span class="fc" id="L66">        int kernelSize = 6;</span>
+<span class="fc" id="L67">        double sum = _coordinateToGradValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L68">        return (float) _sigmoid(sum * 64 / kernelSize);</span>
+    }
+
+    public static float grainy( float xIn, float yIn ) {
+<span class="fc" id="L72">        float scale = 2;</span>
+<span class="fc" id="L73">        int kernelSize = 4;</span>
+<span class="fc" id="L74">        double sum = _coordinateToGradValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L75">        double stochastic = (Math.sin(sum * (12.0/kernelSize)) + 1)/2;</span>
+        // We make the smallest and largest values both the largest,
+        // and the values around 0.5 become close to 0
+<span class="fc" id="L78">        return (float) Math.abs((stochastic-0.5)*2);</span>
+    }
+
+    public static float tiles( float xIn, float yIn ) {
+<span class="fc" id="L82">        float scale = 10;</span>
+<span class="fc" id="L83">        int kernelSize = 8;</span>
+<span class="fc" id="L84">        double sum = _coordinateToGradTileValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L85">        return (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);</span>
+    }
+
+    private static double _coordinateToGradTileValue( int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L89">        final int maxDistance  = kernelSize / 2;</span>
+<span class="fc" id="L90">        final int kernelPoints = kernelSize * kernelSize;</span>
+<span class="fc" id="L91">        final double sampleRate = 0.5;</span>
+<span class="fc" id="L92">        double sum = 0;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L94">            final int x = i % kernelSize;</span>
+<span class="fc" id="L95">            final int y = i / kernelSize;</span>
+<span class="fc" id="L96">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L97">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L98">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L99">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L100">            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            final boolean takeSample = (255 * sampleRate -128) &lt; score;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            if ( takeSample ) {</span>
+<span class="fc" id="L103">                final double vx = (rx - xIn);</span>
+<span class="fc" id="L104">                final double vy = (ry - yIn);</span>
+<span class="fc" id="L105">                final double distance = Math.max(vy, vx);</span>
+<span class="fc" id="L106">                final double relevance = Math.max(0, 1.0 - distance / maxDistance);</span>
+<span class="fc" id="L107">                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;</span>
+<span class="fc" id="L108">                sum += ( frac * (relevance*relevance) );</span>
+            }
+        }
+<span class="fc" id="L111">        return sum;</span>
+    }
+
+    public static float fabric( float xIn, float yIn ) {
+<span class="fc" id="L115">        float scale = 5;</span>
+<span class="fc" id="L116">        int kernelSize = 4;</span>
+<span class="fc" id="L117">        double sum = _coordinateToFiberValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L118">        return (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);</span>
+    }
+
+    private static double _coordinateToFiberValue( int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L122">        final int maxDistance   = kernelSize / 2;</span>
+<span class="fc" id="L123">        final int kernelPoints  = kernelSize * kernelSize;</span>
+<span class="fc" id="L124">        final double sampleRate = 0.5;</span>
+<span class="fc" id="L125">        double sum = 0;</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L127">            final int x = i % kernelSize;</span>
+<span class="fc" id="L128">            final int y = i / kernelSize;</span>
+<span class="fc" id="L129">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L130">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L131">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L132">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L133">            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            final boolean takeSample = (255 * sampleRate - 128) &lt; score;</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            if ( takeSample ) {</span>
+<span class="fc" id="L136">                final double vx = rx - xIn;</span>
+<span class="fc" id="L137">                final double vy = ry - yIn;</span>
+<span class="fc" id="L138">                final double distance = Math.sqrt( vx*vx % 2 + vy*vy % 2);</span>
+<span class="fc" id="L139">                double relevance = Math.max(0, 1.0 - distance / maxDistance);</span>
+<span class="fc" id="L140">                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;</span>
+<span class="fc" id="L141">                relevance = Math.min(1, (relevance * relevance) * 1.5);</span>
+<span class="fc" id="L142">                sum += ( frac * relevance );</span>
+            }
+        }
+<span class="fc" id="L145">        return sum;</span>
+    }
+
+    public static float retro( float xIn, float yIn ) {
+<span class="fc" id="L149">        float scale = 4;</span>
+<span class="fc" id="L150">        int kernelSize = 4;</span>
+<span class="fc" id="L151">        double sum = _coordinateToRetroValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L152">        return (float) ((Math.sin(sum) + 1)/2);</span>
+    }
+
+    private static double _coordinateToRetroValue( int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L156">        final int maxDistance  = kernelSize / 2;</span>
+<span class="fc" id="L157">        final int kernelPoints = kernelSize * kernelSize;</span>
+<span class="fc" id="L158">        final double sampleRate = 0.5;</span>
+<span class="fc" id="L159">        double sum = 0;</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L161">            final int x = i % kernelSize;</span>
+<span class="fc" id="L162">            final int y = i / kernelSize;</span>
+<span class="fc" id="L163">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L164">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L165">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L166">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L167">            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">            final boolean takeSample = (255 * sampleRate -128) &lt; score;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">            if ( takeSample ) {</span>
+<span class="fc" id="L170">                final double vx = rx - xIn;</span>
+<span class="fc" id="L171">                final double vy = ry - yIn;</span>
+<span class="fc" id="L172">                final double distance = Math.sqrt( vx * vx + vy * vy );</span>
+<span class="fc" id="L173">                final double relevance = 1-Math.max(0, 1.0 - distance / maxDistance);</span>
+<span class="fc" id="L174">                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;</span>
+<span class="fc" id="L175">                sum += ( frac * (relevance*relevance) );</span>
+            }
+        }
+<span class="fc" id="L178">        return sum;</span>
+    }
+
+    public static float cells( float xIn, float yIn ) {
+<span class="fc" id="L182">        float scale = 4;</span>
+<span class="fc" id="L183">        int kernelSize = 6;</span>
+<span class="fc" id="L184">        double sum = _coordinateToCellsValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L185">        return (float) sum;</span>
+    }
+
+    private static double _coordinateToCellsValue(int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L189">        final int maxDistance  = kernelSize / 2;</span>
+<span class="fc" id="L190">        final int kernelPoints = kernelSize * kernelSize;</span>
+<span class="fc" id="L191">        final double sampleRate = 0.65;</span>
+<span class="fc" id="L192">        double grad = 0;</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L194">            final int x = i % kernelSize;</span>
+<span class="fc" id="L195">            final int y = i / kernelSize;</span>
+<span class="fc" id="L196">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L197">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L198">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L199">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L200">            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">            final boolean takeSample = (255 * sampleRate -128) &lt; score;</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            if ( takeSample ) {</span>
+<span class="fc" id="L203">                final double vx = rx - xIn;</span>
+<span class="fc" id="L204">                final double vy = ry - yIn;</span>
+<span class="fc" id="L205">                final double distance = Math.sqrt( vx * vx + vy * vy );</span>
+<span class="fc" id="L206">                final double relevance = Math.max(0, 1.0 - distance / maxDistance);</span>
+<span class="fc" id="L207">                final double frac = _fastPseudoRandomDoubleFrom(rx, ry);</span>
+<span class="fc" id="L208">                grad = Math.max( grad, frac * (relevance*relevance) );</span>
+            }
+        }
+<span class="fc" id="L211">        return grad;</span>
+    }
+
+    public static float haze(float xIn, float yIn ) {
+<span class="fc" id="L215">        float scale = 5;</span>
+<span class="fc" id="L216">        int kernelSize = 6;</span>
+<span class="fc" id="L217">        double sum = _coordinateToHazeValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L218">        return  (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);</span>
+    }
+
+    private static double _coordinateToHazeValue( int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L222">        final int maxDistance  = kernelSize / 2;</span>
+<span class="fc" id="L223">        final int kernelPoints = kernelSize * kernelSize;</span>
+<span class="fc" id="L224">        final double sampleRate = 0.5;</span>
+<span class="fc" id="L225">        double sum = 0;</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L227">            final int x = i % kernelSize;</span>
+<span class="fc" id="L228">            final int y = i / kernelSize;</span>
+<span class="fc" id="L229">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L230">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L231">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L232">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L233">            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">            final boolean takeSample = (255 * sampleRate -128) &lt; score;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">            if ( takeSample ) {</span>
+<span class="fc" id="L236">                final double vx = rx - xIn;</span>
+<span class="fc" id="L237">                final double vy = ry - yIn;</span>
+<span class="fc" id="L238">                final double diagonalMax = Math.max(vx * vx, vy * vy);</span>
+<span class="fc" id="L239">                final double horizontalAndVerticalMax = Math.abs(vx)*Math.abs(vy) * 2;</span>
+<span class="fc" id="L240">                final double distance = Math.sqrt( Math.max(diagonalMax, horizontalAndVerticalMax) * 2 );</span>
+<span class="fc" id="L241">                final double relevance = Math.max(0, 1.0 - distance / maxDistance);</span>
+<span class="fc" id="L242">                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;</span>
+<span class="fc" id="L243">                final int rx2 = Math.round( xi * 3 );</span>
+<span class="fc" id="L244">                final int ry2 = Math.round( yi * 3 );</span>
+<span class="fc" id="L245">                final double subNoise = 1 + (_fastPseudoRandomDoubleFrom(rx2, ry2) - 0.5) / 5;</span>
+<span class="fc" id="L246">                sum += ( frac * (relevance*subNoise) );</span>
+            }
+        }
+<span class="fc" id="L249">        return sum;</span>
+    }
+
+    public static float spirals(float xIn, float yIn ) {
+<span class="fc" id="L253">        float scale = 8;</span>
+<span class="fc" id="L254">        int kernelSize = 6;</span>
+<span class="fc" id="L255">        double sum = _coordinateToSpiralValue(kernelSize, xIn/scale, yIn/scale);</span>
+<span class="fc" id="L256">        return (float) _sigmoid(sum*3);</span>
+    }
+
+    private static double _coordinateToSpiralValue(int kernelSize, float xIn, float yIn ) {
+<span class="fc" id="L260">        final int maxDistance  = kernelSize / 2;</span>
+<span class="fc" id="L261">        final int kernelPoints = kernelSize * kernelSize;</span>
+<span class="fc" id="L262">        final double sampleRate = 0.75;</span>
+<span class="fc" id="L263">        double result = 0;</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">        for ( int i = 0; i &lt; kernelPoints; i++ ) {</span>
+<span class="fc" id="L265">            final int x = i % kernelSize;</span>
+<span class="fc" id="L266">            final int y = i / kernelSize;</span>
+<span class="fc" id="L267">            final float xi = ( x - maxDistance ) + xIn;</span>
+<span class="fc" id="L268">            final float yi = ( y - maxDistance ) + yIn;</span>
+<span class="fc" id="L269">            final int rx = Math.round( xi );</span>
+<span class="fc" id="L270">            final int ry = Math.round( yi );</span>
+<span class="fc" id="L271">            final double vx = rx - xIn;</span>
+<span class="fc" id="L272">            final double vy = ry - yIn;</span>
+<span class="fc" id="L273">            final double distance = Math.sqrt( vx * vx + vy * vy );</span>
+<span class="fc" id="L274">            final double relevance = 1.0 - distance / maxDistance;</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">            if ( relevance &gt;= 0 ) {</span>
+<span class="fc" id="L276">                final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">                final boolean takeSample = (255 * sampleRate - 128) &lt; score;</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">                if ( takeSample ) {</span>
+<span class="fc" id="L279">                    final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;</span>
+<span class="fc" id="L280">                    final double relevance2 = relevance * relevance;</span>
+                    // We are calculating the angle between (xIn,yIn) and (rx,ry):
+<span class="fc" id="L282">                    final double angle = Math.atan2(vy, vx);</span>
+<span class="fc" id="L283">                    int numberOfCones = 1+Math.abs(score)/25;</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">                    int spiralSign = (Math.abs(score) % 2 == 0 ? 1 : -1);</span>
+<span class="fc" id="L285">                    double angleOffset = (frac*Math.PI*numberOfCones+relevance2*6*Math.PI*spiralSign);</span>
+<span class="fc" id="L286">                    double conePattern =  (Math.cos(angle*numberOfCones+angleOffset)/2)+0.5;</span>
+<span class="fc" id="L287">                    result += ( conePattern * relevance2 ) + frac * relevance2;</span>
+                }
+            }
+        }
+<span class="fc" id="L291">        return result;</span>
+    }
+
+    public static float mandelbrot( float xIn, float yIn ) {
+<span class="fc" id="L295">        final int MAX_ITERATIONS = 5000;</span>
+<span class="fc" id="L296">        double x = xIn/100.0;</span>
+<span class="fc" id="L297">        double y = yIn/100.0;</span>
+<span class="fc" id="L298">        double ix = 0;</span>
+<span class="fc" id="L299">        double iy = 0;</span>
+<span class="fc" id="L300">        int iteration = 0;</span>
+<span class="pc bpc" id="L301" title="1 of 4 branches missed.">        while (ix * ix + iy * iy &lt; 4 &amp;&amp; iteration &lt; MAX_ITERATIONS) {</span>
+<span class="fc" id="L302">            double xtemp = ix * ix - iy * iy + x;</span>
+<span class="fc" id="L303">            iy = 2 * ix * iy + y;</span>
+<span class="fc" id="L304">            ix = xtemp;</span>
+<span class="fc" id="L305">            iteration++;</span>
+<span class="fc" id="L306">        }</span>
+<span class="fc" id="L307">        return (float) (1 - Math.log(iteration) / Math.log(MAX_ITERATIONS));</span>
+    }
+
+    public static float voronoiBasedCellTissue(float xIn, float yIn ) {
+<span class="fc" id="L311">        float scale = 32f;</span>
+<span class="fc" id="L312">        return _coordinateToWorleyDistanceValue(xIn/scale, yIn/scale);</span>
+    }
+
+    private static float _coordinateToWorleyDistanceValue(float xIn, float yIn ) {
+<span class="fc" id="L316">        final int minX1 = (int) Math.floor(xIn) - 1 ;</span>
+<span class="fc" id="L317">        final int minX2 = (int) Math.floor(xIn)     ;</span>
+<span class="fc" id="L318">        final int minX3 = (int) Math.floor(xIn) + 1 ;</span>
+<span class="fc" id="L319">        final int minY1 = (int) Math.floor(yIn) - 1 ;</span>
+<span class="fc" id="L320">        final int minY2 = (int) Math.floor(yIn)     ;</span>
+<span class="fc" id="L321">        final int minY3 = (int) Math.floor(yIn) + 1 ;</span>
+<span class="fc" id="L322">        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);</span>
+<span class="fc" id="L323">        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX2);</span>
+<span class="fc" id="L324">        final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);</span>
+<span class="fc" id="L325">        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);</span>
+<span class="fc" id="L326">        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX1);</span>
+<span class="fc" id="L327">        final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);</span>
+<span class="fc" id="L328">        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);</span>
+<span class="fc" id="L329">        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX3);</span>
+<span class="fc" id="L330">        final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);</span>
+<span class="fc" id="L331">        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);</span>
+<span class="fc" id="L332">        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX2);</span>
+<span class="fc" id="L333">        final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);</span>
+<span class="fc" id="L334">        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);</span>
+<span class="fc" id="L335">        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX2);</span>
+<span class="fc" id="L336">        final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);</span>
+<span class="fc" id="L337">        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);</span>
+<span class="fc" id="L338">        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX1);</span>
+<span class="fc" id="L339">        final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);</span>
+<span class="fc" id="L340">        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);</span>
+<span class="fc" id="L341">        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX3);</span>
+<span class="fc" id="L342">        final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);</span>
+<span class="fc" id="L343">        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);</span>
+<span class="fc" id="L344">        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX1);</span>
+<span class="fc" id="L345">        final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);</span>
+<span class="fc" id="L346">        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);</span>
+<span class="fc" id="L347">        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX3);</span>
+<span class="fc" id="L348">        final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);</span>
+<span class="fc" id="L349">        double min = 1;</span>
+<span class="fc" id="L350">        min = Math.min(min, distanceCenter);</span>
+<span class="fc" id="L351">        min = Math.min(min, distanceLeft);</span>
+<span class="fc" id="L352">        min = Math.min(min, distanceRight);</span>
+<span class="fc" id="L353">        min = Math.min(min, distanceTop);</span>
+<span class="fc" id="L354">        min = Math.min(min, distanceBottom);</span>
+<span class="fc" id="L355">        min = Math.min(min, distanceTopLeft);</span>
+<span class="fc" id="L356">        min = Math.min(min, distanceTopRight);</span>
+<span class="fc" id="L357">        min = Math.min(min, distanceBottomLeft);</span>
+<span class="fc" id="L358">        min = Math.min(min, distanceBottomRight);</span>
+<span class="fc" id="L359">        return (float) (1 - min);</span>
+    }
+
+    public static float voronoiBasedCellMosaic(float xIn, float yIn ) {
+<span class="fc" id="L363">        float scale = 32f;</span>
+<span class="fc" id="L364">        return _coordinateToRandomValueFromClosestWorleyCell(xIn/scale, yIn/scale);</span>
+    }
+
+    private static float _coordinateToRandomValueFromClosestWorleyCell( float xIn, float yIn ) {
+<span class="fc" id="L368">        final int minX1 = (int) Math.floor(xIn) - 1 ;</span>
+<span class="fc" id="L369">        final int minX2 = (int) Math.floor(xIn)     ;</span>
+<span class="fc" id="L370">        final int minX3 = (int) Math.floor(xIn) + 1 ;</span>
+<span class="fc" id="L371">        final int minY1 = (int) Math.floor(yIn) - 1 ;</span>
+<span class="fc" id="L372">        final int minY2 = (int) Math.floor(yIn)     ;</span>
+<span class="fc" id="L373">        final int minY3 = (int) Math.floor(yIn) + 1 ;</span>
+
+<span class="fc" id="L375">        double minX = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L376">        double minY = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L377">        double minDistance = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L378">        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);</span>
+<span class="fc" id="L379">        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX2);</span>
+<span class="fc" id="L380">        final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);</span>
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">        if (distanceCenter &lt; minDistance) {</span>
+<span class="fc" id="L382">            minDistance = distanceCenter;</span>
+<span class="fc" id="L383">            minX = centerX;</span>
+<span class="fc" id="L384">            minY = centerY;</span>
+        }
+<span class="fc" id="L386">        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);</span>
+<span class="fc" id="L387">        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX1);</span>
+<span class="fc" id="L388">        final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);</span>
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        if (distanceLeft &lt; minDistance) {</span>
+<span class="nc" id="L390">            minDistance = distanceLeft;</span>
+<span class="nc" id="L391">            minX = leftX;</span>
+<span class="nc" id="L392">            minY = leftY;</span>
+        }
+<span class="fc" id="L394">        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);</span>
+<span class="fc" id="L395">        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX3);</span>
+<span class="fc" id="L396">        final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);</span>
+<span class="pc bpc" id="L397" title="1 of 2 branches missed.">        if (distanceRight &lt; minDistance) {</span>
+<span class="nc" id="L398">            minDistance = distanceRight;</span>
+<span class="nc" id="L399">            minX = rightX;</span>
+<span class="nc" id="L400">            minY = rightY;</span>
+        }
+<span class="fc" id="L402">        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);</span>
+<span class="fc" id="L403">        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX2);</span>
+<span class="fc" id="L404">        final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);</span>
+<span class="pc bpc" id="L405" title="1 of 2 branches missed.">        if (distanceTop &lt; minDistance) {</span>
+<span class="nc" id="L406">            minDistance = distanceTop;</span>
+<span class="nc" id="L407">            minX = topX;</span>
+<span class="nc" id="L408">            minY = topY;</span>
+        }
+<span class="fc" id="L410">        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);</span>
+<span class="fc" id="L411">        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX2);</span>
+<span class="fc" id="L412">        final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);</span>
+<span class="pc bpc" id="L413" title="1 of 2 branches missed.">        if (distanceBottom &lt; minDistance) {</span>
+<span class="nc" id="L414">            minDistance = distanceBottom;</span>
+<span class="nc" id="L415">            minX = bottomX;</span>
+<span class="nc" id="L416">            minY = bottomY;</span>
+        }
+<span class="fc" id="L418">        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);</span>
+<span class="fc" id="L419">        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX1);</span>
+<span class="fc" id="L420">        final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);</span>
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">        if (distanceTopLeft &lt; minDistance) {</span>
+<span class="nc" id="L422">            minDistance = distanceTopLeft;</span>
+<span class="nc" id="L423">            minX = topLeftX;</span>
+<span class="nc" id="L424">            minY = topLeftY;</span>
+        }
+<span class="fc" id="L426">        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);</span>
+<span class="fc" id="L427">        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX3);</span>
+<span class="fc" id="L428">        final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);</span>
+<span class="pc bpc" id="L429" title="1 of 2 branches missed.">        if (distanceTopRight &lt; minDistance) {</span>
+<span class="nc" id="L430">            minDistance = distanceTopRight;</span>
+<span class="nc" id="L431">            minX = topRightX;</span>
+<span class="nc" id="L432">            minY = topRightY;</span>
+        }
+<span class="fc" id="L434">        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);</span>
+<span class="fc" id="L435">        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX1);</span>
+<span class="fc" id="L436">        final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);</span>
+<span class="pc bpc" id="L437" title="1 of 2 branches missed.">        if (distanceBottomLeft &lt; minDistance) {</span>
+<span class="nc" id="L438">            minDistance = distanceBottomLeft;</span>
+<span class="nc" id="L439">            minX = bottomLeftX;</span>
+<span class="nc" id="L440">            minY = bottomLeftY;</span>
+        }
+<span class="fc" id="L442">        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);</span>
+<span class="fc" id="L443">        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX3);</span>
+<span class="fc" id="L444">        final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);</span>
+<span class="pc bpc" id="L445" title="1 of 2 branches missed.">        if (distanceBottomRight &lt; minDistance) {</span>
+<span class="nc" id="L446">            minDistance = distanceBottomRight;</span>
+<span class="nc" id="L447">            minX = bottomRightX;</span>
+<span class="nc" id="L448">            minY = bottomRightY;</span>
+        }
+<span class="fc" id="L450">        return (float) _fastPseudoRandomDoubleFrom((float) minX, (float) minY);</span>
+    }
+
+    public static float voronoiBasedPolygonCell(float xIn, float yIn ) {
+<span class="fc" id="L454">        float scale = 32f;</span>
+<span class="fc" id="L455">        return _coordinateToClosestWorleyCellEdge(xIn/scale, yIn/scale);</span>
+    }
+
+    private static float _coordinateToClosestWorleyCellEdge( float xIn, float yIn ) {
+<span class="fc" id="L459">        final int minX1 = (int) Math.floor(xIn) - 1 ;</span>
+<span class="fc" id="L460">        final int minX2 = (int) Math.floor(xIn)     ;</span>
+<span class="fc" id="L461">        final int minX3 = (int) Math.floor(xIn) + 1 ;</span>
+<span class="fc" id="L462">        final int minY1 = (int) Math.floor(yIn) - 1 ;</span>
+<span class="fc" id="L463">        final int minY2 = (int) Math.floor(yIn)     ;</span>
+<span class="fc" id="L464">        final int minY3 = (int) Math.floor(yIn) + 1 ;</span>
+
+<span class="fc" id="L466">        double closestX = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L467">        double closestY = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L468">        double secondClosestX = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L469">        double secondClosestY = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L470">        double minDistance1 = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L471">        double minDistance2 = Double.POSITIVE_INFINITY;</span>
+
+<span class="fc" id="L473">        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);</span>
+<span class="fc" id="L474">        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX2);</span>
+<span class="fc" id="L475">        final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);</span>
+<span class="pc bpc" id="L476" title="3 of 4 branches missed.">        if (distanceCenter &lt; minDistance1 || distanceCenter &lt; minDistance2) {</span>
+<span class="pc bpc" id="L477" title="1 of 2 branches missed.">            if (distanceCenter &lt; minDistance1) {</span>
+<span class="fc" id="L478">                minDistance2 = minDistance1;</span>
+<span class="fc" id="L479">                minDistance1 = distanceCenter;</span>
+<span class="fc" id="L480">                secondClosestX = closestX;</span>
+<span class="fc" id="L481">                secondClosestY = closestY;</span>
+<span class="fc" id="L482">                closestX = centerX;</span>
+<span class="fc" id="L483">                closestY = centerY;</span>
+            } else {
+<span class="nc" id="L485">                minDistance2 = distanceCenter;</span>
+<span class="nc" id="L486">                secondClosestX = centerX;</span>
+<span class="nc" id="L487">                secondClosestY = centerY;</span>
+            }
+        }
+<span class="fc" id="L490">        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);</span>
+<span class="fc" id="L491">        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX1);</span>
+<span class="fc" id="L492">        final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);</span>
+<span class="pc bpc" id="L493" title="2 of 4 branches missed.">        if (distanceLeft &lt; minDistance1 || distanceLeft &lt; minDistance2) {</span>
+<span class="pc bpc" id="L494" title="1 of 2 branches missed.">            if (distanceLeft &lt; minDistance1) {</span>
+<span class="nc" id="L495">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L496">                minDistance1 = distanceLeft;</span>
+<span class="nc" id="L497">                secondClosestX = closestX;</span>
+<span class="nc" id="L498">                secondClosestY = closestY;</span>
+<span class="nc" id="L499">                closestX = leftX;</span>
+<span class="nc" id="L500">                closestY = leftY;</span>
+            } else {
+<span class="fc" id="L502">                minDistance2 = distanceLeft;</span>
+<span class="fc" id="L503">                secondClosestX = leftX;</span>
+<span class="fc" id="L504">                secondClosestY = leftY;</span>
+            }
+        }
+<span class="fc" id="L507">        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);</span>
+<span class="fc" id="L508">        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, -minX3);</span>
+<span class="fc" id="L509">        final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);</span>
+<span class="pc bpc" id="L510" title="2 of 4 branches missed.">        if (distanceRight &lt; minDistance1 || distanceRight &lt; minDistance2) {</span>
+<span class="pc bpc" id="L511" title="1 of 2 branches missed.">            if (distanceRight &lt; minDistance1) {</span>
+<span class="nc" id="L512">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L513">                minDistance1 = distanceRight;</span>
+<span class="nc" id="L514">                secondClosestX = closestX;</span>
+<span class="nc" id="L515">                secondClosestY = closestY;</span>
+<span class="nc" id="L516">                closestX = rightX;</span>
+<span class="nc" id="L517">                closestY = rightY;</span>
+            } else {
+<span class="fc" id="L519">                minDistance2 = distanceRight;</span>
+<span class="fc" id="L520">                secondClosestX = rightX;</span>
+<span class="fc" id="L521">                secondClosestY = rightY;</span>
+            }
+        }
+<span class="fc" id="L524">        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);</span>
+<span class="fc" id="L525">        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX2);</span>
+<span class="fc" id="L526">        final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);</span>
+<span class="pc bpc" id="L527" title="2 of 4 branches missed.">        if (distanceTop &lt; minDistance1 || distanceTop &lt; minDistance2) {</span>
+<span class="pc bpc" id="L528" title="1 of 2 branches missed.">            if (distanceTop &lt; minDistance1) {</span>
+<span class="nc" id="L529">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L530">                minDistance1 = distanceTop;</span>
+<span class="nc" id="L531">                secondClosestX = closestX;</span>
+<span class="nc" id="L532">                secondClosestY = closestY;</span>
+<span class="nc" id="L533">                closestX = topX;</span>
+<span class="nc" id="L534">                closestY = topY;</span>
+            } else {
+<span class="fc" id="L536">                minDistance2 = distanceTop;</span>
+<span class="fc" id="L537">                secondClosestX = topX;</span>
+<span class="fc" id="L538">                secondClosestY = topY;</span>
+            }
+        }
+<span class="fc" id="L541">        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);</span>
+<span class="fc" id="L542">        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX2);</span>
+<span class="fc" id="L543">        final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);</span>
+<span class="pc bpc" id="L544" title="2 of 4 branches missed.">        if (distanceBottom &lt; minDistance1 || distanceBottom &lt; minDistance2) {</span>
+<span class="pc bpc" id="L545" title="1 of 2 branches missed.">            if (distanceBottom &lt; minDistance1) {</span>
+<span class="nc" id="L546">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L547">                minDistance1 = distanceBottom;</span>
+<span class="nc" id="L548">                secondClosestX = closestX;</span>
+<span class="nc" id="L549">                secondClosestY = closestY;</span>
+<span class="nc" id="L550">                closestX = bottomX;</span>
+<span class="nc" id="L551">                closestY = bottomY;</span>
+            } else {
+<span class="fc" id="L553">                minDistance2 = distanceBottom;</span>
+<span class="fc" id="L554">                secondClosestX = bottomX;</span>
+<span class="fc" id="L555">                secondClosestY = bottomY;</span>
+            }
+        }
+<span class="fc" id="L558">        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);</span>
+<span class="fc" id="L559">        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX1);</span>
+<span class="fc" id="L560">        final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);</span>
+<span class="pc bpc" id="L561" title="2 of 4 branches missed.">        if (distanceTopLeft &lt; minDistance1 || distanceTopLeft &lt; minDistance2) {</span>
+<span class="nc bnc" id="L562" title="All 2 branches missed.">            if (distanceTopLeft &lt; minDistance1) {</span>
+<span class="nc" id="L563">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L564">                minDistance1 = distanceTopLeft;</span>
+<span class="nc" id="L565">                secondClosestX = closestX;</span>
+<span class="nc" id="L566">                secondClosestY = closestY;</span>
+<span class="nc" id="L567">                closestX = topLeftX;</span>
+<span class="nc" id="L568">                closestY = topLeftY;</span>
+            } else {
+<span class="nc" id="L570">                minDistance2 = distanceTopLeft;</span>
+<span class="nc" id="L571">                secondClosestX = topLeftX;</span>
+<span class="nc" id="L572">                secondClosestY = topLeftY;</span>
+            }
+        }
+<span class="fc" id="L575">        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);</span>
+<span class="fc" id="L576">        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, -minX3);</span>
+<span class="fc" id="L577">        final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);</span>
+<span class="pc bpc" id="L578" title="2 of 4 branches missed.">        if (distanceTopRight &lt; minDistance1 || distanceTopRight &lt; minDistance2) {</span>
+<span class="nc bnc" id="L579" title="All 2 branches missed.">            if (distanceTopRight &lt; minDistance1) {</span>
+<span class="nc" id="L580">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L581">                minDistance1 = distanceTopRight;</span>
+<span class="nc" id="L582">                secondClosestX = closestX;</span>
+<span class="nc" id="L583">                secondClosestY = closestY;</span>
+<span class="nc" id="L584">                closestX = topRightX;</span>
+<span class="nc" id="L585">                closestY = topRightY;</span>
+            } else {
+<span class="nc" id="L587">                minDistance2 = distanceTopRight;</span>
+<span class="nc" id="L588">                secondClosestX = topRightX;</span>
+<span class="nc" id="L589">                secondClosestY = topRightY;</span>
+            }
+        }
+<span class="fc" id="L592">        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);</span>
+<span class="fc" id="L593">        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX1);</span>
+<span class="fc" id="L594">        final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);</span>
+<span class="pc bpc" id="L595" title="2 of 4 branches missed.">        if (distanceBottomLeft &lt; minDistance1 || distanceBottomLeft &lt; minDistance2) {</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">            if (distanceBottomLeft &lt; minDistance1) {</span>
+<span class="nc" id="L597">                minDistance2 = minDistance1;</span>
+<span class="nc" id="L598">                minDistance1 = distanceBottomLeft;</span>
+<span class="nc" id="L599">                secondClosestX = closestX;</span>
+<span class="nc" id="L600">                secondClosestY = closestY;</span>
+<span class="nc" id="L601">                closestX = bottomLeftX;</span>
+<span class="nc" id="L602">                closestY = bottomLeftY;</span>
+            } else {
+<span class="nc" id="L604">                minDistance2 = distanceBottomLeft;</span>
+<span class="nc" id="L605">                secondClosestX = bottomLeftX;</span>
+<span class="nc" id="L606">                secondClosestY = bottomLeftY;</span>
+            }
+        }
+<span class="fc" id="L609">        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);</span>
+<span class="fc" id="L610">        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, -minX3);</span>
+<span class="fc" id="L611">        final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);</span>
+<span class="pc bpc" id="L612" title="2 of 4 branches missed.">        if (distanceBottomRight &lt; minDistance1 || distanceBottomRight &lt; minDistance2) {</span>
+<span class="nc bnc" id="L613" title="All 2 branches missed.">            if (distanceBottomRight &lt; minDistance1) {</span>
+<span class="nc" id="L614">                secondClosestX = closestX;</span>
+<span class="nc" id="L615">                secondClosestY = closestY;</span>
+<span class="nc" id="L616">                closestX = bottomRightX;</span>
+<span class="nc" id="L617">                closestY = bottomRightY;</span>
+            } else {
+<span class="nc" id="L619">                secondClosestX = bottomRightX;</span>
+<span class="nc" id="L620">                secondClosestY = bottomRightY;</span>
+            }
+        }
+        /*
+            We now have a line that spans between 2 cell centers
+            which have their boundary in the middle.
+            We now project the current pixel position onto
+            that line.
+        */
+<span class="fc" id="L629">        double t = projectPointOntoLine(closestX, closestY, secondClosestX, secondClosestY, xIn, yIn);</span>
+<span class="fc" id="L630">        double distanceBetweenTheTwo = _distanceBetween(closestX, closestY, secondClosestX, secondClosestY);</span>
+<span class="fc" id="L631">        double frac = ((0.5-t)*Math.pow(distanceBetweenTheTwo, 2));</span>
+<span class="fc" id="L632">        return (float) Math.max(0, Math.min(1, Math.sqrt(frac)));</span>
+    }
+
+    public static double projectPointOntoLine(double x1, double y1, double x2, double y2, double px, double py) {
+<span class="fc" id="L636">        double dx = x2 - x1;</span>
+<span class="fc" id="L637">        double dy = y2 - y1;</span>
+<span class="fc" id="L638">        double lengthSquared = (dx * dx + dy * dy);</span>
+
+<span class="pc bpc" id="L640" title="1 of 2 branches missed.">        if (lengthSquared == 0) {</span>
+<span class="nc" id="L641">            throw new IllegalArgumentException(&quot;The two points defining the line must not be the same.&quot;);</span>
+        }
+
+<span class="fc" id="L644">        return ((px - x1) * dx + (py - y1) * dy) / lengthSquared;</span>
+    }
+
+
+    private static double _distanceBetween( double x1, double y1, double x2, double y2 ) {
+<span class="fc" id="L649">        return Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );</span>
+    }
+
+    public static float voronoiBasedPondInDrizzle(float xIn, float yIn ) {
+<span class="fc" id="L653">        float scale = 0.5f/32;</span>
+<span class="fc" id="L654">        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale);</span>
+<span class="fc" id="L655">        return (float) _wave(Math.pow(Math.abs(pool), 2));</span>
+    }
+
+    public static float voronoiBasedPondInRain(float xIn, float yIn ) {
+<span class="fc" id="L659">        float scale = 0.5f/32;</span>
+<span class="fc" id="L660">        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale)*1.5;</span>
+<span class="fc" id="L661">        pool += _voronoiBasedWavesSum(yIn*scale*2, -xIn*scale*2)/1.5;</span>
+<span class="fc" id="L662">        return (float) _wave(Math.abs(pool*1.5));</span>
+    }
+
+    public static float voronoiBasedPondOfStrings(float xIn, float yIn ) {
+<span class="fc" id="L666">        float scale = 0.5f/32;</span>
+<span class="fc" id="L667">        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale);</span>
+<span class="fc" id="L668">        return (float) _wave(Math.pow(Math.abs(pool*4), 0.5));</span>
+    }
+
+    public static float voronoiBasedPondOfTangledStrings(float xIn, float yIn ) {
+<span class="fc" id="L672">        float scale = 0.5f/32;</span>
+<span class="fc" id="L673">        double pool = _voronoiBasedWavesSum(xIn*scale, yIn*scale)*1.5;</span>
+<span class="fc" id="L674">        pool += _voronoiBasedWavesSum(yIn*scale*2, -xIn*scale*2)/1.5;</span>
+<span class="fc" id="L675">        return (float) _wave(Math.pow(Math.abs(pool*3), 0.5));</span>
+    }
+
+    private static double _voronoiBasedWavesSum( float xIn, float yIn ) {
+<span class="fc" id="L679">        final int minX1 = (int) Math.floor(xIn) - 1 ;</span>
+<span class="fc" id="L680">        final int minX2 = (int) Math.floor(xIn)     ;</span>
+<span class="fc" id="L681">        final int minX3 = (int) Math.floor(xIn) + 1 ;</span>
+<span class="fc" id="L682">        final int minY1 = (int) Math.floor(yIn) - 1 ;</span>
+<span class="fc" id="L683">        final int minY2 = (int) Math.floor(yIn)     ;</span>
+<span class="fc" id="L684">        final int minY3 = (int) Math.floor(yIn) + 1 ;</span>
+<span class="fc" id="L685">        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);</span>
+<span class="fc" id="L686">        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);</span>
+<span class="fc" id="L687">        final double randomCenter = _fastPseudoRandomDoubleFrom((float) centerX, (float) centerY);</span>
+<span class="fc" id="L688">        final double distanceCenter = _invDistanceBetween(centerX, centerY, xIn, yIn);</span>
+<span class="fc" id="L689">        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);</span>
+<span class="fc" id="L690">        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);</span>
+<span class="fc" id="L691">        final double randomLeft = _fastPseudoRandomDoubleFrom((float) leftX, (float) leftY);</span>
+<span class="fc" id="L692">        final double distanceLeft = _invDistanceBetween(leftX, leftY, xIn, yIn);</span>
+<span class="fc" id="L693">        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);</span>
+<span class="fc" id="L694">        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);</span>
+<span class="fc" id="L695">        final double randomRight = _fastPseudoRandomDoubleFrom((float) rightX, (float) rightY);</span>
+<span class="fc" id="L696">        final double distanceRight = _invDistanceBetween(rightX, rightY, xIn, yIn);</span>
+<span class="fc" id="L697">        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);</span>
+<span class="fc" id="L698">        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);</span>
+<span class="fc" id="L699">        final double randomTop = _fastPseudoRandomDoubleFrom((float) topX, (float) topY);</span>
+<span class="fc" id="L700">        final double distanceTop = _invDistanceBetween(topX, topY, xIn, yIn);</span>
+<span class="fc" id="L701">        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);</span>
+<span class="fc" id="L702">        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);</span>
+<span class="fc" id="L703">        final double randomBottom = _fastPseudoRandomDoubleFrom((float) bottomX, (float) bottomY);</span>
+<span class="fc" id="L704">        final double distanceBottom = _invDistanceBetween(bottomX, bottomY, xIn, yIn);</span>
+<span class="fc" id="L705">        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);</span>
+<span class="fc" id="L706">        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);</span>
+<span class="fc" id="L707">        final double randomTopLeft = _fastPseudoRandomDoubleFrom((float) topLeftX, (float) topLeftY);</span>
+<span class="fc" id="L708">        final double distanceTopLeft = _invDistanceBetween(topLeftX, topLeftY, xIn, yIn);</span>
+<span class="fc" id="L709">        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);</span>
+<span class="fc" id="L710">        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);</span>
+<span class="fc" id="L711">        final double randomTopRight = _fastPseudoRandomDoubleFrom((float) topRightX, (float) topRightY);</span>
+<span class="fc" id="L712">        final double distanceTopRight = _invDistanceBetween(topRightX, topRightY, xIn, yIn);</span>
+<span class="fc" id="L713">        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);</span>
+<span class="fc" id="L714">        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);</span>
+<span class="fc" id="L715">        final double randomBottomLeft = _fastPseudoRandomDoubleFrom((float) bottomLeftX, (float) bottomLeftY);</span>
+<span class="fc" id="L716">        final double distanceBottomLeft = _invDistanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);</span>
+<span class="fc" id="L717">        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);</span>
+<span class="fc" id="L718">        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);</span>
+<span class="fc" id="L719">        final double randomBottomRight = _fastPseudoRandomDoubleFrom((float) bottomRightX, (float) bottomRightY);</span>
+<span class="fc" id="L720">        final double distanceBottomRight = _invDistanceBetween(bottomRightX, bottomRightY, xIn, yIn);</span>
+<span class="fc" id="L721">        double pool = 0;</span>
+<span class="fc" id="L722">        pool += _rippleAmplitude( distanceCenter     , randomCenter      );</span>
+<span class="fc" id="L723">        pool += _rippleAmplitude( distanceLeft       , randomLeft        );</span>
+<span class="fc" id="L724">        pool += _rippleAmplitude( distanceRight      , randomRight       );</span>
+<span class="fc" id="L725">        pool += _rippleAmplitude( distanceTop        , randomTop         );</span>
+<span class="fc" id="L726">        pool += _rippleAmplitude( distanceBottom     , randomBottom      );</span>
+<span class="fc" id="L727">        pool += _rippleAmplitude( distanceTopLeft    , randomTopLeft     );</span>
+<span class="fc" id="L728">        pool += _rippleAmplitude( distanceTopRight   , randomTopRight    );</span>
+<span class="fc" id="L729">        pool += _rippleAmplitude( distanceBottomLeft , randomBottomLeft  );</span>
+<span class="fc" id="L730">        pool += _rippleAmplitude( distanceBottomRight, randomBottomRight );</span>
+<span class="fc" id="L731">        return pool;</span>
+    }
+
+    private static double _rippleAmplitude( double distance, double random ) {
+<span class="fc" id="L735">        double impactForce = ( 3 + 32 * random );</span>
+<span class="fc" id="L736">        double amplitude = distance * Math.sin( ( 1 + Math.pow( distance, 2 ) ) * impactForce );</span>
+<span class="fc" id="L737">        double fadeAway = ( 0.5 + random );</span>
+<span class="fc" id="L738">        return amplitude * fadeAway;</span>
+    }
+
+    private static double _wave(double in) {
+<span class="fc" id="L742">        return 1 - ( 1 + Math.cos(in) ) / 2;</span>
+    }
+
+    private static double _invDistanceBetween(double x1, double y1, double x2, double y2 ) {
+<span class="fc" id="L746">        return Math.max(0, 1 - Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) ));</span>
+    }
+
+    private static double _sigmoid( double x ) {
+<span class="fc" id="L750">        return 1 / (1 + Math.exp(-x));</span>
+    }
+
+    /**
+     * @param x The x coordinate
+     * @param y The y coordinate
+     * @return A pseudo random double in the range 0.0 to 1.0
+     */
+    private static double _fastPseudoRandomDoubleFrom( float x, float y ) {
+<span class="fc" id="L759">        final byte randomByte = _fastPseudoRandomByteSeedFrom(x, y);</span>
+        // The byte is in the range -128 to 127, so -128 is 0.0 and 127 is 1.0
+<span class="fc" id="L761">        return (randomByte + 128) / 255.0;</span>
+    }
+
+    private static byte _fastPseudoRandomByteSeedFrom( float a, float b ) {
+<span class="fc" id="L765">        return _fastPseudoRandomByteSeedFrom(</span>
+<span class="fc" id="L766">                    Float.floatToRawIntBits(a),</span>
+<span class="fc" id="L767">                    Float.floatToRawIntBits(b)</span>
+                 );
+    }
+
+    private static byte _fastPseudoRandomByteSeedFrom( int a, int b ) {
+<span class="fc" id="L772">        long x = PRIME_1 * a;</span>
+<span class="fc" id="L773">        long y = PRIME_2 * (x + b);</span>
+<span class="fc" id="L774">        return _longSeedToByte(x ^ y);</span>
+    }
+
+    private static byte _longSeedToByte(long seed) {
+<span class="fc" id="L778">        int asInt = (int) (seed ^ (seed &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L779">        short asShort = (short) (asInt ^ (asInt &gt;&gt;&gt; 16));</span>
+<span class="fc" id="L780">        return (byte) (asShort ^ (asShort &gt;&gt;&gt; 8));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

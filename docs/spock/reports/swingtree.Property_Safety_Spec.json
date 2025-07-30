@@ -1,0 +1,286 @@
+{
+  "className":"swingtree.Property_Safety_Spec",
+  "title":"Property Null and Mutability Safety",
+  "narrative":"Properties are a core concept in Swing-Tree. They are in essence\n    just wrapper classes used to represent the state of your views.\n    Because of this, it is important that properties are\n    are nullable only when they need to be, and that they are\n    immutable only when they need to be.\n\n    Furthermore, using nullable properties in Swing-Tree\n    will be prohibited it is does not make sense.\n    For example, you may not use null to model the text of a label,\n    instead, the empty String \"\" must be used!",
+  "subjects":["sprouts.Val","sprouts.Var","sprouts.Vals","sprouts.Vars"],
+  "statistics":{
+    "runs":"14",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The \"get\" method of a property throws an exception if the property is null.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The \"get\" method of a property throws an exception if the property is null\n            for the same reason that the \"get\" method of the Optional class throws an\n            exception if the Optional is empty. It is a way to force the developer to\n            handle the case where the property is null. If the developer does not want\n            to handle the case where the property is null, then the developer should\n            use the \"orElse\" method instead.\n            The \"get\" method is only intended to be used in a context where\n            the property is expected to have a value or is fully non-nullable altogether. \n            Use the \"orElse\" or \"orElseNull\" method to clearly indicate that the property\n            may be null.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A nullable property.","code":["def nullable = Var.ofNullable(Long, null)"]},
+
+        {"kind":"when","text":"The property is accessed...","code":["nullable.get()"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can only wrap null if we specify a type class.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is necessary simply\n            because we cannot know what type of object the property should wrap\n            based on the supplied null. Generics are erased at runtime, so\n            we do not know what type of object the property should wrap.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property with a type class...","code":["Val<String> property = Var.ofNullable(String, null)"]},
+
+        {"kind":"expect","text":"The property has the expected type.","code":["property.type() == String.class"]},
+
+        {"kind":"and","text":"The property is empty.","code":["property.isEmpty()"]},
+
+        {"kind":"when","text":"We create a property without a type class...","code":["Val<?> property2 = Var.of(null)"]},
+
+        {"kind":"then","text":"The factory method will throw an exception.","code":["thrown(NullPointerException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A \"Val\" instance is immutable. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Val\" instance wrapping a simple integer.","code":["def val = Val.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(val)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.set(7) }","{ it.set(From.VIEW, 9) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A \"Val\" instance is immutable. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Val\" instance wrapping a simple integer.","code":["def val = Val.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(val)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.set(7) }","{ it.set(From.VIEW, 9) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty property will throw an exception if you try to access its value.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.ofNullable(Long, null)"]},
+
+        {"kind":"when","text":"We try to access the value of the property.","code":["property.orElseThrow()"]},
+
+        {"kind":"then","text":"The property will throw an exception.","code":["thrown(MissingItemException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null items.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception if it is null!\n            Use \"orElseNull\" if you are fine with your property being empty \n            and to also make this intend clear.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.ofNullable(Long, null)"]},
+
+        {"kind":"expect","text":"The property is empty.","code":["property.orElseNull() == null","property.isEmpty()","!property.isPresent()"]},
+
+        {"kind":"when","text":"We try to access the value of the property through \"orElseThroe\".","code":["property.orElseThrow()"]},
+
+        {"kind":"then","text":"The property will throw an exception.","code":["thrown(MissingItemException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A \"Var\" may only wrap null if it is created as nullable.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A \"Var\" may only wrap null if it is explicitly created as nullable\n            property through the \"ofNullable\" factory method. If the developer\n            wants to create a \"Var\" that is not nullable, then they\n            should use the \"of\" factory method instead.\n            The \"Var\" interface is a subtype of the \"Val\" interface, \n            which simply adds the ability to change the value of the property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"2 mutable properties, a nullable and a non-nullable property.","code":["def nullable = Var.ofNullable(Long, 73L)","def nonNull  = Var.of(42L)"]},
+
+        {"kind":"when","text":"The nullable property is set to null...","code":["nullable.set(null)"]},
+
+        {"kind":"then","text":"...it succeeds.","code":["nullable.orElseNull() == null"]},
+
+        {"kind":"when","text":"We want to store a non-null item in the nullable property...","code":["nullable.set(7L)"]},
+
+        {"kind":"then","text":"...that also succeeds, because the property can wrap both null and non-null items.","code":["nullable.get() == 7L"]},
+
+        {"kind":"when","text":"On the other hand, the non-nullable property is set to null...","code":["nonNull.set(null)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Swing-Tree will not allow you to model a check box selection using a nullable properties.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you try to bind a nullable property to the state of a UI component for which\n            null does not make sense, Swing-Tree will throw an exception.\n            For example, if you try to bind a nullable property to the \"selected\" state of a\n            \"JCheckBox\", then Swing-Tree will throw an exception because a \"JCheckBox\" cannot\n            be in a \"null\" state.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A nullable property.","code":["def property = Var.ofNullable(Boolean, null)"]},
+
+        {"kind":"when","text":"We try to bind the property to a \"JCheckBox\".","code":["UI.checkBox(\"Check Me Out!\", property)"]},
+
+        {"kind":"then","text":"Swing-Tree will throw an exception.","code":["thrown(Exception)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You may not model the text of a \"JLabel\" using a nullable property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you try to bind a nullable property to the text of a UI component for which\n            null does not make sense, Swing-Tree will throw an exception.\n            A good example for this is text, ergo Strings, where the absence of content\n            is represented by an empty String, not null.\n            Here you will see that if you try to bind a nullable property to the text of a\n            \"JLabel\", then Swing-Tree will throw an exception because a \"JLabel\" text\n            cannot be in a \"null\" state.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A nullable property.","code":["def property = Var.ofNullable(String, null)"]},
+
+        {"kind":"when","text":"We try to bind the property to a \"JLabel\".","code":["UI.label(property)"]},
+
+        {"kind":"then","text":"Swing-Tree will throw an exception.","code":["var e = thrown(Exception)"]},
+
+        {"kind":"and","text":"","code":["e.message == \"Property 'text' of type 'String' may not be null, but it was. Please use an empty string instead of null!\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

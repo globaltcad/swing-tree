@@ -1,0 +1,133 @@
+{
+  "className":"swingtree.Style_Animations_Spec",
+  "title":"Style Animations",
+  "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted.\n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
+  "subjects":[],
+  "statistics":{
+    "runs":"5",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A transitory style animation always ends with a progress of 1.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In this example we use a transitory style animation to record the progress of the animation.\n            The important note here is that the progress of the animation will always end with 1.\n            What this means for you in practice is that you can use this fact as \n            a signal to perform some action once the animation has completed.\n\n            So you can use the progress in a way where the animated style will be\n            reset to its original state once the animation has completed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create an event object for triggering the animation.","code":["var event = sprouts.Event.create()"]},
+
+        {"kind":"and","text":"Two lists in which we record the progress and cycle values of the animation.","code":["var proresses = []","var cycles = []"]},
+
+        {"kind":"and","text":"We create a simple `JTogglButton` UI component with a style animation.","code":["var ui = UI.toggleButton(\"Click me!\")","                .withTransitoryStyle(event.observable(), LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {","                    proresses << state.progress()","                    cycles << state.cycle()","                    return conf;","                })"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var button = ui.get(JToggleButton)"]},
+
+        {"kind":"expect","text":"Initially the two lists are empty.","code":["proresses.isEmpty()","cycles.isEmpty()"]},
+
+        {"kind":"when","text":"We trigger the animation.","code":["event.fire()","Thread.sleep(100)","UI.sync()","button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The progress of the animation will always end with 1.\n        ","code":["proresses.last() == 1"]},
+
+        {"kind":"and","text":"\n            The cycle of the animation will always end with 1.\n        ","code":["cycles.last() == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `onMouseClick` event style animation is only temporary.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A vanilla component created through one of the many `UI` factory\n            methods will not have any animations applied to it.\n            However, once you apply a style animation to it, it will\n            temporarily change the component to support your animated style.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var ui = UI.label(\"Click me!\")","            .onMouseClick(it ->","                it.animateFor(1, TimeUnit.MINUTES, status ->","                    it.style(status, style -> style","                        .borderWidth((int) (10 * status.cycle()))","                        .borderColor(new Color(0, 100,200))","                        .backgroundColor(new Color(255, 100, 0, (int) (255 * status.cycle())))","                    )","                )","            )"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"\n            When the user clicks on the label, the border width of the label\n            will be animated from 0 to 10 over the course of 100 milliseconds\n            and the background color will be animated from transparent to orange.\n            But initially the label will not have any border or background color.\n            So let's check that.\n        ","code":["label.border == null","label.background == new Color(238, 238, 238) // default background color of a JLabel","label.foreground == new Color(51, 51, 51) // default foreground color of a JLabel","label.getUI() instanceof MetalLabelUI"]},
+
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(100)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label will have a border and the custom colors...","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border != null","}","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `onMouseClick` event style animation dispatched using the `animateStyleFor` method is only temporary.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The event delegate passed to the `onMouseClick` lambda exposes\n            a useful API for interacting with the component.\n            This includes the `animateStyleFor` method which allows you\n            to animate the style of the component for a given duration.\n            Once you apply a style animation to it, it will append the provided styler lambda\n            to the end of the style chain and then when the component is repainted,\n            it will temporarily change the component to support your animated style.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var ui = UI.label(\"Click me!\")","            .onMouseClick(it ->","                it.animateStyleFor(1, TimeUnit.MINUTES, (state, style) -> style","                    .borderWidthAt(UI.Edge.BOTTOM, (int) (12 * state.cycle()))","                    .borderColor(Color.BLACK)","                    .shadowColor(new Color(0, 100,200, (int) (255 * state.cycle())))","                    .shadowBlurRadius((int) (12 * state.cycle()))","                    .shadowIsInset(false)","                    .fontSize((int) (22 + 14 * state.cycle()))","                )","            )"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"\n            When the user clicks on the label, the border width of the label\n            will be animated from 0 to 10 over the course of 100 milliseconds\n            and the background color will be animated from transparent to orange.\n            But initially the label will not have any border or background color.\n            So let's check that.\n        ","code":["label.border == null","label.font.size <= 13","label.getUI() instanceof MetalLabelUI"]},
+
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(1_000)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label will have a border and a background color.","code":["label.border != null","label.font.size > 13"]},
+
+        {"kind":"and","text":"The UI of the component was not overridden, because the shadow can be rendered through the border of the component.","code":["(label.getUI() instanceof MetalLabelUI)","label.border != null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"SwingTree will uninstall any custom border after an animation has completed.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A vanilla component created through one of the many `UI` factory\n            methods will not have any animations applied to it.\n            However, once you apply a style animation to it, it will\n            temporarily change the component to support your animated style.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var ui = UI.label(\"Click me!\")","            .onMouseClick(it ->","                it.animateFor(1, TimeUnit.SECONDS, status ->","                    it.style(status, style -> style","                        .borderWidth((int) (10 * status.cycle()))","                        .backgroundColor(new Color(255, 100, 0, (int) (255 * status.cycle())))","                    )","                )","            )","var label = ui.get(JLabel)","label.setSize(200, 60) // We set the size of the label to make it visible."]},
+
+        {"kind":"expect","text":"It has the expected initial state.","code":["label.border == null","label.background == new Color(238, 238, 238) // default background color of a JLabel","label.foreground == new Color(51, 51, 51) // default foreground color of a JLabel","label.getUI() instanceof MetalLabelUI"]},
+
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(50)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The label will have a custom border installed.\n        ","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border != null","}","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]},
+
+        {"kind":"when","text":"We wait for the animation to end...","code":["Thread.sleep(2000)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The border will have been uninstalled.\n        ","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border == null","}","label.background == new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Advanced style animations will override the Look and Feel of a component temporarily",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A vanilla component created through one of the many `UI` factory\n            methods will not have any animations applied to it.\n            However, once you apply a style animation to it, it will\n            temporarily change the component to support your animated style.\n            For very advanced styles, this may mean that the component\n            will temporarily override the Look and Feel of the component.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple `JButton` UI component with a style animation.","code":["var ui = UI.button(\"Click me!\")","            .onClick(it ->","                it.animateFor(300, TimeUnit.MILLISECONDS, status ->","                    it.style(status, style -> style","                        .border((int) (12 * status.cycle()), Color.RED)","                        .backgroundColor(new Color(255, 100, 0, (int) (255 * status.cycle())))","                        .margin(12)","                        .foundationColor(new Color(0, 100, 200))","                        .painter(UI.Layer.BACKGROUND, g2d -> {","                            boolean isMouseRollover = style.component().getModel().isRollover()","                            // We draw a custom gradient:","                            var gradient = new GradientPaint(","                                0, 0, isMouseRollover ? Color.RED : Color.BLUE,","                                    style.component().getWidth(), style.component().getHeight(), isMouseRollover ? Color.BLUE : Color.RED","                            )","                            g2d.setPaint(gradient)","                            g2d.fillRect(0, 0, it.component.getWidth(), it.component.getHeight())","                        })","                    )","                )","            )"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"expect","text":"\n            Initially the button will the default button border and background color.\n        ","code":["button.border instanceof CompoundBorder","button.background == new Color(238, 238, 238) // default background color of a JButton","button.foreground == new Color(51, 51, 51) // default foreground color of a JButton","button.getUI() instanceof MetalButtonUI"]},
+
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["button.doClick()","Thread.sleep(100)","UI.sync()","UI.runNow({button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})"]},
+
+        {"kind":"then","text":"The label will have a border and a background color.","code":["!(button.border instanceof CompoundBorder)","button.background != new Color(238, 238, 238)","button.foreground == new Color(51, 51, 51)","!(button.getUI() instanceof MetalButtonUI)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

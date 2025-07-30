@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActiveDrag.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.components</a> &gt; <span class="el_source">ActiveDrag.java</span></div><h1>ActiveDrag.java</h1><pre class="source lang-java linenums">package swingtree.components;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.DragAwayComponentConf;
+import swingtree.layout.Bounds;
+import swingtree.layout.Position;
+import swingtree.layout.Size;
+import swingtree.style.ComponentExtension;
+
+import javax.swing.JComponent;
+import javax.swing.JRootPane;
+import java.awt.*;
+import java.awt.dnd.DragSource;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
+import java.util.Objects;
+import java.util.Optional;
+
+import static javax.swing.SwingUtilities.convertPoint;
+import static javax.swing.SwingUtilities.getDeepestComponentAt;
+
+final class ActiveDrag {
+
+<span class="fc" id="L26">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ActiveDrag.class);</span>
+
+<span class="fc" id="L28">    private static final ActiveDrag NO_DRAG = new ActiveDrag(</span>
+                                                        null, null, 0,
+<span class="fc" id="L30">                                                        Position.origin(), Position.origin(), Position.origin(),</span>
+                                                        null
+                                                    );
+
+<span class="fc" id="L34">    public static ActiveDrag none() { return NO_DRAG; }</span>
+
+    private final @Nullable Component                draggedComponent;
+    private final @Nullable BufferedImage            currentDragImage;
+    private final int                                componentHash;
+    private final Position start;
+    private final Position offset;
+    private final Position localOffset;
+    private final @Nullable DragAwayComponentConf&lt;?&gt; dragConf;
+
+    private ActiveDrag(
+        @Nullable Component                draggedComponent,
+        @Nullable BufferedImage            currentDragImage,
+        int                                componentHash,
+        Position                           start,
+        Position                           offset,
+        Position                           localOffset,
+        @Nullable DragAwayComponentConf&lt;?&gt; dragConf
+<span class="fc" id="L52">    ) {</span>
+<span class="fc" id="L53">        this.draggedComponent  = draggedComponent;</span>
+<span class="fc" id="L54">        this.currentDragImage  = currentDragImage;</span>
+<span class="fc" id="L55">        this.componentHash     = componentHash;</span>
+<span class="fc" id="L56">        this.start             = Objects.requireNonNull(start);</span>
+<span class="fc" id="L57">        this.offset            = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L58">        this.localOffset       = Objects.requireNonNull(localOffset);</span>
+<span class="fc" id="L59">        this.dragConf          = dragConf;</span>
+<span class="fc" id="L60">    }</span>
+
+    public @Nullable Component draggedComponent() {
+<span class="nc" id="L63">        return draggedComponent;</span>
+    }
+
+    public @Nullable BufferedImage currentDragImage() {
+<span class="nc" id="L67">        return currentDragImage;</span>
+    }
+
+    public Optional&lt;DragAwayComponentConf&lt;?&gt;&gt; dragConf() {
+<span class="nc" id="L71">        return Optional.ofNullable(dragConf);</span>
+    }
+
+    public ActiveDrag begin(Point dragStart, @Nullable JRootPane rootPane)
+    {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if ( rootPane == null )</span>
+<span class="nc" id="L77">            return this;</span>
+        /*
+           We traverse the entire component tree
+           to find the deepest component that is under the mouse
+           and has a non-default cursor
+           if we find such a component, we store it in _toBeDragged
+         */
+<span class="nc" id="L84">        java.awt.Component component = getDeepestComponentAt(</span>
+<span class="nc" id="L85">                                                rootPane.getContentPane(),</span>
+                                                dragStart.x, dragStart.y
+                                            );
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if ( !(component instanceof JComponent) )</span>
+<span class="nc" id="L90">            return this; // We only support JComponents for dragging</span>
+
+<span class="nc" id="L92">        Position mousePosition = Position.of(dragStart);</span>
+
+        Optional&lt;DragAwayComponentConf&lt;JComponent&gt;&gt; dragConf;
+        do {
+<span class="nc" id="L96">            dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(mousePosition);</span>
+<span class="nc bnc" id="L97" title="All 6 branches missed.">            if ( !dragConf.isPresent() || dragConf.map(it-&gt;!it.enabled()).orElse(false) ) {</span>
+<span class="nc" id="L98">                Component parent = component.getParent();</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                if ( parent instanceof JComponent )</span>
+<span class="nc" id="L100">                    component = parent;</span>
+                else
+<span class="nc" id="L102">                    return this;</span>
+            }
+        }
+<span class="nc bnc" id="L105" title="All 6 branches missed.">        while ( !dragConf.isPresent() || dragConf.map(it-&gt;!it.enabled()).orElse(false) );</span>
+
+<span class="nc" id="L107">        Position absoluteComponentPosition = Position.of(convertPoint(component, 0,0, rootPane.getContentPane()));</span>
+
+<span class="nc" id="L109">        return this.withDragConf(dragConf.get())</span>
+<span class="nc" id="L110">                    .withDraggedComponent(component)</span>
+<span class="nc" id="L111">                     .withStart(mousePosition)</span>
+<span class="nc" id="L112">                     .withOffset(Position.origin())</span>
+<span class="nc" id="L113">                     .withLocalOffset(mousePosition.minus(absoluteComponentPosition))</span>
+<span class="nc" id="L114">                     .renderComponentIntoImage();</span>
+    }
+
+
+    public ActiveDrag renderComponentIntoImage()
+    {
+<span class="nc" id="L120">        Objects.requireNonNull(dragConf);</span>
+<span class="nc" id="L121">        BufferedImage image = dragConf.customDragImage().map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);</span>
+<span class="nc" id="L122">        Component component = Objects.requireNonNull(draggedComponent);</span>
+
+<span class="nc" id="L124">        int currentComponentHash = 0;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if ( component instanceof JComponent ) {</span>
+<span class="nc" id="L126">            currentComponentHash = ComponentExtension.from((JComponent) component).viewStateHashCode();</span>
+<span class="nc bnc" id="L127" title="All 4 branches missed.">            if ( currentComponentHash == this.componentHash &amp;&amp; image != null )</span>
+<span class="nc" id="L128">                return this;</span>
+        }
+<span class="nc" id="L130">        else return this;</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if ( dragConf.opacity() &lt;= 0.0 )</span>
+<span class="nc" id="L133">            return this;</span>
+
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        boolean weNeedClearing = image != null;</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if ( image == null )</span>
+<span class="nc" id="L138">            image = new BufferedImage(</span>
+<span class="nc" id="L139">                        component.getWidth(),</span>
+<span class="nc" id="L140">                        component.getHeight(),</span>
+                        BufferedImage.TYPE_INT_ARGB
+                    );
+
+        // We wipe the image before rendering the component
+<span class="nc" id="L145">        Graphics2D g = image.createGraphics();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if ( weNeedClearing ) {</span>
+<span class="nc" id="L147">            Composite oldComp = g.getComposite();</span>
+<span class="nc" id="L148">            g.setComposite(AlphaComposite.Clear);</span>
+<span class="nc" id="L149">            g.fillRect(0, 0, image.getWidth(), image.getHeight());</span>
+<span class="nc" id="L150">            g.setComposite(oldComp);</span>
+        }
+<span class="nc" id="L152">        component.paint(g);</span>
+
+        try {
+<span class="nc bnc" id="L155" title="All 4 branches missed.">            if ( dragConf.opacity() &lt; 1.0 &amp;&amp; dragConf.opacity() &gt; 0.0 ) {</span>
+<span class="nc" id="L156">                RescaleOp makeTransparent = new RescaleOp(</span>
+<span class="nc" id="L157">                                                new float[]{1.0f, 1.0f, 1.0f, /* alpha scaleFactor */ (float) dragConf.opacity()},</span>
+                                                new float[]{0f, 0f, 0f, /* alpha offset */ 0f}, null
+                                            );
+<span class="nc" id="L160">                image = makeTransparent.filter(image, null);</span>
+            }
+<span class="nc" id="L162">        } catch (Exception e) {</span>
+<span class="nc" id="L163">            log.error(&quot;Failed to make the rendering of dragged component transparent.&quot;, e);</span>
+<span class="nc" id="L164">        }</span>
+<span class="nc" id="L165">        g.dispose();</span>
+
+<span class="nc" id="L167">        return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset, dragConf);</span>
+    }
+
+    public ActiveDrag dragged(MouseEvent e, @Nullable JRootPane rootPane)
+    {
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if ( draggedComponent != null ) {</span>
+<span class="nc" id="L173">            Point point = e.getPoint();</span>
+<span class="nc" id="L174">            ActiveDrag updatedDrag = this.withOffset(Position.of(point.x - start.x(), point.y - start.y()))</span>
+<span class="nc" id="L175">                                         .renderComponentIntoImage();</span>
+<span class="nc" id="L176">            return updatedDrag;</span>
+        }
+<span class="nc" id="L178">        return this;</span>
+    }
+
+    public boolean hasDraggedComponent() {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        return draggedComponent != null;</span>
+    }
+
+    Size draggedComponentSize() {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if ( draggedComponent != null ) {</span>
+<span class="nc" id="L187">            return Size.of(draggedComponent.getSize());</span>
+        }
+<span class="nc" id="L189">        return Size.unknown();</span>
+    }
+
+    public void paint(Graphics g){
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if ( !DragSource.isDragImageSupported() ) {</span>
+            /*
+                If the drag image is not supported by the platform, we
+                do the image rendering ourselves directly on the Graphics object
+                of the glass pane of the root pane.
+            */
+<span class="pc bpc" id="L199" title="3 of 4 branches missed.">            if (draggedComponent != null &amp;&amp; currentDragImage != null) {</span>
+<span class="nc" id="L200">                Position whereToRender = getRenderPosition();</span>
+<span class="nc" id="L201">                g.drawImage(currentDragImage, (int) whereToRender.x(), (int) whereToRender.y(), null);</span>
+            }
+        }
+<span class="fc" id="L204">    }</span>
+
+    Position getRenderPosition() {
+<span class="nc" id="L207">        return Position.of(</span>
+<span class="nc" id="L208">                (start.x() + offset.x() - localOffset.x()),</span>
+<span class="nc" id="L209">                (start.y() + offset.y() - localOffset.y())</span>
+            );
+    }
+
+    Position getStart() {
+<span class="nc" id="L214">        return start;</span>
+    }
+
+    Bounds getBounds() {
+<span class="nc" id="L218">        return Bounds.of(getRenderPosition(), draggedComponentSize());</span>
+    }
+
+    public ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
+<span class="nc" id="L222">        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);</span>
+    }
+
+    public ActiveDrag withStart(Position start) {
+<span class="nc" id="L226">        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);</span>
+    }
+
+    public ActiveDrag withOffset(Position offset) {
+<span class="nc" id="L230">        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);</span>
+    }
+
+    public ActiveDrag withLocalOffset(Position localOffset) {
+<span class="nc" id="L234">        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);</span>
+    }
+
+    public ActiveDrag withDragConf( DragAwayComponentConf&lt;?&gt; dragConf ) {
+<span class="nc" id="L238">        return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);</span>
+    }
+
+    /**
+     * Converts a given Image into a BufferedImage
+     *
+     * @param img The Image to be converted
+     * @return The converted BufferedImage
+     */
+    private static BufferedImage toBufferedImage(Image img)
+    {
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (img instanceof BufferedImage)</span>
+        {
+<span class="nc" id="L251">            return (BufferedImage) img;</span>
+        }
+
+        // Create a buffered image with transparency
+<span class="nc" id="L255">        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);</span>
+
+        // Draw the image on to the buffered image
+<span class="nc" id="L258">        Graphics2D bGr = bimage.createGraphics();</span>
+<span class="nc" id="L259">        bGr.drawImage(img, 0, 0, null);</span>
+<span class="nc" id="L260">        bGr.dispose();</span>
+
+        // Return the buffered image
+<span class="nc" id="L263">        return bimage;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

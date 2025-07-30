@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleUtil.java</span></div><h1>StyleUtil.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import swingtree.UI;
+import swingtree.api.Painter;
+
+import java.awt.*;
+import java.awt.geom.Area;
+import java.util.Objects;
+
+/**
+ *  Well, here it is, almost every project seems to have at least one of these, right? &lt;br&gt;
+ *  Although we tried really hard to avoid it, we still ended up with a random utility class.
+ *  &lt;b&gt;But don't worry, it is package-private, so it may not pollute the public API.
+ *  &lt;br&gt;&lt;br&gt;
+ *  Dear future maintainer(s): Please keep it private!&lt;/b&gt;
+ */
+final class StyleUtil
+{
+    static final String DEFAULT_KEY = &quot;default&quot;;
+
+
+    private StyleUtil() {} // No instantiation, just a utility class
+
+    static void transferConfigurations(
+            Graphics2D from,
+            Graphics2D to
+    ) {
+<span class="fc" id="L29">        to.setFont(from.getFont());</span>
+<span class="fc" id="L30">        to.setColor(from.getColor());</span>
+<span class="fc" id="L31">        to.setBackground(from.getBackground());</span>
+<span class="fc" id="L32">        to.setComposite(from.getComposite());</span>
+<span class="fc" id="L33">        to.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.</span>
+<span class="fc" id="L34">        to.setComposite(from.getComposite());</span>
+<span class="fc" id="L35">        to.setPaint(from.getPaint());</span>
+<span class="fc" id="L36">        to.setRenderingHints(from.getRenderingHints());</span>
+<span class="fc" id="L37">        to.setStroke(from.getStroke());</span>
+<span class="fc" id="L38">    }</span>
+
+    static @Nullable Shape intersect( @Nullable Shape clipA, @Nullable Shape clipB )
+    {
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if ( Objects.equals(clipA, clipB) )</span>
+<span class="nc" id="L43">            return clipA;</span>
+
+<span class="fc" id="L45">        Shape finalClip = null;</span>
+
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">        if ( clipA == null &amp;&amp; clipB != null )</span>
+<span class="fc" id="L48">            finalClip = clipB;</span>
+
+<span class="pc bpc" id="L50" title="1 of 4 branches missed.">        if ( clipA != null &amp;&amp; clipB == null )</span>
+<span class="nc" id="L51">            finalClip = clipA;</span>
+
+<span class="pc bpc" id="L53" title="1 of 4 branches missed.">        if ( clipA != null &amp;&amp; clipB != null ) {</span>
+<span class="fc" id="L54">            Area intersected = new Area(clipB);</span>
+<span class="fc" id="L55">            intersected.intersect(new Area(clipA));</span>
+<span class="fc" id="L56">            finalClip = intersected;</span>
+        }
+<span class="fc" id="L58">        return finalClip;</span>
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    static String toString( @Nullable Color color ) {
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if ( color == UI.Color.UNDEFINED ) return &quot;DEFAULT&quot;;</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if ( color == null ) return &quot;?&quot;;</span>
+<span class="fc" id="L65">        return &quot;rgba(&quot; + color.getRed() + &quot;,&quot; + color.getGreen() + &quot;,&quot; + color.getBlue() + &quot;,&quot; + color.getAlpha() + &quot;)&quot;;</span>
+    }
+
+    static String toString( @Nullable Paint paint ) {
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if ( paint == null ) return &quot;?&quot;;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if ( paint instanceof Color ) return toString((Color) paint);</span>
+<span class="fc" id="L71">        return Objects.toString(paint);</span>
+    }
+
+    static String toString( @Nullable Arc arc ) {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if ( arc == null ) return &quot;?&quot;;</span>
+<span class="nc" id="L76">        return &quot;Arc(&quot; + arc.width() + &quot;,&quot; + arc.height() + &quot;)&quot;;</span>
+    }
+
+    static String toString( Painter painter ) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if ( painter == null ) return &quot;?&quot;;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if ( painter == Painter.none() ) return &quot;none&quot;;</span>
+<span class="nc" id="L82">        return &quot;Painter@&quot; + Integer.toHexString(Objects.hashCode(painter));</span>
+    }
+
+    @SuppressWarnings(&quot;GetClassOnEnum&quot;)
+    static String toString( Enum&lt;?&gt; enumBasedId ) {
+<span class="fc" id="L87">        return enumBasedId.getClass().getSimpleName() + &quot;.&quot; + enumBasedId.name();</span>
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    static boolean isUndefinedColor( @Nullable Color color ) {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        return color == UI.Color.UNDEFINED;</span>
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    static boolean isUndefinedFont( @Nullable Font font ) {
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        return font == UI.Font.UNDEFINED;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

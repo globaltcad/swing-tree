@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParentSizeClass.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.layout</a> &gt; <span class="el_source">ParentSizeClass.java</span></div><h1>ParentSizeClass.java</h1><pre class="source lang-java linenums">package swingtree.layout;
+
+/**
+ * Represents a classification of the size of a parent component in a {@link ResponsiveGridFlowLayout}
+ * that serves as a sort of layout mode for the child components.
+ * &lt;p&gt;
+ *     The size classes are ordered from smallest to largest, and are used to determine the
+ *     relative size of the parent component in relation to the other components in the layout.
+ * &lt;/p&gt;
+ */
+<span class="fc" id="L11">public enum ParentSizeClass</span>
+{
+    /**
+     * The size is considered to be void, meaning that the
+     * dimension smaller or equal to {@code 0}.
+     */
+<span class="fc" id="L17">    VOID,</span>
+    /**
+     * The size is considered to be very small, meaning that the
+     * dimension is greater than {@code 0} and less than 1/5 of its preferred size.
+     */
+<span class="fc" id="L22">    VERY_SMALL,</span>
+    /**
+     * The size is considered to be small, meaning that the
+     * dimension is greater than or equal to 1/5 of its preferred size
+     * and less than 2/5 of its preferred size.
+     */
+<span class="fc" id="L28">    SMALL,</span>
+    /**
+     * The size is considered to be medium, meaning that the
+     * dimension is greater than or equal to 2/5 of its preferred size
+     * and less than 3/5 of its preferred size.
+     */
+<span class="fc" id="L34">    MEDIUM,</span>
+    /**
+     * The size is considered to be large, meaning that the
+     * dimension is greater than or equal to 3/5 of its preferred size
+     * and less than 4/5 of its preferred size.
+     */
+<span class="fc" id="L40">    LARGE,</span>
+    /**
+     * The size is considered to be very large, meaning that the
+     * dimension is greater than or equal to 4/5 of its preferred size
+     * and less than 5/5 of its preferred size.
+     */
+<span class="fc" id="L46">    VERY_LARGE,</span>
+    /**
+     * The size is considered to be oversize, meaning that the
+     * dimension is greater than or equal to 5/5 of its preferred size.
+     */
+<span class="fc" id="L51">    OVERSIZE;</span>
+
+    /**
+     * Returns the {@link ParentSizeClass} that corresponds to the given current size and preferred size.
+     * @param currentSize The current size of the parent component.
+     * @param preferredSize The preferred size of the parent component.
+     * @return The {@link ParentSizeClass} that corresponds to the given current size and preferred size.
+     */
+    static ParentSizeClass of( int currentSize, int preferredSize ) {
+        // How much preferred width the parent actually fills:
+<span class="fc" id="L61">        double howFull = currentSize / (double) preferredSize;</span>
+<span class="fc" id="L62">        howFull = Math.max(0, howFull);</span>
+
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( howFull &lt;= 0 ) {</span>
+<span class="nc" id="L65">            return ParentSizeClass.VOID;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        } else if (howFull &lt; 1/5d) {</span>
+<span class="fc" id="L67">            return ParentSizeClass.VERY_SMALL;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        } else if (howFull &lt; 2/5d) {</span>
+<span class="fc" id="L69">            return ParentSizeClass.SMALL;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        } else if (howFull &lt; 3/5d) {</span>
+<span class="fc" id="L71">            return ParentSizeClass.MEDIUM;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        } else if (howFull &lt; 4/5d) {</span>
+<span class="nc" id="L73">            return ParentSizeClass.LARGE;</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        } else if (howFull &lt;= 1) {</span>
+<span class="fc" id="L75">            return ParentSizeClass.VERY_LARGE;</span>
+        }
+<span class="nc" id="L77">        return ParentSizeClass.OVERSIZE;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
