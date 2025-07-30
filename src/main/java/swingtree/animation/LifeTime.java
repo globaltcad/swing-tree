@@ -1,7 +1,6 @@
 package swingtree.animation;
 
 import com.google.errorprone.annotations.Immutable;
-import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.SwingTree;
@@ -120,6 +119,19 @@ public final class LifeTime
         long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);
         return new LifeTime(startMillis, durationMillis, SwingTree.get().getDefaultAnimationInterval());
     }
+
+    /**
+     *  Creates a new lifetime that will run for the given number of seconds
+     *  and without any start delay. You may also use fractions of seconds
+     *  (e.g. {@code 0.5} for half a second).
+     *
+     * @param time The duration of the animation in seconds.
+     * @return A new lifetime that will start immediately and run for the given duration.
+     */
+    public static LifeTime ofSeconds( double time ) {
+        return of(time, TimeUnit.SECONDS);
+    }
+
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
         long millis = (long) (time * from.toMillis(1));
