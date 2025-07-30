@@ -13,13 +13,13 @@ final class ListBasedComboModel&lt;E extends @Nullable Object&gt; extends Abstra
 	ListBasedComboModel( List&lt;E&gt; items ) {
 <span class="fc" id="L14">		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));</span>
 <span class="fc" id="L15">		_items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L16">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L16">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
 <span class="fc" id="L17">	}</span>
 
 	ListBasedComboModel( Var&lt;E&gt; var, List&lt;E&gt; items ) {
 <span class="fc" id="L20">		super(var);</span>
 <span class="fc" id="L21">		_items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L22">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L22">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
 <span class="fc" id="L23">	}</span>
 
 <span class="fc" id="L25">	@Override public int getSize() { return _items.size(); }</span>

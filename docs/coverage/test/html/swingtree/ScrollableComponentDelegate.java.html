@@ -256,11 +256,12 @@ public final class ScrollableComponentDelegate
      * Scrolling containers, like JViewport, will use this method each
      * time they are validated.
      *
+     * @param fitWidth If true, the viewport will force the Scrollables width to match its own.
      * @return A new scroll config with the desired width fitting mode, which,
      *          if true, makes the viewport force the Scrollables width to match its own.
      */
     public ScrollableComponentDelegate fitWidth( boolean fitWidth ) {
-<span class="fc" id="L263">        return new ScrollableComponentDelegate(</span>
+<span class="fc" id="L264">        return new ScrollableComponentDelegate(</span>
                 _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidth, _fitHeight
         );
     }
@@ -275,11 +276,12 @@ public final class ScrollableComponentDelegate
      * Scrolling containers, like JViewport, will use this method each
      * time they are validated.
      *
+     * @param fitHeight If true, the viewport will force the Scrollables height to match its own.
      * @return A new scroll config with the desired width fitting mode, which,
      *          if true, makes a viewport force the Scrollables height to match its own.
      */
     public ScrollableComponentDelegate fitHeight( boolean fitHeight ) {
-<span class="fc" id="L282">        return new ScrollableComponentDelegate(</span>
+<span class="fc" id="L284">        return new ScrollableComponentDelegate(</span>
                 _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeight
         );
     }
@@ -291,7 +293,7 @@ public final class ScrollableComponentDelegate
      * @return The scroll pane that contains the scrollable component.
      */
     public JScrollPane scrollPane() {
-<span class="nc" id="L294">        return _scrollPane;</span>
+<span class="nc" id="L296">        return _scrollPane;</span>
     }
 
     /**
@@ -301,7 +303,7 @@ public final class ScrollableComponentDelegate
      * @return The viewport of the scroll pane that contains the scrollable component.
      */
     public JViewport viewport() {
-<span class="nc" id="L304">        return _scrollPane.getViewport();</span>
+<span class="nc" id="L306">        return _scrollPane.getViewport();</span>
     }
 
     /**
@@ -318,7 +320,7 @@ public final class ScrollableComponentDelegate
      *         and wrapped by the {@link #view()} component.
      */
     public JComponent content() {
-<span class="nc" id="L321">        return _content;</span>
+<span class="nc" id="L323">        return _content;</span>
     }
 
     /**
@@ -329,13 +331,13 @@ public final class ScrollableComponentDelegate
      * @return The view component that is contained within the scroll pane.
      */
     public Component view() {
-<span class="nc" id="L332">        return _view;</span>
+<span class="nc" id="L334">        return _view;</span>
     }
 
     // Not part of the public API below:
 
     Size preferredSize() {
-<span class="fc" id="L338">        return _preferredSize;</span>
+<span class="fc" id="L340">        return _preferredSize;</span>
     }
 
     int unitIncrement(
@@ -343,7 +345,7 @@ public final class ScrollableComponentDelegate
         UI.Align orientation,
         int      direction
     ) {
-<span class="fc" id="L346">        return _unitIncrement.get(viewRectangle, orientation, direction);</span>
+<span class="fc" id="L348">        return _unitIncrement.get(viewRectangle, orientation, direction);</span>
     }
 
     int blockIncrement(
@@ -351,20 +353,20 @@ public final class ScrollableComponentDelegate
         UI.Align orientation,
         int      direction
     ) {
-<span class="fc" id="L354">        return _blockIncrement.get(viewRectangle, orientation, direction);</span>
+<span class="fc" id="L356">        return _blockIncrement.get(viewRectangle, orientation, direction);</span>
     }
 
     boolean fitWidth() {
-<span class="fc" id="L358">        return _fitWidth;</span>
+<span class="fc" id="L360">        return _fitWidth;</span>
     }
 
     boolean fitHeight() {
-<span class="fc" id="L362">        return _fitHeight;</span>
+<span class="fc" id="L364">        return _fitHeight;</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L367">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L369">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                 &quot;preferredSize=&quot;  + _preferredSize  + &quot;, &quot; +
                 &quot;unitIncrement=&quot;  + _unitIncrement  + &quot;, &quot; +
                 &quot;blockIncrement=&quot; + _blockIncrement + &quot;, &quot; +
@@ -375,21 +377,21 @@ public final class ScrollableComponentDelegate
 
     @Override
     public boolean equals( Object obj ) {
-<span class="nc bnc" id="L378" title="All 2 branches missed.">        if ( this == obj )</span>
-<span class="nc" id="L379">            return true;</span>
-<span class="nc bnc" id="L380" title="All 2 branches missed.">        if ( !(obj instanceof ScrollableComponentDelegate) )</span>
-<span class="nc" id="L381">            return false;</span>
-<span class="nc" id="L382">        ScrollableComponentDelegate that = (ScrollableComponentDelegate) obj;</span>
-<span class="nc bnc" id="L383" title="All 2 branches missed.">        return _preferredSize.equals(that._preferredSize) &amp;&amp;</span>
-<span class="nc bnc" id="L384" title="All 2 branches missed.">               _unitIncrement.equals(that._unitIncrement) &amp;&amp;</span>
-<span class="nc bnc" id="L385" title="All 6 branches missed.">               _blockIncrement.equals(that._blockIncrement) &amp;&amp;</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if ( this == obj )</span>
+<span class="nc" id="L381">            return true;</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">        if ( !(obj instanceof ScrollableComponentDelegate) )</span>
+<span class="nc" id="L383">            return false;</span>
+<span class="nc" id="L384">        ScrollableComponentDelegate that = (ScrollableComponentDelegate) obj;</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">        return _preferredSize.equals(that._preferredSize) &amp;&amp;</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">               _unitIncrement.equals(that._unitIncrement) &amp;&amp;</span>
+<span class="nc bnc" id="L387" title="All 6 branches missed.">               _blockIncrement.equals(that._blockIncrement) &amp;&amp;</span>
                _fitWidth       == that._fitWidth &amp;&amp;
                _fitHeight      == that._fitHeight;
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L392">        return Objects.hash(_preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight);</span>
+<span class="nc" id="L394">        return Objects.hash(_preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight);</span>
     }
 
 }

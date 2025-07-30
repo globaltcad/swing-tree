@@ -24,6 +24,7 @@ import java.util.WeakHashMap;
  *  which also has a listener for these events. So using this we try to
  *  make the behavior more predictable, reliable and intuitive.
  */
+@SuppressWarnings("EnumOrdinal")
 final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
@@ -47,7 +48,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         component.addMouseListener(dispatcherListener);
         ComponentEnterExitListeners[] listenerArray = new ComponentEnterExitListeners[UI.ComponentArea.values().length];
         for (UI.ComponentArea a : UI.ComponentArea.values()) {
-            listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a, component);
+            listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a);
         }
         return listenerArray;
     }
@@ -94,7 +95,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         private final List<MouseListener> enterListeners;
         private final List<MouseListener> exitListeners;
 
-        public ComponentEnterExitListeners( UI.ComponentArea area, Component component ) {
+        public ComponentEnterExitListeners( UI.ComponentArea area ) {
             this.area = area;
             this.location = Location.OUTSIDE;
             this.enterListeners = new ArrayList<>();

@@ -17,7 +17,7 @@ final class ArrayBasedComboModel&lt;E extends @Nullable Object&gt; extends Abstr
 	ArrayBasedComboModel(Var&lt;E&gt; selection, E @Nullable[] items) {
 <span class="fc" id="L18">		super(selection);</span>
 <span class="fc" id="L19">		_items = Objects.requireNonNull(items);</span>
-<span class="fc" id="L20">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L20">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
 <span class="fc" id="L21">	}</span>
 
 

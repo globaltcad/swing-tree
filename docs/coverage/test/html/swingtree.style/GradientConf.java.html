@@ -478,9 +478,10 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      *  Define the rotation of the gradient in degrees.
      *
      *  @param rotation The rotation of the gradient in degrees.
+     *  @return An updated gradient configuration with the specified rotation.
      */
     public GradientConf rotation( float rotation ) {
-<span class="nc" id="L483">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
+<span class="nc" id="L484">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -495,11 +496,11 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return An updated gradient configuration with the specified fractions.
      */
     public GradientConf fractions( double... fractions ) {
-<span class="nc" id="L498">        float[] actualFractions = new float[fractions.length];</span>
-<span class="nc bnc" id="L499" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
-<span class="nc" id="L500">            actualFractions[i] = (float) fractions[i];</span>
+<span class="nc" id="L499">        float[] actualFractions = new float[fractions.length];</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
+<span class="nc" id="L501">            actualFractions[i] = (float) fractions[i];</span>
 
-<span class="nc" id="L502">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);</span>
+<span class="nc" id="L503">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);</span>
     }
 
     /**
@@ -532,61 +533,61 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @throws NullPointerException if the cycle is {@code null}.
      */
     public GradientConf cycle(UI.Cycle cycle ) {
-<span class="nc" id="L535">        Objects.requireNonNull(cycle);</span>
-<span class="nc" id="L536">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);</span>
+<span class="nc" id="L536">        Objects.requireNonNull(cycle);</span>
+<span class="nc" id="L537">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);</span>
     }
 
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L542" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L543">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc" id="L544">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L543" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L544">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L545">        return getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;transition=&quot; + _span + &quot;, &quot; +
                     &quot;type=&quot;       + _type + &quot;, &quot; +
-<span class="fc" id="L547">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+<span class="fc" id="L548">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
                     &quot;offset=&quot;     + _offset + &quot;, &quot; +
                     &quot;size=&quot;       + _size + &quot;, &quot; +
                     &quot;area=&quot;       + _area + &quot;, &quot; +
                     &quot;boundary=&quot;   + _boundary + &quot;, &quot; +
                     &quot;focus=&quot;      + _focus + &quot;, &quot; +
                     &quot;rotation=&quot;   + _rotation + &quot;, &quot; +
-<span class="fc" id="L554">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) + &quot;, &quot; +</span>
+<span class="fc" id="L555">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) + &quot;, &quot; +</span>
                     &quot;cycle=&quot;      + _cycle +
                 &quot;]&quot;;
     }
 
     @Override
     public boolean equals( @Nullable Object o ) {
-<span class="fc bfc" id="L561" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="fc bfc" id="L562" title="All 2 branches covered.">        if ( !(o instanceof GradientConf) ) return false;</span>
-<span class="fc" id="L563">        GradientConf that = (GradientConf) o;</span>
-<span class="fc bfc" id="L564" title="All 4 branches covered.">        return _span       == that._span &amp;&amp;</span>
+<span class="fc bfc" id="L562" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="fc bfc" id="L563" title="All 2 branches covered.">        if ( !(o instanceof GradientConf) ) return false;</span>
+<span class="fc" id="L564">        GradientConf that = (GradientConf) o;</span>
+<span class="fc bfc" id="L565" title="All 4 branches covered.">        return _span       == that._span &amp;&amp;</span>
                _type       == that._type             &amp;&amp;
-<span class="fc bfc" id="L566" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
-<span class="pc bpc" id="L567" title="4 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+<span class="fc bfc" id="L567" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L568" title="4 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
                _size       == that._size             &amp;&amp;
                _area       == that._area             &amp;&amp;
                _boundary   == that._boundary         &amp;&amp;
-<span class="pc bpc" id="L571" title="1 of 4 branches missed.">               Objects.equals(_focus, that._focus)   &amp;&amp;</span>
+<span class="pc bpc" id="L572" title="1 of 4 branches missed.">               Objects.equals(_focus, that._focus)   &amp;&amp;</span>
                _rotation   == that._rotation         &amp;&amp;
-<span class="pc bpc" id="L573" title="2 of 4 branches missed.">               Arrays.equals(_fractions, that._fractions) &amp;&amp;</span>
+<span class="pc bpc" id="L574" title="2 of 4 branches missed.">               Arrays.equals(_fractions, that._fractions) &amp;&amp;</span>
                _cycle      == that._cycle;
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L579">        return Objects.hash(</span>
+<span class="fc" id="L580">        return Objects.hash(</span>
                 _span,
                 _type,
-<span class="fc" id="L582">                Arrays.hashCode(_colors),</span>
+<span class="fc" id="L583">                Arrays.hashCode(_colors),</span>
                 _offset,
-<span class="fc" id="L584">                _size,</span>
+<span class="fc" id="L585">                _size,</span>
                 _area,
                 _boundary,
                 _focus,
-<span class="fc" id="L588">                _rotation,</span>
-<span class="fc" id="L589">                Arrays.hashCode(_fractions),</span>
+<span class="fc" id="L589">                _rotation,</span>
+<span class="fc" id="L590">                Arrays.hashCode(_fractions),</span>
                 _cycle
             );
     }
@@ -594,66 +595,66 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
     @Override
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     public GradientConf simplified() {
-<span class="fc bfc" id="L597" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L598">            return _NONE;</span>
+<span class="fc bfc" id="L598" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L599">            return _NONE;</span>
 
-<span class="pc bpc" id="L600" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
-<span class="nc" id="L601">            return _NONE;</span>
+<span class="pc bpc" id="L601" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L602">            return _NONE;</span>
 
-<span class="pc bpc" id="L603" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )</span>
-<span class="fc" id="L604">            return _NONE;</span>
+<span class="pc bpc" id="L604" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )</span>
+<span class="fc" id="L605">            return _NONE;</span>
 
-<span class="pc bpc" id="L606" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.Color.UNDEFINED ? 0 : 1 ).sum();</span>
+<span class="pc bpc" id="L607" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.Color.UNDEFINED ? 0 : 1 ).sum();</span>
 
-<span class="pc bpc" id="L608" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
-<span class="nc" id="L609">            return _NONE;</span>
+<span class="pc bpc" id="L609" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L610">            return _NONE;</span>
 
-<span class="fc" id="L611">        Offset focus = _focus;</span>
-<span class="fc" id="L612">        float  rotation = _rotation;</span>
+<span class="fc" id="L612">        Offset focus = _focus;</span>
+<span class="fc" id="L613">        float  rotation = _rotation;</span>
 
-<span class="fc bfc" id="L614" title="All 2 branches covered.">        if ( _type != UI.GradientType.RADIAL )</span>
-<span class="fc" id="L615">            focus = Offset.none();</span>
+<span class="fc bfc" id="L615" title="All 2 branches covered.">        if ( _type != UI.GradientType.RADIAL )</span>
+<span class="fc" id="L616">            focus = Offset.none();</span>
         else
-<span class="fc bfc" id="L617" title="All 2 branches covered.">            if ( focus.equals(Offset.none()) )</span>
-<span class="fc" id="L618">                rotation = 0f; // If the focus is not set, then the rotation is irrelevant</span>
+<span class="fc bfc" id="L618" title="All 2 branches covered.">            if ( focus.equals(Offset.none()) )</span>
+<span class="fc" id="L619">                rotation = 0f; // If the focus is not set, then the rotation is irrelevant</span>
 
-<span class="pc bpc" id="L620" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
-<span class="nc" id="L621">            Color[] realColors = new Color[numberOfRealColors];</span>
-<span class="nc" id="L622">            int index = 0;</span>
-<span class="nc bnc" id="L623" title="All 2 branches missed.">            for ( Color color : _colors )</span>
-<span class="nc bnc" id="L624" title="All 2 branches missed.">                if ( color != UI.Color.UNDEFINED )</span>
-<span class="nc" id="L625">                    realColors[index++] = color;</span>
+<span class="pc bpc" id="L621" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="nc" id="L622">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="nc" id="L623">            int index = 0;</span>
+<span class="nc bnc" id="L624" title="All 2 branches missed.">            for ( Color color : _colors )</span>
+<span class="nc bnc" id="L625" title="All 2 branches missed.">                if ( color != UI.Color.UNDEFINED )</span>
+<span class="nc" id="L626">                    realColors[index++] = color;</span>
 
-<span class="nc" id="L627">            _avoidTransparentBlackLeakage(realColors);</span>
-<span class="nc" id="L628">            return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
+<span class="nc" id="L628">            _avoidTransparentBlackLeakage(realColors);</span>
+<span class="nc" id="L629">            return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
         }
 
-<span class="fc bfc" id="L631" title="All 2 branches covered.">        if ( !focus.equals(_focus) ) {</span>
-<span class="fc" id="L632">            _avoidTransparentBlackLeakage(_colors);</span>
-<span class="fc" id="L633">            return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
+<span class="fc bfc" id="L632" title="All 2 branches covered.">        if ( !focus.equals(_focus) ) {</span>
+<span class="fc" id="L633">            _avoidTransparentBlackLeakage(_colors);</span>
+<span class="fc" id="L634">            return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
         }
 
-<span class="fc" id="L636">        _avoidTransparentBlackLeakage(_colors);</span>
-<span class="fc" id="L637">        return this;</span>
+<span class="fc" id="L637">        _avoidTransparentBlackLeakage(_colors);</span>
+<span class="fc" id="L638">        return this;</span>
     }
 
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     private static void _avoidTransparentBlackLeakage(Color[] realColors) {
-<span class="fc bfc" id="L642" title="All 2 branches covered.">        for ( int i = 0; i &lt; realColors.length; i++ ) {</span>
-<span class="fc" id="L643">            Color currentColor = realColors[i];</span>
-<span class="fc bfc" id="L644" title="All 2 branches covered.">            if ( currentColor == UI.Color.TRANSPARENT ) {</span>
-<span class="pc bpc" id="L645" title="1 of 2 branches missed.">                Color leftColor  = ( i &gt; 0                     ? realColors[i - 1] : null);</span>
-<span class="pc bpc" id="L646" title="1 of 2 branches missed.">                Color rightColor = ( i &lt; realColors.length - 1 ? realColors[i + 1] : null);</span>
-<span class="pc bpc" id="L647" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? rightColor : leftColor);</span>
-<span class="pc bpc" id="L648" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? leftColor : rightColor);</span>
-<span class="pc bpc" id="L649" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? currentColor : leftColor);</span>
-<span class="pc bpc" id="L650" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? currentColor : rightColor);</span>
-<span class="fc" id="L651">                int averageR = ( leftColor.getRed()   + rightColor.getRed()   ) / 2;</span>
-<span class="fc" id="L652">                int averageG = ( leftColor.getGreen() + rightColor.getGreen() ) / 2;</span>
-<span class="fc" id="L653">                int averageB = ( leftColor.getBlue()  + rightColor.getBlue()  ) / 2;</span>
-<span class="fc" id="L654">                realColors[i] = new Color(averageR, averageG, averageB, 0);</span>
+<span class="fc bfc" id="L643" title="All 2 branches covered.">        for ( int i = 0; i &lt; realColors.length; i++ ) {</span>
+<span class="fc" id="L644">            Color currentColor = realColors[i];</span>
+<span class="fc bfc" id="L645" title="All 2 branches covered.">            if ( currentColor == UI.Color.TRANSPARENT ) {</span>
+<span class="pc bpc" id="L646" title="1 of 2 branches missed.">                Color leftColor  = ( i &gt; 0                     ? realColors[i - 1] : null);</span>
+<span class="pc bpc" id="L647" title="1 of 2 branches missed.">                Color rightColor = ( i &lt; realColors.length - 1 ? realColors[i + 1] : null);</span>
+<span class="pc bpc" id="L648" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? rightColor : leftColor);</span>
+<span class="pc bpc" id="L649" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? leftColor : rightColor);</span>
+<span class="pc bpc" id="L650" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? currentColor : leftColor);</span>
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? currentColor : rightColor);</span>
+<span class="fc" id="L652">                int averageR = ( leftColor.getRed()   + rightColor.getRed()   ) / 2;</span>
+<span class="fc" id="L653">                int averageG = ( leftColor.getGreen() + rightColor.getGreen() ) / 2;</span>
+<span class="fc" id="L654">                int averageB = ( leftColor.getBlue()  + rightColor.getBlue()  ) / 2;</span>
+<span class="fc" id="L655">                realColors[i] = new Color(averageR, averageG, averageB, 0);</span>
             }
         }
-<span class="fc" id="L657">    }</span>
+<span class="fc" id="L658">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

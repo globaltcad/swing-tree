@@ -43,19 +43,109 @@ public final class Keyboard
      */
     public enum Key
     {
+        /**
+         * This value is used to indicate that the keyCode is unknown.
+         * KEY_TYPED events do not have a keyCode value; this value
+         * is used instead.
+         * See {@link KeyEvent#VK_UNDEFINED} for more information.
+         */
         NONE(KeyEvent.VK_UNDEFINED),
-        ENTER(KeyEvent.VK_ENTER), BACK_SPACE(KeyEvent.VK_BACK_SPACE), TAB(KeyEvent.VK_TAB),
-        CANCEL(KeyEvent.VK_CANCEL), CLEAR(KeyEvent.VK_CLEAR), SHIFT(KeyEvent.VK_SHIFT),
-        CONTROL(KeyEvent.VK_CONTROL), ALT(KeyEvent.VK_ALT), PAUSE(KeyEvent.VK_PAUSE), CAPS_LOCK(KeyEvent.VK_CAPS_LOCK),
-        ESCAPE(KeyEvent.VK_ESCAPE), SPACE(KeyEvent.VK_SPACE), PAGE_UP(KeyEvent.VK_PAGE_UP), PAGE_DOWN(KeyEvent.VK_PAGE_DOWN),
-        END(KeyEvent.VK_END), HOME(KeyEvent.VK_HOME), LEFT(KeyEvent.VK_LEFT), UP(KeyEvent.VK_UP),
-        RIGHT(KeyEvent.VK_RIGHT), DOWN(KeyEvent.VK_DOWN), COMMA(KeyEvent.VK_COMMA), MINUS(KeyEvent.VK_MINUS),
-        PERIOD(KeyEvent.VK_PERIOD), SLASH(KeyEvent.VK_SLASH),
-        ZERO(KeyEvent.VK_0), ONE(KeyEvent.VK_1), TWO(KeyEvent.VK_2), THREE(KeyEvent.VK_3), FOUR(KeyEvent.VK_4),
-        FIVE(KeyEvent.VK_5), SIX(KeyEvent.VK_6), SEVEN(KeyEvent.VK_7), EIGHT(KeyEvent.VK_8), NINE(KeyEvent.VK_9),
+        /** Constant for the ENTER virtual key. See {@link KeyEvent#VK_ENTER} for the underlying key-code. */
+        ENTER(KeyEvent.VK_ENTER),
+        /** Constant for the BACK_SPACE virtual key. See {@link KeyEvent#VK_BACK_SPACE} for the underlying key-code.*/
+        BACK_SPACE(KeyEvent.VK_BACK_SPACE),
+        /** Constant for the TAB virtual key. See {@link KeyEvent#VK_TAB} for the underlying key-code.*/
+        TAB(KeyEvent.VK_TAB),
+        /** Constant for the CANCEL virtual key. See {@link KeyEvent#VK_CANCEL} for the underlying key-code.*/
+        CANCEL(KeyEvent.VK_CANCEL),
+        /** Constant for the CLEAR virtual key. See {@link KeyEvent#VK_CLEAR} for the underlying key-code.*/
+        CLEAR(KeyEvent.VK_CLEAR),
+        /** Constant for the SHIFT virtual key. See {@link KeyEvent#VK_SHIFT} for the underlying key-code.*/
+        SHIFT(KeyEvent.VK_SHIFT),
+        /** Constant for the CONTROL virtual key. See {@link KeyEvent#VK_CONTROL} for the underlying key-code.*/
+        CONTROL(KeyEvent.VK_CONTROL),
+        /** Constant for the ALT virtual key. See {@link KeyEvent#VK_ALT} for the underlying key-code.*/
+        ALT(KeyEvent.VK_ALT),
+        /** Constant for the PAUSE virtual key. See {@link KeyEvent#VK_PAUSE} for the underlying key-code.*/
+        PAUSE(KeyEvent.VK_PAUSE),
+        /** Constant for the CAPS_LOCK virtual key. See {@link KeyEvent#VK_CAPS_LOCK} for the underlying key-code.*/
+        CAPS_LOCK(KeyEvent.VK_CAPS_LOCK),
+        /** Constant for the ESCAPE virtual key. See {@link KeyEvent#VK_ESCAPE} for the underlying key-code.*/
+        ESCAPE(KeyEvent.VK_ESCAPE),
+        /** Constant for the SPACE virtual key. See {@link KeyEvent#VK_SPACE} for the underlying key-code.*/
+        SPACE(KeyEvent.VK_SPACE),
+        /** Constant for the PAGE_UP virtual key. See {@link KeyEvent#VK_PAGE_UP} for the underlying key-code.*/
+        PAGE_UP(KeyEvent.VK_PAGE_UP),
+        /** Constant for the PAGE_DOWN virtual key. See {@link KeyEvent#VK_PAGE_DOWN} for the underlying key-code.*/
+        PAGE_DOWN(KeyEvent.VK_PAGE_DOWN),
+        /** Constant for the END virtual key. See {@link KeyEvent#VK_END} for the underlying key-code.*/
+        END(KeyEvent.VK_END),
+        /** Constant for the HOME virtual key. See {@link KeyEvent#VK_HOME} for the underlying key-code.*/
+        HOME(KeyEvent.VK_HOME),
+        /**
+         * Constant for the non-numpad <b>left</b> arrow key. See {@link KeyEvent#VK_LEFT} for the underlying key-code.
+         * @see #LEFT
+         */
+        LEFT(KeyEvent.VK_LEFT),
+        /**
+         * Constant for the non-numpad <b>up</b> arrow key.See {@link KeyEvent#VK_U} for the underlying key-code.
+         * @see #UP
+         */
+        UP(KeyEvent.VK_UP),
+        /**
+         * Constant for the non-numpad <b>right</b> arrow key. See {@link KeyEvent#VK_RIGHT} for the underlying key-code.
+         * @see #RIGHT
+         */
+        RIGHT(KeyEvent.VK_RIGHT),
+        /**
+         * Constant for the non-numpad <b>down</b> arrow key.See {@link KeyEvent#VK_DOWN} for the underlying key-code.
+         * @see #DOWN
+         */
+        DOWN(KeyEvent.VK_DOWN),
+        /**
+         * Constant for the comma key, ","
+         */
+        COMMA(KeyEvent.VK_COMMA),
+        /**
+         * Constant for the minus key, "-"
+         */
+        MINUS(KeyEvent.VK_MINUS),
+        /**
+         * Constant for the period key, "."
+         */
+        PERIOD(KeyEvent.VK_PERIOD),
+        /**
+         * Constant for the forward slash key, "/"
+         */
+        SLASH(KeyEvent.VK_SLASH),
+        /** Constant for the "0" key. */
+        ZERO(KeyEvent.VK_0),
+        /** Constant for the "1" key. */
+        ONE(KeyEvent.VK_1),
+        /** Constant for the "2" key. */
+        TWO(KeyEvent.VK_2),
+        /** Constant for the "3" key. */
+        THREE(KeyEvent.VK_3),
+        /** Constant for the "4" key. */
+        FOUR(KeyEvent.VK_4),
+        /** Constant for the "5" key. */
+        FIVE(KeyEvent.VK_5),
+        /** Constant for the "6" key. */
+        SIX(KeyEvent.VK_6),
+        /** Constant for the "7" key. */
+        SEVEN(KeyEvent.VK_7),
+        /** Constant for the "8" key. */
+        EIGHT(KeyEvent.VK_8),
+        /** Constant for the "9" key. */
+        NINE(KeyEvent.VK_9),
 
-
+        /**
+         * Constant for the semicolon key, ";"
+         */
         SEMICOLON(KeyEvent.VK_SEMICOLON),
+        /**
+         * Constant for the equals key, "="
+         */
         EQUALS(KeyEvent.VK_EQUALS),
 
         A(KeyEvent.VK_A), B(KeyEvent.VK_B), C(KeyEvent.VK_C), D(KeyEvent.VK_D), E(KeyEvent.VK_E), F(KeyEvent.VK_F),
@@ -124,7 +214,7 @@ public final class Keyboard
     }
 
 
-    public Keyboard() {
+    private Keyboard() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {

@@ -8,6 +8,8 @@ import java.util.Objects;
  *  <p>
  *  This class is a {@link UIForAnyMenuItem} subtype, and as such, it inherits all of the
  *  builder methods from that class.
+ *
+ * @param <M> The type of {@link JRadioButtonMenuItem} being built by this builder.
  */
 public final class UIForRadioButtonMenuItem<M extends JRadioButtonMenuItem>
 extends UIForAnyMenuItem<UIForRadioButtonMenuItem<M>, M>

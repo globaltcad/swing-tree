@@ -18,32 +18,35 @@ public interface Animation
      * @param animator A function taking in the current animation status and
      *                 a value to be transformed and returned based in the status.
      * @return The created {@link Animation}.
+     * @param &lt;T&gt; The type of the value that is animated.
+     *            This is typically a value object that models the state of the animation
+     *            in terms of the properties that change over time.
      */
     static &lt;T&gt; Animation of( Var&lt;T&gt; target, AnimationTransformation&lt;T&gt; animator )
     {
-<span class="fc" id="L24">        return new Animation() {</span>
+<span class="fc" id="L27">        return new Animation() {</span>
             @Override
             public void run( AnimationStatus status ) {
-<span class="fc" id="L27">                T newValue = target.get();</span>
+<span class="fc" id="L30">                T newValue = target.get();</span>
                 try {
-<span class="fc" id="L29">                    newValue = animator.run(status, newValue);</span>
-<span class="nc" id="L30">                } catch ( Exception e ) {</span>
-<span class="nc" id="L31">                    throw new RuntimeException(e);</span>
+<span class="fc" id="L32">                    newValue = animator.run(status, newValue);</span>
+<span class="nc" id="L33">                } catch ( Exception e ) {</span>
+<span class="nc" id="L34">                    throw new RuntimeException(e);</span>
                 } finally {
-<span class="fc" id="L33">                    target.set( newValue );</span>
+<span class="fc" id="L36">                    target.set( newValue );</span>
                 }
-<span class="fc" id="L35">            }</span>
+<span class="fc" id="L38">            }</span>
             @Override
             public void finish( AnimationStatus status ) {
-<span class="fc" id="L38">                T newValue = target.get();</span>
+<span class="fc" id="L41">                T newValue = target.get();</span>
                 try {
-<span class="fc" id="L40">                    newValue = animator.finish(status, newValue);</span>
-<span class="nc" id="L41">                } catch ( Exception e ) {</span>
-<span class="nc" id="L42">                    throw new RuntimeException(e);</span>
+<span class="fc" id="L43">                    newValue = animator.finish(status, newValue);</span>
+<span class="nc" id="L44">                } catch ( Exception e ) {</span>
+<span class="nc" id="L45">                    throw new RuntimeException(e);</span>
                 } finally {
-<span class="fc" id="L44">                    target.set( newValue );</span>
+<span class="fc" id="L47">                    target.set( newValue );</span>
                 }
-<span class="fc" id="L46">            }</span>
+<span class="fc" id="L49">            }</span>
         };
     }
 
@@ -81,6 +84,6 @@ public interface Animation
      */
     default void finish( AnimationStatus status ) throws Exception {
         /* Override this method to perform cleanup after the animation has finished */
-<span class="fc" id="L84">    }</span>
+<span class="fc" id="L87">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

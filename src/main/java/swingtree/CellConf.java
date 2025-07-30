@@ -51,6 +51,7 @@ import java.util.function.Supplier;
  * renderer and an editor for a cell on a single call to the {@link RenderAs#as(Configurator)} method, and then
  * to update the renderer or editor in every subsequent call to the same method.
  *
+ * @param <C> The type of the parent component that contains this cell, typically a table, list or combo box.
  * @param <V> The entry type of the entry of this {@link CellConf}.
  */
 public final class CellConf<C extends JComponent, V>
@@ -496,7 +497,7 @@ public final class CellConf<C extends JComponent, V>
         return this;
     }
 
-    public CellConf<C, V> _withRenderer(@Nullable Component component ) {
+    private CellConf<C, V> _withRenderer(@Nullable Component component ) {
         return new CellConf<>(
             jListIfInvolved,
             parent,

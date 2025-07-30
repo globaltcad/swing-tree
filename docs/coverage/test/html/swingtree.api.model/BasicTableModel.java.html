@@ -78,6 +78,8 @@ public interface BasicTableModel extends TableModel
     /**
      *  The class below is a functional builder for creating a lambda based implementation of the {@link BasicTableModel}.
      *  This allows fo a boilerplate free functional API.
+     *
+     * @param &lt;E&gt; Common type for all entry items in the table.
      */
      class Builder&lt;E&gt; implements Buildable&lt;BasicTableModel&gt;
      {
@@ -92,8 +94,8 @@ public interface BasicTableModel extends TableModel
         private final Observable     observableEvent;
 
          public Builder( Class&lt;E&gt; commonEntryType ) {
-<span class="fc" id="L95">             this(</span>
-<span class="fc" id="L96">                 Objects.requireNonNull(commonEntryType),</span>
+<span class="fc" id="L97">             this(</span>
+<span class="fc" id="L98">                 Objects.requireNonNull(commonEntryType),</span>
                  null,
                  null,
                  null,
@@ -103,9 +105,9 @@ public interface BasicTableModel extends TableModel
                  null,
                  null
              );
-<span class="fc" id="L106">         }</span>
+<span class="fc" id="L108">         }</span>
 
-         public Builder(
+         private Builder(
              Class&lt;E&gt;                 commonEntryType,
              @Nullable RowCount       rowCount,
              @Nullable ColumnCount    colCount,
@@ -115,17 +117,17 @@ public interface BasicTableModel extends TableModel
              @Nullable CellEditable   cellEditable,
              @Nullable ColumnName     columnName,
              @Nullable Observable     observableEvent
-<span class="fc" id="L118">         ) {</span>
-<span class="fc" id="L119">             this.commonEntryType = Objects.requireNonNull(commonEntryType);</span>
-<span class="fc" id="L120">             this.rowCount        = rowCount;</span>
-<span class="fc" id="L121">             this.colCount        = colCount;</span>
-<span class="fc" id="L122">             this.entryGetter     = entryGetter;</span>
-<span class="fc" id="L123">             this.entrySetter     = entrySetter;</span>
-<span class="fc" id="L124">             this.columnClass     = columnClass;</span>
-<span class="fc" id="L125">             this.cellEditable    = cellEditable;</span>
-<span class="fc" id="L126">             this.columnName      = columnName;</span>
-<span class="fc" id="L127">             this.observableEvent = observableEvent;</span>
-<span class="fc" id="L128">         }</span>
+<span class="fc" id="L120">         ) {</span>
+<span class="fc" id="L121">             this.commonEntryType = Objects.requireNonNull(commonEntryType);</span>
+<span class="fc" id="L122">             this.rowCount        = rowCount;</span>
+<span class="fc" id="L123">             this.colCount        = colCount;</span>
+<span class="fc" id="L124">             this.entryGetter     = entryGetter;</span>
+<span class="fc" id="L125">             this.entrySetter     = entrySetter;</span>
+<span class="fc" id="L126">             this.columnClass     = columnClass;</span>
+<span class="fc" id="L127">             this.cellEditable    = cellEditable;</span>
+<span class="fc" id="L128">             this.columnName      = columnName;</span>
+<span class="fc" id="L129">             this.observableEvent = observableEvent;</span>
+<span class="fc" id="L130">         }</span>
 
          /**
           *  Use this to define the lambda which dynamically determines the row count of the table model.
@@ -133,9 +135,9 @@ public interface BasicTableModel extends TableModel
           * @return This builder instance.
           */
         public Builder&lt;E&gt; rowCount( RowCount rowCount ) {
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">            if ( rowCount == null ) throw new IllegalArgumentException(&quot;rowCount cannot be null&quot;);</span>
-<span class="pc bpc" id="L137" title="1 of 2 branches missed.">            if ( this.rowCount != null ) throw new IllegalStateException(RowCount.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L138">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if ( rowCount == null ) throw new IllegalArgumentException(&quot;rowCount cannot be null&quot;);</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">            if ( this.rowCount != null ) throw new IllegalStateException(RowCount.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L140">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -146,9 +148,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colCount( ColumnCount columnCount ) {
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">            if ( columnCount == null ) throw new IllegalArgumentException(&quot;columnCount cannot be null&quot;);</span>
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">            if ( this.colCount != null ) throw new IllegalStateException(ColumnCount.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L151">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            if ( columnCount == null ) throw new IllegalArgumentException(&quot;columnCount cannot be null&quot;);</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">            if ( this.colCount != null ) throw new IllegalStateException(ColumnCount.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L153">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, columnCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -159,9 +161,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; getsEntryAt(EntryGetter&lt;E&gt; entryGetter) {
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            if ( entryGetter == null ) throw new IllegalArgumentException(&quot;valueAt cannot be null&quot;);</span>
-<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if ( this.entryGetter != null ) throw new IllegalStateException(EntryGetter.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L164">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">            if ( entryGetter == null ) throw new IllegalArgumentException(&quot;valueAt cannot be null&quot;);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">            if ( this.entryGetter != null ) throw new IllegalStateException(EntryGetter.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L166">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -172,9 +174,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; setsEntryAt(EntrySetter&lt;E&gt; entrySetter) {
-<span class="nc bnc" id="L175" title="All 2 branches missed.">            if ( entrySetter == null ) throw new IllegalArgumentException(&quot;setValueAt cannot be null&quot;);</span>
-<span class="nc bnc" id="L176" title="All 2 branches missed.">            if ( this.entrySetter != null ) throw new IllegalStateException(EntrySetter.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="nc" id="L177">            return new Builder&lt;&gt;(</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if ( entrySetter == null ) throw new IllegalArgumentException(&quot;setValueAt cannot be null&quot;);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            if ( this.entrySetter != null ) throw new IllegalStateException(EntrySetter.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="nc" id="L179">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -185,9 +187,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colClass( ColumnClass&lt;E&gt; columnClass ) {
-<span class="nc bnc" id="L188" title="All 2 branches missed.">            if ( columnClass == null ) throw new IllegalArgumentException(&quot;columnClass cannot be null&quot;);</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">            if ( this.columnClass != null ) throw new IllegalStateException(ColumnClass.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="nc" id="L190">            return new Builder&lt;&gt;(</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if ( columnClass == null ) throw new IllegalArgumentException(&quot;columnClass cannot be null&quot;);</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            if ( this.columnClass != null ) throw new IllegalStateException(ColumnClass.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="nc" id="L192">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -198,8 +200,8 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colClasses( Class&lt;? extends E&gt;... classes ) {
-<span class="nc bnc" id="L201" title="All 2 branches missed.">            if ( classes == null ) throw new IllegalArgumentException(&quot;classes cannot be null&quot;);</span>
-<span class="nc bnc" id="L202" title="All 2 branches missed.">            return colClass((colIndex) -&gt; colIndex &gt;= classes.length ? commonEntryType : classes[colIndex]);</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if ( classes == null ) throw new IllegalArgumentException(&quot;classes cannot be null&quot;);</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">            return colClass((colIndex) -&gt; colIndex &gt;= classes.length ? commonEntryType : classes[colIndex]);</span>
         }
         /**
          *  Accepts a lambda allowing the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
@@ -207,9 +209,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; isEditableIf( CellEditable cellEditable ) {
-<span class="pc bpc" id="L210" title="1 of 2 branches missed.">            if ( cellEditable == null ) throw new IllegalArgumentException(&quot;cellEditable cannot be null&quot;);</span>
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if ( this.cellEditable != null ) throw new IllegalStateException(CellEditable.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L212">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">            if ( cellEditable == null ) throw new IllegalArgumentException(&quot;cellEditable cannot be null&quot;);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">            if ( this.cellEditable != null ) throw new IllegalStateException(CellEditable.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L214">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -220,10 +222,10 @@ public interface BasicTableModel extends TableModel
           * @return This builder instance.
           */
         public Builder&lt;E&gt; colName( ColumnName columnName ) {
-<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if ( columnName == null ) throw new IllegalArgumentException(&quot;columnName cannot be null&quot;);</span>
-<span class="pc bpc" id="L224" title="1 of 2 branches missed.">            if (this.columnName != null)</span>
-<span class="nc" id="L225">                throw new IllegalStateException(ColumnName.class.getSimpleName() + &quot; already set&quot;);</span>
-<span class="fc" id="L226">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">            if ( columnName == null ) throw new IllegalArgumentException(&quot;columnName cannot be null&quot;);</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">            if (this.columnName != null)</span>
+<span class="nc" id="L227">                throw new IllegalStateException(ColumnName.class.getSimpleName() + &quot; already set&quot;);</span>
+<span class="fc" id="L228">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -234,8 +236,8 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colNames( String... names ) {
-<span class="pc bpc" id="L237" title="1 of 2 branches missed.">            if ( names == null ) throw new IllegalArgumentException(&quot;names cannot be null&quot;);</span>
-<span class="fc" id="L238">            return colName((colIndex) -&gt; names[colIndex]);</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">            if ( names == null ) throw new IllegalArgumentException(&quot;names cannot be null&quot;);</span>
+<span class="fc" id="L240">            return colName((colIndex) -&gt; names[colIndex]);</span>
         }
         /**
          *  Use this to define the event which will be fired when the table model is updated.
@@ -243,9 +245,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; updateOn( Observable updateEvent ) {
-<span class="pc bpc" id="L246" title="1 of 2 branches missed.">            if ( updateEvent == null ) throw new IllegalArgumentException(&quot;updateEvent cannot be null&quot;);</span>
-<span class="pc bpc" id="L247" title="1 of 2 branches missed.">            if ( this.observableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L248">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">            if ( updateEvent == null ) throw new IllegalArgumentException(&quot;updateEvent cannot be null&quot;);</span>
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">            if ( this.observableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L250">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, updateEvent
                 );
@@ -255,26 +257,26 @@ public interface BasicTableModel extends TableModel
          * @return The {@link BasicTableModel} instance.
          */
         @Override public BasicTableModel build() {
-<span class="fc" id="L258">            FunTableModel tm = new FunTableModel();</span>
-<span class="fc bfc" id="L259" title="All 2 branches covered.">            if ( observableEvent != null )</span>
-<span class="fc" id="L260">                observableEvent.subscribe(()-&gt; UI.run(()-&gt;{</span>
+<span class="fc" id="L260">            FunTableModel tm = new FunTableModel();</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">            if ( observableEvent != null )</span>
+<span class="fc" id="L262">                observableEvent.subscribe(()-&gt; UI.run(()-&gt;{</span>
                     // We want the table model update to be as thorough as possible, so we
                     // will fire a table structure changed event, followed by a table data
                     // changed event.
-<span class="fc" id="L264">                    tm.fireTableStructureChanged();</span>
-<span class="fc" id="L265">                    tm.fireTableDataChanged();</span>
-<span class="fc" id="L266">                }));</span>
-<span class="fc" id="L267">            return tm;</span>
+<span class="fc" id="L266">                    tm.fireTableStructureChanged();</span>
+<span class="fc" id="L267">                    tm.fireTableDataChanged();</span>
+<span class="fc" id="L268">                }));</span>
+<span class="fc" id="L269">            return tm;</span>
         }
 
-<span class="fc" id="L270">         private class FunTableModel extends AbstractTableModel implements BasicTableModel {</span>
-<span class="pc bpc" id="L271" title="1 of 2 branches missed.">             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }</span>
-<span class="pc bpc" id="L272" title="1 of 2 branches missed.">             @Override public int getColumnCount() { return colCount == null ? 0 : colCount.get(); }</span>
-<span class="pc bpc" id="L273" title="1 of 2 branches missed.">             @Override public Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }</span>
-<span class="pc bpc" id="L274" title="1 of 2 branches missed.">             @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }</span>
-<span class="pc bpc" id="L275" title="1 of 2 branches missed.">             @Override public Class&lt;?&gt; getColumnClass(int colIndex) { return columnClass == null ? super.getColumnClass(colIndex) : columnClass.get(colIndex); }</span>
-<span class="pc bpc" id="L276" title="1 of 4 branches missed.">             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null &amp;&amp; cellEditable.is(rowIndex, colIndex); }</span>
-<span class="fc bfc" id="L277" title="All 2 branches covered.">             @Override public String getColumnName(int colIndex) { return columnName == null ? super.getColumnName(colIndex) : columnName.get(colIndex); }</span>
+<span class="fc" id="L272">         private class FunTableModel extends AbstractTableModel implements BasicTableModel {</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">             @Override public int getColumnCount() { return colCount == null ? 0 : colCount.get(); }</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">             @Override public Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">             @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">             @Override public Class&lt;?&gt; getColumnClass(int colIndex) { return columnClass == null ? super.getColumnClass(colIndex) : columnClass.get(colIndex); }</span>
+<span class="pc bpc" id="L278" title="1 of 4 branches missed.">             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null &amp;&amp; cellEditable.is(rowIndex, colIndex); }</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">             @Override public String getColumnName(int colIndex) { return columnName == null ? super.getColumnName(colIndex) : columnName.get(colIndex); }</span>
          }
 
      }

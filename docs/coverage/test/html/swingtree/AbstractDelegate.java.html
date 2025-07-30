@@ -1258,7 +1258,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *      }))
      *  }&lt;/pre&gt;
      *  You may also be interested in doing style animations, if so, maybe consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param status The current animation progress status, which is important so that the rendering can be synchronized with the animation.
@@ -1293,7 +1293,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *      }))
      *  }&lt;/pre&gt;
      *  You may also be interested in doing style animations, if so, maybe consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param area The area of the component which should be painted.
@@ -1330,15 +1330,16 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *      }))
      *  }&lt;/pre&gt;
      *  You may also be interested in doing style animations, if so, maybe consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
+     * @param layer The layer of the component which should be painted on.
      * @param status The current animation progress status, which is important so that the rendering can be synchronized with the animation.
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( UI.Layer layer, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1340">        this.paint(UI.ComponentArea.BODY, layer, status, painter);</span>
-<span class="nc" id="L1341">    }</span>
+<span class="nc" id="L1341">        this.paint(UI.ComponentArea.BODY, layer, status, painter);</span>
+<span class="nc" id="L1342">    }</span>
 
     /**
      *  A common use case is to render something on top of the component
@@ -1364,7 +1365,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *      }))
      *  }&lt;/pre&gt;
      *  You may also be interested in doing style animations, if so, maybe consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param area The area of the component which should be painted.
@@ -1375,13 +1376,13 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *                {@link Graphics2D} instance for doing paint operations...
      */
     public final void paint( UI.ComponentArea area, UI.Layer layer, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1378">        Objects.requireNonNull(status);</span>
-<span class="nc" id="L1379">        Objects.requireNonNull(painter);</span>
-<span class="nc" id="L1380">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1379">        Objects.requireNonNull(status);</span>
+<span class="nc" id="L1380">        Objects.requireNonNull(painter);</span>
+<span class="nc" id="L1381">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the rendering later in the paint method of a custom border implementation!
-<span class="nc" id="L1382">            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);</span>
-<span class="nc" id="L1383">        });</span>
-<span class="nc" id="L1384">    }</span>
+<span class="nc" id="L1383">            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);</span>
+<span class="nc" id="L1384">        });</span>
+<span class="nc" id="L1385">    }</span>
 
     /**
      *  Use this method to delegate to the parent of the component.
@@ -1428,28 +1429,28 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  for a duration of 1 second. &lt;br&gt;
      *  &lt;p&gt;
      *  You may also be interested in doing style animations, if so, maybe consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event
      *  based styling animations and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)}
      *  to see how to do 2 state switch based styling animations.
      *
      * @param action The action which should be executed on the delegate of the parent component.
      */
     public final void parentDelegate( sprouts.Action&lt;AbstractDelegate&lt;JComponent&gt;&gt; action ) {
-<span class="nc" id="L1438">        Objects.requireNonNull(action);</span>
-<span class="nc" id="L1439">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
-<span class="nc" id="L1440">            Container parent = _component().getParent();</span>
-<span class="nc bnc" id="L1441" title="All 2 branches missed.">            if ( parent instanceof JComponent ) {</span>
+<span class="nc" id="L1439">        Objects.requireNonNull(action);</span>
+<span class="nc" id="L1440">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1441">            Container parent = _component().getParent();</span>
+<span class="nc bnc" id="L1442" title="All 2 branches missed.">            if ( parent instanceof JComponent ) {</span>
                 try {
-<span class="nc" id="L1443">                    AbstractDelegate&lt;JComponent&gt; delegate = new AbstractDelegate&lt;&gt;( false, (JComponent) parent, (JComponent) parent );</span>
-<span class="nc" id="L1444">                    action.accept(delegate);</span>
-<span class="nc" id="L1445">                } catch( Exception e ) {</span>
-<span class="nc" id="L1446">                    log.error(&quot;Error while processing parent delegate!&quot;, e);</span>
-<span class="nc" id="L1447">                }</span>
+<span class="nc" id="L1444">                    AbstractDelegate&lt;JComponent&gt; delegate = new AbstractDelegate&lt;&gt;( false, (JComponent) parent, (JComponent) parent );</span>
+<span class="nc" id="L1445">                    action.accept(delegate);</span>
+<span class="nc" id="L1446">                } catch( Exception e ) {</span>
+<span class="nc" id="L1447">                    log.error(&quot;Error while processing parent delegate!&quot;, e);</span>
+<span class="nc" id="L1448">                }</span>
             } else {
-<span class="nc" id="L1449">                log.warn(&quot;Parent of component is not a JComponent, cannot apply parent delegate!&quot;);</span>
+<span class="nc" id="L1450">                log.warn(&quot;Parent of component is not a JComponent, cannot apply parent delegate!&quot;);</span>
             }
-<span class="nc" id="L1451">        });</span>
-<span class="nc" id="L1452">    }</span>
+<span class="nc" id="L1452">        });</span>
+<span class="nc" id="L1453">    }</span>
 
     /**
      *  A common use case is to animate the style of a component when a user event occurs.
@@ -1481,7 +1482,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  }&lt;/pre&gt;
      *  Also see {@link #animateStyleFor(LifeTime, AnimatedStyler)} for a version of this method which uses a {@link LifeTime} instead of a duration.
      *  If you are interested in doing more advanced style animations, consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param duration The duration of the animation.
@@ -1491,15 +1492,15 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *               for which you can define the style properties.
      */
     public final void animateStyleFor( double duration, TimeUnit unit, AnimatedStyler&lt;C&gt; styler ) {
-<span class="fc" id="L1494">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L1495">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L1496">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1495">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L1496">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L1497">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="fc" id="L1498">            this.animateFor(duration, unit, status -&gt;</span>
-<span class="fc" id="L1499">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
+<span class="fc" id="L1499">            this.animateFor(duration, unit, status -&gt;</span>
+<span class="fc" id="L1500">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
             );
-<span class="fc" id="L1501">        });</span>
-<span class="fc" id="L1502">    }</span>
+<span class="fc" id="L1502">        });</span>
+<span class="fc" id="L1503">    }</span>
 
     /**
      *  A common use case is to animate the style of a component when a user event occurs.
@@ -1531,7 +1532,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  }&lt;/pre&gt;
      *  Also see {@link #animateStyleFor(double, TimeUnit, AnimatedStyler)} for a version of this method which uses a {@link LifeTime} instead of a duration.
      *  If you are interested in doing more advanced style animations, consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param lifetime The lifetime of the animation.
@@ -1541,15 +1542,15 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *               for which you can define the style properties.
      */
     public final void animateStyleFor( LifeTime lifetime, AnimatedStyler&lt;C&gt; styler ) {
-<span class="nc" id="L1544">        Objects.requireNonNull(lifetime);</span>
-<span class="nc" id="L1545">        Objects.requireNonNull(styler);</span>
-<span class="nc" id="L1546">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1545">        Objects.requireNonNull(lifetime);</span>
+<span class="nc" id="L1546">        Objects.requireNonNull(styler);</span>
+<span class="nc" id="L1547">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="nc" id="L1548">            this.animateFor(lifetime, status -&gt;</span>
-<span class="nc" id="L1549">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
+<span class="nc" id="L1549">            this.animateFor(lifetime, status -&gt;</span>
+<span class="nc" id="L1550">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
             );
-<span class="nc" id="L1551">        });</span>
-<span class="nc" id="L1552">    }</span>
+<span class="nc" id="L1552">        });</span>
+<span class="nc" id="L1553">    }</span>
 
     /**
      *  A common use case is to style the component based on the current animation state.
@@ -1575,13 +1576,13 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void style(AnimationStatus state, Styler&lt;C&gt; styler ) {
-<span class="fc" id="L1578">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L1579">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L1580">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1579">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L1580">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L1581">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="fc" id="L1582">            ComponentExtension.from(_component).addAnimatedStyler(state, styler);</span>
-<span class="fc" id="L1583">        });</span>
-<span class="fc" id="L1584">    }</span>
+<span class="fc" id="L1583">            ComponentExtension.from(_component).addAnimatedStyler(state, styler);</span>
+<span class="fc" id="L1584">        });</span>
+<span class="fc" id="L1585">    }</span>
 
     /**
      *  Exposes access the animation builder API, where you can define the conditions
@@ -1593,8 +1594,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
     public final AnimationDispatcher animateFor(double duration, TimeUnit unit ) {
-<span class="fc" id="L1596">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L1597">        return AnimationDispatcher.animateFor(LifeTime.of(duration, unit), _component());</span>
+<span class="fc" id="L1597">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L1598">        return AnimationDispatcher.animateFor(LifeTime.of(duration, unit), _component());</span>
     }
 
     /**
@@ -1606,8 +1607,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
     public final AnimationDispatcher animateFor(LifeTime lifeTime ) {
-<span class="nc" id="L1609">        Objects.requireNonNull(lifeTime);</span>
-<span class="nc" id="L1610">        return AnimationDispatcher.animateFor(lifeTime, _component());</span>
+<span class="nc" id="L1610">        Objects.requireNonNull(lifeTime);</span>
+<span class="nc" id="L1611">        return AnimationDispatcher.animateFor(lifeTime, _component());</span>
     }
 
     /**
@@ -1633,10 +1634,10 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
-<span class="nc" id="L1636">        Objects.requireNonNull(lifeTime);</span>
-<span class="nc" id="L1637">        Objects.requireNonNull(animation);</span>
-<span class="nc" id="L1638">        AnimationDispatcher.animateFor(lifeTime, _component()).go(animation);</span>
-<span class="nc" id="L1639">    }</span>
+<span class="nc" id="L1637">        Objects.requireNonNull(lifeTime);</span>
+<span class="nc" id="L1638">        Objects.requireNonNull(animation);</span>
+<span class="nc" id="L1639">        AnimationDispatcher.animateFor(lifeTime, _component()).go(animation);</span>
+<span class="nc" id="L1640">    }</span>
 
     /**
      *  Use this to schedule and run the provided animation
@@ -1649,10 +1650,10 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
-<span class="fc" id="L1652">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L1653">        Objects.requireNonNull(animation);</span>
-<span class="fc" id="L1654">        this.animateFor(duration, unit).go(animation);</span>
-<span class="fc" id="L1655">    }</span>
+<span class="fc" id="L1653">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L1654">        Objects.requireNonNull(animation);</span>
+<span class="fc" id="L1655">        this.animateFor(duration, unit).go(animation);</span>
+<span class="fc" id="L1656">    }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1663,7 +1664,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1666">    public float getScale() { return UI.scale(); }</span>
+<span class="nc" id="L1667">    public float getScale() { return UI.scale(); }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1674,7 +1675,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1677">    public float scale() { return UI.scale(); }</span>
+<span class="nc" id="L1678">    public float scale() { return UI.scale(); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
@@ -1683,7 +1684,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code int} value to scale.
      *  @return The scaled {@code int} value.
      */
-<span class="nc" id="L1686">    public int scale( int value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1687">    public int scale( int value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
@@ -1692,7 +1693,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code float} value to scale.
      *  @return The scaled {@code float} value.
      */
-<span class="nc" id="L1695">    public float scale( float value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1696">    public float scale( float value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
@@ -1701,7 +1702,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code double} value to scale.
      *  @return The scaled {@code double} value.
      */
-<span class="nc" id="L1704">    public double scale( double value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1705">    public double scale( double value ) { return UI.scale(value); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -676,6 +676,10 @@ public class JScrollPanels extends UI.ScrollPane
             );
         }
 
+        /**
+         *  The last state of this entry panel is the view which was most recently set.
+         * @return The last state of this entry panel.
+         */
         public JComponent getLastState() { return _lastState; }
 
         public boolean isEntrySelected() { return _isSelected; }

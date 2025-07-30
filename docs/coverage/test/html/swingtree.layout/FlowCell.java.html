@@ -52,52 +52,58 @@ public final class FlowCell implements AddConstraint
 <span class="fc" id="L52">    private static final Logger log = LoggerFactory.getLogger(FlowCell.class);</span>
     private final Configurator&lt;FlowCellConf&gt; _configurator;
 
-<span class="fc" id="L55">    public FlowCell(Configurator&lt;FlowCellConf&gt; configurator) {</span>
-<span class="fc" id="L56">        Objects.requireNonNull(configurator);</span>
-<span class="fc" id="L57">        _configurator = configurator;</span>
-<span class="fc" id="L58">    }</span>
+    /**
+     *  The public constructor for the flow-cell layout configuration.
+     *  &lt;b&gt;Please use {@link UI#AUTO_SPAN(Configurator)} instead of calling this
+     *  constructor directly, because this constructor may change between versions!&lt;/b&gt;
+     * @param configurator A functional configurator for the cell.
+     */
+<span class="fc" id="L61">    public FlowCell(Configurator&lt;FlowCellConf&gt; configurator) {</span>
+<span class="fc" id="L62">        Objects.requireNonNull(configurator);</span>
+<span class="fc" id="L63">        _configurator = configurator;</span>
+<span class="fc" id="L64">    }</span>
 
     FlowCellConf fetchConfig(
         int maxCells, Size parentSize, ParentSizeClass parentSizeCategory, boolean defaultHeightFill
     ) {
-<span class="fc" id="L63">        FlowCellConf conf = new FlowCellConf(</span>
+<span class="fc" id="L69">        FlowCellConf conf = new FlowCellConf(</span>
                                     maxCells, parentSize, parentSizeCategory,
                                     new FlowCellSpanPolicy[0], defaultHeightFill,
                                     UI.VerticalAlignment.CENTER
                             );
         try {
-<span class="fc" id="L69">            return _configurator.configure(conf);</span>
-<span class="nc" id="L70">        } catch (Exception e) {</span>
-<span class="nc" id="L71">            log.error(</span>
-<span class="nc" id="L72">                &quot;Error configuring '&quot;+ FlowCellConf.class.getSimpleName()+&quot;' instance &quot; +</span>
-<span class="nc" id="L73">                &quot;for '&quot;+ ResponsiveGridFlowLayout.class.getSimpleName() + &quot;' layout.&quot;,</span>
+<span class="fc" id="L75">            return _configurator.configure(conf);</span>
+<span class="nc" id="L76">        } catch (Exception e) {</span>
+<span class="nc" id="L77">            log.error(</span>
+<span class="nc" id="L78">                &quot;Error configuring '&quot;+ FlowCellConf.class.getSimpleName()+&quot;' instance &quot; +</span>
+<span class="nc" id="L79">                &quot;for '&quot;+ ResponsiveGridFlowLayout.class.getSimpleName() + &quot;' layout.&quot;,</span>
                 e
             );
         }
-<span class="nc" id="L77">        return conf;</span>
+<span class="nc" id="L83">        return conf;</span>
     }
 
     @Override
     public Object toConstraintForLayoutManager() {
-<span class="fc" id="L82">        return this;</span>
+<span class="fc" id="L88">        return this;</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L87">        return this.getClass().getSimpleName() + &quot;[&quot; + _configurator + &quot;]&quot;;</span>
+<span class="nc" id="L93">        return this.getClass().getSimpleName() + &quot;[&quot; + _configurator + &quot;]&quot;;</span>
     }
 
     @Override
     public boolean equals(Object obj) {
-<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (this == obj) return true;</span>
-<span class="nc bnc" id="L93" title="All 4 branches missed.">        if (obj == null || getClass() != obj.getClass()) return false;</span>
-<span class="nc" id="L94">        FlowCell that = (FlowCell) obj;</span>
-<span class="nc" id="L95">        return Objects.equals(_configurator, that._configurator);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (this == obj) return true;</span>
+<span class="nc bnc" id="L99" title="All 4 branches missed.">        if (obj == null || getClass() != obj.getClass()) return false;</span>
+<span class="nc" id="L100">        FlowCell that = (FlowCell) obj;</span>
+<span class="nc" id="L101">        return Objects.equals(_configurator, that._configurator);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L100">        return Objects.hash(_configurator);</span>
+<span class="nc" id="L106">        return Objects.hash(_configurator);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -14,20 +14,20 @@ class VarsBasedComboModel&lt;E extends @Nullable Object&gt; extends AbstractComb
     VarsBasedComboModel( Vars&lt;E&gt; items ) {
 <span class="fc" id="L15">        super(Var.ofNullable(_findCommonType(items), null));</span>
 <span class="fc" id="L16">        _items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L17">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L17">        _selectedIndex = _indexOf(_getSelectedItemSafely());</span>
 <span class="pc" id="L18">        Viewables.cast(_items).onChange(it -&gt; _itemListChanged() );</span>
 <span class="fc" id="L19">    }</span>
 
     VarsBasedComboModel( Var&lt;E&gt; var, Vars&lt;E&gt; items ) {
 <span class="fc" id="L22">        super(var);</span>
 <span class="fc" id="L23">        _items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L24">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L24">        _selectedIndex = _indexOf(_getSelectedItemSafely());</span>
 <span class="fc" id="L25">        Viewables.cast(_items).onChange( it -&gt; _itemListChanged() );</span>
 <span class="fc" id="L26">    }</span>
 
     private void _itemListChanged() {
 <span class="fc" id="L29">        UI.run(()-&gt; {</span>
-<span class="fc" id="L30">            int newSelection = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L30">            int newSelection = _indexOf(_getSelectedItemSafely());</span>
 <span class="pc bpc" id="L31" title="1 of 2 branches missed.">            if ( newSelection != _selectedIndex )</span>
 <span class="nc" id="L32">                this.setSelectedItem(_items.at(newSelection).orElseNull());</span>
                 // ^ This will fire the listeners for us already

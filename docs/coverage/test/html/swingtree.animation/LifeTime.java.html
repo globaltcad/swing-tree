@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LifeTime.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">LifeTime.java</span></div><h1>LifeTime.java</h1><pre class="source lang-java linenums">package swingtree.animation;
 
 import com.google.errorprone.annotations.Immutable;
-import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.SwingTree;
@@ -27,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  *  various utility methods on the {@link swingtree.UI} class. &lt;br&gt;
  *  The most straight forward way would be to call {@link swingtree.UI#animateFor(LifeTime)}
  *  or {@link swingtree.UI#animateFor(LifeTime, Component)}.
- *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)}
+ *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)}
  *  or {@link swingtree.UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)}. &lt;br&gt;
  *  Another use case is to schedule an animation through the component event delegate
  *  as part of your event handling code using {@link swingtree.ComponentDelegate#animateStyleFor(LifeTime, AnimatedStyler)}. &lt;br&gt;
@@ -49,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 @Immutable
 public final class LifeTime
 {
-<span class="fc" id="L52">    private static final LifeTime _NONE = new LifeTime(0, 0, 0);</span>
+<span class="fc" id="L51">    private static final LifeTime _NONE = new LifeTime(0, 0, 0);</span>
 
     private final long _delay; // in milliseconds
     private final long _duration;
@@ -63,7 +62,7 @@ public final class LifeTime
      * @return A lifetime that does nothing.
      */
     public static LifeTime none() {
-<span class="fc" id="L66">        return _NONE;</span>
+<span class="fc" id="L65">        return _NONE;</span>
     }
 
     /**
@@ -74,8 +73,8 @@ public final class LifeTime
      * @return A new lifetime that will start immediately and run for the given duration.
      */
     public static LifeTime of( long time, TimeUnit unit ) {
-<span class="fc" id="L77">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L78">        return new LifeTime(0, unit.toMillis(time), SwingTree.get().getDefaultAnimationInterval());</span>
+<span class="fc" id="L76">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L77">        return new LifeTime(0, unit.toMillis(time), SwingTree.get().getDefaultAnimationInterval());</span>
     }
 
     /**
@@ -89,8 +88,8 @@ public final class LifeTime
      * @return A new lifetime that will start immediately and run for the given duration.
      */
     public static LifeTime of( double time, TimeUnit unit ) {
-<span class="fc" id="L92">        long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);</span>
-<span class="fc" id="L93">        return new LifeTime(0, millis, SwingTree.get().getDefaultAnimationInterval());</span>
+<span class="fc" id="L91">        long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L92">        return new LifeTime(0, millis, SwingTree.get().getDefaultAnimationInterval());</span>
     }
 
     /**
@@ -102,7 +101,7 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
-<span class="nc" id="L105">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), SwingTree.get().getDefaultAnimationInterval());</span>
+<span class="nc" id="L104">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), SwingTree.get().getDefaultAnimationInterval());</span>
     }
 
     /**
@@ -116,23 +115,36 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
-<span class="nc" id="L119">        long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);</span>
-<span class="nc" id="L120">        long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);</span>
-<span class="nc" id="L121">        return new LifeTime(startMillis, durationMillis, SwingTree.get().getDefaultAnimationInterval());</span>
+<span class="nc" id="L118">        long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L119">        long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L120">        return new LifeTime(startMillis, durationMillis, SwingTree.get().getDefaultAnimationInterval());</span>
     }
+
+    /**
+     *  Creates a new lifetime that will run for the given number of seconds
+     *  and without any start delay. You may also use fractions of seconds
+     *  (e.g. {@code 0.5} for half a second).
+     *
+     * @param time The duration of the animation in seconds.
+     * @return A new lifetime that will start immediately and run for the given duration.
+     */
+    public static LifeTime ofSeconds( double time ) {
+<span class="nc" id="L132">        return of(time, TimeUnit.SECONDS);</span>
+    }
+
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
-<span class="fc" id="L125">        long millis = (long) (time * from.toMillis(1));</span>
-<span class="fc" id="L126">        long remainderMillis = (long) (time * from.toMillis(1) - millis);</span>
-<span class="fc" id="L127">        return to.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L137">        long millis = (long) (time * from.toMillis(1));</span>
+<span class="fc" id="L138">        long remainderMillis = (long) (time * from.toMillis(1) - millis);</span>
+<span class="fc" id="L139">        return to.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
     }
 
 
-<span class="fc" id="L131">    private LifeTime( long delay, long duration, long interval ) {</span>
-<span class="fc" id="L132">        _delay     = delay;</span>
-<span class="fc" id="L133">        _duration  = duration;</span>
-<span class="fc" id="L134">        _interval = interval;</span>
-<span class="fc" id="L135">    }</span>
+<span class="fc" id="L143">    private LifeTime( long delay, long duration, long interval ) {</span>
+<span class="fc" id="L144">        _delay     = delay;</span>
+<span class="fc" id="L145">        _duration  = duration;</span>
+<span class="fc" id="L146">        _interval = interval;</span>
+<span class="fc" id="L147">    }</span>
 
 
     /**
@@ -143,8 +155,8 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay.
      */
     public LifeTime startingIn( long delay, TimeUnit unit ) {
-<span class="nc" id="L146">        long offset = unit.toMillis( delay );</span>
-<span class="nc" id="L147">        return LifeTime.of(</span>
+<span class="nc" id="L158">        long offset = unit.toMillis( delay );</span>
+<span class="nc" id="L159">        return LifeTime.of(</span>
                     offset,    TimeUnit.MILLISECONDS,
                     _duration, TimeUnit.MILLISECONDS
                 );
@@ -169,7 +181,7 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public LifeTime withInterval( long interval, TimeUnit unit ) {
-<span class="nc" id="L172">        return new LifeTime(_delay, _duration, unit.toMillis(interval));</span>
+<span class="nc" id="L184">        return new LifeTime(_delay, _duration, unit.toMillis(interval));</span>
     }
 
     /**
@@ -178,8 +190,8 @@ public final class LifeTime
      * @return The duration of the animation.
      */
     public long getDurationIn( TimeUnit unit ) {
-<span class="fc" id="L181">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L182">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L193">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L194">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
@@ -188,8 +200,8 @@ public final class LifeTime
      * @return The delay after which the animation should start.
      */
     public long getDelayIn( TimeUnit unit ) {
-<span class="fc" id="L191">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L192">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L203">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L204">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
@@ -210,28 +222,28 @@ public final class LifeTime
      * @return The interval in the given time unit.
      */
     public long getIntervalIn( TimeUnit unit ) {
-<span class="fc" id="L213">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L214">        return unit.convert(_interval, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L225">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L226">        return unit.convert(_interval, TimeUnit.MILLISECONDS);</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
-<span class="fc" id="L221">        LifeTime lifeTime = (LifeTime) o;</span>
-<span class="pc bpc" id="L222" title="4 of 6 branches missed.">        return _delay     == lifeTime._delay    &amp;&amp;</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
+<span class="fc" id="L233">        LifeTime lifeTime = (LifeTime) o;</span>
+<span class="pc bpc" id="L234" title="4 of 6 branches missed.">        return _delay     == lifeTime._delay    &amp;&amp;</span>
                _duration  == lifeTime._duration &amp;&amp;
                _interval  == lifeTime._interval;
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L229">        return Objects.hash(_delay, _duration, _interval);</span>
+<span class="nc" id="L241">        return Objects.hash(_delay, _duration, _interval);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L234">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L246">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
                     &quot;delay=&quot;    + _delay    + &quot;, &quot;+
                     &quot;duration=&quot; + _duration + &quot;, &quot;+
                     &quot;interval=&quot; + _interval +

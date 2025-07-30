@@ -14,6 +14,11 @@ import swingtree.layout.AddConstraint;
  *  {@link UIForAnySwing#addAll(Var, BoundViewSupplier)},  <br>
  *  {@link UIForAnySwing#addAll(String, Var, BoundViewSupplier)}, <br>
  *  {@link UIForAnySwing#addAll(AddConstraint, Var, BoundViewSupplier)}, <br>
+ *
+ * @param <M> The type of model for which a view declaration is created
+ *           upon an invocation to {{@link #createViewFor(Var)}}.
+ *           This is expected to be an immutable object with value semantics,
+ *           like a record for example...
  */
 @FunctionalInterface
 public interface BoundViewSupplier<M extends HasId<?>>

@@ -25,7 +25,7 @@
 
         {"kind":"and","text":"Two lists in which we record the progress and cycle values of the animation.","code":["var proresses = []","var cycles = []"]},
 
-        {"kind":"and","text":"We create a simple `JTogglButton` UI component with a style animation.","code":["var ui = UI.toggleButton(\"Click me!\")","                .withTransitoryStyle(event, LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {","                    proresses << state.progress()","                    cycles << state.cycle()","                    return conf;","                })"]},
+        {"kind":"and","text":"We create a simple `JTogglButton` UI component with a style animation.","code":["var ui = UI.toggleButton(\"Click me!\")","                .withTransitoryStyle(event.observable(), LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {","                    proresses << state.progress()","                    cycles << state.cycle()","                    return conf;","                })"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var button = ui.get(JToggleButton)"]},
 

@@ -49,13 +49,13 @@ import java.util.Objects;
  */
 public final class DragDropComponentConf&lt;C extends JComponent&gt;
 {
-<span class="nc" id="L52">    private static final Action NO_ACTION = e -&gt; {};</span>
-<span class="nc" id="L53">    private static final Logger log = LoggerFactory.getLogger(DragDropComponentConf.class);</span>
+<span class="pc" id="L52">    private static final Action NO_ACTION = e -&gt; {};</span>
+<span class="fc" id="L53">    private static final Logger log = LoggerFactory.getLogger(DragDropComponentConf.class);</span>
 
     public static &lt;C extends JComponent&gt; DragDropComponentConf&lt;C&gt; of(
         C component
     ) {
-<span class="nc" id="L58">        return new DragDropComponentConf&lt;&gt;(</span>
+<span class="fc" id="L58">        return new DragDropComponentConf&lt;&gt;(</span>
                 component,
                 NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION
         );
@@ -75,14 +75,14 @@ public final class DragDropComponentConf&lt;C extends JComponent&gt;
         Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; onDropActionChanged,
         Action&lt;ComponentDelegate&lt;C,DropTargetEvent&gt;&gt;     onDragExit,
         Action&lt;ComponentDelegate&lt;C,DropTargetDropEvent&gt;&gt; onDragDropEnd
-<span class="nc" id="L78">    ) {</span>
-<span class="nc" id="L79">        _component           = Objects.requireNonNull(component);</span>
-<span class="nc" id="L80">        _onDragEnter         = Objects.requireNonNull(onDragEnter);</span>
-<span class="nc" id="L81">        _onDragOver          = Objects.requireNonNull(onDragOver);</span>
-<span class="nc" id="L82">        _onDropActionChanged = Objects.requireNonNull(onDropActionChanged);</span>
-<span class="nc" id="L83">        _onDragExit          = Objects.requireNonNull(onDragExit);</span>
-<span class="nc" id="L84">        _onDragDropEnd       = Objects.requireNonNull(onDragDropEnd);</span>
-<span class="nc" id="L85">    }</span>
+<span class="fc" id="L78">    ) {</span>
+<span class="fc" id="L79">        _component           = Objects.requireNonNull(component);</span>
+<span class="fc" id="L80">        _onDragEnter         = Objects.requireNonNull(onDragEnter);</span>
+<span class="fc" id="L81">        _onDragOver          = Objects.requireNonNull(onDragOver);</span>
+<span class="fc" id="L82">        _onDropActionChanged = Objects.requireNonNull(onDropActionChanged);</span>
+<span class="fc" id="L83">        _onDragExit          = Objects.requireNonNull(onDragExit);</span>
+<span class="fc" id="L84">        _onDragDropEnd       = Objects.requireNonNull(onDragDropEnd);</span>
+<span class="fc" id="L85">    }</span>
 
     /**
      * Returns the component that this configuration is for
@@ -213,13 +213,13 @@ public final class DragDropComponentConf&lt;C extends JComponent&gt;
      * {@link DropTargetDropEvent#isLocalTransfer} returns
      * &lt;code&gt;true&lt;/code&gt;. Otherwise, the behavior of the call is
      * implementation-dependent.
-     * &lt;P&gt;
+     *
      * @param action An {@link Action} with a {@link DropTargetDropEvent}
      *               wrapped in a {@link ComponentDelegate} passed to it.
      * @return A new {@link DragDropComponentConf} updated with the supplied action.
      */
     public DragDropComponentConf&lt;C&gt; onDrop( Action&lt;ComponentDelegate&lt;C,DropTargetDropEvent&gt;&gt; action ) {
-<span class="nc" id="L222">        return new DragDropComponentConf&lt;&gt;(</span>
+<span class="fc" id="L222">        return new DragDropComponentConf&lt;&gt;(</span>
             _component,
             _onDragEnter,
             _onDragOver,
@@ -231,9 +231,9 @@ public final class DragDropComponentConf&lt;C extends JComponent&gt;
 
 
     DropTarget toNewDropTarget() {
-<span class="nc" id="L234">        return new DropTarget(</span>
+<span class="fc" id="L234">        return new DropTarget(</span>
             _component,
-<span class="nc" id="L236">            new DropTargetListener() {</span>
+<span class="fc" id="L236">            new DropTargetListener() {</span>
                 @Override
                 public void dragEnter(DropTargetDragEvent event) {
                     try {

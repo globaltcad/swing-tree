@@ -813,8 +813,14 @@ import java.util.Optional;
 <span class="pc bpc" id="L813" title="1 of 2 branches missed.">        if ( other != null ) {</span>
 <span class="fc" id="L814">            defaultBackgroundColor = other.getBackground();</span>
         }
-<span class="fc" id="L816">        owner.setBackground(defaultBackgroundColor);</span>
-<span class="fc" id="L817">    }</span>
+<span class="fc bfc" id="L816" title="All 2 branches covered.">        if ( defaultBackgroundColor == null ) {</span>
+<span class="pc bpc" id="L817" title="1 of 2 branches missed.">            if ( owner.isBackgroundSet() ) // is this is false then the component already has it set to null!</span>
+<span class="fc" id="L818">                owner.setBackground(defaultBackgroundColor);</span>
+        } else {
+<span class="pc bpc" id="L820" title="1 of 2 branches missed.">            if ( !Objects.equals(owner.getBackground(), defaultBackgroundColor) )</span>
+<span class="fc" id="L821">                owner.setBackground(defaultBackgroundColor);</span>
+        }
+<span class="fc" id="L823">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

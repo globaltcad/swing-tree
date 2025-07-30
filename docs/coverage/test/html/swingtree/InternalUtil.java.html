@@ -9,17 +9,38 @@ final class InternalUtil
 {
     private InternalUtil() {}
 
+    static int _actualComponentCountFrom(Container container) {
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if ( container instanceof JMenu ) {</span>
+<span class="fc" id="L14">            return ((JMenu) container).getMenuComponentCount();</span>
+        }
+<span class="fc" id="L16">        return container.getComponentCount();</span>
+    }
+
+    static Component[] _actualComponentsFrom(Container container) {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if ( container instanceof JMenu ) {</span>
+<span class="fc" id="L21">            return ((JMenu) container).getMenuComponents();</span>
+        }
+<span class="fc" id="L23">        return container.getComponents();</span>
+    }
+
+    static Component _actualGetComponentAt(int index, Container container) {
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if ( container instanceof JMenu ) {</span>
+<span class="fc" id="L28">            return ((JMenu) container).getMenuComponent(index);</span>
+        }
+<span class="fc" id="L30">        return container.getComponent(index);</span>
+    }
+
     static void _traverseEnable(Component c, boolean isEnabled ) {
-<span class="nc" id="L13">        c.setEnabled( isEnabled );</span>
-<span class="nc bnc" id="L14" title="All 4 branches missed.">        if ( JPanel.class.isAssignableFrom( c.getClass() ) || JBox.class.isAssignableFrom( c.getClass() ) )</span>
-<span class="nc bnc" id="L15" title="All 2 branches missed.">            for ( Component c2 : ((JComponent)c).getComponents() )</span>
-<span class="nc" id="L16">                _traverseEnable( c2, isEnabled );</span>
+<span class="nc" id="L34">        c.setEnabled( isEnabled );</span>
+<span class="nc bnc" id="L35" title="All 4 branches missed.">        if ( JPanel.class.isAssignableFrom( c.getClass() ) || JBox.class.isAssignableFrom( c.getClass() ) )</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">            for ( Component c2 : ((JComponent)c).getComponents() )</span>
+<span class="nc" id="L37">                _traverseEnable( c2, isEnabled );</span>
         /*
             Note:
                 We use getClass() here, because we want to stop at subclasses of
                 JBox or JPanel because they are likely user defined components and not dumb
                 wrappers for other components.
         */
-<span class="nc" id="L23">    }</span>
+<span class="nc" id="L44">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

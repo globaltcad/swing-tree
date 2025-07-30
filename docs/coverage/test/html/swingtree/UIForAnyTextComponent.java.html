@@ -188,22 +188,22 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
      */
     public final I withFont( Val&lt;Font&gt; font ) {
-<span class="nc" id="L191">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
-<span class="nc" id="L192">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
-<span class="nc" id="L193">        return _withOnShow( font, (c,v) -&gt; {</span>
-<span class="nc bnc" id="L194" title="All 2 branches missed.">                    if ( _isUndefinedFont(v) )</span>
+<span class="fc" id="L191">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="fc" id="L192">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="fc" id="L193">        return _withOnShow( font, (c,v) -&gt; {</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(v) )</span>
 <span class="nc" id="L195">                        c.setFont(null);</span>
                     else
-<span class="nc" id="L197">                        c.setFont(v);</span>
-<span class="nc" id="L198">                })</span>
-<span class="nc" id="L199">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L200">                    Font newFont = font.orElseThrowUnchecked();</span>
-<span class="nc bnc" id="L201" title="All 2 branches missed.">                    if ( _isUndefinedFont(newFont) )</span>
+<span class="fc" id="L197">                        c.setFont(v);</span>
+<span class="fc" id="L198">                })</span>
+<span class="fc" id="L199">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L200">                    Font newFont = font.orElseThrowUnchecked();</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(newFont) )</span>
 <span class="nc" id="L202">                        thisComponent.setFont( null );</span>
                     else
-<span class="nc" id="L204">                        thisComponent.setFont( newFont );</span>
-<span class="nc" id="L205">                })</span>
-<span class="nc" id="L206">                ._this();</span>
+<span class="fc" id="L204">                        thisComponent.setFont( newFont );</span>
+<span class="fc" id="L205">                })</span>
+<span class="fc" id="L206">                ._this();</span>
 
     }
 
@@ -220,6 +220,48 @@ import java.util.function.Consumer;
 <span class="fc" id="L220">                ._this();</span>
     }
 
+    /**
+     *  Use this to dynamically set the modifiability flag of the wrapped {@link JTextComponent}
+     *  through the provided {@link Boolean} based view model property.
+     *  When the modifiability flag wrapped by the provided property changes,
+     *  then this change will automatically be translated to the
+     *  {@link JTextComponent#setEditable(boolean)} method of the wrapped text component.
+     *
+     * @param isEditable The boolean property to bind the modifiability flag of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if the specified property is &lt;code&gt;null&lt;/code&gt;.
+     * @throws IllegalArgumentException if the specified property allows &lt;code&gt;null&lt;/code&gt; values.
+     */
+    public final I isEditableIf( Val&lt;Boolean&gt; isEditable ) {
+<span class="fc" id="L236">        Objects.requireNonNull(isEditable, &quot;isEditable&quot;);</span>
+<span class="fc" id="L237">        NullUtil.nullPropertyCheck(isEditable, &quot;isEditable&quot;, &quot;Use a boolean property instead of null!&quot;);</span>
+<span class="fc" id="L238">        return _withOnShow( isEditable, (c,v) -&gt; c.setEditable(v) )</span>
+<span class="fc" id="L239">                ._with( thisComponent -&gt; thisComponent.setEditable(isEditable.orElseThrowUnchecked()) )</span>
+<span class="fc" id="L240">                ._this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the modifiability flag of the wrapped {@link JTextComponent}
+     *  through the inverse of the supplied {@link Boolean} based view model property.
+     *  When the modifiability flag wrapped by the provided property changes,
+     *  then this change will automatically be translated to the
+     *  {@link JTextComponent#setEditable(boolean)} method of the wrapped text component.&lt;br&gt;
+     *  &lt;b&gt;
+     *      This method is the inverse of {@link #isEditableIf(Val)}.
+     *  &lt;/b&gt;
+     *
+     * @param isNotEditable The boolean property to bind the non-modifiability of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if the specified property is &lt;code&gt;null&lt;/code&gt;.
+     * @throws IllegalArgumentException if the specified property allows &lt;code&gt;null&lt;/code&gt; values.
+     */
+    public final I isEditableIfNot( Val&lt;Boolean&gt; isNotEditable ) {
+<span class="fc" id="L259">        Objects.requireNonNull(isNotEditable, &quot;isNotEditable&quot;);</span>
+<span class="fc" id="L260">        NullUtil.nullPropertyCheck(isNotEditable, &quot;isNotEditable&quot;, &quot;Use a boolean property instead of null!&quot;);</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        return _withOnShow( isNotEditable, (c,v) -&gt; c.setEditable(!v) )</span>
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">                ._with( thisComponent -&gt; thisComponent.setEditable(!isNotEditable.orElseThrowUnchecked()) )</span>
+<span class="fc" id="L263">                ._this();</span>
+    }
 
     /**
      *  Use this to register any change in the contents of the text component including both
@@ -229,39 +271,39 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I onContentChange( Action&lt;ComponentDelegate&lt;JTextComponent, DocumentEvent&gt;&gt; action ) {
-<span class="fc" id="L232">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L233">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L234">                    thisComponent.getDocument().addDocumentListener(new DocumentListener() {</span>
+<span class="fc" id="L274">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L275">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L276">                    thisComponent.getDocument().addDocumentListener(new DocumentListener() {</span>
                         @Override public void insertUpdate(DocumentEvent e)  {
-<span class="fc" id="L236">                            _runInApp(()-&gt;{</span>
+<span class="fc" id="L278">                            _runInApp(()-&gt;{</span>
                                 try {
-<span class="fc" id="L238">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="nc" id="L239">                                } catch (Exception ex) {</span>
-<span class="nc" id="L240">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
-<span class="fc" id="L241">                                }</span>
-<span class="fc" id="L242">                            });</span>
-<span class="fc" id="L243">                        }</span>
+<span class="fc" id="L280">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L281">                                } catch (Exception ex) {</span>
+<span class="nc" id="L282">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
+<span class="fc" id="L283">                                }</span>
+<span class="fc" id="L284">                            });</span>
+<span class="fc" id="L285">                        }</span>
                         @Override public void removeUpdate(DocumentEvent e)  {
-<span class="fc" id="L245">                            _runInApp(()-&gt;{</span>
+<span class="fc" id="L287">                            _runInApp(()-&gt;{</span>
                                 try {
-<span class="fc" id="L247">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="nc" id="L248">                                } catch (Exception ex) {</span>
-<span class="nc" id="L249">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
-<span class="fc" id="L250">                                }</span>
-<span class="fc" id="L251">                            });</span>
-<span class="fc" id="L252">                        }</span>
+<span class="fc" id="L289">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L290">                                } catch (Exception ex) {</span>
+<span class="nc" id="L291">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
+<span class="fc" id="L292">                                }</span>
+<span class="fc" id="L293">                            });</span>
+<span class="fc" id="L294">                        }</span>
                         @Override public void changedUpdate(DocumentEvent e) {
-<span class="nc" id="L254">                            _runInApp(()-&gt;{</span>
+<span class="nc" id="L296">                            _runInApp(()-&gt;{</span>
                                 try {
-<span class="nc" id="L256">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="nc" id="L257">                                } catch (Exception ex) {</span>
-<span class="nc" id="L258">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
-<span class="nc" id="L259">                                }</span>
-<span class="nc" id="L260">                            });</span>
-<span class="nc" id="L261">                        }</span>
+<span class="nc" id="L298">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L299">                                } catch (Exception ex) {</span>
+<span class="nc" id="L300">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
+<span class="nc" id="L301">                                }</span>
+<span class="nc" id="L302">                            });</span>
+<span class="nc" id="L303">                        }</span>
                     });
-<span class="fc" id="L263">                })</span>
-<span class="fc" id="L264">                ._this();</span>
+<span class="fc" id="L305">                })</span>
+<span class="fc" id="L306">                ._this();</span>
     }
 
     /**
@@ -272,26 +314,26 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I onTextChange( Action&lt;ComponentDelegate&lt;JTextComponent, DocumentEvent&gt;&gt; action ) {
-<span class="fc" id="L275">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L276">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L277">                    _onTextChange(thisComponent, e -&gt; _runInApp( () -&gt; {</span>
+<span class="fc" id="L317">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L318">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L319">                    _onTextChange(thisComponent, e -&gt; _runInApp( () -&gt; {</span>
                         try {
-<span class="fc" id="L279">                            action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="nc" id="L280">                        } catch (Exception ex) {</span>
-<span class="nc" id="L281">                            log.error(&quot;Error while executing action on text change!&quot;, ex);</span>
-<span class="fc" id="L282">                        }</span>
-<span class="fc" id="L283">                    }));</span>
-<span class="fc" id="L284">                })</span>
-<span class="fc" id="L285">                ._this();</span>
+<span class="fc" id="L321">                            action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L322">                        } catch (Exception ex) {</span>
+<span class="nc" id="L323">                            log.error(&quot;Error while executing action on text change!&quot;, ex);</span>
+<span class="fc" id="L324">                        }</span>
+<span class="fc" id="L325">                    }));</span>
+<span class="fc" id="L326">                })</span>
+<span class="fc" id="L327">                ._this();</span>
     }
 
     protected final void _onTextChange( C thisComponent, Consumer&lt;DocumentEvent&gt; action ) {
-<span class="fc" id="L289">        thisComponent.getDocument().addDocumentListener(new DocumentListener() {</span>
-<span class="fc" id="L290">            @Override public void insertUpdate(DocumentEvent e) { action.accept(e); }</span>
-<span class="fc" id="L291">            @Override public void removeUpdate(DocumentEvent e) { action.accept(e); }</span>
-<span class="nc" id="L292">            @Override public void changedUpdate(DocumentEvent e) {}</span>
+<span class="fc" id="L331">        thisComponent.getDocument().addDocumentListener(new DocumentListener() {</span>
+<span class="fc" id="L332">            @Override public void insertUpdate(DocumentEvent e) { action.accept(e); }</span>
+<span class="fc" id="L333">            @Override public void removeUpdate(DocumentEvent e) { action.accept(e); }</span>
+<span class="nc" id="L334">            @Override public void changedUpdate(DocumentEvent e) {}</span>
         });
-<span class="fc" id="L294">    }</span>
+<span class="fc" id="L336">    }</span>
 
     /**
      * @param thisComponent The component which is wrapped by this builder.
@@ -299,56 +341,56 @@ import java.util.function.Consumer;
      *                      component supports text filtering (The underlying document is an {@link AbstractDocument}).
      */
     private void _ifFilterable( C thisComponent, Runnable action ) {
-<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if ( thisComponent.getDocument() instanceof AbstractDocument ) {</span>
-<span class="fc" id="L303">            ExtraState state = ExtraState.of( thisComponent );</span>
-<span class="fc" id="L304">            action.run();</span>
-<span class="fc" id="L305">            AbstractDocument doc = (AbstractDocument) thisComponent.getDocument();</span>
-<span class="fc" id="L306">            doc.setDocumentFilter(new DocumentFilter() {</span>
+<span class="pc bpc" id="L344" title="1 of 2 branches missed.">        if ( thisComponent.getDocument() instanceof AbstractDocument ) {</span>
+<span class="fc" id="L345">            ExtraState state = ExtraState.of( thisComponent );</span>
+<span class="fc" id="L346">            action.run();</span>
+<span class="fc" id="L347">            AbstractDocument doc = (AbstractDocument) thisComponent.getDocument();</span>
+<span class="fc" id="L348">            doc.setDocumentFilter(new DocumentFilter() {</span>
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 @Override
                 public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-<span class="fc" id="L312">                    state.removes.forEach(action -&gt; {</span>
+<span class="fc" id="L354">                    state.removes.forEach(action -&gt; {</span>
                         try {
-<span class="fc" id="L314">                            action.accept(new TextRemoveDelegate(thisComponent, fb, offset, length));</span>
-<span class="nc" id="L315">                        } catch (Exception e) {</span>
-<span class="nc" id="L316">                            log.error(&quot;Error while executing action on text remove!&quot;, e);</span>
-<span class="fc" id="L317">                        }</span>
-<span class="fc" id="L318">                    });</span>
-<span class="pc bpc" id="L319" title="1 of 2 branches missed.">                    if ( state.removes.isEmpty() ) fb.remove(offset, length);</span>
-<span class="fc" id="L320">                }</span>
+<span class="fc" id="L356">                            action.accept(new TextRemoveDelegate(thisComponent, fb, offset, length));</span>
+<span class="nc" id="L357">                        } catch (Exception e) {</span>
+<span class="nc" id="L358">                            log.error(&quot;Error while executing action on text remove!&quot;, e);</span>
+<span class="fc" id="L359">                        }</span>
+<span class="fc" id="L360">                    });</span>
+<span class="pc bpc" id="L361" title="1 of 2 branches missed.">                    if ( state.removes.isEmpty() ) fb.remove(offset, length);</span>
+<span class="fc" id="L362">                }</span>
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 @Override
                 public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-<span class="fc" id="L326">                    state.inserts.forEach(action -&gt; {</span>
+<span class="fc" id="L368">                    state.inserts.forEach(action -&gt; {</span>
                         try {
-<span class="fc" id="L328">                            action.accept(new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr));</span>
-<span class="nc" id="L329">                        } catch (Exception e) {</span>
-<span class="nc" id="L330">                            log.error(&quot;Error while executing action on text insert!&quot;, e);</span>
-<span class="fc" id="L331">                        }</span>
-<span class="fc" id="L332">                    });</span>
-<span class="pc bpc" id="L333" title="1 of 2 branches missed.">                    if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);</span>
-<span class="fc" id="L334">                }</span>
+<span class="fc" id="L370">                            action.accept(new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr));</span>
+<span class="nc" id="L371">                        } catch (Exception e) {</span>
+<span class="nc" id="L372">                            log.error(&quot;Error while executing action on text insert!&quot;, e);</span>
+<span class="fc" id="L373">                        }</span>
+<span class="fc" id="L374">                    });</span>
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">                    if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);</span>
+<span class="fc" id="L376">                }</span>
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 @Override
                 public void replace(FilterBypass fb, int offset, int length, @Nullable String text, AttributeSet attrs) throws BadLocationException {
-<span class="fc" id="L340">                    state.replaces.forEach(action -&gt; {</span>
+<span class="fc" id="L382">                    state.replaces.forEach(action -&gt; {</span>
                         try {
-<span class="fc" id="L342">                            action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs));</span>
-<span class="nc" id="L343">                        } catch (Exception e) {</span>
-<span class="nc" id="L344">                            log.error(&quot;Error while executing action on text replace!&quot;, e);</span>
-<span class="fc" id="L345">                        }</span>
-<span class="fc" id="L346">                    });</span>
-<span class="pc bpc" id="L347" title="1 of 2 branches missed.">                    if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);</span>
-<span class="fc" id="L348">                }</span>
+<span class="fc" id="L384">                            action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs));</span>
+<span class="nc" id="L385">                        } catch (Exception e) {</span>
+<span class="nc" id="L386">                            log.error(&quot;Error while executing action on text replace!&quot;, e);</span>
+<span class="fc" id="L387">                        }</span>
+<span class="fc" id="L388">                    });</span>
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">                    if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);</span>
+<span class="fc" id="L390">                }</span>
             });
         }
-<span class="fc" id="L351">    }</span>
+<span class="fc" id="L393">    }</span>
 
     /**
      *  Allows you to register a user action listener which will be called
@@ -362,12 +404,12 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I onTextRemove( Action&lt;TextRemoveDelegate&gt; action ) {
-<span class="fc" id="L365">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L366">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L367">                    ExtraState state = ExtraState.of( thisComponent );</span>
-<span class="fc" id="L368">                    _ifFilterable(thisComponent, () -&gt; state.removes.add(action));</span>
-<span class="fc" id="L369">               })</span>
-<span class="fc" id="L370">               ._this();</span>
+<span class="fc" id="L407">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L408">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L409">                    ExtraState state = ExtraState.of( thisComponent );</span>
+<span class="fc" id="L410">                    _ifFilterable(thisComponent, () -&gt; state.removes.add(action));</span>
+<span class="fc" id="L411">               })</span>
+<span class="fc" id="L412">               ._this();</span>
     }
 
     /**
@@ -385,11 +427,11 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I onTextInsert( Action&lt;TextInsertDelegate&gt; action ) {
-<span class="fc" id="L388">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L389">                    ExtraState state = ExtraState.of( thisComponent );</span>
-<span class="fc" id="L390">                    _ifFilterable(thisComponent, () -&gt; state.inserts.add(action));</span>
-<span class="fc" id="L391">               })</span>
-<span class="fc" id="L392">               ._this();</span>
+<span class="fc" id="L430">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L431">                    ExtraState state = ExtraState.of( thisComponent );</span>
+<span class="fc" id="L432">                    _ifFilterable(thisComponent, () -&gt; state.inserts.add(action));</span>
+<span class="fc" id="L433">               })</span>
+<span class="fc" id="L434">               ._this();</span>
     }
 
     /**
@@ -407,25 +449,25 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I onTextReplace( Action&lt;TextReplaceDelegate&gt; action ) {
-<span class="fc" id="L410">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L411">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L412">                    ExtraState state = ExtraState.of( thisComponent );</span>
-<span class="fc" id="L413">                    _ifFilterable(thisComponent, () -&gt; state.replaces.add(action));</span>
-<span class="fc" id="L414">               })</span>
-<span class="fc" id="L415">               ._this();</span>
+<span class="fc" id="L452">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L453">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L454">                    ExtraState state = ExtraState.of( thisComponent );</span>
+<span class="fc" id="L455">                    _ifFilterable(thisComponent, () -&gt; state.replaces.add(action));</span>
+<span class="fc" id="L456">               })</span>
+<span class="fc" id="L457">               ._this();</span>
     }
 
 
-<span class="fc" id="L419">    private static class ExtraState</span>
+<span class="fc" id="L461">    private static class ExtraState</span>
     {
         static ExtraState of( JTextComponent textComponent ) {
-<span class="fc" id="L422">            return ComponentExtension.from(textComponent)</span>
-<span class="fc" id="L423">                                     .getOrSet(ExtraState.class, ExtraState::new);</span>
+<span class="fc" id="L464">            return ComponentExtension.from(textComponent)</span>
+<span class="fc" id="L465">                                     .getOrSet(ExtraState.class, ExtraState::new);</span>
         }
 
-<span class="fc" id="L426">        final java.util.List&lt;Action&lt;TextRemoveDelegate&gt;&gt;   removes = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L427">        final java.util.List&lt;Action&lt;TextInsertDelegate&gt;&gt;   inserts = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L428">        final java.util.List&lt;Action&lt;TextReplaceDelegate&gt;&gt;  replaces = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L468">        final java.util.List&lt;Action&lt;TextRemoveDelegate&gt;&gt;   removes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L469">        final java.util.List&lt;Action&lt;TextInsertDelegate&gt;&gt;   inserts = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L470">        final java.util.List&lt;Action&lt;TextReplaceDelegate&gt;&gt;  replaces = new ArrayList&lt;&gt;();</span>
     }
 
 }

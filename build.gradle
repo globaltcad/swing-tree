@@ -20,7 +20,7 @@ println "Static analysis enabled: $WE_CAN_DO_STATIC_ANALYSIS"
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
-String VERSION  = "0.13.0"
+String VERSION  = "0.14.0"
 
 group GROUP_ID
 version VERSION
@@ -51,7 +51,7 @@ dependencies {
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0-M22'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0'
     api group: 'com.github.weisj',     name: 'jsvg',            version: '2.0.0'
 
     // Logging :
@@ -121,6 +121,15 @@ jacocoTestReport {
 check.dependsOn jacocoTestReport
 
 // CUSTOM DEPLOYMENT TASKS :
+
+// 0: Cleanup
+task cleanForDeployment(type: Delete) {
+    delete "$rootDir/build"
+    delete fileTree("$rootDir/docs/jdocs/") { include '**/*' }
+    delete fileTree("$rootDir/docs/spock/json/") { include '**/*' }
+    delete fileTree("$rootDir/docs/spock/reports/") { include '**/*' }
+    delete fileTree("$rootDir/docs/coverage/test/") { include '**/*' }
+}
 
 // 1:
 task deploy() {

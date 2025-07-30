@@ -2402,7 +2402,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    defines a custom background and border color on a label:
      *    <pre>{@code
      *      UI.label("I have a highlight animation!")
-     *      .withTransitoryStyle(vm.highlightEvent(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -> it
+     *      .withTransitoryStyle(vm.highlightEvent().observable(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -> it
      *          .backgroundColor(new Color(0, 0, 0, (int)(state.progress() * 255)))
      *          .borderColor(new Color(255, 255, 255, (int)(state.progress() * 255)))
      *      )

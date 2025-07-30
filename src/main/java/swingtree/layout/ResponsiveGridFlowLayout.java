@@ -356,8 +356,9 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             Container target, Cell[] cells,
             int x, int y, int width, int height,
             int rowStart, int rowEnd, boolean ltr,
-            boolean useBaseline, @Nullable int[] ascent,
-            @Nullable int[] descent
+            boolean useBaseline,
+            int@Nullable [] ascent,
+            int@Nullable [] descent
     ) {
         int hgap = UI.scale(_horizontalGapSize);
         switch (_alignmentCode) {
@@ -689,19 +690,40 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         return Optional.of(newSize);
     }
 
+    private static int rankOf(ParentSizeClass sizeClass){
+        switch (sizeClass) {
+            case VOID:
+                return 0;
+            case VERY_SMALL:
+                return 1;
+            case SMALL:
+                return 2;
+            case MEDIUM:
+                return 3;
+            case LARGE:
+                return 4;
+            case VERY_LARGE:
+                return 5;
+            case OVERSIZE:
+                return 6;
+            default:
+                return -1;
+        }
+    }
+
     private static Optional<FlowCellSpanPolicy> _findNextBestAutoSpan( FlowCellConf cell, ParentSizeClass targetSize ) {
-        Optional<FlowCellSpanPolicy> autoSpan = _find(targetSize.ordinal(), cell);
+        Optional<FlowCellSpanPolicy> autoSpan = _find(rankOf(targetSize), cell);
         if ( autoSpan.isPresent() )
             return autoSpan;
 
         // We did not find the exact match. Let's try to find the closest match.
 
         int numberOfSizeClasses = ParentSizeClass.values().length;
-        int targetOrdinal = targetSize.ordinal();
+        int targetOrdinal = rankOf(targetSize);
         /*
             We want to find the enum value which is closed to the target ordinal.
          */
-        int sign = ( targetSize.ordinal() > numberOfSizeClasses / 2 ? 1 : -1 );
+        int sign = ( rankOf(targetSize) > numberOfSizeClasses / 2 ? 1 : -1 );
         for ( int offset = 1; offset < numberOfSizeClasses; offset++ ) {
             sign = -sign;
             autoSpan = _find(targetOrdinal + offset * sign, cell);

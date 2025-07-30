@@ -51,6 +51,7 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
      *              (usually based on the {@link AnimationStatus#progress()}).
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
+     * @throws Exception if the style could not be applied by the client code.
      */
     ComponentStyleDelegate&lt;C&gt; style( AnimationStatus status, ComponentStyleDelegate&lt;C&gt; delegate ) throws Exception;
 
@@ -65,20 +66,20 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
      * of the given {@link AnimatedStyler}.
      */
     default AnimatedStyler&lt;C&gt; andThen( AnimatedStyler&lt;C&gt; other ) {
-<span class="nc" id="L68">        Objects.requireNonNull(other, &quot;Use AnimatedStyler.none() instead of null.&quot;);</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">        if ( this == none() )</span>
-<span class="nc" id="L70">            return other;</span>
-<span class="nc bnc" id="L71" title="All 2 branches missed.">        if ( other == none() )</span>
-<span class="nc" id="L72">            return this;</span>
+<span class="nc" id="L69">        Objects.requireNonNull(other, &quot;Use AnimatedStyler.none() instead of null.&quot;);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if ( this == none() )</span>
+<span class="nc" id="L71">            return other;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if ( other == none() )</span>
+<span class="nc" id="L73">            return this;</span>
 
-<span class="nc" id="L74">        return (state, delegate) -&gt; {</span>
-<span class="nc" id="L75">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
+<span class="nc" id="L75">        return (state, delegate) -&gt; {</span>
+<span class="nc" id="L76">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
             try {
-<span class="nc" id="L77">                result = style( state, delegate );</span>
-<span class="nc" id="L78">            } catch ( Exception e ) {</span>
-<span class="nc" id="L79">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
-<span class="nc" id="L80">            }</span>
-<span class="nc" id="L81">            return other.style( state, result );</span>
+<span class="nc" id="L78">                result = style( state, delegate );</span>
+<span class="nc" id="L79">            } catch ( Exception e ) {</span>
+<span class="nc" id="L80">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
+<span class="nc" id="L81">            }</span>
+<span class="nc" id="L82">            return other.style( state, result );</span>
         };
     }
 }

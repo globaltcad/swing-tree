@@ -78,6 +78,8 @@ public interface BasicTableModel extends TableModel
     /**
      *  The class below is a functional builder for creating a lambda based implementation of the {@link BasicTableModel}.
      *  This allows fo a boilerplate free functional API.
+     *
+     * @param <E> Common type for all entry items in the table.
      */
      class Builder<E> implements Buildable<BasicTableModel>
      {
@@ -105,7 +107,7 @@ public interface BasicTableModel extends TableModel
              );
          }
 
-         public Builder(
+         private Builder(
              Class<E>                 commonEntryType,
              @Nullable RowCount       rowCount,
              @Nullable ColumnCount    colCount,

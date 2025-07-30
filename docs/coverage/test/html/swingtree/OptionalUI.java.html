@@ -588,8 +588,8 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @throws NoSuchElementException if no component is present
      */
     public C orElseThrow() {
-<span class="pc bpc" id="L591" title="1 of 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L592">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="fc bfc" id="L591" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L592">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
 <span class="pc bpc" id="L593" title="1 of 2 branches missed.">        if ( _component == null )</span>
 <span class="nc" id="L594">            throw new NoSuchElementException(&quot;No component present&quot;);</span>
 

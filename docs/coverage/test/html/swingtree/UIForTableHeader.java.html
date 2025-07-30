@@ -127,11 +127,15 @@ public final class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIFo
 <span class="nc" id="L127">            return this;</span>
 <span class="nc" id="L128">        }</span>
 <span class="nc" id="L129">        Objects.requireNonNull(builder);</span>
-<span class="nc" id="L130">        return withDefaultRenderer(builder.getForTable());</span>
+<span class="nc" id="L130">        CellBuilder&lt;H, Object&gt; finalBuilder = builder;</span>
+<span class="nc" id="L131">        return _with(thisComponent -&gt; {</span>
+<span class="nc" id="L132">                        thisComponent.setDefaultRenderer(finalBuilder.getForTable(thisComponent.getDefaultRenderer()));</span>
+<span class="nc" id="L133">                    })</span>
+<span class="nc" id="L134">                    ._this();</span>
     }
 
     private static &lt;T extends JTableHeader&gt; CellBuilder&lt;T, Object&gt; _renderTable() {
-<span class="nc" id="L134">        return (CellBuilder) CellBuilder.forTable(Object.class);</span>
+<span class="nc" id="L138">        return (CellBuilder) CellBuilder.forTable(Object.class);</span>
     }
 
 }

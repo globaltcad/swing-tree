@@ -164,7 +164,7 @@
 
         {"kind":"when","text":"We try to access the value of the property.","code":["property.get()"]},
 
-        {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
+        {"kind":"then","text":"The property will throw an exception indicating that the item is missing.","code":["thrown(MissingItemRuntimeException)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

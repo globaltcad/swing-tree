@@ -4,7 +4,7 @@
   "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of properties that can be bound to UI components\n    to model their state.\n    This specification demonstrates how to bind the properties of\n    you view model to the SwingTree UI.",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
-    "runs":"26",
+    "runs":"28",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -320,6 +320,64 @@
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The text field will have the new text.","code":["panel.components[1].text == \"Goodbye World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind to the `isEditable` flag of a text component.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the editable state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui =","            UI.panel(\"fill, wrap 1\")","            .add(UI.button(\"Click Me!\"))","            .add(UI.textField(\"Hello World\").isEditableIf(property))","            .add(UI.textArea(\"Hello World\").isEditableIfNot(property))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The text field will be editable.","code":["panel.components[1].editable == true"]},
+
+        {"kind":"and","text":"The text area will be non-editable.","code":["panel.components[2].editable == false"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The text field will be non-editable.","code":["panel.components[1].editable == false"]},
+
+        {"kind":"and","text":"The text area will be editable.","code":["panel.components[2].editable == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind to the `Font` property of a text component.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the font of a component.","code":["Val<Font> property = Var.of(new Font(\"Arial\", Font.PLAIN, 12))"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.button(\"Click Me!\"))","            .add(UI.textField(\"Hello World\").withFont(property))","            .add(UI.textArea(\"Hello World\").withFont(property.view(f->f.deriveFont(Font.ITALIC))))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The text field will have the font of the property.","code":["panel.components[1].font == new Font(\"Arial\", Font.PLAIN, 12)"]},
+
+        {"kind":"and","text":"The text area will have the slightly derived font from the property.","code":["panel.components[2].font == new Font(\"Arial\", Font.ITALIC, 12)"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(new Font(\"Times New Roman\", Font.BOLD, 16))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The text field will have the new font.","code":["panel.components[1].font == new Font(\"Times New Roman\", Font.BOLD, 16)"]},
+
+        {"kind":"and","text":"The text area will again have the slightly derived font from the property.","code":["panel.components[2].font == new Font(\"Times New Roman\", Font.ITALIC, 16)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

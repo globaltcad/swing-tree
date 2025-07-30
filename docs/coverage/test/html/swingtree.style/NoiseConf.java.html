@@ -320,9 +320,10 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      *  This will rotate the input space of the noise function.
      *
      *  @param rotation The rotation of the noise gradient in degrees.
+     *  @return A new noise gradient style with the specified rotation.
      */
     public NoiseConf rotation( float rotation ) {
-<span class="fc" id="L325">        return of(_function, _colors, _offset, _scale, _area, _boundary, rotation, _fractions);</span>
+<span class="fc" id="L326">        return of(_function, _colors, _offset, _scale, _area, _boundary, rotation, _fractions);</span>
     }
 
     /**
@@ -334,87 +335,88 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      *  colors will be evenly distributed between the last two fractions.
      *
      *  @param fractions The fractions of the noise gradient.
+     *  @return A new noise gradient style with the specified fractions.
      */
     public NoiseConf fractions( double... fractions ) {
-<span class="nc" id="L339">        float[] actualFractions = new float[fractions.length];</span>
-<span class="nc bnc" id="L340" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
-<span class="nc" id="L341">            actualFractions[i] = (float) fractions[i];</span>
+<span class="nc" id="L341">        float[] actualFractions = new float[fractions.length];</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
+<span class="nc" id="L343">            actualFractions[i] = (float) fractions[i];</span>
 
-<span class="nc" id="L343">        return of(_function, _colors, _offset, _scale, _area, _boundary, _rotation, actualFractions);</span>
+<span class="nc" id="L345">        return of(_function, _colors, _offset, _scale, _area, _boundary, _rotation, actualFractions);</span>
     }
 
     @Override
     public String toString() {
-<span class="pc bpc" id="L348" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L349">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="nc" id="L350">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L351">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="nc" id="L352">        return getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;function=&quot;    + _function + &quot;, &quot; +
-<span class="nc" id="L352">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+<span class="nc" id="L354">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
                     &quot;offset=&quot;     + _offset + &quot;, &quot; +
                     &quot;scale=&quot;      + _scale + &quot;, &quot; +
                     &quot;area=&quot;       + _area + &quot;, &quot; +
                     &quot;boundary=&quot;   + _boundary + &quot;, &quot; +
                     &quot;rotation=&quot;   + _rotation + &quot;, &quot; +
-<span class="nc" id="L358">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) +</span>
+<span class="nc" id="L360">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) +</span>
                 &quot;]&quot;;
     }
 
     @Override
     public boolean equals( @Nullable Object o ) {
-<span class="fc bfc" id="L364" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="fc bfc" id="L365" title="All 2 branches covered.">        if ( !(o instanceof NoiseConf) ) return false;</span>
-<span class="fc" id="L366">        NoiseConf that = (NoiseConf) o;</span>
-<span class="fc bfc" id="L367" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
-<span class="fc bfc" id="L368" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
-<span class="pc bpc" id="L369" title="1 of 2 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
-<span class="pc bpc" id="L370" title="4 of 8 branches missed.">                Objects.equals(_scale, that._scale)   &amp;&amp;</span>
+<span class="fc bfc" id="L366" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if ( !(o instanceof NoiseConf) ) return false;</span>
+<span class="fc" id="L368">        NoiseConf that = (NoiseConf) o;</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L371" title="1 of 2 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+<span class="pc bpc" id="L372" title="4 of 8 branches missed.">                Objects.equals(_scale, that._scale)   &amp;&amp;</span>
                _area       == that._area             &amp;&amp;
                _boundary   == that._boundary         &amp;&amp;
                _rotation   == that._rotation         &amp;&amp;
-<span class="pc bpc" id="L374" title="1 of 2 branches missed.">               Arrays.equals(_fractions, that._fractions);</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">               Arrays.equals(_fractions, that._fractions);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L379">        return Objects.hash(</span>
+<span class="fc" id="L381">        return Objects.hash(</span>
                 _function,
-<span class="fc" id="L381">                Arrays.hashCode(_colors),</span>
+<span class="fc" id="L383">                Arrays.hashCode(_colors),</span>
                 _offset,
                 _scale,
                 _area,
                 _boundary,
-<span class="fc" id="L386">                _rotation,</span>
-<span class="fc" id="L387">                Arrays.hashCode(_fractions)</span>
+<span class="fc" id="L388">                _rotation,</span>
+<span class="fc" id="L389">                Arrays.hashCode(_fractions)</span>
             );
     }
 
     @Override
     public NoiseConf simplified() {
-<span class="fc bfc" id="L393" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L394">            return _NONE;</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L396">            return _NONE;</span>
 
-<span class="pc bpc" id="L396" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
-<span class="nc" id="L397">            return _NONE;</span>
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L399">            return _NONE;</span>
 
-<span class="pc bpc" id="L399" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
-<span class="fc" id="L400">            return _NONE;</span>
+<span class="pc bpc" id="L401" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
+<span class="fc" id="L402">            return _NONE;</span>
 
-<span class="fc bfc" id="L402" title="All 2 branches covered.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();</span>
 
-<span class="pc bpc" id="L404" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
-<span class="nc" id="L405">            return _NONE;</span>
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L407">            return _NONE;</span>
 
-<span class="fc bfc" id="L407" title="All 2 branches covered.">        if ( numberOfRealColors != _colors.length ) {</span>
-<span class="fc" id="L408">            Color[] realColors = new Color[numberOfRealColors];</span>
-<span class="fc" id="L409">            int index = 0;</span>
-<span class="fc bfc" id="L410" title="All 2 branches covered.">            for ( Color color : _colors )</span>
-<span class="fc bfc" id="L411" title="All 2 branches covered.">                if ( !StyleUtil.isUndefinedColor(color) )</span>
-<span class="fc" id="L412">                    realColors[index++] = color;</span>
+<span class="fc bfc" id="L409" title="All 2 branches covered.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="fc" id="L410">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="fc" id="L411">            int index = 0;</span>
+<span class="fc bfc" id="L412" title="All 2 branches covered.">            for ( Color color : _colors )</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">                if ( !StyleUtil.isUndefinedColor(color) )</span>
+<span class="fc" id="L414">                    realColors[index++] = color;</span>
 
-<span class="fc" id="L414">            return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );</span>
+<span class="fc" id="L416">            return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );</span>
         }
 
-<span class="fc" id="L417">        return this;</span>
+<span class="fc" id="L419">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

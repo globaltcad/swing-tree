@@ -4,7 +4,7 @@
   "narrative":"Tabs are a way to efficiently group related content in a single container.\n    The tabs can be bound to a property, so that the selected tab is always\n    the one that corresponds to the value of the property.\n    You can also model other aspects of a tab using properties, such as\n    whether it is enabled, visible, or has a tooltip.",
   "subjects":[],
   "statistics":{
-    "runs":"36",
+    "runs":"44",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -27,11 +27,11 @@
 
         {"kind":"expect","text":"","code":["tabbedPane.getSelectedIndex() == -1","tabbedPane.getTabCount() == 3"]},
 
-        {"kind":"when","text":"We select the first tab.","code":["tabbedPane.selectedIndex = 0"]},
+        {"kind":"when","text":"We select the first tab.","code":["UI.runNow(()->{ tabbedPane.selectedIndex = 0 })"]},
 
         {"kind":"then","text":"All properties reflect this change.","code":["selectedIndex.get() == 0","tab1Selected.get() == true","tab2Selected.get() == false","tab3Selected.get() == false"]},
 
-        {"kind":"when","text":"We select the second tab.","code":["tabbedPane.selectedIndex = 1"]},
+        {"kind":"when","text":"We select the second tab.","code":["UI.runNow(()->{ tabbedPane.selectedIndex = 1 })"]},
 
         {"kind":"then","text":"The selected index property is updated, and the boolean properties are correct too.","code":["selectedIndex.get() == 1","tab2Selected.get() == true","tab1Selected.get() == false","tab3Selected.get() == false"]},
 
@@ -64,11 +64,11 @@
 
         {"kind":"expect","text":"","code":["tabbedPane.getSelectedIndex() == -1","tabbedPane.getTabCount() == 3"]},
 
-        {"kind":"when","text":"We select the first tab.","code":["tabbedPane.selectedIndex = 0"]},
+        {"kind":"when","text":"We select the first tab.","code":["UI.runNow(()->{ tabbedPane.selectedIndex = 0 })"]},
 
         {"kind":"then","text":"The properties reflect this change.","code":["tab1Selected.get() == true","tab2Selected.get() == false","tab3Selected.get() == false"]},
 
-        {"kind":"when","text":"We select the second tab.","code":["tabbedPane.selectedIndex = 1"]},
+        {"kind":"when","text":"We select the second tab.","code":["UI.runNow(()->{ tabbedPane.selectedIndex = 1 })"]},
 
         {"kind":"then","text":"The properties reflect this change, only the second tab is selected.","code":["tab1Selected.get() == false","tab2Selected.get() == true","tab3Selected.get() == false"]},
 
@@ -376,7 +376,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -403,7 +403,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -430,7 +430,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -457,7 +457,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -484,7 +484,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -511,7 +511,115 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property list is bound to a tabbed pane compute efficiently. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based property list and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string based property list, a tab supplier and a tabbed pane UI node.","code":["var tabs = Vars.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(tabs, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["operation(tabs)","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == tabs.size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property list is bound to a tabbed pane compute efficiently. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based property list and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string based property list, a tab supplier and a tabbed pane UI node.","code":["var tabs = Vars.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(tabs, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["operation(tabs)","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == tabs.size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property list is bound to a tabbed pane compute efficiently. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based property list and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string based property list, a tab supplier and a tabbed pane UI node.","code":["var tabs = Vars.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(tabs, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["operation(tabs)","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == tabs.size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property list is bound to a tabbed pane compute efficiently. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based property list and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string based property list, a tab supplier and a tabbed pane UI node.","code":["var tabs = Vars.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(tabs, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["operation(tabs)","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == tabs.size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -601,7 +709,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -628,7 +736,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -655,7 +763,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -682,7 +790,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -709,7 +817,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -736,7 +844,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -763,7 +871,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -790,7 +898,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -817,7 +925,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -844,7 +952,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -871,7 +979,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -898,7 +1006,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -925,7 +1033,7 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -952,7 +1060,115 @@
 
         {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
 
-        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tuple property is bound to a tabbed pane compute efficiently. [14]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based tuple property and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string tuple property, a tab supplier and a tabbed pane UI node.","code":["var tuple = Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","var models = Var.of(tuple)","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(models, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["models.update( it -> operation(it) )","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == models.get().size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tuple property is bound to a tabbed pane compute efficiently. [15]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based tuple property and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string tuple property, a tab supplier and a tabbed pane UI node.","code":["var tuple = Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","var models = Var.of(tuple)","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(models, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["models.update( it -> operation(it) )","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == models.get().size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tuple property is bound to a tabbed pane compute efficiently. [16]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based tuple property and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string tuple property, a tab supplier and a tabbed pane UI node.","code":["var tuple = Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","var models = Var.of(tuple)","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(models, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["models.update( it -> operation(it) )","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == models.get().size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tuple property is bound to a tabbed pane compute efficiently. [17]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string based tuple property and a tab supplier \n            to dynamically add or remove tabs. The GUI will only update the\n            tabs that have changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string tuple property, a tab supplier and a tabbed pane UI node.","code":["var tuple = Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\")","var models = Var.of(tuple)","TabSupplier<String> supplier = (String title) -> UI.tab(title)","def pane =","        UI.tabbedPane(UI.Side.TOP)","                .addAll(models, supplier)","                .get(JTabbedPane)"]},
+
+        {"kind":"and","text":"We unpack the pane and the expected differences:","code":["var iniComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"when","text":"We run the operation on the tuple...","code":["models.update( it -> operation(it) )","UI.sync()"]},
+
+        {"kind":"and","text":"We unpack the updated components:","code":["var updatedComps = (0..<pane.getTabCount()).collect({pane.getComponentAt(it)})"]},
+
+        {"kind":"then","text":"The tabbed pane is updated.","code":["pane.getTabCount() == models.get().size()","pane.getTabCount() == diff.findAll( it -> it == _ || it >= 0 ).size()"]},
+
+        {"kind":"and","text":"","code":["diff.findAll({it == _ || it >= 0}).indexed().every({","    it.value == _ || iniComps[it.value] === updatedComps[it.key]","})"]},
+
+        {"kind":"and","text":"The components at `-1` are totally new.","code":["diff.indexed().every({","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","})"]},
+
+        {"kind":"where","text":"We test the following operations:","code":{"diff":["[0,-1, 2, 3, 4]","[0,-1,-1, 3, 4]","[0, _, 2, 3, 4]","[0, _, _, 3, 4]","[_, _, _, _, 4]","[0, _, _, _, _]","[0, 1, 2, _, _]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]","[_, _, _, _, _]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, \"Tab X\") }","{ it.setAllAt(1, \"Tab 3\", \"Tab 2\") }","{ it.setAllAt(0, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 1\") }","{ it.setAllAt(1, \"Tab 4\", \"Tab 3\", \"Tab 2\", \"Tab 5\") }","{ it.setAllAt(3, \"Tab 5\", \"Tab 4\") }","{ it.add(\"Tab X\") }","{ it.addAll(\"Tab X\", \"Tab Y\") }","{ it.addAt(0, \"Tab X\") }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }","{ Tuple.of(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ it.clear().addAll(\"Tab 1\", \"Tab 2\", \"Tab 3\", \"Tab 4\", \"Tab 5\") }","{ Tuple.of(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }","{ it.clear().addAll(\"Tab a\", \"Tab b\", \"Tab c\", \"Tab d\", \"Tab e\") }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

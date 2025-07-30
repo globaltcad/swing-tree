@@ -321,34 +321,41 @@ final class LayerCache
         }
 
         /**
+         *  Creates a {@link Graphics2D} object for rendering into the cached image if
+         *  the number of cache hits until allocation count-down has reached zero.
+         *  Calling this method will decrement the count-down once if it is greater than zero,
+         *  or allocate the image if it is not greater than zero and the image is not yet allocated.
+         *  A graphics object is only returned if the count-down has reached zero,
+         *  otherwise null is returned.
+         *
          * @return a {@link Graphics2D} object for rendering into the cached image or null if
          *         the image is not yet allocated. Continuous calls to this method will eventually
          *         allocate the image.
          */
         public @Nullable Graphics2D createGraphics() {
-<span class="pc bpc" id="L329" title="1 of 2 branches missed.">            if ( _isRendered )</span>
-<span class="nc" id="L330">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
-<span class="pc bpc" id="L331" title="1 of 2 branches missed.">            if ( _numberOfHitsUntilAllocation &gt; 0 ) {</span>
-<span class="nc" id="L332">                _numberOfHitsUntilAllocation--;</span>
-<span class="nc" id="L333">                return null;</span>
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">            if ( _isRendered )</span>
+<span class="nc" id="L337">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
+<span class="pc bpc" id="L338" title="1 of 2 branches missed.">            if ( _numberOfHitsUntilAllocation &gt; 0 ) {</span>
+<span class="nc" id="L339">                _numberOfHitsUntilAllocation--;</span>
+<span class="nc" id="L340">                return null;</span>
             }
-<span class="pc bpc" id="L335" title="1 of 2 branches missed.">            if ( _image == null )</span>
-<span class="fc" id="L336">                _image = _imageAllocator.get();</span>
-<span class="fc" id="L337">            _isRendered = true;</span>
-<span class="fc" id="L338">            return _image.createGraphics();</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">            if ( _image == null )</span>
+<span class="fc" id="L343">                _image = _imageAllocator.get();</span>
+<span class="fc" id="L344">            _isRendered = true;</span>
+<span class="fc" id="L345">            return _image.createGraphics();</span>
         }
 
         public LayerRenderConf getKeyOrElse( LayerRenderConf newFallbackKey ) {
-<span class="fc" id="L342">            LayerRenderConf key = _key.get();</span>
-<span class="pc bpc" id="L343" title="1 of 2 branches missed.">            if ( key == null ) {</span>
-<span class="nc" id="L344">                _key = new WeakReference&lt;&gt;(newFallbackKey);</span>
-<span class="nc" id="L345">                key = newFallbackKey;</span>
+<span class="fc" id="L349">            LayerRenderConf key = _key.get();</span>
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">            if ( key == null ) {</span>
+<span class="nc" id="L351">                _key = new WeakReference&lt;&gt;(newFallbackKey);</span>
+<span class="nc" id="L352">                key = newFallbackKey;</span>
             }
-<span class="fc" id="L347">            return key;</span>
+<span class="fc" id="L354">            return key;</span>
         }
 
         public boolean isRendered() {
-<span class="fc" id="L351">            return _isRendered;</span>
+<span class="fc" id="L358">            return _isRendered;</span>
         }
     }
 

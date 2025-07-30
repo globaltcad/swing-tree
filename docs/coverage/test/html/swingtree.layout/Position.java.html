@@ -6,14 +6,14 @@ import java.awt.Point;
 import java.util.Objects;
 
 /**
- *  An immutable value based class that represents a location in a two-dimensional
+ *  An immutable value based class that represents a location in float based two-dimensional
  *  coordinate system specified in float precision and specifically designed
  *  for Swing components.
  *  It can be used as an alternative to the AWT {@link Point} class,
  *  but in situations where immutability is desired (which should be most cases).
  *  &lt;p&gt;
- *  Use the {@link #of(float, float)} factory method to create a new instance
- *  or {@link #withX(int)} and {@link #withY(int)} to create a new instance
+ *  Use the {@link #of(double, double)} factory method to create a new instance
+ *  or {@link #withX(double)} and {@link #withY(double)} to create a new instance
  *  with a modified value.
  */
 @Immutable
@@ -30,11 +30,11 @@ public final class Position
      * @return A new location with the specified x- and y-coordinates.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Position of( float x, float y ) {
+    public static Position of( double x, double y ) {
 <span class="fc bfc" id="L34" title="All 4 branches covered.">        if ( x == 0 &amp;&amp; y == 0 )</span>
 <span class="fc" id="L35">            return ORIGIN;</span>
 
-<span class="fc" id="L37">        return new Position(x, y);</span>
+<span class="fc" id="L37">        return new Position((float) x, (float) y);</span>
     }
 
     /**
@@ -45,9 +45,9 @@ public final class Position
      * @return A new location with the x- and y-coordinates of the specified point.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Position of(Point p ) {
-<span class="nc" id="L49">        Objects.requireNonNull(p);</span>
-<span class="nc" id="L50">        return of( p.x, p.y );</span>
+    public static Position of( Point p ) {
+<span class="fc" id="L49">        Objects.requireNonNull(p);</span>
+<span class="fc" id="L50">        return of( p.x, p.y );</span>
     }
 
     public static Position origin() {
@@ -94,7 +94,7 @@ public final class Position
      * @return A new location with the same x-coordinate as this location
      *         and the specified y-coordinate.
      */
-    public Position withY(int y ) {
+    public Position withY( double y ) {
 <span class="fc" id="L98">        return of( _x, y );</span>
     }
 
@@ -107,7 +107,7 @@ public final class Position
      * @return A new location with the same y-coordinate as this location
      *         and the specified x-coordinate.
      */
-    public Position withX(int x ) {
+    public Position withX( double x ) {
 <span class="fc" id="L111">        return of( x, _y );</span>
     }
 
@@ -120,7 +120,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of this location
      *         increased by the specified values.
      */
-    public Position plus(float dx, float dy ) {
+    public Position plus( double dx, double dy ) {
 <span class="nc" id="L124">        return of( _x + dx, _y + dy );</span>
     }
 
@@ -132,7 +132,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of this location
      *         increased by the x- and y-coordinates of the specified location.
      */
-    public Position plus(Position other ) {
+    public Position plus( Position other ) {
 <span class="nc" id="L136">        return of( _x + other._x, _y + other._y );</span>
     }
 
@@ -145,7 +145,7 @@ public final class Position
      * @return A new location with the x- and y-coordinates of this location
      *         decreased by the specified values.
      */
-    public Position minus(float dx, float dy ) {
+    public Position minus( double dx, double dy ) {
 <span class="nc" id="L149">        return of( _x - dx, _y - dy );</span>
     }
 
@@ -187,7 +187,7 @@ public final class Position
 <span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
 <span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
 <span class="fc" id="L189">        Position other = (Position) o;</span>
-<span class="pc bpc" id="L190" title="1 of 4 branches missed.">        return _x == other._x &amp;&amp; _y == other._y;</span>
+<span class="fc bfc" id="L190" title="All 4 branches covered.">        return _x == other._x &amp;&amp; _y == other._y;</span>
     }
 
     @Override

@@ -4,7 +4,7 @@
   "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected state and appearance.",
   "subjects":[],
   "statistics":{
-    "runs":"31",
+    "runs":"33",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -488,6 +488,36 @@
         {"kind":"given","text":"We create the UI.","code":["var ui1 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())","var ui2 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())","var ui3 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())"]},
 
         {"kind":"expect","text":"","code":["new Utility.Query(ui1).findAll(JTabbedPane).get(0).getSelectedIndex() == 2","new Utility.Query(ui2).findAll(JTabbedPane).get(0).getSelectedIndex() == 2","new Utility.Query(ui3).findAll(JTabbedPane).get(0).getSelectedIndex() == 2"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The tasks manager examples can be created error free.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"","code":["new examples.tasks.mvvm.TasksView(new examples.tasks.mvvm.TasksViewModel())","new examples.tasks.mvi.TasksView(Var.of(new examples.tasks.mvi.TasksViewModel()))"]},
+
+        {"kind":"then","text":"","code":["noExceptionThrown()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The chat UI examples can be created error free.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"","code":["new examples.chat.mvvm.ChatView(new examples.chat.mvvm.ChatViewModel())","new examples.chat.mvi.ChatView(Var.of(new examples.chat.mvi.ChatViewModel()))"]},
+
+        {"kind":"then","text":"","code":["noExceptionThrown()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

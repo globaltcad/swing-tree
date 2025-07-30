@@ -7,42 +7,44 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JCheckBox} instances.
+ *
+ * @param &lt;B&gt; The type of {@link JCheckBox} being built by this builder.
  */
 public final class UIForCheckBox&lt;B extends JCheckBox&gt; extends UIForAnyButton&lt;UIForCheckBox&lt;B&gt;, B&gt;
 {
     private final BuilderState&lt;B&gt; _state;
 
-<span class="fc" id="L15">    UIForCheckBox( BuilderState&lt;B&gt; state ) {</span>
-<span class="fc" id="L16">        Objects.requireNonNull(state, &quot;state&quot;);</span>
-<span class="fc" id="L17">        _state = state;</span>
-<span class="fc" id="L18">    }</span>
+<span class="fc" id="L17">    UIForCheckBox( BuilderState&lt;B&gt; state ) {</span>
+<span class="fc" id="L18">        Objects.requireNonNull(state, &quot;state&quot;);</span>
+<span class="fc" id="L19">        _state = state;</span>
+<span class="fc" id="L20">    }</span>
 
     @Override
     protected BuilderState&lt;B&gt; _state() {
-<span class="fc" id="L22">        return _state;</span>
+<span class="fc" id="L24">        return _state;</span>
     }
     
     @Override
     protected UIForCheckBox&lt;B&gt; _newBuilderWithState(BuilderState&lt;B&gt; newState ) {
-<span class="fc" id="L27">        return new UIForCheckBox&lt;&gt;(newState);</span>
+<span class="fc" id="L29">        return new UIForCheckBox&lt;&gt;(newState);</span>
     }
 
 
     public UIForCheckBox&lt;B&gt; borderIsPaintedFlatIf(boolean borderPainted ) {
-<span class="nc" id="L32">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L33">                   thisComponent.setBorderPaintedFlat(borderPainted);</span>
-<span class="nc" id="L34">               })</span>
-<span class="nc" id="L35">               ._this();</span>
+<span class="nc" id="L34">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L35">                   thisComponent.setBorderPaintedFlat(borderPainted);</span>
+<span class="nc" id="L36">               })</span>
+<span class="nc" id="L37">               ._this();</span>
     }
 
     public UIForCheckBox&lt;B&gt; borderIsPaintedFlatIf(Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L39">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L40">                    thisComponent.setBorderPaintedFlat(v);</span>
-<span class="nc" id="L41">                })</span>
-<span class="nc" id="L42">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L43">                    thisComponent.setBorderPaintedFlat( val.get() );</span>
-<span class="nc" id="L44">                })</span>
-<span class="nc" id="L45">               ._this();</span>
+<span class="nc" id="L41">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L42">                    thisComponent.setBorderPaintedFlat(v);</span>
+<span class="nc" id="L43">                })</span>
+<span class="nc" id="L44">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L45">                    thisComponent.setBorderPaintedFlat( val.get() );</span>
+<span class="nc" id="L46">                })</span>
+<span class="nc" id="L47">               ._this();</span>
     }
 
 }

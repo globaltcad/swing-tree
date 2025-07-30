@@ -253,7 +253,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * which will be called when a selection has been made. If the combo box is editable, then
      * an {@link ActionEvent} will be fired when editing has stopped.
      * For more information see {@link JComboBox#addActionListener(ActionListener)}.
-     * <p>
+     *
      * @param action The {@link Action} that will be notified.
      * @return This very builder instance, which allows for method chaining.
      **/
@@ -457,7 +457,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * Sets the {@link ListCellRenderer} for the {@link JComboBox}, which renders the combo box items
      * by supplying a custom component for each item through the
      * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
-     * <p>
+     *
      * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the combo box.
      * @return This very instance, which enables builder-style method chaining.
      */

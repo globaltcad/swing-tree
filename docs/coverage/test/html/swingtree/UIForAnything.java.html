@@ -584,9 +584,16 @@ import java.util.function.Supplier;
     {
 <span class="fc" id="L585">        Objects.requireNonNull(val);</span>
 <span class="fc" id="L586">        Objects.requireNonNull(displayAction);</span>
+<span class="fc" id="L587">        _onShowDelegated( val, thisComponent, (component, delegate) -&gt; displayAction.accept(component, delegate.currentValue().orElseNull()));</span>
+<span class="fc" id="L588">    }</span>
+
+    protected final &lt;T&gt; void _onShowDelegated( Val&lt;T&gt; val, C thisComponent, BiConsumer&lt;C, ValDelegate&lt;T&gt;&gt; displayAction )
+    {
+<span class="fc" id="L592">        Objects.requireNonNull(val);</span>
+<span class="fc" id="L593">        Objects.requireNonNull(displayAction);</span>
         Ref&lt;Val&lt;T&gt;&gt; valRef;
-<span class="fc bfc" id="L588" title="All 4 branches covered.">        if ( val.isLens() || val.isView() )</span>
-<span class="fc" id="L589">            valRef = Ref.of(val);</span>
+<span class="fc bfc" id="L595" title="All 4 branches covered.">        if ( val.isLens() || val.isView() )</span>
+<span class="fc" id="L596">            valRef = Ref.of(val);</span>
             /*
                 We don't want lenses or views to be garbage collected, so we keep a strong reference to them.
                 The reason for this is that these types of properties
@@ -595,51 +602,57 @@ import java.util.function.Supplier;
                 parent properties (lenses and views observer their parent properties).
              */
         else
-<span class="fc" id="L598">            valRef = Ref.of(new WeakReference&lt;&gt;(val));</span>
+<span class="fc" id="L605">            valRef = Ref.of(new WeakReference&lt;&gt;(val));</span>
 
-<span class="fc" id="L600">        _onShow( valRef, new WeakReference&lt;&gt;(thisComponent), displayAction );</span>
-<span class="fc" id="L601">    }</span>
+<span class="fc" id="L607">        _onShowDelegated( valRef, new WeakReference&lt;&gt;(thisComponent), displayAction );</span>
+<span class="fc" id="L608">    }</span>
 
     protected final &lt;T&gt; UIForAnything&lt;I,C,E&gt; _withOnShow( Val&lt;T&gt; val, BiConsumer&lt;C, T&gt; displayAction )
     {
-<span class="fc" id="L605">        Objects.requireNonNull(val);</span>
-<span class="fc" id="L606">        Objects.requireNonNull(displayAction);</span>
-<span class="fc" id="L607">        return _with( thisComponent -&gt; _onShow( val, thisComponent, displayAction) );</span>
+<span class="fc" id="L612">        Objects.requireNonNull(val);</span>
+<span class="fc" id="L613">        Objects.requireNonNull(displayAction);</span>
+<span class="fc" id="L614">        return _with( thisComponent -&gt; _onShow( val, thisComponent, displayAction) );</span>
     }
 
-    private &lt;T&gt; void _onShow(
+    private &lt;T&gt; void _onShowDelegated(
         Ref&lt;Val&lt;T&gt;&gt;       propertyRef,
         WeakReference&lt;C&gt;  weakComponent,
-        BiConsumer&lt;C, T&gt;  displayAction
+        BiConsumer&lt;C, ValDelegate&lt;T&gt;&gt;  displayAction
     ) {
-<span class="fc" id="L615">        Objects.requireNonNull(propertyRef);</span>
-<span class="fc" id="L616">        Objects.requireNonNull(weakComponent);</span>
-<span class="fc" id="L617">        Objects.requireNonNull(displayAction);</span>
-<span class="fc" id="L618">        Action&lt;ValDelegate&lt;T&gt;&gt; action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)-&gt;{</span>
-<span class="fc" id="L619">            T v = delegate.currentValue().orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.</span>
-<span class="fc" id="L620">            _runInUI(() -&gt;</span>
-<span class="fc" id="L621">                UI.run( () -&gt; {</span>
-                    try {
-<span class="fc" id="L623">                        displayAction.accept(localComponent, v); // Here the captured value is used. This is extremely important!</span>
-                        /*
-                             Since this is happening in another thread we are using the captured property item/value.
-                             The property might have changed in the meantime, but we don't care about that,
-                             we want things to happen in the order they were triggered.
-                         */
-<span class="nc" id="L629">                    } catch ( Exception e ) {</span>
-<span class="nc" id="L630">                        throw new RuntimeException(</span>
-<span class="nc" id="L631">                            &quot;Failed to apply state of property '&quot; + propertyRef.get() + &quot;' to &quot; +</span>
-                            &quot;component '&quot; + localComponent + &quot;'.&quot;,
-                            e
-                        );
-<span class="fc" id="L635">                    }</span>
-<span class="fc" id="L636">                })</span>
-            );
-<span class="fc" id="L638">        });</span>
-<span class="fc" id="L639">        Optional.ofNullable(propertyRef.get()).ifPresent(</span>
-<span class="fc" id="L640">            property -&gt; Viewable.cast(property).onChange(From.ALL, action)</span>
+<span class="fc" id="L622">        Objects.requireNonNull(propertyRef);</span>
+<span class="fc" id="L623">        Objects.requireNonNull(weakComponent);</span>
+<span class="fc" id="L624">        Objects.requireNonNull(displayAction);</span>
+<span class="fc" id="L625">        Action&lt;ValDelegate&lt;T&gt;&gt; action = (delegate)-&gt;{</span>
+<span class="fc" id="L626">            C localComponent = weakComponent.get();</span>
+<span class="pc bpc" id="L627" title="1 of 2 branches missed.">            if ( localComponent == null ) {</span>
+<span class="nc" id="L628">                return;</span>
+            }
+<span class="fc" id="L630">            _runInUI(() -&gt; {</span>
+                try {
+<span class="fc" id="L632">                    displayAction.accept(localComponent, delegate); // Here the captured delegate (and its value) is used. This is extremely important!</span>
+                    /*
+                         Since this may be happening in another thread, we are using the captured property item/value.
+                         The property might have changed in the meantime, but we don't care about that,
+                         we want things to happen in the order they were triggered.
+                     */
+<span class="nc" id="L638">                } catch ( Exception e ) {</span>
+<span class="nc" id="L639">                    throw new RuntimeException(</span>
+<span class="nc" id="L640">                        &quot;Failed to apply state of property '&quot; + propertyRef.get() + &quot;' to &quot; +</span>
+                        &quot;component '&quot; + localComponent + &quot;'.&quot;,
+                        e
+                    );
+<span class="fc" id="L644">                }</span>
+<span class="fc" id="L645">            });</span>
+<span class="fc" id="L646">        };</span>
+<span class="fc" id="L647">        Optional.ofNullable(propertyRef.get()).ifPresent(</span>
+            property -&gt; {
+<span class="fc" id="L649">                JComponent component = (JComponent) Objects.requireNonNull(weakComponent.get());</span>
+<span class="fc" id="L650">                ComponentExtension.from(component).storeBoundObservable(</span>
+<span class="fc" id="L651">                        property.view().onChange(From.ALL, action)</span>
+                    );
+<span class="fc" id="L653">            }</span>
         );
-<span class="fc" id="L642">    }</span>
+<span class="fc" id="L655">    }</span>
 
     /**
      *  Use this to register a state change listener for the provided property list
@@ -654,36 +667,47 @@ import java.util.function.Supplier;
     protected final &lt;T&gt; void _onShow(
         Vals&lt;T&gt; vals, C c, BiConsumer&lt;C, ValsDelegate&lt;T&gt;&gt; displayAction
     ) {
-<span class="fc" id="L657">        Objects.requireNonNull(vals);</span>
-<span class="fc" id="L658">        Objects.requireNonNull(displayAction);</span>
-<span class="fc" id="L659">        _onShow( vals, new WeakReference&lt;&gt;(c), displayAction );</span>
-<span class="fc" id="L660">    }</span>
+<span class="fc" id="L670">        Objects.requireNonNull(vals);</span>
+<span class="fc" id="L671">        Objects.requireNonNull(displayAction);</span>
+<span class="fc" id="L672">        _onShow( vals, new WeakReference&lt;&gt;(c), displayAction );</span>
+<span class="fc" id="L673">    }</span>
 
     protected final &lt;T&gt; UIForAnything&lt;I,C,E&gt; _withOnShow(
         Vals&lt;T&gt; vals, BiConsumer&lt;C, ValsDelegate&lt;T&gt;&gt; displayAction
     ) {
-<span class="fc" id="L665">        Objects.requireNonNull(vals);</span>
-<span class="fc" id="L666">        Objects.requireNonNull(displayAction);</span>
-<span class="fc" id="L667">        return _with( thisComponent -&gt; _onShow( vals, thisComponent, displayAction ) );</span>
+<span class="fc" id="L678">        Objects.requireNonNull(vals);</span>
+<span class="fc" id="L679">        Objects.requireNonNull(displayAction);</span>
+<span class="fc" id="L680">        return _with( thisComponent -&gt; _onShow( vals, thisComponent, displayAction ) );</span>
     }
 
     private &lt;T&gt; void _onShow(
         Vals&lt;T&gt; properties, WeakReference&lt;C&gt; weakComponent, BiConsumer&lt;C, ValsDelegate&lt;T&gt;&gt; displayAction
     ) {
-<span class="fc" id="L673">        Objects.requireNonNull(properties);</span>
-<span class="fc" id="L674">        Objects.requireNonNull(displayAction);</span>
-<span class="fc" id="L675">        Action&lt;ValsDelegate&lt;T&gt;&gt; action = Action.ofWeak(Objects.requireNonNull(weakComponent.get()), (localComponent, delegate)-&gt;{</span>
-<span class="fc" id="L676">            _runInUI(() -&gt;{</span>
-<span class="fc" id="L677">                displayAction.accept(localComponent, delegate);</span>
+<span class="fc" id="L686">        Objects.requireNonNull(properties);</span>
+<span class="fc" id="L687">        Objects.requireNonNull(displayAction);</span>
+<span class="fc" id="L688">        Action&lt;ValsDelegate&lt;T&gt;&gt; action = (delegate)-&gt;{</span>
+<span class="fc" id="L689">            C localComponent = weakComponent.get();</span>
+<span class="pc bpc" id="L690" title="1 of 2 branches missed.">            if ( localComponent == null ) {</span>
+<span class="nc" id="L691">                return;</span>
+            }
+<span class="fc" id="L693">            _runInUI(() -&gt;{</span>
+<span class="fc" id="L694">                displayAction.accept(localComponent, delegate);</span>
                 /*
                     We make sure that the action is only executed if the component
                     is not disposed. This is important because the action may
                     access the component, and we don't want to get a NPE.
                 */
-<span class="fc" id="L683">            });</span>
-<span class="fc" id="L684">        });</span>
-<span class="fc" id="L685">        Viewables.cast(properties).onChange(action);</span>
-<span class="fc" id="L686">    }</span>
+<span class="fc" id="L700">            });</span>
+<span class="fc" id="L701">        };</span>
+<span class="fc" id="L702">        C component = weakComponent.get();</span>
+<span class="pc bpc" id="L703" title="1 of 2 branches missed.">        if (!(component instanceof JComponent)) {</span>
+<span class="nc" id="L704">            log.error(&quot;Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. &quot;, new Throwable());</span>
+<span class="nc" id="L705">            return;</span>
+        }
+<span class="fc" id="L707">        Viewables&lt;T&gt; viewables = properties.view();</span>
+<span class="fc" id="L708">        viewables.onChange(action);</span>
+<span class="fc" id="L709">        ComponentExtension.from((JComponent) component).storeBoundObservable(viewables);</span>
+<span class="fc" id="L710">    }</span>
 
     /**
      *  Exposes the this-pointer of the builder instance cast to the {@code I} type
@@ -692,7 +716,7 @@ import java.util.function.Supplier;
      *  and warnings in the codebase. &lt;br&gt;
      * @return The builder instance itself based on the type parameter {@code &lt;I&gt;}.
      */
-<span class="fc" id="L695">    protected final I _this() { return (I) this; }</span>
+<span class="fc" id="L719">    protected final I _this() { return (I) this; }</span>
 
     /**
      *  This method is used to dispose of the state of the builder,
@@ -704,38 +728,38 @@ import java.util.function.Supplier;
      *  part of a tree of components, and if one component is not garbage collected,
      *  then the whole tree is not garbage collected.
      */
-<span class="fc" id="L707">    protected final void _disposeState() { _state().dispose(); }</span>
+<span class="fc" id="L731">    protected final void _disposeState() { _state().dispose(); }</span>
 
     @Override
     public final int hashCode() {
-<span class="nc" id="L711">        return _state().hashCode();</span>
+<span class="nc" id="L735">        return _state().hashCode();</span>
     }
 
     @Override
     @SuppressWarnings(&quot;EqualsGetClass&quot;)
     public final boolean equals( Object obj ) {
-<span class="pc bpc" id="L717" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L718" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L719" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L720">        UIForAnything&lt;?,?,?&gt; other = (UIForAnything&lt;?,?,?&gt;) obj;</span>
-<span class="fc" id="L721">        return _state().equals(other._state());</span>
+<span class="pc bpc" id="L741" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L742" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L743" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L744">        UIForAnything&lt;?,?,?&gt; other = (UIForAnything&lt;?,?,?&gt;) obj;</span>
+<span class="fc" id="L745">        return _state().equals(other._state());</span>
     }
 
     @Override
     public final String toString() {
-<span class="fc" id="L726">        String componentTypeName = _state().componentType().getName();</span>
-<span class="fc" id="L727">        String builderTypeName   = getClass().getSimpleName();</span>
-<span class="fc" id="L728">        String asString          = builderTypeName + &quot;[&quot; + componentTypeName + &quot;]&quot;;</span>
+<span class="fc" id="L750">        String componentTypeName = _state().componentType().getName();</span>
+<span class="fc" id="L751">        String builderTypeName   = getClass().getSimpleName();</span>
+<span class="fc" id="L752">        String asString          = builderTypeName + &quot;[&quot; + componentTypeName + &quot;]&quot;;</span>
 
-<span class="fc bfc" id="L730" title="All 2 branches covered.">        if ( _state().isDisposed() ) {</span>
+<span class="fc bfc" id="L754" title="All 2 branches covered.">        if ( _state().isDisposed() ) {</span>
             // We make the whole string strikethrough if the builder is disposed.
-<span class="fc" id="L732">            StringBuilder sb = new StringBuilder();</span>
-<span class="fc bfc" id="L733" title="All 2 branches covered.">            for ( int i = 0; i &lt; asString.length(); i++ )</span>
-<span class="fc" id="L734">                sb.append(asString.charAt(i)).append(&quot;\u0336&quot;);</span>
-<span class="fc" id="L735">            asString = sb.toString();</span>
+<span class="fc" id="L756">            StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L757" title="All 2 branches covered.">            for ( int i = 0; i &lt; asString.length(); i++ )</span>
+<span class="fc" id="L758">                sb.append(asString.charAt(i)).append(&quot;\u0336&quot;);</span>
+<span class="fc" id="L759">            asString = sb.toString();</span>
         }
 
-<span class="fc" id="L738">        return asString;</span>
+<span class="fc" id="L762">        return asString;</span>
     }
 
 }

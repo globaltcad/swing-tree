@@ -1,7 +1,6 @@
 package swingtree.animation;
 
 import com.google.errorprone.annotations.Immutable;
-import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.SwingTree;
@@ -27,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  *  various utility methods on the {@link swingtree.UI} class. <br>
  *  The most straight forward way would be to call {@link swingtree.UI#animateFor(LifeTime)}
  *  or {@link swingtree.UI#animateFor(LifeTime, Component)}.
- *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)}
+ *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)}
  *  or {@link swingtree.UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)}. <br>
  *  Another use case is to schedule an animation through the component event delegate
  *  as part of your event handling code using {@link swingtree.ComponentDelegate#animateStyleFor(LifeTime, AnimatedStyler)}. <br>
@@ -120,6 +119,19 @@ public final class LifeTime
         long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);
         return new LifeTime(startMillis, durationMillis, SwingTree.get().getDefaultAnimationInterval());
     }
+
+    /**
+     *  Creates a new lifetime that will run for the given number of seconds
+     *  and without any start delay. You may also use fractions of seconds
+     *  (e.g. {@code 0.5} for half a second).
+     *
+     * @param time The duration of the animation in seconds.
+     * @return A new lifetime that will start immediately and run for the given duration.
+     */
+    public static LifeTime ofSeconds( double time ) {
+        return of(time, TimeUnit.SECONDS);
+    }
+
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
         long millis = (long) (time * from.toMillis(1));

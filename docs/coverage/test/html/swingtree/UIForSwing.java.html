@@ -5,6 +5,8 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JComponent} types.
+ *
+ * @param &lt;C&gt; The type of the {@link JComponent} being built.
  */
 public final class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&lt;UIForSwing&lt;C&gt;, C&gt;
 {
@@ -16,20 +18,20 @@ public final class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&
      *
      * @param state The {@link BuilderState} modelling how the component is built.
      */
-<span class="fc" id="L19">    UIForSwing(BuilderState&lt;C&gt; state) {</span>
-<span class="fc" id="L20">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L21">        _state = state;</span>
-<span class="fc" id="L22">    }</span>
+<span class="fc" id="L21">    UIForSwing(BuilderState&lt;C&gt; state) {</span>
+<span class="fc" id="L22">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L23">        _state = state;</span>
+<span class="fc" id="L24">    }</span>
 
 
     @Override
     protected BuilderState&lt;C&gt; _state() {
-<span class="fc" id="L27">        return _state;</span>
+<span class="fc" id="L29">        return _state;</span>
     }
     
     @Override
     protected UIForSwing&lt;C&gt; _newBuilderWithState(BuilderState&lt;C&gt; newState ) {
-<span class="fc" id="L32">        return new UIForSwing&lt;&gt;(newState);</span>
+<span class="fc" id="L34">        return new UIForSwing&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
