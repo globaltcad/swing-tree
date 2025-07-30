@@ -264,9 +264,9 @@ function createLoaderDropDownFor(specName, expandableFeature) {
 
 function buildFeatureListFor(expandableFeature, data, content) {
     let nothingHappened = true;
-    data['features'].forEach((feature)=>{
-        if ( feature['id'].toString() == expandableFeature.toString() ) {
-            content.append(createUIForFeature(feature));
+    data['features'].forEach((featureData)=>{
+        if ( featureData['id'].toString() == expandableFeature.toString() ) {
+            content.append(createUIForFeature(featureData, -1));
             nothingHappened = false;
         }
     });
@@ -276,10 +276,8 @@ function buildFeatureListFor(expandableFeature, data, content) {
                             .filter( f => f['id'].startsWith(expandableFeature) )
                             .sort( (a,b) => b.length - a.length ) // We sort them by size
         // Now we unroll the iterations (we call them examples here) so that the user can see them all!
-        choices.forEach( (iteration, i) => {
-            content.append('<p style="font-weight: bold;">Example '+i+':</p>')
-            //content.append($('<p style="font-size: 12px"><i>'+iteration['id'].substring(expandableFeature.length).trim()+'</i></p>'));
-            content.append(createUIForFeature(iteration));
+        choices.forEach( (featureData, i) => {
+            content.append(createUIForFeature(featureData, i));
         })
     }
     setTimeout(() => {
@@ -322,36 +320,51 @@ function buildFeatureListFor(expandableFeature, data, content) {
         ....
 
 */
-function createUIForFeature(featureData) {
+function createUIForFeature(featureData, exampleIndex) {
     let wrapper = $('<div></div>');
-    let blocks = $('<div></div>');
     if ( featureData['iterations']['extraInfo'].length > 0 ) {
-        // We attach the extra info to the wrapper:
-        let info = removeIndentationAndTurnIntoMarkdown(featureData['iterations']['extraInfo'][0]);
-        wrapper.append("<p>" + info + "</p>");
-        //(only the first one because we don't care about all the iterations)
+        if ( exampleIndex < 0 || exampleIndex === 0 ) {
+            // We attach the extra info to the wrapper:
+            let info = removeIndentationAndTurnIntoMarkdown(featureData['iterations']['extraInfo'][0]);
+            wrapper.append("<p>" + info + "</p>");
+            //(only the first one because we don't care about all the iterations)
+        }
     }
+    if ( exampleIndex >= 0 ) {
+        wrapper.append('<p style="font-weight: bold;">Example ' + (exampleIndex+1) + ':</p>')
+        featureData['blocks'].forEach((block)=>{
+            let kind = block['kind'];
+            if ( kind === 'where' ) {
+                let code = block['code'];
+                let table = dictionaryOfHeaderNamesToColumnArraysToTable(code, exampleIndex);
+                wrapper.append(table);
+            }
+        });
+    }
+    let blocks = $('<div></div>');
     // We iterate over the blocks:
     featureData['blocks'].forEach((block, i)=>{
         autoCompleteMissingBlockData(block, 73 * i + featureData['blocks'].length );
         let kind = block['kind'];
         let text = block['text'];
         let code = block['code'];
-        let blockDiv = $('<div></div>');
-        let blockTitle = $('<div style="width:100%"></div>');
-        blockTitle.html("<i>"+uppercaseFirstLetter(kind)+"</i> "+lowercaseFirstLetter(text));
-        blockDiv.append(blockTitle);
-        if ( kind === 'where' ) {
-            let table = dictionaryOfHeaderNamesToColumnArraysToTable(code);
-            blockDiv.append(table);
-        } else {
-            let blockCode = $('<pre style="width:100%"></pre>');
-            let codeWrapper = $('<code class="hljs language-java" style="box-shadow: inset 0 0 3px 0 #767676"></code>');
-            blockCode.append(codeWrapper);
-            codeWrapper.text(code.join("\n"));
-            blockDiv.append(blockCode);
+        if ( kind !== 'where' || exampleIndex < 0 ) { // If false then the data is added under the "Example X:" heder
+            let blockDiv = $('<div></div>');
+            let blockTitle = $('<div style="width:100%"></div>');
+            blockTitle.html("<i>" + uppercaseFirstLetter(kind) + "</i> " + lowercaseFirstLetter(text));
+            blockDiv.append(blockTitle);
+            if (kind === 'where') {
+                let table = dictionaryOfHeaderNamesToColumnArraysToTable(code, exampleIndex);
+                blockDiv.append(table);
+            } else {
+                let blockCode = $('<pre style="width:100%"></pre>');
+                let codeWrapper = $('<code class="hljs language-java" style="box-shadow: inset 0 0 3px 0 #767676"></code>');
+                blockCode.append(codeWrapper);
+                codeWrapper.text(code.join("\n"));
+                blockDiv.append(blockCode);
+            }
+            blocks.append(blockDiv);
         }
-        blocks.append(blockDiv);
     });
     return wrapper.append(blocks);
 }
@@ -443,7 +456,7 @@ function lowercaseFirstLetter(string) {
 // The following method takes a json in the format
 // {"column1":["row-value1", "row-value2", ...], "column2":["row-value1", "row-value2", ...], ...}
 // and returns a table with the specified columns and values.
-function dictionaryOfHeaderNamesToColumnArraysToTable(dataTable) {
+function dictionaryOfHeaderNamesToColumnArraysToTable(dataTable, exampleIndex) {
     console.log(dataTable)
     let headers = [];
     let table = $('<table class="DataTable"></table>');
@@ -460,27 +473,29 @@ function dictionaryOfHeaderNamesToColumnArraysToTable(dataTable) {
     if ( headers.length === 0 ) return table;
     table.append(header);
     for ( let i = 0; i < numberOfColumns; i++ ) {
-        let row = $('<tr></tr>');
-        for ( let j = 0; j < headers.length; j++ ) {
-            let cell = $('<td></td>');
-            let text = filterTableEntryNoise(dataTable[headers[j]][i]);
-            // Now we check the length of the string and make longer text have smaller font size:
-            let size = text.length - 10 * ( 3 - headers.length );
-            if      ( size > 50 ) cell.css('font-size', '55%');
-            else if ( size > 45 ) cell.css('font-size', '60%');
-            else if ( size > 40 ) cell.css('font-size', '65%');
-            else if ( size > 35 ) cell.css('font-size', '70%');
-            else if ( size > 30 ) cell.css('font-size', '75%');
-            else if ( size > 25 ) cell.css('font-size', '80%');
-            else if ( size > 20 ) cell.css('font-size', '85%');
-            else if ( size > 15 ) cell.css('font-size', '90%');
-            else if ( size > 10 ) cell.css('font-size', '95%');
-            let code = $('<code class="hljs language-java"></code>');
-            code.text(text);
-            cell.append(code);
-            row.append(cell);
+        if ( exampleIndex < 0 || i === exampleIndex ) {
+            let row = $('<tr></tr>');
+            for (let j = 0; j < headers.length; j++) {
+                let cell = $('<td></td>');
+                let text = filterTableEntryNoise(dataTable[headers[j]][i]);
+                // Now we check the length of the string and make longer text have smaller font size:
+                let size = text.length - 10 * (3 - headers.length);
+                if (size > 50) cell.css('font-size', '55%');
+                else if (size > 45) cell.css('font-size', '60%');
+                else if (size > 40) cell.css('font-size', '65%');
+                else if (size > 35) cell.css('font-size', '70%');
+                else if (size > 30) cell.css('font-size', '75%');
+                else if (size > 25) cell.css('font-size', '80%');
+                else if (size > 20) cell.css('font-size', '85%');
+                else if (size > 15) cell.css('font-size', '90%');
+                else if (size > 10) cell.css('font-size', '95%');
+                let code = $('<code class="hljs language-java"></code>');
+                code.text(text);
+                cell.append(code);
+                row.append(cell);
+            }
+            table.append(row);
         }
-        table.append(row);
     }
     return $('<div style="overflow: auto; max-height: 16em; margin-bottom: 0.75em;"></div>').append(table);
 }
