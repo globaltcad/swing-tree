@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  *  various utility methods on the {@link swingtree.UI} class. <br>
  *  The most straight forward way would be to call {@link swingtree.UI#animateFor(LifeTime)}
  *  or {@link swingtree.UI#animateFor(LifeTime, Component)}.
- *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)}
+ *  But you may also schedule a style animation using {@link swingtree.UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)}
  *  or {@link swingtree.UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)}. <br>
  *  Another use case is to schedule an animation through the component event delegate
  *  as part of your event handling code using {@link swingtree.ComponentDelegate#animateStyleFor(LifeTime, AnimatedStyler)}. <br>
