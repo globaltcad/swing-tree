@@ -27,19 +27,29 @@ import java.util.WeakHashMap;
 final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
-    private static final EnterExitComponentBoundsEventDispatcher eventDispatcher = new EnterExitComponentBoundsEventDispatcher();
     private static final MouseListener dispatcherListener = new MouseAdapter() { };
+    static {
+        Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
+        Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
+    }
 
     static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
-        Map<JComponent, ComponentEnterExitListeners[]> allListeners = eventDispatcher.listeners;
-        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
+        ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
-        Map<JComponent, ComponentEnterExitListeners[]> allListeners = eventDispatcher.listeners;
-        ComponentEnterExitListeners listeners = allListeners.computeIfAbsent(component, EnterExitComponentBoundsEventDispatcher::iniListeners)[area.ordinal()];
+        ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addExitListener(listener);
+    }
+
+    private static ComponentEnterExitListeners[] fetchListenersInitialized(JComponent component) {
+        Object foundObject = component.getClientProperty(ComponentEnterExitListeners.class);
+        if ( !(foundObject instanceof ComponentEnterExitListeners[]) ) {
+            foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners(component);
+            component.putClientProperty(ComponentEnterExitListeners.class, foundObject);
+        }
+        return (ComponentEnterExitListeners[]) foundObject;
     }
 
     private static ComponentEnterExitListeners[] iniListeners(JComponent component) {
@@ -52,23 +62,14 @@ final class EnterExitComponentBoundsEventDispatcher {
         return listenerArray;
     }
 
-
-    private final Map<JComponent, ComponentEnterExitListeners[]> listeners;
-
-    private EnterExitComponentBoundsEventDispatcher() {
-        listeners = new WeakHashMap<>();
-        Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
-        Toolkit.getDefaultToolkit().addAWTEventListener(this::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
-    }
-
-    public void onMouseEvent(AWTEvent event) {
+    private static void onMouseEvent(AWTEvent event) {
         if (event instanceof MouseEvent) {
             MouseEvent mouseEvent = (MouseEvent) event;
 
             Component eventComponent = mouseEvent.getComponent();
             while ( eventComponent instanceof JComponent ) {
                 JComponent toReceiveEvent = (JComponent) eventComponent;
-                ComponentEnterExitListeners[] componentListenerInfo = listeners.get(toReceiveEvent);
+                ComponentEnterExitListeners[] componentListenerInfo = fetchListenersInitialized(toReceiveEvent);
                 if (componentListenerInfo != null) {
                     for (UI.ComponentArea area : UI.ComponentArea.values()) {
                         ComponentEnterExitListeners currentListeners = componentListenerInfo[area.ordinal()];
