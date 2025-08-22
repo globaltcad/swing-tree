@@ -38,7 +38,7 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
   for [MVVM](docs/markdown/Advanced-MVVM.md) and [MVI](docs/markdown/Functional-MVVM.md) architecture
   (for decoupling UI and business logic)
 - user friendly [stability oriented error handling](docs/markdown/Sane-Error-Handling.md)
-- support for [Data-Oriented programming](Data-Oriented-SwingTree.md)
+- support for [Data-Oriented programming](docs/markdown/Data-Oriented-SwingTree.md)
 - tried, tested and used extensively in production
 
 </td>
