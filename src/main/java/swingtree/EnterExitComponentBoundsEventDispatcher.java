@@ -25,20 +25,20 @@ import java.util.List;
 final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
-    private static final MouseListener dispatcherListener = new MouseAdapter() { };
+    private static final MouseListener EMPTY_NO_OP_MOUSE_LISTENER = new MouseAdapter() { };
     static {
         Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
         Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
-        component.addMouseListener(dispatcherListener); // <- ensures that mouse events are enabled
+        component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
-        component.addMouseListener(dispatcherListener); // <- ensures that mouse events are enabled
+        component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addExitListener(listener);
     }
