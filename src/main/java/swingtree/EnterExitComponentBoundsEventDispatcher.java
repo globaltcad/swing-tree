@@ -11,8 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  *  A custom event dispatcher for mouse enter and exit events based on the mouse
@@ -34,11 +32,13 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+        component.addMouseListener(dispatcherListener);
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+        component.addMouseListener(dispatcherListener);
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addExitListener(listener);
     }
@@ -46,15 +46,14 @@ final class EnterExitComponentBoundsEventDispatcher {
     private static ComponentEnterExitListeners[] fetchListenersInitialized(JComponent component) {
         Object foundObject = component.getClientProperty(ComponentEnterExitListeners.class);
         if ( !(foundObject instanceof ComponentEnterExitListeners[]) ) {
-            foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners(component);
+            foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners();
             component.putClientProperty(ComponentEnterExitListeners.class, foundObject);
         }
         return (ComponentEnterExitListeners[]) foundObject;
     }
 
-    private static ComponentEnterExitListeners[] iniListeners(JComponent component) {
+    private static ComponentEnterExitListeners[] iniListeners() {
         // ensures that mouse events are enabled
-        component.addMouseListener(dispatcherListener);
         ComponentEnterExitListeners[] listenerArray = new ComponentEnterExitListeners[UI.ComponentArea.values().length];
         for (UI.ComponentArea a : UI.ComponentArea.values()) {
             listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a);
