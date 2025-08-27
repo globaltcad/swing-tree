@@ -11,8 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  *  A custom event dispatcher for mouse enter and exit events based on the mouse
@@ -27,18 +25,20 @@ import java.util.WeakHashMap;
 final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
-    private static final MouseListener dispatcherListener = new MouseAdapter() { };
+    private static final MouseListener EMPTY_NO_OP_MOUSE_LISTENER = new MouseAdapter() { };
     static {
         Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
         Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+        component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+        component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addExitListener(listener);
     }
@@ -46,15 +46,13 @@ final class EnterExitComponentBoundsEventDispatcher {
     private static ComponentEnterExitListeners[] fetchListenersInitialized(JComponent component) {
         Object foundObject = component.getClientProperty(ComponentEnterExitListeners.class);
         if ( !(foundObject instanceof ComponentEnterExitListeners[]) ) {
-            foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners(component);
+            foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners();
             component.putClientProperty(ComponentEnterExitListeners.class, foundObject);
         }
         return (ComponentEnterExitListeners[]) foundObject;
     }
 
-    private static ComponentEnterExitListeners[] iniListeners(JComponent component) {
-        // ensures that mouse events are enabled
-        component.addMouseListener(dispatcherListener);
+    private static ComponentEnterExitListeners[] iniListeners() {
         ComponentEnterExitListeners[] listenerArray = new ComponentEnterExitListeners[UI.ComponentArea.values().length];
         for (UI.ComponentArea a : UI.ComponentArea.values()) {
             listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a);
