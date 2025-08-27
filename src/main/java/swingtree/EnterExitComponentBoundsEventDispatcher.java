@@ -15,19 +15,21 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- *  A custom event dispatcher for mouse enter and exit events based on the mouse
- *  cursor location exiting or entering a component's bounds even if the
- *  mouse cursor is on a child component.<br>
- *  This is in essence a fix for the default Swing behavior which also dispatches enter/exit
- *  events when the mouse cursor enters or exits the bounds of a child component
- *  which also has a listener for these events. So using this we try to
- *  make the behavior more predictable, reliable and intuitive.
+ * A custom event dispatcher for mouse enter and exit events based on the mouse
+ * cursor location exiting or entering a component's bounds even if the
+ * mouse cursor is on a child component.<br>
+ * This is in essence a fix for the default Swing behavior which also dispatches enter/exit
+ * events when the mouse cursor enters or exits the bounds of a child component
+ * which also has a listener for these events. So using this we try to
+ * make the behavior more predictable, reliable and intuitive.
  */
 @SuppressWarnings("EnumOrdinal")
 final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
-    private static final MouseListener dispatcherListener = new MouseAdapter() { };
+    private static final MouseListener dispatcherListener = new MouseAdapter() {
+    };
+
     static {
         Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
         Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
@@ -45,7 +47,7 @@ final class EnterExitComponentBoundsEventDispatcher {
 
     private static ComponentEnterExitListeners[] fetchListenersInitialized(JComponent component) {
         Object foundObject = component.getClientProperty(ComponentEnterExitListeners.class);
-        if ( !(foundObject instanceof ComponentEnterExitListeners[]) ) {
+        if (!(foundObject instanceof ComponentEnterExitListeners[])) {
             foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners(component);
             component.putClientProperty(ComponentEnterExitListeners.class, foundObject);
         }
@@ -63,21 +65,30 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     private static void onMouseEvent(AWTEvent event) {
-        if (event instanceof MouseEvent) {
-            MouseEvent mouseEvent = (MouseEvent) event;
+        try {
+            if (event instanceof MouseEvent) {
+                MouseEvent mouseEvent = (MouseEvent) event;
 
-            Component eventComponent = mouseEvent.getComponent();
-            while ( eventComponent instanceof JComponent ) {
-                JComponent toReceiveEvent = (JComponent) eventComponent;
-                ComponentEnterExitListeners[] componentListenerInfo = fetchListenersInitialized(toReceiveEvent);
-                if (componentListenerInfo != null) {
-                    for (UI.ComponentArea area : UI.ComponentArea.values()) {
-                        ComponentEnterExitListeners currentListeners = componentListenerInfo[area.ordinal()];
-                        currentListeners.dispatch(toReceiveEvent, mouseEvent);
+                Component eventComponent = mouseEvent.getComponent();
+                while (eventComponent instanceof JComponent) {
+                    JComponent toReceiveEvent = (JComponent) eventComponent;
+                    ComponentEnterExitListeners[] componentListenerInfo = fetchListenersInitialized(toReceiveEvent);
+                    if (componentListenerInfo != null) {
+                        for (UI.ComponentArea area : UI.ComponentArea.values()) {
+                            ComponentEnterExitListeners currentListeners = componentListenerInfo[area.ordinal()];
+                            currentListeners.dispatch(toReceiveEvent, mouseEvent);
+                        }
                     }
+                    eventComponent = toReceiveEvent.getParent();
                 }
-                eventComponent = toReceiveEvent.getParent();
+
+                String message = "consumed: " + mouseEvent.isConsumed() + "\n" +
+                    "mouseEvent: " + mouseEvent;
+
+                log.info(message);
             }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -86,9 +97,9 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     /**
-     *  Contains the enter and exit listeners for a component as well as
-     *  a flag indicating whether the mouse cursor is currently within the
-     *  bounds of the component or not.
+     * Contains the enter and exit listeners for a component as well as
+     * a flag indicating whether the mouse cursor is currently within the
+     * bounds of the component or not.
      */
     private static class ComponentEnterExitListeners {
         private final UI.ComponentArea area;
@@ -96,15 +107,15 @@ final class EnterExitComponentBoundsEventDispatcher {
         private final List<MouseListener> enterListeners;
         private final List<MouseListener> exitListeners;
 
-        public ComponentEnterExitListeners( UI.ComponentArea area ) {
+        public ComponentEnterExitListeners(UI.ComponentArea area) {
             this.area = area;
             this.location = Location.OUTSIDE;
             this.enterListeners = new ArrayList<>();
-            this.exitListeners  = new ArrayList<>();
+            this.exitListeners = new ArrayList<>();
         }
 
         private final boolean areaIsEqualToBounds(Component component) {
-            if ( this.area == UI.ComponentArea.ALL ) {
+            if (this.area == UI.ComponentArea.ALL) {
                 return true;
             }
             Shape shape = ComponentExtension.from((JComponent) component).getComponentArea(area).orElse(null);
@@ -139,38 +150,37 @@ final class EnterExitComponentBoundsEventDispatcher {
                     location = onMouseExit(component, event);
                     break;
                 case MouseEvent.MOUSE_MOVED:
-                    if ( !areaIsEqualToBounds(component) ) {
-                        if ( location == Location.INSIDE ) {
+                    if (!areaIsEqualToBounds(component)) {
+                        if (location == Location.INSIDE) {
                             location = onMouseExit(component, event);
-                        } else if ( location == Location.OUTSIDE ) {
+                        } else if (location == Location.OUTSIDE) {
                             location = onMouseEnter(component, event);
                         }
                     }
-                break;
+                    break;
             }
         }
 
         private Location determineCurrentLocationOf(MouseEvent event) {
             return ComponentExtension.from((JComponent) event.getComponent())
-                    .getComponentArea(area)
-                    .filter( shape -> shape.contains(event.getPoint()) )
-                    .map( isInsideShape -> Location.INSIDE )
-                    .orElse(Location.OUTSIDE);
+                .getComponentArea(area)
+                .filter(shape -> shape.contains(event.getPoint()))
+                .map(isInsideShape -> Location.INSIDE)
+                .orElse(Location.OUTSIDE);
         }
 
-        private Location onMouseEnter(JComponent component, MouseEvent mouseEvent)
-        {
+        private Location onMouseEnter(JComponent component, MouseEvent mouseEvent) {
             mouseEvent = withNewSource(mouseEvent, component);
 
             if (enterListeners.isEmpty())
                 return determineCurrentLocationOf(mouseEvent);
 
-            if ( areaIsEqualToBounds(component) ) {
+            if (areaIsEqualToBounds(component)) {
                 dispatchEnterToAllListeners(mouseEvent);
                 return Location.INSIDE;
             } else {
                 Location nextLocation = determineCurrentLocationOf(mouseEvent);
-                if ( nextLocation == Location.INSIDE && this.location == Location.OUTSIDE )
+                if (nextLocation == Location.INSIDE && this.location == Location.OUTSIDE)
                     dispatchEnterToAllListeners(mouseEvent);
 
                 return nextLocation;
@@ -178,7 +188,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         }
 
         private void dispatchEnterToAllListeners(MouseEvent mouseEvent) {
-            for ( MouseListener listener : enterListeners ) {
+            for (MouseListener listener : enterListeners) {
                 try {
                     listener.mouseEntered(mouseEvent);
                 } catch (Exception e) {
@@ -187,19 +197,18 @@ final class EnterExitComponentBoundsEventDispatcher {
             }
         }
 
-        private Location onMouseExit(JComponent component, MouseEvent mouseEvent)
-        {
+        private Location onMouseExit(JComponent component, MouseEvent mouseEvent) {
             mouseEvent = withNewSource(mouseEvent, component);
 
             if (exitListeners.isEmpty())
                 return determineCurrentLocationOf(mouseEvent);
 
-            if ( areaIsEqualToBounds(component) ) {
+            if (areaIsEqualToBounds(component)) {
                 dispatchExitToAllListeners(mouseEvent);
                 return Location.OUTSIDE;
             } else {
                 Location nextLocation = determineCurrentLocationOf(mouseEvent);
-                if ( nextLocation == Location.OUTSIDE && this.location == Location.INSIDE )
+                if (nextLocation == Location.OUTSIDE && this.location == Location.INSIDE)
                     dispatchExitToAllListeners(mouseEvent);
 
                 return nextLocation;
@@ -207,7 +216,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         }
 
         private void dispatchExitToAllListeners(MouseEvent mouseEvent) {
-            for ( MouseListener listener : exitListeners ) {
+            for (MouseListener listener : exitListeners) {
                 try {
                     listener.mouseExited(mouseEvent);
                 } catch (Exception e) {
@@ -238,7 +247,7 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     private static MouseEvent withNewSource(MouseEvent event, JComponent newSource) {
-        if ( event.getSource() == newSource )
+        if (event.getSource() == newSource)
             return event;
 
         // We need to convert the mouse position to the new source's coordinate system
