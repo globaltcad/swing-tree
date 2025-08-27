@@ -32,13 +32,13 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
-        component.addMouseListener(dispatcherListener);
+        component.addMouseListener(dispatcherListener); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
     static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
-        component.addMouseListener(dispatcherListener);
+        component.addMouseListener(dispatcherListener); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addExitListener(listener);
     }
@@ -53,7 +53,6 @@ final class EnterExitComponentBoundsEventDispatcher {
     }
 
     private static ComponentEnterExitListeners[] iniListeners() {
-        // ensures that mouse events are enabled
         ComponentEnterExitListeners[] listenerArray = new ComponentEnterExitListeners[UI.ComponentArea.values().length];
         for (UI.ComponentArea a : UI.ComponentArea.values()) {
             listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a);
