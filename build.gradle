@@ -50,9 +50,25 @@ dependencies {
     implementation group: 'org.jspecify', name: 'jspecify', version: '[1+, )'
 
     // Main dependencies:
-    api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '2.0.0'
-    api group: 'com.github.weisj',     name: 'jsvg',            version: '2.0.0'
+
+    api("com.miglayout:miglayout-swing") {// https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
+        version {
+            require("[5.3, 12.0.0)") // Allows 2.0.0 and above, up to 11.
+            prefer("5.3") // Default if user doesn't specify
+        }
+    }
+    api("com.github.weisj:jsvg") {
+        version {
+            require("[2.0.0, 3.0.0)") // Allows 2.0.0 and above, but not 3.0.0+
+            prefer("2.0.0") // Default if user doesn't specify
+        }
+    }
+    api("io.github.globaltcad:sprouts") {
+        version {
+            require("[2.0.0, 3.0.0)") // Allows 2.0.0 and above, but not 3.0.0+
+            prefer("2.1.0") // Default if user doesn't specify
+        }
+    }
 
     // Logging :
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '[1+, )'
