@@ -132,7 +132,7 @@ identity entirely!
 ## Sum Types and Pattern Matching
 
 Java has actively evolved towards working data/value objects
-through dedicated languages features like pattern matching and records.
+through dedicated language features like pattern matching and records.
 Pattern matching allows you to deconstruct your data without boilerplate
 code and in a way where you can write operations to be more functional and
 pipeline-like.
