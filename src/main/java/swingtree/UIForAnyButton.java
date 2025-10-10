@@ -89,109 +89,6 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
-     *  Takes the provided {@link Icon} and scales it to the provided width and height
-     *  before displaying it on the wrapped button type.<br>
-     *  Also see {@link #withIcon(int, int, IconDeclaration)}, which is
-     *  <b>the preferred way of setting icons on buttons!</b>
-     *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
-     * @param icon The {@link Icon} which should be scaled and displayed on the button.
-     * @return This very builder to allow for method chaining.
-     */
-    public I withIcon( int width, int height, ImageIcon icon ) {
-        NullUtil.nullArgCheck(icon,"icon",Icon.class);
-        icon = _fitTo( width, height, icon );
-        return withIcon(icon);
-    }
-
-    /**
-     *  Takes the provided {@link IconDeclaration} and scales it to the provided width and height
-     *  before displaying it on the wrapped button type.
-     *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
-     * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
-     * @return This very builder to allow for method chaining.
-     */
-    public I withIcon( int width, int height, IconDeclaration icon ) {
-        NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
-        return icon.find()
-                   .map( i -> withIcon(width, height, i) )
-                   .orElseGet( this::_this );
-    }
-
-    /**
-     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
-     *  to the provided width and height before displaying it on the wrapped button type.
-     *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
-     * @param icon The {@link Icon} which should be scaled and displayed on the button.
-     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
-     * @return This very builder to allow for method chaining.
-     */
-    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
-        NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
-        return icon.find()
-                .map( i -> withIcon(_fitTo(width, height, i), fitComponent) )
-                .orElseGet( this::_this );
-    }
-
-    /**
-     *  Sets the {@link Icon} property of the wrapped button type and scales it
-     *  according to the provided {@link UI.FitComponent} policy.
-     *  This icon is also used as the "pressed" and "disabled" icon if
-     *  there is no explicitly set pressed icon.<br>
-     *  Please also see {@link #withIcon(IconDeclaration, UI.FitComponent)}, which is
-     *  <b>the recommended way of setting icons on buttons!</b>
-     *
-     * @param icon The {@link SvgIcon} which should be displayed on the button.
-     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
-     * @return This very builder to allow for method chaining.
-     */
-    public I withIcon( ImageIcon icon, UI.FitComponent fitComponent ) {
-        NullUtil.nullArgCheck(icon,"icon", ImageIcon.class);
-        NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
-        if ( icon instanceof SvgIcon)
-        {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            return withIcon( svgIcon.withFitComponent(fitComponent) );
-        }
-        else
-            return _with( thisComponent -> {
-                       UI.runLater(()->{
-                           int width  = thisComponent.getWidth();
-                           int height = thisComponent.getHeight();
-                           width  = Math.max(width,  thisComponent.getMinimumSize().width);
-                           height = Math.max(height, thisComponent.getMinimumSize().height);
-                           if ( width > 0 && height > 0 )
-                               thisComponent.setIcon(_fitTo( width, height, icon ));
-                       });
-                   })
-                   ._this();
-
-    }
-
-    /**
-     *  Sets the {@link Icon} property of the wrapped button type and scales it
-     *  according to the provided {@link UI.FitComponent} policy.
-     *  This icon is also used as the "pressed" and "disabled" icon if
-     *  no other icon type is explicitly set.
-     *
-     * @param icon The {@link IconDeclaration} which should be displayed on the button.
-     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
-     * @return This very builder to allow for method chaining.
-     */
-    public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
-        NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
-        NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
-        return icon.find()
-                   .map( i -> withIcon(i, fitComponent) )
-                   .orElseGet( this::_this );
-    }
-
-    /**
      *  Use this to specify the icon for the wrapped button type.
      *  The icon is determined based on the provided {@link IconDeclaration}
      *  instance which is conceptually merely a resource path to the icon.
@@ -237,7 +134,113 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                ._this();
     }
 
-    private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
+    /**
+     *  Takes the provided {@link Icon} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.<br>
+     *  Also see {@link #withIcon(int, int, IconDeclaration)}, which is
+     *  <b>the preferred way of setting icons on buttons!</b>
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, Icon icon ) {
+        NullUtil.nullArgCheck(icon,"icon",Icon.class);
+        icon = _fitTo( width, height, icon );
+        return withIcon(icon);
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
+        return icon.find()
+                   .map( i -> withIcon(width, height, i) )
+                   .orElseGet( this::_this );
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration}, whose referenced icon will be scaled and displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+        NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
+        return icon.find()
+                .map( i -> withIcon(_fitTo(width, height, i), fitComponent) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Sets the {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is also used as the "pressed" and "disabled" icon if
+     *  there is no explicitly set pressed icon.<br>
+     *  Please also see {@link #withIcon(IconDeclaration, UI.FitComponent)}, which is
+     *  <b>the recommended way of setting icons on buttons!</b>
+     *
+     * @param icon The {@link Icon} which should be displayed on the button.
+     *             Ideally, this should be an {@link SvgIcon} to ensure that {@link swingtree.UI.FitComponent}
+     *             can be applied properly.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should
+     *                     be scaled to fit the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( Icon icon, UI.FitComponent fitComponent ) {
+        NullUtil.nullArgCheck(icon,"icon", ImageIcon.class);
+        NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
+        if ( icon instanceof SvgIcon)
+        {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            return withIcon( svgIcon.withFitComponent(fitComponent) );
+        }
+        else
+            return _with( thisComponent -> {
+                       UI.runLater(()->{
+                           int width  = thisComponent.getWidth();
+                           int height = thisComponent.getHeight();
+                           width  = Math.max(width,  thisComponent.getMinimumSize().width);
+                           height = Math.max(height, thisComponent.getMinimumSize().height);
+                           if ( width > 0 && height > 0 )
+                               thisComponent.setIcon(_fitTo( width, height, icon ));
+                       });
+                   })
+                   ._this();
+
+    }
+
+    /**
+     *  Sets the {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is also used as the "pressed" and "disabled" icon if
+     *  no other icon type is explicitly set.
+     *
+     * @param icon The {@link IconDeclaration} which should be displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
+        NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
+        return icon.find()
+                   .map( i -> withIcon(i, fitComponent) )
+                   .orElseGet( this::_this );
+    }
+
+    private Icon _fitTo( int width, int height, Icon icon ) {
         if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
             svgIcon = svgIcon.withIconWidth(width);
@@ -247,7 +250,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
         }
         else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
-            return ScalableImageIcon.of(Size.of(width, height), icon);
+            if ( icon instanceof ImageIcon )
+                return ScalableImageIcon.of(Size.of(width, height), (ImageIcon) icon);
         }
         return icon;
     }
