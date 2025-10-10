@@ -152,7 +152,7 @@ possibilities within your data model in a clean and type-safe way.
 
 Take a look at this example:
 
-**Sealed Type in Java:**
+**A Sealed Type:**
 ```java
 sealed interface Shape { 
     double area();
@@ -175,7 +175,7 @@ static BufferedImage render(Cursor cursor) {
 }
 ```
 
-The above code snippet the sealed `Shape` interface defines a 
+In the above code snippet the sealed `Shape` interface defines a 
 closed hierarchy in which all possible subclasses are known at compile time. 
 This feature enhances type safety and enables the compiler to perform exhaustive checks, 
 reducing the likelihood of unhandled cases. In the context of DOP, sealed types facilitate 
