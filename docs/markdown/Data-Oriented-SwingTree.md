@@ -147,7 +147,8 @@ There are two essential algebraic data types:
 Sum types are particularly useful in DOP for expressing different 
 possibilities within your data model in a clean and type-safe way.
 
-You can think of it as polymorphism but for value types!
+> [!TIP]
+> You can think of it as polymorphism but for value types!
 
 Take a look at this example:
 
@@ -265,7 +266,7 @@ And finally, the most important benefit: **Frontend interoperability!**
 
 --- 
 
-GUIs are something the user changes in place, which means that at
+GUIs are something the user changes in-place, which means that at
 their core, they imply an interaction with a mutable data structure.
 And this is where we can use our lens properties instead of having to 
 write mutable objects. **Essentially, this pattern frees us from
@@ -318,9 +319,14 @@ In the `PersonView` for example, a call to:
 textField(forename)
 ```
 ...creates a `JTextField` whose text is bidirectionally bound to the `forename` lens property.
-Here the user input updates are passed to the `Var`, and any programmatic changes to the `Var` are 
-reflected back to the state of the UI. This bidirectional binding streamlines the synchronization 
-between the UI and the underlying data model.
+Here, any user input updates coming from the text field are passed to the `Var`, and any 
+programmatic changes to the `Var` are reflected back to the state of the UI. 
+
+> [!NOTE]
+> This bidirectional binding automates the synchronization 
+> between the UI and the underlying data model and more importantly
+> it is **the core mechanism which decouples the complex and stateful GUI data structure
+> from your simpler domain driven data structures.**
 
 
 ### 📋 Dynamic Collections with Tuple and Var
@@ -354,8 +360,11 @@ and even apply functional operations on them, like so:
 ```java
 members.update(all -> all.map(person -> person.withAge(42)));
 ```
+Here we are using `Tuple::map(Function)` to create a new `Tuple` where all `Person` instances
+have their age set to `42`. The `members` property then updates the `Team` property accordingly.
 
-You can think of this tuple based property as an **observable list**.
+> [!TIP]
+> You can think of this tuple based property as an **observable list**.
 
 ### 🧩 Composable Views with addAll
 
@@ -440,14 +449,20 @@ example with respect to the `Person` type: **This time, there is a `UUID` in the
 
 More specifically, the `Person` record, now implements `sprouts.HasId<UUID>`.
 
-This is an important requirement that SwingTree needs in order to facilitate the creation
-and maintenance of components bound to tuple items. Remember, the big difference between
-value objects and regular (mutable) objects is that values define their identity in terms
-of their contents. This means that two value objects with the same contents are equal.
-But this creates a problem when two items in a tuple suddenly become equal despite being
-represented and bound to different GUI components. In that case, the GUI components no longer
-know what to target. By implementing `sprouts.HasId`, we tell SwingTree to use the `id()`
-attribute as a constant identifier for the binding mechanism.
+Why is that?
+
+> [!IMPORTANT]
+> This is an important requirement that SwingTree needs in order to facilitate the creation
+> and maintenance of components bound to tuple items. Remember, the big difference between
+> value objects and regular (mutable) objects is that values define their identity in terms
+> of their contents. This means that two value objects with the same contents are equal.
+> But this creates a problem when two items in a tuple suddenly become equal despite being
+> represented and bound to different GUI components. In that case, the GUI components no longer
+> know what to target. By implementing `sprouts.HasId`, we tell SwingTree to use the `id()`
+> attribute as a constant identifier for the binding mechanism.
+
+And that’s it! :sparkles: You now know how to use Data Oriented Programming
+with SwingTree :deciduous_tree: and Sprouts :seedling: to build reactive and declarative UIs in Java.
 
 ---
 
