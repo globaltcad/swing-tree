@@ -75,6 +75,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *     UI.button("Something")
      *     .peek( button -> button.setIcon(...) );
      *  }</pre>
+     *  Please also see {@link #withIcon(IconDeclaration)}, which is
+     *  <b>the recommended way of setting icons on buttons!</b>
      *
      *
      * @param icon The {@link Icon} which should be displayed on the button.
@@ -88,7 +90,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the provided {@link Icon} and scales it to the provided width and height
-     *  before displaying it on the wrapped button type.
+     *  before displaying it on the wrapped button type.<br>
+     *  Also see {@link #withIcon(int, int, IconDeclaration)}, which is
+     *  <b>the preferred way of setting icons on buttons!</b>
      *
      * @param width The width of the icon.
      * @param height The height of the icon.
@@ -99,21 +103,6 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
         icon = _fitTo( width, height, icon );
         return withIcon(icon);
-    }
-
-    private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
-        if ( icon instanceof SvgIcon ) {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconWidth(width);
-            return svgIcon.withIconHeight(height);
-        }
-        else if ( icon instanceof ScalableImageIcon ) {
-            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
-        }
-        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
-            return ScalableImageIcon.of(Size.of(width, height), icon);
-        }
-        return icon;
     }
 
     /**
@@ -153,7 +142,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Sets the {@link Icon} property of the wrapped button type and scales it
      *  according to the provided {@link UI.FitComponent} policy.
      *  This icon is also used as the "pressed" and "disabled" icon if
-     *  there is no explicitly set pressed icon.
+     *  there is no explicitly set pressed icon.<br>
+     *  Please also see {@link #withIcon(IconDeclaration, UI.FitComponent)}, which is
+     *  <b>the recommended way of setting icons on buttons!</b>
      *
      * @param icon The {@link SvgIcon} which should be displayed on the button.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
@@ -182,6 +173,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     }
 
+    /**
+     *  Sets the {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is also used as the "pressed" and "disabled" icon if
+     *  no other icon type is explicitly set.
+     *
+     * @param icon The {@link IconDeclaration} which should be displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     */
     public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
@@ -236,10 +237,40 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                ._this();
     }
 
+    private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconWidth(width);
+            return svgIcon.withIconHeight(height);
+        }
+        else if ( icon instanceof ScalableImageIcon ) {
+            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
+        }
+        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
+            return ScalableImageIcon.of(Size.of(width, height), icon);
+        }
+        return icon;
+    }
+
     private static void _setIconFromDeclaration( AbstractButton button, IconDeclaration icon ) {
         Optional<ImageIcon> optIcon = icon.find();
         if ( optIcon.isPresent() )
             button.setIcon(optIcon.get());
+        else {
+            log.warn(
+                    "Failed to load from 'IconDeclaration' instance '{}', " +
+                    "with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.",
+                    icon, icon.path(), icon.size(), button,
+                    new Throwable("Stack trace for debugging purposes.")
+                );
+            button.setIcon(null);
+        }
+    }
+
+    private static void _setIconOnPressFromDeclaration( AbstractButton button, IconDeclaration icon ) {
+        Optional<ImageIcon> optIcon = icon.find();
+        if ( optIcon.isPresent() )
+            button.setPressedIcon(optIcon.get());
         else {
             log.warn(
                     "Failed to load from 'IconDeclaration' instance '{}', " +
