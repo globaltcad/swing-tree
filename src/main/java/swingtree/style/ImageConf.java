@@ -336,9 +336,9 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified image.
      * @throws NullPointerException If the specified {@code path} is null.
      */
-    public ImageConf image(String path ) {
+    public ImageConf image( String path ) {
         Objects.requireNonNull(path);
-        return image(() -> path);
+        return image(IconDeclaration.of(path));
     }
 
     /**
