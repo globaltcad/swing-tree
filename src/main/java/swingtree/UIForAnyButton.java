@@ -15,11 +15,11 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -202,24 +202,15 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIcon( Icon icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", ImageIcon.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
-        if ( icon instanceof SvgIcon)
-        {
+        if ( icon instanceof SvgIcon) {
             SvgIcon svgIcon = (SvgIcon) icon;
             return withIcon( svgIcon.withFitComponent(fitComponent) );
         }
-        else
+        else // If it is not an SVG icon, then it is not dynamic, so we do the dynamic sizing ourselves:
             return _with( thisComponent -> {
-                       UI.runLater(()->{
-                           int width  = thisComponent.getWidth();
-                           int height = thisComponent.getHeight();
-                           width  = Math.max(width,  thisComponent.getMinimumSize().width);
-                           height = Math.max(height, thisComponent.getMinimumSize().height);
-                           if ( width > 0 && height > 0 )
-                               thisComponent.setIcon(_fitTo( width, height, icon ));
-                       });
+                          _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setIcon);
                    })
                    ._this();
-
     }
 
     /**
@@ -240,7 +231,89 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                    .orElseGet( this::_this );
     }
 
-    private Icon _fitTo( int width, int height, Icon icon ) {
+    private static void _installAutomaticIconApplier(
+        AbstractButton thisComponent,
+        Icon icon,
+        UI.FitComponent fitComponent,
+        BiConsumer<AbstractButton, Icon> iconApplier
+    ) {
+        Runnable dynamicSizer = _createDynamicIconApplier(thisComponent, icon, fitComponent, iconApplier);
+        dynamicSizer.run(); // Initial sizing
+        UI.runLater(dynamicSizer); // Run later to ensure correct sizing after layout
+        // TODO: make ScalableImageIcon use FitComponent to automatically resize itself
+    }
+
+    private static Runnable _createDynamicIconApplier(
+        AbstractButton thisComponent,
+        Icon icon,
+        UI.FitComponent fitComponent,
+        BiConsumer<AbstractButton, Icon> iconApplier
+    ) {
+        AtomicReference<Size> lastSize = new AtomicReference<>(Size.of(-1,-1));
+        return ()->{
+            Size size = _determineIconSize(thisComponent, icon, fitComponent);
+            if ( !Objects.equals(size,lastSize.get()) ) {
+                lastSize.set(size);
+                int width = size.width().map(Number::intValue).orElse(-1);
+                int height = size.height().map(Number::intValue).orElse(-1);
+                if ( width > 0 && height > 0 )
+                    iconApplier.accept(thisComponent, _fitTo( width, height, icon ));
+            }
+        };
+    }
+
+    private static Size _determineIconSize(JComponent thisComponent, Icon icon, UI.FitComponent fitComponent) {
+        int width ;
+        int height;
+        Insets insets = thisComponent.getInsets();
+        int fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);
+        int fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);
+        fittedWidth = UI.unscale(fittedWidth) - insets.left - insets.right; // We unscale because the icon will be scaled internally
+        fittedHeight = UI.unscale(fittedHeight) - insets.top  - insets.bottom;
+        int iconWidth  = icon.getIconWidth();
+        int iconHeight = icon.getIconHeight();
+        // We need to determine and return a base size to be scaled later on...
+        // But some icon types already do the scaling internally, so we need to check for that:
+        if ( icon instanceof ScalableImageIcon ) {
+            ScalableImageIcon scalableIcon = (ScalableImageIcon) icon;
+            if ( scalableIcon.getBaseWidth() > 0 )
+                iconWidth = scalableIcon.getBaseWidth();
+            if ( scalableIcon.getBaseHeight() > 0 )
+                iconHeight = scalableIcon.getBaseHeight();
+        } else if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            if ( svgIcon.getBaseWidth() > 0 )
+                iconWidth = svgIcon.getBaseWidth();
+            if ( svgIcon.getBaseHeight() > 0 )
+                iconHeight = svgIcon.getBaseHeight();
+        }
+        if ( fitComponent == UI.FitComponent.NO ) {
+            width  = iconWidth;
+            height = iconHeight;
+        } else if ( fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT) {
+            width  = fittedWidth;
+            height = fittedHeight;
+        } else if ( fitComponent == UI.FitComponent.WIDTH ) {
+            width  = fittedWidth;
+            height = iconHeight;
+        } else if ( fitComponent == UI.FitComponent.HEIGHT ) {
+            width = iconWidth;
+            height = fittedHeight;
+        } else if ( fitComponent == UI.FitComponent.MAX_DIM ) {
+            width  = Math.max(fittedWidth, fittedHeight);
+            height = Math.max(fittedWidth, fittedHeight);
+        } else if ( fitComponent == UI.FitComponent.MIN_DIM ) {
+            width  = Math.min(fittedWidth, fittedHeight);
+            height = Math.min(fittedWidth, fittedHeight);
+        } else {
+            log.error("Unknown 'UI.FitComponent' value: '{}'. Using 'NO' instead.", fitComponent);
+            width  = icon.getIconWidth();
+            height = icon.getIconHeight();
+        }
+        return Size.of(width, height);
+    }
+
+    private static Icon _fitTo(int width, int height, Icon icon) {
         if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
             svgIcon = svgIcon.withIconWidth(width);
@@ -248,10 +321,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         }
         else if ( icon instanceof ScalableImageIcon ) {
             return ((ScalableImageIcon)icon).withSize(Size.of(width, height));
-        }
-        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
-            if ( icon instanceof ImageIcon )
-                return ScalableImageIcon.of(Size.of(width, height), (ImageIcon) icon);
+        } else if ( icon instanceof ImageIcon ) {
+            return ScalableImageIcon.of(Size.of(width, height), (ImageIcon) icon);
         }
         return icon;
     }
