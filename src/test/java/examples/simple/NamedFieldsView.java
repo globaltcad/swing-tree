@@ -1,5 +1,6 @@
 package examples.simple;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import examples.FancyTextField;
 import sprouts.Event;
 import sprouts.Var;
@@ -8,10 +9,7 @@ import swingtree.animation.LifeTime;
 import swingtree.api.IconDeclaration;
 import swingtree.style.SvgIcon;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.awt.Color;
 import java.time.DayOfWeek;
 import java.util.LinkedHashMap;
@@ -21,6 +19,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ *  A simple view which uses various aspects of the SwingTree API
+ *  mainly written to do manual testing of the API features by checking
+ *  if the layout and behavior is as expected.
+ */
 public class NamedFieldsView extends JPanel {
 
     private final Var<Boolean> toggle = Var.of(false);
@@ -34,11 +37,11 @@ public class NamedFieldsView extends JPanel {
         comboboxDefinition.setEditable(true);
         comboboxDefinition.setInheritsPopupMenu(true);
 
+        IconDeclaration pngT    = ()->"img/seed.png";
         IconDeclaration funnel  = ()->"img/funnel.svg";
         IconDeclaration notes   = ()->"img/two-16th-notes.svg";
         IconDeclaration tree    = ()->"img/curvey-bubble-tree.svg";
         IconDeclaration svgT    = ()->"img/dandelion.svg";
-        IconDeclaration pngT    = ()->"img/seed.png";
 
         Map<String, List<String>> data = new LinkedHashMap<>();
         data.put("A", Stream.of("A1", "A2", "A3").collect(Collectors.toList()));
@@ -49,7 +52,7 @@ public class NamedFieldsView extends JPanel {
         .add(
             UI.panel("fill, wrap 1", "[grow]")
             .add("center",
-                UI.box("fill, wrap 5")
+                UI.box("fill, wrap 6")
                 .add("shrinkx", UI.label("Max dim sizing:"))
                 .add("growx, pushx",
                     UI.toggleButton(funnel, UI.FitComponent.MAX_DIM).withMinSize(42, 36)
@@ -59,6 +62,9 @@ public class NamedFieldsView extends JPanel {
                 )
                 .add("growx, pushx",
                     UI.toggleButton(tree, UI.FitComponent.MAX_DIM).withMinSize(42, 36)
+                )
+                .add("growx, pushx",
+                    UI.toggleButton(pngT, UI.FitComponent.MAX_DIM).withMinSize(42, 36)
                 )
                 .add("growx, pushx",
                     UI.icon(funnel).withMinSize(19, 19)
@@ -75,6 +81,9 @@ public class NamedFieldsView extends JPanel {
                 )
                 .add("growx, pushx",
                     UI.toggleButton(tree, UI.FitComponent.MIN_DIM).withMinSize(42, 36)
+                )
+                .add("growx, pushx",
+                    UI.toggleButton(pngT, UI.FitComponent.MIN_DIM).withMinSize(42, 36)
                 )
                 .add("growx, pushx",
                     UI.icon(funnel).withMinSize(19, 19)
@@ -102,7 +111,7 @@ public class NamedFieldsView extends JPanel {
                 UI.box("fill")
                 .add("alignx right, shrinkx", UI.label("Menu Item:").peek(design::fitLeft))
                 .add("growx, pushx",
-                    UI.menuItem("<- The T is displayed here!", svgT.find(SvgIcon.class).map(i->i.withIconSize(16,16)).get())
+                    UI.menuItem("<- The T is displayed here!", svgT.find(ImageIcon.class).get())
                 )
             )
             .add(
@@ -173,8 +182,8 @@ public class NamedFieldsView extends JPanel {
                 UI.label("Hello!")
                 .withTransitionalStyle(toggle, LifeTime.of(1, TimeUnit.SECONDS), (state, conf)->conf
                     .border((3*state.progress()), Color.BLACK)
-                    .marginLeft( (int)(conf.component().getWidth()*state.progress()/2) )
-                    .marginRight( (int)(conf.component().getWidth()*state.regress()/2) )
+                    .marginLeft( (int)(200*state.progress()/2) )
+                    .marginRight( (int)(200*state.regress()/2) )
                 )
             )
         )
@@ -215,12 +224,13 @@ public class NamedFieldsView extends JPanel {
         // First we set nimbus as the look and feel.
         // This is not necessary, but it looks better.
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ( "Nimbus".equals(info.getName()) ) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
+            //for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            //    if ( "Nimbus".equals(info.getName()) ) {
+            //        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+            //        break;
+            //    }
+            //}
+            FlatLightLaf.setup();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
