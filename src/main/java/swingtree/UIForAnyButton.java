@@ -231,6 +231,179 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                    .orElseGet( this::_this );
     }
 
+    // - On Press Icon:
+
+    /**
+     *  Use this to set the "pressed" icon for the wrapped button type.
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> button.setPressedIcon(...) );
+     *  }</pre>
+     *  Please also see {@link #withIconOnPress(IconDeclaration)}, which is
+     *  <b>the recommended way of setting icons on buttons!</b>
+     *
+     *
+     * @param icon The {@link Icon} which should be displayed when the button is pressed.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}.
+     */
+    public I withIconOnPress( Icon icon ) {
+        Objects.requireNonNull(icon);
+        return _with( c -> c.setPressedIcon(icon) )._this();
+    }
+
+    /**
+     *  Takes the provided {@link Icon} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type when the user presses the button type.<br>
+     *  Also see {@link #withIconOnPress(int, int, IconDeclaration)}, which is
+     *  <b>the preferred way of setting icons on buttons!</b>
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and then displayed when the button is being pressed.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnPress( int width, int height, Icon icon ) {
+        Objects.requireNonNull(icon);
+        icon = _fitTo( width, height, icon );
+        return withIconOnPress(icon);
+    }
+
+    /**
+     *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
+     *  before displaying it on the wrapped button type when pressed.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and
+     *             then displayed when the button is being pressed.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} id {@code null}!
+     */
+    public I withIconOnPress( int width, int height, IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return icon.find()
+                .map( i -> withIconOnPress(width, height, i) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type
+     *  when pressed by the user.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and then displayed when the button is being pressed.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     */
+    public I withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return icon.find()
+                .map( i -> withIconOnPress(_fitTo(width, height, i), fitComponent) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Sets the pressed {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is only displayed when the user presses the button type.<br>
+     *  Please also see {@link #withIconOnPress(IconDeclaration, UI.FitComponent)}, which is
+     *  <b>the recommended way of setting pressed icons on buttons!</b>
+     *
+     * @param icon The {@link SvgIcon} which should be displayed when the button is being pressed.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     */
+    public I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        if ( icon instanceof SvgIcon)
+        {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            return withIconOnPress( svgIcon.withFitComponent(fitComponent) );
+        }
+        else
+            return _with( thisComponent -> {
+                        _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setPressedIcon);
+                    })
+                    ._this();
+
+    }
+
+    /**
+     *  Sets the pressed {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is only displayed temporarily when the user presses and holds the button.
+     *
+     * @param icon The {@link IconDeclaration} which should be displayed when the button is being pressed.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     */
+    public I withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent ) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return icon.find()
+                .map( i -> withIconOnPress(i, fitComponent) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Use this to specify the icon for the wrapped button type,
+     *  which ought to be displayed temporarily when the user presses the button.
+     *  The icon is resolved based on the supplied {@link IconDeclaration}
+     *  instance which serves as a resource path to the icon actual.
+     *
+     * @param icon The desired icon to be displayed on top of the button for when it is being pressed.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnPress( IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return _with( c -> icon.find().ifPresent(c::setPressedIcon) )._this();
+    }
+
+    /**
+     *  Use this to dynamically set the "pressed icon" property for the wrapped button type,
+     *  which is displayed when the user presses and holds the button.
+     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  then so does the pressed icon of this button.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
+     * @param icon The {@link Icon} property which should be displayed when the button is being pressed.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}.
+     */
+    public I withIconOnPress( Val<IconDeclaration> icon ) {
+        Objects.requireNonNull(icon);
+        NullUtil.nullPropertyCheck(icon, "icon");
+        return _withOnShow( icon, UIForAnyButton::_setIconOnPressFromDeclaration)
+                ._with( c -> _setIconOnPressFromDeclaration(c, icon.orElseThrowUnchecked()) )
+                ._this();
+    }
+
     private static void _installAutomaticIconApplier(
         AbstractButton thisComponent,
         Icon icon,
