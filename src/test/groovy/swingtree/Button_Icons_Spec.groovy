@@ -69,7 +69,7 @@ class Button_Icons_Spec extends Specification
             JMenuItem menuItem = UI.menuItem("I have a regular icon")
                                    .withIcon( testIcon )
                                    .get(JMenuItem)
-        expect : 'The icon of the `JMenuItem` to be the exact same as the one we set.'
+        expect : 'The icon of the `JMenuItem` to be a correct image with scaling support.'
             menuItem.getIcon() instanceof ScalableImageIcon
             menuItem.getIcon().getIconWidth() == (7 * uiScale) as int
             menuItem.getIcon().getIconHeight() == (13 * uiScale) as int
@@ -430,4 +430,298 @@ class Button_Icons_Spec extends Specification
             uiScale << [2, 3]
     }
 
+    // On Press Icon:
+
+    def 'We can use `withIconOnPress( Icon icon )` to specify a pressed icon.'(
+        float uiScale
+    ) {
+        reportInfo """
+            A pressed icon is shown when the user presses the button based component.
+            This provides visual feedback during the press interaction.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(7,13,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JMenuItem` and set its pressed icon using `withIconOnPress( Icon icon )`.'
+            JMenuItem menuItem = UI.menuItem("I have a pressed icon")
+                                   .withIconOnPress( testIcon )
+                                   .get(JMenuItem)
+        expect : 'The pressed icon of the `JMenuItem` to be a properly scaled icon.'
+            menuItem.getPressedIcon() instanceof ScalableImageIcon
+            menuItem.getPressedIcon().getIconWidth() == (7 * uiScale) as int
+            menuItem.getPressedIcon().getIconHeight() == (13 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnPress( IconDeclaration icon )` to specify a pressed icon.'(float uiScale)
+    {
+        reportInfo """
+            An `IconDeclaration` can be used to define the pressed icon of a button based component.
+            The actual `Icon` will be loaded automatically by SwingTree and shown when the user presses the component.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(16, 12), "img/trees.png")
+        and : 'Then we create a `JRadioButton` and set its pressed icon using `withIconOnPress( IconDeclaration icon )`.'
+            JRadioButton radioButton = UI.radioButton("I have a pressed icon")
+                                      .withIconOnPress( treesIcon )
+                                      .get(JRadioButton)
+        expect : 'The pressed icon of the `JRadioButton` to be loaded and set correctly.'
+            radioButton.getPressedIcon() instanceof ImageIcon
+            radioButton.getPressedIcon().getIconWidth() == (16 * uiScale) as int
+            radioButton.getPressedIcon().getIconHeight() == (12 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnPress( Val<IconDeclaration> icon )` to make a pressed icon reactive.'(float uiScale)
+    {
+        reportInfo """
+            You can use a `Var` property of an `IconDeclaration` to make the pressed icon of a button 
+            based component reactive. This means that whenever the value of the `Var` changes, 
+            the pressed icon of the component will be updated automatically.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'First we create two constants of `IconDeclaration` for testing purposes.'
+            IconDeclaration swingIcon = IconDeclaration.of(Size.of(22, 13), "img/swing.png")
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 64), "img/trees.png")
+        and : 'Then we create a `Var<IconDeclaration>` and set its initial value to the `swingIcon` declaration.'
+            Var<IconDeclaration> iconProperty = Var.of(swingIcon)
+        and : 'Next we create a regular `JButton` and set its pressed icon using the `Var<IconDeclaration>`.'
+            JButton button = UI.button("I have a reactive pressed icon")
+                             .withIconOnPress( iconProperty )
+                             .get(JButton)
+        expect : 'The pressed icon of the `JButton` is loaded and set correctly to the initial value.'
+            button.getPressedIcon() instanceof ImageIcon
+            button.getPressedIcon().getIconWidth() == (22 * uiScale) as int
+            button.getPressedIcon().getIconHeight() == (13 * uiScale) as int
+
+        when : 'We change the value of the `Var<IconDeclaration>` property to the `treesIcon` declaration.'
+            iconProperty.set(treesIcon)
+        and : 'We wait for the Event Dispatch Thread to process all events.'
+            UI.sync()
+        then : 'We can confirm that the pressed icon of the `JButton` was set to the new value.'
+            button.getPressedIcon() instanceof ImageIcon
+            button.getPressedIcon().getIconWidth() == (42 * uiScale) as int
+            button.getPressedIcon().getIconHeight() == (64 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnPress( int width, int height, Icon icon )` to specify a pressed icon with a custom size.'()
+    {
+        reportInfo """
+            You can specify a custom size for a pressed icon by providing the desired width and height
+            along with the `Icon` instance itself. This ensures that the pressed icon fits well within 
+            the layout of your button based component during the press interaction.
+        """
+        given : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(32,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JCheckBox` and set its pressed icon using `withIconOnPress( int width, int height, Icon icon )` with a custom size.'
+            JCheckBox checkBox = UI.checkBox("I have a pressed icon with custom size")
+                                .withIconOnPress(24, 19, testIcon)
+                                .get(JCheckBox)
+        expect : 'The pressed icon of the `JCheckBox` is NOT the exact same instance as the one we set, but has the correct custom size.'
+            checkBox.getPressedIcon() !== testIcon
+            checkBox.getPressedIcon().getIconWidth() == 24
+            checkBox.getPressedIcon().getIconHeight() == 19
+    }
+
+    def 'We can use `withIconOnPress( int width, int height, IconDeclaration icon )` to specify a pressed icon with custom size.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a custom size for a pressed icon by providing the desired width and height
+            along with an `IconDeclaration`. This ensures proper sizing of the pressed icon during user interaction.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 24), "img/seed.png")
+        and : 'Then we build a `JRadioButtonMenuItem` and set its pressed icon using `withIconOnPress( int width, int height, IconDeclaration icon )` with a custom size.'
+            var radioButtonMenuItem = UI.radioButtonMenuItem("I have a pressed icon with custom size")
+                                              .withIconOnPress(33, 19, treesIcon)
+                                              .get(JRadioButtonMenuItem)
+        expect : 'The pressed icon of the `JRadioButtonMenuItem` is loaded and has the correct custom size.'
+            radioButtonMenuItem.getPressedIcon() instanceof ImageIcon
+            radioButtonMenuItem.getPressedIcon().getIconWidth() == (33 * uiScale) as int
+            radioButtonMenuItem.getPressedIcon().getIconHeight() == (19 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a pressed icon with custom size and layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a custom size and layout for a pressed icon by providing the desired width, height,
+            `IconDeclaration`, and a `UI.FitComponent` value. This ensures the pressed icon behaves correctly
+            when the component is resized during the press interaction.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(73, 66), "img/two-16th-notes.svg")
+        and : 'Then we build a `JSplitButton` and set its pressed icon using `withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` with a custom size and layout.'
+            var splitButton = UI.splitButton("I have a pressed icon with custom size and layout")
+                                .withIconOnPress(55, 44, treesIcon, UI.FitComponent.WIDTH)
+                                .get(JSplitButton)
+        expect : 'The pressed icon of the `JSplitButton` is loaded and has the correct custom size.'
+            splitButton.getPressedIcon() instanceof ImageIcon
+            splitButton.getPressedIcon().getIconWidth() == (55 * uiScale) as int
+            splitButton.getPressedIcon().getIconHeight() == (44 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnPress( Icon icon, UI.FitComponent fitComponent )` to specify a pressed icon with custom layout.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a layout behavior for a pressed icon by providing the `Icon` instance
+            along with a `UI.FitComponent` value. This ensures the pressed icon behaves correctly
+            when the button based component is resized during the press interaction.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(42,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JButton` and set its pressed icon using `withIconOnPress( Icon icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JButton button = UI.button("Click!").withSizeExactly(80, 30)
+                                .withIconOnPress( testIcon, UI.FitComponent.NO )
+                                .get(JButton)
+        expect : 'The pressed icon of the `JButton` has the expected dimensions!'
+            button.getPressedIcon().getIconWidth() == UI.scale(42)
+            button.getPressedIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnPress( testIcon, UI.FitComponent.WIDTH )
+                     .get(JButton)
+        then : 'The pressed icon of the `JButton` has the expected dimensions!'
+            button.getPressedIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getPressedIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnPress( testIcon, UI.FitComponent.HEIGHT )
+                     .get(JButton)
+        then : 'The pressed icon of the `JButton` has the expected dimensions!'
+            button.getPressedIcon().getIconWidth() == UI.scale(42)
+            button.getPressedIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnPress( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                     .get(JButton)
+        then : 'The pressed icon of the `JButton` has the expected dimensions!'
+            button.getPressedIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getPressedIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnPress( testIcon, UI.FitComponent.MIN_DIM )
+                     .get(JButton)
+        then : 'The pressed icon of the `JButton` has the expected dimensions!'
+            int minDim = Math.min(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
+            button.getPressedIcon().getIconWidth() == UI.scale(minDim)
+            button.getPressedIcon().getIconHeight() == UI.scale(minDim)
+
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnPress( testIcon, UI.FitComponent.MAX_DIM )
+                     .get(JButton)
+        then : 'The pressed icon of the `JButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
+            button.getPressedIcon().getIconWidth() == UI.scale(maxDim)
+            button.getPressedIcon().getIconHeight() == UI.scale(maxDim)
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a pressed icon with custom layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a layout behavior for a pressed icon specified through an `IconDeclaration`
+            along with a `UI.FitComponent` value. This ensures proper behavior of the pressed icon
+            during resize interactions.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42,32), "img/trees.png")
+        and : 'Then we create a `JToggleButton` and set its pressed icon using `withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JToggleButton toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                                       .withIconOnPress( treesIcon, UI.FitComponent.NO )
+                                       .get(JToggleButton)
+        expect : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                           .withIconOnPress( treesIcon, UI.FitComponent.WIDTH )
+                           .get(JToggleButton)
+        then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnPress( treesIcon, UI.FitComponent.HEIGHT )
+                            .get(JToggleButton)
+        then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnPress( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                            .get(JToggleButton)
+        then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnPress( treesIcon, UI.FitComponent.MIN_DIM )
+                            .get(JToggleButton)
+        then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
+            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(minDim)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(minDim)
+
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnPress( treesIcon, UI.FitComponent.MAX_DIM )
+                            .get(JToggleButton)
+        then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(maxDim)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(maxDim)
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
 }
