@@ -8,6 +8,7 @@ import sprouts.Var
 import swingtree.api.IconDeclaration
 import swingtree.components.JSplitButton
 import swingtree.layout.Size
+import swingtree.style.ScalableImageIcon
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
@@ -49,22 +50,32 @@ class Button_Icons_Spec extends Specification
     }
 
 
-    def 'We can use `withIcon( Icon icon )` to specify a regular icon.'()
-    {
+    def 'We can use `withIcon( Icon icon )` to specify a regular icon.'(
+        float uiScale
+    ) {
         reportInfo """
             A regular icon is the most basic kind of icon you can set
             on a button based component. It will be shown in most situations
             but can be overridden by other icons for specific situations
             (like when the button is hovered over, pressed, disabled, etc).
         """
-        given : 'We create a new `ImageIcon` for testing purposes.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
             ImageIcon testIcon = new ImageIcon( new BufferedImage(7,13,BufferedImage.TYPE_INT_ARGB) )
         and : 'Then we create a `JMenuItem` and set its icon using `withIcon( Icon icon )`.'
             JMenuItem menuItem = UI.menuItem("I have a regular icon")
                                    .withIcon( testIcon )
                                    .get(JMenuItem)
         expect : 'The icon of the `JMenuItem` to be the exact same as the one we set.'
-            menuItem.getIcon() === testIcon
+            menuItem.getIcon() instanceof ScalableImageIcon
+            menuItem.getIcon().getIconWidth() == (7 * uiScale) as int
+            menuItem.getIcon().getIconHeight() == (13 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
     }
 
     def 'We can use `withIcon( IconDeclaration icon )` to specify a regular icon.'(float uiScale)

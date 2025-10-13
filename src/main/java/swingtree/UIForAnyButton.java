@@ -85,7 +85,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
-        return _with( c -> c.setIcon(icon) )._this();
+        return _with( c -> c.setIcon(_ensureIconIsScalable(icon)) )._this();
     }
 
     /**
@@ -250,7 +250,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIconOnPress( Icon icon ) {
         Objects.requireNonNull(icon);
-        return _with( c -> c.setPressedIcon(icon) )._this();
+        return _with( c -> c.setPressedIcon(_ensureIconIsScalable(icon)) )._this();
     }
 
     /**
@@ -498,6 +498,19 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             return ScalableImageIcon.of(Size.of(width, height), (ImageIcon) icon);
         }
         return icon;
+    }
+
+    private static Icon _ensureIconIsScalable(Icon icon) {
+        if ( icon instanceof ScalableImageIcon ) {
+            return icon; // Already scalable
+        }
+        if ( icon instanceof SvgIcon ) {
+            return icon; // Already scalable
+        }
+        if ( icon instanceof ImageIcon ) {
+            return ScalableImageIcon.of(Size.of(icon.getIconWidth(), icon.getIconHeight()), (ImageIcon) icon);
+        }
+        return icon; // Not yet supported
     }
 
     private static void _setIconFromDeclaration( AbstractButton button, IconDeclaration icon ) {
