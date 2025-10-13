@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Action;
@@ -13,9 +14,11 @@ import swingtree.style.SvgIcon;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import java.awt.Font;
-import java.awt.Insets;
-import java.awt.event.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -508,32 +511,29 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private static void _setIconFromDeclaration( AbstractButton button, IconDeclaration icon ) {
-        Optional<ImageIcon> optIcon = icon.find();
-        if ( optIcon.isPresent() )
-            button.setIcon(optIcon.get());
-        else {
-            log.warn(
-                    "Failed to load from 'IconDeclaration' instance '{}', " +
-                    "with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.",
-                    icon, icon.path(), icon.size(), button,
-                    new Throwable("Stack trace for debugging purposes.")
-                );
-            button.setIcon(null);
-        }
+        _setAnyIconFromDeclaration(button, icon, AbstractButton::setIcon);
     }
 
     private static void _setIconOnPressFromDeclaration( AbstractButton button, IconDeclaration icon ) {
+        _setAnyIconFromDeclaration(button, icon, AbstractButton::setPressedIcon);
+    }
+
+    private static void _setAnyIconFromDeclaration(
+        AbstractButton button,
+        IconDeclaration icon,
+        BiConsumer<AbstractButton, @Nullable Icon> iconSetter
+    ) {
         Optional<ImageIcon> optIcon = icon.find();
         if ( optIcon.isPresent() )
-            button.setPressedIcon(optIcon.get());
+            iconSetter.accept(button, optIcon.get());
         else {
             log.warn(
                     "Failed to load from 'IconDeclaration' instance '{}', " +
-                    "with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.",
+                            "with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.",
                     icon, icon.path(), icon.size(), button,
                     new Throwable("Stack trace for debugging purposes.")
-                );
-            button.setIcon(null);
+            );
+            iconSetter.accept(button, null);
         }
     }
 
