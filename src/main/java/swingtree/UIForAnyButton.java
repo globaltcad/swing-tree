@@ -202,12 +202,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIcon( Icon icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", ImageIcon.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
-        if ( icon instanceof SvgIcon) {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            return withIcon( svgIcon.withFitComponent(fitComponent) );
-        }
-        else // If it is not an SVG icon, then it is not dynamic, so we do the dynamic sizing ourselves:
-            return _with( thisComponent -> {
+        return _with( thisComponent -> {
                           _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setIcon);
                    })
                    ._this();
@@ -324,13 +319,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
-        if ( icon instanceof SvgIcon)
-        {
-            SvgIcon svgIcon = (SvgIcon) icon;
-            return withIconOnPress( svgIcon.withFitComponent(fitComponent) );
-        }
-        else
-            return _with( thisComponent -> {
+        return _with( thisComponent -> {
                         _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setPressedIcon);
                     })
                     ._this();
@@ -410,6 +399,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         UI.FitComponent fitComponent,
         BiConsumer<AbstractButton, Icon> iconApplier
     ) {
+        if ( icon instanceof SvgIcon) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            iconApplier.accept(thisComponent, svgIcon.withFitComponent(fitComponent));
+            return; // An SvgIcon already scales dynamically!
+        }
         Runnable dynamicSizer = _createDynamicIconApplier(thisComponent, icon, fitComponent, iconApplier);
         dynamicSizer.run(); // Initial sizing
         UI.runLater(dynamicSizer); // Run later to ensure correct sizing after layout
