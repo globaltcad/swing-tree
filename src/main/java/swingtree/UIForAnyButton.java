@@ -73,11 +73,15 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Use this to set the icon for the wrapped button type.
-     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
      *  <pre>{@code
      *     UI.button("Something")
      *     .peek( button -> button.setIcon(...) );
      *  }</pre>
+     *  But on top of simply setting the icon on the component,
+     *  it will also try to convert it to an icon variant which scales according to
+     *  the {@link UI#scale()} factor.
      *  Please also see {@link #withIcon(IconDeclaration)}, which is
      *  <b>the recommended way of setting icons on buttons!</b>
      *
@@ -121,7 +125,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  lightweight value object that merely models the resource location of the icon
      *  even if it is not yet loaded or even does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
+     *  This is especially useful when writing unit tests for your view model,
      *  where the icon may not be available at all, but you still want to test
      *  the behaviour of your view model.
      *
@@ -380,7 +384,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  lightweight value object that merely models the resource location of the icon
      *  even if it is not yet loaded or even does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
+     *  This is especially useful when writing unit tests for your view model,
      *  where the icon may not be available at all, but you still want to test
      *  the behaviour of your view model.
      *
@@ -393,6 +397,183 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow( icon, UIForAnyButton::_setIconOnPressFromDeclaration)
                 ._with( c -> _setIconOnPressFromDeclaration(c, icon.orElseThrowUnchecked()) )
+                ._this();
+    }
+
+    // - On Hover Icon:
+
+    /**
+     *  Use this to set the "hovered" icon for the wrapped button type,
+     *  which translates to {@link AbstractButton#setRolloverIcon(Icon)} of the
+     *  underlying button component, but with additional UI scalability guarantees.
+     *  In most cases this is a convenience method to avoid peeking into this
+     *  builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> button.setRolloverIcon(...) );
+     *  }</pre>
+     *  But on top of simply setting the hover/rollover icon on the component,
+     *  it will also try to convert it to an icon variant which scales according to
+     *  the {@link UI#scale()} factor.
+     *  Please also see {@link #withIconOnHover(IconDeclaration)}, which is
+     *  <b>the recommended way of setting icons on buttons!</b>
+     *
+     *
+     * @param icon The {@link Icon} which should be displayed when the cursor hovers over the button.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}.
+     */
+    public I withIconOnHover( Icon icon ) {
+        Objects.requireNonNull(icon);
+        return _with( c -> c.setRolloverIcon(_ensureIconIsScalable(icon)) )._this();
+    }
+
+    /**
+     *  Takes the provided {@link Icon} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type when the user hovers their cursor over
+     *  the button type.<br>
+     *  Also see {@link #withIconOnHover(int, int, IconDeclaration)}, which is
+     *  <b>the preferred way of setting hover icons on buttons!</b>
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and then displayed when the button is being hovered over.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnHover( int width, int height, Icon icon ) {
+        Objects.requireNonNull(icon);
+        icon = _fitTo( width, height, icon );
+        return withIconOnHover(icon);
+    }
+
+    /**
+     *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
+     *  before displaying it on the wrapped button type whenever the user hovers their cursor of the button.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and
+     *             then displayed when the button is being hovered over.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} id {@code null}!
+     */
+    public I withIconOnHover( int width, int height, IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return icon.find()
+                .map( i -> withIconOnHover(width, height, i) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type
+     *  whenever the user hovers their cursor over the button...
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and then displayed when the button is being hovered over.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     */
+    public I withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return icon.find()
+                .map( i -> withIconOnHover(_fitTo(width, height, i), fitComponent) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Sets the hover {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is only displayed when the user hovers their cursor over the button type.<br>
+     *  Please also see {@link #withIconOnHover(IconDeclaration, UI.FitComponent)}, which is
+     *  <b>the recommended way of setting hover icons on buttons!</b>
+     *
+     * @param icon The {@link SvgIcon} which should be displayed when the button is being pressed.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     */
+    public I withIconOnHover( Icon icon, UI.FitComponent fitComponent ) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return _with( thisComponent -> {
+                    _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setRolloverIcon);
+                })
+                ._this();
+
+    }
+
+    /**
+     *  Sets the hover {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is only displayed temporarily when the user hovers their mouse cursor
+     *  over the button area.
+     *
+     * @param icon The {@link IconDeclaration} which should be displayed when the button is being hovered over.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     */
+    public I withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent ) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return icon.find()
+                .map( i -> withIconOnHover(i, fitComponent) )
+                .orElseGet( this::_this );
+    }
+
+    /**
+     *  Use this to specify the icon for the wrapped button type,
+     *  which ought to be displayed temporarily whenever the user
+     *  has their cursor hovering over the button area.
+     *  The icon is resolved based on the supplied {@link IconDeclaration}
+     *  instance which serves as a resource path to the icon actual.
+     *
+     * @param icon The desired icon to be displayed on top of the button for when it is being hovered over.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnHover( IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return _with( c -> icon.find().ifPresent(c::setRolloverIcon) )._this();
+    }
+
+    /**
+     *  Use this to dynamically set the "hovered icon" property for the wrapped button type,
+     *  which is displayed when the user hovers their cursor over the button area.
+     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  then so does the "hover icon" of this button. Or more specifically,
+     *  the {@link AbstractButton#getRolloverIcon()} property of the underlying component.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should always use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful when writing unit tests for your view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
+     * @param icon The {@link Icon} property which should be displayed when the button is being hovered over.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}.
+     */
+    public I withIconOnHover( Val<IconDeclaration> icon ) {
+        Objects.requireNonNull(icon);
+        NullUtil.nullPropertyCheck(icon, "icon");
+        return _withOnShow( icon, UIForAnyButton::_setIconOnHoverFromDeclaration)
+                ._with( c -> _setIconOnHoverFromDeclaration(c, icon.orElseThrowUnchecked()) )
                 ._this();
     }
 
@@ -515,6 +696,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private static void _setIconOnPressFromDeclaration( AbstractButton button, IconDeclaration icon ) {
+        _setAnyIconFromDeclaration(button, icon, AbstractButton::setPressedIcon);
+    }
+
+    private static void _setIconOnHoverFromDeclaration( AbstractButton button, IconDeclaration icon ) {
         _setAnyIconFromDeclaration(button, icon, AbstractButton::setPressedIcon);
     }
 
