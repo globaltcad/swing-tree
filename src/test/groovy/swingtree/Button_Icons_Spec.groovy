@@ -725,4 +725,320 @@ class Button_Icons_Spec extends Specification
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
+
+    // Icon On Hover:
+
+        // On Hover Icon:
+
+    def 'We can use `withIconOnHover( Icon icon )` to specify a hover icon.'(
+        float uiScale
+    ) {
+        reportInfo """
+            A hover icon is shown when the user moves the mouse cursor over the button based component.
+            This provides visual feedback during the hover interaction, making the interface more responsive.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(7,13,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JMenuItem` and set its hover icon using `withIconOnHover( Icon icon )`.'
+            JMenuItem menuItem = UI.menuItem("I have a hover icon")
+                                   .withIconOnHover( testIcon )
+                                   .get(JMenuItem)
+        expect : 'The hover icon of the `JMenuItem` to be a properly scaled icon.'
+            menuItem.getRolloverIcon() instanceof ScalableImageIcon
+            menuItem.getRolloverIcon().getIconWidth() == (7 * uiScale) as int
+            menuItem.getRolloverIcon().getIconHeight() == (13 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnHover( IconDeclaration icon )` to specify a hover icon.'(float uiScale)
+    {
+        reportInfo """
+            An `IconDeclaration` can be used to define the hover icon of a button based component.
+            The actual `Icon` will be loaded automatically by SwingTree and shown when the user hovers over the component.
+            This is particularly useful for creating consistent hover states across your application.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(16, 12), "img/trees.png")
+        and : 'Then we create a `JRadioButton` and set its hover icon using `withIconOnHover( IconDeclaration icon )`.'
+            JRadioButton radioButton = UI.radioButton("I have a hover icon")
+                                      .withIconOnHover( treesIcon )
+                                      .get(JRadioButton)
+        expect : 'The hover icon of the `JRadioButton` to be loaded and set correctly.'
+            radioButton.getRolloverIcon() instanceof ScalableImageIcon
+            radioButton.getRolloverIcon().getIconWidth() == (16 * uiScale) as int
+            radioButton.getRolloverIcon().getIconHeight() == (12 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnHover( Val<IconDeclaration> icon )` to make a hover icon reactive.'(float uiScale)
+    {
+        reportInfo """
+            You can use a `Var` property of an `IconDeclaration` to make the hover icon of a button 
+            based component reactive. This means that whenever the value of the `Var` changes, 
+            the hover icon of the component will be updated automatically.
+            
+            This is useful for dynamic interfaces where hover states might change based on 
+            application state, user preferences, or other runtime conditions.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'First we create two constants of `IconDeclaration` for testing purposes.'
+            IconDeclaration swingIcon = IconDeclaration.of(Size.of(22, 13), "img/swing.png")
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 64), "img/trees.png")
+        and : 'Then we create a `Var<IconDeclaration>` and set its initial value to the `swingIcon` declaration.'
+            Var<IconDeclaration> iconProperty = Var.of(swingIcon)
+        and : 'Next we create a regular `JButton` and set its hover icon using the `Var<IconDeclaration>`.'
+            JButton button = UI.button("I have a reactive hover icon")
+                             .withIconOnHover( iconProperty )
+                             .get(JButton)
+        expect : 'The hover icon of the `JButton` is loaded and set correctly to the initial value.'
+            button.getRolloverIcon() instanceof ScalableImageIcon
+            button.getRolloverIcon().getIconWidth() == (22 * uiScale) as int
+            button.getRolloverIcon().getIconHeight() == (13 * uiScale) as int
+
+        when : 'We change the value of the `Var<IconDeclaration>` property to the `treesIcon` declaration.'
+            iconProperty.set(treesIcon)
+        and : 'We wait for the Event Dispatch Thread to process all events.'
+            UI.sync()
+        then : 'We can confirm that the hover icon of the `JButton` was set to the new value.'
+            button.getRolloverIcon() instanceof ScalableImageIcon
+            button.getRolloverIcon().getIconWidth() == (42 * uiScale) as int
+            button.getRolloverIcon().getIconHeight() == (64 * uiScale) as int
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnHover( int width, int height, Icon icon )` to specify a hover icon with a custom size.'()
+    {
+        reportInfo """
+            You can specify a custom size for a hover icon by providing the desired width and height
+            along with the `Icon` instance itself. This ensures that the hover icon fits well within 
+            the layout of your button based component during the hover interaction.
+            
+            This is particularly useful when you want hover icons to maintain consistent dimensions
+            regardless of their original size.
+        """
+        given : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(32,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JCheckBox` and set its hover icon using `withIconOnHover( int width, int height, Icon icon )` with a custom size.'
+            JCheckBox checkBox = UI.checkBox("I have a hover icon with custom size")
+                                .withIconOnHover(24, 19, testIcon)
+                                .get(JCheckBox)
+        expect : 'The hover icon of the `JCheckBox` is NOT the exact same instance as the one we set, but has the correct custom size.'
+            checkBox.getRolloverIcon() !== testIcon
+            checkBox.getRolloverIcon().getIconWidth() == 24
+            checkBox.getRolloverIcon().getIconHeight() == 19
+    }
+
+    def 'We can use `withIconOnHover( int width, int height, IconDeclaration icon )` to specify a hover icon with custom size.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a custom size for a hover icon by providing the desired width and height
+            along with an `IconDeclaration`. This ensures proper sizing of the hover icon during user interaction,
+            maintaining visual consistency while allowing for high-quality icon resources.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 24), "img/seed.png")
+        and : 'Then we build a `JRadioButtonMenuItem` and set its hover icon using `withIconOnHover( int width, int height, IconDeclaration icon )` with a custom size.'
+            var radioButtonMenuItem = UI.radioButtonMenuItem("I have a hover icon with custom size")
+                                              .withIconOnHover(33, 19, treesIcon)
+                                              .get(JRadioButtonMenuItem)
+        expect : 'The hover icon of the `JRadioButtonMenuItem` is loaded and has the correct custom size.'
+            radioButtonMenuItem.getRolloverIcon() instanceof ScalableImageIcon
+            radioButtonMenuItem.getRolloverIcon().getIconWidth() == (33 * uiScale) as int
+            radioButtonMenuItem.getRolloverIcon().getIconHeight() == (19 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a hover icon with custom size and layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a custom size and layout for a hover icon by providing the desired width, height,
+            `IconDeclaration`, and a `UI.FitComponent` value. This ensures the hover icon behaves correctly
+            when the component is resized during the hover interaction.
+            
+            This combination gives you fine-grained control over how hover icons appear in your interface,
+            ensuring they maintain proper proportions and visual quality across different component sizes.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(73, 66), "img/two-16th-notes.svg")
+        and : 'Then we build a `JSplitButton` and set its hover icon using `withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` with a custom size and layout.'
+            var splitButton = UI.splitButton("I have a hover icon with custom size and layout")
+                                .withIconOnHover(55, 44, treesIcon, UI.FitComponent.WIDTH)
+                                .get(JSplitButton)
+        expect : 'The hover icon of the `JSplitButton` is loaded and has the correct custom size.'
+            splitButton.getRolloverIcon() instanceof SvgIcon
+            splitButton.getRolloverIcon().getIconWidth() == (55 * uiScale) as int
+            splitButton.getRolloverIcon().getIconHeight() == (44 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnHover( Icon icon, UI.FitComponent fitComponent )` to specify a hover icon with custom layout.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a layout behavior for a hover icon by providing the `Icon` instance
+            along with a `UI.FitComponent` value. This ensures the hover icon behaves correctly
+            when the button based component is resized during the hover interaction.
+            
+            This is particularly useful for creating responsive interfaces where components
+            may change size based on window layout or user preferences, and you want the
+            hover icon to adapt appropriately.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(42,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JButton` and set its hover icon using `withIconOnHover( Icon icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JButton button = UI.button("Click!").withSizeExactly(80, 30)
+                                .withIconOnHover( testIcon, UI.FitComponent.NO )
+                                .get(JButton)
+        expect : 'The hover icon of the `JButton` has the expected dimensions!'
+            button.getRolloverIcon().getIconWidth() == UI.scale(42)
+            button.getRolloverIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnHover( testIcon, UI.FitComponent.WIDTH )
+                     .get(JButton)
+        then : 'The hover icon of the `JButton` has the expected dimensions!'
+            button.getRolloverIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getRolloverIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnHover( testIcon, UI.FitComponent.HEIGHT )
+                     .get(JButton)
+        then : 'The hover icon of the `JButton` has the expected dimensions!'
+            button.getRolloverIcon().getIconWidth() == UI.scale(42)
+            button.getRolloverIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnHover( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                     .get(JButton)
+        then : 'The hover icon of the `JButton` has the expected dimensions!'
+            button.getRolloverIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getRolloverIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnHover( testIcon, UI.FitComponent.MIN_DIM )
+                     .get(JButton)
+        then : 'The hover icon of the `JButton` has the expected dimensions!'
+            int minDim = Math.min(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
+            button.getRolloverIcon().getIconWidth() == UI.scale(minDim)
+            button.getRolloverIcon().getIconHeight() == UI.scale(minDim)
+
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                     .withIconOnHover( testIcon, UI.FitComponent.MAX_DIM )
+                     .get(JButton)
+        then : 'The hover icon of the `JButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
+            button.getRolloverIcon().getIconWidth() == UI.scale(maxDim)
+            button.getRolloverIcon().getIconHeight() == UI.scale(maxDim)
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a hover icon with custom layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a layout behavior for a hover icon specified through an `IconDeclaration`
+            along with a `UI.FitComponent` value. This ensures proper behavior of the hover icon
+            during resize interactions while maintaining the benefits of using declared icons
+            (such as automatic loading and DPI scaling).
+            
+            This approach combines the convenience of icon declarations with the flexibility
+            of responsive layout behaviors for hover states.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42,32), "img/trees.png")
+        and : 'Then we create a `JToggleButton` and set its hover icon using `withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JToggleButton toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                                       .withIconOnHover( treesIcon, UI.FitComponent.NO )
+                                       .get(JToggleButton)
+        expect : 'The hover icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                           .withIconOnHover( treesIcon, UI.FitComponent.WIDTH )
+                           .get(JToggleButton)
+        then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(32)
+
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnHover( treesIcon, UI.FitComponent.HEIGHT )
+                            .get(JToggleButton)
+        then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnHover( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                            .get(JToggleButton)
+        then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnHover( treesIcon, UI.FitComponent.MIN_DIM )
+                            .get(JToggleButton)
+        then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
+            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(minDim)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(minDim)
+
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
+                            .withIconOnHover( treesIcon, UI.FitComponent.MAX_DIM )
+                            .get(JToggleButton)
+        then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(maxDim)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(maxDim)
+
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
 }

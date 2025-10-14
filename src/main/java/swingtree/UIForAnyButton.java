@@ -750,7 +750,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private static void _setIconOnHoverFromDeclaration( AbstractButton button, IconDeclaration icon ) {
-        _setAnyIconFromDeclaration(button, icon, AbstractButton::setPressedIcon);
+        _setAnyIconFromDeclaration(button, icon, AbstractButton::setRolloverIcon);
     }
 
     private static void _setAnyIconFromDeclaration(
