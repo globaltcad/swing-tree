@@ -9,6 +9,7 @@ import swingtree.api.IconDeclaration
 import swingtree.components.JSplitButton
 import swingtree.layout.Size
 import swingtree.style.ScalableImageIcon
+import swingtree.style.SvgIcon
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
@@ -107,7 +108,7 @@ class Button_Icons_Spec extends Specification
                                       .withIcon( treesIcon )
                                       .get(JRadioButton)
         expect : 'The icon of the `JRadioButton` to be loaded and set correctly.'
-            radioButton.getIcon() instanceof ImageIcon
+            radioButton.getIcon() instanceof ScalableImageIcon
             radioButton.getIcon().getIconWidth() == (16 * uiScale) as int
             radioButton.getIcon().getIconHeight() == (12 * uiScale) as int
 
@@ -148,7 +149,7 @@ class Button_Icons_Spec extends Specification
                              .withIcon( iconProperty )
                              .get(JButton)
         expect : 'The icon of the `JButton` is loaded and set correctly to the initial value.'
-            button.getIcon() instanceof ImageIcon
+            button.getIcon() instanceof ScalableImageIcon
             button.getIcon().getIconWidth() == (22 * uiScale) as int
             button.getIcon().getIconHeight() == (13 * uiScale) as int
 
@@ -157,7 +158,7 @@ class Button_Icons_Spec extends Specification
         and : 'We wait for the Event Dispatch Thread to process all events.'
             UI.sync()
         then : 'We can confirm that the icon of the `JButton` was set to the new value.'
-            button.getIcon() instanceof ImageIcon
+            button.getIcon() instanceof ScalableImageIcon
             button.getIcon().getIconWidth() == (42 * uiScale) as int
             button.getIcon().getIconHeight() == (64 * uiScale) as int
 
@@ -216,7 +217,7 @@ class Button_Icons_Spec extends Specification
                                               .withIcon(33, 19, treesIcon)
                                               .get(JRadioButtonMenuItem)
         expect : 'The icon of the `JRadioButtonMenuItem` is loaded and has the correct custom size.'
-            radioButtonMenuItem.getIcon() instanceof ImageIcon
+            radioButtonMenuItem.getIcon() instanceof ScalableImageIcon
             radioButtonMenuItem.getIcon().getIconWidth() == (33 * uiScale) as int
             radioButtonMenuItem.getIcon().getIconHeight() == (19 * uiScale) as int
         where : 'We test this with different UI scaling factors.'
@@ -255,7 +256,7 @@ class Button_Icons_Spec extends Specification
                                 .withIcon(55, 44, treesIcon, UI.FitComponent.WIDTH)
                                 .get(JSplitButton)
         expect : 'The icon of the `JSplitButton` is loaded and has the correct custom size.'
-            splitButton.getIcon() instanceof ImageIcon
+            splitButton.getIcon() instanceof SvgIcon
             splitButton.getIcon().getIconWidth() == (55 * uiScale) as int
             splitButton.getIcon().getIconHeight() == (44 * uiScale) as int
         where : 'We test this with different UI scaling factors.'
@@ -475,7 +476,7 @@ class Button_Icons_Spec extends Specification
                                       .withIconOnPress( treesIcon )
                                       .get(JRadioButton)
         expect : 'The pressed icon of the `JRadioButton` to be loaded and set correctly.'
-            radioButton.getPressedIcon() instanceof ImageIcon
+            radioButton.getPressedIcon() instanceof ScalableImageIcon
             radioButton.getPressedIcon().getIconWidth() == (16 * uiScale) as int
             radioButton.getPressedIcon().getIconHeight() == (12 * uiScale) as int
 
@@ -504,7 +505,7 @@ class Button_Icons_Spec extends Specification
                              .withIconOnPress( iconProperty )
                              .get(JButton)
         expect : 'The pressed icon of the `JButton` is loaded and set correctly to the initial value.'
-            button.getPressedIcon() instanceof ImageIcon
+            button.getPressedIcon() instanceof ScalableImageIcon
             button.getPressedIcon().getIconWidth() == (22 * uiScale) as int
             button.getPressedIcon().getIconHeight() == (13 * uiScale) as int
 
@@ -513,7 +514,7 @@ class Button_Icons_Spec extends Specification
         and : 'We wait for the Event Dispatch Thread to process all events.'
             UI.sync()
         then : 'We can confirm that the pressed icon of the `JButton` was set to the new value.'
-            button.getPressedIcon() instanceof ImageIcon
+            button.getPressedIcon() instanceof ScalableImageIcon
             button.getPressedIcon().getIconWidth() == (42 * uiScale) as int
             button.getPressedIcon().getIconHeight() == (64 * uiScale) as int
 
@@ -557,7 +558,7 @@ class Button_Icons_Spec extends Specification
                                               .withIconOnPress(33, 19, treesIcon)
                                               .get(JRadioButtonMenuItem)
         expect : 'The pressed icon of the `JRadioButtonMenuItem` is loaded and has the correct custom size.'
-            radioButtonMenuItem.getPressedIcon() instanceof ImageIcon
+            radioButtonMenuItem.getPressedIcon() instanceof ScalableImageIcon
             radioButtonMenuItem.getPressedIcon().getIconWidth() == (33 * uiScale) as int
             radioButtonMenuItem.getPressedIcon().getIconHeight() == (19 * uiScale) as int
         where : 'We test this with different UI scaling factors.'
@@ -583,7 +584,7 @@ class Button_Icons_Spec extends Specification
                                 .withIconOnPress(55, 44, treesIcon, UI.FitComponent.WIDTH)
                                 .get(JSplitButton)
         expect : 'The pressed icon of the `JSplitButton` is loaded and has the correct custom size.'
-            splitButton.getPressedIcon() instanceof ImageIcon
+            splitButton.getPressedIcon() instanceof SvgIcon
             splitButton.getPressedIcon().getIconWidth() == (55 * uiScale) as int
             splitButton.getPressedIcon().getIconHeight() == (44 * uiScale) as int
         where : 'We test this with different UI scaling factors.'

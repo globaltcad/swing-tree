@@ -116,7 +116,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
-        return _with( c -> icon.find().ifPresent(c::setIcon) )._this();
+        return _with( c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setIcon) )._this();
     }
 
     /**
@@ -387,7 +387,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIconOnPress( IconDeclaration icon ) {
         Objects.requireNonNull(icon);
-        return _with( c -> icon.find().ifPresent(c::setPressedIcon) )._this();
+        return _with( c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setPressedIcon) )._this();
     }
 
     /**
@@ -576,7 +576,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIconOnHover( IconDeclaration icon ) {
         Objects.requireNonNull(icon);
-        return _with( c -> icon.find().ifPresent(c::setRolloverIcon) )._this();
+        return _with( c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setRolloverIcon) )._this();
     }
 
     /**
