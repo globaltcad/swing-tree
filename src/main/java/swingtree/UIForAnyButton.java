@@ -79,9 +79,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *     UI.button("Something")
      *     .peek( button -> button.setIcon(...) );
      *  }</pre>
-     *  But on top of simply setting the icon on the component,
-     *  it will also try to convert it to an icon variant which scales according to
-     *  the {@link UI#scale()} factor.
+     *  But on top of simply setting the icon on the component, this method
+     *  will also try to convert the icon to an icon variant which scales according to
+     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
+     *  that the icon is upscaled proportionally in high-dpi environments.
      *  Please also see {@link #withIcon(IconDeclaration)}, which is
      *  <b>the recommended way of setting icons on buttons!</b>
      *
@@ -99,6 +100,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to specify the icon for the wrapped button type.
      *  The icon is determined based on the provided {@link IconDeclaration}
      *  instance which is conceptually merely a resource path to the icon.
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Click me!")
+     *     .peek( button -> icon.find().ifPresent(button::setIcon) );
+     *  }</pre>
+     *  But on top of simply setting the icon on the component, this method
+     *  will also try to convert the icon to an icon variant which scales according to
+     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
+     *  that the icon is upscaled proportionally in high-dpi environments.
      *
      * @param icon The desired icon to be displayed on top of the button.
      * @return This very builder to allow for method chaining.
@@ -110,8 +121,21 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Use this to dynamically set the icon property for the wrapped button type.
-     *  When the icon wrapped by the provided property changes,
-     *  then so does the icon displayed on this button.
+     *  When the {@link IconDeclaration} wrapped by the provided property changes,
+     *  then so does the icon displayed on this button.<br>
+     *  <p>
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> iconProperty.onChange(From.ALL,
+     *          icon -> icon.find().ifPresent(button::setIcon)
+     *     ));
+     *  }</pre>
+     *  But on top of simply setting the icon on the component, this method
+     *  will also try to convert the icon to an icon variant which scales according to
+     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
+     *  that the icon is upscaled proportionally in high-dpi environments.
      *  <p>
      *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
      *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
@@ -370,7 +394,20 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to dynamically set the "pressed icon" property for the wrapped button type,
      *  which is displayed when the user presses and holds the button.
      *  When the icon wrapped by the supplied {@link Var} property changes,
-     *  then so does the pressed icon of this button.
+     *  then so does the pressed icon of this button.<br>
+     *  <p>
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> iconProperty.onChange(From.ALL,
+     *          icon -> icon.find().ifPresent(button::setPressedIcon)
+     *     ));
+     *  }</pre>
+     *  But on top of simply setting the pressed icon on the component, this method
+     *  will also try to convert the icon to an icon variant which scales according to
+     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
+     *  that the icon is upscaled proportionally in high-dpi environments.
      *  <p>
      *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
      *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
@@ -547,7 +584,20 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  which is displayed when the user hovers their cursor over the button area.
      *  When the icon wrapped by the supplied {@link Var} property changes,
      *  then so does the "hover icon" of this button. Or more specifically,
-     *  the {@link AbstractButton#getRolloverIcon()} property of the underlying component.
+     *  the {@link AbstractButton#getRolloverIcon()} property of the underlying component.<br>
+     *  <p>
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> iconProperty.onChange(From.ALL,
+     *          icon -> icon.find().ifPresent(button::setRolloverIcon)
+     *     ));
+     *  }</pre>
+     *  But on top of simply setting the rollover icon on the component, this method
+     *  will also try to convert the icon to an icon variant which scales according to
+     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
+     *  that the icon is upscaled proportionally in high-dpi environments.
      *  <p>
      *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
      *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
