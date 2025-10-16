@@ -63,7 +63,7 @@ dependencies {
             prefer("2.0.0") // Default if user doesn't specify
         }
     }
-    api group: 'io.github.globaltcad', name: 'sprouts', version: '3b84ad3af5206d11850f0a7a3d8383854506bd34'
+    api group: 'io.github.globaltcad', name: 'sprouts', version: '9d4c2171d961ef877ebbad7b96e4475d74d03844'
 
 
     // Logging :
