@@ -53,7 +53,7 @@ dependencies {
 
     api("com.miglayout:miglayout-swing") {// https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
         version {
-            require("[5.3, 12.0.0)") // Allows 2.0.0 and above, up to 11.
+            require("[5.3, 12.0.0)")
             prefer("5.3") // Default if user doesn't specify
         }
     }
@@ -63,7 +63,12 @@ dependencies {
             prefer("2.0.0") // Default if user doesn't specify
         }
     }
-    api group: 'io.github.globaltcad', name: 'sprouts', version: '9d4c2171d961ef877ebbad7b96e4475d74d03844'
+    api("io.github.globaltcad:sprouts") {
+        version {
+            require("[2.0.0, 3.0.0)") // Allows 2.0.0 and above, but not 3.0.0+
+            prefer("2.1.1") // Default if user doesn't specify
+        }
+    }
 
 
     // Logging :
