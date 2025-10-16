@@ -63,12 +63,8 @@ dependencies {
             prefer("2.0.0") // Default if user doesn't specify
         }
     }
-    api("io.github.globaltcad:sprouts") {
-        version {
-            require("[2.0.0, 3.0.0)") // Allows 2.0.0 and above, but not 3.0.0+
-            prefer("2.1.0") // Default if user doesn't specify
-        }
-    }
+    api group: 'io.github.globaltcad', name: 'sprouts', version: '3b84ad3af5206d11850f0a7a3d8383854506bd34'
+
 
     // Logging :
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '[1+, )'
