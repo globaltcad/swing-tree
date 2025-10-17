@@ -1600,5 +1600,283 @@ class Button_Icons_Spec extends Specification
             uiScale << [1, 2, 3]
     }
 
+    // On Disabled And Selected Icon:
+
+    def 'We can use `withIconOnDisabledAndSelected( Icon icon )` to specify a disabled and selected icon.'(
+        float uiScale
+    ) {
+        reportInfo """
+            A disabled and selected icon is shown when the button based component is both disabled and selected.
+            This provides visual feedback for toggleable components that are currently not interactive but are in the selected state.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(7,13,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JToggleButton` and set its disabled and selected icon using `withIconOnDisabledAndSelected( Icon icon )`.'
+            JToggleButton toggleButton = UI.toggleButton("I have a disabled and selected icon")
+                                         .withIconOnDisabledAndSelected( testIcon )
+                                         .get(JToggleButton)
+        expect : 'The disabled and selected icon of the `JToggleButton` to be a properly scaled icon.'
+            toggleButton.getDisabledSelectedIcon() instanceof ScalableImageIcon
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == (7 * uiScale) as int
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == (13 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnDisabledAndSelected( IconDeclaration icon )` to specify a disabled and selected icon.'(float uiScale)
+    {
+        reportInfo """
+            An `IconDeclaration` can be used to define the disabled and selected icon of a button based component.
+            The actual `Icon` will be loaded automatically by SwingTree and shown when the component is both disabled and selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(16, 12), "img/trees.png")
+        and : 'Then we create a `JRadioButton` and set its disabled and selected icon using `withIconOnDisabledAndSelected( IconDeclaration icon )`.'
+            JRadioButton radioButton = UI.radioButton("I have a disabled and selected icon")
+                                      .withIconOnDisabledAndSelected( treesIcon )
+                                      .get(JRadioButton)
+        expect : 'The disabled and selected icon of the `JRadioButton` to be loaded and set correctly.'
+            radioButton.getDisabledSelectedIcon() instanceof ScalableImageIcon
+            radioButton.getDisabledSelectedIcon().getIconWidth() == (16 * uiScale) as int
+            radioButton.getDisabledSelectedIcon().getIconHeight() == (12 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnDisabledAndSelected( Val<IconDeclaration> icon )` to make a disabled and selected icon reactive.'(float uiScale)
+    {
+        reportInfo """
+            You can use a `Var` property of an `IconDeclaration` to make the disabled and selected icon of a button
+            based component reactive. This means that whenever the value of the `Var` changes,
+            the disabled and selected icon of the component will be updated automatically.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'First we create two constants of `IconDeclaration` for testing purposes.'
+            IconDeclaration swingIcon = IconDeclaration.of(Size.of(22, 13), "img/swing.png")
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 64), "img/trees.png")
+        and : 'Then we create a `Var<IconDeclaration>` and set its initial value to the `swingIcon` declaration.'
+            Var<IconDeclaration> iconProperty = Var.of(swingIcon)
+        and : 'Next we create a regular `JToggleButton` and set its disabled and selected icon using the `Var<IconDeclaration>`.'
+            JToggleButton toggleButton = UI.toggleButton("I have a reactive disabled and selected icon")
+                                       .withIconOnDisabledAndSelected( iconProperty )
+                                       .get(JToggleButton)
+        expect : 'The disabled and selected icon of the `JToggleButton` is loaded and set correctly to the initial value.'
+            toggleButton.getDisabledSelectedIcon() instanceof ScalableImageIcon
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == (22 * uiScale) as int
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == (13 * uiScale) as int
+        when : 'We change the value of the `Var<IconDeclaration>` property to the `treesIcon` declaration.'
+            iconProperty.set(treesIcon)
+        and : 'We wait for the Event Dispatch Thread to process all events.'
+            UI.sync()
+        then : 'We can confirm that the disabled and selected icon of the `JToggleButton` was set to the new value.'
+            toggleButton.getDisabledSelectedIcon() instanceof ScalableImageIcon
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == (42 * uiScale) as int
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == (64 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnDisabledAndSelected( int width, int height, Icon icon )` to specify a disabled and selected icon with a custom size.'()
+    {
+        reportInfo """
+            You can specify a custom size for a disabled and selected icon by providing the desired width and height
+            along with the `Icon` instance itself. This ensures that the disabled and selected icon fits well within
+            the layout of your button based component when both disabled and selected.
+        """
+        given : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(32,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JCheckBox` and set its disabled and selected icon using `withIconOnDisabledAndSelected( int width, int height, Icon icon )` with a custom size.'
+            JCheckBox checkBox = UI.checkBox("I have a disabled and selected icon with custom size")
+                                .withIconOnDisabledAndSelected(24, 19, testIcon)
+                                .get(JCheckBox)
+        expect : 'The disabled and selected icon of the `JCheckBox` is NOT the exact same instance as the one we set, but has the correct custom size.'
+            checkBox.getDisabledSelectedIcon() !== testIcon
+            checkBox.getDisabledSelectedIcon().getIconWidth() == 24
+            checkBox.getDisabledSelectedIcon().getIconHeight() == 19
+    }
+
+    def 'We can use `withIconOnDisabledAndSelected( int width, int height, IconDeclaration icon )` to specify a disabled and selected icon with custom size.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a custom size for a disabled and selected icon by providing the desired width and height
+            along with an `IconDeclaration`. This ensures proper sizing of the disabled and selected icon when the component is both disabled and selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 24), "img/seed.png")
+        and : 'Then we build a `JRadioButton` and set its disabled and selected icon using `withIconOnDisabledAndSelected( int width, int height, IconDeclaration icon )` with a custom size.'
+            var radioButton = UI.radioButton("I have a disabled and selected icon with custom size")
+                              .withIconOnDisabledAndSelected(33, 19, treesIcon)
+                              .get(JRadioButton)
+        expect : 'The disabled and selected icon of the `JRadioButton` is loaded and has the correct custom size.'
+            radioButton.getDisabledSelectedIcon() instanceof ScalableImageIcon
+            radioButton.getDisabledSelectedIcon().getIconWidth() == (33 * uiScale) as int
+            radioButton.getDisabledSelectedIcon().getIconHeight() == (19 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnDisabledAndSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a disabled and selected icon with custom size and layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a custom size and layout for a disabled and selected icon by providing the desired width, height,
+            `IconDeclaration`, and a `UI.FitComponent` value. This ensures the disabled and selected icon behaves correctly
+            when the component is resized and both disabled and selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(73, 66), "img/two-16th-notes.svg")
+        and : 'Then we build a `JToggleButton` and set its disabled and selected icon using `withIconOnDisabledAndSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` with a custom size and layout.'
+            var toggleButton = UI.toggleButton("I have a disabled and selected icon with custom size and layout")
+                                .withIconOnDisabledAndSelected(55, 44, treesIcon, UI.FitComponent.WIDTH)
+                                .get(JToggleButton)
+        expect : 'The disabled and selected icon of the `JToggleButton` is loaded and has the correct custom size.'
+            toggleButton.getDisabledSelectedIcon() instanceof SvgIcon
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == (55 * uiScale) as int
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == (44 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnDisabledAndSelected( Icon icon, UI.FitComponent fitComponent )` to specify a disabled and selected icon with custom layout.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a layout behavior for a disabled and selected icon by providing the `Icon` instance
+            along with a `UI.FitComponent` value. This ensures the disabled and selected icon behaves correctly
+            when the button based component is resized and both disabled and selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(42,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JToggleButton` and set its disabled and selected icon using `withIconOnDisabledAndSelected( Icon icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JToggleButton toggleButton = UI.toggleButton("Click!").withSizeExactly(80, 30)
+                                        .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.NO )
+                                        .get(JToggleButton)
+        expect : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.WIDTH )
+                         .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.HEIGHT )
+                         .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                         .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.MIN_DIM )
+                         .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(minDim)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(minDim)
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.MAX_DIM )
+                         .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(maxDim)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(maxDim)
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnDisabledAndSelected( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a disabled and selected icon with custom layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a layout behavior for a disabled and selected icon specified through an `IconDeclaration`
+            along with a `UI.FitComponent` value. This ensures proper behavior of the disabled and selected icon
+            during resize interactions while maintaining the benefits of using declared icons.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42,32), "img/trees.png")
+        and : 'Then we create a `JToggleButton` and set its disabled and selected icon using `withIconOnDisabledAndSelected( IconDeclaration icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JToggleButton toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                                       .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.NO )
+                                       .get(JToggleButton)
+        expect : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                       .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.WIDTH )
+                       .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.HEIGHT )
+                        .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                        .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.MIN_DIM )
+                        .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(minDim)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(minDim)
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.MAX_DIM )
+                        .get(JToggleButton)
+        then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(maxDim)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(maxDim)
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
 
 }

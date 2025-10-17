@@ -1025,6 +1025,192 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 ._this();
     }
 
+    // Icon on disabled AND selected
+
+    /**
+     *  Use this to set the "disabled and selected" icon for the wrapped button type.
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> button.setDisabledSelectedIcon(...) );
+     *  }</pre>
+     *  But in addition to simply setting the disabled and selected icon on the component, this method
+     *  will also try to convert the icon to an icon variant which scales according to
+     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
+     *  that the icon is upscaled proportionally in high-dpi environments.
+     *  Please also see {@link #withIconOnDisabledAndSelected(IconDeclaration)}, which is
+     *  <b>the recommended way of setting disabled and selected icons on buttons!</b>
+     *
+     * @param icon The {@link Icon} which should be displayed when the button is both disabled and selected.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}.
+     */
+    public I withIconOnDisabledAndSelected(Icon icon) {
+        Objects.requireNonNull(icon);
+        return _with(c -> c.setDisabledSelectedIcon(_ensureIconIsScalable(icon)))._this();
+    }
+
+    /**
+     *  Takes the provided {@link Icon} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type when the button is both disabled and selected.<br>
+     *  Also see {@link #withIconOnDisabledAndSelected(int, int, IconDeclaration)}, which is
+     *  <b>the preferred way of setting disabled and selected icons on buttons!</b>
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and then displayed when the button is both disabled and selected.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnDisabledAndSelected(int width, int height, Icon icon) {
+        Objects.requireNonNull(icon);
+        icon = _fitTo(width, height, icon);
+        return withIconOnDisabledAndSelected(icon);
+    }
+
+    /**
+     *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
+     *  before displaying it on the wrapped button type when both disabled and selected.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and
+     *             then displayed when the button is both disabled and selected.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon) {
+        Objects.requireNonNull(icon);
+        return icon.find()
+                .map(i -> withIconOnDisabledAndSelected(width, height, i))
+                .orElseGet(this::_this);
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type
+     *  when both disabled and selected by the user.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and then displayed when the button is both disabled and selected.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
+     */
+    public I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return icon.find()
+                .map(i -> withIconOnDisabledAndSelected(_fitTo(width, height, i), fitComponent))
+                .orElseGet(this::_this);
+    }
+
+    /**
+     *  Sets the disabled and selected {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is only displayed when the button is both disabled and selected.<br>
+     *  Please also see {@link #withIconOnDisabledAndSelected(IconDeclaration, UI.FitComponent)}, which is
+     *  <b>the recommended way of setting disabled and selected icons on buttons!</b>
+     *
+     * @param icon The {@link SvgIcon} which should be displayed when the button is both disabled and selected.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
+     */
+    public I withIconOnDisabledAndSelected(Icon icon, UI.FitComponent fitComponent) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return _with(thisComponent -> {
+                    _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setDisabledSelectedIcon);
+                })
+                ._this();
+    }
+
+    /**
+     *  Sets the disabled and selected {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is only displayed when the button is both disabled and selected.
+     *
+     * @param icon The {@link IconDeclaration} which should be displayed when the button is both disabled and selected.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
+     */
+    public I withIconOnDisabledAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+        Objects.requireNonNull(icon);
+        Objects.requireNonNull(fitComponent);
+        return icon.find()
+                .map(i -> withIconOnDisabledAndSelected(i, fitComponent))
+                .orElseGet(this::_this);
+    }
+
+    /**
+     *  Use this to specify the icon for the wrapped button type,
+     *  which ought to be displayed when the button is both disabled and selected.
+     *  The icon is resolved based on the supplied {@link IconDeclaration}
+     *  instance which serves as a resource path to the icon actual.
+     *
+     * @param icon The desired icon to be displayed on top of the button for when it is both disabled and selected.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}!
+     */
+    public I withIconOnDisabledAndSelected(IconDeclaration icon) {
+        Objects.requireNonNull(icon);
+        return _with(c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setDisabledSelectedIcon))._this();
+    }
+
+    /**
+     *  Use this to dynamically set the "disabled and selected icon" property for the wrapped button type,
+     *  which is displayed when the button is both disabled and selected.
+     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  then so does the disabled and selected icon of this button.<br>
+     *  <p>
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *     .peek( button -> iconProperty.onChange(From.ALL,
+     *          icon -> icon.find().ifPresent(button::setDisabledSelectedIcon)
+     *     ));
+     *  }</pre>
+     *  But in addition to simply setting the disabled and selected icon on the component, this method
+     *  will also try to load and install the icon as a scalable {@link ImageIcon}, which means that
+     *  in case of the referenced icon being an SVG file, the icon will be loaded as
+     *  a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
+     *  <p>
+     *  But note that here you cannot use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful when writing unit tests for your view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
+     * @param icon The {@link Icon} property which should be displayed when the button is both disabled and selected.
+     * @return This very builder to allow for method chaining.
+     * @throws NullPointerException if {@code icon} is {@code null}.
+     */
+    public I withIconOnDisabledAndSelected(Val<IconDeclaration> icon) {
+        Objects.requireNonNull(icon);
+        NullUtil.nullPropertyCheck(icon, "icon");
+        return _withOnShow(icon, UIForAnyButton::_setIconOnDisabledAndSelectedFromDeclaration)
+                ._with(c -> _setIconOnDisabledAndSelectedFromDeclaration(c, icon.orElseThrowUnchecked()))
+                ._this();
+    }
+
+
 
     private static void _installAutomaticIconApplier(
         AbstractButton thisComponent,
@@ -1158,6 +1344,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     private static void _setIconOnDisabledFromDeclaration(AbstractButton button, IconDeclaration icon) {
         _setAnyIconFromDeclaration(button, icon, AbstractButton::setDisabledIcon);
+    }
+
+    private static void _setIconOnDisabledAndSelectedFromDeclaration(AbstractButton button, IconDeclaration icon) {
+        _setAnyIconFromDeclaration(button, icon, AbstractButton::setDisabledSelectedIcon);
     }
 
 
