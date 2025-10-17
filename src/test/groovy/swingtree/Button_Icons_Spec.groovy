@@ -1041,4 +1041,284 @@ class Button_Icons_Spec extends Specification
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
+
+    // On Selected Icon:
+
+    def 'We can use `withIconOnSelected( Icon icon )` to specify a selected icon.'(
+        float uiScale
+    ) {
+        reportInfo """
+            A selected icon is shown when the button based component is in the selected state.
+            This provides visual feedback for toggleable components like radio buttons, check boxes, or toggle buttons.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(7,13,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JToggleButton` and set its selected icon using `withIconOnSelected( Icon icon )`.'
+            JToggleButton toggleButton = UI.toggleButton("I have a selected icon")
+                                         .withIconOnSelected( testIcon )
+                                         .get(JToggleButton)
+        expect : 'The selected icon of the `JToggleButton` to be a properly scaled icon.'
+            toggleButton.getSelectedIcon() instanceof ScalableImageIcon
+            toggleButton.getSelectedIcon().getIconWidth() == (7 * uiScale) as int
+            toggleButton.getSelectedIcon().getIconHeight() == (13 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnSelected( IconDeclaration icon )` to specify a selected icon.'(float uiScale)
+    {
+        reportInfo """
+            An `IconDeclaration` can be used to define the selected icon of a button based component.
+            The actual `Icon` will be loaded automatically by SwingTree and shown when the component is selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(16, 12), "img/trees.png")
+        and : 'Then we create a `JRadioButton` and set its selected icon using `withIconOnSelected( IconDeclaration icon )`.'
+            JRadioButton radioButton = UI.radioButton("I have a selected icon")
+                                      .withIconOnSelected( treesIcon )
+                                      .get(JRadioButton)
+        expect : 'The selected icon of the `JRadioButton` to be loaded and set correctly.'
+            radioButton.getSelectedIcon() instanceof ScalableImageIcon
+            radioButton.getSelectedIcon().getIconWidth() == (16 * uiScale) as int
+            radioButton.getSelectedIcon().getIconHeight() == (12 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnSelected( Val<IconDeclaration> icon )` to make a selected icon reactive.'(float uiScale)
+    {
+        reportInfo """
+            You can use a `Var` property of an `IconDeclaration` to make the selected icon of a button
+            based component reactive. This means that whenever the value of the `Var` changes,
+            the selected icon of the component will be updated automatically.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'First we create two constants of `IconDeclaration` for testing purposes.'
+            IconDeclaration swingIcon = IconDeclaration.of(Size.of(22, 13), "img/swing.png")
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 64), "img/trees.png")
+        and : 'Then we create a `Var<IconDeclaration>` and set its initial value to the `swingIcon` declaration.'
+            Var<IconDeclaration> iconProperty = Var.of(swingIcon)
+        and : 'Next we create a regular `JToggleButton` and set its selected icon using the `Var<IconDeclaration>`.'
+            JToggleButton toggleButton = UI.toggleButton("I have a reactive selected icon")
+                                       .withIconOnSelected( iconProperty )
+                                       .get(JToggleButton)
+        expect : 'The selected icon of the `JToggleButton` is loaded and set correctly to the initial value.'
+            toggleButton.getSelectedIcon() instanceof ScalableImageIcon
+            toggleButton.getSelectedIcon().getIconWidth() == (22 * uiScale) as int
+            toggleButton.getSelectedIcon().getIconHeight() == (13 * uiScale) as int
+        when : 'We change the value of the `Var<IconDeclaration>` property to the `treesIcon` declaration.'
+            iconProperty.set(treesIcon)
+        and : 'We wait for the Event Dispatch Thread to process all events.'
+            UI.sync()
+        then : 'We can confirm that the selected icon of the `JToggleButton` was set to the new value.'
+            toggleButton.getSelectedIcon() instanceof ScalableImageIcon
+            toggleButton.getSelectedIcon().getIconWidth() == (42 * uiScale) as int
+            toggleButton.getSelectedIcon().getIconHeight() == (64 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnSelected( int width, int height, Icon icon )` to specify a selected icon with a custom size.'()
+    {
+        reportInfo """
+            You can specify a custom size for a selected icon by providing the desired width and height
+            along with the `Icon` instance itself. This ensures that the selected icon fits well within
+            the layout of your button based component when selected.
+        """
+        given : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(32,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JCheckBox` and set its selected icon using `withIconOnSelected( int width, int height, Icon icon )` with a custom size.'
+            JCheckBox checkBox = UI.checkBox("I have a selected icon with custom size")
+                                .withIconOnSelected(24, 19, testIcon)
+                                .get(JCheckBox)
+        expect : 'The selected icon of the `JCheckBox` is NOT the exact same instance as the one we set, but has the correct custom size.'
+            checkBox.getSelectedIcon() !== testIcon
+            checkBox.getSelectedIcon().getIconWidth() == 24
+            checkBox.getSelectedIcon().getIconHeight() == 19
+    }
+
+    def 'We can use `withIconOnSelected( int width, int height, IconDeclaration icon )` to specify a selected icon with custom size.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a custom size for a selected icon by providing the desired width and height
+            along with an `IconDeclaration`. This ensures proper sizing of the selected icon when the component is selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42, 24), "img/seed.png")
+        and : 'Then we build a `JRadioButton` and set its selected icon using `withIconOnSelected( int width, int height, IconDeclaration icon )` with a custom size.'
+            var radioButton = UI.radioButton("I have a selected icon with custom size")
+                              .withIconOnSelected(33, 19, treesIcon)
+                              .get(JRadioButton)
+        expect : 'The selected icon of the `JRadioButton` is loaded and has the correct custom size.'
+            radioButton.getSelectedIcon() instanceof ScalableImageIcon
+            radioButton.getSelectedIcon().getIconWidth() == (33 * uiScale) as int
+            radioButton.getSelectedIcon().getIconHeight() == (19 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'Use `withIconOnSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a selected icon with custom size and layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a custom size and layout for a selected icon by providing the desired width, height,
+            `IconDeclaration`, and a `UI.FitComponent` value. This ensures the selected icon behaves correctly
+            when the component is resized and selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(73, 66), "img/two-16th-notes.svg")
+        and : 'Then we build a `JToggleButton` and set its selected icon using `withIconOnSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` with a custom size and layout.'
+            var toggleButton = UI.toggleButton("I have a selected icon with custom size and layout")
+                                .withIconOnSelected(55, 44, treesIcon, UI.FitComponent.WIDTH)
+                                .get(JToggleButton)
+        expect : 'The selected icon of the `JToggleButton` is loaded and has the correct custom size.'
+            toggleButton.getSelectedIcon() instanceof SvgIcon
+            toggleButton.getSelectedIcon().getIconWidth() == (55 * uiScale) as int
+            toggleButton.getSelectedIcon().getIconHeight() == (44 * uiScale) as int
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnSelected( Icon icon, UI.FitComponent fitComponent )` to specify a selected icon with custom layout.'(float uiScale)
+    {
+        reportInfo """
+            You can specify a layout behavior for a selected icon by providing the `Icon` instance
+            along with a `UI.FitComponent` value. This ensures the selected icon behaves correctly
+            when the button based component is resized and selected.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `ImageIcon` for testing purposes.'
+            ImageIcon testIcon = new ImageIcon( new BufferedImage(42,32,BufferedImage.TYPE_INT_ARGB) )
+        and : 'Then we create a `JToggleButton` and set its selected icon using `withIconOnSelected( Icon icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JToggleButton toggleButton = UI.toggleButton("Click!").withSizeExactly(80, 30)
+                                        .withIconOnSelected( testIcon, UI.FitComponent.NO )
+                                        .get(JToggleButton)
+        expect : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnSelected( testIcon, UI.FitComponent.WIDTH )
+                         .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnSelected( testIcon, UI.FitComponent.HEIGHT )
+                         .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnSelected( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                         .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnSelected( testIcon, UI.FitComponent.MIN_DIM )
+                         .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(minDim)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(minDim)
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                         .withIconOnSelected( testIcon, UI.FitComponent.MAX_DIM )
+                         .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(maxDim)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(maxDim)
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
+    def 'We can use `withIconOnSelected( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a selected icon with custom layout.'(
+            float uiScale
+    ) {
+        reportInfo """
+            You can specify a layout behavior for a selected icon specified through an `IconDeclaration`
+            along with a `UI.FitComponent` value. This ensures proper behavior of the selected icon
+            during resize interactions while maintaining the benefits of using declared icons.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a new `IconDeclaration` for testing purposes.'
+            IconDeclaration treesIcon = IconDeclaration.of(Size.of(42,32), "img/trees.png")
+        and : 'Then we create a `JToggleButton` and set its selected icon using `withIconOnSelected( IconDeclaration icon, UI.FitComponent fitComponent )` with a custom layout behavior.'
+            JToggleButton toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                                       .withIconOnSelected( treesIcon, UI.FitComponent.NO )
+                                       .get(JToggleButton)
+        expect : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "WIDTH" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                       .withIconOnSelected( treesIcon, UI.FitComponent.WIDTH )
+                       .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(32)
+        when : 'We re-create the button with the "HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnSelected( treesIcon, UI.FitComponent.HEIGHT )
+                        .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(42)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnSelected( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
+                        .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+        when : 'We re-create the button with the "MIN_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnSelected( treesIcon, UI.FitComponent.MIN_DIM )
+                        .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(minDim)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(minDim)
+        when : 'We re-create the button with the "MAX_DIM" fit component option.'
+            toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
+                        .withIconOnSelected( treesIcon, UI.FitComponent.MAX_DIM )
+                        .get(JToggleButton)
+        then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
+            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(maxDim)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(maxDim)
+        where : 'We test this with different UI scaling factors.'
+            uiScale << [1, 2, 3]
+    }
+
 }
