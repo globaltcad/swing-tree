@@ -79,7 +79,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *     UI.button("Something")
      *     .peek( button -> button.setIcon(...) );
      *  }</pre>
-     *  But on top of simply setting the icon on the component, this method
+     *  But in addition to simply setting the icon on the component, this method
      *  will also try to convert the icon to an icon variant which scales according to
      *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
      *  that the icon is upscaled proportionally in high-dpi environments.
@@ -106,7 +106,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *     UI.button("Click me!")
      *     .peek( button -> icon.find().ifPresent(button::setIcon) );
      *  }</pre>
-     *  But on top of simply setting the icon on the component, this method
+     *  But in addition to simply setting the icon on the component, this method
      *  will also try to convert the icon to an icon variant which scales according to
      *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
      *  that the icon is upscaled proportionally in high-dpi environments.
@@ -132,12 +132,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *          icon -> icon.find().ifPresent(button::setIcon)
      *     ));
      *  }</pre>
-     *  But on top of simply setting the icon on the component, this method
+     *  But in addition to simply setting the icon on the component, this method
      *  will also try to convert the icon to an icon variant which scales according to
      *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
      *  that the icon is upscaled proportionally in high-dpi environments.
      *  <p>
-     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  But note that here you cannot use the {@link Icon} or {@link ImageIcon} classes directly,
      *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
@@ -325,7 +325,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is being pressed.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
     public I withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
@@ -345,7 +345,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link SvgIcon} which should be displayed when the button is being pressed.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
     public I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
@@ -365,7 +365,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link IconDeclaration} which should be displayed when the button is being pressed.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
     public I withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
@@ -404,12 +404,15 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *          icon -> icon.find().ifPresent(button::setPressedIcon)
      *     ));
      *  }</pre>
-     *  But on top of simply setting the pressed icon on the component, this method
-     *  will also try to convert the icon to an icon variant which scales according to
-     *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
-     *  that the icon is upscaled proportionally in high-dpi environments.
+     *  But in addition to simply setting the pressed icon on the component, this method
+     *  will also try to load and install the icon as a scalable {@link ImageIcon}, which means that
+     *  in case of the referenced icon being an SVG file, the icon will be loaded as
+     *  a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *  <p>
-     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  But note that here you cannot use the {@link Icon} or {@link ImageIcon} classes directly,
      *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
@@ -449,7 +452,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *     UI.button("Something")
      *     .peek( button -> button.setRolloverIcon(...) );
      *  }</pre>
-     *  But on top of simply setting the hover/rollover icon on the component,
+     *  But in addition to simply setting the hover/rollover icon on the component,
      *  it will also try to convert it to an icon variant which scales according to
      *  the {@link UI#scale()} factor.
      *  Please also see {@link #withIconOnHover(IconDeclaration)}, which is
@@ -486,11 +489,27 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
-     *  before displaying it on the wrapped button type whenever the user hovers their cursor of the button.
+     *  before displaying it on the wrapped button type whenever the user hovers their cursor of the button.<br>
+     *  <p>
+     *  For most scenarios, this is a convenience method equivalent to
+     *  peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Click me!")
+     *     .peek( button -> iconProperty.onChange(From.ALL,
+     *          icon -> icon.withSize(width,height)
+     *                 .find()
+     *                 .ifPresent(button::setRolloverIcon)
+     *     ));
+     *  }</pre>
+     *  In case of the referenced icon being an SVG file, the icon will be loaded as
+     *  a fully scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param width The width of the icon.
      * @param height The height of the icon.
-     * @param icon The {@link IconDeclaration} which should be scaled and
+     * @param icon The {@link IconDeclaration} which whose icon should be scaled and
      *             then displayed when the button is being hovered over.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} id {@code null}!
@@ -503,19 +522,28 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
-     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
-     *  to the provided width and height before displaying it on the wrapped button type
-     *  whenever the user hovers their cursor over the button...
+     *  Takes the supplied {@link IconDeclaration} and scales the corresponding icon it
+     *  to the desired width and height after which it uses the {@link swingtree.UI.FitComponent}
+     *  layout policy enum constant to display it on the wrapped button type
+     *  whenever the user hovers their cursor over the button...<br>
+     *  Note that the {@code width} and {@code height} properties only serve as reference values
+     *  as the {@link swingtree.UI.FitComponent} is used to resiye the icon to fit the component.
+     *  <p>
+     *  In case of the referenced icon being an SVG file, the icon will be loaded as
+     *  a fully scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param width The width of the icon.
      * @param height The height of the icon.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is being hovered over.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
     public I withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
-        Objects.requireNonNull(icon);
+        Objects.requireNonNull(icon); 
         Objects.requireNonNull(fitComponent);
         return icon.find()
                 .map( i -> withIconOnHover(_fitTo(width, height, i), fitComponent) )
@@ -532,7 +560,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link SvgIcon} which should be displayed when the button is being pressed.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
     public I withIconOnHover( Icon icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
@@ -553,7 +581,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link IconDeclaration} which should be displayed when the button is being hovered over.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if any of the supplied arguments is {@code null}!
+     * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
     public I withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
@@ -594,12 +622,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *          icon -> icon.find().ifPresent(button::setRolloverIcon)
      *     ));
      *  }</pre>
-     *  But on top of simply setting the rollover icon on the component, this method
+     *  But in addition to simply setting the rollover icon on the component, this method
      *  will also try to convert the icon to an icon variant which scales according to
      *  the current {@link UI#scale()} factor (see {@link ScalableImageIcon}) so
      *  that the icon is upscaled proportionally in high-dpi environments.
      *  <p>
-     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  But note that here you cannot use the {@link Icon} or {@link ImageIcon} classes directly,
      *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
      *  which merely models the resource location of the icon, but does not load
      *  the whole icon itself.
