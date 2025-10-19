@@ -429,7 +429,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Use this to dynamically set the "pressed icon" property for the wrapped button type,
      *  which is displayed when the user presses and holds the button.
-     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  When the icon wrapped by the supplied {@link Val} property changes,
      *  then so does the pressed icon of this button.<br>
      *  <p>
      *  For most scenarios, this is a convenience method equivalent to
@@ -652,7 +652,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Use this to dynamically set the "hovered icon" property for the wrapped button type,
      *  which is displayed when the user hovers their cursor over the button area.
-     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  When the icon wrapped by the supplied {@link Val} property changes,
      *  then so does the "hover icon" of this button. Or more specifically,
      *  the {@link AbstractButton#getRolloverIcon()} property of the underlying component.<br>
      *  <p>
@@ -865,7 +865,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Use this to dynamically set the "rollover and selected icon" property for the wrapped button type,
      *  which is displayed when the button is both rolled over and selected.
-     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  When the icon wrapped by the supplied {@link Val} property changes,
      *  then so does the rollover and selected icon of this button.<br>
      *  <p>
      *  For most scenarios, this is a convenience method equivalent to
@@ -1080,7 +1080,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Use this to dynamically set the "selected icon" property for the wrapped button type,
      *  which is displayed when the button is selected.
-     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  When the icon wrapped by the supplied {@link Val} property changes,
      *  then so does the selected icon of this button.<br>
      *  <p>
      *  For most scenarios, this is a convenience method equivalent to
@@ -1295,7 +1295,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Use this to dynamically set the "disabled icon" property for the wrapped button type,
      *  which is displayed when the button is disabled.
-     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  When the icon wrapped by the supplied {@link Val} property changes,
      *  then so does the disabled icon of this button.<br>
      *  <p>
      *  For most scenarios, this is a convenience method equivalent to
@@ -1510,7 +1510,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Use this to dynamically set the "disabled and selected icon" property for the wrapped button type,
      *  which is displayed when the button is both disabled and selected.
-     *  When the icon wrapped by the supplied {@link Var} property changes,
+     *  When the icon wrapped by the supplied {@link Val} property changes,
      *  then so does the disabled and selected icon of this button.<br>
      *  <p>
      *  For most scenarios, this is a convenience method equivalent to
