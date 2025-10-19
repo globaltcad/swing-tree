@@ -171,8 +171,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIcon(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and displayed on the button.
      * @return This very builder to allow for method chaining.
      */
@@ -184,10 +186,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the provided {@link IconDeclaration} and scales it to the provided width and height
-     *  before displaying it on the wrapped button type.
+     *  before displaying it on the wrapped button type.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
      * @return This very builder to allow for method chaining.
      */
@@ -200,10 +210,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
-     *  to the provided width and height before displaying it on the wrapped button type.
+     *  to the provided width and height before displaying it on the wrapped button type.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link IconDeclaration}, whose referenced icon will be scaled and displayed on the button.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -244,6 +262,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  according to the provided {@link UI.FitComponent} policy.
      *  This icon is also used as the "pressed" and "disabled" icon if
      *  no other icon type is explicitly set.
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon}, which means that
+     *  in case of the referenced icon being an SVG file, the icon will be loaded as
+     *  a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The {@link IconDeclaration} which should be displayed on the button.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
@@ -285,8 +309,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIconOnPress(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is being pressed.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
@@ -300,9 +326,17 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
      *  before displaying it on the wrapped button type when pressed.
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon}, which means that
+     *  in case of the referenced icon being an SVG file, the icon will be loaded as
+     *  a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which should be scaled and
      *             then displayed when the button is being pressed.
      * @return This very builder to allow for method chaining.
@@ -320,8 +354,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  to the provided width and height before displaying it on the wrapped button type
      *  when pressed by the user.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is being pressed.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -475,8 +511,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIconOnHover(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting hover icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is being hovered over.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
@@ -507,8 +545,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  dynamically scales the underlying image according to the {@link UI#scale()}
      *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which whose icon should be scaled and
      *             then displayed when the button is being hovered over.
      * @return This very builder to allow for method chaining.
@@ -535,8 +575,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  dynamically scales the underlying image according to the {@link UI#scale()}
      *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is being hovered over.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -686,8 +728,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIconOnHoverAndSelected(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting rollover and selected icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is both rolled over and selected.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
@@ -700,10 +744,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
-     *  before displaying it on the wrapped button type when both rolled over and selected.
+     *  before displaying it on the wrapped button type when both rolled over and selected.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which should be scaled and
      *             then displayed when the button is both rolled over and selected.
      * @return This very builder to allow for method chaining.
@@ -719,10 +771,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
      *  to the provided width and height before displaying it on the wrapped button type
-     *  when both rolled over and selected by the user.
+     *  when both rolled over and selected by the user.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is both rolled over and selected.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -760,7 +820,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Sets the rollover and selected {@link Icon} property of the wrapped button type and scales it
      *  according to the provided {@link UI.FitComponent} policy.
-     *  This icon is only displayed when the button is both rolled over and selected.
+     *  This icon is only displayed when the button is both rolled over and selected.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The {@link IconDeclaration} which should be displayed when the button is both rolled over and selected.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
@@ -779,7 +845,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to specify the icon for the wrapped button type,
      *  which ought to be displayed when the button is both rolled over and selected.
      *  The icon is resolved based on the supplied {@link IconDeclaration}
-     *  instance which serves as a resource path to the icon actual.
+     *  instance which serves as a resource path to the icon actual.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The desired icon to be displayed on top of the button for when it is both rolled over and selected.
      * @return This very builder to allow for method chaining.
@@ -871,8 +943,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIconOnSelected(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting selected icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is selected.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
@@ -885,10 +959,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
-     *  before displaying it on the wrapped button type when selected.
+     *  before displaying it on the wrapped button type when selected.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which should be scaled and
      *             then displayed when the button is selected.
      * @return This very builder to allow for method chaining.
@@ -904,10 +986,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
      *  to the provided width and height before displaying it on the wrapped button type
-     *  when selected by the user.
+     *  when selected by the user.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is selected.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -945,7 +1035,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Sets the selected {@link Icon} property of the wrapped button type and scales it
      *  according to the provided {@link UI.FitComponent} policy.
-     *  This icon is only displayed when the button is selected.
+     *  This icon is only displayed when the button is selected.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The {@link IconDeclaration} which should be displayed when the button is selected.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
@@ -964,7 +1060,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to specify the icon for the wrapped button type,
      *  which ought to be displayed when the button is selected.
      *  The icon is resolved based on the supplied {@link IconDeclaration}
-     *  instance which serves as a resource path to the icon actual.
+     *  instance which serves as a resource path to the icon actual.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The desired icon to be displayed on top of the button for when it is selected.
      * @return This very builder to allow for method chaining.
@@ -1056,8 +1158,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIconOnDisabled(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting disabled icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is disabled.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
@@ -1070,10 +1174,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
-     *  before displaying it on the wrapped button type when disabled.
+     *  before displaying it on the wrapped button type when disabled.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which should be scaled and
      *             then displayed when the button is disabled.
      * @return This very builder to allow for method chaining.
@@ -1089,10 +1201,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
      *  to the provided width and height before displaying it on the wrapped button type
-     *  when disabled by the user.
+     *  when disabled by the user.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is disabled.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -1130,7 +1250,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Sets the disabled {@link Icon} property of the wrapped button type and scales it
      *  according to the provided {@link UI.FitComponent} policy.
-     *  This icon is only displayed when the button is disabled.
+     *  This icon is only displayed when the button is disabled.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The {@link IconDeclaration} which should be displayed when the button is disabled.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
@@ -1149,7 +1275,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to specify the icon for the wrapped button type,
      *  which ought to be displayed when the button is disabled.
      *  The icon is resolved based on the supplied {@link IconDeclaration}
-     *  instance which serves as a resource path to the icon actual.
+     *  instance which serves as a resource path to the icon actual.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The desired icon to be displayed on top of the button for when it is disabled.
      * @return This very builder to allow for method chaining.
@@ -1241,8 +1373,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Also see {@link #withIconOnDisabledAndSelected(int, int, IconDeclaration)}, which is
      *  <b>the preferred way of setting disabled and selected icons on buttons!</b>
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is both disabled and selected.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
@@ -1255,10 +1389,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
-     *  before displaying it on the wrapped button type when both disabled and selected.
+     *  before displaying it on the wrapped button type when both disabled and selected.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()}.
      * @param icon The {@link IconDeclaration} which should be scaled and
      *             then displayed when the button is both disabled and selected.
      * @return This very builder to allow for method chaining.
@@ -1274,10 +1416,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
      *  to the provided width and height before displaying it on the wrapped button type
-     *  when both disabled and selected by the user.
+     *  when both disabled and selected by the user.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
-     * @param width The width of the icon.
-     * @param height The height of the icon.
+     * @param width The desired width of the icon in "developer pixels",
+     *              the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
+     * @param height The desired height of the icon in "developer pixels",
+     *               the actual width may be influenced by {@link UI#scale()} and {@link UI.FitComponent}.
      * @param icon The {@link Icon} which should be scaled and then displayed when the button is both disabled and selected.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
@@ -1315,7 +1465,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Sets the disabled and selected {@link Icon} property of the wrapped button type and scales it
      *  according to the provided {@link UI.FitComponent} policy.
-     *  This icon is only displayed when the button is both disabled and selected.
+     *  This icon is only displayed when the button is both disabled and selected.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The {@link IconDeclaration} which should be displayed when the button is both disabled and selected.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
@@ -1334,7 +1490,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to specify the icon for the wrapped button type,
      *  which ought to be displayed when the button is both disabled and selected.
      *  The icon is resolved based on the supplied {@link IconDeclaration}
-     *  instance which serves as a resource path to the icon actual.
+     *  instance which serves as a resource path to the icon actual.<br>
+     *  This method will try to load and install the icon as a scalable {@link ImageIcon},
+     *  which means that in case of the referenced icon being an SVG file, the icon will be
+     *  loaded as a smoothly scalable {@link SvgIcon}, if it is a png or jpeg file however,
+     *  then this method will represent it as a {@link ScalableImageIcon}, which
+     *  dynamically scales the underlying image according to the {@link UI#scale()}
+     *  so that it has a proportionally correct size in high-dpi environments.
      *
      * @param icon The desired icon to be displayed on top of the button for when it is both disabled and selected.
      * @return This very builder to allow for method chaining.
