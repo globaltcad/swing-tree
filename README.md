@@ -138,7 +138,7 @@ For more examples take a look at the <a href="src/test/groovy/swingtree/examples
 <dependency>
   <groupId>io.github.globaltcad</groupId>
   <artifactId>swing-tree</artifactId>
-  <version>0.14.0</version>
+  <version>0.15.0</version>
 </dependency>
 ```
 
@@ -147,11 +147,11 @@ For more examples take a look at the <a href="src/test/groovy/swingtree/examples
 ## Getting started with Gradle ##
 Groovy DSL:
 ```
-implementation 'io.github.globaltcad:swing-tree:0.14.0'
+implementation 'io.github.globaltcad:swing-tree:0.15.0'
 ```
 Kotlin DSL:
 ```
-implementation("io.github.globaltcad:swing-tree:0.14.0")
+implementation("io.github.globaltcad:swing-tree:0.15.0")
 ```
 ---
 
@@ -170,7 +170,7 @@ allprojects {
 ...either by specifiying the version tag:
 ```
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:0.14.0'
+	implementation 'com.github.globaltcad:swing-tree:0.15.0'
 }
 ```
 ...or by using a custom commit hash instead:

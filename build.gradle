@@ -20,7 +20,7 @@ println "Static analysis enabled: $WE_CAN_DO_STATIC_ANALYSIS"
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
-String VERSION  = "0.14.0"
+String VERSION  = "0.15.0"
 
 group GROUP_ID
 version VERSION
