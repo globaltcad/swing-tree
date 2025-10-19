@@ -527,7 +527,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
     /**
      *  Takes the supplied {@link IconDeclaration} and scales it to the desired width and height
-     *  before displaying it on the wrapped button type whenever the user hovers their cursor of the button.<br>
+     *  before displaying it on the wrapped button type whenever the user hovers their cursor over the button.<br>
      *  <p>
      *  For most scenarios, this is a convenience method equivalent to
      *  peeking into this builder like so:
