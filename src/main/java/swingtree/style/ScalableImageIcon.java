@@ -74,7 +74,7 @@ public final class ScalableImageIcon extends ImageIcon
         } catch ( Exception e ) {
             log.error("An error occurred while calculating the size of a ScalableImageIcon.", e);
         }
-        _baseSize      = Size.of((int) targetWidth, (int) targetHeight);
+        _baseSize      = Size.of(targetWidth, targetHeight);
         _sourceIcon = original;
         _relativeScale = relativeScale;
         _currentScale  = UI.scale();
@@ -85,8 +85,8 @@ public final class ScalableImageIcon extends ImageIcon
         if ( !_relativeScale.hasPositiveWidth() || !_relativeScale.hasPositiveHeight() )
             return original;
         try {
-            int width  = (int) (original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));
-            int height = (int) (original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));
+            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));
+            int height = Math.round(original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));
             Image originalImage = original.getImage();
             if ( width == original.getIconWidth() && height == original.getIconHeight() )
                 return original;

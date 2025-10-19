@@ -1268,9 +1268,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         NullUtil.nullArgCheck(onHover, "onHover", Icon.class);
         NullUtil.nullArgCheck(onPress, "onPress", Icon.class);
-        return button().peek(it -> it.setIcon(icon) )
-                .peek(it -> it.setRolloverIcon(onHover) )
-                .peek(it -> it.setPressedIcon(onPress) );
+        return button()
+                .withIcon(icon)
+                .withIconOnHover(onHover)
+                .withIconOnPress(onPress);
     }
 
     /**
