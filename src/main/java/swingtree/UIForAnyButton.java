@@ -340,7 +340,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link IconDeclaration} which should be scaled and
      *             then displayed when the button is being pressed.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if {@code icon} id {@code null}!
+     * @throws NullPointerException if {@code icon} is {@code null}!
      */
     public I withIconOnPress( int width, int height, IconDeclaration icon ) {
         Objects.requireNonNull(icon);
@@ -552,7 +552,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link IconDeclaration} which whose icon should be scaled and
      *             then displayed when the button is being hovered over.
      * @return This very builder to allow for method chaining.
-     * @throws NullPointerException if {@code icon} id {@code null}!
+     * @throws NullPointerException if {@code icon} is {@code null}!
      */
     public I withIconOnHover( int width, int height, IconDeclaration icon ) {
         Objects.requireNonNull(icon);
