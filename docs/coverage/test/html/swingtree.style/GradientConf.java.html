@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GradientConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">GradientConf.java</span></div><h1>GradientConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.UI;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Function;
+
+/**
+ *  An immutable config API for specifying a gradient style.
+ *  as a sub-style of various other styles,
+ *  like for example {@link BaseConf} or {@link BorderConf} accessed through the
+ *  {@link ComponentStyleDelegate#gradient(String, swingtree.api.Configurator)}
+ *  method.
+ *  The state of a gradient style is immutable and can only be updated by
+ *  wither like methods that return a new instance of the gradient style
+ *  with the specified property updated.
+ *  &lt;p&gt;
+ *  The following properties with their respective purpose are available:
+ *  &lt;br&gt;
+ *  &lt;ul&gt;
+ *      &lt;li&gt;&lt;b&gt;Transition&lt;/b&gt;
+ *          The transition defines the direction of the gradient.
+ *          &lt;br&gt;
+ *          The following transitions are available:
+ *          &lt;ul&gt;
+ *              &lt;li&gt;{@link UI.Span#TOP_LEFT_TO_BOTTOM_RIGHT}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#BOTTOM_LEFT_TO_TOP_RIGHT}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#TOP_RIGHT_TO_BOTTOM_LEFT}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#BOTTOM_RIGHT_TO_TOP_LEFT}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#TOP_TO_BOTTOM}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#LEFT_TO_RIGHT}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#BOTTOM_TO_TOP}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Span#RIGHT_TO_LEFT}&lt;/li&gt;
+ *          &lt;/ul&gt;
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Type&lt;/b&gt;
+ *          The type defines the shape of the gradient
+ *          which can be either linear or radial. &lt;br&gt;
+ *          So the following types are available:
+ *          &lt;ul&gt;
+ *              &lt;li&gt;{@link UI.GradientType#LINEAR}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.GradientType#RADIAL}&lt;/li&gt;
+ *              &lt;li&gt;{@link UI.GradientType#CONIC}&lt;/li&gt;
+ *          &lt;/ul&gt;
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Colors&lt;/b&gt;
+ *          An array of colors that will be used
+ *          as a basis for the gradient transition.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Offset&lt;/b&gt;
+ *          The offset defines the start position of the gradient
+ *          on the x and y axis.
+ *          This property, together with the {@link #span(UI.Span)}
+ *          property, defines the start position and direction of the gradient.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Size&lt;/b&gt;
+ *          The size defines the size of the gradient
+ *          in terms of the distance from the start position of the gradient
+ *          to the end position of the gradient.
+ *          &lt;br&gt;
+ *          If no size is specified, the size of the gradient will be
+ *          based on the size of the component that the gradient is applied to.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Area&lt;/b&gt;
+ *          The component are to which the gradient is clipped to.
+ *          Which means that the gradient will only be visible within the
+ *          specified area of the component.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Boundary&lt;/b&gt;
+ *          The boundaries of a component define the outlines between the different
+ *          {@link swingtree.UI.ComponentArea}s.
+ *          Setting a particular boundary causes the gradient to start at that boundary.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Focus Offset&lt;/b&gt;
+ *          An offset property consisting of a {@code x} and {@code y} value
+ *          which will be used together with the gradients position to calculate
+ *          a focus point.
+ *          This is only relevant for radial gradients!
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Rotation&lt;/b&gt;
+ *          The rotation of the gradient in degrees.
+ *          This is typically only relevant for a linear gradient.
+ *          However it is also applicable to a radial gradient with a focus offset,
+ *          where the rotation will be applied to the focus offset.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Fractions&lt;/b&gt;
+ *          An array of values between 0 and 1 that defines the relative position
+ *          of each color in the gradient.
+ *          &lt;br&gt;
+ *          Note that the number of fractions must match the number of colors in the gradient.
+ *          However, if the number of fractions is less than the number of colors, then the remaining
+ *          colors will be determined based on linear interpolation.
+ *          If the number of fractions is greater than the number of colors, then the remaining
+ *          fractions will be ignored.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Cycle&lt;/b&gt;
+ *          The cycle of the gradient which can be one of the following constants:
+ *          &lt;ul&gt;
+ *              &lt;li&gt;{@link UI.Cycle#NONE} -
+ *                  The gradient is only rendered once, without repeating.
+ *                  The last color is used to fill the remaining area.
+ *                  This is the default cycle.
+ *              &lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Cycle#REFLECT} -
+ *                  The gradient is rendered once and then reflected.,
+ *                  which means that the gradient is rendered again in reverse order
+ *                  starting from the last color and ending with the first color.
+ *                  After that, the gradient is rendered again in the original order,
+ *                  starting from the first color and ending with the last color and so on.
+ *              &lt;/li&gt;
+ *              &lt;li&gt;{@link UI.Cycle#REPEAT} -
+ *                  The gradient is rendered repeatedly, which means that it
+ *                  is rendered again and again in the original order, starting from the first color
+ *                  and ending with the last color.
+ *              &lt;/li&gt;
+ *          &lt;/ul&gt;
+ *          Note that this property ultimately translates to the {@link java.awt.MultipleGradientPaint.CycleMethod}
+ *          of the {@link java.awt.LinearGradientPaint} or {@link java.awt.RadialGradientPaint} that is used
+ *          to render the gradient inside the SwingTree style engine.
+ *      &lt;/li&gt;
+ *  &lt;/ul&gt;
+ *  &lt;p&gt;
+ *  You can also use the {@link #none()} method to specify that no gradient should be used,
+ *  as the instance returned by that method is a gradient without any colors, effectively
+ *  making it a representation of the absence of a gradient style.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
+{
+<span class="fc" id="L138">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientConf.class);</span>
+<span class="fc" id="L139">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
+
+<span class="fc" id="L141">    private static final GradientConf _NONE = new GradientConf(</span>
+                                                        UI.Span.TOP_TO_BOTTOM,
+                                                        UI.GradientType.LINEAR,
+                                                        new Color[0],
+<span class="fc" id="L145">                                                        Offset.none(),</span>
+                                                        -1f,
+                                                        UI.ComponentArea.BODY,
+                                                        UI.ComponentBoundary.EXTERIOR_TO_BORDER,
+<span class="fc" id="L149">                                                        Offset.none(),</span>
+                                                        0f,
+                                                        new float[0],
+                                                        UI.Cycle.NONE
+                                                    );
+
+    /**
+     *  Use the returned instance as a representation of the absence of a gradient.
+     *
+     *  @return A gradient without any colors, effectively
+     *          representing the absence of a gradient.
+     */
+<span class="fc" id="L161">    public static GradientConf none() { return _NONE; }</span>
+    
+    static GradientConf of(
+        UI.Span span,
+        UI.GradientType      type,
+        Color[]              colors,
+        Offset               offset,
+        float                size,
+        UI.ComponentArea     area,
+        UI.ComponentBoundary boundary,
+        Offset               focus,
+        float                rotation,
+        float[]              fractions,
+        UI.Cycle             cycle
+    ) {
+        // The rotation may be any number
+        // which always has to be normalized to a value between -180 and 180
+<span class="fc" id="L178">        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );</span>
+
+<span class="fc" id="L180">        GradientConf none = none();</span>
+<span class="fc bfc" id="L181" title="All 4 branches covered.">        if ( span       == none._span &amp;&amp;</span>
+             type       == none._type       &amp;&amp;
+<span class="fc bfc" id="L183" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
+<span class="pc bpc" id="L184" title="4 of 8 branches missed.">             Objects.equals(offset, none._offset) &amp;&amp;</span>
+             size       == none._size &amp;&amp;
+             area       == none._area       &amp;&amp;
+             boundary   == none._boundary   &amp;&amp;
+<span class="pc bpc" id="L188" title="2 of 4 branches missed.">             Objects.equals(focus, none._focus) &amp;&amp;</span>
+             rotation   == none._rotation   &amp;&amp;
+<span class="pc bpc" id="L190" title="2 of 4 branches missed.">             Arrays.equals(fractions, none._fractions) &amp;&amp;</span>
+             cycle      == none._cycle
+        )
+<span class="fc" id="L193">            return none;</span>
+
+<span class="fc" id="L195">        return new GradientConf(span, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);</span>
+    }
+
+
+    private final UI.Span _span;
+    private final UI.GradientType      _type;
+    private final Color[]              _colors;
+    private final Offset               _offset;
+    private final float                _size;
+    private final UI.ComponentArea     _area;
+    private final UI.ComponentBoundary _boundary;
+    private final Offset               _focus;
+    private final float                _rotation;
+    private final float[]              _fractions;
+    private final UI.Cycle             _cycle;
+
+
+    private GradientConf(
+        UI.Span span,
+        UI.GradientType      type,
+        Color[]              colors,
+        Offset               offset,
+        float                size,
+        UI.ComponentArea     area,
+        UI.ComponentBoundary boundary,
+        Offset               focus,
+        float                rotation,
+        float[]              fractions,
+        UI.Cycle             cycle
+<span class="fc" id="L224">    ) {</span>
+<span class="fc" id="L225">        _span = Objects.requireNonNull(span);</span>
+<span class="fc" id="L226">        _type       = Objects.requireNonNull(type);</span>
+<span class="fc" id="L227">        _colors     = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L228">        _offset     = Objects.requireNonNull(offset);</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        _size       = ( size &lt; 0 ? -1 : size );</span>
+<span class="fc" id="L230">        _area       = Objects.requireNonNull(area);</span>
+<span class="fc" id="L231">        _boundary   = Objects.requireNonNull(boundary);</span>
+<span class="fc" id="L232">        _focus      = Objects.requireNonNull(focus);</span>
+<span class="fc" id="L233">        _rotation   = rotation;</span>
+<span class="fc" id="L234">        _fractions  = Objects.requireNonNull(fractions);</span>
+<span class="fc" id="L235">        _cycle      = Objects.requireNonNull(cycle);</span>
+<span class="fc" id="L236">    }</span>
+
+<span class="fc" id="L238">    UI.Span span() { return _span; }</span>
+
+<span class="fc" id="L240">    UI.GradientType type() { return _type; }</span>
+
+<span class="fc" id="L242">    Color[] colors() { return _colors; }</span>
+
+<span class="fc" id="L244">    Offset offset() { return _offset; }</span>
+
+<span class="fc" id="L246">    float size() { return _size; }</span>
+
+<span class="fc" id="L248">    UI.ComponentArea area() { return _area; }</span>
+
+<span class="fc" id="L250">    UI.ComponentBoundary boundary() { return _boundary; }</span>
+
+<span class="fc" id="L252">    Offset focus() { return _focus; }</span>
+
+<span class="fc" id="L254">    float rotation() { return _rotation; }</span>
+
+<span class="fc" id="L256">    float[] fractions() { return _fractions; }</span>
+
+<span class="fc" id="L258">    UI.Cycle cycle() { return _cycle; }</span>
+
+    boolean isOpaque() {
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
+<span class="fc" id="L262">            return false;</span>
+
+<span class="fc" id="L264">        boolean foundTransparentColor = false;</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">            if ( c.getAlpha() &lt; 255 ) {</span>
+<span class="fc" id="L267">                foundTransparentColor = true;</span>
+<span class="fc" id="L268">                break;</span>
+            }
+        }
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        return !foundTransparentColor;</span>
+    }
+
+    GradientConf _scale( double scale ) {
+<span class="pc bpc" id="L275" title="3 of 4 branches missed.">        if ( _size &gt; 0 &amp;&amp; scale != 1 )</span>
+<span class="nc" id="L276">            return of(</span>
+                    _span,
+                        _type,
+                        _colors,
+<span class="nc" id="L280">                        _offset.scale(scale),</span>
+                        (float) (_size * scale),
+                        _area,
+                        _boundary,
+<span class="nc" id="L284">                        _focus.scale(scale),</span>
+                        _rotation,
+                        _fractions,
+                        _cycle
+                    );
+        else
+<span class="fc" id="L290">            return this;</span>
+    }
+
+    /**
+     *  Define a list of colors which will, as part of the gradient, transition from one
+     *  to the next in the order they are specified.
+     *  &lt;p&gt;
+     *  Note that you need to specify at least two colors for a gradient to be visible.
+     *
+     * @param colors The colors in the gradient.
+     * @return A new gradient style with the specified colors.
+     * @throws NullPointerException if any of the colors is {@code null}.
+     */
+    public GradientConf colors( Color... colors ) {
+<span class="fc" id="L304">        Objects.requireNonNull(colors);</span>
+<span class="fc bfc" id="L305" title="All 2 branches covered.">        for ( Color color : colors )</span>
+<span class="fc" id="L306">            Objects.requireNonNull(color, &quot;Use UI.Color.UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc" id="L307">        return of(_span, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define a list of {@link String} based colors which will, as part of the gradient, transition from one
+     *  to the next in the order they are specified.
+     *  &lt;p&gt;
+     *  Note that you need to specify at least two colors for a gradient to be visible.
+     *
+     * @param colors The colors in the gradient in {@link String} format.
+     * @return A new gradient style with the specified colors.
+     * @throws NullPointerException if any of the colors is {@code null}.
+     */
+    public GradientConf colors( String... colors ) {
+<span class="fc" id="L321">        Objects.requireNonNull(colors);</span>
+        try {
+<span class="fc" id="L323">            Color[] actualColors = new Color[colors.length];</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L325">                actualColors[i] = UI.color(colors[i]);</span>
+
+<span class="fc" id="L327">            return of(_span, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="nc" id="L328">        } catch ( Exception e ) {</span>
+<span class="nc" id="L329">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
+<span class="nc" id="L330">            return this; // We want to avoid side effects other than a wrong color</span>
+        }
+    }
+
+    /**
+     *  Define from where and to where the gradient should transition to
+     *  within the {@link UI.ComponentBoundary} of the component.
+     *  &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.Span#TOP_LEFT_TO_BOTTOM_RIGHT}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#BOTTOM_LEFT_TO_TOP_RIGHT}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#TOP_RIGHT_TO_BOTTOM_LEFT}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#BOTTOM_RIGHT_TO_TOP_LEFT}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#TOP_TO_BOTTOM}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#LEFT_TO_RIGHT}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#BOTTOM_TO_TOP}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Span#RIGHT_TO_LEFT}&lt;/li&gt;
+     *  &lt;/ul&gt;
+     *
+     * @param span The span policy of the gradient, which defines the direction of the gradient.
+     * @return A new gradient style with the specified alignment.
+     * @throws NullPointerException if the alignment is {@code null}.
+     */
+    public GradientConf span( UI.Span span ) {
+<span class="fc" id="L353">        Objects.requireNonNull(span);</span>
+<span class="fc" id="L354">        return of(span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the type of the gradient which is one of the following:
+     *  &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.GradientType#LINEAR}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.GradientType#RADIAL}&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.GradientType#CONIC}&lt;/li&gt;
+     *  &lt;/ul&gt;
+     *
+     * @param type The type of the gradient.
+     * @return A new gradient style with the specified type.
+     * @throws NullPointerException if the type is {@code null}.
+     */
+    public GradientConf type( UI.GradientType type ) {
+<span class="fc" id="L370">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L371">        return of(_span, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the offset of the gradient which is the start position of the gradient
+     *  on the x and y-axis. &lt;br&gt;
+     *  Note that the offset is relative to the component that the gradient is applied to.
+     *
+     * @param x The gradient start offset on the x-axis.
+     * @param y The gradient start offset on the y-axis.
+     * @return A new gradient style with the specified offset.
+     */
+    public GradientConf offset( double x, double y ) {
+<span class="fc" id="L384">        return of(_span, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the size of the gradient which is the size of the gradient
+     *  in terms of the distance from the start position of the gradient
+     *  to the end position of the gradient.
+     *  &lt;p&gt;
+     *  Note that if no size is specified, the size of the gradient will be
+     *  based on the size of the component that the gradient is applied to.
+     *
+     * @param size The gradient size.
+     * @return A new gradient style with the specified size.
+     */
+    public GradientConf size( double size ) {
+<span class="fc" id="L399">        return of(_span, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the area of the component to which the gradient is clipped to.
+     *  Which means that the gradient will only be visible within the
+     *  specified area of the component.
+     *
+     * @param area The area of the component to which the gradient is clipped to.
+     * @return A new gradient style with the specified area.
+     */
+    public GradientConf clipTo( UI.ComponentArea area ) {
+<span class="fc" id="L411">        return of(_span, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the boundary at which the gradient should start in terms of its base position.
+     *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
+     *  then the gradient position will be determined by the margin of the component. &lt;br&gt;
+     *  Here a complete list of the available boundaries:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link UI.ComponentArea#BODY}.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component's body, which is between the margin and the border.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component's interior, which is between the border and the padding area.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+     *     Using this boundary will cause the gradient to be positioned somewhere after the padding area
+     *     and before the content area, which is where all of the child components are located.
+     *     &lt;/li&gt;
+     * &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  You can think of this property as a convenient way to define the base position of the gradient.
+     *  So if you want to do the positioning yourself, then you may configure this property to
+     *  {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}, which will cause the gradient to be positioned
+     *  at the outermost edge of the component, and then use the {@link #offset(double, double)} method
+     *  to define the exact position of the gradient.
+     *  (You may also want to set the {@link #span(UI.Span)}
+     *  property to {@link UI.Span#TOP_LEFT_TO_BOTTOM_RIGHT} to make sure that the gradient
+     *  is positioned in the top left corner (origin position) of the component)
+     *
+     * @param boundary The boundary at which the gradient should start in terms of its offset.
+     * @return A new gradient style with the specified boundary.
+     */
+    public GradientConf boundary( UI.ComponentBoundary boundary ) {
+<span class="fc" id="L459">        return of(_span, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the focus offset of a radial gradient as a second position relative
+     *  to the main position of the gradient (see {@link #offset(double, double)} and {@link #boundary(UI.ComponentBoundary)}
+     *  which is used to define the direction of the gradient.
+     *  &lt;p&gt;
+     *  Note that this property is only relevant for radial gradients.
+     *
+     *  @param x The focus offset on the x-axis.
+     *  @param y The focus offset on the y-axis.
+     * @return An updated gradient configuration with the specified focus offset.
+     */
+    public GradientConf focus( double x, double y ) {
+<span class="fc" id="L474">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the rotation of the gradient in degrees.
+     *
+     *  @param rotation The rotation of the gradient in degrees.
+     *  @return An updated gradient configuration with the specified rotation.
+     */
+    public GradientConf rotation( float rotation ) {
+<span class="nc" id="L484">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the fractions of the gradient in the dorm of an array of values between 0 and 1
+     *  that each the relative position of each color in the gradient transition.
+     *  &lt;p&gt;
+     *  Note that the number of fractions must match the number of colors in the gradient.
+     *  If the number of fractions is less than the number of colors, then the remaining
+     *  colors will be evenly distributed between the last two fractions.
+     *
+     *  @param fractions The fractions of the gradient.
+     * @return An updated gradient configuration with the specified fractions.
+     */
+    public GradientConf fractions( double... fractions ) {
+<span class="nc" id="L499">        float[] actualFractions = new float[fractions.length];</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
+<span class="nc" id="L501">            actualFractions[i] = (float) fractions[i];</span>
+
+<span class="nc" id="L503">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);</span>
+    }
+
+    /**
+     *  Define the cycle of the gradient which is one of the following:
+     *  &lt;ul&gt;
+     *      &lt;li&gt;{@link UI.Cycle#NONE} -
+     *          The gradient is only rendered once, without repeating.
+     *          The last color is used to fill the remaining area.
+     *          This is the default cycle.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.Cycle#REFLECT} -
+     *          The gradient is rendered once and then reflected.,
+     *          which means that the gradient is rendered again in reverse order
+     *          starting from the last color and ending with the first color.
+     *          After that, the gradient is rendered again in the original order,
+     *          starting from the first color and ending with the last color and so on.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.Cycle#REPEAT} -
+     *          The gradient is rendered repeatedly, which means that it
+     *          is rendered again and again in the original order, starting from the first color
+     *          and ending with the last color.
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  Note that this property ultimately translates to the {@link java.awt.MultipleGradientPaint.CycleMethod}
+     *  of the {@link java.awt.LinearGradientPaint} or {@link java.awt.RadialGradientPaint} that is used
+     *  to render the gradient inside the SwingTree style engine.
+     *
+     * @param cycle The cycle of the gradient.
+     * @return A new gradient style with the specified cycle method.
+     * @throws NullPointerException if the cycle is {@code null}.
+     */
+    public GradientConf cycle(UI.Cycle cycle ) {
+<span class="nc" id="L536">        Objects.requireNonNull(cycle);</span>
+<span class="nc" id="L537">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);</span>
+    }
+
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L543" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L544">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L545">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+                    &quot;transition=&quot; + _span + &quot;, &quot; +
+                    &quot;type=&quot;       + _type + &quot;, &quot; +
+<span class="fc" id="L548">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+                    &quot;offset=&quot;     + _offset + &quot;, &quot; +
+                    &quot;size=&quot;       + _size + &quot;, &quot; +
+                    &quot;area=&quot;       + _area + &quot;, &quot; +
+                    &quot;boundary=&quot;   + _boundary + &quot;, &quot; +
+                    &quot;focus=&quot;      + _focus + &quot;, &quot; +
+                    &quot;rotation=&quot;   + _rotation + &quot;, &quot; +
+<span class="fc" id="L555">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) + &quot;, &quot; +</span>
+                    &quot;cycle=&quot;      + _cycle +
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( @Nullable Object o ) {
+<span class="fc bfc" id="L562" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="fc bfc" id="L563" title="All 2 branches covered.">        if ( !(o instanceof GradientConf) ) return false;</span>
+<span class="fc" id="L564">        GradientConf that = (GradientConf) o;</span>
+<span class="fc bfc" id="L565" title="All 4 branches covered.">        return _span       == that._span &amp;&amp;</span>
+               _type       == that._type             &amp;&amp;
+<span class="fc bfc" id="L567" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L568" title="4 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+               _size       == that._size             &amp;&amp;
+               _area       == that._area             &amp;&amp;
+               _boundary   == that._boundary         &amp;&amp;
+<span class="pc bpc" id="L572" title="1 of 4 branches missed.">               Objects.equals(_focus, that._focus)   &amp;&amp;</span>
+               _rotation   == that._rotation         &amp;&amp;
+<span class="pc bpc" id="L574" title="2 of 4 branches missed.">               Arrays.equals(_fractions, that._fractions) &amp;&amp;</span>
+               _cycle      == that._cycle;
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L580">        return Objects.hash(</span>
+                _span,
+                _type,
+<span class="fc" id="L583">                Arrays.hashCode(_colors),</span>
+                _offset,
+<span class="fc" id="L585">                _size,</span>
+                _area,
+                _boundary,
+                _focus,
+<span class="fc" id="L589">                _rotation,</span>
+<span class="fc" id="L590">                Arrays.hashCode(_fractions),</span>
+                _cycle
+            );
+    }
+
+    @Override
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    public GradientConf simplified() {
+<span class="fc bfc" id="L598" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L599">            return _NONE;</span>
+
+<span class="pc bpc" id="L601" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L602">            return _NONE;</span>
+
+<span class="pc bpc" id="L604" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )</span>
+<span class="fc" id="L605">            return _NONE;</span>
+
+<span class="pc bpc" id="L607" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.Color.UNDEFINED ? 0 : 1 ).sum();</span>
+
+<span class="pc bpc" id="L609" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L610">            return _NONE;</span>
+
+<span class="fc" id="L612">        Offset focus = _focus;</span>
+<span class="fc" id="L613">        float  rotation = _rotation;</span>
+
+<span class="fc bfc" id="L615" title="All 2 branches covered.">        if ( _type != UI.GradientType.RADIAL )</span>
+<span class="fc" id="L616">            focus = Offset.none();</span>
+        else
+<span class="fc bfc" id="L618" title="All 2 branches covered.">            if ( focus.equals(Offset.none()) )</span>
+<span class="fc" id="L619">                rotation = 0f; // If the focus is not set, then the rotation is irrelevant</span>
+
+<span class="pc bpc" id="L621" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="nc" id="L622">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="nc" id="L623">            int index = 0;</span>
+<span class="nc bnc" id="L624" title="All 2 branches missed.">            for ( Color color : _colors )</span>
+<span class="nc bnc" id="L625" title="All 2 branches missed.">                if ( color != UI.Color.UNDEFINED )</span>
+<span class="nc" id="L626">                    realColors[index++] = color;</span>
+
+<span class="nc" id="L628">            _avoidTransparentBlackLeakage(realColors);</span>
+<span class="nc" id="L629">            return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
+        }
+
+<span class="fc bfc" id="L632" title="All 2 branches covered.">        if ( !focus.equals(_focus) ) {</span>
+<span class="fc" id="L633">            _avoidTransparentBlackLeakage(_colors);</span>
+<span class="fc" id="L634">            return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
+        }
+
+<span class="fc" id="L637">        _avoidTransparentBlackLeakage(_colors);</span>
+<span class="fc" id="L638">        return this;</span>
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    private static void _avoidTransparentBlackLeakage(Color[] realColors) {
+<span class="fc bfc" id="L643" title="All 2 branches covered.">        for ( int i = 0; i &lt; realColors.length; i++ ) {</span>
+<span class="fc" id="L644">            Color currentColor = realColors[i];</span>
+<span class="fc bfc" id="L645" title="All 2 branches covered.">            if ( currentColor == UI.Color.TRANSPARENT ) {</span>
+<span class="pc bpc" id="L646" title="1 of 2 branches missed.">                Color leftColor  = ( i &gt; 0                     ? realColors[i - 1] : null);</span>
+<span class="pc bpc" id="L647" title="1 of 2 branches missed.">                Color rightColor = ( i &lt; realColors.length - 1 ? realColors[i + 1] : null);</span>
+<span class="pc bpc" id="L648" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? rightColor : leftColor);</span>
+<span class="pc bpc" id="L649" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? leftColor : rightColor);</span>
+<span class="pc bpc" id="L650" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? currentColor : leftColor);</span>
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? currentColor : rightColor);</span>
+<span class="fc" id="L652">                int averageR = ( leftColor.getRed()   + rightColor.getRed()   ) / 2;</span>
+<span class="fc" id="L653">                int averageG = ( leftColor.getGreen() + rightColor.getGreen() ) / 2;</span>
+<span class="fc" id="L654">                int averageB = ( leftColor.getBlue()  + rightColor.getBlue()  ) / 2;</span>
+<span class="fc" id="L655">                realColors[i] = new Color(averageR, averageG, averageB, 0);</span>
+            }
+        }
+<span class="fc" id="L658">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

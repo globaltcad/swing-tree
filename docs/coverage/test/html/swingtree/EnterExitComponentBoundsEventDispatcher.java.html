@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnterExitComponentBoundsEventDispatcher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">EnterExitComponentBoundsEventDispatcher.java</span></div><h1>EnterExitComponentBoundsEventDispatcher.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.style.ComponentExtension;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *  A custom event dispatcher for mouse enter and exit events based on the mouse
+ *  cursor location exiting or entering a component's bounds even if the
+ *  mouse cursor is on a child component.&lt;br&gt;
+ *  This is in essence a fix for the default Swing behavior which also dispatches enter/exit
+ *  events when the mouse cursor enters or exits the bounds of a child component
+ *  which also has a listener for these events. So using this we try to
+ *  make the behavior more predictable, reliable and intuitive.
+ */
+@SuppressWarnings(&quot;EnumOrdinal&quot;)
+<span class="nc" id="L25">final class EnterExitComponentBoundsEventDispatcher {</span>
+
+<span class="fc" id="L27">    private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);</span>
+<span class="fc" id="L28">    private static final MouseListener EMPTY_NO_OP_MOUSE_LISTENER = new MouseAdapter() { };</span>
+    static {
+<span class="fc" id="L30">        Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);</span>
+<span class="fc" id="L31">        Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);</span>
+<span class="fc" id="L32">    }</span>
+
+    static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+<span class="fc" id="L35">        component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // &lt;- ensures that mouse events are enabled</span>
+<span class="fc" id="L36">        ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];</span>
+<span class="fc" id="L37">        listeners.addEnterListener(listener);</span>
+<span class="fc" id="L38">    }</span>
+
+    static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+<span class="fc" id="L41">        component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // &lt;- ensures that mouse events are enabled</span>
+<span class="fc" id="L42">        ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];</span>
+<span class="fc" id="L43">        listeners.addExitListener(listener);</span>
+<span class="fc" id="L44">    }</span>
+
+    private static ComponentEnterExitListeners[] fetchListenersInitialized(JComponent component) {
+<span class="fc" id="L47">        Object foundObject = component.getClientProperty(ComponentEnterExitListeners.class);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if ( !(foundObject instanceof ComponentEnterExitListeners[]) ) {</span>
+<span class="fc" id="L49">            foundObject = EnterExitComponentBoundsEventDispatcher.iniListeners();</span>
+<span class="fc" id="L50">            component.putClientProperty(ComponentEnterExitListeners.class, foundObject);</span>
+        }
+<span class="fc" id="L52">        return (ComponentEnterExitListeners[]) foundObject;</span>
+    }
+
+    private static ComponentEnterExitListeners[] iniListeners() {
+<span class="fc" id="L56">        ComponentEnterExitListeners[] listenerArray = new ComponentEnterExitListeners[UI.ComponentArea.values().length];</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (UI.ComponentArea a : UI.ComponentArea.values()) {</span>
+<span class="fc" id="L58">            listenerArray[a.ordinal()] = new ComponentEnterExitListeners(a);</span>
+        }
+<span class="fc" id="L60">        return listenerArray;</span>
+    }
+
+    private static void onMouseEvent(AWTEvent event) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (event instanceof MouseEvent) {</span>
+<span class="fc" id="L65">            MouseEvent mouseEvent = (MouseEvent) event;</span>
+
+<span class="fc" id="L67">            Component eventComponent = mouseEvent.getComponent();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">            while ( eventComponent instanceof JComponent ) {</span>
+<span class="fc" id="L69">                JComponent toReceiveEvent = (JComponent) eventComponent;</span>
+<span class="fc" id="L70">                ComponentEnterExitListeners[] componentListenerInfo = fetchListenersInitialized(toReceiveEvent);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                if (componentListenerInfo != null) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                    for (UI.ComponentArea area : UI.ComponentArea.values()) {</span>
+<span class="fc" id="L73">                        ComponentEnterExitListeners currentListeners = componentListenerInfo[area.ordinal()];</span>
+<span class="fc" id="L74">                        currentListeners.dispatch(toReceiveEvent, mouseEvent);</span>
+                    }
+                }
+<span class="fc" id="L77">                eventComponent = toReceiveEvent.getParent();</span>
+<span class="fc" id="L78">            }</span>
+        }
+<span class="fc" id="L80">    }</span>
+
+<span class="fc" id="L82">    enum Location {</span>
+<span class="fc" id="L83">        INSIDE, OUTSIDE</span>
+    }
+
+    /**
+     *  Contains the enter and exit listeners for a component as well as
+     *  a flag indicating whether the mouse cursor is currently within the
+     *  bounds of the component or not.
+     */
+<span class="fc" id="L91">    private static class ComponentEnterExitListeners {</span>
+        private final UI.ComponentArea area;
+        private Location location;
+        private final List&lt;MouseListener&gt; enterListeners;
+        private final List&lt;MouseListener&gt; exitListeners;
+
+<span class="fc" id="L97">        public ComponentEnterExitListeners( UI.ComponentArea area ) {</span>
+<span class="fc" id="L98">            this.area = area;</span>
+<span class="fc" id="L99">            this.location = Location.OUTSIDE;</span>
+<span class="fc" id="L100">            this.enterListeners = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L101">            this.exitListeners  = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L102">        }</span>
+
+        private final boolean areaIsEqualToBounds(Component component) {
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">            if ( this.area == UI.ComponentArea.ALL ) {</span>
+<span class="nc" id="L106">                return true;</span>
+            }
+<span class="fc" id="L108">            Shape shape = ComponentExtension.from((JComponent) component).getComponentArea(area).orElse(null);</span>
+<span class="pc bpc" id="L109" title="2 of 4 branches missed.">            return shape != null &amp;&amp; shape.equals(component.getBounds());</span>
+        }
+
+        public void addEnterListener(MouseListener listener) {
+<span class="fc" id="L113">            enterListeners.add(listener);</span>
+<span class="fc" id="L114">        }</span>
+
+        public void addExitListener(MouseListener listener) {
+<span class="fc" id="L117">            exitListeners.add(listener);</span>
+<span class="fc" id="L118">        }</span>
+
+        public void dispatch(JComponent component, MouseEvent event) {
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">            assert isRelated(component, event.getComponent());</span>
+
+<span class="pc bpc" id="L123" title="1 of 4 branches missed.">            switch (event.getID()) {</span>
+                case MouseEvent.MOUSE_ENTERED:
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                    if (location == Location.INSIDE)</span>
+<span class="fc" id="L126">                        return;</span>
+
+<span class="fc" id="L128">                    location = onMouseEnter(component, event);</span>
+<span class="fc" id="L129">                    break;</span>
+                case MouseEvent.MOUSE_EXITED:
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">                    if (location == Location.OUTSIDE)</span>
+<span class="fc" id="L132">                        return;</span>
+
+<span class="nc bnc" id="L134" title="All 2 branches missed.">                    if (containsScreenLocation(component, event.getLocationOnScreen()))</span>
+<span class="nc" id="L135">                        return;</span>
+
+<span class="nc" id="L137">                    location = onMouseExit(component, event);</span>
+<span class="nc" id="L138">                    break;</span>
+                case MouseEvent.MOUSE_MOVED:
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                    if ( !areaIsEqualToBounds(component) ) {</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                        if ( location == Location.INSIDE ) {</span>
+<span class="nc" id="L142">                            location = onMouseExit(component, event);</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">                        } else if ( location == Location.OUTSIDE ) {</span>
+<span class="nc" id="L144">                            location = onMouseEnter(component, event);</span>
+                        }
+                    }
+                break;
+            }
+<span class="fc" id="L149">        }</span>
+
+        private Location determineCurrentLocationOf(MouseEvent event) {
+<span class="fc" id="L152">            return ComponentExtension.from((JComponent) event.getComponent())</span>
+<span class="fc" id="L153">                    .getComponentArea(area)</span>
+<span class="fc" id="L154">                    .filter( shape -&gt; shape.contains(event.getPoint()) )</span>
+<span class="fc" id="L155">                    .map( isInsideShape -&gt; Location.INSIDE )</span>
+<span class="fc" id="L156">                    .orElse(Location.OUTSIDE);</span>
+        }
+
+        private Location onMouseEnter(JComponent component, MouseEvent mouseEvent)
+        {
+<span class="fc" id="L161">            mouseEvent = withNewSource(mouseEvent, component);</span>
+
+<span class="fc bfc" id="L163" title="All 2 branches covered.">            if (enterListeners.isEmpty())</span>
+<span class="fc" id="L164">                return determineCurrentLocationOf(mouseEvent);</span>
+
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">            if ( areaIsEqualToBounds(component) ) {</span>
+<span class="nc" id="L167">                dispatchEnterToAllListeners(mouseEvent);</span>
+<span class="nc" id="L168">                return Location.INSIDE;</span>
+            } else {
+<span class="fc" id="L170">                Location nextLocation = determineCurrentLocationOf(mouseEvent);</span>
+<span class="pc bpc" id="L171" title="1 of 4 branches missed.">                if ( nextLocation == Location.INSIDE &amp;&amp; this.location == Location.OUTSIDE )</span>
+<span class="fc" id="L172">                    dispatchEnterToAllListeners(mouseEvent);</span>
+
+<span class="fc" id="L174">                return nextLocation;</span>
+            }
+        }
+
+        private void dispatchEnterToAllListeners(MouseEvent mouseEvent) {
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            for ( MouseListener listener : enterListeners ) {</span>
+                try {
+<span class="fc" id="L181">                    listener.mouseEntered(mouseEvent);</span>
+<span class="nc" id="L182">                } catch (Exception e) {</span>
+<span class="nc" id="L183">                    log.error(&quot;Failed to process mouseEntered event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
+<span class="fc" id="L184">                }</span>
+<span class="fc" id="L185">            }</span>
+<span class="fc" id="L186">        }</span>
+
+        private Location onMouseExit(JComponent component, MouseEvent mouseEvent)
+        {
+<span class="nc" id="L190">            mouseEvent = withNewSource(mouseEvent, component);</span>
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">            if (exitListeners.isEmpty())</span>
+<span class="nc" id="L193">                return determineCurrentLocationOf(mouseEvent);</span>
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">            if ( areaIsEqualToBounds(component) ) {</span>
+<span class="nc" id="L196">                dispatchExitToAllListeners(mouseEvent);</span>
+<span class="nc" id="L197">                return Location.OUTSIDE;</span>
+            } else {
+<span class="nc" id="L199">                Location nextLocation = determineCurrentLocationOf(mouseEvent);</span>
+<span class="nc bnc" id="L200" title="All 4 branches missed.">                if ( nextLocation == Location.OUTSIDE &amp;&amp; this.location == Location.INSIDE )</span>
+<span class="nc" id="L201">                    dispatchExitToAllListeners(mouseEvent);</span>
+
+<span class="nc" id="L203">                return nextLocation;</span>
+            }
+        }
+
+        private void dispatchExitToAllListeners(MouseEvent mouseEvent) {
+<span class="nc bnc" id="L208" title="All 2 branches missed.">            for ( MouseListener listener : exitListeners ) {</span>
+                try {
+<span class="nc" id="L210">                    listener.mouseExited(mouseEvent);</span>
+<span class="nc" id="L211">                } catch (Exception e) {</span>
+<span class="nc" id="L212">                    log.error(&quot;Failed to process mouseExited event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
+<span class="nc" id="L213">                }</span>
+<span class="nc" id="L214">            }</span>
+<span class="nc" id="L215">        }</span>
+    }
+
+    private static boolean isRelated(Component parent, Component other) {
+<span class="fc" id="L219">        Component o = other;</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        while (o != null) {</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">            if (o == parent)</span>
+<span class="fc" id="L222">                return true;</span>
+<span class="nc" id="L223">            o = o.getParent();</span>
+        }
+<span class="nc" id="L225">        return false;</span>
+    }
+
+    private static boolean containsScreenLocation(Component component, Point screenLocation) {
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (!component.isShowing())</span>
+<span class="nc" id="L230">            return false;</span>
+<span class="nc" id="L231">        Point compLocation = component.getLocationOnScreen();</span>
+<span class="nc" id="L232">        Dimension compSize = component.getSize();</span>
+<span class="nc" id="L233">        int relativeX = screenLocation.x - compLocation.x;</span>
+<span class="nc" id="L234">        int relativeY = screenLocation.y - compLocation.y;</span>
+<span class="nc bnc" id="L235" title="All 8 branches missed.">        return (relativeX &gt;= 0 &amp;&amp; relativeX &lt; compSize.width &amp;&amp; relativeY &gt;= 0 &amp;&amp; relativeY &lt; compSize.height);</span>
+    }
+
+    private static MouseEvent withNewSource(MouseEvent event, JComponent newSource) {
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if ( event.getSource() == newSource )</span>
+<span class="fc" id="L240">            return event;</span>
+
+        // We need to convert the mouse position to the new source's coordinate system
+<span class="nc" id="L243">        Point mousePositionRelativeToNewComponent = event.getPoint();</span>
+<span class="nc" id="L244">        SwingUtilities.convertPointToScreen(mousePositionRelativeToNewComponent, (Component) event.getSource());</span>
+<span class="nc" id="L245">        SwingUtilities.convertPointFromScreen(mousePositionRelativeToNewComponent, newSource);</span>
+<span class="nc" id="L246">        return new MouseEvent(</span>
+            newSource,
+<span class="nc" id="L248">            event.getID(),</span>
+<span class="nc" id="L249">            event.getWhen(),</span>
+<span class="nc" id="L250">            event.getModifiersEx(),</span>
+            mousePositionRelativeToNewComponent.x,
+            mousePositionRelativeToNewComponent.y,
+<span class="nc" id="L253">            event.getClickCount(),</span>
+<span class="nc" id="L254">            event.isPopupTrigger(),</span>
+<span class="nc" id="L255">            event.getButton()</span>
+        );
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

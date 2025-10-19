@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LenientAWTEventProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.threading</a> &gt; <span class="el_source">LenientAWTEventProcessor.java</span></div><h1>LenientAWTEventProcessor.java</h1><pre class="source lang-java linenums">package swingtree.threading;
+
+import org.slf4j.Logger;
+
+import java.util.function.Supplier;
+
+/**
+ *  This {@link EventProcessor} implementation is called lenient because it does not
+ *  throw any exceptions when a task is not registered by the UI thread.
+ *  When this processor is installed
+ *  all the event handling will typically be done by the UI thead (the AWT event dispatch thread, short EDT)
+ *  simply because all the Swing component events will be executed on the EDT,
+ *  however this will not be enforced. &lt;br&gt;
+ *  Note that this {@link EventProcessor} will effectively couple the UI
+ *  to the business logic of you application with respect to the execution model. &lt;br&gt;
+ *  This is not a big problem for simple demo applications,
+ *  however, when building larger products it is important to not use the UI thread for
+ *  business logic so that the UI stays responsive.
+ *  This is why you should prefer the usage of the {@link DecoupledEventProcessor}
+ *  alongside the registration of a worker thread through
+ *  {@link DecoupledEventProcessor#join()} at {@link EventProcessor#DECOUPLED}.
+ *  &lt;br&gt;&lt;br&gt;
+ *  See {@link swingtree.UI#use(EventProcessor, Supplier)} for more information about the
+ *  usage of the {@link EventProcessor} interface.
+ */
+<span class="fc" id="L26">final class LenientAWTEventProcessor extends BasicSingleThreadedEventProcessor</span>
+{
+<span class="fc" id="L28">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(LenientAWTEventProcessor.class);</span>
+
+    @Override protected void _tryRunning( Runnable runnable, boolean expectedToBeInvokedFromUIThread ) {
+        try {
+<span class="fc" id="L32">            runnable.run();</span>
+<span class="nc" id="L33">        } catch (Exception e) {</span>
+            // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
+<span class="nc" id="L35">            log.error(&quot;An exception occurred while running a task in the UI thread!&quot;, e);</span>
+<span class="fc" id="L36">        }</span>
+<span class="fc" id="L37">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

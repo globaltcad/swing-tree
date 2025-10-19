@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnyToggleButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnyToggleButton.java</span></div><h1>UIForAnyToggleButton.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.From;
+import sprouts.Var;
+
+import javax.swing.JToggleButton;
+
+/**
+ *  An abstract precursor for swing tree builder nodes for {@link JToggleButton} instances.
+ *  Extend this class to create a builder node for a custom {@link JToggleButton} subtype.
+ *
+ * @param &lt;I&gt; The type of this builder node.
+ * @param &lt;B&gt; The type of the {@link JToggleButton} subtype which will be managed by this builder.
+ */
+<span class="fc" id="L15">public abstract class UIForAnyToggleButton&lt;I, B extends JToggleButton&gt; extends UIForAnyButton&lt;I, B&gt;</span>
+{
+    /**
+     *  Use this to dynamically bind the selection flag of the button to a {@link Var}
+     *  property which will determine the selection state of the button based on the
+     *  equality of the property value and the provided reference value.
+     *  So if the first {@code state} argument is equal to the value of the {@code selection} property,
+     *  the button will be selected, otherwise it will be deselected.&lt;br&gt;
+     *  A typical use case is to bind a button to an enum property, like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var&lt;Step&gt; step = Var.of(Step.ONE);
+     *
+     *      // In your view:
+     *      UI.radioButton(&quot;Two&quot;).isSelectedIf(Step.TWO, vm.getStep());
+     *  }&lt;/pre&gt;
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. &lt;br&gt;
+     *  &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param state The reference value which this {@link JToggleButton} should represent.
+     * @param selection The {@link sprouts.Var} instance which will be used
+     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type
+     *                  based on the equality of the {@code state} argument and the value of the property.
+     * @param &lt;E&gt; The type of the property value.
+     * @return The current builder type, to allow for further method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final &lt;E&gt; I isSelectedIf( E state, Var&lt;E&gt; selection ) {
+<span class="fc" id="L46">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
+<span class="fc" id="L47">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
+<span class="fc" id="L48">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
+<span class="fc" id="L49">        return _withOnShow( selection, (button,s) -&gt; {</span>
+<span class="fc" id="L50">                   _setSelectedSilently(button, state.equals(s));</span>
+<span class="fc" id="L51">               })</span>
+<span class="fc" id="L52">               ._with( button -&gt; {</span>
+<span class="fc" id="L53">                   _setSelectedSilently(button, state.equals(selection.get()));</span>
+                   // When the user clicks the button, we update the selection property!
+                   // But only if the button is selected, otherwise we'll ignore the click.
+                   // And we also trigger &quot;set&quot; events for the button, so that other buttons
+                   // can be updated to reflect the new selection state.
+<span class="fc" id="L58">                   _onChange(button, event -&gt; {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                       if ( button.isSelected() )</span>
+<span class="nc" id="L60">                           selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
+<span class="nc" id="L61">                   });</span>
+<span class="fc" id="L62">               })</span>
+<span class="fc" id="L63">               ._this();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

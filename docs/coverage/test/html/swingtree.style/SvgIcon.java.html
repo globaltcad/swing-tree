@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SvgIcon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">SvgIcon.java</span></div><h1>SvgIcon.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.LoaderContext;
+import com.github.weisj.jsvg.parser.SVGLoader;
+import com.github.weisj.jsvg.view.FloatSize;
+import com.github.weisj.jsvg.view.ViewBox;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.UI;
+import swingtree.layout.Size;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.border.Border;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your GUI.
+ *   This in essence just a wrapper around the &lt;a href=&quot;https://github.com/weisJ/jsvg&quot;&gt;JSVG library&lt;/a&gt;,
+ *   which renders SVG images using the Java2D graphics API.
+ *   &lt;p&gt;
+ *   You may use this like a regular {@link ImageIcon}, but have to keep in mind that SVG documents
+ *   do not really have a fixed size, meaning that the {@link #getIconWidth()} and {@link #getIconHeight()}
+ *   on a freshly loaded {@link SvgIcon} will return -1 which causes the icon to be rendered according to the
+ *   width and height of the component it is rendered into (see {@link #paintIcon(Component, java.awt.Graphics, int, int)}).
+ *   &lt;p&gt;
+ *   If you want to render the icon with a fixed size, you can use the {@link #withIconWidth(int)} and
+ *   {@link #withIconHeight(int)} or {@link #withIconSize(int, int)} methods to create a new {@link SvgIcon}
+ *   with the given width and height.
+ *   &lt;p&gt;
+ *   An {@link SvgIcon} with an undefined width or height will also be using the {@link UI.FitComponent}
+ *   and {@link UI.Placement} policies to determine how the icon should be placed and sized within a component.
+ *   Use the {@link #withFitComponent(UI.FitComponent)} and {@link #withPreferredPlacement(UI.Placement)}
+ *   methods to create a new {@link SvgIcon} with the given policies and use the {@link #getFitComponent()}
+ *   and {@link #getPreferredPlacement()} methods to retrieve the current policies
+ *   (Not that these will not have any effect if the width and height are both defined).
+ *   &lt;p&gt;
+ *   &lt;b&gt;Also note that the direct use of this class and it's API is discouraged in favour of simply
+ *   calling the {@link UI#findIcon(String)} or {@link UI#findSvgIcon(String)} methods, which
+ *   will automatically load and cache all of the icons for you.&lt;/b&gt;
+ */
+public final class SvgIcon extends ImageIcon
+{
+<span class="fc" id="L51">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);</span>
+<span class="fc" id="L52">    private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.MIN_DIM;</span>
+<span class="fc" id="L53">    private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;</span>
+    private static final int             NO_SIZE               = -1;
+<span class="fc" id="L55">    private static final Insets          ZERO_INSETS           = new Insets(0,0,0,0);</span>
+
+
+    private final @Nullable SVGDocument _svgDocument;
+    private final Size                  _size;
+    private final UI.FitComponent       _fitComponent;
+    private final UI.Placement          _preferredPlacement;
+
+<span class="fc" id="L63">    private @Nullable BufferedImage _cache = null;</span>
+
+
+    private SvgIcon(
+        @Nullable SVGDocument svgDocument, // nullable
+        Size                  size,
+        UI.FitComponent       fitComponent,
+        UI.Placement          preferredPlacement
+    ) {
+<span class="fc" id="L72">        super();</span>
+<span class="fc" id="L73">        _svgDocument        = svgDocument;</span>
+<span class="fc" id="L74">        _size               = Objects.requireNonNull(size);</span>
+<span class="fc" id="L75">        _fitComponent       = Objects.requireNonNull(fitComponent);</span>
+<span class="fc" id="L76">        _preferredPlacement = Objects.requireNonNull(preferredPlacement);</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * @param path The path to the SVG document.
+     */
+    public SvgIcon( String path ) {
+<span class="fc" id="L83">        this(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * @param svgUrl The URL to the SVG document.
+     */
+    public SvgIcon( URL svgUrl ) {
+<span class="nc" id="L90">        this(_loadSvgDocument(svgUrl), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="nc" id="L91">    }</span>
+
+    /**
+     * @param stream The input stream supplying the text data of the SVG document.
+     */
+    public SvgIcon( InputStream stream ) {
+<span class="nc" id="L97">        this(_loadSvgDocument(stream), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="nc" id="L98">    }</span>
+
+    /**
+     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     */
+    public SvgIcon( SVGDocument svgDocument ) {
+<span class="fc" id="L104">        this(svgDocument, Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * @param path The path to the SVG document.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( String path, Dimension size ) {
+<span class="nc" id="L112">        this(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="nc" id="L113">    }</span>
+
+    /**
+     * @param svgUrl The URL to the SVG document.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( URL svgUrl, Dimension size ) {
+<span class="nc" id="L120">        this(_loadSvgDocument(svgUrl), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="nc" id="L121">    }</span>
+
+    /**
+     * @param stream The input stream supplying the text data of the SVG document.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( InputStream stream, Dimension size ) {
+<span class="nc" id="L128">        this(_loadSvgDocument(stream), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="nc" id="L129">    }</span>
+
+    /**
+     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( SVGDocument svgDocument, Dimension size ) {
+<span class="nc" id="L136">        this(svgDocument, Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);</span>
+<span class="nc" id="L137">    }</span>
+
+
+    private static @Nullable SVGDocument _loadSvgDocument( URL svgUrl ) {
+<span class="fc" id="L141">        SVGDocument tempSVGDocument = null;</span>
+        try {
+<span class="fc" id="L143">            SVGLoader loader = new SVGLoader();</span>
+<span class="fc" id="L144">            tempSVGDocument = loader.load(svgUrl);</span>
+<span class="nc" id="L145">        } catch (Exception e) {</span>
+<span class="nc" id="L146">            log.error(&quot;Failed to load SVG document from URL: &quot; + svgUrl, e);</span>
+<span class="fc" id="L147">        }</span>
+<span class="fc" id="L148">        return tempSVGDocument;</span>
+    }
+
+    private static @Nullable SVGDocument _loadSvgDocument( InputStream stream ) {
+<span class="nc" id="L152">        SVGDocument tempSVGDocument = null;</span>
+        try {
+<span class="nc" id="L154">            SVGLoader loader = new SVGLoader();</span>
+<span class="nc" id="L155">            tempSVGDocument = loader.load(stream, null, LoaderContext.createDefault());</span>
+<span class="nc" id="L156">        } catch (Exception e) {</span>
+<span class="nc" id="L157">            log.error(&quot;Failed to load SVG document from stream: &quot; + stream, e);</span>
+<span class="nc" id="L158">        }</span>
+<span class="nc" id="L159">        return tempSVGDocument;</span>
+    }
+
+    /**
+     *  Exposes the width of the icon, or -1 if the icon should be rendered according
+     *  to the width of a given component or the width of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).&lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that the returned width is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled width, use {@link #getBaseWidth()}.
+     *  &lt;/b&gt;
+     * @return The width of the icon, or -1 if the icon should be rendered according
+     *         to the width of a given component or the width of the SVG document itself.
+     */
+    @Override
+    public int getIconWidth() {
+<span class="fc" id="L178">        Size adjustedSize = _sizeWithAspectRatioCorrection(_size);</span>
+<span class="fc" id="L179">        return adjustedSize.width().map(UI::scale).map(Math::round).orElse(NO_SIZE);</span>
+    }
+
+    /**
+     *  Creates an updated {@link SvgIcon} with the given width returned by {@link #getIconWidth()}.
+     *
+     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
+     *              to the width of a given component or the width of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given width.
+     *        If the width is -1, the icon will be rendered according to the width of a given component
+     *        or the width of the SVG document itself.
+     */
+    public SvgIcon withIconWidth( int newWidth ) {
+<span class="fc" id="L192">        int width = _size.width().map(Math::round).orElse(NO_SIZE);</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if ( newWidth == width )</span>
+<span class="nc" id="L194">            return this;</span>
+<span class="fc" id="L195">        return new SvgIcon(_svgDocument, _size.withWidth(newWidth), _fitComponent, _preferredPlacement);</span>
+    }
+
+    /**
+     *  Exposes the height of the icon, or -1 if the icon should be rendered according
+     *  to the height of a given component or the height of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).&lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that the returned height is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled height, use {@link #getBaseHeight()}.
+     *  &lt;/b&gt;
+     *
+     * @return A new {@link SvgIcon} with the given width and height.
+     *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
+     *        or the width or height of the SVG document itself.
+     */
+    @Override
+    public int getIconHeight() {
+<span class="fc" id="L216">        Size adjustedSize = _sizeWithAspectRatioCorrection(_size);</span>
+<span class="fc" id="L217">        return adjustedSize.height().map(UI::scale).map(Math::round).orElse(NO_SIZE);</span>
+    }
+
+    /**
+     *  Exposes the fixed width defined for the icon, which is the width
+     *  that was set when the icon was created or updated using the
+     *  {@link #withIconWidth(int)} method.&lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that this width is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      If you want a scaled width, that is more suitable for rendering the icon,
+     *      use the {@link #getIconWidth()} method.
+     *  &lt;/b&gt;
+     *
+     * @return The width of the icon without scaling.
+     */
+    public int getBaseWidth() {
+<span class="fc" id="L233">        return _size.width().map(Math::round).orElse(NO_SIZE);</span>
+    }
+
+    /**
+     *  Exposes the fixed height defined for the icon, which is the height
+     *  that was set when the icon was created or updated using the
+     *  {@link #withIconHeight(int)} method.&lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that this height is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      If you want a scaled height, that is more suitable for rendering the icon,
+     *      use the {@link #getIconHeight()} method.
+     *  &lt;/b&gt;
+     *
+     * @return The height of the icon without scaling.
+     */
+    public int getBaseHeight() {
+<span class="fc" id="L249">        return _size.height().map(Math::round).orElse(NO_SIZE);</span>
+    }
+
+    /**
+     *  Creates an updated {@link SvgIcon} with the supplied integer used
+     *  as the icon height, which you can retrieve using {@link #getIconHeight()}.
+     *  If the height is -1, the icon will be rendered according to the height of a given component
+     *  or the height of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
+     *
+     * @param height The height of the icon, or -1 if the icon should be rendered according
+     *               to the height of a given component or the height of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given height.
+     *        If the height is -1, the icon will be rendered according to the height of a given component
+     *        or the height of the SVG document itself.
+     */
+    public SvgIcon withIconHeight( int height ) {
+<span class="fc" id="L266">        int currentHeight = _size.height().map(Math::round).orElse(NO_SIZE);</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if ( height == currentHeight )</span>
+<span class="nc" id="L268">            return this;</span>
+<span class="fc" id="L269">        return new SvgIcon(_svgDocument, _size.withHeight(height), _fitComponent, _preferredPlacement);</span>
+    }
+
+    /**
+     *  Creates an updated {@link SvgIcon} with the given width and height.
+     *  Dimensions smaller than 0 are considered &quot;undefined&quot;.
+     *  When the icon is being rendered then these will be determined according to the
+     *  aspect ratio of the SVG document, the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement}
+     *  policies or the size of the component the SVG is rendered into.
+     *
+     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
+     *              to the width of a given component or the width of the SVG document itself.
+     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
+     *               to the height of a given component or the height of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given width and height.
+     *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
+     *        or the width or height of the SVG document itself.
+     */
+    public SvgIcon withIconSize( int newWidth, int newHeight ) {
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        newWidth  = newWidth  &lt; 0 ? NO_SIZE : newWidth;</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        newHeight = newHeight &lt; 0 ? NO_SIZE : newHeight;</span>
+<span class="fc" id="L290">        int width  = _size.width().map(Math::round).orElse(NO_SIZE);</span>
+<span class="fc" id="L291">        int height = _size.height().map(Math::round).orElse(NO_SIZE);</span>
+<span class="fc bfc" id="L292" title="All 4 branches covered.">        if ( newWidth == width &amp;&amp; newHeight == height )</span>
+<span class="fc" id="L293">            return this;</span>
+<span class="fc" id="L294">        return new SvgIcon(_svgDocument, Size.of(newWidth, newHeight), _fitComponent, _preferredPlacement);</span>
+    }
+
+    /**
+     *  Allows you to create an updated {@link SvgIcon} with the given size
+     *  in the form of a {@link Size} object containing the width and height.
+     *  If the width or height is -1, the icon will be rendered according to the
+     *  width or height of a given component, the width or height of the SVG document
+     *  and the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement} policies.
+     *
+     * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} with the given width and height.
+     */
+    public SvgIcon withIconSize( Size size ) {
+<span class="fc" id="L308">        return withIconSize(</span>
+<span class="fc" id="L309">                    size.width().map(Math::round).orElse(NO_SIZE),</span>
+<span class="fc" id="L310">                    size.height().map(Math::round).orElse(NO_SIZE)</span>
+                );
+    }
+
+    /**
+     *  Determines the size of the icon (both width and height) using the provided width
+     *  and the aspect ratio of the SVG document.
+     *  If the width is -1, the icon will lose its fixed width and will
+     *  be rendered according to the width of a given component.
+     *  &lt;p&gt;
+     *  For example, if the SVG document has an aspect ratio of 2:1, and the width is 200,
+     *  then the height will be 100.
+     *  &lt;p&gt;
+     *  Also see {@link #withIconSizeFromHeight(int)}.
+     *
+     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
+     *              to the width of a given component or the width of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given width and a logical height that is
+     *         determined by the aspect ratio of the SVG document.
+     */
+    public SvgIcon withIconSizeFromWidth( int newWidth ) {
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">        if ( newWidth &lt; 0 )</span>
+<span class="nc" id="L332">            return this.withIconSize(NO_SIZE, NO_SIZE);</span>
+
+<span class="fc" id="L334">        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));</span>
+<span class="fc" id="L335">        return new SvgIcon(_svgDocument, adjustedSize, _fitComponent, _preferredPlacement);</span>
+    }
+
+    /**
+     *  Determines the size of the icon (both width and height) using the provided height
+     *  and the aspect ratio of the SVG document.
+     *  If the height is -1, the icon will lose its fixed height and will
+     *  be rendered according to the height of a given component.
+     *  &lt;p&gt;
+     *  For example, if the SVG document has an aspect ratio of 2:1, and the height is 100,
+     *  then the width will be 200.
+     *  &lt;p&gt;
+     *  Also see {@link #withIconSizeFromWidth(int)}.
+     *
+     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
+     *               to the height of a given component or the height of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given height and a logical width that is
+     *         determined by the aspect ratio of the SVG document.
+     */
+    public SvgIcon withIconSizeFromHeight( int newHeight ) {
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">        if ( newHeight &lt; 0 )</span>
+<span class="nc" id="L356">            return this.withIconSize(NO_SIZE, NO_SIZE);</span>
+
+<span class="fc" id="L358">        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));</span>
+<span class="fc" id="L359">        return new SvgIcon(_svgDocument, adjustedSize, _fitComponent, _preferredPlacement);</span>
+    }
+
+    /**
+     *  The underlying SVG document contains a size object, which
+     *  is the width and height of the root SVG element inside the document.
+     *
+     * @return The size of the SVG document in the form of a {@link Size},
+     *         a subclass of {@link java.awt.geom.Dimension2D}.
+     */
+    public Size getSvgSize() {
+<span class="pc bpc" id="L370" title="1 of 2 branches missed.">        if ( _svgDocument == null )</span>
+<span class="nc" id="L371">            return Size.unknown();</span>
+<span class="fc" id="L372">        FloatSize svgSize = _svgDocument.size();</span>
+<span class="fc" id="L373">        return Size.of(svgSize.width, svgSize.height);</span>
+    }
+
+    /**
+     *  Allows you to access the underlying {@link SVGDocument} that is used to render the icon.
+     *
+     * @return The underlying {@link SVGDocument} that is used to render the icon.
+     */
+    public @Nullable SVGDocument getSvgDocument() {
+<span class="fc" id="L382">        return _svgDocument;</span>
+    }
+
+    /**
+     *  Allows you to access the {@link UI.FitComponent} policy, which
+     *  determines if and how the icon should be fitted
+     *  onto a component when rendered through the
+     *  {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.&lt;br&gt;
+     *  The following fit modes are available:
+     *  &lt;ul&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#NO} -
+     *      The image will not be scaled to fit the inner component area.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#WIDTH} -
+     *      The image will be scaled to fit the inner component width.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#HEIGHT} -
+     *      The image will be scaled to fit the inner component height.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#WIDTH_AND_HEIGHT} -
+     *      The image will be scaled to fit both the component width and height.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#MAX_DIM} -
+     *      The image will be scaled to fit the larger of the two dimensions of the inner component area.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#MIN_DIM} -
+     *      The image will be scaled to fit the smaller of the two dimensions of the inner component area.
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  See {@link #withFitComponent(UI.FitComponent)} if you want to create a new {@link SvgIcon}
+     *  with an updated fit policy.
+     *
+     * @return The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
+     *         any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     */
+<span class="nc" id="L417">    public UI.FitComponent getFitComponent() { return _fitComponent; }</span>
+
+    /**
+     *  There are different kinds of strategies to fit an SVG icon onto the component.
+     *  These strategies are identified using the {@link UI.FitComponent} enum
+     *  which defines the following fit modes:
+     *  &lt;ul&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#NO} -
+     *          The image will not be scaled to fit the inner component area.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#WIDTH} -
+     *          The image will be scaled to fit the inner component width.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#HEIGHT} -
+     *          The image will be scaled to fit the inner component height.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#WIDTH_AND_HEIGHT} -
+     *          The image will be scaled to fit both the component width and height.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#MAX_DIM} -
+     *          The image will be scaled to fit the larger
+     *          of the two dimension of the inner component area.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link UI.FitComponent#MIN_DIM} -
+     *          The image will be scaled to fit the smaller
+     *          of the two dimension of the inner component area.
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     * @param fit The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
+     *            any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     * @return A new {@link SvgIcon} with the given {@link UI.FitComponent} policy.
+     */
+    public SvgIcon withFitComponent( UI.FitComponent fit ) {
+<span class="fc" id="L450">        Objects.requireNonNull(fit);</span>
+<span class="fc bfc" id="L451" title="All 2 branches covered.">        if ( fit == _fitComponent )</span>
+<span class="fc" id="L452">            return this;</span>
+<span class="fc" id="L453">        return new SvgIcon(_svgDocument, _size, fit, _preferredPlacement);</span>
+    }
+
+    /**
+     *  The preferred placement policy determines where the icon
+     *  should be placed within a component when rendered through the
+     *  {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.
+     *
+     * @return The {@link UI.Placement} that determines where the icon should be placed within a component
+     *         (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     */
+<span class="fc" id="L464">    public UI.Placement getPreferredPlacement() { return _preferredPlacement; }</span>
+
+    /**
+     *  Allows you to get an updated {@link SvgIcon} with the given {@link UI.Placement} policy
+     *  which determines where the icon should be placed within a component
+     *  when rendered through the {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.
+     *
+     * @param placement The {@link UI.Placement} that determines where the icon should be placed within a component
+     *                  (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     * @return A new {@link SvgIcon} with the given {@link UI.Placement} policy.
+     */
+    public SvgIcon withPreferredPlacement( UI.Placement placement ) {
+<span class="fc" id="L476">        Objects.requireNonNull(placement);</span>
+<span class="pc bpc" id="L477" title="1 of 2 branches missed.">        if ( placement == _preferredPlacement )</span>
+<span class="nc" id="L478">            return this;</span>
+<span class="fc" id="L479">        return new SvgIcon(_svgDocument, _size, _fitComponent, placement);</span>
+    }
+
+    /**
+     *  Creates a new {@link Image} from the SVG document.
+     * @return A new {@link Image} where the SVG document has been rendered into.
+     */
+    @Override
+    public Image getImage() {
+
+<span class="nc bnc" id="L489" title="All 2 branches missed.">        if ( _cache != null )</span>
+<span class="nc" id="L490">            return _cache;</span>
+
+<span class="nc" id="L492">        int width  = getIconWidth();</span>
+<span class="nc" id="L493">        int height = getIconHeight();</span>
+
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        if ( _svgDocument != null ) {</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">            if (width &lt; 0)</span>
+<span class="nc" id="L497">                width = (int) UI.scale(_svgDocument.size().width);</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">            if (height &lt; 0)</span>
+<span class="nc" id="L499">                height = (int) UI.scale(_svgDocument.size().height);</span>
+        }
+
+        // We create a new buffered image, render into it, and then return it.
+<span class="nc" id="L503">        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        if ( _svgDocument != null )</span>
+<span class="nc" id="L505">            _svgDocument.render(</span>
+                    null,
+<span class="nc" id="L507">                    image.createGraphics(),</span>
+                    new ViewBox(0, 0, width, height)
+                );
+
+<span class="nc" id="L511">        return image;</span>
+    }
+
+    /**
+     *  We don't support this. An SVG document is not really an image, it's a vector graphic.
+     *  Extending {@link ImageIcon} is just for compatibility reasons...
+     */
+    @Override
+    public void setImage( Image image ) {
+        // We don't support this.
+<span class="nc" id="L521">    }</span>
+
+    /**
+     * @param c The component to render the icon into.
+     * @param g the graphics context
+     * @param x the X coordinate of the icon's top-left corner
+     * @param y the Y coordinate of the icon's top-left corner
+     */
+    @Override
+    public synchronized void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
+    {
+<span class="pc bpc" id="L532" title="1 of 2 branches missed.">        if ( _svgDocument == null )</span>
+<span class="nc" id="L533">            return;</span>
+
+<span class="fc" id="L535">        int scaledWidth  = getIconWidth();</span>
+<span class="fc" id="L536">        int scaledHeight = getIconHeight();</span>
+
+<span class="fc" id="L538">        UI.Placement preferredPlacement = _preferredPlacement;</span>
+
+<span class="pc bpc" id="L540" title="2 of 4 branches missed.">        if ( preferredPlacement == UI.Placement.UNDEFINED &amp;&amp; c instanceof JComponent )</span>
+<span class="fc" id="L541">            preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();</span>
+
+<span class="fc" id="L543">        Insets insets = ZERO_INSETS;</span>
+
+<span class="pc bpc" id="L545" title="1 of 2 branches missed.">        if ( c != null ) {</span>
+            /*
+                If the component exists we want to account for its (border) insets.
+                This is to avoid the icon colliding with the component border
+                and also to make sure the icon is centered properly.
+            */
+<span class="pc bpc" id="L551" title="1 of 2 branches missed.">            insets = Optional.ofNullable( c instanceof JComponent ? ((JComponent)c).getBorder() : null )</span>
+<span class="fc" id="L552">                                .map( b -&gt; {</span>
+                                    try {
+<span class="fc" id="L554">                                        return _determineInsetsForBorder(b, c);</span>
+<span class="nc" id="L555">                                    } catch (Exception e) {</span>
+<span class="nc" id="L556">                                        return ZERO_INSETS;</span>
+                                    }
+                                })
+<span class="fc" id="L559">                                .orElse(ZERO_INSETS);</span>
+
+<span class="fc bfc" id="L561" title="All 2 branches covered.">            if ( scaledWidth &lt; 0 )</span>
+<span class="fc" id="L562">                x = insets.left;</span>
+
+<span class="fc bfc" id="L564" title="All 2 branches covered.">            if ( scaledHeight &lt; 0 )</span>
+<span class="fc" id="L565">                y = insets.top;</span>
+        }
+
+<span class="pc bpc" id="L568" title="1 of 2 branches missed.">        int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );</span>
+<span class="pc bpc" id="L569" title="1 of 2 branches missed.">        int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );</span>
+
+<span class="fc bfc" id="L571" title="All 2 branches covered.">        width  = scaledWidth  &gt;= 0 ? scaledWidth  : width  - insets.right  - insets.left;</span>
+<span class="fc bfc" id="L572" title="All 2 branches covered.">        height = scaledHeight &gt;= 0 ? scaledHeight : height - insets.bottom - insets.top ;</span>
+
+<span class="pc bpc" id="L574" title="1 of 2 branches missed.">        if ( width  &lt;= 0 ) {</span>
+<span class="nc" id="L575">            int smaller = (int) Math.floor( width / 2.0 );</span>
+<span class="nc" id="L576">            int larger  = (int) Math.ceil(  width / 2.0 );</span>
+<span class="nc" id="L577">            x += smaller;</span>
+<span class="nc" id="L578">            width = ( larger - smaller );</span>
+        }
+<span class="pc bpc" id="L580" title="1 of 2 branches missed.">        if ( height &lt;= 0 ) {</span>
+<span class="nc" id="L581">            int smaller = (int) Math.floor( height / 2.0 );</span>
+<span class="nc" id="L582">            int larger  = (int) Math.ceil(  height / 2.0 );</span>
+<span class="nc" id="L583">            y += smaller;</span>
+<span class="nc" id="L584">            height = ( larger - smaller );</span>
+        }
+
+<span class="pc bpc" id="L587" title="1 of 4 branches missed.">        if ( scaledWidth &gt; 0 &amp;&amp; scaledHeight &gt; 0 ) {</span>
+<span class="pc bpc" id="L588" title="2 of 6 branches missed.">            if ( _cache != null &amp;&amp; _cache.getWidth() == width &amp;&amp; _cache.getHeight() == height )</span>
+<span class="fc" id="L589">                g.drawImage(_cache, x, y, width, height, null);</span>
+            else {
+<span class="fc" id="L591">                _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L592">                paintIcon(c, _cache.getGraphics(), 0, 0, width, height);</span>
+<span class="fc" id="L593">                g.drawImage(_cache, x, y, width, height, null);</span>
+            }
+        }
+        else
+<span class="fc" id="L597">            _paintIcon( c, g, x, y, width, height, preferredPlacement );</span>
+<span class="fc" id="L598">    }</span>
+
+    private Insets _determineInsetsForBorder( Border b, Component c )
+    {
+<span class="pc bpc" id="L602" title="1 of 2 branches missed.">        if ( b == null )</span>
+<span class="nc" id="L603">            return ZERO_INSETS;</span>
+
+<span class="fc bfc" id="L605" title="All 2 branches covered.">        if ( b instanceof StyleAndAnimationBorder )</span>
+<span class="fc" id="L606">            return ((StyleAndAnimationBorder&lt;?&gt;)b).getFullPaddingInsets();</span>
+
+        // Compound border
+<span class="pc bpc" id="L609" title="1 of 2 branches missed.">        if ( b instanceof javax.swing.border.CompoundBorder ) {</span>
+<span class="nc" id="L610">            javax.swing.border.CompoundBorder cb = (javax.swing.border.CompoundBorder) b;</span>
+<span class="nc" id="L611">            return cb.getOutsideBorder().getBorderInsets(c);</span>
+        }
+
+        try {
+<span class="fc" id="L615">            return b.getBorderInsets(c);</span>
+<span class="nc" id="L616">        } catch (Exception e) {</span>
+            // Ignore
+        }
+<span class="nc" id="L619">        return ZERO_INSETS;</span>
+    }
+
+    void paintIcon(
+            final @Nullable Component c,
+            final java.awt.Graphics g,
+            int x,
+            int y,
+            int width,
+            int height
+    ) {
+<span class="fc" id="L630">        _paintIcon( c, g, x, y, width, height, _preferredPlacement );</span>
+<span class="fc" id="L631">    }</span>
+
+    private void _paintIcon(
+        final @Nullable Component c,
+        final java.awt.Graphics g,
+        int x,
+        int y,
+        int width,
+        int height,
+        UI.Placement preferredPlacement
+    ) {
+<span class="pc bpc" id="L642" title="1 of 2 branches missed.">        if ( _svgDocument == null )</span>
+<span class="nc" id="L643">            return;</span>
+
+<span class="fc" id="L645">        int scaledWidth  = getIconWidth();</span>
+<span class="fc" id="L646">        int scaledHeight = getIconHeight();</span>
+
+<span class="pc bpc" id="L648" title="1 of 2 branches missed.">        width  = ( width  &lt; 0 ? scaledWidth  : width  );</span>
+<span class="pc bpc" id="L649" title="1 of 2 branches missed.">        height = ( height &lt; 0 ? scaledHeight : height );</span>
+
+<span class="fc" id="L651">        Graphics2D g2d = (Graphics2D) g.create();</span>
+
+<span class="fc" id="L653">        FloatSize svgSize = _svgDocument.size();</span>
+<span class="pc bpc" id="L654" title="1 of 2 branches missed.">        float svgRefWidth  = ( svgSize.width  &gt; svgSize.height ? 1f : svgSize.width  / svgSize.height );</span>
+<span class="pc bpc" id="L655" title="1 of 2 branches missed.">        float svgRefHeight = ( svgSize.height &gt; svgSize.width  ? 1f : svgSize.height / svgSize.width  );</span>
+<span class="fc bfc" id="L656" title="All 2 branches covered.">        float imgRefWidth  = (     width      &gt;=   height      ? 1f : (float) width  /   height       );</span>
+<span class="fc bfc" id="L657" title="All 2 branches covered.">        float imgRefHeight = (     height     &gt;=   width       ? 1f : (float) height /   width        );</span>
+
+<span class="fc" id="L659">        float scaleX = imgRefWidth  / svgRefWidth;</span>
+<span class="fc" id="L660">        float scaleY = imgRefHeight / svgRefHeight;</span>
+
+<span class="pc bpc" id="L662" title="1 of 4 branches missed.">        if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {</span>
+<span class="pc bpc" id="L663" title="1 of 2 branches missed.">            if ( width &lt; height )</span>
+<span class="nc" id="L664">                scaleX = 1f;</span>
+<span class="fc bfc" id="L665" title="All 2 branches covered.">            if ( height &lt; width )</span>
+<span class="fc" id="L666">                scaleY = 1f;</span>
+        }
+
+<span class="fc bfc" id="L669" title="All 2 branches covered.">        if ( _fitComponent == UI.FitComponent.WIDTH )</span>
+<span class="fc" id="L670">            scaleX = 1f;</span>
+
+<span class="fc bfc" id="L672" title="All 2 branches covered.">        if ( _fitComponent == UI.FitComponent.HEIGHT )</span>
+<span class="fc" id="L673">            scaleY = 1f;</span>
+
+<span class="fc" id="L675">        ViewBox viewBox = new ViewBox(x, y, width, height);</span>
+<span class="fc" id="L676">        float boxX      = viewBox.x  / scaleX;</span>
+<span class="fc" id="L677">        float boxY      = viewBox.y  / scaleY;</span>
+<span class="fc" id="L678">        float boxWidth  = viewBox.width  / scaleX;</span>
+<span class="fc" id="L679">        float boxHeight = viewBox.height / scaleY;</span>
+<span class="pc bpc" id="L680" title="1 of 2 branches missed.">        if ( _fitComponent == UI.FitComponent.MAX_DIM ) {</span>
+            // We now want to make sure that the
+<span class="nc bnc" id="L682" title="All 2 branches missed.">            if ( boxWidth &lt; boxHeight ) {</span>
+                // We find the scale factor of the heights between the two rectangles:
+<span class="nc" id="L684">                float scaleHeight = ( viewBox.height / svgSize.height );</span>
+                // We now want to scale the view box so that both have the same heights:
+<span class="nc" id="L686">                float newWidth  = svgSize.width  * scaleHeight;</span>
+<span class="nc" id="L687">                float newHeight = svgSize.height * scaleHeight;</span>
+<span class="nc" id="L688">                float newX = viewBox.x + (viewBox.width - newWidth) / 2f;</span>
+<span class="nc" id="L689">                float newY = viewBox.y;</span>
+<span class="nc" id="L690">                viewBox = new ViewBox(newX, newY, newWidth, newHeight);</span>
+<span class="nc" id="L691">            } else {</span>
+                // We find the scale factor of the widths between the two rectangles:
+<span class="nc" id="L693">                float scaleWidth = ( viewBox.width / svgSize.width );</span>
+                // We now want to scale the view box so that both have the same widths:
+<span class="nc" id="L695">                float newWidth  = svgSize.width  * scaleWidth;</span>
+<span class="nc" id="L696">                float newHeight = svgSize.height * scaleWidth;</span>
+<span class="nc" id="L697">                float newX = viewBox.x;</span>
+<span class="nc" id="L698">                float newY = viewBox.y + (viewBox.height - newHeight) / 2f;</span>
+<span class="nc" id="L699">                viewBox = new ViewBox(newX, newY, newWidth, newHeight);</span>
+<span class="nc" id="L700">            }</span>
+        }
+        else
+<span class="fc" id="L703">            viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);</span>
+
+<span class="fc bfc" id="L705" title="All 2 branches covered.">        if ( _fitComponent == UI.FitComponent.NO ) {</span>
+<span class="pc bpc" id="L706" title="1 of 2 branches missed.">            width   = scaledWidth  &gt;= 0 ? scaledWidth  : (int) svgSize.width;</span>
+<span class="pc bpc" id="L707" title="1 of 2 branches missed.">            height  = scaledHeight &gt;= 0 ? scaledHeight : (int) svgSize.height;</span>
+<span class="fc" id="L708">            viewBox = new ViewBox( x, y, width, height );</span>
+        }
+
+        // Let's check if the view box exists:
+<span class="pc bpc" id="L712" title="2 of 4 branches missed.">        if ( viewBox.width &lt;= 0 || viewBox.height &lt;= 0 )</span>
+<span class="nc" id="L713">            return;</span>
+
+        // Also let's check if the view box has valid values:
+<span class="pc bpc" id="L716" title="4 of 8 branches missed.">        if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )</span>
+<span class="nc" id="L717">            return;</span>
+
+        // Let's make sure the view box has the correct dimension ratio:
+<span class="fc" id="L720">        float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;</span>
+<span class="fc" id="L721">        float boxRatio     =      viewBox.width        /      viewBox.height;</span>
+<span class="fc bfc" id="L722" title="All 2 branches covered.">        if ( boxRatio &gt; viewBoxRatio ) {</span>
+            // The view box is too wide, we need to make it narrower:
+<span class="fc" id="L724">            float newWidth = viewBox.height * viewBoxRatio;</span>
+<span class="fc" id="L725">            viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );</span>
+        }
+<span class="pc bpc" id="L727" title="1 of 2 branches missed.">        if ( boxRatio &lt; viewBoxRatio ) {</span>
+            // The view box is too tall, we need to make it shorter:
+<span class="nc" id="L729">            float newHeight = viewBox.width / viewBoxRatio;</span>
+<span class="nc" id="L730">            viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );</span>
+        }
+
+        /*
+            Before we do the actual rendering we first check if there
+            is a preferred placement that is not the center.
+            If that is the case we move the view box accordingly.
+         */
+<span class="pc bpc" id="L738" title="1 of 4 branches missed.">        if ( preferredPlacement != UI.Placement.UNDEFINED &amp;&amp; preferredPlacement != UI.Placement.CENTER ) {</span>
+            // First we correct if the component area is smaller than the view box:
+<span class="nc" id="L740">            width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );</span>
+<span class="nc" id="L741">            width += (int) Math.max(0, x - viewBox.x );</span>
+<span class="nc" id="L742">            x = (int) Math.min(x, viewBox.x);</span>
+<span class="nc" id="L743">            height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );</span>
+<span class="nc" id="L744">            height += (int) Math.max(0, y - viewBox.y );</span>
+<span class="nc" id="L745">            y = (int) Math.min(y, viewBox.y);</span>
+
+<span class="nc bnc" id="L747" title="All 9 branches missed.">            switch ( preferredPlacement ) {</span>
+                case TOP_LEFT:
+<span class="nc" id="L749">                    viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L750">                    break;</span>
+                case TOP_RIGHT:
+<span class="nc" id="L752">                    viewBox = new ViewBox( x + width - viewBox.width, y, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L753">                    break;</span>
+                case BOTTOM_LEFT:
+<span class="nc" id="L755">                    viewBox = new ViewBox( x, y + height - viewBox.height, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L756">                    break;</span>
+                case BOTTOM_RIGHT:
+<span class="nc" id="L758">                    viewBox = new ViewBox( x + width - viewBox.width, y + height - viewBox.height, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L759">                    break;</span>
+                case TOP:
+<span class="nc" id="L761">                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L762">                    break;</span>
+                case BOTTOM:
+<span class="nc" id="L764">                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y + height - viewBox.height, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L765">                    break;</span>
+                case LEFT:
+<span class="nc" id="L767">                    viewBox = new ViewBox( x, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L768">                    break;</span>
+                case RIGHT:
+<span class="nc" id="L770">                    viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );</span>
+<span class="nc" id="L771">                    break;</span>
+                default:
+<span class="nc" id="L773">                    log.warn(&quot;Unknown preferred placement: &quot; + preferredPlacement);</span>
+            }
+        }
+
+        // Now onto the actual rendering:
+
+<span class="fc" id="L779">        boolean doAntiAliasing  = StyleEngine.IS_ANTIALIASING_ENABLED();</span>
+<span class="fc bfc" id="L780" title="All 2 branches covered.">        boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;</span>
+<span class="fc bfc" id="L781" title="All 4 branches covered.">        if ( doAntiAliasing &amp;&amp; !wasAntiAliasing )</span>
+<span class="fc" id="L782">            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );</span>
+
+<span class="fc bfc" id="L784" title="All 4 branches covered.">        boolean needsScaling = ( scaleX != 1 || scaleY != 1 );</span>
+<span class="fc" id="L785">        AffineTransform oldTransform = g2d.getTransform();</span>
+
+<span class="fc bfc" id="L787" title="All 2 branches covered.">        if ( needsScaling ) {</span>
+<span class="fc" id="L788">            AffineTransform newTransform = new AffineTransform(oldTransform);</span>
+<span class="fc" id="L789">            newTransform.scale(scaleX, scaleY);</span>
+<span class="fc" id="L790">            g2d.setTransform(newTransform);</span>
+        }
+
+        try {
+            // We also have to scale x and y, this is because the SVGDocument does not
+            // account for the scale of the transform with respect to the view box!
+<span class="fc" id="L796">            _svgDocument.render((JComponent) c, g2d, viewBox);</span>
+<span class="nc" id="L797">        } catch (Exception e) {</span>
+<span class="nc" id="L798">            log.warn(&quot;Failed to render SVG document.&quot;, e);</span>
+<span class="fc" id="L799">        }</span>
+
+<span class="fc bfc" id="L801" title="All 2 branches covered.">        if ( needsScaling )</span>
+<span class="fc" id="L802">            g2d.setTransform(oldTransform); // back to the previous scaling!</span>
+
+<span class="fc bfc" id="L804" title="All 4 branches covered.">        if ( doAntiAliasing &amp;&amp; !wasAntiAliasing )</span>
+<span class="fc" id="L805">            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );</span>
+<span class="fc" id="L806">    }</span>
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L810">        return Objects.hash(_svgDocument, _size, _fitComponent, _preferredPlacement);</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="fc bfc" id="L815" title="All 2 branches covered.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L816" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L817" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L818">        SvgIcon rhs = (SvgIcon) obj;</span>
+<span class="nc bnc" id="L819" title="All 2 branches missed.">        return Objects.equals(_size,               rhs._size)        &amp;&amp;</span>
+<span class="nc bnc" id="L820" title="All 2 branches missed.">               Objects.equals(_svgDocument,        rhs._svgDocument)  &amp;&amp;</span>
+<span class="nc bnc" id="L821" title="All 2 branches missed.">               Objects.equals(_fitComponent,       rhs._fitComponent) &amp;&amp;</span>
+<span class="nc bnc" id="L822" title="All 2 branches missed.">               Objects.equals(_preferredPlacement, rhs._preferredPlacement);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L827">        int width  = _size.width().map(Math::round).orElse(NO_SIZE);</span>
+<span class="fc" id="L828">        int height = _size.height().map(Math::round).orElse(NO_SIZE);</span>
+<span class="fc" id="L829">        String typeName           = getClass().getSimpleName();</span>
+<span class="fc bfc" id="L830" title="All 2 branches covered.">        String widthAsStr              = width  &lt; 0 ? &quot;?&quot; : String.valueOf(width);</span>
+<span class="fc bfc" id="L831" title="All 2 branches covered.">        String heightAsStr             = height &lt; 0 ? &quot;?&quot; : String.valueOf(height);</span>
+<span class="fc" id="L832">        String fitComponent       = _fitComponent.toString();</span>
+<span class="fc" id="L833">        String preferredPlacement = _preferredPlacement.toString();</span>
+<span class="fc" id="L834">        String svgDocument        = Optional.ofNullable(_svgDocument)</span>
+<span class="fc" id="L835">                                            .map(it -&gt; {</span>
+<span class="fc" id="L836">                                                String docClass = it.getClass().getSimpleName();</span>
+<span class="fc" id="L837">                                                FloatSize size = it.size();</span>
+<span class="fc" id="L838">                                                return docClass + &quot;[width=&quot; + size.width + &quot;, height=&quot; + size.height + &quot;]&quot;;</span>
+                                            })
+<span class="fc" id="L840">                                            .orElse(&quot;?&quot;);</span>
+<span class="fc" id="L841">        return typeName + &quot;[&quot; +</span>
+                    &quot;width=&quot; + widthAsStr + &quot;, &quot; +
+                    &quot;height=&quot; + heightAsStr + &quot;, &quot; +
+                    &quot;fitComponent=&quot; + fitComponent + &quot;, &quot; +
+                    &quot;preferredPlacement=&quot; + preferredPlacement + &quot;, &quot; +
+                    &quot;doc=&quot; + svgDocument +
+                &quot;]&quot;;
+    }
+
+    private Size _sizeWithAspectRatioCorrection( Size size ) {
+<span class="pc bpc" id="L851" title="1 of 2 branches missed.">        if ( _svgDocument == null )</span>
+<span class="nc" id="L852">            return size;</span>
+<span class="fc bfc" id="L853" title="All 4 branches covered.">        if ( size.hasPositiveWidth() &amp;&amp; size.hasPositiveHeight() )</span>
+<span class="fc" id="L854">            return size;</span>
+<span class="fc bfc" id="L855" title="All 2 branches covered.">        if ( size.equals(Size.unknown()) )</span>
+<span class="fc" id="L856">            return size;</span>
+
+        /*
+            The client code has only specified one of the dimensions
+            and the other dimension is unknown.
+
+            This means they want the icon to have a somewhat fixed size,
+            but they want the other dimension to be determined by the
+            aspect ratio of the SVG document.
+
+            So we try to calculate the missing dimension here:
+        */
+<span class="fc" id="L868">        return _aspectRatio().map( aspectRatio -&gt; {</span>
+                    // Now the two cases:
+<span class="fc bfc" id="L870" title="All 2 branches covered.">                    if ( size.hasPositiveWidth() ) {</span>
+                        // The width is known, calculate the height:
+<span class="fc" id="L872">                        double width = size.width().map(Number::doubleValue).orElse(1d);</span>
+<span class="fc" id="L873">                        return size.withHeight((int) Math.ceil(width / aspectRatio));</span>
+                    } else {
+                        // The height is known, calculate the width:
+<span class="fc" id="L876">                        double height = size.height().map(Number::doubleValue).orElse(1d);</span>
+<span class="fc" id="L877">                        return size.withWidth((int) Math.ceil(height * aspectRatio));</span>
+                    }
+                })
+<span class="fc" id="L880">                .orElse(size);</span>
+    }
+
+    private Optional&lt;Double&gt; _aspectRatio() {
+<span class="pc bpc" id="L884" title="1 of 2 branches missed.">        if ( _svgDocument == null )</span>
+<span class="nc" id="L885">            return Optional.empty();</span>
+
+<span class="fc" id="L887">        double aspectRatio1 = 0;</span>
+<span class="fc" id="L888">        double aspectRatio2 = 0;</span>
+
+<span class="fc" id="L890">        ViewBox viewBox = _svgDocument.viewBox();</span>
+<span class="pc bpc" id="L891" title="2 of 4 branches missed.">        if ( viewBox.width &gt; 0 &amp;&amp; viewBox.height &gt; 0 )</span>
+<span class="fc" id="L892">            aspectRatio1 = viewBox.width / viewBox.height;</span>
+
+<span class="fc" id="L894">        FloatSize svgSize = _svgDocument.size();</span>
+<span class="pc bpc" id="L895" title="2 of 4 branches missed.">        if ( svgSize.width &gt; 0 &amp;&amp; svgSize.height &gt; 0 )</span>
+<span class="fc" id="L896">            aspectRatio2 = svgSize.width / svgSize.height;</span>
+
+        // We prefer the &quot;svgSize&quot; aspect ratio over the &quot;viewBox&quot; aspect ratio:
+<span class="pc bpc" id="L899" title="1 of 2 branches missed.">        double aspectRatio = aspectRatio2 &gt; 0 ? aspectRatio2 : aspectRatio1;</span>
+
+<span class="pc bpc" id="L901" title="1 of 2 branches missed.">        if ( aspectRatio == 0 )</span>
+<span class="nc" id="L902">            return Optional.empty();</span>
+        else
+<span class="fc" id="L904">            return Optional.of(aspectRatio);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

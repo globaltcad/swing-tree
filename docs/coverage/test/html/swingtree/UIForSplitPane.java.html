@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSplitPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSplitPane.java</span></div><h1>UIForSplitPane.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.From;
+import sprouts.Val;
+import sprouts.Var;
+
+import javax.swing.JSplitPane;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.Objects;
+
+/**
+ *  A SwingTree builder node designed for configuring {@link JSplitPane} instances.
+ *
+ * @param &lt;P&gt; The type of {@link JSplitPane} that this {@link UIForSplitPane} is configuring.
+ */
+public final class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAnySwing&lt;UIForSplitPane&lt;P&gt;, P&gt;
+{
+    private final BuilderState&lt;P&gt; _state;
+
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param state The {@link BuilderState} modelling how the component is built.
+     */
+
+<span class="fc" id="L28">    UIForSplitPane( BuilderState&lt;P&gt; state ) {</span>
+<span class="fc" id="L29">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L30">        _state = state;</span>
+<span class="fc" id="L31">    }</span>
+
+    @Override
+    protected BuilderState&lt;P&gt; _state() {
+<span class="fc" id="L35">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForSplitPane&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
+<span class="fc" id="L40">        return new UIForSplitPane&lt;&gt;(newState);</span>
+    }
+
+    /**
+     * Sets the alignment of the split bar in the split pane.
+     *
+     * @param align The alignment of the split bar in the split pane.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided alignment is null.
+     */
+    public final UIForSplitPane&lt;P&gt; withOrientation( UI.Align align ) {
+<span class="fc" id="L51">        NullUtil.nullArgCheck( align, &quot;split&quot;, UI.Align.class );</span>
+<span class="fc" id="L52">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L53">                    thisComponent.setOrientation( align.forSplitPane() );</span>
+<span class="fc" id="L54">                })</span>
+<span class="fc" id="L55">                ._this();</span>
+    }
+
+    /**
+     * Sets the alignment of the split bar in the split pane dynamically
+     * based on the provided {@link Val} property which will be observed
+     * by the split pane.
+     *
+     * @param align The alignment property of the split bar in the split pane.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided alignment is null or the property is allowed to wrap a null value.
+     */
+    public final UIForSplitPane&lt;P&gt; withOrientation( Val&lt;UI.Align&gt; align ) {
+<span class="fc" id="L68">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="fc" id="L69">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L70">        return _withOnShow( align, (thisComponent,it) -&gt; {</span>
+<span class="fc" id="L71">                    thisComponent.setOrientation( it.forSplitPane() );</span>
+<span class="fc" id="L72">                })</span>
+<span class="fc" id="L73">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L74">                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSplitPane() );</span>
+<span class="fc" id="L75">                })</span>
+<span class="fc" id="L76">                ._this();</span>
+    }
+
+    /**
+     * Sets the location of the divider. This is passed off to the
+     * look and feel implementation, and then listeners are notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via &lt;code&gt;setLastDividerLocation&lt;/code&gt;.
+     *
+     * @param location An int specifying a UI-specific value (typically a
+     *        pixel count)
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerAt( int location ) {
+<span class="fc" id="L92">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L93">                    thisComponent.setDividerLocation(location);</span>
+<span class="fc" id="L94">                })</span>
+<span class="fc" id="L95">                ._this();</span>
+    }
+
+    /**
+     * Sets the location of the divider in the form of a property,
+     * which can be dynamically update the divide.
+     * This is passed off to the
+     * look and feel implementation, and then listeners are notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via &lt;code&gt;setLastDividerLocation&lt;/code&gt;.
+     *
+     * @param location A property dynamically determining a UI-specific value (typically a
+     *        pixel count)
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code location} is {@code null}.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerAt( Val&lt;Integer&gt; location ) {
+<span class="fc" id="L114">        NullUtil.nullArgCheck( location, &quot;location&quot;, Val.class );</span>
+<span class="fc" id="L115">        NullUtil.nullPropertyCheck( location, &quot;location&quot;, &quot;Null is not a valid divider location.&quot; );</span>
+<span class="fc" id="L116">        return _withOnShow( location, (thisComponent, it) -&gt; {</span>
+<span class="fc" id="L117">                    thisComponent.setDividerLocation(it);</span>
+<span class="fc" id="L118">                })</span>
+<span class="fc" id="L119">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L120">                    thisComponent.setDividerLocation( location.orElseThrowUnchecked() );</span>
+<span class="fc" id="L121">                })</span>
+<span class="fc" id="L122">                ._this();</span>
+    }
+
+    /**
+     * Sets the size of the divider.
+     *
+     * @param size An integer giving the size of the divider in pixels
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerSize( int size ) {
+<span class="fc" id="L132">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L133">                    thisComponent.setDividerSize(UI.scale(size));</span>
+<span class="fc" id="L134">                })</span>
+<span class="fc" id="L135">                ._this();</span>
+    }
+
+    /**
+     * Sets the size of the divider in the form of a property,
+     * which can be dynamically update.
+     *
+     * @param size A property dynamically determining the size of the divider in pixels
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerSize( Val&lt;Integer&gt; size ) {
+<span class="fc" id="L147">        NullUtil.nullArgCheck( size, &quot;size&quot;, Val.class );</span>
+<span class="fc" id="L148">        NullUtil.nullPropertyCheck( size, &quot;size&quot;, &quot;Null is not a valid divider size.&quot; );</span>
+<span class="fc" id="L149">        return _withOnShow( size, (thisComponent,it) -&gt; {</span>
+<span class="fc" id="L150">                    thisComponent.setDividerSize(UI.scale(it));</span>
+<span class="fc" id="L151">                })</span>
+<span class="fc" id="L152">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L153">                    thisComponent.setDividerSize( UI.scale(size.orElseThrowUnchecked()) );</span>
+<span class="fc" id="L154">                })</span>
+<span class="fc" id="L155">                ._this();</span>
+    }
+
+    private void _calculateDividerLocationFrom( P p, double percentage ) {
+        int loc = (int) (
+<span class="fc bfc" id="L160" title="All 2 branches covered.">                        p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT</span>
+<span class="fc" id="L161">                            ? p.getWidth()  * percentage</span>
+<span class="fc" id="L162">                            : p.getHeight() * percentage</span>
+                    );
+<span class="fc" id="L164">        p.setDividerLocation(loc);</span>
+<span class="fc" id="L165">    }</span>
+
+    private double _calculatePercentageFrom( P p ) {
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        return p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT</span>
+<span class="nc" id="L169">                ? (double) p.getDividerLocation() / p.getWidth()</span>
+<span class="fc" id="L170">                : (double) p.getDividerLocation() / p.getHeight();</span>
+    }
+
+    /**
+     * Sets the location of the divider based on a percentage value.
+     * So if the split pane split is aligned horizontally, the divider
+     * will be set to the percentage of the height of the split pane.
+     * If the split pane is aligned vertically, the divider will be set
+     * to the percentage of the width of the split pane.
+     * &lt;p&gt;
+     * Note that a component listener is installed to the split pane's size temporarily,
+     * so that the divider location can be calculated when the split pane is sized
+     * by the layout manager for the first time.
+     * This is because before the layout manager did its thing, there was no way to know the actual
+     * location of the divider based on the percentage.
+     * &lt;b&gt;
+     *     So keep in mind that changes to the divider location immediately after this
+     *     method is called will be overridden by said listener!
+     * &lt;/b&gt;
+     * &lt;p&gt;
+     * A change of the divider location is ultimately passed off to the
+     * look and feel implementation, where listeners are then notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via {@link JSplitPane#setLastDividerLocation(int)}.
+     *
+     * @param percentage A double value between 0 and 1, representing the percentage of the split pane's
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDivisionOf( double percentage ) {
+<span class="fc" id="L201">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L202">                    _calculateDividerLocationFrom(thisComponent, percentage);</span>
+                    /*
+                        Before the layout manager did its thing, there was no way to know the actual
+                        location of the divider.
+                        So we install a listener to the split pane's size, so that we can recalculate
+                        the divider location when the split pane is resized.
+                        Then it removes itself after the first time it's called.
+                     */
+<span class="fc" id="L210">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
+                        @Override
+                        public void componentResized( ComponentEvent e ) {
+<span class="nc" id="L213">                            _calculateDividerLocationFrom(thisComponent, percentage);</span>
+<span class="nc" id="L214">                            thisComponent.removeComponentListener(this);</span>
+<span class="nc" id="L215">                        }</span>
+                    });
+<span class="fc" id="L217">                })</span>
+<span class="fc" id="L218">                ._this();</span>
+    }
+
+    /**
+     * Updates the location of the divider based on a percentage property which means
+     * that if the split pane split is aligned horizontally, the divider
+     * will be set to the percentage of the height of the split pane and
+     * if the split pane is aligned vertically, the divider will be set
+     * to the percentage of the width of the split pane.
+     * &lt;p&gt;
+     * This method binds the property uni-directionally,
+     * which means that the property will be observed by the
+     * split pane, but the split pane will not change the property
+     * (see {@link #withDivisionOf(Var)} for a bidirectional variant).
+     * &lt;p&gt;
+     * A change of the divider location is ultimately passed off to the
+     * look and feel implementation, where listeners are then notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via {@link JSplitPane#setLastDividerLocation(int)}.
+     * &lt;p&gt;
+     *     Note that the percentage is calculated based on the split pane's
+     *     current size, so if the split pane is resized, the divider location
+     *     will be recalculated in order to honor the percentage.
+     * &lt;/p&gt;
+     * @param percentage A property dynamically determining a double value between 0 and 1, representing the percentage of the split pane's
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDivisionOf( Val&lt;Double&gt; percentage ) {
+<span class="nc" id="L248">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Val.class );</span>
+<span class="nc" id="L249">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
+<span class="nc" id="L250">        return _withOnShow( percentage, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L251">                    _calculateDividerLocationFrom(thisComponent, v);</span>
+<span class="nc" id="L252">               })</span>
+<span class="nc" id="L253">                ._with( thisComponent -&gt; {</span>
+                    // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
+                    // when the split pane is resized:
+<span class="nc" id="L256">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
+                        @Override
+                        public void componentResized( ComponentEvent e ) {
+<span class="nc" id="L259">                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
+<span class="nc" id="L260">                        }</span>
+                    });
+<span class="nc" id="L262">                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
+<span class="nc" id="L263">                })</span>
+<span class="nc" id="L264">                ._this();</span>
+    }
+
+    /**
+     * Updates the location of the divider based on a percentage property which means
+     * that if the split pane split is aligned horizontally, the divider
+     * will be set to the percentage of the height of the split pane.
+     * If, however, the split pane is aligned vertically, then the divider will be set
+     * to the percentage of the width of the split pane.
+     * &lt;p&gt;
+     * Note that this binds the property to the location of the divider
+     * bidirectionally, which means that the value inside the property will be updated when the
+     * divider location is changed by the user and the divider location will be updated when the
+     * property changes in the business logic. &lt;br&gt;
+     * &lt;p&gt;
+     * A change of the divider location is ultimately passed off to the
+     * look and feel implementation, where listeners are then notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via {@link JSplitPane#setLastDividerLocation(int)}.
+     * &lt;p&gt;
+     *     Note that the percentage is calculated based on the split pane's
+     *     current size, so if the split pane changes its size, the divider location
+     *     will be recalculated.
+     * &lt;p&gt;
+     * @param percentage A property dynamically determining a double value between 0 and 1, representing the percentage of the split pane's
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDivisionOf( Var&lt;Double&gt; percentage ) {
+<span class="fc" id="L294">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Var.class );</span>
+<span class="fc" id="L295">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
+<span class="fc" id="L296">        return _withOnShow( percentage, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L297">                    _calculateDividerLocationFrom(thisComponent, v);</span>
+<span class="fc" id="L298">               })</span>
+<span class="fc" id="L299">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L300">                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
+                    // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
+                    // when the split pane is resized:
+<span class="fc" id="L303">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
+                        @Override
+                        public void componentResized( ComponentEvent e ) {
+<span class="nc" id="L306">                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
+<span class="nc" id="L307">                        }</span>
+                    });
+                    // We listen for slider movement as well, so that we can recalculate the divider location
+<span class="fc" id="L310">                    thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -&gt; {</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">                        if ( evt.getNewValue() != null ) {</span>
+<span class="fc" id="L312">                            double newPercentage = _calculatePercentageFrom(thisComponent);</span>
+<span class="fc" id="L313">                            percentage.set(From.VIEW, newPercentage);</span>
+                        }
+<span class="fc" id="L315">                    });</span>
+<span class="fc" id="L316">                })</span>
+<span class="fc" id="L317">                ._this();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

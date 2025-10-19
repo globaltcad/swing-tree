@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NoiseConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">NoiseConf.java</span></div><h1>NoiseConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.UI;
+import swingtree.api.NoiseFunction;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.Objects;
+
+/**
+ *  A noise gradient configuration which is used to define a noise gradient style
+ *  for a component based on a {@link NoiseFunction} which is a function
+ *  that takes a coordinate and returns a value between 0 and 1. &lt;br&gt;
+ *  The noise gradient is then defined by a list of colors which will transition from one
+ *  to the next in the order they are specified. &lt;br&gt;
+ *  The noise gradient can also be offset, scaled, rotated and clipped to a specific area of the component,
+ *  and positioned at a specific boundary of the component.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
+{
+<span class="fc" id="L28">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NoiseConf.class);</span>
+<span class="fc" id="L29">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
+
+<span class="fc" id="L31">    private static final NoiseConf _NONE = new NoiseConf(</span>
+                                                        UI.NoiseType.STOCHASTIC,
+                                                        new Color[0],
+<span class="fc" id="L34">                                                        Offset.none(),</span>
+<span class="fc" id="L35">                                                        Scale.none(),</span>
+                                                        UI.ComponentArea.BODY,
+                                                        UI.ComponentBoundary.EXTERIOR_TO_BORDER,
+                                                        0f,
+                                                        new float[0]
+                                                    );
+
+    /**
+     *  Use the returned instance as a representation of the absence of a noise gradient.
+     *
+     *  @return A noise gradient without any colors, effectively
+     *          representing the absence of a noise gradient.
+     */
+<span class="fc" id="L48">    public static NoiseConf none() { return _NONE; }</span>
+
+    static NoiseConf of(
+        NoiseFunction        function,
+        Color[]              colors,
+        Offset               offset,
+        Scale                scale,
+        UI.ComponentArea     area,
+        UI.ComponentBoundary boundary,
+        float                rotation,
+        float[]              fractions
+    ) {
+        // The rotation may be any number
+        // which always has to be normalized to a value between -180 and 180
+<span class="fc" id="L62">        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );</span>
+
+<span class="fc" id="L64">        NoiseConf none = none();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if ( function   .equals( none._function ) &amp;&amp;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">             offset     .equals( none._offset   ) &amp;&amp;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">             scale      .equals( none._scale    ) &amp;&amp;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">             area       .equals( none._area     ) &amp;&amp;</span>
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">             boundary   .equals( none._boundary ) &amp;&amp;</span>
+             rotation   == none._rotation   &amp;&amp;
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">             Arrays.equals(fractions, none._fractions)</span>
+        )
+<span class="fc" id="L74">            return none;</span>
+
+<span class="fc" id="L76">        return new NoiseConf(</span>
+            function,
+            colors,
+            offset,
+            scale,
+            area,
+            boundary,
+            rotation,
+            fractions
+        );
+    }
+
+
+    private final NoiseFunction        _function;
+    private final Color[]              _colors;
+    private final Offset               _offset;
+    private final Scale                _scale;
+    private final UI.ComponentArea     _area;
+    private final UI.ComponentBoundary _boundary;
+    private final float                _rotation;
+    private final float[]              _fractions;
+
+
+    private NoiseConf(
+        NoiseFunction        function,
+        Color[]              colors,
+        Offset               offset,
+        Scale                scale,
+        UI.ComponentArea     area,
+        UI.ComponentBoundary boundary,
+        float                rotation,
+        float[]              fractions
+<span class="fc" id="L108">    ) {</span>
+<span class="fc" id="L109">        _function   = Objects.requireNonNull(function);</span>
+<span class="fc" id="L110">        _colors     = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L111">        _offset     = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L112">        _scale      = Objects.requireNonNull(scale);</span>
+<span class="fc" id="L113">        _area       = Objects.requireNonNull(area);</span>
+<span class="fc" id="L114">        _boundary   = Objects.requireNonNull(boundary);</span>
+<span class="fc" id="L115">        _rotation   = rotation;</span>
+<span class="fc" id="L116">        _fractions  = Objects.requireNonNull(fractions);</span>
+<span class="fc" id="L117">    }</span>
+
+<span class="fc" id="L119">    NoiseFunction function() { return _function; }</span>
+    
+<span class="fc" id="L121">    Color[] colors() { return _colors; }</span>
+
+<span class="fc" id="L123">    Offset offset() { return _offset; }</span>
+
+<span class="fc" id="L125">    Scale scale() { return _scale; }</span>
+
+<span class="fc" id="L127">    UI.ComponentArea area() { return _area; }</span>
+
+<span class="fc" id="L129">    UI.ComponentBoundary boundary() { return _boundary; }</span>
+
+<span class="fc" id="L131">    float rotation() { return _rotation; }</span>
+
+<span class="fc" id="L133">    float[] fractions() { return _fractions; }</span>
+
+
+    boolean isOpaque() {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
+<span class="fc" id="L138">            return false;</span>
+
+<span class="fc" id="L140">        boolean foundTransparentColor = false;</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">            if ( c.getAlpha() &lt; 255 ) {</span>
+<span class="nc" id="L143">                foundTransparentColor = true;</span>
+<span class="nc" id="L144">                break;</span>
+            }
+        }
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        return !foundTransparentColor;</span>
+    }
+
+    NoiseConf _scale( double scale ) {
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if ( scale == 1 )</span>
+<span class="nc" id="L152">            return this;</span>
+
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L155">            return _NONE;</span>
+
+<span class="nc" id="L157">        return of(</span>
+            _function,
+            _colors,
+            _offset,
+<span class="nc" id="L161">            _scale.scale(scale),</span>
+            _area,
+            _boundary,
+            _rotation,
+            _fractions
+        );
+    }
+
+    /**
+     *  Accepts the {@link NoiseFunction}, which takes a coordinate and returns a value
+     *  between 0 and 1. &lt;br&gt;
+     *  The noise function is used to define the noise gradient.
+     *  &lt;p&gt;
+     *  &lt;b&gt;Take a look at {@link UI.NoiseType} for a rich set of predefined noise functions.&lt;/b&gt;
+     *
+     * @param function The noise function mapping the translated, scaled and rotated virtual space
+     *                 to a gradient value of a pixel in the color space / view space of the screen.
+     * @return A new noise gradient style with the specified noise function.
+     */
+    public NoiseConf function( NoiseFunction function ) {
+<span class="fc" id="L181">        return of(function, _colors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define a list of colors which will, as part of the noise gradient, transition from one
+     *  to the next in the order they are specified.
+     *  &lt;p&gt;
+     *  Note that you need to specify at least two colors for a noise gradient to be visible.
+     *
+     * @param colors The colors in the noise gradient.
+     * @return A new noise gradient style with the specified colors.
+     * @throws NullPointerException if any of the colors is {@code null}.
+     */
+    public NoiseConf colors( Color... colors ) {
+<span class="fc" id="L195">        Objects.requireNonNull(colors);</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        for ( Color color : colors )</span>
+<span class="fc" id="L197">            Objects.requireNonNull(color, &quot;Use UI.Color.UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc" id="L198">        return of(_function, colors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define a list of {@link String} based colors which will, as part of the noise gradient, transition from one
+     *  to the next in the order they are specified.
+     *  &lt;p&gt;
+     *  Note that you need to specify at least two colors for a noise gradient to be visible.
+     *
+     * @param colors The colors in the noise gradient in {@link String} format.
+     * @return A new noise gradient style with the specified colors.
+     * @throws NullPointerException if any of the colors is {@code null}.
+     */
+    public NoiseConf colors( String... colors ) {
+<span class="fc" id="L212">        Objects.requireNonNull(colors);</span>
+        try {
+<span class="fc" id="L214">            Color[] actualColors = new Color[colors.length];</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L216">                actualColors[i] = UI.color(colors[i]);</span>
+
+<span class="fc" id="L218">            return of(_function, actualColors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
+<span class="nc" id="L219">        } catch ( Exception e ) {</span>
+<span class="nc" id="L220">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
+<span class="nc" id="L221">            return this; // We want to avoid side effects other than a wrong color</span>
+        }
+    }
+
+    /**
+     *  Define the offset of the noise gradient which is the start position of the noise gradient
+     *  on the x and y-axis. &lt;br&gt;
+     *  Note that the offset is relative to the component that the noise gradient is applied to.
+     *  &lt;p&gt;
+     * @param x The noise gradient start offset on the x-axis.
+     * @param y The noise gradient start offset on the y-axis.
+     * @return A new noise gradient style with the specified offset.
+     */
+    public NoiseConf offset(double x, double y ) {
+<span class="fc" id="L235">        return of(_function, _colors, Offset.of(x,y), _scale, _area, _boundary, _rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define the scale of the noise gradient in terms of its size / granularity.
+     *  It scales the input space of the noise function.
+     *
+     * @param scale The noise gradient size.
+     * @return A new noise gradient style with the specified size.
+     */
+    public NoiseConf scale( double scale ) {
+<span class="fc" id="L246">        return of(_function, _colors, _offset, Scale.of(scale, scale), _area, _boundary, _rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define the x and y scale of the noise gradient in terms of its size / granularity.
+     *  It scales the input space of the noise function.
+     *
+     * @param x The noise gradient size on the x-axis.
+     * @param y The noise gradient size on the y-axis.
+     * @return A new noise gradient style with the specified size.
+     */
+    public NoiseConf scale( double x, double y ) {
+<span class="fc" id="L258">        return of(_function, _colors, _offset, Scale.of(x,y), _area, _boundary, _rotation, _fractions);</span>
+    }
+    
+    /**
+     *  Define the area of the component to which the noise gradient is clipped to.
+     *  Which means that the noise gradient will only be visible within the
+     *  specified area of the component.
+     *
+     * @param area The area of the component to which the noise gradient is clipped to.
+     * @return A new noise gradient style with the specified area.
+     */
+    public NoiseConf clipTo( UI.ComponentArea area ) {
+<span class="fc" id="L270">        return of(_function, _colors, _offset, _scale, area, _boundary, _rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define the boundary at which the noise gradient should start in terms of its base position.
+     *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
+     *  then the noise gradient position will be determined by the margin of the component. &lt;br&gt;
+     *  Here a complete list of the available boundaries:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     Using this boundary will cause the noise gradient to be positioned somewhere at
+     *     the outer most edge of the component.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link UI.ComponentArea#BODY}.
+     *     Using this boundary will cause the noise gradient to be positioned somewhere at
+     *     the outer most edge of the component's body, which is between the margin and the border.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     Using this boundary will cause the noise gradient to be positioned somewhere at
+     *     the outer most edge of the component's interior, which is between the border and the padding area.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+     *     Using this boundary will cause the noise gradient to be positioned somewhere after the padding area
+     *     and before the content area, which is where all of the child components are located.
+     *     &lt;/li&gt;
+     * &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  You can think of this property as a convenient way to define the base position of the noise gradient.
+     *  So if you want to do the positioning yourself, then you may configure this property to
+     *  {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}, which will cause the noise gradient to be positioned
+     *  at the outermost edge of the component, and then use the {@link #offset(double, double)} method
+     *  to define the exact position of the noise gradient.
+     *
+     * @param boundary The boundary at which the noise gradient should start in terms of its offset.
+     * @return A new noise gradient style with the specified boundary.
+     */
+    public NoiseConf boundary( UI.ComponentBoundary boundary ) {
+<span class="fc" id="L315">        return of(_function, _colors, _offset, _scale, _area, boundary, _rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define the rotation of the noise gradient in degrees.
+     *  This will rotate the input space of the noise function.
+     *
+     *  @param rotation The rotation of the noise gradient in degrees.
+     *  @return A new noise gradient style with the specified rotation.
+     */
+    public NoiseConf rotation( float rotation ) {
+<span class="fc" id="L326">        return of(_function, _colors, _offset, _scale, _area, _boundary, rotation, _fractions);</span>
+    }
+
+    /**
+     *  Define the fractions of the noise gradient which is an array of values between 0 and 1
+     *  that defines the relative position of each color in the noise gradient.
+     *  &lt;p&gt;
+     *  Note that the number of fractions must match the number of colors in the noise gradient.
+     *  If the number of fractions is less than the number of colors, then the remaining
+     *  colors will be evenly distributed between the last two fractions.
+     *
+     *  @param fractions The fractions of the noise gradient.
+     *  @return A new noise gradient style with the specified fractions.
+     */
+    public NoiseConf fractions( double... fractions ) {
+<span class="nc" id="L341">        float[] actualFractions = new float[fractions.length];</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
+<span class="nc" id="L343">            actualFractions[i] = (float) fractions[i];</span>
+
+<span class="nc" id="L345">        return of(_function, _colors, _offset, _scale, _area, _boundary, _rotation, actualFractions);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L351">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="nc" id="L352">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+                    &quot;function=&quot;    + _function + &quot;, &quot; +
+<span class="nc" id="L354">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+                    &quot;offset=&quot;     + _offset + &quot;, &quot; +
+                    &quot;scale=&quot;      + _scale + &quot;, &quot; +
+                    &quot;area=&quot;       + _area + &quot;, &quot; +
+                    &quot;boundary=&quot;   + _boundary + &quot;, &quot; +
+                    &quot;rotation=&quot;   + _rotation + &quot;, &quot; +
+<span class="nc" id="L360">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) +</span>
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( @Nullable Object o ) {
+<span class="fc bfc" id="L366" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if ( !(o instanceof NoiseConf) ) return false;</span>
+<span class="fc" id="L368">        NoiseConf that = (NoiseConf) o;</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L371" title="1 of 2 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+<span class="pc bpc" id="L372" title="4 of 8 branches missed.">                Objects.equals(_scale, that._scale)   &amp;&amp;</span>
+               _area       == that._area             &amp;&amp;
+               _boundary   == that._boundary         &amp;&amp;
+               _rotation   == that._rotation         &amp;&amp;
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">               Arrays.equals(_fractions, that._fractions);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L381">        return Objects.hash(</span>
+                _function,
+<span class="fc" id="L383">                Arrays.hashCode(_colors),</span>
+                _offset,
+                _scale,
+                _area,
+                _boundary,
+<span class="fc" id="L388">                _rotation,</span>
+<span class="fc" id="L389">                Arrays.hashCode(_fractions)</span>
+            );
+    }
+
+    @Override
+    public NoiseConf simplified() {
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L396">            return _NONE;</span>
+
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L399">            return _NONE;</span>
+
+<span class="pc bpc" id="L401" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
+<span class="fc" id="L402">            return _NONE;</span>
+
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();</span>
+
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L407">            return _NONE;</span>
+
+<span class="fc bfc" id="L409" title="All 2 branches covered.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="fc" id="L410">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="fc" id="L411">            int index = 0;</span>
+<span class="fc bfc" id="L412" title="All 2 branches covered.">            for ( Color color : _colors )</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">                if ( !StyleUtil.isUndefinedColor(color) )</span>
+<span class="fc" id="L414">                    realColors[index++] = color;</span>
+
+<span class="fc" id="L416">            return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );</span>
+        }
+
+<span class="fc" id="L419">        return this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

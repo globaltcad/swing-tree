@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwingTreeInitConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">SwingTreeInitConfig.java</span></div><h1>SwingTreeInitConfig.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import swingtree.style.StyleSheet;
+import swingtree.threading.EventProcessor;
+
+import java.awt.Font;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+/**
+ *  An immutable configuration object for the {@link SwingTree} library,
+ *  which can be configured using a functional {@link SwingTreeConfigurator} lambda
+ *  passed to {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
+ *  &lt;p&gt;
+ *  It allows for the configuration of the default
+ *  font, font installation, scaling, event processing and
+ *  application wide {@link StyleSheet}.
+ */
+public final class SwingTreeInitConfig
+{
+    /**
+     *  Defines how the {@link Font}, specified through {@link SwingTreeInitConfig#defaultFont(Font)},
+     *  is installed in the {@link javax.swing.UIManager}.
+     */
+<span class="fc" id="L27">    public enum FontInstallation</span>
+    {
+        /**
+         *  A soft installation will only install the font as the &quot;defaultFont&quot; property
+         *  of the {@link javax.swing.UIManager}.
+         */
+<span class="fc" id="L33">        SOFT,</span>
+
+        /**
+         *  A hard installation will install the font as the &quot;defaultFont&quot; property
+         *  of the {@link javax.swing.UIManager} and as the default font of all
+         *  {@link javax.swing.UIManager} components.
+         */
+<span class="fc" id="L40">        HARD,</span>
+
+        /**
+         *  No installation will be performed.
+         */
+<span class="fc" id="L45">        NONE</span>
+    }
+
+    /**
+     *  Defines how the scaling factor for the UI should be determined.
+     */
+<span class="fc" id="L51">    public enum Scaling</span>
+    {
+        /**
+         *  No scaling will be performed.
+         */
+<span class="fc" id="L56">        NONE,</span>
+
+        /**
+         *  The scaling will be derived from the supplied scaling factor.
+         *  (see {@link SwingTreeInitConfig#uiScaleFactor(float)} as well as
+         *  system property {@code &quot;swingtree.uiScale&quot;}).
+         */
+<span class="fc" id="L63">        FROM_SCALING_FACTOR,</span>
+
+        /**
+         *  The scaling will be derived from the default font size,
+         *  if a default font was specified. (see {@link SwingTreeInitConfig#defaultFont(Font)})
+         */
+<span class="fc" id="L69">        FROM_DEFAULT_FONT,</span>
+
+        /**
+         *  The scaling will be derived from the system font size.
+         *  This scaling policy is chosen if no default font was specified,
+         *  no scaling factor was specified and the scaling mode is enabled
+         *  (see {@link SwingTreeInitConfig#isUiScaleFactorEnabled()}).
+         */
+<span class="fc" id="L77">        FROM_SYSTEM_FONT</span>
+    }
+
+    public static SwingTreeInitConfig standard() {
+<span class="fc" id="L81">        return new SwingTreeInitConfig(</span>
+                        null,
+                        FontInstallation.SOFT,
+                        EventProcessor.COUPLED_STRICT,
+<span class="fc" id="L85">                        StyleSheet.none(),</span>
+<span class="fc" id="L86">                        SystemProperties.getFloat(SystemProperties.UI_SCALE,                 -1    ),</span>
+<span class="fc" id="L87">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),</span>
+<span class="fc" id="L88">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),</span>
+<span class="fc" id="L89">                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    )</span>
+                    );
+                    /*
+                        Note that we want the refresh rate to be as high as possible so that the animation
+                        looks smooth, but we don't want to use 100% of the CPU.
+                        The ideal refresh rate is 60 fps which is 16.6 ms per frame.
+                        So we set the timer to 16 ms.
+                        This does of course not account for the time it takes to run the animation
+                        code, but that should be negligible, and in the worst case
+                        the animation will be a bit slower than 60 fps.
+                    */
+    }
+
+
+    private final @Nullable Font   _defaultFont; // may be null
+    private final FontInstallation _fontInstallation;
+    private final EventProcessor   _eventProcessor;
+    private final StyleSheet       _styleSheet;
+    private final float            _uiScale;
+    private final boolean          _uiScaleEnabled;
+    private final boolean          _uiScaleAllowScaleDown;
+    private final long             _defaultAnimationInterval;
+
+
+    private SwingTreeInitConfig(
+        @Nullable Font   defaultFont,
+        FontInstallation fontInstallation,
+        EventProcessor   eventProcessor,
+        StyleSheet       styleSheet,
+        float            uiScale,
+        boolean          uiScaleEnabled,
+        boolean          uiScaleAllowScaleDown,
+        long             defaultAnimationInterval
+<span class="fc" id="L122">    ) {</span>
+<span class="fc" id="L123">        _defaultFont              = defaultFont;</span>
+<span class="fc" id="L124">        _fontInstallation         = Objects.requireNonNull(fontInstallation);</span>
+<span class="fc" id="L125">        _eventProcessor           = Objects.requireNonNull(eventProcessor);</span>
+<span class="fc" id="L126">        _styleSheet               = Objects.requireNonNull(styleSheet);</span>
+<span class="fc" id="L127">        _uiScale                  = uiScale;</span>
+<span class="fc" id="L128">        _uiScaleEnabled           = uiScaleEnabled;</span>
+<span class="fc" id="L129">        _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;</span>
+<span class="fc" id="L130">        _defaultAnimationInterval = defaultAnimationInterval;</span>
+<span class="fc" id="L131">    }</span>
+
+    /**
+     *  Returns an {@link Optional} containing the default font
+     *  or an empty {@link Optional} if no default font is set.
+     */
+    Optional&lt;Font&gt; defaultFont() {
+<span class="fc" id="L138">        return Optional.ofNullable(_defaultFont);</span>
+    }
+
+    /**
+     *  Returns the {@link FontInstallation} mode.
+     */
+    FontInstallation fontInstallation() {
+<span class="fc" id="L145">        return _fontInstallation;</span>
+    }
+
+    /**
+     *  Returns the {@link Scaling} mode
+     *  which is determined based on the configuration.
+     *  &lt;ul&gt;
+     *      &lt;li&gt;
+     *          If {@code false} was passed to {@link #isUiScaleFactorEnabled(boolean)},
+     *          then {@link Scaling#NONE} is returned.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;
+     *          Otherwise, if a scaling factor greater than 0 was passed to {@link #uiScaleFactor(float)},
+     *          then {@link Scaling#FROM_SCALING_FACTOR} is returned.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;
+     *          Otherwise, if a default font was passed to {@link #defaultFont(Font)}, &lt;br&gt;
+     *          then {@link Scaling#FROM_DEFAULT_FONT} is returned. &lt;br&gt;
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  If none of the above applies, then {@link Scaling#FROM_SYSTEM_FONT} is returned. &lt;br&gt;
+     */
+    Scaling scalingStrategy() {
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if ( !_uiScaleEnabled )</span>
+<span class="nc" id="L170">            return Scaling.NONE;</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if ( _uiScale &gt; 0 )</span>
+<span class="fc" id="L172">            return Scaling.FROM_SCALING_FACTOR;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if ( _defaultFont != null )</span>
+<span class="fc" id="L174">            return Scaling.FROM_DEFAULT_FONT;</span>
+
+<span class="fc" id="L176">        return Scaling.FROM_SYSTEM_FONT;</span>
+    }
+
+    /**
+     *  Returns the {@link EventProcessor},
+     *  which is used to process both UI and application events.
+     */
+    EventProcessor eventProcessor() {
+<span class="fc" id="L184">        return _eventProcessor;</span>
+    }
+
+    /**
+     *  Returns an {@link Optional} containing the {@link StyleSheet}
+     *  or an empty {@link Optional} if no {@link StyleSheet} is set.
+     */
+    StyleSheet styleSheet() {
+<span class="fc" id="L192">        return _styleSheet;</span>
+    }
+
+    /**
+     *  Returns the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
+     */
+    float uiScaleFactor() {
+<span class="fc" id="L199">        return _uiScale;</span>
+    }
+
+    /**
+     *  Returns whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
+     */
+    boolean isUiScaleFactorEnabled() {
+<span class="fc" id="L206">        return _uiScaleEnabled;</span>
+    }
+
+    /**
+     *  Returns whether values smaller than 100% are allowed for the user scale factor
+     *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
+     */
+    boolean isUiScaleDownAllowed() {
+<span class="fc" id="L214">        return _uiScaleAllowScaleDown;</span>
+    }
+
+    /**
+     *  Returns the default animation interval in milliseconds,
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to 60 fps.
+     *  See {@link #standard()}, returning an instance of this config with the default value. &lt;br&gt;
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     */
+    long defaultAnimationInterval() {
+<span class="fc" id="L231">        return _defaultAnimationInterval;</span>
+    }
+
+    /**
+     *  Used to configure the default font, which may be used by the {@link SwingTree}
+     *  to derive the UI scaling factor and or to install the font in the {@link javax.swing.UIManager}
+     *  depending on the {@link FontInstallation} mode (see {@link #defaultFont(Font, FontInstallation)}).
+     * @param newDefaultFont The new default font, or {@code null} to unset the default font.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default font.
+     */
+    public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
+<span class="nc" id="L242">        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Used to configure both the default {@link Font} and the {@link FontInstallation} mode.
+     *  &lt;p&gt;
+     *  The {@link FontInstallation} mode determines how the {@link Font} is installed
+     *  in the {@link javax.swing.UIManager} (see {@link FontInstallation}).
+     *  &lt;p&gt;
+     *  If the {@link FontInstallation} mode is {@link FontInstallation#SOFT},
+     *  then the {@link Font} will only be installed as the &quot;defaultFont&quot; property
+     *  in the {@link javax.swing.UIManager}. If on the other hand the {@link FontInstallation}
+     *  mode is {@link FontInstallation#HARD}, then the {@link Font} will be installed
+     *  by replacing all {@link Font}s in the {@link javax.swing.UIManager}.
+     *
+     * @param newDefaultFont The new default font, or {@code null} to unset the default font.
+     * @param newFontInstallation The new {@link FontInstallation} mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
+     */
+    public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
+<span class="fc" id="L262">        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Used to configure the {@link EventProcessor}, which is used to process both
+     *  UI and application events.
+     *  You may create your own {@link EventProcessor} implementation or use one of the
+     *  predefined ones like {@link EventProcessor#COUPLED_STRICT}, {@link EventProcessor#COUPLED}
+     *  or {@link EventProcessor#DECOUPLED}.
+     *
+     * @param newEventProcessor The new {@link EventProcessor}.
+     * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
+     */
+    public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
+<span class="fc" id="L276">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Used to configure a global {@link StyleSheet} serving as a base for all
+     *  {@link StyleSheet}s used inside your application (see {@link UI#use(swingtree.style.StyleSheet, Supplier)}).
+     *
+     * @param newStyleSheet The new {@link StyleSheet}, or {@code null} to unset the {@link StyleSheet}.
+     * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
+     */
+    public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
+<span class="fc" id="L287">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Use this to configure the UI scaling factor.
+     *  The default factor determined by the system property {@code &quot;swingtree.uiScale&quot;}.
+     *  &lt;p&gt;
+     *  If Java runtime scales (Java 9 or later), this scale factor is applied on top
+     *  of the Java system scale factor. Java 8 does not scale and this scale factor
+     *  replaces the user scale factor that SwingTree computes based on the font.
+     *  To replace the Java 9+ system scale factor, use system property &quot;sun.java2d.uiScale&quot;,
+     *  which has the same syntax as this one.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Allowed Values&lt;/strong&gt; e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)&lt;br&gt;
+     *
+     * @param newUiScale The new UI scaling factor.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
+     */
+    public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
+<span class="fc" id="L306">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Used to configure whether the UI scaling mode is enabled as is specified by the
+     *  system property {@code swingtree.uiScale.enabled}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+     *
+     * @param newUiScaleEnabled The new UI scaling mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
+     */
+    public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
+<span class="nc" id="L320">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Used to configure whether values smaller than 100% are allowed for the user scale factor
+     *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@code false}
+     *
+     * @param newUiScaleAllowScaleDown The new UI scaling mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
+     */
+    public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
+<span class="nc" id="L334">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown, _defaultAnimationInterval);</span>
+    }
+
+    /**
+     *  Used to configure the default animation interval in milliseconds,
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to 60 fps.
+     *  See {@link #standard()}, returning an instance of this config with the default value. &lt;br&gt;
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     *
+     * @param newDefaultAnimationInterval The new default animation interval.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default animation interval.
+     */
+    public SwingTreeInitConfig defaultAnimationInterval( long newDefaultAnimationInterval ) {
+<span class="nc" id="L354">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, newDefaultAnimationInterval);</span>
+    }
+
+    /**
+     * Defines/documents own system properties used in SwingTree.
+     *
+     * @author Daniel Nepp, but originally a derivative work of Karl Tauber
+     */
+    private static interface SystemProperties
+    {
+        /**
+         * Specifies a custom scale factor used to scale the UI.
+         * &lt;p&gt;
+         * If Java runtime scales (Java 9 or later), this scale factor is applied on top
+         * of the Java system scale factor. Java 8 does not scale and this scale factor
+         * replaces the user scale factor that SwingTree computes based on the font.
+         * To replace the Java 9+ system scale factor, use system property &quot;sun.java2d.uiScale&quot;,
+         * which has the same syntax as this one.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)&lt;br&gt;
+         */
+        String UI_SCALE = &quot;swingtree.uiScale&quot;;
+
+        /**
+         * Specifies whether user scaling mode is enabled.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+         */
+        String UI_SCALE_ENABLED = &quot;swingtree.uiScale.enabled&quot;;
+
+        /**
+         * Specifies whether values smaller than 100% are allowed for the user scale factor
+         * (see {@link UI#scale()}).
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code false}
+         */
+        String UI_SCALE_ALLOW_SCALE_DOWN = &quot;swingtree.uiScale.allowScaleDown&quot;;
+
+        /**
+         * Specifies the default animation interval in milliseconds.
+         * &lt;p&gt;
+         * This property is used as default value by the {@link swingtree.animation.LifeTime}
+         * object which is used to define the duration of an {@link swingtree.animation.Animation}.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; must be a positive integer&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code 16}
+         */
+        String ANIMATION_INTERVAL = &quot;swingtree.animationInterval&quot;;
+
+        /**
+         * Checks whether a system property is set and returns {@code true} if its value
+         * is {@code &quot;true&quot;} (case-insensitive), otherwise it returns {@code false}.
+         * If the system property is not set, {@code defaultValue} is returned.
+         */
+        static boolean getBool( String key, boolean defaultValue ) {
+<span class="fc" id="L411">            String value = System.getProperty( key );</span>
+<span class="pc bpc" id="L412" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+        }
+
+        /**
+         * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
+         */
+        static float getFloat( String key, float defaultValue ) {
+<span class="fc" id="L419">            String s = System.getProperty( key );</span>
+
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L422">                return defaultValue;</span>
+
+<span class="nc" id="L424">            float units = 1;</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
+<span class="nc" id="L426">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
+<span class="nc" id="L428">                units = 96;</span>
+<span class="nc" id="L429">                s = s.substring( 0, s.length() - 3 );</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
+<span class="nc" id="L431">                units = 100;</span>
+<span class="nc" id="L432">                s = s.substring( 0, s.length() - 1 );</span>
+            }
+
+            try {
+<span class="nc" id="L436">                float scale = Float.parseFloat( s );</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
+<span class="nc" id="L438">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L439">                return defaultValue;</span>
+            }
+        }
+
+        static long getLong( String key, long defaultValue ) {
+<span class="fc" id="L444">            String s = System.getProperty( key );</span>
+
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L447">                return defaultValue;</span>
+
+            try {
+<span class="nc" id="L450">                long interval = Long.parseLong( s );</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">                return interval &gt; 0 ? interval : defaultValue;</span>
+<span class="nc" id="L452">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L453">                return defaultValue;</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
