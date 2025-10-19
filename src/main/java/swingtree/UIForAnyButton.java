@@ -1590,19 +1590,19 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 int width = size.width().map(Number::intValue).orElse(-1);
                 int height = size.height().map(Number::intValue).orElse(-1);
                 if ( width > 0 && height > 0 )
-                    iconApplier.accept(thisComponent, _fitTo( width, height, icon ));
+                    iconApplier.accept(thisComponent, _fitTo( size, icon ));
             }
         };
     }
 
     private static Size _determineIconSize(JComponent thisComponent, Icon icon, UI.FitComponent fitComponent) {
-        int width ;
-        int height;
+        float width ;
+        float height;
         Insets insets = thisComponent.getInsets();
-        int fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);
-        int fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);
-        fittedWidth = UI.unscale(fittedWidth) - insets.left - insets.right; // We unscale because the icon will be scaled internally
-        fittedHeight = UI.unscale(fittedHeight) - insets.top  - insets.bottom;
+        float fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);
+        float fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);
+        fittedWidth  = Math.max(0, UI.unscale((float) fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally
+        fittedHeight = Math.max(0, UI.unscale((float) fittedHeight - insets.top  - insets.bottom));
         int iconWidth  = icon.getIconWidth();
         int iconHeight = icon.getIconHeight();
         // We need to determine and return a base size to be scaled later on...
@@ -1647,10 +1647,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private static Icon _fitTo(int width, int height, Icon icon) {
+        return _fitTo(Size.of(width, height), icon);
+    }
+
+    private static Icon _fitTo(Size size, Icon icon) {
+        float width = size.width().orElse(0f);
+        float height = size.height().orElse(0f);
         if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconWidth(width);
-            return svgIcon.withIconHeight(height);
+            svgIcon = svgIcon.withIconWidth((int) width);
+            return svgIcon.withIconHeight((int) height);
         }
         else if ( icon instanceof ScalableImageIcon ) {
             return ((ScalableImageIcon)icon).withSize(Size.of(width, height));

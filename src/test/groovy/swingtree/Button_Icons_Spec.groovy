@@ -304,7 +304,7 @@ class Button_Icons_Spec extends Specification
                      .withIcon( testIcon, UI.FitComponent.WIDTH )
                      .get(JButton)
         then : 'The icon of the `JButton` has the expected dimensions!'
-            button.getIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getIcon().getIconWidth() == UI.scale(80) - button.insets.left - button.insets.right
             button.getIcon().getIconHeight() == UI.scale(32)
 
         when : 'We re-create the button with the "HEIGHT" fit component option.'
@@ -313,33 +313,33 @@ class Button_Icons_Spec extends Specification
                      .get(JButton)
         then : 'The icon of the `JButton` has the expected dimensions!'
             button.getIcon().getIconWidth() == UI.scale(42)
-            button.getIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+            button.getIcon().getIconHeight() == UI.scale(30) - button.insets.top - button.insets.bottom
 
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             button = UI.button("I have a regular icon with custom layout").withSizeExactly(80, 30)
                      .withIcon( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                      .get(JButton)
         then : 'The icon of the `JButton` has the expected dimensions!'
-            button.getIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
-            button.getIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+            button.getIcon().getIconWidth() == UI.scale(80) - button.insets.left - button.insets.right
+            button.getIcon().getIconHeight() == UI.scale(30) - button.insets.top - button.insets.bottom
 
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             button = UI.button("I have a regular icon with custom layout").withSizeExactly(80, 30)
                      .withIcon( testIcon, UI.FitComponent.MIN_DIM )
                      .get(JButton)
         then : 'The icon of the `JButton` has the expected dimensions!'
-            int minDim = Math.min(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
-            button.getIcon().getIconWidth() == UI.scale(minDim)
-            button.getIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - button.insets.left - button.insets.right, UI.scale(30) - button.insets.top - button.insets.bottom)
+            button.getIcon().getIconWidth() == minDim
+            button.getIcon().getIconHeight() == minDim
 
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             button = UI.button("I have a regular icon with custom layout").withSizeExactly(80, 30)
                      .withIcon( testIcon, UI.FitComponent.MAX_DIM )
                      .get(JButton)
         then : 'The icon of the `JButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
-            button.getIcon().getIconWidth() == UI.scale(maxDim)
-            button.getIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - button.insets.left - button.insets.right, UI.scale(30) - button.insets.top - button.insets.bottom)
+            button.getIcon().getIconWidth() == maxDim
+            button.getIcon().getIconHeight() == maxDim
 
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
@@ -388,7 +388,7 @@ class Button_Icons_Spec extends Specification
                            .withIcon( treesIcon, UI.FitComponent.WIDTH )
                            .get(JToggleButton)
         then : 'The icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getIcon().getIconHeight() == UI.scale(32)
 
         when : 'We re-create the button with the "HEIGHT" fit component option.'
@@ -398,7 +398,7 @@ class Button_Icons_Spec extends Specification
                             .get(JToggleButton)
         then : 'The icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
 
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a regular icon with custom layout").withSizeExactly(80, 30)
@@ -406,29 +406,29 @@ class Button_Icons_Spec extends Specification
                             .withIcon( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                             .get(JToggleButton)
         then : 'The icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
 
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a regular icon with custom layout").withSizeExactly(80, 30)
                             .withIcon( treesIcon, UI.FitComponent.MIN_DIM )
                             .get(JToggleButton)
         then : 'The icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getIcon().getIconWidth() == minDim
+            toggleButton.getIcon().getIconHeight() == minDim
 
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a regular icon with custom layout").withSizeExactly(80, 30)
                             .withIcon( treesIcon, UI.FitComponent.MAX_DIM )
                             .get(JToggleButton)
         then : 'The icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getIcon().getIconWidth() == maxDim
+            toggleButton.getIcon().getIconHeight() == maxDim
 
         where : 'We test this with different UI scaling factors.'
-            uiScale << [2, 3]
+            uiScale << [1, 2, 3]
     }
 
     // On Press Icon:
@@ -617,7 +617,7 @@ class Button_Icons_Spec extends Specification
                      .withIconOnPress( testIcon, UI.FitComponent.WIDTH )
                      .get(JButton)
         then : 'The pressed icon of the `JButton` has the expected dimensions!'
-            button.getPressedIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getPressedIcon().getIconWidth() == UI.scale(80) - button.insets.left - button.insets.right
             button.getPressedIcon().getIconHeight() == UI.scale(32)
 
         when : 'We re-create the button with the "HEIGHT" fit component option.'
@@ -626,33 +626,33 @@ class Button_Icons_Spec extends Specification
                      .get(JButton)
         then : 'The pressed icon of the `JButton` has the expected dimensions!'
             button.getPressedIcon().getIconWidth() == UI.scale(42)
-            button.getPressedIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+            button.getPressedIcon().getIconHeight() == UI.scale(30) - button.insets.top - button.insets.bottom
 
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
                      .withIconOnPress( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                      .get(JButton)
         then : 'The pressed icon of the `JButton` has the expected dimensions!'
-            button.getPressedIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
-            button.getPressedIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+            button.getPressedIcon().getIconWidth() == UI.scale(80) - button.insets.left - button.insets.right
+            button.getPressedIcon().getIconHeight() == UI.scale(30) - button.insets.top - button.insets.bottom
 
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
                      .withIconOnPress( testIcon, UI.FitComponent.MIN_DIM )
                      .get(JButton)
         then : 'The pressed icon of the `JButton` has the expected dimensions!'
-            int minDim = Math.min(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
-            button.getPressedIcon().getIconWidth() == UI.scale(minDim)
-            button.getPressedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - button.insets.left - button.insets.right, UI.scale(30) - button.insets.top - button.insets.bottom)
+            button.getPressedIcon().getIconWidth() == minDim
+            button.getPressedIcon().getIconHeight() == minDim
 
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             button = UI.button("I have a pressed icon with custom layout").withSizeExactly(80, 30)
                      .withIconOnPress( testIcon, UI.FitComponent.MAX_DIM )
                      .get(JButton)
         then : 'The pressed icon of the `JButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
-            button.getPressedIcon().getIconWidth() == UI.scale(maxDim)
-            button.getPressedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - button.insets.left - button.insets.right, UI.scale(30) - button.insets.top - button.insets.bottom)
+            button.getPressedIcon().getIconWidth() == maxDim
+            button.getPressedIcon().getIconHeight() == maxDim
 
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
@@ -685,7 +685,7 @@ class Button_Icons_Spec extends Specification
                            .withIconOnPress( treesIcon, UI.FitComponent.WIDTH )
                            .get(JToggleButton)
         then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getPressedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getPressedIcon().getIconHeight() == UI.scale(32)
 
         when : 'We re-create the button with the "HEIGHT" fit component option.'
@@ -694,33 +694,33 @@ class Button_Icons_Spec extends Specification
                             .get(JToggleButton)
         then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getPressedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getPressedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
 
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
                             .withIconOnPress( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                             .get(JToggleButton)
         then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getPressedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getPressedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getPressedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getPressedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
 
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
                             .withIconOnPress( treesIcon, UI.FitComponent.MIN_DIM )
                             .get(JToggleButton)
         then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getPressedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getPressedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getPressedIcon().getIconWidth() == minDim
+            toggleButton.getPressedIcon().getIconHeight() == minDim
 
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a pressed icon with custom layout").withSizeExactly(80, 30)
                             .withIconOnPress( treesIcon, UI.FitComponent.MAX_DIM )
                             .get(JToggleButton)
         then : 'The pressed icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getPressedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getPressedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getPressedIcon().getIconWidth() == maxDim
+            toggleButton.getPressedIcon().getIconHeight() == maxDim
 
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
@@ -929,7 +929,7 @@ class Button_Icons_Spec extends Specification
                      .withIconOnHover( testIcon, UI.FitComponent.WIDTH )
                      .get(JButton)
         then : 'The hover icon of the `JButton` has the expected dimensions!'
-            button.getRolloverIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
+            button.getRolloverIcon().getIconWidth() == UI.scale(80) - button.insets.left - button.insets.right
             button.getRolloverIcon().getIconHeight() == UI.scale(32)
 
         when : 'We re-create the button with the "HEIGHT" fit component option.'
@@ -938,33 +938,33 @@ class Button_Icons_Spec extends Specification
                      .get(JButton)
         then : 'The hover icon of the `JButton` has the expected dimensions!'
             button.getRolloverIcon().getIconWidth() == UI.scale(42)
-            button.getRolloverIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+            button.getRolloverIcon().getIconHeight() == UI.scale(30) - button.insets.top - button.insets.bottom
 
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
                      .withIconOnHover( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                      .get(JButton)
         then : 'The hover icon of the `JButton` has the expected dimensions!'
-            button.getRolloverIcon().getIconWidth() == UI.scale(80 - button.insets.left - button.insets.right)
-            button.getRolloverIcon().getIconHeight() == UI.scale(30 - button.insets.top - button.insets.bottom)
+            button.getRolloverIcon().getIconWidth() == UI.scale(80) - button.insets.left - button.insets.right
+            button.getRolloverIcon().getIconHeight() == UI.scale(30) - button.insets.top - button.insets.bottom
 
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
                      .withIconOnHover( testIcon, UI.FitComponent.MIN_DIM )
                      .get(JButton)
         then : 'The hover icon of the `JButton` has the expected dimensions!'
-            int minDim = Math.min(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
-            button.getRolloverIcon().getIconWidth() == UI.scale(minDim)
-            button.getRolloverIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - button.insets.left - button.insets.right, UI.scale(30) - button.insets.top - button.insets.bottom)
+            button.getRolloverIcon().getIconWidth() == minDim
+            button.getRolloverIcon().getIconHeight() == minDim
 
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             button = UI.button("I have a hover icon with custom layout").withSizeExactly(80, 30)
                      .withIconOnHover( testIcon, UI.FitComponent.MAX_DIM )
                      .get(JButton)
         then : 'The hover icon of the `JButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - button.insets.left - button.insets.right, 30 - button.insets.top - button.insets.bottom)
-            button.getRolloverIcon().getIconWidth() == UI.scale(maxDim)
-            button.getRolloverIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - button.insets.left - button.insets.right, UI.scale(30) - button.insets.top - button.insets.bottom)
+            button.getRolloverIcon().getIconWidth() == maxDim
+            button.getRolloverIcon().getIconHeight() == maxDim
 
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
@@ -1001,7 +1001,7 @@ class Button_Icons_Spec extends Specification
                            .withIconOnHover( treesIcon, UI.FitComponent.WIDTH )
                            .get(JToggleButton)
         then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getRolloverIcon().getIconHeight() == UI.scale(32)
 
         when : 'We re-create the button with the "HEIGHT" fit component option.'
@@ -1010,33 +1010,33 @@ class Button_Icons_Spec extends Specification
                             .get(JToggleButton)
         then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getRolloverIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
 
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
                             .withIconOnHover( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                             .get(JToggleButton)
         then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
 
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
                             .withIconOnHover( treesIcon, UI.FitComponent.MIN_DIM )
                             .get(JToggleButton)
         then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverIcon().getIconWidth() == minDim
+            toggleButton.getRolloverIcon().getIconHeight() == minDim
 
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a hover icon with custom layout").withSizeExactly(80, 30)
                             .withIconOnHover( treesIcon, UI.FitComponent.MAX_DIM )
                             .get(JToggleButton)
         then : 'The hover icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getRolloverIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getRolloverIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverIcon().getIconWidth() == maxDim
+            toggleButton.getRolloverIcon().getIconHeight() == maxDim
 
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
@@ -1223,7 +1223,7 @@ class Button_Icons_Spec extends Specification
                          .withIconOnHoverAndSelected( testIcon, UI.FitComponent.WIDTH )
                          .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
@@ -1231,30 +1231,30 @@ class Button_Icons_Spec extends Specification
                          .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnHoverAndSelected( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                          .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnHoverAndSelected( testIcon, UI.FitComponent.MIN_DIM )
                          .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == minDim
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnHoverAndSelected( testIcon, UI.FitComponent.MAX_DIM )
                          .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == maxDim
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -1285,7 +1285,7 @@ class Button_Icons_Spec extends Specification
                        .withIconOnHoverAndSelected( treesIcon, UI.FitComponent.WIDTH )
                        .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
@@ -1293,30 +1293,30 @@ class Button_Icons_Spec extends Specification
                         .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnHoverAndSelected( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                         .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnHoverAndSelected( treesIcon, UI.FitComponent.MIN_DIM )
                         .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == minDim
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a hover and selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnHoverAndSelected( treesIcon, UI.FitComponent.MAX_DIM )
                         .get(JToggleButton)
         then : 'The hover and selected icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getRolloverSelectedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getRolloverSelectedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getRolloverSelectedIcon().getIconWidth() == maxDim
+            toggleButton.getRolloverSelectedIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -1502,7 +1502,7 @@ class Button_Icons_Spec extends Specification
                          .withIconOnSelected( testIcon, UI.FitComponent.WIDTH )
                          .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getSelectedIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
@@ -1510,30 +1510,30 @@ class Button_Icons_Spec extends Specification
                          .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getSelectedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnSelected( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                          .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnSelected( testIcon, UI.FitComponent.MIN_DIM )
                          .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == minDim
+            toggleButton.getSelectedIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnSelected( testIcon, UI.FitComponent.MAX_DIM )
                          .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == maxDim
+            toggleButton.getSelectedIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -1564,7 +1564,7 @@ class Button_Icons_Spec extends Specification
                        .withIconOnSelected( treesIcon, UI.FitComponent.WIDTH )
                        .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getSelectedIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
@@ -1572,30 +1572,30 @@ class Button_Icons_Spec extends Specification
                         .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getSelectedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnSelected( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                         .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnSelected( treesIcon, UI.FitComponent.MIN_DIM )
                         .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == minDim
+            toggleButton.getSelectedIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnSelected( treesIcon, UI.FitComponent.MAX_DIM )
                         .get(JToggleButton)
         then : 'The selected icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getSelectedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getSelectedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getSelectedIcon().getIconWidth() == maxDim
+            toggleButton.getSelectedIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -1781,7 +1781,7 @@ class Button_Icons_Spec extends Specification
                          .withIconOnDisabled( testIcon, UI.FitComponent.WIDTH )
                          .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getDisabledIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
@@ -1789,30 +1789,30 @@ class Button_Icons_Spec extends Specification
                          .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getDisabledIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnDisabled( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                          .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnDisabled( testIcon, UI.FitComponent.MIN_DIM )
                          .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconWidth() == minDim
+            toggleButton.getDisabledIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnDisabled( testIcon, UI.FitComponent.MAX_DIM )
                          .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconWidth() == maxDim
+            toggleButton.getDisabledIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -1843,7 +1843,7 @@ class Button_Icons_Spec extends Specification
                        .withIconOnDisabled( treesIcon, UI.FitComponent.WIDTH )
                        .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getDisabledIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
@@ -1851,30 +1851,30 @@ class Button_Icons_Spec extends Specification
                         .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getDisabledIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnDisabled( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                         .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnDisabled( treesIcon, UI.FitComponent.MIN_DIM )
                         .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconWidth() == minDim
+            toggleButton.getDisabledIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnDisabled( treesIcon, UI.FitComponent.MAX_DIM )
                         .get(JToggleButton)
         then : 'The disabled icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getDisabledIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledIcon().getIconWidth() == maxDim
+            toggleButton.getDisabledIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -2060,7 +2060,7 @@ class Button_Icons_Spec extends Specification
                          .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.WIDTH )
                          .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
@@ -2068,30 +2068,30 @@ class Button_Icons_Spec extends Specification
                          .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                          .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.MIN_DIM )
                          .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == minDim
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
                          .withIconOnDisabledAndSelected( testIcon, UI.FitComponent.MAX_DIM )
                          .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == maxDim
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
@@ -2122,7 +2122,7 @@ class Button_Icons_Spec extends Specification
                        .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.WIDTH )
                        .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
             toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(32)
         when : 'We re-create the button with the "HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
@@ -2130,30 +2130,30 @@ class Button_Icons_Spec extends Specification
                         .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
             toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(42)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "WIDTH_AND_HEIGHT" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.WIDTH_AND_HEIGHT )
                         .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80 - toggleButton.insets.left - toggleButton.insets.right)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30 - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom
         when : 'We re-create the button with the "MIN_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.MIN_DIM )
                         .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            int minDim = Math.min(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(minDim)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(minDim)
+            int minDim = Math.min(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == minDim
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == minDim
         when : 'We re-create the button with the "MAX_DIM" fit component option.'
             toggleButton = UI.toggleButton("I have a disabled and selected icon with custom layout").withSizeExactly(80, 30)
                         .withIconOnDisabledAndSelected( treesIcon, UI.FitComponent.MAX_DIM )
                         .get(JToggleButton)
         then : 'The disabled and selected icon of the `JToggleButton` has the expected dimensions!'
-            int maxDim = Math.max(80 - toggleButton.insets.left - toggleButton.insets.right, 30 - toggleButton.insets.top - toggleButton.insets.bottom)
-            toggleButton.getDisabledSelectedIcon().getIconWidth() == UI.scale(maxDim)
-            toggleButton.getDisabledSelectedIcon().getIconHeight() == UI.scale(maxDim)
+            int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)
+            toggleButton.getDisabledSelectedIcon().getIconWidth() == maxDim
+            toggleButton.getDisabledSelectedIcon().getIconHeight() == maxDim
         where : 'We test this with different UI scaling factors.'
             uiScale << [1, 2, 3]
     }
