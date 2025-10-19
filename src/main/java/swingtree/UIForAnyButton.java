@@ -249,7 +249,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public I withIcon( Icon icon, UI.FitComponent fitComponent ) {
-        NullUtil.nullArgCheck(icon,"icon", ImageIcon.class);
+        NullUtil.nullArgCheck(icon,"icon", Icon.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
         return _with( thisComponent -> {
                           _installAutomaticIconApplier(thisComponent, icon, fitComponent, AbstractButton::setIcon);
