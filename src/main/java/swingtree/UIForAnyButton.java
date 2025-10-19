@@ -599,7 +599,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Please also see {@link #withIconOnHover(IconDeclaration, UI.FitComponent)}, which is
      *  <b>the recommended way of setting hover icons on buttons!</b>
      *
-     * @param icon The {@link SvgIcon} which should be displayed when the button is being pressed.
+     * @param icon The {@link SvgIcon} which should be displayed when the button is being hovered over.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
