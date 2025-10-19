@@ -567,7 +567,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  layout policy enum constant to display it on the wrapped button type
      *  whenever the user hovers their cursor over the button...<br>
      *  Note that the {@code width} and {@code height} properties only serve as reference values
-     *  as the {@link swingtree.UI.FitComponent} is used to resiye the icon to fit the component.
+     *  as the {@link swingtree.UI.FitComponent} is used to resize the icon to fit the component.
      *  <p>
      *  In case of the referenced icon being an SVG file, the icon will be loaded as
      *  a fully scalable {@link SvgIcon}, if it is a png or jpeg file however,
