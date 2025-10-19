@@ -39,9 +39,9 @@ repositories {
 dependencies {
 
     if ( WE_CAN_DO_STATIC_ANALYSIS ) {
-        errorprone "com.uber.nullaway:nullaway:0.10.25"
+        errorprone "com.uber.nullaway:nullaway:0.11.1"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-        errorprone "com.google.errorprone:error_prone_core:2.27.0"
+        errorprone "com.google.errorprone:error_prone_core:2.29.2"
     }
     else
         errorprone "com.google.errorprone:error_prone_core:2.9.+"
@@ -76,10 +76,11 @@ dependencies {
     // Note that we are lenient with the version of slf4j, as we do not want to force a specific version on the user.
 
     // Testing :
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-    testImplementation platform('org.spockframework:spock-bom:2.3-groovy-4.0')
-    testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+    testImplementation platform('org.junit:junit-bom:5.11.2') // JUnit BOM for version management
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // Required for test execution
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.3-groovy-4.0'
     testImplementation 'com.athaydes:spock-reports:2.5.1-groovy-4.0'
     testImplementation 'org.slf4j:slf4j-api:2.0.12'
     testImplementation 'org.slf4j:slf4j-simple:2.0.12'
@@ -125,7 +126,7 @@ test {
 // CONFIGURING TEST REPORTING :
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.13"
     reportsDirectory.set(file("docs/coverage"))
 }
 
