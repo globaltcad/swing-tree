@@ -74,7 +74,7 @@ public final class ScalableImageIcon extends ImageIcon
 <span class="nc" id="L74">        } catch ( Exception e ) {</span>
 <span class="nc" id="L75">            log.error(&quot;An error occurred while calculating the size of a ScalableImageIcon.&quot;, e);</span>
 <span class="fc" id="L76">        }</span>
-<span class="fc" id="L77">        _baseSize      = Size.of((int) targetWidth, (int) targetHeight);</span>
+<span class="fc" id="L77">        _baseSize      = Size.of(targetWidth, targetHeight);</span>
 <span class="fc" id="L78">        _sourceIcon = original;</span>
 <span class="fc" id="L79">        _relativeScale = relativeScale;</span>
 <span class="fc" id="L80">        _currentScale  = UI.scale();</span>
@@ -85,10 +85,10 @@ public final class ScalableImageIcon extends ImageIcon
 <span class="pc bpc" id="L85" title="1 of 4 branches missed.">        if ( !_relativeScale.hasPositiveWidth() || !_relativeScale.hasPositiveHeight() )</span>
 <span class="fc" id="L86">            return original;</span>
         try {
-<span class="fc" id="L88">            int width  = (int) (original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));</span>
-<span class="fc" id="L89">            int height = (int) (original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));</span>
+<span class="fc" id="L88">            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));</span>
+<span class="fc" id="L89">            int height = Math.round(original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));</span>
 <span class="fc" id="L90">            Image originalImage = original.getImage();</span>
-<span class="pc bpc" id="L91" title="1 of 4 branches missed.">            if ( width == original.getIconWidth() &amp;&amp; height == original.getIconHeight() )</span>
+<span class="fc bfc" id="L91" title="All 4 branches covered.">            if ( width == original.getIconWidth() &amp;&amp; height == original.getIconHeight() )</span>
 <span class="fc" id="L92">                return original;</span>
 <span class="pc bpc" id="L93" title="2 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
                 // We create the smallest possible image to avoid exceptions.
@@ -233,4 +233,4 @@ public final class ScalableImageIcon extends ImageIcon
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

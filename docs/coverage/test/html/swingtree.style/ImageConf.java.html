@@ -336,9 +336,9 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @return A new {@link ImageConf} instance with the specified image.
      * @throws NullPointerException If the specified {@code path} is null.
      */
-    public ImageConf image(String path ) {
+    public ImageConf image( String path ) {
 <span class="fc" id="L340">        Objects.requireNonNull(path);</span>
-<span class="fc" id="L341">        return image(() -&gt; path);</span>
+<span class="fc" id="L341">        return image(IconDeclaration.of(path));</span>
     }
 
     /**
@@ -711,4 +711,4 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

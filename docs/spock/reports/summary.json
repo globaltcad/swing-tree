@@ -1,28 +1,16 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Wed Jul 30 21:46:10 JST 2025",
+  "created": "Mon Oct 20 04:51:33 JST 2025",
   "statistics":{
-    "runs":"58",
-    "passed":"58",
+    "runs":"59",
+    "passed":"59",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
     "duration":"?"
   },
   "specifications": [{
-      "className":"Example_Spec.Example_Spec",
-      "title":"An Introduction to writing Spock Specifications",
-      "narrative":"Hello and welcome to the example / template specification of this project.\n    This is a simple introduction as to how to get started writing Spock specifications.\n\n    Spock works on top of Groovy which is in essence a syntactic super-set of Java.\n    That means that one can write Java code in Groovy, and 99% of the time it will \n    work the exact same way.",
-      "featureCount":"5",
-      "failures":"0",
-      "errors":"0",
-      "skipped":"0" ,
-      "successRate":"1.0",
-      "duration":"?",
-      "executedFeatures":[{"id":"Call me feature not unit test!","extraInfo":[]},{"id":"I am readable and also best practice!","extraInfo":[]},{"id":"Numbers to the power of two with a fancy data table!","extraInfo":[]},{"id":"Should be able to remove from list","extraInfo":[]},{"id":"iAmNotSoReadable","extraInfo":[]}],
-      "ignoredFeatures":[]
-    },{
       "className":"swingtree.Animations_Spec",
       "title":"Animations",
       "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations \n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a `Timer` that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
@@ -33,6 +21,54 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Animate the color of a label when it is clicked.","extraInfo":[]},{"id":"Animate the height of a panel based on a Var<Boolean>.","extraInfo":[]},{"id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.","extraInfo":[]},{"id":"The event delegation object of a user event can be used to register animations.","extraInfo":[]},{"id":"Use `Animatable<M>` to define animations for immutable view models.","extraInfo":[]},{"id":"Use the API exposed by `UI.animateFor(..)` to schedule animations","extraInfo":[]},{"id":"Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.Label_Spec",
+      "title":"Labels",
+      "narrative":"This spec demonstrates the use of labels\n    in Swing-Tree.",
+      "featureCount":"4",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"A label UI can be created using the UI.label(..) factory method.","extraInfo":[]},{"id":"Create labels with custom horizontal and vertical alignment.","extraInfo":[]},{"id":"Create labels with custom horizontal and vertical text position.","extraInfo":[]},{"id":"The icon of a label may be specified using an `IconDeclaration`.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.Layout_Spec",
+      "title":"Responsive Layouts",
+      "narrative":"A basic requirement of any UI framework is the ability to create UIs\n    with layouts that adapt to different screen sizes and resolutions.\n    SwingTree is primarily based on the `MigLayout` layout manager, which\n    is a powerful and flexible layout manager that can be used to create\n    all kinds of layouts. \n\n    However, `MigLayout` is based on a rigid grid system, which can make\n    it difficult to create responsive layouts that adapt to different\n    size constraints. \n\n    To address this limitation, SwingTree provides an alternative layout\n    manager called `ResponsiveGridFlowLayout`, that is originally\n    based on the `FlowLayout` layout manager, but has been extended to\n    support responsive grid cell sizing.\n\n    In this specification, we will explore the features of the `ResponsiveGridFlowLayout`\n    as part of declarative SwingTree UI code.",
+      "featureCount":"5",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"The `.withFlowLayout()` method creates a responsive flow layout with good defaults.","extraInfo":[]},{"id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`.","extraInfo":[]},{"id":"The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI.","extraInfo":[]},{"id":"Use the `UI.AUTO_SPAN(..)` factory method to define responsive component constraints.","extraInfo":[]},{"id":"You can configure how the cell of a responsive flow layout is used vertically.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.SvgIcon_Spec",
+      "title":"SVG Support through SvgIcon",
+      "narrative":"Swing-Tree supports SVG icons through the `SvgIcon` class,\n    which is a subclass of `javax.swing.ImageIcon`.\n    This allows for smooth integration of SVG icons into regular\n    Swing components, like buttons, labels, etc.\n\n    In this specification we will see how to use the `SvgIcon` class.",
+      "featureCount":"7",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"A basic `SvgIcon` does not have a size.","extraInfo":[]},{"id":"The `String` representation of the `SvgIcon` shows its properties.","extraInfo":[]},{"id":"The `SvgIcon` is immutable, and its size must be specified through wither methods.","extraInfo":[]},{"id":"The `SvgIcon` will determine missing image size dimensions through the aspect ratio of the SVG document.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"The `UI.findSvgIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"Example_Spec.Example_Spec",
+      "title":"An Introduction to writing Spock Specifications",
+      "narrative":"Hello and welcome to the example / template specification of this project.\n    This is a simple introduction as to how to get started writing Spock specifications.\n\n    Spock works on top of Groovy which is in essence a syntactic super-set of Java.\n    That means that one can write Java code in Groovy, and 99% of the time it will \n    work the exact same way.",
+      "featureCount":"5",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Call me feature not unit test!","extraInfo":[]},{"id":"I am readable and also best practice!","extraInfo":[]},{"id":"Numbers to the power of two with a fancy data table!","extraInfo":[]},{"id":"Should be able to remove from list","extraInfo":[]},{"id":"iAmNotSoReadable","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Async_MVVM_Spec",
@@ -105,6 +141,18 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"A button group will not only synchronize the selection state of radio buttons, but also bound properties.","extraInfo":[]},{"id":"Bind the \"isSelected\" flag of a button to the equality between an enum and a enum property","extraInfo":[]},{"id":"Bind the \"isSelected\" flag of a button to the inequality between an enum and a enum property","extraInfo":[]},{"id":"Directly bind an enum based property to the selection state of a radio button.","extraInfo":[]},{"id":"Directly bind any property to the selection state of a radio button.","extraInfo":[]},{"id":"We can bind to the text of a button.","extraInfo":[]},{"id":"You can bind the icon as well as selection state of a toggle button to properties.","extraInfo":[]},{"id":"You can bind to the enabled state of a button.","extraInfo":[]},{"id":"You can bind to the selection state of a button.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.Button_Icons_Spec",
+      "title":"Button Icons",
+      "narrative":"In SwingTree there are various kinds of\n    button based widget types. All of these\n    button types can have different kinds of icons\n    for different parts of a user interaction:\n\n    - A standard icon for most situation.\n    - An on rollover / hover icon for when the mouse \n      cursor moves over the button type.\n    - A on press icon, which is shown when the user\n      presses the button.\n    - An icon shown when the component is disabled\n    - An icon shown when the component is selected\n    - An icon shown when the component is selected AND disabled\n    - An icon shown when the component is selected AND being hovered over\n\n    In this specification we show you all of the methods\n    for specifying these icons and ensure that they wor as intended.",
+      "featureCount":"56",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Use `withIcon( int width, int height, Icon icon )` to specify a regular icon with a custom size.","extraInfo":[]},{"id":"Use `withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a regular icon with custom size and layout.","extraInfo":[]},{"id":"Use `withIconOnDisabled( int width, int height, Icon icon )` to specify a disabled icon with a custom size.","extraInfo":[]},{"id":"Use `withIconOnDisabled( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a disabled icon with custom size and layout.","extraInfo":[]},{"id":"Use `withIconOnDisabledAndSelected( int width, int height, Icon icon )` to specify a disabled and selected icon with a custom size.","extraInfo":[]},{"id":"Use `withIconOnDisabledAndSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a disabled and selected icon with custom size and layout.","extraInfo":[]},{"id":"Use `withIconOnHover( int width, int height, Icon icon )` to specify a hover icon with a custom size.","extraInfo":[]},{"id":"Use `withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a hover icon with custom size and layout.","extraInfo":[]},{"id":"Use `withIconOnHoverAndSelected( int width, int height, Icon icon )` to specify a hover and selected icon with a custom size.","extraInfo":[]},{"id":"Use `withIconOnHoverAndSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a hover and selected icon with custom size and layout.","extraInfo":[]},{"id":"Use `withIconOnPress( int width, int height, Icon icon )` to specify a pressed icon with a custom size.","extraInfo":[]},{"id":"Use `withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a pressed icon with custom size and layout.","extraInfo":[]},{"id":"Use `withIconOnSelected( int width, int height, Icon icon )` to specify a selected icon with a custom size.","extraInfo":[]},{"id":"Use `withIconOnSelected( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent )` to specify a selected icon with custom size and layout.","extraInfo":[]},{"id":"We can use `withIcon( Icon icon )` to specify a regular icon.","extraInfo":[]},{"id":"We can use `withIcon( Icon icon, UI.FitComponent fitComponent )` to specify a regular icon with custom layout.","extraInfo":[]},{"id":"We can use `withIcon( IconDeclaration icon )` to specify a regular icon.","extraInfo":[]},{"id":"We can use `withIcon( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a regular icon with custom layout.","extraInfo":[]},{"id":"We can use `withIcon( Val<IconDeclaration> icon )` to make a regular icon reactive.","extraInfo":[]},{"id":"We can use `withIcon( int width, int height, IconDeclaration icon )` to specify a regular icon with custom size.","extraInfo":[]},{"id":"We can use `withIconOnDisabled( Icon icon )` to specify a disabled icon.","extraInfo":[]},{"id":"We can use `withIconOnDisabled( Icon icon, UI.FitComponent fitComponent )` to specify a disabled icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnDisabled( IconDeclaration icon )` to specify a disabled icon.","extraInfo":[]},{"id":"We can use `withIconOnDisabled( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a disabled icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnDisabled( Val<IconDeclaration> icon )` to make a disabled icon reactive.","extraInfo":[]},{"id":"We can use `withIconOnDisabled( int width, int height, IconDeclaration icon )` to specify a disabled icon with custom size.","extraInfo":[]},{"id":"We can use `withIconOnDisabledAndSelected( Icon icon )` to specify a disabled and selected icon.","extraInfo":[]},{"id":"We can use `withIconOnDisabledAndSelected( Icon icon, UI.FitComponent fitComponent )` to specify a disabled and selected icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnDisabledAndSelected( IconDeclaration icon )` to specify a disabled and selected icon.","extraInfo":[]},{"id":"We can use `withIconOnDisabledAndSelected( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a disabled and selected icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnDisabledAndSelected( Val<IconDeclaration> icon )` to make a disabled and selected icon reactive.","extraInfo":[]},{"id":"We can use `withIconOnDisabledAndSelected( int width, int height, IconDeclaration icon )` to specify a disabled and selected icon with custom size.","extraInfo":[]},{"id":"We can use `withIconOnHover( Icon icon )` to specify a hover icon.","extraInfo":[]},{"id":"We can use `withIconOnHover( Icon icon, UI.FitComponent fitComponent )` to specify a hover icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnHover( IconDeclaration icon )` to specify a hover icon.","extraInfo":[]},{"id":"We can use `withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a hover icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnHover( Val<IconDeclaration> icon )` to make a hover icon reactive.","extraInfo":[]},{"id":"We can use `withIconOnHover( int width, int height, IconDeclaration icon )` to specify a hover icon with custom size.","extraInfo":[]},{"id":"We can use `withIconOnHoverAndSelected( Icon icon )` to specify a hover and selected icon.","extraInfo":[]},{"id":"We can use `withIconOnHoverAndSelected( Icon icon, UI.FitComponent fitComponent )` to specify a hover and selected icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnHoverAndSelected( IconDeclaration icon )` to specify a hover and selected icon.","extraInfo":[]},{"id":"We can use `withIconOnHoverAndSelected( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a hover and selected icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnHoverAndSelected( Val<IconDeclaration> icon )` to make a hover and selected icon reactive.","extraInfo":[]},{"id":"We can use `withIconOnHoverAndSelected( int width, int height, IconDeclaration icon )` to specify a hover and selected icon with custom size.","extraInfo":[]},{"id":"We can use `withIconOnPress( Icon icon )` to specify a pressed icon.","extraInfo":[]},{"id":"We can use `withIconOnPress( Icon icon, UI.FitComponent fitComponent )` to specify a pressed icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnPress( IconDeclaration icon )` to specify a pressed icon.","extraInfo":[]},{"id":"We can use `withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a pressed icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnPress( Val<IconDeclaration> icon )` to make a pressed icon reactive.","extraInfo":[]},{"id":"We can use `withIconOnPress( int width, int height, IconDeclaration icon )` to specify a pressed icon with custom size.","extraInfo":[]},{"id":"We can use `withIconOnSelected( Icon icon )` to specify a selected icon.","extraInfo":[]},{"id":"We can use `withIconOnSelected( Icon icon, UI.FitComponent fitComponent )` to specify a selected icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnSelected( IconDeclaration icon )` to specify a selected icon.","extraInfo":[]},{"id":"We can use `withIconOnSelected( IconDeclaration icon, UI.FitComponent fitComponent )` to specify a selected icon with custom layout.","extraInfo":[]},{"id":"We can use `withIconOnSelected( Val<IconDeclaration> icon )` to make a selected icon reactive.","extraInfo":[]},{"id":"We can use `withIconOnSelected( int width, int height, IconDeclaration icon )` to specify a selected icon with custom size.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Color_Spec",
@@ -273,30 +321,6 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"A property can define the horizontal and vertical alignment of a label.","extraInfo":[]},{"id":"A property can define the image relative horizontal and vertical alignment of a label.","extraInfo":[]},{"id":"It is possible to bind to the minimum, maximum and preferred size of a label","extraInfo":[]},{"id":"We can bind to the foreground and background color of a UI node.","extraInfo":[]},{"id":"We can bind to the text of a label.","extraInfo":[]},{"id":"We can store icons inside properties and then bind them to labels.","extraInfo":[]},{"id":"You can bind a variable to the \"enable\" flag of a label.","extraInfo":[]},{"id":"You can bind a variable to the \"visible\" flag of a label.","extraInfo":[]},{"id":"You can dynamically model the font size of your labels using an integer based property.","extraInfo":[]}],
-      "ignoredFeatures":[]
-    },{
-      "className":"swingtree.Label_Spec",
-      "title":"Labels",
-      "narrative":"This spec demonstrates the use of labels\n    in Swing-Tree.",
-      "featureCount":"4",
-      "failures":"0",
-      "errors":"0",
-      "skipped":"0" ,
-      "successRate":"1.0",
-      "duration":"?",
-      "executedFeatures":[{"id":"A label UI can be created using the UI.label(..) factory method.","extraInfo":[]},{"id":"Create labels with custom horizontal and vertical alignment.","extraInfo":[]},{"id":"Create labels with custom horizontal and vertical text position.","extraInfo":[]},{"id":"The icon of a label may be specified using an `IconDeclaration`.","extraInfo":[]}],
-      "ignoredFeatures":[]
-    },{
-      "className":"swingtree.Layout_Spec",
-      "title":"Responsive Layouts",
-      "narrative":"A basic requirement of any UI framework is the ability to create UIs\n    with layouts that adapt to different screen sizes and resolutions.\n    SwingTree is primarily based on the `MigLayout` layout manager, which\n    is a powerful and flexible layout manager that can be used to create\n    all kinds of layouts. \n\n    However, `MigLayout` is based on a rigid grid system, which can make\n    it difficult to create responsive layouts that adapt to different\n    size constraints. \n\n    To address this limitation, SwingTree provides an alternative layout\n    manager called `ResponsiveGridFlowLayout`, that is originally\n    based on the `FlowLayout` layout manager, but has been extended to\n    support responsive grid cell sizing.\n\n    In this specification, we will explore the features of the `ResponsiveGridFlowLayout`\n    as part of declarative SwingTree UI code.",
-      "featureCount":"5",
-      "failures":"0",
-      "errors":"0",
-      "skipped":"0" ,
-      "successRate":"1.0",
-      "duration":"?",
-      "executedFeatures":[{"id":"The `.withFlowLayout()` method creates a responsive flow layout with good defaults.","extraInfo":[]},{"id":"The `ResponsiveGridFlowLayout` lays out its components exactly like the regular `FlowLayout`.","extraInfo":[]},{"id":"The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI.","extraInfo":[]},{"id":"Use the `UI.AUTO_SPAN(..)` factory method to define responsive component constraints.","extraInfo":[]},{"id":"You can configure how the cell of a responsive flow layout is used vertically.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Layout_Styling_Spec",
@@ -609,18 +633,6 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Compared to other colors with an alpha of 0, using `UI.Color.TRANSPARENT` in a gradient style avoids color leakage.","extraInfo":[]},{"id":"Style objects are value based (with respect to equality and hash code).","extraInfo":[]},{"id":"SwingTree will simplify the style configuration of a component if possible.","extraInfo":[]},{"id":"The String representation of a style config will tell you everything about it!","extraInfo":[]},{"id":"The `UI.Color.UNDEFINED` constant can be used as a safe shorthand for null for the background and foreground properties of the style API","extraInfo":[]},{"id":"The `UI.Color.UNDEFINED` constant can be used as a safe shorthand for null for various properties in the style API","extraInfo":[]},{"id":"The `UI.Font.UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API","extraInfo":[]},{"id":"The border style will be simplified if margin and widths are all 0.","extraInfo":[]},{"id":"The style API allows you to configure a custom noise paint for a component font.","extraInfo":[]},{"id":"The style API allows you to configure a custom paint for a component font.","extraInfo":[]},{"id":"Various kinds of String expressions can be parsed as colors by various style properties.","extraInfo":[]}],
-      "ignoredFeatures":[]
-    },{
-      "className":"swingtree.SvgIcon_Spec",
-      "title":"SVG Support through SvgIcon",
-      "narrative":"Swing-Tree supports SVG icons through the `SvgIcon` class,\n    which is a subclass of `javax.swing.ImageIcon`.\n    This allows for smooth integration of SVG icons into regular\n    Swing components, like buttons, labels, etc.\n\n    In this specification we will see how to use the `SvgIcon` class.",
-      "featureCount":"7",
-      "failures":"0",
-      "errors":"0",
-      "skipped":"0" ,
-      "successRate":"1.0",
-      "duration":"?",
-      "executedFeatures":[{"id":"A basic `SvgIcon` does not have a size.","extraInfo":[]},{"id":"The `String` representation of the `SvgIcon` shows its properties.","extraInfo":[]},{"id":"The `SvgIcon` is immutable, and its size must be specified through wither methods.","extraInfo":[]},{"id":"The `SvgIcon` will determine missing image size dimensions through the aspect ratio of the SVG document.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"The `UI.findSvgIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Tab_Binding_Spec",

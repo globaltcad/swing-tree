@@ -929,8 +929,8 @@ public final class UI extends UIFactoryMethods
      * @return The unscaled float value.
      */
     public static float unscale( float value ) {
-<span class="nc" id="L932">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L933" title="All 2 branches missed.">        return ( scaleFactor == 1f ? value : (value / scaleFactor) );</span>
+<span class="fc" id="L932">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="fc bfc" id="L933" title="All 2 branches covered.">        return ( scaleFactor == 1f ? value : (value / scaleFactor) );</span>
     }
 
     /**
@@ -3357,4 +3357,4 @@ public final class UI extends UIFactoryMethods
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
