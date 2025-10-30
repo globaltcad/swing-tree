@@ -84,15 +84,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             );
     }
 
-    private void _bindRepaintOn( JComponent thisComponent, Event event ) {
+    private void _bindRepaintOn( JComponent thisComponent, Viewable<?> property ) {
         ComponentExtension.from(thisComponent).storeBoundObservable(
-                event.observable().subscribe( () -> _runInUI(thisComponent::repaint) )
-            );
-    }
-
-    private void _bindRepaintOn( JComponent thisComponent, Val<?> event ) {
-        ComponentExtension.from(thisComponent).storeBoundObservable(
-                event.view().subscribe( () -> _runInUI(thisComponent::repaint) )
+                property.subscribe( () -> _runInUI(thisComponent::repaint) )
             );
     }
 
@@ -134,20 +128,32 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Allows you to bind an {@link Event} to the {@link JComponent#repaint()} method of
      *  the component represented by this builder. <br>
      *  This means that the component will be repainted whenever the event is fired
-     *  through the {@link Event#fire()} method.
+     *  through the {@link Event#fire()} method.<br>
+     *  Note that this is essentially a convenience method equivalent to invoking
+     *  {@link #withRepaintOn(Observable)} with the supplied event converted
+     *  to an {@link Observable} like so:<br>
+     *  <pre>{@code
+     *      .withRepaintOn(event.observable())
+     *  }</pre>
      *
      * @param event The event to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Event event ) {
-        return _with( thisComponent -> _bindRepaintOn(thisComponent, event) )._this();
+        return withRepaintOn(event.observable());
     }
 
     /**
      *  This method exposes a concise way to bind multiple {@link Event}s to the
      *  {@link JComponent#repaint()} method of the component represented by this builder.
      *  This means that the component will be repainted whenever any one of the events is fired
-     *  through the {@link Event#fire()} method.
+     *  through the {@link Event#fire()} method.<br>
+     *  Note that this is essentially a convenience method equivalent to invoking
+     *  {@link #withRepaintOn(Observable, Observable, Observable[])} with each event converted
+     *  to an {@link Observable} like so:<br>
+     *  <pre>{@code
+     *      .withRepaintOn(a.observable(), b.observable(), c.observable())
+     *  }</pre>
      *
      * @param first The first event to which the repaint method of the component will be bound.
      * @param second The second event to which the repaint method of the component will be bound.
@@ -155,14 +161,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Event first, Event second, Event... rest ) {
-        return _with( thisComponent -> {
-                    _bindRepaintOn(thisComponent, first);
-                    _bindRepaintOn(thisComponent, second);
-                    for ( Event e : rest ) {
-                        _bindRepaintOn(thisComponent, e);
-                    }
-                })
-                ._this();
+        return withRepaintOn(
+                    first.observable(),
+                    second.observable(),
+                    Arrays.stream(rest).map(Event::observable).toArray(Observable[]::new)
+                );
     }
 
     /**
@@ -176,13 +179,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
      *      and then also pass these properties to the this {@code withRepaintOn}
      *      method to ensure that the style gets re-evaluated and then repainted.
-     *  </p>
+     *  </p><br>
+     *  Also note that this is essentially a convenience method equivalent to invoking
+     *  {@link #withRepaintOn(Viewable)} with the supplied property converted
+     *  to a {@link Viewable} like so:<br>
+     *  <pre>{@code
+     *      .withRepaintOn(property.view())
+     *  }</pre>
      *
-     * @param event The {@link Val} to which the repaint method of the component will be bound.
+     * @param property The {@link Val} to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
-    public final I withRepaintOn( Val<?> event ) {
-        return _with( thisComponent -> _bindRepaintOn(thisComponent, event) )._this();
+    public final I withRepaintOn( Val<?> property ) {
+        return withRepaintOn(property.view());
     }
 
     /**
@@ -196,7 +205,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
      *      and then also pass these properties to the this {@code withRepaintOn}
      *      method to ensure that the style gets re-evaluated and then repainted.
-     *  </p>
+     *  </p><br>
+     *  Also note that this is essentially a convenience method equivalent to invoking
+     *  {@link #withRepaintOn(Viewable, Viewable, Viewable[])} with each property converted
+     *  to a {@link Viewable} like so:<br>
+     *  <pre>{@code
+     *      .withRepaintOn(a.view(), b.view(), c.view())
+     *  }</pre>
      *
      * @param first The first {@link Val} to which the repaint method of the component will be bound.
      * @param second The second {@link Val} to which the repaint method of the component will be bound.
@@ -204,10 +219,56 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Val<?> first, Val<?> second, Val<?>... rest ) {
+        return withRepaintOn(
+                    first.view(),
+                    second.view(),
+                    Arrays.stream(rest).map(Val::view).toArray(Viewable[]::new)
+                );
+    }
+
+    /**
+     *  Allows you to bind a {@link Viewable} to the {@link JComponent#repaint()} method
+     *  of the component represented by this builder. <br>
+     *  This means that the component will be repainted whenever the value of the {@link Viewable}
+     *  changes. If the {@link Viewable} is derived from a mutable {@link Var} property,
+     *  then this event is usually triggered through the {@link Var#set(Object)} method.<br>
+     *  <p>
+     *      A typical use case is to use {@link Viewable} properties in the
+     *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
+     *      and then also pass these properties to the this {@code withRepaintOn}
+     *      method to ensure that the style gets re-evaluated and then repainted.
+     *  </p>
+     *
+     * @param property The {@link Viewable} to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Viewable<?> property ) {
+        return _with( thisComponent -> _bindRepaintOn(thisComponent, property) )._this();
+    }
+
+    /**
+     *  Use this method to bind multiple {@link Viewable}s to the
+     *  {@link JComponent#repaint()} method of the component represented by this builder.
+     *  This means that the component will be repainted whenever the value of any one of the
+     *  {@link Viewable}s changes. If the {@link Viewable} is derived from a mutable {@link Var} property,
+     *  then this event is usually triggered through the {@link Var#set(Object)} method.<br>
+     *  <p>
+     *      A typical use case is to use {@link Viewable} properties in the
+     *      {@link Styler} of the style API exposed by {@link UIForAnySwing#withStyle(Styler)},
+     *      and then also pass these properties to the this {@code withRepaintOn}
+     *      method to ensure that the style gets re-evaluated and then repainted.
+     *  </p>
+     *
+     * @param first The first {@link Viewable} to which the repaint method of the component will be bound.
+     * @param second The second {@link Viewable} to which the repaint method of the component will be bound.
+     * @param rest The rest of the {@link Viewable}s to which the repaint method of the component will be bound.
+     * @return This declarative builder instance, which enables builder-style method chaining.
+     */
+    public final I withRepaintOn( Viewable<?> first, Viewable<?> second, Viewable<?>... rest ) {
         return _with( c -> {
                     _bindRepaintOn(c, first);
                     _bindRepaintOn(c, second);
-                    for ( Val<?> o : rest ) {
+                    for ( Viewable<?> o : rest ) {
                         _bindRepaintOn(c, o);
                     }
                 })._this();
