@@ -4,7 +4,9 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import spock.util.concurrent.PollingConditions
+import sprouts.Var
 import swingtree.animation.LifeTime
+import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -309,5 +311,96 @@ class Style_Animations_Spec extends Specification
             !(button.getUI() instanceof MetalButtonUI)
     }
 
+    def 'You can animate a style using properties and the `withRepaintOn` methods!'( float uiScale ) {
+        reportInfo """
+            Styles in SwingTree a functions which take in a configuration
+            and transform it into a new and updated configuration.
+            But this function is not invoked all the time, so when you capture
+            mutable state in such a style function, like a property for example,
+            it is your responsibility to trigger a re-evaluation and repaint.
+            
+            This is what 'withRepaintOn' is useful for, because it re-evaluates the
+            style and then triggers a repaint.
+        """
+        given : """
+            First up, we initialize SwingTree with a custom DPI scale and
+            then define some scaling an scaling rounding error functions
+            which mirror how SwingTree calculates margin errors based on
+            its box model being fractional... This will make more sense 
+            if you continue reading. 
+        """
+            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            var scale = { it * uiScale }
+            var scaledToString = { String.valueOf(scale(it)).replace(".0", "") }
+            var scaleError = { 1 - ( scale(it) % 1 ) }
+            var scaleErrorToString = {
+                var err = scaleError(it)
+                if ( err == 1 ) err = 0
+                var asStr = String.valueOf(err).replace(".0", "")
+                return asStr == "0" ? "?" : asStr
+            }
+        and : "We create a simple mutable float property for modelling a dynamic border width!"
+            var width = Var.of(0f)
+        and : """
+            We create a Swing component, a JLabel, and
+            apply a style to it based on a float property which
+            is bound to the 'withRepaintOn' method.
+        """
+            var label =
+                        UI.label("Title").withSizeExactly(84, 42)
+                        .withRepaintOn(width)
+                        .withStyle(conf -> conf
+                            .border(width.get(), "green")
+                            .borderRadius(width.get())
+                            .backgroundColor("oak")
+                        )
+                        .get(JLabel)
+        and : 'Then we get a string encoding of the entire style:'
+            var styleString = ComponentExtension.from(label).getStyle().toString()
+
+        expect :
+            styleString.contains("BorderConf[NONE]")
+            styleString.contains("backgroundColor=rgba(216,181,137,255)")
+
+        when : """
+            We noe set a fractional border width! Note that Swing does not
+            support fractional components widths, so how does it ensure that
+            the layout is not broken? Well...
+        """
+            width.set(2.5f)
+            UI.sync()
+            styleString = ComponentExtension.from(label).getStyle().toString()
+        then : """
+            Here you can see that the custom border automatically created
+            a fractional margin by which always produces a component with
+            a whole width and height!
+            
+            All of this dynamically updated because of the 'withRepaintOn' method!
+        """
+            !styleString.contains("BorderConf[NONE]")
+            styleString.contains("backgroundColor=rgba(216,181,137,255)")
+            styleString.contains("BorderConf[" +
+                        "radius=${scaledToString(2.5)}, " +
+                        "width=${scaledToString(2.5)}, " +
+                        "margin=Outline[" +
+                            "top=${scaleErrorToString(2.5)}, " +
+                            "right=${scaleErrorToString(2.5)}, " +
+                            "bottom=${scaleErrorToString(2.5)}, " +
+                            "left=${scaleErrorToString(2.5)}" +
+                        "], " +
+                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "color=rgba(0,128,0,255)" +
+                    "]")
+
+        when : 'We go back to the old value...'
+            width.set(0f)
+            UI.sync()
+            styleString = ComponentExtension.from(label).getStyle().toString()
+        then : 'Everything is back to normal! No style.'
+            styleString.contains("BorderConf[NONE]")
+            styleString.contains("backgroundColor=rgba(216,181,137,255)")
+        where :
+            uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
+    }
 
 }

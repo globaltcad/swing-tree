@@ -80,14 +80,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
         ComponentExtension.from(thisComponent).storeBoundObservable(
-                event.subscribe( () -> _runInUI( thisComponent::repaint ) )
+                event.subscribe( () -> _runInUI( ()->{
+                    ComponentExtension.from(thisComponent).gatherApplyAndInstallStyle(false);
+                    thisComponent.repaint();
+                }))
             );
     }
 
-    private void _bindRepaintOn( JComponent thisComponent, Viewable<?> property ) {
-        ComponentExtension.from(thisComponent).storeBoundObservable(
-                property.subscribe( () -> _runInUI(thisComponent::repaint) )
-            );
+    private void _bindRepaintOn(JComponent thisComponent, Observable first, Observable second, Observable... rest ) {
+        _bindRepaintOn(thisComponent, first);
+        _bindRepaintOn(thisComponent, second);
+        for ( Observable o : rest ) {
+            _bindRepaintOn(thisComponent, o);
+        }
     }
 
     /**
@@ -115,13 +120,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Observable first, Observable second, Observable... rest ) {
-        return _with( c -> {
-                    _bindRepaintOn(c, first);
-                    _bindRepaintOn(c, second);
-                    for ( Observable o : rest ) {
-                        _bindRepaintOn(c, o);
-                    }
-                })._this();
+        return _with( c -> _bindRepaintOn(c, first, second, rest ) )._this();
     }
 
     /**
