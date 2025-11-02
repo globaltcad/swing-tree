@@ -204,7 +204,9 @@ public final class SwingTree
      */
     public void setUiScaleFactor( float scaleFactor ) {
         log.debug("Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
-        _uiScale.get().setUserScaleFactor(scaleFactor);
+        UI.run(()->{
+            _uiScale.get().setUserScaleFactor(scaleFactor);
+        });
     }
 
     /**
