@@ -266,9 +266,19 @@ class Animations_Spec extends Specification
             label.getForeground().getBlue() < 10
     }
 
-    def 'Animate the height of a panel based on a Var<Boolean>.'()
+    def 'Animate the height of a panel based on a Var<Boolean>.'(float uiScale)
     {
-        given : 'A simple list used as a trace for the animation runs.'
+        given :  """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the SVG is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A simple list used as a trace for the animation runs.'
             var trace = []
         and : 'A Var<Boolean> indicating whether the panel should be expanded or not.'
             var isExpanded = Var.of(true)
@@ -283,20 +293,25 @@ class Animations_Spec extends Specification
                     })
                     .get(JPanel)
         expect: 'The JPanel is initially expanded.'
-            panel.getPreferredSize() == new Dimension(100, 200)
-            panel.getMinimumSize()   == new Dimension(50,  200)
-            panel.getMaximumSize()   == new Dimension(200, 200)
-            panel.getSize()          == new Dimension(90,  200)
+            panel.getPreferredSize() == new Dimension((100 * uiScale) as int, (200 * uiScale) as int)
+            panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, (200 * uiScale) as int)
+            panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, (200 * uiScale) as int)
+            panel.getSize()          == new Dimension((90  * uiScale) as int, (200 * uiScale) as int)
         when: 'We set the panel to not expanded.'
             trace.clear()
             isExpanded.set(false)
         and: 'We wait for the animation to complete.'
             Wait.until({ trace.contains(0d) },2_500)
         then: 'The JPanel is not expanded.'
-            panel.getPreferredSize() == new Dimension(100, 0)
-            panel.getMinimumSize()   == new Dimension(50,  0)
-            panel.getMaximumSize()   == new Dimension(200, 0)
-            panel.getSize()          == new Dimension(90,  0)
+            panel.getPreferredSize() == new Dimension((100 * uiScale) as int, 0)
+            panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, 0)
+            panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, 0)
+            panel.getSize()          == new Dimension((90  * uiScale) as int, 0)
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale << [1, 2, 3]
     }
 
 }

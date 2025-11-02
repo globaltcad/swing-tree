@@ -36,15 +36,24 @@ class SvgIcon_Spec extends Specification
             icon.getIconWidth()  == -1
     }
 
-    def 'The `SvgIcon` is immutable, and its size must be specified through wither methods.'()
-    {
+    def 'The `SvgIcon` is immutable, and its size must be specified through wither methods.'(float uiScale) {
         reportInfo """
             The reason why the `SvgIcon` is immutable is because
             it makes caching of the icon easier and safer.
             So when you want to change the size of the icon,
             you must use its various wither methods.
         """
-        given : 'We create a basic `SvgIcon` of a funnel.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the SVG is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a basic `SvgIcon` of a funnel.'
             var icon = new SvgIcon("/img/funnel.svg")
         when : 'We use the various wither methods to create differently sized icons.'
             var icon2 = icon.withIconWidth(12)
@@ -53,30 +62,35 @@ class SvgIcon_Spec extends Specification
             var icon5 = icon.withIconSizeFromWidth(31)
             var icon4 = icon.withIconSizeFromHeight(24)
         then : 'These icons have different sizes.'
-            icon1.getIconWidth()  == 13
-            icon1.getIconHeight() == 13
+            icon1.getIconWidth()  == (13 * uiScale) as int
+            icon1.getIconHeight() == (13 * uiScale) as int
             icon1.getBaseWidth()  == -1
             icon1.getBaseHeight() == 13
 
-            icon2.getIconWidth()  == 12
-            icon2.getIconHeight() == 12
+            icon2.getIconWidth()  == (12 * uiScale) as int
+            icon2.getIconHeight() == (12 * uiScale) as int
             icon2.getBaseWidth()  == 12
             icon2.getBaseHeight() == -1
 
-            icon3.getIconWidth()  == 27
-            icon3.getIconHeight() == 16
+            icon3.getIconWidth()  == (27 * uiScale) as int
+            icon3.getIconHeight() == (16 * uiScale) as int
             icon3.getBaseWidth()  == 27
             icon3.getBaseHeight() == 16
 
-            icon4.getIconWidth()  == 24
-            icon4.getIconHeight() == 24
+            icon4.getIconWidth()  == (24 * uiScale) as int
+            icon4.getIconHeight() == (24 * uiScale) as int
             icon4.getBaseWidth()  == 24
             icon4.getBaseHeight() == 24
 
-            icon5.getIconWidth()  == 31
-            icon5.getIconHeight() == 31
+            icon5.getIconWidth()  == (31 * uiScale) as int
+            icon5.getIconHeight() == (31 * uiScale) as int
             icon5.getBaseWidth()  == 31
             icon5.getBaseHeight() == 31
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale << [1, 2, 3]
     }
 
     def 'The `String` representation of the `SvgIcon` shows its properties.'()

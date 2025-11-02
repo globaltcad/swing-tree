@@ -145,7 +145,9 @@ class Layout_Spec extends Specification
             two panels with the same components, one using a `FlowLayout` and the
             other using a `ResponsiveGridFlowLayout`.
         """
-        given : 'Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.'
+        given : 'We first setup the default UI scale factor of 1f, which is needed to align with the standard flow layout!'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'Two panels with the same components, one using a `FlowLayout` and the other using a `ResponsiveGridFlowLayout`.'
             var ourFlowPanel =
                         UI.panel().withFlowLayout(alignment, horizontalGap, verticalGap)
                         .withPrefSize(prefSize)
@@ -180,6 +182,9 @@ class Layout_Spec extends Specification
             ourFlowPanel.getComponent(2).getBounds() == regularFlowPanel.getComponent(2).getBounds()
             ourFlowPanel.getComponent(3).getBounds() == regularFlowPanel.getComponent(3).getBounds()
             ourFlowPanel.getComponent(4).getBounds() == regularFlowPanel.getComponent(4).getBounds()
+        cleanup :
+            SwingTree.clear()
+
         where :
             alignment                      | horizontalGap | verticalGap | prefSize
 
@@ -227,7 +232,9 @@ class Layout_Spec extends Specification
             and then demonstrate how the components span different numbers of cells
             in the grid for different sizes of the parent container.
         """
-        given : 'A panel with components that have responsive cell span constraints.'
+        given : 'We first setup the default UI scale factor of 1f, which is needed to align with the standard flow layout!'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A panel with components that have responsive cell span constraints.'
             var ui =
                           UI.panel("ins 0").withFlowLayout(UI.HorizontalAlignment.CENTER, 10, 20)
                           .withPrefSize(120, 100)
@@ -304,10 +311,12 @@ class Layout_Spec extends Specification
         and : 'The parent container has the correct static and dynamic preferred size:'
             panel.getPreferredSize() == new Dimension(120, 100)
             panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 180)
+        cleanup :
+            SwingTree.clear()
     }
 
     def 'You can configure how the cell of a responsive flow layout is used vertically.'(
-        Size layoutSize, boolean isFill, UI.VerticalAlignment alignInCell, List<List<Integer>> expectedBounds
+        float uiScale, Size layoutSize, boolean isFill, UI.VerticalAlignment alignInCell, List<List<Integer>> expectedBounds
     ) {
         reportInfo """
             The `ResponsiveGridFlowLayout` layout manager supports vertical alignment
@@ -323,7 +332,9 @@ class Layout_Spec extends Specification
             In this unit test, we will demonstrate how the vertical alignment
             of components within their cells can be configured.
         """
-        given : 'A panel with components that have responsive cell span constraints.'
+        given : 'We first setup the UI scale factor used globally!'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A panel with components that have responsive cell span constraints.'
             var ui =
                           UI.panel("ins 0").withFlowLayout(UI.HorizontalAlignment.CENTER, 5, 10)
                           .withPrefSize(120, 100)
@@ -355,21 +366,33 @@ class Layout_Spec extends Specification
             panel.getComponent(2).getBounds() == bounds3
             panel.getComponent(3).getBounds() == bounds4
         and : 'The parent container has the correct static and dynamic preferred size:'
-            panel.getPreferredSize() == new Dimension(120, 100)
-            panel.getLayout().preferredLayoutSize(panel) == new Dimension(120, 100)
+            panel.getPreferredSize() == new Dimension((120 * uiScale) as int, (100 * uiScale) as int)
+            panel.getLayout().preferredLayoutSize(panel) == new Dimension((120 * uiScale) as int, (100 * uiScale) as int)
+        cleanup :
+            SwingTree.clear()
 
         where :
-            layoutSize       | isFill | alignInCell                    || expectedBounds
+            uiScale | layoutSize       | isFill | alignInCell                    || expectedBounds
 
-            Size.of(120,200) | false  | UI.VerticalAlignment.UNDEFINED || [[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]
-            Size.of(120,200) | false  | UI.VerticalAlignment.CENTER    || [[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]
-            Size.of(120,200) | false  | UI.VerticalAlignment.TOP       || [[14,10,15,10],[34,10,7,20],[46,10,31,30],[82,10,23,40]]
-            Size.of(120,200) | false  | UI.VerticalAlignment.BOTTOM    || [[14,40,15,10],[34,30,7,20],[46,20,31,30],[82,10,23,40]]
+              1f    | Size.of(120,200) | false  | UI.VerticalAlignment.UNDEFINED || [[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]
+              1f    | Size.of(120,200) | false  | UI.VerticalAlignment.CENTER    || [[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]
+              1f    | Size.of(120,200) | false  | UI.VerticalAlignment.TOP       || [[14,10,15,10],[34,10,7,20],[46,10,31,30],[82,10,23,40]]
+              1f    | Size.of(120,200) | false  | UI.VerticalAlignment.BOTTOM    || [[14,40,15,10],[34,30,7,20],[46,20,31,30],[82,10,23,40]]
 
-            Size.of(120,200) | true   | UI.VerticalAlignment.UNDEFINED || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
-            Size.of(120,200) | true   | UI.VerticalAlignment.CENTER    || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
-            Size.of(120,200) | true   | UI.VerticalAlignment.TOP       || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
-            Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+              1f    | Size.of(120,200) | true   | UI.VerticalAlignment.UNDEFINED || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+              1f    | Size.of(120,200) | true   | UI.VerticalAlignment.CENTER    || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+              1f    | Size.of(120,200) | true   | UI.VerticalAlignment.TOP       || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+              1f    | Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]
+
+              2f    | Size.of(120,200) | false  | UI.VerticalAlignment.UNDEFINED || [[20,40,20,20],[50,30,13,40],[73,20,26,60],[43,100,33,80]]
+              2f    | Size.of(120,200) | false  | UI.VerticalAlignment.CENTER    || [[20,40,20,20],[50,30,13,40],[73,20,26,60],[43,100,33,80]]
+              2f    | Size.of(120,200) | false  | UI.VerticalAlignment.TOP       || [[20,20,20,20],[50,20,13,40],[73,20,26,60],[43,100,33,80]]
+              2f    | Size.of(120,200) | false  | UI.VerticalAlignment.BOTTOM    || [[20,60,20,20],[50,40,13,40],[73,20,26,60],[43,100,33,80]]
+
+              2f    | Size.of(120,200) | true   | UI.VerticalAlignment.UNDEFINED || [[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]
+              2f    | Size.of(120,200) | true   | UI.VerticalAlignment.CENTER    || [[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]
+              2f    | Size.of(120,200) | true   | UI.VerticalAlignment.TOP       || [[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]
+              2f    | Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]
     }
 
 }

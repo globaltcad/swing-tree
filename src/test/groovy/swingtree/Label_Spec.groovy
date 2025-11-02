@@ -31,7 +31,7 @@ class Label_Spec extends Specification
             label.text == "Test"
     }
 
-    def 'The icon of a label may be specified using an `IconDeclaration`.'()
+    def 'The icon of a label may be specified using an `IconDeclaration`.'(float uiScale)
     {
         reportInfo """
             In larger applications you should consider using the `IconDeclaration`
@@ -70,7 +70,17 @@ class Label_Spec extends Specification
             where the icon may not be available at all, but you still want to test
             the behaviour of your view model.
         """
-        given : 'We create an `IconDeclaration` as a simple path provider.'
+        given :  """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the SVG is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create an `IconDeclaration` as a simple path provider.'
             IconDeclaration iconDeclaration = IconDeclaration.of("img/seed.png")
         and : 'We create a new label ui node with the icon declaration.'
             var ui =
@@ -81,12 +91,17 @@ class Label_Spec extends Specification
 
         expect : 'The icon should be loaded and displayed.'
             label.icon != null
-            label.icon.iconHeight == 512
-            label.icon.iconWidth == 512
+            label.icon.iconHeight == (512 * uiScale) as int
+            label.icon.iconWidth == (512 * uiScale) as int
         and : 'The icon should be the same as the one we specified.'
             label.icon === iconDeclaration.find().get()
         and : 'The label should have the specified text.'
             label.text == "Test"
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale << [1, 2, 3]
     }
 
     def 'Create labels with custom horizontal and vertical alignment.'() {
