@@ -9,24 +9,20 @@ import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.ImageIcon;
-import javax.swing.LookAndFeel;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -204,9 +200,12 @@ public final class SwingTree
      */
     public void setUiScaleFactor( float scaleFactor ) {
         log.debug("Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
-        UI.run(()->{
+        if ( UI.thisIsUIThread() )
             _uiScale.get().setUserScaleFactor(scaleFactor);
-        });
+        else
+            UI.runNow(()->{
+                _uiScale.get().setUserScaleFactor(scaleFactor);
+            });
     }
 
     /**
@@ -246,6 +245,22 @@ public final class SwingTree
      * to the given font.
      */
     public Font scale( Font font ) {
+        if( !_config.isUiScaleFactorEnabled() )
+            return font;
+
+        float scaleFactor = getUiScaleFactor();
+        if( scaleFactor <= 0 || scaleFactor == 1 )
+            return font;
+
+        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );
+        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
+    }
+
+    /**
+     * Applies a custom scale factor given in system property "swingtree.uiScale"
+     * to the given font.
+     */
+    public Font applyScaleAsFontSize( Font font ) {
         if( !_config.isUiScaleFactorEnabled() )
             return font;
 

@@ -171,7 +171,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                     if ( _isUndefinedFont(font) )
                         thisComponent.setFont(null);
                     else
-                        thisComponent.setFont(font);
+                        thisComponent.setFont(SwingTree.get().scale(font));
                 })
                 ._this();
     }
@@ -194,14 +194,14 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                     if ( _isUndefinedFont(v) )
                         c.setFont(null);
                     else
-                        c.setFont(v);
+                        c.setFont(SwingTree.get().scale(v));
                 })
                 ._with( thisComponent -> {
                     Font newFont = font.orElseThrowUnchecked();
                     if ( _isUndefinedFont(newFont) )
                         thisComponent.setFont( null );
                     else
-                        thisComponent.setFont( newFont );
+                        thisComponent.setFont( SwingTree.get().scale(newFont) );
                 })
                 ._this();
 

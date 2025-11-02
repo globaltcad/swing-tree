@@ -3676,6 +3676,49 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
+     *  Use this to set the size of the font of the wrapped {@link JComponent}.
+     * @param size The size of the font which should be displayed on the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withFontSize( int size ) {
+        return _with( thisComponent -> {
+                    Font f = thisComponent.getFont();
+                    thisComponent.setFont(f.deriveFont(UI.scale((float)size)));
+                    ComponentExtension.from(thisComponent).localUiScaleFactor().onChange(From.ALL, it -> {
+                        thisComponent.setFont(f.deriveFont(UI.scale((float)size)));
+                    });
+                })
+                ._this();
+    }
+
+    /**
+     *  Use this to dynamically set the size of the font of the wrapped {@link JComponent}
+     *  through the provided view model property.
+     *  When the integer wrapped by the provided property changes,
+     *  then so does the font size of this component.
+     *
+     * @param size The size property of the font which should be displayed on the component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
+     */
+    public final I withFontSize( Val<Integer> size ) {
+        NullUtil.nullArgCheck( size, "size", Val.class );
+        NullUtil.nullPropertyCheck( size, "size", "Use the default font size of this component instead of null!" );
+        return _withOnShow( size, (thisComponent,v) -> {
+                    Font f = thisComponent.getFont();
+                    thisComponent.setFont(f.deriveFont(UI.scale((float)v)));
+                })
+                ._with( thisComponent -> {
+                    Font f = thisComponent.getFont();
+                    thisComponent.setFont(f.deriveFont(UI.scale((float)size.orElseThrowUnchecked())));
+                    ComponentExtension.from(thisComponent).localUiScaleFactor().onChange(From.ALL, it -> {
+                        thisComponent.setFont(f.deriveFont(UI.scale((float)size.orElseThrowUnchecked())));
+                    });
+                })
+                ._this();
+    }
+
+    /**
      *  Calls the provided action event handler when the mouse gets pressed and then released.
      *  This delegates to a {@link MouseListener} based mouse click event listener registered in the UI component.
      *  <br><br>
