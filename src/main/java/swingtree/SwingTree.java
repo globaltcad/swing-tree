@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Var;
+import sprouts.Viewable;
 import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
@@ -207,10 +208,16 @@ public final class SwingTree
     }
 
     /**
-     * Adds a property change listener to the user scale factor, so
-     * when the user scale factor changes, the property "swingtree.uiScale" is fired.
+     * Creates and returns a reactive {@link Viewable} of the library context's user scale factor
+     * which will update itself and invoke all of its change listeners, the user scale factor changes,
+     * through methods like {@link #setUiScaleFactor(float)}.<br>
+     * If you no longer reference a reactive property view strongly in your
+     * code, then it will be garbage collected alongside all of its change
+     * listeners automatically for you!<br>
+     * <p>
      * The user scale factor is a scaling factor that is used by SwingTree's
-     * style engine to scale the UI during painting.
+     * style engine to scale the UI during painting.<br>
+     * <p>
      * Note that this is different from the system/Graphics2D scale factor, which is
      * the scale factor that the JRE uses to scale everything through the
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
@@ -223,33 +230,13 @@ public final class SwingTree
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".
      *
-     * @param listener The property change listener to add.
+     * @return A reactive property holding the current user scale factor used
+     *         for scaling the UI of your application. You may hold onto such a view
+     *         a register change listeners on it to ensure your component always have
+     *         the correct scale!
      */
-    public void addUiScaleChangeListener(PropertyChangeListener listener) {
-        _uiScale.get().addPropertyChangeListener(listener);
-    }
-
-    /**
-     * Removes the provided property change listener from the user scale factor
-     * property with the name "swingtree.uiScale".
-     * The user scale factor is a scaling factor that is used by SwingTree's
-     * style engine to scale the UI during painting.
-     * Note that this is different from the system/Graphics2D scale factor, which is
-     * the scale factor that the JRE uses to scale everything through the
-     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
-     * <p>
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
-     * <p>
-     * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
-     * or directly through the system property "swingtree.uiScale".
-     *
-     * @param listener The property change listener to remove.
-     */
-    public void removeUiScaleChangeListener(PropertyChangeListener listener) {
-        _uiScale.get().removePropertyChangeListener(listener);
+    public Viewable<Float> createAndGetUiScaleView() {
+        return _uiScale.get().createScaleFactorViewable();
     }
 
     /**
@@ -431,7 +418,6 @@ public final class SwingTree
     static final class UiScale
     {
         private final SwingTreeInitConfig config;
-        private @Nullable PropertyChangeSupport changeSupport;
 
         private static @Nullable Boolean jreHiDPI;
 
@@ -564,16 +550,8 @@ public final class SwingTree
             return (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
         }
 
-        public void addPropertyChangeListener( PropertyChangeListener listener ) {
-            if( changeSupport == null )
-                changeSupport = new PropertyChangeSupport( UiScale.class );
-            changeSupport.addPropertyChangeListener( listener );
-        }
-
-        public void removePropertyChangeListener( PropertyChangeListener listener ) {
-            if( changeSupport == null )
-                return;
-            changeSupport.removePropertyChangeListener( listener );
+        public Viewable<Float> createScaleFactorViewable() {
+            return scaleFactor.view();
         }
 
         //---- system scaling (Java 9) --------------------------------------------
@@ -844,12 +822,7 @@ public final class SwingTree
         private void _setUserScaleFactor(float scaleFactor) {
             // minimum scale factor
             scaleFactor = Math.max( scaleFactor, 0.1f );
-
-            float oldScaleFactor = this.scaleFactor.get();
             this.scaleFactor.set(scaleFactor);
-
-            if ( changeSupport != null )
-                changeSupport.firePropertyChange( "userScaleFactor", oldScaleFactor, scaleFactor );
         }
 
         /**
