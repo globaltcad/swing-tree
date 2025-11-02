@@ -1224,7 +1224,7 @@ class UI_Scaling_Spec extends Specification
 
         then : 'Font size scales with the factor while preserving family and style'
             label.font.style == Font.PLAIN
-            label.font.size == 22  // 14 * 1.5
+            label.font.size == 21
 
         when : 'Only the font property changes to a different font with new size'
             dynamicFont.set(new Font("Times New Roman", Font.BOLD, 16))
@@ -1289,7 +1289,7 @@ class UI_Scaling_Spec extends Specification
 
         then : 'All font sizes scale appropriately regardless of specification method'
             button.font.style == Font.ITALIC
-            button.font.size == 22  // 18 * 1.5
+            button.font.size == 27
 
             label.font.style == Font.BOLD
             label.font.size == 24   // 16 * 1.5
