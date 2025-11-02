@@ -2682,10 +2682,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> {
             c.setMinimumSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                 c.setMinimumSize(UI.scale(size.toDimension()));
                 _revalidate(c);
-            }));
+            });
         })._this();
     }
 
@@ -2714,10 +2714,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMinimumSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMinimumSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2756,10 +2756,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2773,10 +2773,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMinWidth( int width ) {
         return _with( c -> {
                     _setMinWidth(c, width);
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinWidth(c, width);
                         _revalidate(c);
-                    }));
+                    });
                })
                ._this();
     }
@@ -2803,10 +2803,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMinWidth(c, width.get());
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinWidth(c, width.get());
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2821,10 +2821,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMinHeight( int height ) {
         return _with( c -> {
                     _setMinHeight(c, height);
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinHeight(c, height);
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2851,10 +2851,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMinHeight(c, height.get());
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinHeight(c, height.get());
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2882,12 +2882,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMaxSize( Size size ) {
         NullUtil.nullArgCheck(size, "size", Size.class);
         return _with( c -> {
-            c.setMaximumSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
-                c.setMaximumSize(UI.scale(size.toDimension()));
-                _revalidate(c);
-            }));
-        })._this();
+                    c.setMaximumSize(UI.scale(size.toDimension()));
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                        c.setMaximumSize(UI.scale(size.toDimension()));
+                        _revalidate(c);
+                    });
+                })._this();
     }
 
     /**
@@ -2906,10 +2906,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMaximumSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2947,10 +2947,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2964,10 +2964,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMaxWidth( int width ) {
         return _with( c -> {
                     c.setMaximumSize(new Dimension(UI.scale(width), c.getMaximumSize().height));
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize(new Dimension(UI.scale(width), c.getMaximumSize().height));
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -2994,10 +2994,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMaxWidth(c, width.get());
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMaxWidth(c, width.get());
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3011,10 +3011,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMaxHeight( int height ) {
         return _with( c -> {
                     _setMaxHeight(c, height);
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMaxHeight(c, height);
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3041,10 +3041,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMaxHeight(c, height.get());
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMaxHeight(c, height.get());
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3078,10 +3078,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Size.class);
         return _with( c -> {
             c.setPreferredSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                 c.setPreferredSize(UI.scale(size.toDimension()));
                 _revalidate(c);
-            }));
+            });
         })._this();
     }
 
@@ -3103,10 +3103,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setPreferredSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setPreferredSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3148,10 +3148,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3166,10 +3166,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withPrefWidth( int width ) {
         return _with( c -> {
                     _setPrefWidth(c, width);
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefWidth(c, width);
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3197,10 +3197,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setPrefWidth(c, width.get());
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefWidth(c, width.get());
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3215,10 +3215,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withPrefHeight( int height ) {
         return _with( c -> {
                     _setPrefHeight(c, height);
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefHeight(c, height);
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3246,10 +3246,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setPrefHeight(c, height.get());
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefHeight(c, height.get());
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3283,10 +3283,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> {
             c.setSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                 c.setSize(UI.scale(size.toDimension()));
                 _revalidate(c);
-            }));
+            });
         })._this();
     }
 
@@ -3312,10 +3312,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3351,10 +3351,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withWidth( int width ) {
         return _with( c -> {
                     c.setSize(new Dimension(UI.scale(width), c.getSize().height));
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(UI.scale(width), c.getSize().height));
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3378,10 +3378,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3399,10 +3399,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withHeight( int height ) {
         return _with( c -> {
                     c.setSize(new Dimension(c.getSize().width, UI.scale(height)));
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(c.getSize().width, UI.scale(height)));
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3426,10 +3426,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }
@@ -3527,12 +3527,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setMinimumSize(UI.scale(size.get().toDimension()));
                     c.setMaximumSize(UI.scale(size.get().toDimension()));
                     c.setPreferredSize(UI.scale(size.get().toDimension()));
-                    ComponentExtension.from(c).storeBoundObservable(SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it->{
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMinimumSize(UI.scale(size.get().toDimension()));
                         c.setMaximumSize(UI.scale(size.get().toDimension()));
                         c.setPreferredSize(UI.scale(size.get().toDimension()));
                         _revalidate(c);
-                    }));
+                    });
                 })
                 ._this();
     }

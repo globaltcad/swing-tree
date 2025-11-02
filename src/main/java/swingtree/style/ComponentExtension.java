@@ -2,9 +2,12 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.From;
 import sprouts.Observable;
 import sprouts.Tuple;
+import sprouts.Viewable;
 import swingtree.DragAwayComponentConf;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
 import swingtree.api.Configurator;
@@ -18,6 +21,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -65,6 +69,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private final C _owner;
+    private final Viewable<Float> _localUiScaleFactor;
     private final List<Observable>  _boundProps = new ArrayList<>(0);
     private final List<Object>      _extraState = new ArrayList<>(0);
     private final List<String>      _styleGroups = new ArrayList<>(0);
@@ -80,9 +85,27 @@ public final class ComponentExtension<C extends JComponent>
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
+        AtomicReference<@Nullable Font> referenceFont = new AtomicReference<>();
+        _localUiScaleFactor = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it -> {
+            Font currentFont = referenceFont.get();
+            if ( currentFont == null ) {
+                currentFont = owner.getFont();
+                referenceFont.set(currentFont);
+            }
+            if ( currentFont != null ) {
+                Font scaledFont = SwingTree.get().scale(currentFont);
+                owner.setFont(scaledFont);
+            }
+            gatherApplyAndInstallStyle(false);
+            UI.runLater(()->{
+                owner.revalidate();
+            });
+        });
     }
 
     C getOwner() { return _owner; }
+
+    public Viewable<Float> localUiScaleFactor() { return _localUiScaleFactor; }
 
     /**
      *  Stores the given observable in the extension in order to ensure that

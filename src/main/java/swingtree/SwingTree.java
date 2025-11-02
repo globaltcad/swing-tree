@@ -240,6 +240,26 @@ public final class SwingTree
     }
 
     /**
+     * Applies a custom scale factor given in system property "swingtree.uiScale"
+     * to the given font.
+     */
+    public Font scale( Font font ) {
+        if( !_config.isUiScaleFactorEnabled() )
+            return font;
+
+        float scaleFactor = getUiScaleFactor();
+        if( scaleFactor <= 0 )
+            return font;
+
+        float fontScaleFactor = UiScale._computeScaleFactorFromFontSize( font );
+        if( scaleFactor == fontScaleFactor )
+            return font;
+
+        int newFontSize = Math.max( Math.round( (font.getSize() / fontScaleFactor) * scaleFactor ), 1 );
+        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
+    }
+
+    /**
      * Returns whether system scaling is enabled.
      * System scaling means that the JRE scales everything
      * through the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
