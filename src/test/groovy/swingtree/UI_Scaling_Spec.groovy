@@ -4,12 +4,14 @@ package swingtree
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.From
 import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
 import java.awt.*
+import java.lang.ref.WeakReference
 
 @Title("High IPD Scaling")
 @Narrative('''
@@ -412,5 +414,57 @@ class UI_Scaling_Spec extends Specification
             button.minimumSize == new Dimension(1554, 240)
             button.maximumSize == new Dimension(1554, 240)
             button.size == new Dimension(0, 0)
+    }
+
+    def 'You can get a reactive view on the current UI scale to update you components dynamically!'() {
+        reportInfo """
+            The UI scale factor built into the SwingTree library
+            can be viewed reactively and without fearing memory leaks.
+            This is done by getting a reactive property view from
+            the SwingTree library context.
+        """
+        given : 'We first reset the UI scale to a simple default!'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'Then we create a reactive property and a list acting as change listener trace...'
+            var trace = []
+            var reactiveScale = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, {
+                trace.add(it.currentValue().orElseThrow())
+            })
+
+        when :
+            SwingTree.get().setUiScaleFactor(2.0f)
+        then :
+            trace == [2f]
+
+        when :
+            SwingTree.get().setUiScaleFactor(1.234567f)
+        then :
+            trace == [2f, 1.25f] // rounded
+
+        when :
+            SwingTree.get().setUiScaleFactor(42f)
+        then :
+            trace == [2f, 1.25f, 42f]
+
+        when : 'We set the reactive property to null, to indicate that we no longer need to listen to it!'
+            reactiveScale = null
+            waitForGarbageCollection()
+            SwingTree.get().setUiScaleFactor(3.456f)
+        then : 'The trace has not grown, despite setting a new scale globally!'
+            trace == [2f, 1.25f, 42f]
+    }
+
+
+    /**
+     * This method guarantees that garbage collection is
+     * done unlike <code>{@link System#gc()}</code>
+     */
+    static void waitForGarbageCollection() {
+        Object obj = new Object();
+        WeakReference ref = new WeakReference<>(obj);
+        obj = null;
+        while(ref.get() != null) {
+            System.gc();
+        }
     }
 }
