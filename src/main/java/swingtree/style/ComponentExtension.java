@@ -85,16 +85,24 @@ public final class ComponentExtension<C extends JComponent>
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
+        @Nullable Font defaultFont = UIManager.getDefaults().getFont("defaultFont");
+        @Nullable Integer defaultFontSize = (defaultFont != null ? defaultFont.getSize() : null);
         AtomicReference<@Nullable Font> referenceFont = new AtomicReference<>();
+        AtomicReference<Boolean> hasDefaultSize = new AtomicReference<>(false);
         _localUiScaleFactor = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it -> {
             Font currentFont = referenceFont.get();
             if ( currentFont == null ) {
                 currentFont = owner.getFont();
                 referenceFont.set(currentFont);
+                if ( defaultFontSize != null && currentFont != null && defaultFontSize == currentFont.getSize() ) {
+                    hasDefaultSize.set(true);
+                }
             }
             if ( currentFont != null ) {
-                Font scaledFont = SwingTree.get().scale(currentFont);
-                owner.setFont(scaledFont);
+                if ( Objects.requireNonNull(hasDefaultSize.get()) )
+                    owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));
+                else
+                    owner.setFont(SwingTree.get().scale(currentFont));
             }
             gatherApplyAndInstallStyle(false);
             UI.runLater(()->{
