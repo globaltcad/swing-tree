@@ -2,6 +2,7 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Var;
 import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
@@ -434,7 +435,7 @@ public final class SwingTree
 
         private static @Nullable Boolean jreHiDPI;
 
-        private float scaleFactor = 1;
+        private final Var<Float> scaleFactor = Var.of(1f);
         private boolean initialized;
 
 
@@ -444,11 +445,11 @@ public final class SwingTree
             try {
                 // add user scale factor to allow layout managers (e.g. MigLayout) to use it
                 UIManager.put( "laf.scaleFactor", (UIDefaults.ActiveValue) t -> {
-                    return this.scaleFactor;
+                    return this.scaleFactor.get();
                 });
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {
-                    this.scaleFactor = 1;
+                    this.scaleFactor.set(1f);
                     this.initialized = true;
                     return;
                 }
@@ -462,10 +463,10 @@ public final class SwingTree
                 }
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
-                    float defaultScale = this.scaleFactor;
+                    float defaultScale = this.scaleFactor.get();
                     Font highDPIFont = _calculateDPIAwarePlatformFont();
                     boolean updated = _initialize( highDPIFont );
-                    if ( this.scaleFactor != defaultScale ) {
+                    if ( this.scaleFactor.isNot(defaultScale) ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
                         log.debug("Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
                     }
@@ -817,7 +818,7 @@ public final class SwingTree
          */
         public float getUserScaleFactor() {
             _initialize();
-            return scaleFactor;
+            return scaleFactor.get();
         }
 
         public void setUserScaleFactor( float scaleFactor ) {
@@ -844,8 +845,8 @@ public final class SwingTree
             // minimum scale factor
             scaleFactor = Math.max( scaleFactor, 0.1f );
 
-            float oldScaleFactor = this.scaleFactor;
-            this.scaleFactor = scaleFactor;
+            float oldScaleFactor = this.scaleFactor.get();
+            this.scaleFactor.set(scaleFactor);
 
             if ( changeSupport != null )
                 changeSupport.firePropertyChange( "userScaleFactor", oldScaleFactor, scaleFactor );
