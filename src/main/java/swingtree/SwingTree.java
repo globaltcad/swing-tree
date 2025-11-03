@@ -233,7 +233,7 @@ public final class SwingTree
      *
      * @return A reactive property holding the current user scale factor used
      *         for scaling the UI of your application. You may hold onto such a view
-     *         a register change listeners on it to ensure your component always have
+     *         and register change listeners on it to ensure your components always have
      *         the correct scale!
      */
     public Viewable<Float> createAndGetUiScaleView() {
