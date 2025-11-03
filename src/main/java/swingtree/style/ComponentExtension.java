@@ -2,9 +2,12 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.From;
 import sprouts.Observable;
 import sprouts.Tuple;
+import sprouts.Viewable;
 import swingtree.DragAwayComponentConf;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.animation.AnimationStatus;
 import swingtree.api.Configurator;
@@ -18,6 +21,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -65,6 +69,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private final C _owner;
+    private final Viewable<Float> _localUiScaleFactor;
     private final List<Observable>  _boundProps = new ArrayList<>(0);
     private final List<Object>      _extraState = new ArrayList<>(0);
     private final List<String>      _styleGroups = new ArrayList<>(0);
@@ -80,9 +85,50 @@ public final class ComponentExtension<C extends JComponent>
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
+        @Nullable Font defaultFont = UIManager.getDefaults().getFont("defaultFont");
+        @Nullable Integer defaultFontSize = (defaultFont != null ? defaultFont.getSize() : null);
+        AtomicReference<@Nullable Font> referenceFont = new AtomicReference<>();
+        AtomicReference<Boolean> hasDefaultSize = new AtomicReference<>(false);
+        _localUiScaleFactor = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it -> {
+            Font currentFont = referenceFont.get();
+            if ( currentFont == null ) {
+                currentFont = owner.getFont();
+                referenceFont.set(currentFont);
+                if ( defaultFontSize != null && currentFont != null && defaultFontSize == currentFont.getSize() ) {
+                    hasDefaultSize.set(true);
+                }
+            }
+            if ( currentFont != null ) {
+                if ( Boolean.TRUE.equals(hasDefaultSize.get()) )
+                    owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));
+                else
+                    owner.setFont(scale(currentFont, it.oldValue().orElseThrowUnchecked()));
+            }
+            gatherApplyAndInstallStyle(false);
+            UI.runLater(()->{
+                owner.revalidate();
+            });
+        });
+    }
+
+    private Font scale(Font font, float previousScale) {
+        if( !SwingTree.get().isUiScaleFactorEnabled() )
+            return font;
+
+        if( previousScale <= 0 )
+            return font;
+
+        float scaleFactor = SwingTree.get().getUiScaleFactor() / previousScale;
+        if( scaleFactor <= 0 || scaleFactor == 1 )
+            return font;
+
+        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );
+        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
     }
 
     C getOwner() { return _owner; }
+
+    public Viewable<Float> localUiScaleFactor() { return _localUiScaleFactor; }
 
     /**
      *  Stores the given observable in the extension in order to ensure that

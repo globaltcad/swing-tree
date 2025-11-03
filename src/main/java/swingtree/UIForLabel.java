@@ -4,11 +4,8 @@ import org.slf4j.Logger;
 import sprouts.Val;
 import swingtree.api.IconDeclaration;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import java.awt.Desktop;
-import java.awt.Font;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -531,43 +528,6 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     }
 
     /**
-     *  Use this to set the size of the font of the wrapped {@link JLabel}.
-     * @param size The size of the font which should be displayed on the label.
-     * @return This very builder to allow for method chaining.
-     */
-    public UIForLabel<L> withFontSize( int size ) {
-        return _with( thisComponent -> {
-                    Font f = thisComponent.getFont();
-                    thisComponent.setFont(f.deriveFont((float)size));
-                })
-                ._this();
-    }
-
-    /**
-     *  Use this to dynamically set the size of the font of the wrapped {@link JLabel}
-     *  through the provided view model property.
-     *  When the integer wrapped by the provided property changes,
-     *  then so does the font size of this label.
-     *
-     * @param size The size property of the font which should be displayed on the label.
-     * @return This very builder to allow for method chaining.
-     * @throws IllegalArgumentException if {@code size} is {@code null}.
-     */
-    public UIForLabel<L> withFontSize( Val<Integer> size ) {
-        NullUtil.nullArgCheck( size, "size", Val.class );
-        NullUtil.nullPropertyCheck( size, "size", "Use the default font size of this component instead of null!" );
-        return _withOnShow( size, (thisComponent,v) -> {
-                    Font f = thisComponent.getFont();
-                    thisComponent.setFont(f.deriveFont((float)v));
-                })
-                ._with( thisComponent -> {
-                    Font f = thisComponent.getFont();
-                    thisComponent.setFont(f.deriveFont((float)size.orElseThrowUnchecked()));
-                })
-                ._this();
-    }
-
-    /**
      *  Use this to set the font of the wrapped {@link JLabel}.
      * @param font The font of the text which should be displayed on the label.
      * @return This builder instance, to allow for method chaining.
@@ -579,7 +539,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     if ( _isUndefinedFont(font) )
                         thisComponent.setFont(null);
                     else
-                        thisComponent.setFont(font);
+                        thisComponent.setFont(SwingTree.get().scale(font));
                 })
                 ._this();
     }
@@ -602,10 +562,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                     if ( _isUndefinedFont(v) )
                         thisComponent.setFont(null);
                     else
-                        thisComponent.setFont(v);
+                        thisComponent.setFont(SwingTree.get().scale(v));
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setFont(font.orElseThrowUnchecked());
+                    thisComponent.setFont(SwingTree.get().scale(font.orElseThrowUnchecked()));
                 })
                 ._this();
     }

@@ -2,29 +2,27 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Var;
+import sprouts.Viewable;
 import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.ImageIcon;
-import javax.swing.LookAndFeel;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -202,14 +200,25 @@ public final class SwingTree
      */
     public void setUiScaleFactor( float scaleFactor ) {
         log.debug("Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
-        _uiScale.get().setUserScaleFactor(scaleFactor);
+        if ( UI.thisIsUIThread() )
+            _uiScale.get().setUserScaleFactor(scaleFactor);
+        else
+            UI.runNow(()->{
+                _uiScale.get().setUserScaleFactor(scaleFactor);
+            });
     }
 
     /**
-     * Adds a property change listener to the user scale factor, so
-     * when the user scale factor changes, the property "swingtree.uiScale" is fired.
+     * Creates and returns a reactive {@link Viewable} of the library context's user scale factor
+     * which will update itself and invoke all of its change listeners when the user scale factor changes,
+     * through methods like {@link #setUiScaleFactor(float)}.<br>
+     * If you no longer reference a reactive property view strongly in your
+     * code, then it will be garbage collected alongside all of its change
+     * listeners automatically for you!<br>
+     * <p>
      * The user scale factor is a scaling factor that is used by SwingTree's
-     * style engine to scale the UI during painting.
+     * style engine to scale the UI during painting.<br>
+     * <p>
      * Note that this is different from the system/Graphics2D scale factor, which is
      * the scale factor that the JRE uses to scale everything through the
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
@@ -222,33 +231,57 @@ public final class SwingTree
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".
      *
-     * @param listener The property change listener to add.
+     * @return A reactive property holding the current user scale factor used
+     *         for scaling the UI of your application. You may hold onto such a view
+     *         and register change listeners on it to ensure your components always have
+     *         the correct scale!
      */
-    public void addUiScaleChangeListener(PropertyChangeListener listener) {
-        _uiScale.get().addPropertyChangeListener(listener);
+    public Viewable<Float> createAndGetUiScaleView() {
+        return _uiScale.get().createScaleFactorViewable();
     }
 
     /**
-     * Removes the provided property change listener from the user scale factor
-     * property with the name "swingtree.uiScale".
-     * The user scale factor is a scaling factor that is used by SwingTree's
-     * style engine to scale the UI during painting.
-     * Note that this is different from the system/Graphics2D scale factor, which is
-     * the scale factor that the JRE uses to scale everything through the
-     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
-     * <p>
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
-     * <p>
-     * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
-     * or directly through the system property "swingtree.uiScale".
-     *
-     * @param listener The property change listener to remove.
+     *  Returns whether the UI scaling mode is enabled as is specified by
+     *  the system property {@code swingtree.uiScale.enabled}.
      */
-    public void removeUiScaleChangeListener(PropertyChangeListener listener) {
-        _uiScale.get().removePropertyChangeListener(listener);
+    public boolean isUiScaleFactorEnabled() {
+        return _config.isUiScaleFactorEnabled();
+    }
+
+    /**
+     * Applies a custom scale factor given in system property "swingtree.uiScale"
+     * to the given font.
+     */
+    public Font scale( Font font ) {
+        if( !isUiScaleFactorEnabled() )
+            return font;
+
+        float scaleFactor = getUiScaleFactor();
+        if( scaleFactor <= 0 || scaleFactor == 1 )
+            return font;
+
+        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );
+        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
+    }
+
+    /**
+     * Converts the current scale factor given in system property "swingtree.uiScale"
+     * to a font size and then returns a new font derived from the provided one, with that new size!
+     */
+    public Font applyScaleAsFontSize( Font font ) {
+        if( !isUiScaleFactorEnabled() )
+            return font;
+
+        float scaleFactor = getUiScaleFactor();
+        if( scaleFactor <= 0 )
+            return font;
+
+        float fontScaleFactor = UiScale._computeScaleFactorFromFontSize( font );
+        if( scaleFactor == fontScaleFactor )
+            return font;
+
+        int newFontSize = Math.max( Math.round( (font.getSize() / fontScaleFactor) * scaleFactor ), 1 );
+        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
     }
 
     /**
@@ -430,11 +463,10 @@ public final class SwingTree
     static final class UiScale
     {
         private final SwingTreeInitConfig config;
-        private @Nullable PropertyChangeSupport changeSupport;
 
         private static @Nullable Boolean jreHiDPI;
 
-        private float scaleFactor = 1;
+        private final Var<Float> scaleFactor = Var.of(1f);
         private boolean initialized;
 
 
@@ -444,11 +476,11 @@ public final class SwingTree
             try {
                 // add user scale factor to allow layout managers (e.g. MigLayout) to use it
                 UIManager.put( "laf.scaleFactor", (UIDefaults.ActiveValue) t -> {
-                    return this.scaleFactor;
+                    return this.scaleFactor.get();
                 });
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {
-                    this.scaleFactor = 1;
+                    this.scaleFactor.set(1f);
                     this.initialized = true;
                     return;
                 }
@@ -462,10 +494,10 @@ public final class SwingTree
                 }
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
-                    float defaultScale = this.scaleFactor;
+                    float defaultScale = this.scaleFactor.get();
                     Font highDPIFont = _calculateDPIAwarePlatformFont();
                     boolean updated = _initialize( highDPIFont );
-                    if ( this.scaleFactor != defaultScale ) {
+                    if ( this.scaleFactor.isNot(defaultScale) ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
                         log.debug("Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
                     }
@@ -563,16 +595,8 @@ public final class SwingTree
             return (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
         }
 
-        public void addPropertyChangeListener( PropertyChangeListener listener ) {
-            if( changeSupport == null )
-                changeSupport = new PropertyChangeSupport( UiScale.class );
-            changeSupport.addPropertyChangeListener( listener );
-        }
-
-        public void removePropertyChangeListener( PropertyChangeListener listener ) {
-            if( changeSupport == null )
-                return;
-            changeSupport.removePropertyChangeListener( listener );
+        public Viewable<Float> createScaleFactorViewable() {
+            return scaleFactor.view();
         }
 
         //---- system scaling (Java 9) --------------------------------------------
@@ -817,7 +841,7 @@ public final class SwingTree
          */
         public float getUserScaleFactor() {
             _initialize();
-            return scaleFactor;
+            return scaleFactor.get();
         }
 
         public void setUserScaleFactor( float scaleFactor ) {
@@ -843,12 +867,7 @@ public final class SwingTree
         private void _setUserScaleFactor(float scaleFactor) {
             // minimum scale factor
             scaleFactor = Math.max( scaleFactor, 0.1f );
-
-            float oldScaleFactor = this.scaleFactor;
-            this.scaleFactor = scaleFactor;
-
-            if ( changeSupport != null )
-                changeSupport.firePropertyChange( "userScaleFactor", oldScaleFactor, scaleFactor );
+            this.scaleFactor.set(scaleFactor);
         }
 
         /**

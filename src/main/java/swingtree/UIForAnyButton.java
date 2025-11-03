@@ -1728,41 +1728,6 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
-     *  Use this to set the size of the font of the wrapped button type.
-     * @param size The size of the font which should be displayed on the button.
-     * @return This very builder to allow for method chaining.
-     */
-    public I withFontSize( int size ) {
-        return _with( button -> {
-                   Font old = button.getFont();
-                   button.setFont(old.deriveFont(UI.scale((float)size)));
-               })
-               ._this();
-    }
-
-    /**
-     *  Use this to dynamically set the size of the font of the wrapped button type
-     *  through the provided view model property.
-     *  When the integer wrapped by the provided property changes,
-     *  then so does the font size of the text displayed on this button.
-     *
-     * @param size The size property of the font which should be displayed on the button.
-     * @return This very builder to allow for method chaining.
-     * @throws IllegalArgumentException if {@code size} is {@code null}.
-     */
-    public I withFontSize( Val<Integer> size ) {
-        NullUtil.nullArgCheck(size, "val", Val.class);
-        NullUtil.nullPropertyCheck(size, "size", "Null is not a sensible value for a font size.");
-        return _withOnShow( size, (c,v)->{
-                    c.setFont(c.getFont().deriveFont(UI.scale((float)v)));
-                })
-                ._with( c -> {
-                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrowUnchecked())));
-                })
-                ._this();
-    }
-
-    /**
      *  Use this to set the font of the wrapped button type.
      * @param font The font of the text which should be displayed on the button.
      * @return This builder instance, to allow for method chaining.
@@ -1774,7 +1739,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                         if ( _isUndefinedFont(font) )
                             button.setFont(null);
                         else
-                            button.setFont(font);
+                            button.setFont(SwingTree.get().scale(font));
                     })._this();
     }
 
@@ -1796,14 +1761,14 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     if ( _isUndefinedFont(v) )
                         c.setFont(null);
                     else
-                        c.setFont(v);
+                        c.setFont(SwingTree.get().scale(v));
                 })
                ._with( thisComponent -> {
                    Font newFont = font.orElseThrowUnchecked();
                    if ( _isUndefinedFont(newFont) )
                        thisComponent.setFont( null );
                    else
-                       thisComponent.setFont( newFont );
+                       thisComponent.setFont( SwingTree.get().scale(newFont) );
                } )
                ._this();
     }
