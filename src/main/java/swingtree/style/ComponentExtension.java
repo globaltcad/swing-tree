@@ -99,7 +99,7 @@ public final class ComponentExtension<C extends JComponent>
                 }
             }
             if ( currentFont != null ) {
-                if ( Objects.requireNonNull(hasDefaultSize.get()) )
+                if ( Boolean.TRUE.equals(hasDefaultSize.get()) )
                     owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));
                 else
                     owner.setFont(scale(currentFont, it.oldValue().orElseThrowUnchecked()));
