@@ -266,7 +266,7 @@ public final class SwingTree
 
     /**
      * Converts the current scale factor given in system property "swingtree.uiScale"
-     * to a font size and the returns a new font derived from the provided one, with that new size!
+     * to a font size and then returns a new font derived from the provided one, with that new size!
      */
     public Font applyScaleAsFontSize( Font font ) {
         if( !isUiScaleFactorEnabled() )
