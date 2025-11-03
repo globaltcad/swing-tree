@@ -210,7 +210,7 @@ public final class SwingTree
 
     /**
      * Creates and returns a reactive {@link Viewable} of the library context's user scale factor
-     * which will update itself and invoke all of its change listeners, the user scale factor changes,
+     * which will update itself and invoke all of its change listeners when the user scale factor changes,
      * through methods like {@link #setUiScaleFactor(float)}.<br>
      * If you no longer reference a reactive property view strongly in your
      * code, then it will be garbage collected alongside all of its change
