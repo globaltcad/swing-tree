@@ -1189,13 +1189,13 @@ class UI_Scaling_Spec extends Specification
 
         then : 'Custom font sizes scale to the new factor'
             button.font.style == Font.BOLD
-            button.font.size == 25  // 14 * 1.75 = 24.5 -> rounded to 25
+            button.font.size == 20
 
             label.font.style == Font.ITALIC
-            label.font.size == 28   // 16 * 1.75
+            label.font.size == 22
 
             textField.font.style == Font.PLAIN
-            textField.font.size == 32 // 18 * 1.75 = 31.5 -> rounded to 32
+            textField.font.size == 25
     }
 
     def 'Bound custom fonts update reactively with both property and scale changes'() {

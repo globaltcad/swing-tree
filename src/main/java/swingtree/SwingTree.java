@@ -241,11 +241,19 @@ public final class SwingTree
     }
 
     /**
+     *  Returns whether the UI scaling mode is enabled as is specified by
+     *  the system property {@code swingtree.uiScale.enabled}.
+     */
+    public boolean isUiScaleFactorEnabled() {
+        return _config.isUiScaleFactorEnabled();
+    }
+
+    /**
      * Applies a custom scale factor given in system property "swingtree.uiScale"
      * to the given font.
      */
     public Font scale( Font font ) {
-        if( !_config.isUiScaleFactorEnabled() )
+        if( !isUiScaleFactorEnabled() )
             return font;
 
         float scaleFactor = getUiScaleFactor();
@@ -261,7 +269,7 @@ public final class SwingTree
      * to a font size and the returns a new font derived from the provided one, with that new size!
      */
     public Font applyScaleAsFontSize( Font font ) {
-        if( !_config.isUiScaleFactorEnabled() )
+        if( !isUiScaleFactorEnabled() )
             return font;
 
         float scaleFactor = getUiScaleFactor();

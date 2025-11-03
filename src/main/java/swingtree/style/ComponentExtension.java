@@ -102,13 +102,28 @@ public final class ComponentExtension<C extends JComponent>
                 if ( Objects.requireNonNull(hasDefaultSize.get()) )
                     owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));
                 else
-                    owner.setFont(SwingTree.get().scale(currentFont));
+                    owner.setFont(scale(currentFont, it.oldValue().orElseThrowUnchecked()));
             }
             gatherApplyAndInstallStyle(false);
             UI.runLater(()->{
                 owner.revalidate();
             });
         });
+    }
+
+    private Font scale(Font font, float previousScale) {
+        if( !SwingTree.get().isUiScaleFactorEnabled() )
+            return font;
+
+        if( previousScale <= 0 )
+            return font;
+
+        float scaleFactor = SwingTree.get().getUiScaleFactor() / previousScale;
+        if( scaleFactor <= 0 || scaleFactor == 1 )
+            return font;
+
+        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );
+        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
     }
 
     C getOwner() { return _owner; }
