@@ -426,7 +426,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  then visibility of the underlying {@link JComponent} type will be updated accordingly.
      *  <p>
      * <i>
-     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to
+     *     Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to
      *           send the property value to this view component.
      * </i>
      *
@@ -456,7 +456,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  If the supplied {@link Val} property is {@code false}, the component will be visible.
      *  <p>
      *  <i>
-     *      Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to
+     *      Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to
      *            send the property value to this view component.
      *  </i>
      * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
@@ -483,7 +483,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  then the underlying {@link JComponent} type will be visible,
      *  otherwise it will be invisible.
      * <i>
-     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your
+     *     Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your
      *           view model to send the property value to this view component.
      * </i>
      *
@@ -514,7 +514,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  then the underlying {@link JComponent} type will be invisible,
      *  otherwise it will be visible.
      * <i>
-     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your
+     *     Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your
      *           view model to send the property value to this view component.
      * </i>
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component invisible.
@@ -596,7 +596,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to make the wrapped UI component dynamically enabled or disabled,
      *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component enabled.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component enabled.
@@ -620,7 +620,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #isEnabledIf(Enum, Val)}.
      *  Use this to make the wrapped UI component dynamically disabled or enabled,
      *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component disabled.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component disabled.
@@ -672,7 +672,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to dynamically make the wrapped UI component focusable.
      *  This is useful if you want to make a component focusable only if a certain condition is met.
      *  <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
@@ -703,7 +703,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to dynamically make the wrapped UI component focusable.
      *  This is useful if you want to make a component focusable only if a certain condition is met.
      *  <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not, wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
@@ -724,7 +724,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to make the wrapped UI component dynamically focusable or non-focusable
      *  based on the equality between the supplied enum value and enum property. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component focusable.
      *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component focusable.
@@ -749,7 +749,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #isFocusableIf(Enum, Val)}.
      *  Use this to make the wrapped UI component dynamically focusable or non-focusable
      *  based on the equality between the supplied enum value and enum property. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component non-focusable.
      *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component non-focusable.
@@ -869,7 +869,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Use this to dynamically attach a border to the wrapped component. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -1650,7 +1650,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -1671,7 +1671,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder
      *  based on boolean property determining if the provided cursor should be set ot not. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The boolean property determining if the provided cursor should be set ot not.
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
@@ -1694,7 +1694,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to dynamically set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder
      *  based on boolean property determining if the provided cursor should be set ot not. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The boolean property determining if the provided cursor should be set ot not.
      * @param type The {@link UI.Cursor} type property defined by a simple enum exposed by this API.
@@ -2169,7 +2169,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          button.setToolTipText(tip.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
@@ -2250,7 +2250,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          button.setBackground(bg.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -2270,7 +2270,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to a background color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param colorIfTrue The background color which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -2295,7 +2295,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a background color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param color The background color property which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -2321,7 +2321,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to 2 colors to the background of the component
      *  which sre set based on the value of a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
      * @param colorIfTrue The background color which should be set for the UI component.
@@ -2335,7 +2335,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to 2 color properties to the background of the component
      *  which sre set based on the value of a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
      * @param colorIfTrue The background color which should be set for the UI component.
@@ -2555,7 +2555,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          button.setForeground(fg.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -2578,7 +2578,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component.
      * @param condition The condition property which determines whether the foreground color should be set or not.
@@ -2605,7 +2605,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param color The foreground color property which should be set for the UI component.
      * @param condition The condition property which determines whether the foreground color should be set or not.
@@ -2633,7 +2633,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the foreground color should be set or not.
      * @param colorIfTrue The foreground color which should be set for the UI component.
@@ -2660,7 +2660,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the foreground color should be set or not.
      * @param colorIfTrue The foreground color property which should be set for the UI component.

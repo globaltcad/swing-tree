@@ -57,7 +57,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Binds the provided {@link Val} property to the wrapped button type
      *  and sets the text of the button to the value of the property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to manually
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to manually
      * send the property value to this view component.</i>
      * @param text The view model property which should be bound to this UI.
      * @return This very builder to allow for method chaining.
@@ -1904,7 +1904,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
      *  and deselected otherwise. <br>
      *  <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param state The reference value which the button type should represent when selected.
      * @param selection The {@link sprouts.Val} instance which will be used
@@ -1928,7 +1928,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  This is the inverse of {@link #isSelectedIf(Object, Val)}.
      *  Use this to make the wrapped UI component dynamically deselected or selected,
      *  based on the equality between the supplied value and the property value. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i><br>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i><br>
      *  A typical use case is to bind to an enum property, like so: <br>
      *  <pre>{@code
      *      // In your view model:
@@ -2204,7 +2204,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the horizontal alignment of the icon and text
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -2253,7 +2253,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the vertical alignment of the icon and text
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -2302,7 +2302,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the horizontal position of the text relative to the icon
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -2350,7 +2350,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the vertical position of the text relative to the icon
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
