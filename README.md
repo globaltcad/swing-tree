@@ -128,7 +128,7 @@ a `MigLayout` instance,
 which is the most general purpose layout manager.
 (However you can also use other layout managers of course.)
 
-For more examples take a look at the <a href="src/test/groovy/swingtree/examples">examples folder</a> inside the test suite.
+For more examples take a look at the <a href="src/test/java/examples">examples folder</a> inside the test suite.
 
 ---
 
