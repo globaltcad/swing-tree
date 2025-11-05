@@ -1470,7 +1470,7 @@ public class AbstractDelegate<C extends JComponent>
      *        .borderRadius( (int)(60 * state.progress()) )
      *    ))
      *  }</pre>
-     *  <b>Not that the effect of this method can also be modelled using {@link #animateFor(LifeTime, Animation)}
+     *  <b>You can achieve the same effect using {@link #animateFor(LifeTime, Animation)}
      *  and {@link #style(AnimationStatus, Styler)} as follows:</b>
      *  <pre>{@code
      *    UI.button("Click me").withPrefSize(400, 400)
@@ -1480,10 +1480,12 @@ public class AbstractDelegate<C extends JComponent>
      *        );
      *    }))
      *  }</pre>
-     *  Also see {@link #animateStyleFor(LifeTime, AnimatedStyler)} for a version of this method which uses a {@link LifeTime} instead of a duration.
+     *  Also see {@link #animateStyleFor(LifeTime, AnimatedStyler)} for a version of this method which
+     *  uses a {@link LifeTime} instead of a duration.
      *  If you are interested in doing more advanced style animations, consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
-     *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event
+     *  based styling animations and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to
+     *  see how to do 2 state switch based styling animations.
      *
      * @param duration The duration of the animation.
      * @param unit The time unit of the duration.
