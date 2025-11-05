@@ -15,15 +15,35 @@ import java.util.concurrent.TimeUnit;
 @Immutable
 public final class LifeSpan
 {
+    /**
+     * Creates a lifespan that starts now and has the specified lifetime.
+     *
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that starts now and has the specified lifetime.
+     */
     public static LifeSpan startingNowWith( LifeTime lifeTime ) {
         return new LifeSpan(lifeTime, System.currentTimeMillis() + lifeTime.getDelayIn(TimeUnit.MILLISECONDS));
     }
 
+    /**
+     * Creates a lifespan that starts after the specified offset starting from now and has the specified lifetime.
+     *
+     * @param offset The offset from now when the animation should start.
+     * @param unit The time unit of the offset.
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that starts after the specified offset from now, with the specified lifetime.
+     */
     public static LifeSpan startingNowWithOffset( long offset, TimeUnit unit, LifeTime lifeTime ) {
         long inMillis = unit.toMillis(offset);
         return new LifeSpan(lifeTime, System.currentTimeMillis() + inMillis);
     }
 
+    /**
+     * Creates a lifespan that ends now and has the specified lifetime.
+     *
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that ends now and has the specified lifetime.
+     */
     public static LifeSpan endingNowWith( LifeTime lifeTime ) {
         return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));
     }
