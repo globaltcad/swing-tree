@@ -5371,7 +5371,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  Dynamically generates views for the items in a {@link Tuple} of items,
      *  and automatically regenerate the view when the tuple in the specified property changes.
      *  The type of individual items in the tuple can be anything, but it is usually value
      *  based view models.<br>
@@ -5409,7 +5409,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  Dynamically generates views for the items in a {@link Tuple} of items,
      *  and automatically regenerate the view when the tuple in the specified property changes.
      *  The type of individual items in the tuple can be anything, but it is usually value
      *  based view models.<br>
@@ -5450,7 +5450,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Dynamically generate views for the items in a {@link Tuple} of items,
+     *  Dynamically generates views for the items in a {@link Tuple} of items,
      *  and automatically regenerate the view when the tuple in the specified property changes.
      *  The type of individual items in the tuple can be anything, but it is usually value
      *  based view models.<br>
@@ -5490,7 +5490,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Dynamically generate views bi-directionally bound to {@link HasId} based items
+     *  Dynamically generates views bi-directionally bound to {@link HasId} based items
      *  in a {@link Tuple} of items, and automatically regenerate a view if the {@link HasId#id()}
      *  of any item in the tuple changes.<br>
      *  If items change in terms of other properties, the view will not be updated,
@@ -5531,7 +5531,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Dynamically generate views bi-directionally bound to {@link HasId} based items
+     *  Dynamically generates views bi-directionally bound to {@link HasId} based items
      *  in a {@link Tuple} of items, and automatically regenerate a view if the {@link HasId#id()}
      *  of any item in the tuple changes.<br>
      *  If items change in terms of other properties, the view will not be updated,
@@ -5575,7 +5575,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Dynamically generate views bi-directionally bound to {@link HasId} based items
+     *  Dynamically generates views bi-directionally bound to {@link HasId} based items
      *  in a {@link Tuple} of items, and automatically regenerate a view if the {@link HasId#id()}
      *  of any item in the tuple changes.<br>
      *  If items change in terms of other properties, the view will not be updated,
@@ -5615,6 +5615,80 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     }
                 })
                 ._this();
+    }
+
+    /**
+     *  Generates views for each item in the supplied {@link Tuple} of items
+     *  and adds them to the component wrapped by this builder instance.
+     *  The type of individual items in the tuple can be anything, but it is usually value
+     *  based view models.<br>
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will be added to the component wrapped by this builder instance.<br>
+     *  If you want to generate views from multiple items dynamically bound to a property,
+     *  use the {@link #addAll(Val, ViewSupplier)} method instead.
+     *
+     * @param models A {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the {@code models} or the {@code viewSupplier} is null.
+     */
+    public final <M> I addAll( Tuple<M> models, ViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
+        return addAll( Val.of(models), viewSupplier);
+    }
+
+    /**
+     *  Generates views for each item in the supplied {@link Tuple} of items
+     *  and adds them to the component wrapped by this builder instance.
+     *  The type of individual items in the tuple can be anything, but it is usually value
+     *  based view models.<br>
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will be added to the component wrapped by this builder instance.<br>
+     *  If you want to generate views from multiple items dynamically bound to a property,
+     *  use the {@link #addAll(String, Val, ViewSupplier)} method instead.
+     *
+     * @param attr The {@link String} based {@link MigLayout} layout information
+     *             which should be used as layout constraints for each generated view.
+     * @param models A {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
+     */
+    public final <M> I addAll( String attr, Tuple<M> models, ViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
+        return addAll(attr, Val.of(models), viewSupplier);
+    }
+
+    /**
+     *  Generates views for each item in the supplied {@link Tuple} of items
+     *  and adds them to the component wrapped by this builder instance.
+     *  The type of individual items in the tuple can be anything, but it is usually value
+     *  based view models.<br>
+     *  The {@link ViewSupplier} lambda passed to this method will be invoked with
+     *  each item in the tuple and is expected to return a {@link JComponent} instance
+     *  which will be added to the component wrapped by this builder instance.<br>
+     *  If you want to generate views from multiple items dynamically bound to a property,
+     *  use the {@link #addAll(AddConstraint, Val, ViewSupplier)} method instead.
+     *
+     * @param attr The layout information which should be used as layout constraints for each generated view.
+     * @param models A {@link Tuple} of items of any type but preferably view model instances.
+     * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the tuple.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Tuple}, which is the type of the view model.
+     * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
+     */
+    public final <M> I addAll( AddConstraint attr, Tuple<M> models, ViewSupplier<M> viewSupplier ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(models, "models");
+        Objects.requireNonNull(viewSupplier, "viewSupplier");
+        return addAll( attr, Val.of(models), viewSupplier );
     }
 
     private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {

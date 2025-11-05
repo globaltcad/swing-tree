@@ -71,7 +71,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 * @param onClose The operation to be executed when the window is closed.
 	 * @return This declarative builder instance to enable method chaining.
 	 */
-	public final I withOnCloseOperation(UI.OnWindowClose onClose ) {
+	public final I withOnCloseOperation( UI.OnWindowClose onClose ) {
 		NullUtil.nullArgCheck(onClose, "onClose", UI.OnWindowClose.class);
 		return _with( thisWindow -> {
 					if ( thisWindow instanceof JFrame )
@@ -115,11 +115,13 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", sprouts.Action.class);
 		return _with( thisWindow -> {
 					_onKeyStroke( key.code, e -> {
-						try {
-							onKeyPressed.accept(_createDelegate(thisWindow, null));
-						} catch (Exception ex) {
-							log.error("Error occurred while processing key press event.", ex);
-						}
+                        _runInApp(()-> {
+                            try {
+                                onKeyPressed.accept(_createDelegate(thisWindow, null));
+                            } catch (Exception ex) {
+                                log.error("Error occurred while processing key press event.", ex);
+                            }
+                        });
 					}, thisWindow );
 		       })
 			   ._this();
