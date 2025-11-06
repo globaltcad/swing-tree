@@ -1,7 +1,6 @@
 package swingtree;
 
 import org.slf4j.Logger;
-import sprouts.Val;
 
 import javax.swing.*;
 import java.util.Objects;
@@ -40,7 +39,7 @@ public final class UIForButton<B extends AbstractButton> extends UIForAnyButton<
     public final UIForButton<B> makeDefaultButton() {
         return _with( thisButton -> {
                     if ( !(thisButton instanceof JButton) ) {
-                        log.warn(SwingTree.get().loggingMarker(), "Method 'makeDefaultButton()' called on a non JButton component.");
+                        log.warn(SwingTree.get().logMarker(), "Method 'makeDefaultButton()' called on a non JButton component.");
                         return;
                     }
                     UI.runLater(()->{
@@ -60,7 +59,7 @@ public final class UIForButton<B extends AbstractButton> extends UIForAnyButton<
                 if ( tries > 0 )
                     UI.runLater(100, () -> _trySetDefaultButton(button, tries - 1) );
                 else
-                    log.warn(SwingTree.get().loggingMarker(), "Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.");
+                    log.warn(SwingTree.get().logMarker(), "Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.");
             }
     }
 }

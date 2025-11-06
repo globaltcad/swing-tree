@@ -262,7 +262,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         try {
             newColor = UI.color(shadowColor);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '{}'", shadowColor, e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
         return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);

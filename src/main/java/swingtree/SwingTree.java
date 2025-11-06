@@ -116,7 +116,7 @@ public final class SwingTree
             Objects.requireNonNull(config);
             return config;
         } catch (Exception ex) {
-            log.error(SwingTree.get().loggingMarker(), "Error resolving SwingTree configuration", ex);
+            log.error(SwingTree.get().logMarker(), "Error resolving SwingTree configuration", ex);
             ex.printStackTrace();
             return SwingTreeInitConfig.standard();
         }
@@ -132,7 +132,7 @@ public final class SwingTree
                         _installFontInUIManager(new FontUIResource(font));
                 });
         } catch (Exception ex) {
-            log.error(config.loggingMarker(), "Error installing font in UIManager", ex);
+            log.error(config.logMarker(), "Error installing font in UIManager", ex);
             ex.printStackTrace();
         }
     }
@@ -200,7 +200,7 @@ public final class SwingTree
      * @param scaleFactor The user scale factor.
      */
     public void setUiScaleFactor( float scaleFactor ) {
-        log.debug(SwingTree.get().loggingMarker(), "Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
+        log.debug(SwingTree.get().logMarker(), "Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
         if ( UI.thisIsUIThread() )
             _uiScale.get().setUserScaleFactor(scaleFactor);
         else
@@ -344,7 +344,7 @@ public final class SwingTree
         try {
             _config = _config.eventProcessor(Objects.requireNonNull(eventProcessor));
         } catch (Exception ex) {
-            log.error(_config.loggingMarker(), "Error setting event processor", ex);
+            log.error(_config.logMarker(), "Error setting event processor", ex);
             ex.printStackTrace();
         }
 	}
@@ -372,7 +372,7 @@ public final class SwingTree
         try {
             _config = _config.styleSheet(Objects.requireNonNull(styleSheet));
         } catch ( Exception ex ) {
-            log.error(_config.loggingMarker(), "Error setting style sheet", ex);
+            log.error(_config.logMarker(), "Error setting style sheet", ex);
             ex.printStackTrace();
         }
 	}
@@ -439,8 +439,8 @@ public final class SwingTree
      *
      * @return The logging {@link Marker} which is passed to methods of the SLF4J logger.
      */
-    public Marker loggingMarker() {
-        return _config.loggingMarker();
+    public Marker logMarker() {
+        return _config.logMarker();
     }
 
     /**
@@ -505,17 +505,17 @@ public final class SwingTree
                     Font uiScaleReferenceFont = config.defaultFont().orElse(null);
                     if ( uiScaleReferenceFont != null ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
-                        log.debug(config.loggingMarker(), "Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, uiScaleReferenceFont);
+                        log.debug(config.logMarker(), "Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, uiScaleReferenceFont);
                     }
                 }
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
                     float defaultScale = this.scaleFactor.get();
-                    Font highDPIFont = _calculateDPIAwarePlatformFont(config.loggingMarker());
+                    Font highDPIFont = _calculateDPIAwarePlatformFont(config.logMarker());
                     boolean updated = _initialize( highDPIFont );
                     if ( this.scaleFactor.isNot(defaultScale) ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
-                        log.debug(config.loggingMarker(), "Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
+                        log.debug(config.logMarker(), "Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
                     }
                     if ( updated )
                         _setScalePropertyListeners();
@@ -524,7 +524,7 @@ public final class SwingTree
                     _initialize();
 
             } catch (Exception ex) {
-                log.error(config.loggingMarker(), "Error initializing "+ UiScale.class.getSimpleName(), ex);
+                log.error(config.logMarker(), "Error initializing "+ UiScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
                 // the UI may not be scaled correctly. Please report this exception to the library author.
             }

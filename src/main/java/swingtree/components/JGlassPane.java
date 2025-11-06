@@ -206,7 +206,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 relativeX = locationOnDesktop.x - rootPaneLocationOnDesktop.x;
                 relativeY = locationOnDesktop.y - rootPaneLocationOnDesktop.y;
             } catch (Exception e) {
-                log.debug(SwingTree.get().loggingMarker(), "Error while calculating the relative position of a drag.", e);
+                log.debug(SwingTree.get().logMarker(), "Error while calculating the relative position of a drag.", e);
             }
         }
         return new Point(relativeX, relativeY);

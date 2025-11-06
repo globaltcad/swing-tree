@@ -33,7 +33,7 @@ final class LenientAWTEventProcessor extends BasicSingleThreadedEventProcessor
             runnable.run();
         } catch (Exception e) {
             // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
-            log.error(SwingTree.get().loggingMarker(), "An exception occurred while running a task in the UI thread!", e);
+            log.error(SwingTree.get().logMarker(), "An exception occurred while running a task in the UI thread!", e);
         }
     }
 }

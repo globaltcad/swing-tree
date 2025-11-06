@@ -188,7 +188,7 @@ public final class ComponentExtension<C extends JComponent>
         try {
             return Optional.of(_dragAwayConfigurator.apply(mousePosition));
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Error while configuring drag away component!", e);
+            log.error(SwingTree.get().logMarker(), "Error while configuring drag away component!", e);
             return Optional.empty();
         }
     }
@@ -587,7 +587,7 @@ public final class ComponentExtension<C extends JComponent>
                 superPaint.accept((Graphics2D) graphics);
             }
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Error while painting step '"+step+"'!", e);
+            log.error(SwingTree.get().logMarker(), "Error while painting step '"+step+"'!", e);
         }
     }
 
@@ -598,7 +598,7 @@ public final class ComponentExtension<C extends JComponent>
         try {
             superPaint.accept(bufferGraphics);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Error while painting step '"+step+"' into component buffer!", e);
+            log.error(SwingTree.get().logMarker(), "Error while painting step '"+step+"' into component buffer!", e);
         }
         graphics.drawImage(buffer, 0, 0, null);
     }
@@ -717,9 +717,9 @@ public final class ComponentExtension<C extends JComponent>
                             // Anything can happen in client code...
                             componentAsString = _owner.toString();
                         } catch (Exception e2) {
-                            log.error(SwingTree.get().loggingMarker(), "Error while converting component to string!", e2);
+                            log.error(SwingTree.get().logMarker(), "Error while converting component to string!", e2);
                         }
-                        log.error(SwingTree.get().loggingMarker(), "Error while painting look and feel of component '"+componentAsString+"'!", e);
+                        log.error(SwingTree.get().logMarker(), "Error while painting look and feel of component '"+componentAsString+"'!", e);
                     }
                 });
             }
@@ -738,7 +738,7 @@ public final class ComponentExtension<C extends JComponent>
 
                     _styleEngine.paintBorder(internalGraphics, formerBorderPainter);
                 } catch (Exception e) {
-                    log.error(SwingTree.get().loggingMarker(), "Error while painting border!", e);
+                    log.error(SwingTree.get().logMarker(), "Error while painting border!", e);
                 }
                 finally {
                     internalGraphics.setClip(former);
@@ -801,7 +801,7 @@ public final class ComponentExtension<C extends JComponent>
         try {
             painter.run();
         } catch (Exception e) {
-            log.warn(SwingTree.get().loggingMarker(), "Error while rendering component of type '"+_owner.getClass().getName()+"'.", e);
+            log.warn(SwingTree.get().logMarker(), "Error while rendering component of type '"+_owner.getClass().getName()+"'.", e);
         }
         g.setClip(oldClip);
     }
@@ -812,7 +812,7 @@ public final class ComponentExtension<C extends JComponent>
         try {
             paintTask.run();
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Error during clipped painting task.", e);
+            log.error(SwingTree.get().logMarker(), "Error during clipped painting task.", e);
         } finally {
             g2d.setClip(formerClip);
         }
@@ -934,7 +934,7 @@ public final class ComponentExtension<C extends JComponent>
                 }
             }
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Error while hashing children of component '"+_owner+"'.", e);
+            log.error(SwingTree.get().logMarker(), "Error while hashing children of component '"+_owner+"'.", e);
         }
         return hashCode;
     }

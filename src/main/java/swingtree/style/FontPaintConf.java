@@ -98,7 +98,7 @@ final class FontPaintConf
             noise = noiseConfigurator.configure(noise);
             return of(null, null, noise, null);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to apply noise configuration.", e);
+            log.error(SwingTree.get().logMarker(), "Failed to apply noise configuration.", e);
         }
         return this;
     }
@@ -110,7 +110,7 @@ final class FontPaintConf
             gradient = gradientConfigurator.configure(gradient);
             return of(null, null, null, gradient);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to apply gradient configuration.", e);
+            log.error(SwingTree.get().logMarker(), "Failed to apply gradient configuration.", e);
         }
         return this;
     }

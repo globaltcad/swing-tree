@@ -339,7 +339,7 @@ public final class ConfirmDialog
                         ));
             });
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to show confirm dialog, returning 'CANCEL' as dialog result!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to show confirm dialog, returning 'CANCEL' as dialog result!", e);
             return ConfirmAnswer.CANCEL;
         }
     }

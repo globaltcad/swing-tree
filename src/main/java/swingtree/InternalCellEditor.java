@@ -150,7 +150,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             Objects.requireNonNull(delegate);
             delegate.setValueAndTarget(presentationEntry, originalEntryFromModel, targetedEntryType);
         } catch (Exception e) {
-            log.debug(SwingTree.get().loggingMarker(), "Failed to internal cell editor value for host type '"+hostType.getName()+"'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to internal cell editor value for host type '"+hostType.getName()+"'", e);
         }
     }
 
@@ -409,7 +409,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 }
             }
             catch (Exception e) {
-                log.debug(SwingTree.get().loggingMarker(), "Failed to update internal cell editor for host type '"+hostType.getName()+"'", e);
+                log.debug(SwingTree.get().logMarker(), "Failed to update internal cell editor for host type '"+hostType.getName()+"'", e);
             }
         }
     }

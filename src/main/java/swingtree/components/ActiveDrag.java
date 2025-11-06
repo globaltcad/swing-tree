@@ -161,7 +161,7 @@ final class ActiveDrag {
                 image = makeTransparent.filter(image, null);
             }
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to make the rendering of dragged component transparent.", e);
+            log.error(SwingTree.get().logMarker(), "Failed to make the rendering of dragged component transparent.", e);
         }
         g.dispose();
 

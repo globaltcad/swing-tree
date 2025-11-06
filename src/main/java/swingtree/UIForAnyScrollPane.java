@@ -380,7 +380,7 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
                 if ( layout != null)
                     prefChildSize = layout.preferredLayoutSize(_child);
             } catch (Exception e) {
-                log.warn(SwingTree.get().loggingMarker(), "Failed to compute preferred size from the layout manager of the child component.", e);
+                log.warn(SwingTree.get().logMarker(), "Failed to compute preferred size from the layout manager of the child component.", e);
             }
             if ( prefChildSize == null )
                 prefChildSize = _child.getPreferredSize();

@@ -190,7 +190,7 @@ final class LayerCache
                 StyleUtil.transferConfigurations(g, g2);
             }
             catch ( Exception ignored ) {
-                log.debug(SwingTree.get().loggingMarker(), "Error while transferring configurations to the cached image graphics context.");
+                log.debug(SwingTree.get().logMarker(), "Error while transferring configurations to the cached image graphics context.");
             }
             finally {
                 renderer.accept(_layerRenderData, g2);

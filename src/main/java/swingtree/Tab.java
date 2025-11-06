@@ -78,7 +78,7 @@ public final class Tab
      */
     public final Tab isSelectedIf( boolean isSelected ) {
         if ( _isSelected != null )
-            log.warn(SwingTree.get().loggingMarker(), "Selection flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Selection flag already specified!", new Throwable());
 
         return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
@@ -94,7 +94,7 @@ public final class Tab
     public final Tab isSelectedIf( Var<Boolean> isSelected ) {
         NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
         if ( _isSelected != null )
-            log.warn(SwingTree.get().loggingMarker(), "Selection flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Selection flag already specified!", new Throwable());
 
         return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
@@ -111,7 +111,7 @@ public final class Tab
     public final Tab isSelectedIf( Val<Boolean> isSelected ) {
         NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
         if ( _isSelected != null )
-            log.warn(SwingTree.get().loggingMarker(), "Selection flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Selection flag already specified!", new Throwable());
 
         return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
@@ -130,7 +130,7 @@ public final class Tab
         NullUtil.nullArgCheck(state,"state",Enum.class);
         NullUtil.nullArgCheck(selectedState,"selectedState",Var.class);
         if ( _isSelected != null )
-            log.warn(SwingTree.get().loggingMarker(), "Selection flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Selection flag already specified!", new Throwable());
 
         Var<Boolean> isSelectedModel = Var.of(state == selectedState.get());
         Viewable.cast(selectedState).onChange(From.ALL, it -> {
@@ -151,7 +151,7 @@ public final class Tab
      */
     public final Tab isEnabledIf( boolean isEnabled ) {
         if ( _isEnabled != null )
-            log.warn(SwingTree.get().loggingMarker(), "Enabled flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Enabled flag already specified!", new Throwable());
 
         return new Tab(_contents, _headerComponent, _title, _isSelected, Val.of(isEnabled), _icon, _tip, _onSelected, _onMouseClick);
     }
@@ -165,7 +165,7 @@ public final class Tab
     public final Tab isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled,"isEnabled",Val.class);
         if ( _isEnabled != null )
-            log.warn(SwingTree.get().loggingMarker(), "Enabled flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Enabled flag already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -183,7 +183,7 @@ public final class Tab
         NullUtil.nullArgCheck(state,"state",Enum.class);
         NullUtil.nullArgCheck(enabledState,"enabledState",Val.class);
         if ( _isEnabled != null )
-            log.warn(SwingTree.get().loggingMarker(), "Enabled flag already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Enabled flag already specified!", new Throwable());
         Val<Boolean> isEnabled = enabledState.viewAs(Boolean.class, it -> it == state );
         return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
@@ -197,7 +197,7 @@ public final class Tab
     public final Tab withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
         if ( _icon != null )
-            log.warn(SwingTree.get().loggingMarker(), "Icon already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Icon already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, Val.of(icon), _tip, _onSelected, _onMouseClick);
     }
 
@@ -241,7 +241,7 @@ public final class Tab
     public final Tab withIcon( Val<IconDeclaration> iconDeclaration ) {
         NullUtil.nullArgCheck(iconDeclaration,"icon",Val.class);
         if ( _icon != null )
-            log.warn(SwingTree.get().loggingMarker(), "Icon already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Icon already specified!", new Throwable());
         Val<Icon> asIcon = iconDeclaration.viewAs( Icon.class, it -> it.find().orElse(null) );
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, asIcon, _tip, _onSelected, _onMouseClick);
     }
@@ -255,7 +255,7 @@ public final class Tab
     public final Tab withTip( String tip ) {
         NullUtil.nullArgCheck(tip,"tip",String.class);
         if ( _tip != null )
-            log.warn(SwingTree.get().loggingMarker(), "Tip already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Tip already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, Val.of(tip), _onSelected, _onMouseClick);
     }
 
@@ -270,14 +270,14 @@ public final class Tab
     public final Tab withTip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip,"tip",String.class);
         if ( _tip != null )
-            log.warn(SwingTree.get().loggingMarker(), "Tip already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Tip already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);
     }
 
     public final Tab withHeader( JComponent headerComponent ) {
         NullUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
         if ( _headerComponent != null )
-            log.warn(SwingTree.get().loggingMarker(), "Header component already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Header component already specified!", new Throwable());
         return new Tab(_contents, headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -301,7 +301,7 @@ public final class Tab
      */
     public final Tab add( UIForAnySwing<?,?> contents ) {
         if ( _contents != null )
-            log.warn(SwingTree.get().loggingMarker(), "Content component already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Content component already specified!", new Throwable());
         return new Tab(contents.getComponent(), _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -313,7 +313,7 @@ public final class Tab
      */
     public final Tab add( JComponent contents ) {
         if ( _contents != null )
-            log.warn(SwingTree.get().loggingMarker(), "Content component already specified!", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Content component already specified!", new Throwable());
         return new Tab(contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 

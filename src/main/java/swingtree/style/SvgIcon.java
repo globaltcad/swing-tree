@@ -144,7 +144,7 @@ public final class SvgIcon extends ImageIcon
             SVGLoader loader = new SVGLoader();
             tempSVGDocument = loader.load(svgUrl);
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to load SVG document from URL: " + svgUrl, e);
+            log.error(SwingTree.get().logMarker(), "Failed to load SVG document from URL: " + svgUrl, e);
         }
         return tempSVGDocument;
     }
@@ -155,7 +155,7 @@ public final class SvgIcon extends ImageIcon
             SVGLoader loader = new SVGLoader();
             tempSVGDocument = loader.load(stream, null, LoaderContext.createDefault());
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to load SVG document from stream: " + stream, e);
+            log.error(SwingTree.get().logMarker(), "Failed to load SVG document from stream: " + stream, e);
         }
         return tempSVGDocument;
     }
@@ -771,7 +771,7 @@ public final class SvgIcon extends ImageIcon
                     viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
                     break;
                 default:
-                    log.warn(SwingTree.get().loggingMarker(), "Unknown preferred placement: " + preferredPlacement);
+                    log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
             }
         }
 
@@ -796,7 +796,7 @@ public final class SvgIcon extends ImageIcon
             // account for the scale of the transform with respect to the view box!
             _svgDocument.render((JComponent) c, g2d, viewBox);
         } catch (Exception e) {
-            log.warn(SwingTree.get().loggingMarker(), "Failed to render SVG document.", e);
+            log.warn(SwingTree.get().logMarker(), "Failed to render SVG document.", e);
         }
 
         if ( needsScaling )

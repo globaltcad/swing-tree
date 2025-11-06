@@ -115,7 +115,7 @@ final class FlipFlopStyler<C extends JComponent>
                 if ( _animation != null )
                     _animation.run(status);
             } catch ( Exception e ) {
-                log.error(SwingTree.get().loggingMarker(), "Error while running animation.", e);
+                log.error(SwingTree.get().logMarker(), "Error while running animation.", e);
             }
         }
 
@@ -125,7 +125,7 @@ final class FlipFlopStyler<C extends JComponent>
                 if (_animation != null)
                     _animation.finish(status);
             } catch (Exception e) {
-                log.error(SwingTree.get().loggingMarker(), "Error while finishing animation.", e);
+                log.error(SwingTree.get().logMarker(), "Error while finishing animation.", e);
             } finally {
                 dispose();
             }

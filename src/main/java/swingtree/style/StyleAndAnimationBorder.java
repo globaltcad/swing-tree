@@ -76,7 +76,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 then we don't want to mess up how the rest of the component is painted...
                 Therefore, we catch any exceptions that happen in the above code.
             */
-            log.error(SwingTree.get().loggingMarker(), "Exception while painting border style '"+_compExt.getStyle().border()+"': ", ex);
+            log.error(SwingTree.get().logMarker(), "Exception while painting border style '"+_compExt.getStyle().border()+"': ", ex);
         }
     }
 
@@ -120,7 +120,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                  but we don't know which logging framework that is, so we just print
                  the stack trace to the console so that any developers can see what went wrong.
             */
-            log.error(SwingTree.get().loggingMarker(), "Exception while painting former border '{}': ", _formerBorder, ex);
+            log.error(SwingTree.get().logMarker(), "Exception while painting former border '{}': ", _formerBorder, ex);
         }
     }
 

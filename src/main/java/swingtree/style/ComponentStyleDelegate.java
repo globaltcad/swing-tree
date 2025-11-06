@@ -78,7 +78,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             peeker.accept(_component);
         } catch( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Peeker threw an exception: " + e.getMessage(), e);
+            log.error(SwingTree.get().logMarker(), "Peeker threw an exception: " + e.getMessage(), e);
             // We don't want to crash the application if the peeker throws an exception.
         }
         return this;
@@ -127,7 +127,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             return styler.style(this);
         } catch( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Conditional styler threw an exception: " + e.getMessage(), e);
+            log.error(SwingTree.get().logMarker(), "Conditional styler threw an exception: " + e.getMessage(), e);
             // We don't want to crash the application if the conditional styler throws an exception.
         }
         return this;
@@ -432,7 +432,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '"+colorString+"'", e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_styleConf._withBorder(_styleConf.border().withWidth(width).withColor(newColor)));
@@ -565,7 +565,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '"+colorString+"'", e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_styleConf._withBorder(_styleConf.border().withWidthAt(edge, (float) width).withColorAt(edge, newColor)));
@@ -644,7 +644,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '{}'", colorString, e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '{}'", colorString, e);
             return this;
         }
         return _withStyle(_styleConf._withBorder(_styleConf.border().withColor(newColor)));
@@ -794,7 +794,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '"+colorString+"'", e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_styleConf._withBase(_styleConf.base().foundationColor(newColor)));
@@ -910,7 +910,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '"+colorString+"'", e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_styleConf._withBase(_styleConf.base().backgroundColor(newColor)));
@@ -1124,7 +1124,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '"+colorString+"'", e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_styleConf._withBase(_styleConf.base().foregroundColor(newColor)));
@@ -1262,7 +1262,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = UI.color(colorString);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color string: '"+colorString+"'", e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_styleConf._withShadow(ShadowConf.DEFAULT_LAYER, shadow -> shadow.color(newColor)));
@@ -1415,7 +1415,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             shadow = styler.configure(shadow);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to configure shadow '"+shadowName+"' for layer '"+layer+"' using styler: "+styler, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure shadow '"+shadowName+"' for layer '"+layer+"' using styler: "+styler, e);
         }
         // We clone the shadow map:
         NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, shadow);
@@ -1850,7 +1850,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             fontConf = fontStyler.configure(fontConf);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to configure font using styler: "+fontStyler, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure font using styler: "+fontStyler, e);
         }
         StyleConf updatedStyle = _styleConf._withFont(fontConf);
         // We also update the text style, if it exists:
@@ -1879,7 +1879,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             fontConf = fontStyler.configure(fontConf);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to configure font using styler: "+fontStyler, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure font using styler: "+fontStyler, e);
         }
         StyleConf updatedStyle = _styleConf._withFont(fontConf);
         return _withStyle(updatedStyle);

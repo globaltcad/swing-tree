@@ -10,7 +10,6 @@ import swingtree.api.Styler;
 
 import java.awt.Font;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  *  An immutable configuration type which holds custom
@@ -205,7 +204,7 @@ public final class TextConf implements Simplifiable<TextConf>
         try {
             return _fontConf(fontConfFunction.configure(_fontConf));
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Error configuring font style.", e);
+            log.error(SwingTree.get().logMarker(), "Error configuring font style.", e);
             return this;
         }
     }

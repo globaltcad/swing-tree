@@ -12,7 +12,6 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -100,7 +99,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on slider change!", ex);
+                                log.error(SwingTree.get().logMarker(), "Error while executing action on slider change!", ex);
                             }
                         })
                     );

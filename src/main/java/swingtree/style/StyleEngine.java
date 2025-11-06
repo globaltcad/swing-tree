@@ -94,7 +94,7 @@ final class StyleEngine
                 try {
                     StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
                 } catch ( Exception ex ) {
-                    log.error(SwingTree.get().loggingMarker(), "Exception while trying to apply and render parent filter!", ex);
+                    log.error(SwingTree.get().logMarker(), "Exception while trying to apply and render parent filter!", ex);
                 }
             }
         }
@@ -127,7 +127,7 @@ final class StyleEngine
                 then we don't want to mess up how the rest of the component is painted...
                 Therefore, we catch any exceptions that happen in the above code.
             */
-            log.error(SwingTree.get().loggingMarker(), "Exception while painting former border!", ex);
+            log.error(SwingTree.get().logMarker(), "Exception while painting former border!", ex);
         }
     }
 
@@ -159,7 +159,7 @@ final class StyleEngine
                 StyleRenderer.renderStyleOn(layer, conf, graphics);
             });
         else
-            log.error(SwingTree.get().loggingMarker(), "Layer cache is null for layer: " + layer, new Throwable());
+            log.error(SwingTree.get().logMarker(), "Layer cache is null for layer: " + layer, new Throwable());
     }
 
 }

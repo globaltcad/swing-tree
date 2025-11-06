@@ -63,7 +63,7 @@ final class StyleInstaller<C extends JComponent>
         try {
             _dynamicLaF = updater.configure(_dynamicLaF);
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to update dynamic look and feel!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to update dynamic look and feel!", e);
         }
     }
 

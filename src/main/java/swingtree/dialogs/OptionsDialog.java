@@ -435,7 +435,7 @@ public final class OptionsDialog<E extends Enum<E>>
             if ( _property != null )
                 options = _property.type().getEnumConstants();
             else {
-                log.warn(SwingTree.get().loggingMarker(), "No options were specified for dialog with title '{}' and message '{}'.", _title, _message);
+                log.warn(SwingTree.get().logMarker(), "No options were specified for dialog with title '{}' and message '{}'.", _title, _message);
             }
         }
         if ( options == null )
@@ -446,7 +446,7 @@ public final class OptionsDialog<E extends Enum<E>>
             try {
                 asStr[i] = presenter.apply(options[i]);
             } catch ( Exception e ) {
-                log.warn(SwingTree.get().loggingMarker(), "An exception occurred while converting an enum option to a string!", e);
+                log.warn(SwingTree.get().logMarker(), "An exception occurred while converting an enum option to a string!", e);
                 asStr[i] = options[i].toString();
             }
         }
@@ -465,7 +465,7 @@ public final class OptionsDialog<E extends Enum<E>>
             try {
                 defaultOptionStr = presenter.apply(defaultOption);
             } catch ( Exception e ) {
-                log.warn(SwingTree.get().loggingMarker(), "An exception occurred while converting the default option to a string!", e);
+                log.warn(SwingTree.get().logMarker(), "An exception occurred while converting the default option to a string!", e);
                 defaultOptionStr = defaultOption.toString();
             }
         }

@@ -480,7 +480,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                     try {
                         d = _dimensionsFromCellConf(cells[i], maxwidth).orElse(d);
                     } catch (Exception e) {
-                        log.error(SwingTree.get().loggingMarker(), "Error applying cell configuration", e);
+                        log.error(SwingTree.get().logMarker(), "Error applying cell configuration", e);
                     }
                     m.setSize(d.width, d.height);
 

@@ -201,7 +201,7 @@ public final class CellConf<C extends JComponent, V>
         try {
             return entry().map(Object::toString).orElse("");
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to convert entry to string!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to convert entry to string!", e);
         }
         return "";
     }
@@ -372,7 +372,7 @@ public final class CellConf<C extends JComponent, V>
         try {
             newRenderer = configurator.configure(view());
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to configure view!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure view!", e);
         }
         return _withRenderer(newRenderer.orElseNullable(null));
     }
@@ -492,7 +492,7 @@ public final class CellConf<C extends JComponent, V>
         try {
             return this.view(this.defaultRenderSource.get());
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to create default renderer!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to create default renderer!", e);
         }
         return this;
     }
@@ -616,7 +616,7 @@ public final class CellConf<C extends JComponent, V>
         try {
             return presentationEntry(presenter.apply(entry));
         } catch (Exception e) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to convert entry to presentation entry!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to convert entry to presentation entry!", e);
         }
         return this;
     }

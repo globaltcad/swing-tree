@@ -116,7 +116,7 @@ public final class RenderAs<C extends JComponent, E, T extends E>
                 try {
                     renderer.accept(cell, (Graphics2D) g);
                 } catch (Exception e) {
-                    log.warn(SwingTree.get().loggingMarker(), "An exception occurred while rendering a cell!", e);
+                    log.warn(SwingTree.get().logMarker(), "An exception occurred while rendering a cell!", e);
                     /*
                         We log as warning because exceptions during rendering are not considered
                         as harmful as elsewhere!

@@ -2,7 +2,6 @@ package swingtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationDispatcher;
@@ -1444,10 +1443,10 @@ public class AbstractDelegate<C extends JComponent>
                     AbstractDelegate<JComponent> delegate = new AbstractDelegate<>( false, (JComponent) parent, (JComponent) parent );
                     action.accept(delegate);
                 } catch( Exception e ) {
-                    log.error(SwingTree.get().loggingMarker(), "Error while processing parent delegate!", e);
+                    log.error(SwingTree.get().logMarker(), "Error while processing parent delegate!", e);
                 }
             } else {
-                log.warn(SwingTree.get().loggingMarker(), "Parent of component is not a JComponent, cannot apply parent delegate!");
+                log.warn(SwingTree.get().logMarker(), "Parent of component is not a JComponent, cannot apply parent delegate!");
             }
         });
     }

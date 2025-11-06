@@ -218,7 +218,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
             return of(_function, actualColors, _offset, _scale, _area, _boundary, _rotation, _fractions);
         } catch ( Exception e ) {
-            log.error(SwingTree.get().loggingMarker(), "Failed to parse color strings: " + Arrays.toString(colors), e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
         }
     }

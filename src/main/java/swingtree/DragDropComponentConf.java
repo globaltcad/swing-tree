@@ -239,7 +239,7 @@ public final class DragDropComponentConf<C extends JComponent>
                     try {
                         _onDragEnter.accept(new ComponentDelegate<>(_component, event));
                     } catch (Exception e) {
-                        log.error(SwingTree.get().loggingMarker(), "Error occurred while processing drag enter event.", e);
+                        log.error(SwingTree.get().logMarker(), "Error occurred while processing drag enter event.", e);
                     }
                 }
 
@@ -248,7 +248,7 @@ public final class DragDropComponentConf<C extends JComponent>
                     try {
                         _onDragOver.accept(new ComponentDelegate<>(_component, event));
                     } catch (Exception e) {
-                        log.error(SwingTree.get().loggingMarker(), "Error occurred while processing drag over event.", e);
+                        log.error(SwingTree.get().logMarker(), "Error occurred while processing drag over event.", e);
                     }
                 }
 
@@ -257,7 +257,7 @@ public final class DragDropComponentConf<C extends JComponent>
                     try {
                         _onDropActionChanged.accept(new ComponentDelegate<>(_component, event));
                     } catch (Exception e) {
-                        log.error(SwingTree.get().loggingMarker(), "Error occurred while processing drop action changed event.", e);
+                        log.error(SwingTree.get().logMarker(), "Error occurred while processing drop action changed event.", e);
                     }
                 }
 
@@ -266,7 +266,7 @@ public final class DragDropComponentConf<C extends JComponent>
                     try {
                         _onDragExit.accept(new ComponentDelegate<>(_component, event));
                     } catch (Exception e) {
-                        log.error(SwingTree.get().loggingMarker(), "Error occurred while processing drag exit event.", e);
+                        log.error(SwingTree.get().logMarker(), "Error occurred while processing drag exit event.", e);
                     }
                 }
 
@@ -275,7 +275,7 @@ public final class DragDropComponentConf<C extends JComponent>
                     try {
                         _onDragDropEnd.accept(new ComponentDelegate<>(_component, event));
                     } catch (Exception e) {
-                        log.error(SwingTree.get().loggingMarker(), "Error occurred while processing drop event.", e);
+                        log.error(SwingTree.get().logMarker(), "Error occurred while processing drop event.", e);
                     }
                 }
             }

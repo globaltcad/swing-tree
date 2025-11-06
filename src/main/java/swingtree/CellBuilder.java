@@ -305,7 +305,7 @@ public final class CellBuilder<C extends JComponent, E> {
                 else if ( currentCell.view().isEmpty() )
                     _basicEditor.setEntry(currentCell.entry().orElse(null), entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
             } catch (Exception e) {
-                log.error(SwingTree.get().loggingMarker(), "Failed to populate cell editor!", e);
+                log.error(SwingTree.get().logMarker(), "Failed to populate cell editor!", e);
             }
         }
 
@@ -340,7 +340,7 @@ public final class CellBuilder<C extends JComponent, E> {
                     }
                 }
             } catch (Exception e) {
-                log.error(SwingTree.get().loggingMarker(), "Failed to populate cell editor!", e);
+                log.error(SwingTree.get().logMarker(), "Failed to populate cell editor!", e);
             }
         }
 
@@ -365,7 +365,7 @@ public final class CellBuilder<C extends JComponent, E> {
                         table.setRowHeight(row, minSize.height);
                 }
             } catch (Exception e) {
-                log.error(SwingTree.get().loggingMarker(), "Failed to fit cell size", e);
+                log.error(SwingTree.get().logMarker(), "Failed to fit cell size", e);
             }
             return view;
         }
@@ -777,7 +777,7 @@ public final class CellBuilder<C extends JComponent, E> {
             try {
                 return renderer.apply(cell);
             } catch (Exception e) {
-                log.error(SwingTree.get().loggingMarker(), "Failed to convert cell to displayable String!", e);
+                log.error(SwingTree.get().logMarker(), "Failed to convert cell to displayable String!", e);
                 return "";
             }
         };
