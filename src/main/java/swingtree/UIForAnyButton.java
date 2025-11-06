@@ -1639,7 +1639,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             width  = Math.min(fittedWidth, fittedHeight);
             height = Math.min(fittedWidth, fittedHeight);
         } else {
-            log.error("Unknown 'UI.FitComponent' value: '{}'. Using 'NO' instead.", fitComponent);
+            log.error(SwingTree.get().loggingMarker(), "Unknown 'UI.FitComponent' value: '{}'. Using 'NO' instead.", fitComponent);
             width  = icon.getIconWidth();
             height = icon.getIconHeight();
         }
@@ -2084,7 +2084,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                             try {
                                 action.accept(new ComponentDelegate<>(button, e));
                             } catch ( Exception ex ) {
-                                log.error("Failed to execute action on button change event.", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Failed to execute action on button change event.", ex);
                             }
                         })
                     );
@@ -2143,7 +2143,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                             try {
                                 action.accept(new ComponentDelegate<>(button, e));
                             } catch ( Exception ex ) {
-                                log.error("Failed to execute action on button click event.", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Failed to execute action on button click event.", ex);
                             }
                         })
                     );

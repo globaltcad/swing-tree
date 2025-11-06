@@ -1444,10 +1444,10 @@ public class AbstractDelegate<C extends JComponent>
                     AbstractDelegate<JComponent> delegate = new AbstractDelegate<>( false, (JComponent) parent, (JComponent) parent );
                     action.accept(delegate);
                 } catch( Exception e ) {
-                    log.error("Error while processing parent delegate!", e);
+                    log.error(SwingTree.get().loggingMarker(), "Error while processing parent delegate!", e);
                 }
             } else {
-                log.warn("Parent of component is not a JComponent, cannot apply parent delegate!");
+                log.warn(SwingTree.get().loggingMarker(), "Parent of component is not a JComponent, cannot apply parent delegate!");
             }
         });
     }

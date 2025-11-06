@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Styler;
@@ -204,7 +205,7 @@ public final class TextConf implements Simplifiable<TextConf>
         try {
             return _fontConf(fontConfFunction.configure(_fontConf));
         } catch ( Exception e ) {
-            log.error("Error configuring font style.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error configuring font style.", e);
             return this;
         }
     }

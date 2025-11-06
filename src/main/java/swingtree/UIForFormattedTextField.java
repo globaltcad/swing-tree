@@ -38,7 +38,7 @@ public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFo
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error occurred while processing enter action event.", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error occurred while processing enter action event.", ex);
                             }
                         } )
                     );

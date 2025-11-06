@@ -89,7 +89,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup open!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on popup open!", ex);
                             }
                         })
                     );
@@ -126,7 +126,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
                             try {
                                 action.accept(new ComponentDelegate<>((P) thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup close!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on popup close!", ex);
                             }
                         })
                     );
@@ -162,7 +162,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup cancel!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on popup cancel!", ex);
                             }
                         })
                     );

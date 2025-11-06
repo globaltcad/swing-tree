@@ -2,6 +2,7 @@ package swingtree.dialogs;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 
@@ -338,7 +339,7 @@ public final class ConfirmDialog
                         ));
             });
         } catch (Exception e) {
-            log.error("Failed to show confirm dialog, returning 'CANCEL' as dialog result!", e);
+            log.error(SwingTree.get().loggingMarker(), "Failed to show confirm dialog, returning 'CANCEL' as dialog result!", e);
             return ConfirmAnswer.CANCEL;
         }
     }

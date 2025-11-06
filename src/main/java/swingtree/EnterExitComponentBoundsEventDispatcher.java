@@ -180,7 +180,7 @@ final class EnterExitComponentBoundsEventDispatcher {
                 try {
                     listener.mouseEntered(mouseEvent);
                 } catch (Exception e) {
-                    log.error("Failed to process mouseEntered event {}. Error: {}", mouseEvent, e.getMessage(), e);
+                    log.error(SwingTree.get().loggingMarker(), "Failed to process mouseEntered event {}. Error: {}", mouseEvent, e.getMessage(), e);
                 }
             }
         }
@@ -209,7 +209,7 @@ final class EnterExitComponentBoundsEventDispatcher {
                 try {
                     listener.mouseExited(mouseEvent);
                 } catch (Exception e) {
-                    log.error("Failed to process mouseExited event {}. Error: {}", mouseEvent, e.getMessage(), e);
+                    log.error(SwingTree.get().loggingMarker(), "Failed to process mouseExited event {}. Error: {}", mouseEvent, e.getMessage(), e);
                 }
             }
         }

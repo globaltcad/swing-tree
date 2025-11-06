@@ -79,7 +79,7 @@ final class StyleSource<C extends JComponent>
         try {
             styleConf = _styleSheet.applyTo( owner, styleConf );
         } catch (Exception e) {
-            log.error("An exception occurred while applying the style sheet for component '"+owner+"'.", e);
+            log.error(SwingTree.get().loggingMarker(), "An exception occurred while applying the style sheet for component '"+owner+"'.", e);
             /*
                  If any exceptions happen in a StyleSheet implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
@@ -92,7 +92,7 @@ final class StyleSource<C extends JComponent>
             Objects.requireNonNull(updated);
             styleConf = updated.style();
         } catch (Exception e) {
-            log.error("An exception occurred while applying the local styler for component '"+owner+"'.", e);
+            log.error(SwingTree.get().loggingMarker(), "An exception occurred while applying the local styler for component '"+owner+"'.", e);
             /*
                  If any exceptions happen in a Styler implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
@@ -105,7 +105,7 @@ final class StyleSource<C extends JComponent>
             try {
                 styleConf = expirableStyler.get().style(new ComponentStyleDelegate<>(owner, styleConf)).style();
             } catch ( Exception e ) {
-                log.warn("An exception occurred while applying an animation styler!", e);
+                log.warn(SwingTree.get().loggingMarker(), "An exception occurred while applying an animation styler!", e);
                 /*
                      If any exceptions happen in a Styler implementation provided by a user,
                      then we don't want to prevent the other Stylers from doing their job,

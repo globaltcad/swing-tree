@@ -127,7 +127,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
-            log.error("Error while building table renderer.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building table renderer.", e);
             return this;
         }
         CellBuilder<T, Object> finalBuilder = builder;
@@ -238,7 +238,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
-            log.error("Error while building table renderer.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building table renderer.", e);
             return this;
         }
         CellBuilder<T, Object> finalBuilder = builder;
@@ -399,7 +399,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
-            log.error("Error while building table renderer.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building table renderer.", e);
             return this;
         }
         Objects.requireNonNull(builder);
@@ -519,7 +519,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         try {
             return this.withModel(dataModelBuilder.build());
         } catch (Exception e) {
-            log.error("Error while building a table model.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building a table model.", e);
             return this;
         }
     }
@@ -551,7 +551,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         try {
             builder = dataModelBuilder.configure(builder);
         } catch (Exception e) {
-            log.error("Error while building table model.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building table model.", e);
         }
         return this.withModel(builder.build());
     }
@@ -593,7 +593,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         try {
             builder = dataModelBuilder.configure(builder);
         } catch (Exception e) {
-            log.error("Error while building table model.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building table model.", e);
         }
         return this.withModel(builder.build());
     }
@@ -834,7 +834,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             try {
                 column.set(rowIndex, (E) aValue);
             } catch (Exception e) {
-                log.warn("Failed to set value in hash table based table model.", e);
+                log.warn(SwingTree.get().loggingMarker(), "Failed to set value in hash table based table model.", e);
             }
         }
 

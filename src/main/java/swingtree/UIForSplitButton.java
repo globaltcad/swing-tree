@@ -59,7 +59,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                     )
                             );
                     } catch (Exception exception) {
-                        log.error("Error while executing split button action listener.", exception);
+                        log.error(SwingTree.get().loggingMarker(), "Error while executing split button action listener.", exception);
                     }
                 }
             }));
@@ -107,17 +107,17 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
             try {
                 return textProvider.apply(e);
             } catch (Exception ex) {
-                log.error("Error while providing split button text for enum value.", ex);
+                log.error(SwingTree.get().loggingMarker(), "Error while providing split button text for enum value.", ex);
             }
             try {
                 return e.toString();
             } catch (Exception ex) {
-                log.error("Error while providing split button text for enum value using 'toString()'.", ex);
+                log.error(SwingTree.get().loggingMarker(), "Error while providing split button text for enum value using 'toString()'.", ex);
             }
             try {
                 return e.name();
             } catch (Exception ex) {
-                log.error("Error while providing split button text for enum value using 'name()'.", ex);
+                log.error(SwingTree.get().loggingMarker(), "Error while providing split button text for enum value using 'name()'.", ex);
             }
             return "";
         };
@@ -246,7 +246,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                                 )
                                         );
                                     } catch (Exception exception) {
-                                        log.error("Error while executing split button action listener.", exception);
+                                        log.error(SwingTree.get().loggingMarker(), "Error while executing split button action listener.", exception);
                                     }
                                 })
                     );
@@ -310,7 +310,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                         )
                                 );
                             } catch (Exception exception) {
-                                log.error("Error while executing split button action listener.", exception);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing split button action listener.", exception);
                             }
                         })
                     );
@@ -338,7 +338,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                         new ComponentDelegate<>(thisComponent, e)
                                 );
                             } catch (Exception ex) {
-                                log.error("Error while executing action on button click!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on button click!", ex);
                             }
                         })
                     )
@@ -362,7 +362,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup open!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on popup open!", ex);
                             }
                         })
                     );
@@ -403,7 +403,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup close!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on popup close!", ex);
                             }
                         })
                     );
@@ -443,7 +443,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup cancel!", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error while executing action on popup cancel!", ex);
                             }
                         })
                     );
@@ -538,13 +538,13 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                     try {
                         action.accept(new SplitButtonDelegate<>( thisComponent,(SplitItemDelegate<JMenuItem>) delegate ));
                     } catch (Exception exception) {
-                        log.error("Error while executing selection action listener.", exception);
+                        log.error(SwingTree.get().loggingMarker(), "Error while executing selection action listener.", exception);
                     }
                 });
                 try {
                     splitItem.getOnSelected().accept(delegate);
                 } catch (Exception exception) {
-                    log.error("Error while executing split item selection action.", exception);
+                    log.error(SwingTree.get().loggingMarker(), "Error while executing split item selection action.", exception);
                 }
             })
         );

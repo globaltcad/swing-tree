@@ -1,6 +1,7 @@
 package swingtree.threading;
 
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 import java.util.concurrent.BlockingQueue;
@@ -28,7 +29,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 		try {
 			rendererQueue.put(task);
 		} catch (Exception e) {
-			log.error("Failed to register application event!", e);
+			log.error(SwingTree.get().loggingMarker(), "Failed to register application event!", e);
 		}
 	}
 
@@ -52,7 +53,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 				// wait for the task to be processed. The wait is released by the notifyAll() call in the task.
 			}
 		} catch (Exception e) {
-			log.error("Failed to register and run application event!", e);
+			log.error(SwingTree.get().loggingMarker(), "Failed to register and run application event!", e);
 		}
 	}
 
@@ -66,7 +67,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 		try {
 			UI.runNow(runnable);
 		} catch (Exception e) {
-			log.error("Failed to register and run UI event!", e);
+			log.error(SwingTree.get().loggingMarker(), "Failed to register and run UI event!", e);
 		}
 	}
 
@@ -84,7 +85,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 				if (rethrow)
 					throw e;
 				else
-					log.error("An exception occurred while processing an event!", e);
+					log.error(SwingTree.get().loggingMarker(), "An exception occurred while processing an event!", e);
 			}
 		}
 	}
@@ -105,7 +106,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 		try {
 			this.join(false);
 		} catch (InterruptedException e) {
-			log.error("The application event processing queue was interrupted!", e);
+			log.error(SwingTree.get().loggingMarker(), "The application event processing queue was interrupted!", e);
 		}
 	}
 
@@ -143,7 +144,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 			try {
 				this.rendererQueue.take().run();
 			} catch (Exception e) {
-				log.error("An exception occurred while processing an event!", e);
+				log.error(SwingTree.get().loggingMarker(), "An exception occurred while processing an event!", e);
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.NoiseFunction;
 
@@ -217,7 +218,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
             return of(_function, actualColors, _offset, _scale, _area, _boundary, _rotation, _fractions);
         } catch ( Exception e ) {
-            log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
+            log.error(SwingTree.get().loggingMarker(), "Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
         }
     }

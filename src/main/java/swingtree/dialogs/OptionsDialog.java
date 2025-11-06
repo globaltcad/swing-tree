@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
 import sprouts.Var;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 
@@ -434,7 +435,7 @@ public final class OptionsDialog<E extends Enum<E>>
             if ( _property != null )
                 options = _property.type().getEnumConstants();
             else {
-                log.warn("No options were specified for dialog with title '{}' and message '{}'.", _title, _message);
+                log.warn(SwingTree.get().loggingMarker(), "No options were specified for dialog with title '{}' and message '{}'.", _title, _message);
             }
         }
         if ( options == null )
@@ -445,7 +446,7 @@ public final class OptionsDialog<E extends Enum<E>>
             try {
                 asStr[i] = presenter.apply(options[i]);
             } catch ( Exception e ) {
-                log.warn("An exception occurred while converting an enum option to a string!", e);
+                log.warn(SwingTree.get().loggingMarker(), "An exception occurred while converting an enum option to a string!", e);
                 asStr[i] = options[i].toString();
             }
         }
@@ -464,7 +465,7 @@ public final class OptionsDialog<E extends Enum<E>>
             try {
                 defaultOptionStr = presenter.apply(defaultOption);
             } catch ( Exception e ) {
-                log.warn("An exception occurred while converting the default option to a string!", e);
+                log.warn(SwingTree.get().loggingMarker(), "An exception occurred while converting the default option to a string!", e);
                 defaultOptionStr = defaultOption.toString();
             }
         }

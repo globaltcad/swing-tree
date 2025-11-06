@@ -241,7 +241,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error occurred while processing list selection event.", ex);
+                                log.error(SwingTree.get().loggingMarker(), "Error occurred while processing list selection event.", ex);
                             }
                         })
                     );
@@ -313,7 +313,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {
-            log.error("Error while building renderer.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error while building renderer.", e);
             return this;
         }
         Objects.requireNonNull(render);

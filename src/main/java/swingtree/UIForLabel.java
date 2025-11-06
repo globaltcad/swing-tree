@@ -99,7 +99,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                                 if ( !ref.startsWith("http") ) ref = "https://" + ref;
                                 Desktop.getDesktop().browse(new URI(ref));
                             } catch (IOException | URISyntaxException e1) {
-                                log.error("Failed to open link: " + href.orElseThrowUnchecked(), e1);
+                                log.error(SwingTree.get().loggingMarker(), "Failed to open link: " + href.orElseThrowUnchecked(), e1);
                             }
                         }
                         @Override  public void mouseExited(MouseEvent e) { thisComponent.setText(text.get()); }

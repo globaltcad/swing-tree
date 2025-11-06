@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 import javax.swing.JPanel;
@@ -326,7 +327,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
 
             return of(_span, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
         } catch ( Exception e ) {
-            log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
+            log.error(SwingTree.get().loggingMarker(), "Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
         }
     }

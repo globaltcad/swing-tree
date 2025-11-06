@@ -4,6 +4,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.mvvm.EntryViewModel;
@@ -238,9 +239,9 @@ public class JScrollPanels extends UI.ScrollPane
                 if ( existing instanceof EntryPanel ) {
                     EntryPanel existingEntry = (EntryPanel) existing;
                     if ( existingEntry.getComponentCount() == 0 ) {
-                        log.error("The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.", existingEntry, entry, JScrollPanels.class, new Throwable());
+                        log.error(SwingTree.get().loggingMarker(), "The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.", existingEntry, entry, JScrollPanels.class, new Throwable());
                     } else if ( entry.getComponentCount() == 0 ) {
-                        log.error("The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.", entry, existingEntry, JScrollPanels.class, new Throwable());
+                        log.error(SwingTree.get().loggingMarker(), "The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.", entry, existingEntry, JScrollPanels.class, new Throwable());
                     } else {
                         Component existingView = existingEntry.getComponent(0);
                         Component newView = entry.getComponent(0);
@@ -248,13 +249,13 @@ public class JScrollPanels extends UI.ScrollPane
                             continue; // The view is already there
                     }
                 } else {
-                    log.error("Encountered illegal type of entry panel in {}.", JScrollPanels.class, new Throwable());
+                    log.error(SwingTree.get().loggingMarker(), "Encountered illegal type of entry panel in {}.", JScrollPanels.class, new Throwable());
                 }
                 _internal.remove(localIndex);
                 _internal.add(entry, localIndex);
                 somethingChanged = true;
             } catch (Exception e) {
-                log.error("Encountered an exception while trying to update the component at index '{}'.", localIndex, e);
+                log.error(SwingTree.get().loggingMarker(), "Encountered an exception while trying to update the component at index '{}'.", localIndex, e);
             }
         }
         if ( somethingChanged ) {
@@ -322,9 +323,9 @@ public class JScrollPanels extends UI.ScrollPane
         if ( existing instanceof EntryPanel ) {
             EntryPanel existingEntry = (EntryPanel) existing;
             if ( existingEntry.getComponentCount() == 0 ) {
-                log.error("The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.", existingEntry, newEntryPanel, JScrollPanels.class, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.", existingEntry, newEntryPanel, JScrollPanels.class, new Throwable());
             } else if ( newEntryPanel.getComponentCount() == 0 ) {
-                log.error("The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.", newEntryPanel, existingEntry, JScrollPanels.class, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.", newEntryPanel, existingEntry, JScrollPanels.class, new Throwable());
             } else {
                 Component existingView = ((EntryPanel) existing).getComponent(0);
                 Component newView = newEntryPanel.getComponent(0);
@@ -332,7 +333,7 @@ public class JScrollPanels extends UI.ScrollPane
                     return; // The view is already there
             }
         } else {
-            log.error("Encountered illegal type of entry panel in {}.", JScrollPanels.class, new Throwable());
+            log.error(SwingTree.get().loggingMarker(), "Encountered illegal type of entry panel in {}.", JScrollPanels.class, new Throwable());
         }
         // We first remove the old entry panel and then add the new one.
         // This is necessary because the layout manager does not allow to replace
@@ -436,11 +437,11 @@ public class JScrollPanels extends UI.ScrollPane
         if ( numberOfExistingComponents > 0 && numberOfExistingComponents > index ) {
             Component found = _internal.getComponent(index);
             if ( !(found instanceof EntryPanel) ) {
-                log.error("Encountered illegal child component '{}' in '{}'.", found, JScrollPanels.class, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "Encountered illegal child component '{}' in '{}'.", found, JScrollPanels.class, new Throwable());
             } else {
                 EntryPanel existingEntry = (EntryPanel) found;
                 if ( existingEntry.getComponentCount() == 0 ) {
-                    log.error("Existing entry panel '{}' about to be replaced by new view '{}' in '{}' is missing its view.", existingEntry, initialView, JScrollPanels.class, new Throwable());
+                    log.error(SwingTree.get().loggingMarker(), "Existing entry panel '{}' about to be replaced by new view '{}' in '{}' is missing its view.", existingEntry, initialView, JScrollPanels.class, new Throwable());
                 } else {
                     Component existingView = existingEntry.getComponent(0);
                     if ( existingView == initialView )
@@ -591,7 +592,7 @@ public class JScrollPanels extends UI.ScrollPane
                 try {
                     view = viewSupplier.createViewFor(viewModel);
                 } catch (Exception e) {
-                    log.error("Failed to create view for entry " + viewModel, e);
+                    log.error(SwingTree.get().loggingMarker(), "Failed to create view for entry " + viewModel, e);
                 }
                 if ( view == null )
                     view = UI.box(); // We return an empty box if the view is null.
@@ -690,7 +691,7 @@ public class JScrollPanels extends UI.ScrollPane
                 try {
                     _lastState = _provider.apply(isHighlighted);
                 } catch (Exception e) {
-                    log.error("Failed to create view for entry: " + this, e);
+                    log.error(SwingTree.get().loggingMarker(), "Failed to create view for entry: " + this, e);
                 }
                 this.setBackground( isHighlighted ? HIGHLIGHT : LOW_LIGHT );
                 this.add(_lastState, "grow");

@@ -116,7 +116,7 @@ public final class SwingTree
             Objects.requireNonNull(config);
             return config;
         } catch (Exception ex) {
-            log.error("Error resolving SwingTree configuration", ex);
+            log.error(SwingTree.get().loggingMarker(), "Error resolving SwingTree configuration", ex);
             ex.printStackTrace();
             return SwingTreeInitConfig.standard();
         }
@@ -200,7 +200,7 @@ public final class SwingTree
      * @param scaleFactor The user scale factor.
      */
     public void setUiScaleFactor( float scaleFactor ) {
-        log.debug("Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
+        log.debug(SwingTree.get().loggingMarker(), "Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
         if ( UI.thisIsUIThread() )
             _uiScale.get().setUserScaleFactor(scaleFactor);
         else

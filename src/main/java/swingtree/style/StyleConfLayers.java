@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 
@@ -95,7 +96,7 @@ final class StyleConfLayers
         try {
             filter = f.configure(_filter);
         } catch (Exception e) {
-            log.error("Error configuring filter settings for component background.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error configuring filter settings for component background.", e);
         }
         return of(filter, _background, _content, _border, _foreground, _any);
     }
@@ -135,7 +136,7 @@ final class StyleConfLayers
         try {
             return of(_filter, f.configure(_background), f.configure(_content), f.configure(_border), f.configure(_foreground), _any == null ? null : f.configure(_any));
         } catch (Exception e) {
-            log.error("Error configuring style settings for component background.", e);
+            log.error(SwingTree.get().loggingMarker(), "Error configuring style settings for component background.", e);
             return this;
         }
     }

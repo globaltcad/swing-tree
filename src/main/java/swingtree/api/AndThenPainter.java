@@ -1,6 +1,7 @@
 package swingtree.api;
 
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 
 import java.awt.Graphics2D;
 import java.util.Objects;
@@ -22,13 +23,13 @@ final class AndThenPainter implements Painter
         try {
             _before.paint(g2d);
         } catch ( Exception e ) {
-            log.error("Exception in painter: "+_before, e);
+            log.error(SwingTree.get().loggingMarker(), "Exception in painter: "+_before, e);
             // Exceptions inside a painter should not be fatal.
         }
         try {
             _after.paint(g2d);
         } catch ( Exception e ) {
-            log.error("Exception in painter: "+_after, e);
+            log.error(SwingTree.get().loggingMarker(), "Exception in painter: "+_after, e);
             // Exceptions inside a painter should not cripple the rest of the painting.
         }
         /*

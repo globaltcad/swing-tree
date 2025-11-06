@@ -1,6 +1,7 @@
 package swingtree.animation;
 
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.JComponent;
@@ -98,7 +99,7 @@ final class AnimationRunner
             long duration = status.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
             shouldContinue = runningAnimation.condition().shouldContinue(status) && duration > 0;
         } catch ( Exception e ) {
-            log.warn("An exception occurred while checking if an animation should continue!", e);
+            log.warn(SwingTree.get().loggingMarker(), "An exception occurred while checking if an animation should continue!", e);
             /*
                  If exceptions happen in user provided animation stop conditions,
                  then we don't want to mess up the rest of the animation logic, so we catch
@@ -144,7 +145,7 @@ final class AnimationRunner
                         runningAnimation.animation().finish(finishingStatus); // This method may or may not be overridden by the user.
                         // An animation may want to do something when it is finished (e.g. reset the component to its original state).
                     } catch ( Exception e ) {
-                        log.error("An exception occurred while finishing an animation!", e);
+                        log.error(SwingTree.get().loggingMarker(), "An exception occurred while finishing an animation!", e);
                         /*
                              If exceptions happen in the finishing procedure of animations provided by the user,
                              then we don't want to mess up the execution of the rest of the animations,
@@ -157,7 +158,7 @@ final class AnimationRunner
                     requestComponentRepaint.run();
                 });
             } catch ( Exception e ) {
-                log.warn("An exception occurred while executing the finish procedure of an animation!", e);
+                log.warn(SwingTree.get().loggingMarker(), "An exception occurred while executing the finish procedure of an animation!", e);
                 /*
                      If exceptions happen in the finishing procedure of animations provided by the user,
                      then we don't want to mess up the execution of the rest of the animations,
@@ -178,7 +179,7 @@ final class AnimationRunner
             runningAnimation.setCurrentRepeat(status.repeats());
             runningAnimation.animation().run(status);
         } catch ( Exception e ) {
-            log.warn("An exception occurred while executing an animation!", e);
+            log.warn(SwingTree.get().loggingMarker(), "An exception occurred while executing an animation!", e);
             /*
                  If exceptions happen in the animations provided by the user,
                  then we don't want to mess up the execution of the rest of the animations,

@@ -149,13 +149,13 @@ final class ColorUtility {
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
             if (start < 0 || end < 0 || end < start) {
-                log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "Invalid rgb() or rgba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
             String[] parts = colorString.substring(start + 1, end).split(",", -1);
             if (parts.length < 3 || parts.length > 4) {
-                log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "Invalid rgb() or rgba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
@@ -170,7 +170,7 @@ final class ColorUtility {
                     part = part.substring(0, part.length() - 1);
                     values[i] = Integer.parseInt(part);
                     if (values[i] < 0 || values[i] > 100) {
-                        log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                        log.error(SwingTree.get().loggingMarker(), "Invalid rgb() or rgba() color: " + colorString, new Throwable());
                         return UI.Color.UNDEFINED;
                     }
                     values[i] = (int) Math.ceil(values[i] * 2.55);
@@ -191,13 +191,13 @@ final class ColorUtility {
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
             if (start < 0 || end < 0 || end < start) {
-                log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "Invalid hsb() or hsba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
             String[] parts = colorString.substring(start + 1, end).split(",", -1);
             if (parts.length < 3 || parts.length > 4) {
-                log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().loggingMarker(), "Invalid hsb() or hsba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 

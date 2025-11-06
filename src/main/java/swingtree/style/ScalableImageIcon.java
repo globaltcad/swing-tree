@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -72,7 +73,7 @@ public final class ScalableImageIcon extends ImageIcon
             }
             relativeScale = Size.of(targetWidth / originalIconWidth, targetHeight / originalIconHeight);
         } catch ( Exception e ) {
-            log.error("An error occurred while calculating the size of a ScalableImageIcon.", e);
+            log.error(SwingTree.get().loggingMarker(), "An error occurred while calculating the size of a ScalableImageIcon.", e);
         }
         _baseSize      = Size.of(targetWidth, targetHeight);
         _sourceIcon = original;
@@ -96,7 +97,7 @@ public final class ScalableImageIcon extends ImageIcon
             }
             return new ImageIcon(originalImage.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH));
         } catch ( Exception e ) {
-            log.error("An error occurred while scaling an image icon.", e);
+            log.error(SwingTree.get().loggingMarker(), "An error occurred while scaling an image icon.", e);
             return original;
         }
     }
@@ -202,7 +203,7 @@ public final class ScalableImageIcon extends ImageIcon
 
     @Override
     public void setImage( Image image ) {
-        log.warn("Setting the image of a "+this.getClass().getSimpleName()+" is not supported.", new Throwable());
+        log.warn(SwingTree.get().loggingMarker(), "Setting the image of a "+this.getClass().getSimpleName()+" is not supported.", new Throwable());
     }
 
     @Override

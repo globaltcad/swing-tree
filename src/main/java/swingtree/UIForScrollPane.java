@@ -135,14 +135,14 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 int horizontalBlockIncrement = _parent.getHorizontalScrollBar().getBlockIncrement();
                 averageBlockIncrement = (verticalBlockIncrement + horizontalBlockIncrement) / 2;
             } catch ( Exception e ) {
-                log.error("Error while calculating average block increment for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating average block increment for scrollable component.", e);
             }
             try {
                 int verticalUnitIncrement   = _parent.getVerticalScrollBar().getUnitIncrement();
                 int horizontalUnitIncrement = _parent.getHorizontalScrollBar().getUnitIncrement();
                 averageUnitIncrement = (verticalUnitIncrement + horizontalUnitIncrement) / 2;
             } catch ( Exception e ) {
-                log.error("Error while calculating average unit increment for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating average unit increment for scrollable component.", e);
             }
             ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
                                                             _parent, _child,
@@ -153,7 +153,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
             try {
                 delegate = _configurator.configure(delegate);
             } catch ( Exception e ) {
-                log.error("Error while configuring scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while configuring scrollable component.", e);
             }
             return delegate;
         }
@@ -164,7 +164,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
             try {
                 return delegate.preferredSize().toDimension();
             } catch ( Exception e ) {
-                log.error("Error while calculating preferred size for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating preferred size for scrollable component.", e);
                 return new Dimension(0, 0);
             }
         }
@@ -179,7 +179,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
                 return delegate.unitIncrement(bounds, align, direction);
             } catch ( Exception e ) {
-                log.error("Error while calculating unit increment for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating unit increment for scrollable component.", e);
                 return 0;
             }
         }
@@ -194,7 +194,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
                 return delegate.blockIncrement(bounds, align, direction);
             } catch ( Exception e ) {
-                log.error("Error while calculating block increment for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating block increment for scrollable component.", e);
                 return 0;
             }
         }
@@ -205,7 +205,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 ScrollableComponentDelegate delegate = _createNewScrollableConf();
                 return delegate.fitWidth();
             } catch ( Exception e ) {
-                log.error("Error while calculating fit width for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating fit width for scrollable component.", e);
                 return false;
             }
         }
@@ -216,7 +216,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 ScrollableComponentDelegate delegate = _createNewScrollableConf();
                 return delegate.fitHeight();
             } catch ( Exception e ) {
-                log.error("Error while calculating fit height for scrollable component.", e);
+                log.error(SwingTree.get().loggingMarker(), "Error while calculating fit height for scrollable component.", e);
                 return false;
             }
         }
