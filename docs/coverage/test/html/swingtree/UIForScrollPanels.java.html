@@ -326,7 +326,7 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
                 case NONE:
 <span class="nc" id="L327">                    break;</span>
                 default:
-<span class="nc" id="L329">                    log.error(&quot;Unknown change type: {}&quot;, change, new Throwable());</span>
+<span class="nc" id="L329">                    log.error(SwingTree.get().logMarker(), &quot;Unknown change type: {}&quot;, change, new Throwable());</span>
                     // We do a simple rebuild:
 <span class="nc" id="L331">                    c.removeAllEntries();</span>
 <span class="nc" id="L332">                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
@@ -371,7 +371,7 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
                 case NONE:
 <span class="nc" id="L372">                    break;</span>
                 default:
-<span class="nc" id="L374">                    log.error(&quot;Unknown change type: {}&quot;, change, new Throwable());</span>
+<span class="nc" id="L374">                    log.error(SwingTree.get().logMarker(), &quot;Unknown change type: {}&quot;, change, new Throwable());</span>
                     // We do a simple rebuild:
 <span class="nc" id="L376">                    c.removeAllEntries();</span>
 <span class="nc" id="L377">                    _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>

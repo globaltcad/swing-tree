@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
@@ -423,7 +424,7 @@ public final class StyleConf
         try {
             gradConf = styler.configure(gradConf);
         } catch (Exception e) {
-            log.error("Failed to configure gradient '{}' for layer '{}'", shadeName, layer, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure gradient '{}' for layer '{}'", shadeName, layer, e);
         }
         NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, gradConf);
         return _withGradients(layer, newShadows);
@@ -444,7 +445,7 @@ public final class StyleConf
         try {
             noise = styler.configure(noise);
         } catch (Exception e) {
-            log.error("Failed to configure noise '{}' for layer '{}'", noiseName, layer, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure noise '{}' for layer '{}'", noiseName, layer, e);
         }
         // We clone the noise map:
         NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, noise);
@@ -458,7 +459,7 @@ public final class StyleConf
         try {
             ground = styler.configure(ground);
         } catch (Exception e) {
-            log.error("Failed to configure image '{}' for layer '{}'", imageName, layer, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure image '{}' for layer '{}'", imageName, layer, e);
         }
         // We clone the ground map:
         NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, ground);
@@ -476,7 +477,7 @@ public final class StyleConf
         try {
             text = styler.configure(text);
         } catch (Exception e) {
-            log.error("Failed to configure text '{}' for layer '{}'", textName, layer, e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure text '{}' for layer '{}'", textName, layer, e);
         }
         // We clone the text map:
         NamedConfigs<TextConf> newTexts = _layers.get(layer).texts().withNamedStyle(textName, text);

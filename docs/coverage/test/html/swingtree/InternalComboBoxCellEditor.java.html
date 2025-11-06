@@ -217,7 +217,7 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
             try {
 <span class="nc" id="L218">                return Class.forName(TRAMPOLINE, true, new MethodUtil());</span>
 <span class="nc" id="L219">            } catch (ClassNotFoundException e) {</span>
-<span class="nc" id="L220">                log.debug(&quot;Trampoline class not found&quot;, e);</span>
+<span class="nc" id="L220">                log.debug(SwingTree.get().logMarker(), &quot;Trampoline class not found&quot;, e);</span>
             }
 <span class="nc" id="L222">            return null;</span>
         }

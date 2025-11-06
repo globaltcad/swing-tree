@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleRenderer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleRenderer.java</span></div><h1>StyleRenderer.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
-import com.github.weisj.jsvg.view.FloatSize;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.layout.Bounds;
@@ -679,7 +679,7 @@ final class StyleRenderer
 <span class="fc" id="L679">            corner2 = new Point2D.Float(realX, realY);</span>
         }
         else {
-<span class="nc" id="L682">            log.warn(&quot;Unknown gradient type: &quot; + type, new Throwable());</span>
+<span class="nc" id="L682">            log.warn(SwingTree.get().logMarker(), &quot;Unknown gradient type: &quot; + type, new Throwable());</span>
 <span class="nc" id="L683">            return null;</span>
         }
 
@@ -995,7 +995,7 @@ final class StyleRenderer
 <span class="nc" id="L995">            case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;</span>
 <span class="nc" id="L996">            case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;</span>
             default:
-<span class="nc" id="L998">                log.warn(&quot;Unknown cycle method: &quot; + cycle, new Throwable());</span>
+<span class="nc" id="L998">                log.warn(SwingTree.get().logMarker(), &quot;Unknown cycle method: &quot; + cycle, new Throwable());</span>
 <span class="nc" id="L999">                return MultipleGradientPaint.CycleMethod.NO_CYCLE;</span>
         }
     }
@@ -1457,7 +1457,7 @@ final class StyleRenderer
 <span class="fc" id="L1457">            g2d.setClip(newClip);</span>
 <span class="fc" id="L1458">            g2d.drawImage(filtered, -offsetX, -offsetY, null);</span>
 <span class="nc" id="L1459">        } catch (Exception e) {</span>
-<span class="nc" id="L1460">            log.error(&quot;Failed to successfully render filtered parent buffer!&quot;, e);</span>
+<span class="nc" id="L1460">            log.error(SwingTree.get().logMarker(), &quot;Failed to successfully render filtered parent buffer!&quot;, e);</span>
         } finally {
 <span class="fc" id="L1462">            g2d.setClip(oldClip);</span>
         }

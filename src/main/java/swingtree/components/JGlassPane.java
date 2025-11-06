@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
@@ -205,7 +206,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 relativeX = locationOnDesktop.x - rootPaneLocationOnDesktop.x;
                 relativeY = locationOnDesktop.y - rootPaneLocationOnDesktop.y;
             } catch (Exception e) {
-                log.debug("Error while calculating the relative position of a drag.", e);
+                log.debug(SwingTree.get().logMarker(), "Error while calculating the relative position of a drag.", e);
             }
         }
         return new Point(relativeX, relativeY);

@@ -3,6 +3,7 @@ package swingtree.components;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.DragAwayComponentConf;
+import swingtree.SwingTree;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 import swingtree.layout.Size;
@@ -160,7 +161,7 @@ final class ActiveDrag {
                 image = makeTransparent.filter(image, null);
             }
         } catch (Exception e) {
-            log.error("Failed to make the rendering of dragged component transparent.", e);
+            log.error(SwingTree.get().logMarker(), "Failed to make the rendering of dragged component transparent.", e);
         }
         g.dispose();
 

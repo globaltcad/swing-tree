@@ -120,7 +120,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                     try {
                         action.accept(thisComponent);
                     } catch ( Exception e ) {
-                        log.error("Error trying to run 'Peeker' '"+action+"' on component '"+thisComponent+"'.", e);
+                        log.error(SwingTree.get().logMarker(), "Error trying to run 'Peeker' '"+action+"' on component '"+thisComponent+"'.", e);
                     }
                 })
                 ._this();
@@ -701,7 +701,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         };
         C component = weakComponent.get();
         if (!(component instanceof JComponent)) {
-            log.error("Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ", new Throwable());
+            log.error(SwingTree.get().logMarker(), "Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ", new Throwable());
             return;
         }
         Viewables<T> viewables = properties.view();

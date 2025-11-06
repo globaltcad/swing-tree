@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Mon Oct 20 04:51:33 JST 2025",
+  "created": "Fri Nov 07 03:49:28 JST 2025",
   "statistics":{
     "runs":"59",
     "passed":"59",
@@ -578,13 +578,13 @@
       "className":"swingtree.Style_Animations_Spec",
       "title":"Style Animations",
       "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted. \n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
-      "featureCount":"5",
+      "featureCount":"6",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A transitory style animation always ends with a progress of 1.","extraInfo":[]},{"id":"Advanced style animations will override the Look and Feel of a component temporarily","extraInfo":[]},{"id":"An `onMouseClick` event style animation dispatched using the `animateStyleFor` method is only temporary.","extraInfo":[]},{"id":"An `onMouseClick` event style animation is only temporary.","extraInfo":[]},{"id":"SwingTree will uninstall any custom border after an animation has completed.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A transitory style animation always ends with a progress of 1.","extraInfo":[]},{"id":"Advanced style animations will override the Look and Feel of a component temporarily","extraInfo":[]},{"id":"An `onMouseClick` event style animation dispatched using the `animateStyleFor` method is only temporary.","extraInfo":[]},{"id":"An `onMouseClick` event style animation is only temporary.","extraInfo":[]},{"id":"SwingTree will uninstall any custom border after an animation has completed.","extraInfo":[]},{"id":"You can animate a style using properties and the `withRepaintOn` methods!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Style_Installation_Spec",
@@ -698,13 +698,13 @@
       "className":"swingtree.UI_Scaling_Spec",
       "title":"High IPD Scaling",
       "narrative":"Higher resolution displays with higher pixel density \n    (measured in pixels per inch (PPI) or dots per inch (DPI)) have become the norm.  \n    This is especially true for mobile devices, but it is also true for desktop displays.  \n\n    Vanilla Swing does not handle this well unfortunately, even with the introduction of\n    the HiDPI support in Java 9, which allows us to determine the DPI of the display.\n    Because although we calculate the scaling factor, there is no way to apply it to the UI.\n    Instead the task is left to the Look and Feel implementations which may or may not\n    scale the UI.\n    The problem is that older Look and Feels do not scale the UI, and even newer ones\n    may not scale the UI at all. \n    In fact none of the Look and Feels included in the JDK scale the UI.\n\n    SwingTree can hardly solve this problem entirely, but it can help by scaling the UI\n    where the Look and Feel does not.\n    In this specification you will find out how to adjust the SwingTree scaling factor\n    and how it affects the properties of the UI components.",
-      "featureCount":"5",
+      "featureCount":"25",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Dimensionality scaling also works for bound properties.","extraInfo":[]},{"id":"Dimensionality scaling works for properties bound to `withSizeExactly(Val,Val)`.","extraInfo":[]},{"id":"Dimensionality scaling works for properties bound to `withSizeExactly`, `withWidthExactly` and `withHeightExactly`.","extraInfo":[]},{"id":"The dimensionality of components will be scaled by the scaling factor","extraInfo":[]},{"id":"The dimensionality specified in the styling API are scaled by the scaling factor","extraInfo":[]}],
+      "executedFeatures":[{"id":"Bound custom fonts update reactively with both property and scale changes","extraInfo":[]},{"id":"Bound font sizes update reactively with both property and scale changes","extraInfo":[]},{"id":"Bound property dimensions update reactively with scale changes","extraInfo":[]},{"id":"Complex nested layouts maintain proper scaling relationships","extraInfo":[]},{"id":"Component dimensions update reactively when UI scale changes","extraInfo":[]},{"id":"Component size constraints work correctly with fractional scaling factors","extraInfo":[]},{"id":"Custom fonts update reactively when UI scale factor changes","extraInfo":[]},{"id":"Dimensionality scaling also works for bound properties.","extraInfo":[]},{"id":"Dimensionality scaling works for properties bound to `withSizeExactly(Val,Val)`.","extraInfo":[]},{"id":"Dimensionality scaling works for properties bound to `withSizeExactly`, `withWidthExactly` and `withHeightExactly`.","extraInfo":[]},{"id":"Font size scaling works correctly with fractional scaling factors","extraInfo":[]},{"id":"Font sizes specified with `withFontSize(Val<Integer>)` are scaled by the scaling factor","extraInfo":[]},{"id":"Font sizes specified with `withFontSize(int)` are scaled by the scaling factor","extraInfo":[]},{"id":"Font sizes update reactively when UI scale factor changes","extraInfo":[]},{"id":"Fonts specified with `withFont(Font)` are scaled by the scaling factor","extraInfo":[]},{"id":"Fonts specified with `withFont(Val<Font>)` are scaled by the scaling factor","extraInfo":[]},{"id":"Individual width and height properties update reactively with scale changes","extraInfo":[]},{"id":"Mixed font specification methods all scale appropriately","extraInfo":[]},{"id":"Mixed static and bound dimensions all scale reactively","extraInfo":[]},{"id":"Mixed static and bound font sizes all scale appropriately","extraInfo":[]},{"id":"Size-exactly properties update reactively across all component types","extraInfo":[]},{"id":"Style-based dimensions update reactively with scale changes","extraInfo":[]},{"id":"The dimensionality of components will be scaled by the scaling factor","extraInfo":[]},{"id":"The dimensionality specified in the styling API are scaled by the scaling factor","extraInfo":[]},{"id":"You can get a reactive view on the current UI scale to update you components dynamically!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.UI_Updates_Spec",

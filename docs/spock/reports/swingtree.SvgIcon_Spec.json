@@ -4,7 +4,7 @@
   "narrative":"Swing-Tree supports SVG icons through the `SvgIcon` class,\n    which is a subclass of `javax.swing.ImageIcon`.\n    This allows for smooth integration of SVG icons into regular\n    Swing components, like buttons, labels, etc.\n\n    In this specification we will see how to use the `SvgIcon` class.",
   "subjects":["swingtree.style.SvgIcon"],
   "statistics":{
-    "runs":"7",
+    "runs":"9",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -29,18 +29,70 @@
     },
   
     {
-      "id":"The `SvgIcon` is immutable, and its size must be specified through wither methods.",
+      "id":"The `SvgIcon` is immutable, and its size must be specified through wither methods. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The reason why the `SvgIcon` is immutable is because\n            it makes caching of the icon easier and safer.\n            So when you want to change the size of the icon,\n            you must use its various wither methods.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
 
         {"kind":"when","text":"We use the various wither methods to create differently sized icons.","code":["var icon2 = icon.withIconWidth(12)","var icon1 = icon.withIconHeight(13)","var icon3 = icon.withIconSize(27, 16)","var icon5 = icon.withIconSizeFromWidth(31)","var icon4 = icon.withIconSizeFromHeight(24)"]},
 
-        {"kind":"then","text":"These icons have different sizes.","code":["icon1.getIconWidth()  == 13","icon1.getIconHeight() == 13","icon1.getBaseWidth()  == -1","icon1.getBaseHeight() == 13","icon2.getIconWidth()  == 12","icon2.getIconHeight() == 12","icon2.getBaseWidth()  == 12","icon2.getBaseHeight() == -1","icon3.getIconWidth()  == 27","icon3.getIconHeight() == 16","icon3.getBaseWidth()  == 27","icon3.getBaseHeight() == 16","icon4.getIconWidth()  == 24","icon4.getIconHeight() == 24","icon4.getBaseWidth()  == 24","icon4.getBaseHeight() == 24","icon5.getIconWidth()  == 31","icon5.getIconHeight() == 31","icon5.getBaseWidth()  == 31","icon5.getBaseHeight() == 31"]}
+        {"kind":"then","text":"These icons have different sizes.","code":["icon1.getIconWidth()  == (13 * uiScale) as int","icon1.getIconHeight() == (13 * uiScale) as int","icon1.getBaseWidth()  == -1","icon1.getBaseHeight() == 13","icon2.getIconWidth()  == (12 * uiScale) as int","icon2.getIconHeight() == (12 * uiScale) as int","icon2.getBaseWidth()  == 12","icon2.getBaseHeight() == -1","icon3.getIconWidth()  == (27 * uiScale) as int","icon3.getIconHeight() == (16 * uiScale) as int","icon3.getBaseWidth()  == 27","icon3.getBaseHeight() == 16","icon4.getIconWidth()  == (24 * uiScale) as int","icon4.getIconHeight() == (24 * uiScale) as int","icon4.getBaseWidth()  == 24","icon4.getBaseHeight() == 24","icon5.getIconWidth()  == (31 * uiScale) as int","icon5.getIconHeight() == (31 * uiScale) as int","icon5.getBaseWidth()  == 31","icon5.getBaseHeight() == 31"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `SvgIcon` is immutable, and its size must be specified through wither methods. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The reason why the `SvgIcon` is immutable is because\n            it makes caching of the icon easier and safer.\n            So when you want to change the size of the icon,\n            you must use its various wither methods.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+
+        {"kind":"when","text":"We use the various wither methods to create differently sized icons.","code":["var icon2 = icon.withIconWidth(12)","var icon1 = icon.withIconHeight(13)","var icon3 = icon.withIconSize(27, 16)","var icon5 = icon.withIconSizeFromWidth(31)","var icon4 = icon.withIconSizeFromHeight(24)"]},
+
+        {"kind":"then","text":"These icons have different sizes.","code":["icon1.getIconWidth()  == (13 * uiScale) as int","icon1.getIconHeight() == (13 * uiScale) as int","icon1.getBaseWidth()  == -1","icon1.getBaseHeight() == 13","icon2.getIconWidth()  == (12 * uiScale) as int","icon2.getIconHeight() == (12 * uiScale) as int","icon2.getBaseWidth()  == 12","icon2.getBaseHeight() == -1","icon3.getIconWidth()  == (27 * uiScale) as int","icon3.getIconHeight() == (16 * uiScale) as int","icon3.getBaseWidth()  == 27","icon3.getBaseHeight() == 16","icon4.getIconWidth()  == (24 * uiScale) as int","icon4.getIconHeight() == (24 * uiScale) as int","icon4.getBaseWidth()  == 24","icon4.getBaseHeight() == 24","icon5.getIconWidth()  == (31 * uiScale) as int","icon5.getIconHeight() == (31 * uiScale) as int","icon5.getBaseWidth()  == 31","icon5.getBaseHeight() == 31"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `SvgIcon` is immutable, and its size must be specified through wither methods. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The reason why the `SvgIcon` is immutable is because\n            it makes caching of the icon easier and safer.\n            So when you want to change the size of the icon,\n            you must use its various wither methods.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+
+        {"kind":"when","text":"We use the various wither methods to create differently sized icons.","code":["var icon2 = icon.withIconWidth(12)","var icon1 = icon.withIconHeight(13)","var icon3 = icon.withIconSize(27, 16)","var icon5 = icon.withIconSizeFromWidth(31)","var icon4 = icon.withIconSizeFromHeight(24)"]},
+
+        {"kind":"then","text":"These icons have different sizes.","code":["icon1.getIconWidth()  == (13 * uiScale) as int","icon1.getIconHeight() == (13 * uiScale) as int","icon1.getBaseWidth()  == -1","icon1.getBaseHeight() == 13","icon2.getIconWidth()  == (12 * uiScale) as int","icon2.getIconHeight() == (12 * uiScale) as int","icon2.getBaseWidth()  == 12","icon2.getBaseHeight() == -1","icon3.getIconWidth()  == (27 * uiScale) as int","icon3.getIconHeight() == (16 * uiScale) as int","icon3.getBaseWidth()  == 27","icon3.getBaseHeight() == 16","icon4.getIconWidth()  == (24 * uiScale) as int","icon4.getIconHeight() == (24 * uiScale) as int","icon4.getBaseWidth()  == 24","icon4.getBaseHeight() == 24","icon5.getIconWidth()  == (31 * uiScale) as int","icon5.getIconHeight() == (31 * uiScale) as int","icon5.getBaseWidth()  == 31","icon5.getBaseHeight() == 31"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

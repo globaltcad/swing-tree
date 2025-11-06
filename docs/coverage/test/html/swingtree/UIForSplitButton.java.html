@@ -59,7 +59,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                                     )
                             );
 <span class="nc" id="L61">                    } catch (Exception exception) {</span>
-<span class="nc" id="L62">                        log.error(&quot;Error while executing split button action listener.&quot;, exception);</span>
+<span class="nc" id="L62">                        log.error(SwingTree.get().logMarker(), &quot;Error while executing split button action listener.&quot;, exception);</span>
 <span class="fc" id="L63">                    }</span>
 <span class="fc" id="L64">                }</span>
 <span class="fc" id="L65">            }));</span>
@@ -107,17 +107,17 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
             try {
 <span class="fc" id="L108">                return textProvider.apply(e);</span>
 <span class="nc" id="L109">            } catch (Exception ex) {</span>
-<span class="nc" id="L110">                log.error(&quot;Error while providing split button text for enum value.&quot;, ex);</span>
+<span class="nc" id="L110">                log.error(SwingTree.get().logMarker(), &quot;Error while providing split button text for enum value.&quot;, ex);</span>
             }
             try {
 <span class="nc" id="L113">                return e.toString();</span>
 <span class="nc" id="L114">            } catch (Exception ex) {</span>
-<span class="nc" id="L115">                log.error(&quot;Error while providing split button text for enum value using 'toString()'.&quot;, ex);</span>
+<span class="nc" id="L115">                log.error(SwingTree.get().logMarker(), &quot;Error while providing split button text for enum value using 'toString()'.&quot;, ex);</span>
             }
             try {
 <span class="nc" id="L118">                return e.name();</span>
 <span class="nc" id="L119">            } catch (Exception ex) {</span>
-<span class="nc" id="L120">                log.error(&quot;Error while providing split button text for enum value using 'name()'.&quot;, ex);</span>
+<span class="nc" id="L120">                log.error(SwingTree.get().logMarker(), &quot;Error while providing split button text for enum value using 'name()'.&quot;, ex);</span>
             }
 <span class="nc" id="L122">            return &quot;&quot;;</span>
         };
@@ -246,7 +246,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                                                 )
                                         );
 <span class="nc" id="L248">                                    } catch (Exception exception) {</span>
-<span class="nc" id="L249">                                        log.error(&quot;Error while executing split button action listener.&quot;, exception);</span>
+<span class="nc" id="L249">                                        log.error(SwingTree.get().logMarker(), &quot;Error while executing split button action listener.&quot;, exception);</span>
 <span class="nc" id="L250">                                    }</span>
 <span class="nc" id="L251">                                })</span>
                     );
@@ -310,7 +310,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                                         )
                                 );
 <span class="nc" id="L312">                            } catch (Exception exception) {</span>
-<span class="nc" id="L313">                                log.error(&quot;Error while executing split button action listener.&quot;, exception);</span>
+<span class="nc" id="L313">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing split button action listener.&quot;, exception);</span>
 <span class="nc" id="L314">                            }</span>
 <span class="nc" id="L315">                        })</span>
                     );
@@ -338,7 +338,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                                         new ComponentDelegate&lt;&gt;(thisComponent, e)
                                 );
 <span class="nc" id="L340">                            } catch (Exception ex) {</span>
-<span class="nc" id="L341">                                log.error(&quot;Error while executing action on button click!&quot;, ex);</span>
+<span class="nc" id="L341">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on button click!&quot;, ex);</span>
 <span class="nc" id="L342">                            }</span>
 <span class="nc" id="L343">                        })</span>
                     )
@@ -362,7 +362,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                             try {
 <span class="nc" id="L363">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L364">                            } catch (Exception ex) {</span>
-<span class="nc" id="L365">                                log.error(&quot;Error while executing action on popup open!&quot;, ex);</span>
+<span class="nc" id="L365">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup open!&quot;, ex);</span>
 <span class="nc" id="L366">                            }</span>
 <span class="nc" id="L367">                        })</span>
                     );
@@ -403,7 +403,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                             try {
 <span class="nc" id="L404">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L405">                            } catch (Exception ex) {</span>
-<span class="nc" id="L406">                                log.error(&quot;Error while executing action on popup close!&quot;, ex);</span>
+<span class="nc" id="L406">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup close!&quot;, ex);</span>
 <span class="nc" id="L407">                            }</span>
 <span class="nc" id="L408">                        })</span>
                     );
@@ -443,7 +443,7 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                             try {
 <span class="nc" id="L444">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L445">                            } catch (Exception ex) {</span>
-<span class="nc" id="L446">                                log.error(&quot;Error while executing action on popup cancel!&quot;, ex);</span>
+<span class="nc" id="L446">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup cancel!&quot;, ex);</span>
 <span class="nc" id="L447">                            }</span>
 <span class="nc" id="L448">                        })</span>
                     );
@@ -538,13 +538,13 @@ public final class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForA
                     try {
 <span class="fc" id="L539">                        action.accept(new SplitButtonDelegate&lt;&gt;( thisComponent,(SplitItemDelegate&lt;JMenuItem&gt;) delegate ));</span>
 <span class="nc" id="L540">                    } catch (Exception exception) {</span>
-<span class="nc" id="L541">                        log.error(&quot;Error while executing selection action listener.&quot;, exception);</span>
+<span class="nc" id="L541">                        log.error(SwingTree.get().logMarker(), &quot;Error while executing selection action listener.&quot;, exception);</span>
 <span class="fc" id="L542">                    }</span>
 <span class="fc" id="L543">                });</span>
                 try {
 <span class="fc" id="L545">                    splitItem.getOnSelected().accept(delegate);</span>
 <span class="nc" id="L546">                } catch (Exception exception) {</span>
-<span class="nc" id="L547">                    log.error(&quot;Error while executing split item selection action.&quot;, exception);</span>
+<span class="nc" id="L547">                    log.error(SwingTree.get().logMarker(), &quot;Error while executing split item selection action.&quot;, exception);</span>
 <span class="fc" id="L548">                }</span>
 <span class="fc" id="L549">            })</span>
         );

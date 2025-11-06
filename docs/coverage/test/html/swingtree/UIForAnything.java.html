@@ -120,7 +120,7 @@ import java.util.function.Supplier;
                     try {
 <span class="fc" id="L121">                        action.accept(thisComponent);</span>
 <span class="nc" id="L122">                    } catch ( Exception e ) {</span>
-<span class="nc" id="L123">                        log.error(&quot;Error trying to run 'Peeker' '&quot;+action+&quot;' on component '&quot;+thisComponent+&quot;'.&quot;, e);</span>
+<span class="nc" id="L123">                        log.error(SwingTree.get().logMarker(), &quot;Error trying to run 'Peeker' '&quot;+action+&quot;' on component '&quot;+thisComponent+&quot;'.&quot;, e);</span>
 <span class="fc" id="L124">                    }</span>
 <span class="fc" id="L125">                })</span>
 <span class="fc" id="L126">                ._this();</span>
@@ -701,7 +701,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L701">        };</span>
 <span class="fc" id="L702">        C component = weakComponent.get();</span>
 <span class="pc bpc" id="L703" title="1 of 2 branches missed.">        if (!(component instanceof JComponent)) {</span>
-<span class="nc" id="L704">            log.error(&quot;Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. &quot;, new Throwable());</span>
+<span class="nc" id="L704">            log.error(SwingTree.get().logMarker(), &quot;Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. &quot;, new Throwable());</span>
 <span class="nc" id="L705">            return;</span>
         }
 <span class="fc" id="L707">        Viewables&lt;T&gt; viewables = properties.view();</span>

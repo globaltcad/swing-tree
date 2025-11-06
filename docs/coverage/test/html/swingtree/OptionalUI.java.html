@@ -149,7 +149,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
                 else
 <span class="nc" id="L150">                    emptyAction.run();</span>
 <span class="nc" id="L151">            } catch (Exception e) {</span>
-<span class="nc" id="L152">                log.error(&quot;Error performing action on UI component of OptionalUI instance.&quot;, e);</span>
+<span class="nc" id="L152">                log.error(SwingTree.get().logMarker(), &quot;Error performing action on UI component of OptionalUI instance.&quot;, e);</span>
 <span class="nc" id="L153">            }</span>
 <span class="nc" id="L154">        });</span>
 <span class="nc" id="L155">    }</span>

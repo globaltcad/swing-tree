@@ -82,7 +82,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                     try {
 <span class="fc" id="L83">                                        onClick.accept(new TabDelegate(thisComponent, e));</span>
 <span class="nc" id="L84">                                    } catch (Exception ex) {</span>
-<span class="nc" id="L85">                                        log.error(&quot;Error while executing action on tab click!&quot;, ex);</span>
+<span class="nc" id="L85">                                        log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab click!&quot;, ex);</span>
 <span class="fc" id="L86">                                    }</span>
 <span class="fc" id="L87">                                });</span>
 <span class="fc" id="L88">                        }</span>
@@ -113,7 +113,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                     try {
 <span class="fc" id="L114">                                        onPress.accept(new TabDelegate(thisComponent, e));</span>
 <span class="nc" id="L115">                                    } catch (Exception ex) {</span>
-<span class="nc" id="L116">                                        log.error(&quot;Error while executing action on tab press!&quot;, ex);</span>
+<span class="nc" id="L116">                                        log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab press!&quot;, ex);</span>
 <span class="fc" id="L117">                                    }</span>
 <span class="fc" id="L118">                                });</span>
 <span class="fc" id="L119">                        }</span>
@@ -144,7 +144,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                     try {
 <span class="fc" id="L145">                                        onRelease.accept(new TabDelegate(thisComponent, e));</span>
 <span class="nc" id="L146">                                    } catch (Exception ex) {</span>
-<span class="nc" id="L147">                                        log.error(&quot;Error while executing action on tab release!&quot;, ex);</span>
+<span class="nc" id="L147">                                        log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab release!&quot;, ex);</span>
 <span class="fc" id="L148">                                    }</span>
 <span class="fc" id="L149">                                });</span>
 <span class="fc" id="L150">                        }</span>
@@ -175,7 +175,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                     try {
 <span class="fc" id="L176">                                        onEnter.accept(new TabDelegate(thisComponent, e));</span>
 <span class="nc" id="L177">                                    } catch (Exception ex) {</span>
-<span class="nc" id="L178">                                        log.error(&quot;Error while executing action on tab enter!&quot;, ex);</span>
+<span class="nc" id="L178">                                        log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab enter!&quot;, ex);</span>
 <span class="fc" id="L179">                                    }</span>
 <span class="fc" id="L180">                                });</span>
 <span class="fc" id="L181">                        }</span>
@@ -206,7 +206,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                     try {
 <span class="fc" id="L207">                                        onExit.accept(new TabDelegate(thisComponent, e));</span>
 <span class="nc" id="L208">                                    } catch (Exception ex) {</span>
-<span class="nc" id="L209">                                        log.error(&quot;Error while executing action on tab exit!&quot;, ex);</span>
+<span class="nc" id="L209">                                        log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab exit!&quot;, ex);</span>
 <span class="fc" id="L210">                                    }</span>
 <span class="fc" id="L211">                                });</span>
 <span class="fc" id="L212">                        }</span>
@@ -403,7 +403,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                try {
 <span class="nc" id="L404">                                   onSelection.accept(new ComponentDelegate&lt;&gt;(tabbedPane, e));</span>
 <span class="nc" id="L405">                               } catch (Exception ex) {</span>
-<span class="nc" id="L406">                                   log.error(&quot;Error while executing action on tab selection!&quot;, ex);</span>
+<span class="nc" id="L406">                                   log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab selection!&quot;, ex);</span>
 <span class="nc" id="L407">                               }</span>
 <span class="nc" id="L408">                           });</span>
 <span class="nc" id="L409">                   })</span>
@@ -554,7 +554,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
             case NONE:
 <span class="nc" id="L555">                break;</span>
             default:
-<span class="nc" id="L557">                log.warn(&quot;Unknown change type: {}&quot;, delegate.change(), new Throwable());</span>
+<span class="nc" id="L557">                log.warn(SwingTree.get().logMarker(), &quot;Unknown change type: {}&quot;, delegate.change(), new Throwable());</span>
                 // We do a simple rebuild:
 <span class="nc" id="L559">                pane.removeAll();</span>
 <span class="nc" id="L560">                delegate.currentValues().forEach(value -&gt; _addTabAt(pane.getTabCount(), value, tabSupplier, pane));</span>
@@ -676,7 +676,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                 case NONE:
 <span class="nc" id="L677">                    break;</span>
                 default:
-<span class="nc" id="L679">                    log.warn(&quot;Unknown change type: {}&quot;, diff.change(), new Throwable());</span>
+<span class="nc" id="L679">                    log.warn(SwingTree.get().logMarker(), &quot;Unknown change type: {}&quot;, diff.change(), new Throwable());</span>
                     // We do a simple rebuild:
 <span class="nc" id="L681">                    pane.removeAll();</span>
 <span class="nc" id="L682">                    tupleOfModels.forEach(value -&gt; _addTabAt(pane.getTabCount(), value, tabSupplier, pane));</span>
@@ -784,7 +784,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                                 try {
 <span class="nc" id="L785">                                    mouseClickAction.accept(new ComponentDelegate&lt;&gt;(pane, e));</span>
 <span class="nc" id="L786">                                } catch (Exception ex) {</span>
-<span class="nc" id="L787">                                    log.error(&quot;Error while executing action on tab click!&quot;, ex);</span>
+<span class="nc" id="L787">                                    log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab click!&quot;, ex);</span>
 <span class="nc" id="L788">                                }</span>
 <span class="nc" id="L789">                            });</span>
 <span class="nc" id="L790">                    }</span>
@@ -807,7 +807,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                     try {
 <span class="nc" id="L808">                        mouseClickAction.accept(new ComponentDelegate&lt;&gt;(pane, e));</span>
 <span class="nc" id="L809">                    } catch (Exception ex) {</span>
-<span class="nc" id="L810">                        log.error(&quot;Error while executing action on tab click!&quot;, ex);</span>
+<span class="nc" id="L810">                        log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab click!&quot;, ex);</span>
 <span class="nc" id="L811">                    }</span>
 <span class="nc" id="L812">                });</span>
 <span class="nc bnc" id="L813" title="All 2 branches missed.">            if ( indexOfThis &lt; pane.getTabCount() )</span>
@@ -867,7 +867,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                         try {
 <span class="nc" id="L868">                            onChange.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L869">                        } catch (Exception ex) {</span>
-<span class="nc" id="L870">                            log.error(&quot;Error while executing action on tab change!&quot;, ex);</span>
+<span class="nc" id="L870">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab change!&quot;, ex);</span>
 <span class="nc" id="L871">                        }</span>
 <span class="nc" id="L872">                    }));</span>
 <span class="fc" id="L873">                })</span>
@@ -897,7 +897,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                             try {
 <span class="nc" id="L898">                                onSelection.accept(new ComponentDelegate&lt;&gt;(tabbedPane, e));</span>
 <span class="nc" id="L899">                            } catch (Exception ex) {</span>
-<span class="nc" id="L900">                                log.error(&quot;Error while executing action on tab selection!&quot;, ex);</span>
+<span class="nc" id="L900">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab selection!&quot;, ex);</span>
 <span class="nc" id="L901">                            }</span>
 <span class="nc" id="L902">                        });</span>
 <span class="nc" id="L903">                });</span>
@@ -973,7 +973,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
                 try {
 <span class="nc" id="L974">                    listener.stateChanged(e);</span>
 <span class="nc" id="L975">                } catch (Exception ex) {</span>
-<span class="nc" id="L976">                    log.error(&quot;Error while executing action on tab selection!&quot;, ex);</span>
+<span class="nc" id="L976">                    log.error(SwingTree.get().logMarker(), &quot;Error while executing action on tab selection!&quot;, ex);</span>
 <span class="nc" id="L977">                }</span>
 <span class="nc" id="L978">            }</span>
 <span class="nc" id="L979">        }</span>
@@ -999,12 +999,12 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
         try {
 <span class="fc" id="L1000">            Tab tab = tabSupplier.createTabFor(m);</span>
 <span class="fc bfc" id="L1001" title="All 2 branches covered.">            if ( tab == null ) {</span>
-<span class="fc" id="L1002">                log.warn(&quot;Tab supplier returned null for '{}'.&quot;, m, new Throwable());</span>
+<span class="fc" id="L1002">                log.warn(SwingTree.get().logMarker(), &quot;Tab supplier returned null for '{}'.&quot;, m, new Throwable());</span>
 <span class="fc" id="L1003">                return UIForTabbedPane.TAB_NULL;</span>
             }
 <span class="fc" id="L1005">            return tab;</span>
 <span class="fc" id="L1006">        } catch (Exception e) {</span>
-<span class="fc" id="L1007">            log.error(&quot;Error while creating tab for '{}'.&quot;, m, e);</span>
+<span class="fc" id="L1007">            log.error(SwingTree.get().logMarker(), &quot;Error while creating tab for '{}'.&quot;, m, e);</span>
 <span class="fc" id="L1008">            return UIForTabbedPane.TAB_ERROR;</span>
         }
     }

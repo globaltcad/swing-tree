@@ -1,8 +1,8 @@
 package swingtree.style;
 
-import com.github.weisj.jsvg.view.FloatSize;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.layout.Bounds;
@@ -679,7 +679,7 @@ final class StyleRenderer
             corner2 = new Point2D.Float(realX, realY);
         }
         else {
-            log.warn("Unknown gradient type: " + type, new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Unknown gradient type: " + type, new Throwable());
             return null;
         }
 
@@ -995,7 +995,7 @@ final class StyleRenderer
             case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;
             case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;
             default:
-                log.warn("Unknown cycle method: " + cycle, new Throwable());
+                log.warn(SwingTree.get().logMarker(), "Unknown cycle method: " + cycle, new Throwable());
                 return MultipleGradientPaint.CycleMethod.NO_CYCLE;
         }
     }
@@ -1457,7 +1457,7 @@ final class StyleRenderer
             g2d.setClip(newClip);
             g2d.drawImage(filtered, -offsetX, -offsetY, null);
         } catch (Exception e) {
-            log.error("Failed to successfully render filtered parent buffer!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to successfully render filtered parent buffer!", e);
         } finally {
             g2d.setClip(oldClip);
         }

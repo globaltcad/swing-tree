@@ -3,6 +3,7 @@
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.NoiseFunction;
 
@@ -25,14 +26,14 @@ import java.util.Objects;
 @SuppressWarnings(&quot;Immutable&quot;)
 public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
 {
-<span class="fc" id="L28">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NoiseConf.class);</span>
-<span class="fc" id="L29">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
+<span class="fc" id="L29">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NoiseConf.class);</span>
+<span class="fc" id="L30">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
 
-<span class="fc" id="L31">    private static final NoiseConf _NONE = new NoiseConf(</span>
+<span class="fc" id="L32">    private static final NoiseConf _NONE = new NoiseConf(</span>
                                                         UI.NoiseType.STOCHASTIC,
                                                         new Color[0],
-<span class="fc" id="L34">                                                        Offset.none(),</span>
-<span class="fc" id="L35">                                                        Scale.none(),</span>
+<span class="fc" id="L35">                                                        Offset.none(),</span>
+<span class="fc" id="L36">                                                        Scale.none(),</span>
                                                         UI.ComponentArea.BODY,
                                                         UI.ComponentBoundary.EXTERIOR_TO_BORDER,
                                                         0f,
@@ -45,7 +46,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      *  @return A noise gradient without any colors, effectively
      *          representing the absence of a noise gradient.
      */
-<span class="fc" id="L48">    public static NoiseConf none() { return _NONE; }</span>
+<span class="fc" id="L49">    public static NoiseConf none() { return _NONE; }</span>
 
     static NoiseConf of(
         NoiseFunction        function,
@@ -59,21 +60,21 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
     ) {
         // The rotation may be any number
         // which always has to be normalized to a value between -180 and 180
-<span class="fc" id="L62">        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );</span>
+<span class="fc" id="L63">        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );</span>
 
-<span class="fc" id="L64">        NoiseConf none = none();</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">        if ( function   .equals( none._function ) &amp;&amp;</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">             offset     .equals( none._offset   ) &amp;&amp;</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">             scale      .equals( none._scale    ) &amp;&amp;</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">             area       .equals( none._area     ) &amp;&amp;</span>
-<span class="pc bpc" id="L70" title="1 of 4 branches missed.">             boundary   .equals( none._boundary ) &amp;&amp;</span>
+<span class="fc" id="L65">        NoiseConf none = none();</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if ( function   .equals( none._function ) &amp;&amp;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">             offset     .equals( none._offset   ) &amp;&amp;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">             scale      .equals( none._scale    ) &amp;&amp;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">             area       .equals( none._area     ) &amp;&amp;</span>
+<span class="pc bpc" id="L71" title="1 of 4 branches missed.">             boundary   .equals( none._boundary ) &amp;&amp;</span>
              rotation   == none._rotation   &amp;&amp;
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">             Arrays.equals(fractions, none._fractions)</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">             Arrays.equals(fractions, none._fractions)</span>
         )
-<span class="fc" id="L74">            return none;</span>
+<span class="fc" id="L75">            return none;</span>
 
-<span class="fc" id="L76">        return new NoiseConf(</span>
+<span class="fc" id="L77">        return new NoiseConf(</span>
             function,
             colors,
             offset,
@@ -105,60 +106,60 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
         UI.ComponentBoundary boundary,
         float                rotation,
         float[]              fractions
-<span class="fc" id="L108">    ) {</span>
-<span class="fc" id="L109">        _function   = Objects.requireNonNull(function);</span>
-<span class="fc" id="L110">        _colors     = Objects.requireNonNull(colors);</span>
-<span class="fc" id="L111">        _offset     = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L112">        _scale      = Objects.requireNonNull(scale);</span>
-<span class="fc" id="L113">        _area       = Objects.requireNonNull(area);</span>
-<span class="fc" id="L114">        _boundary   = Objects.requireNonNull(boundary);</span>
-<span class="fc" id="L115">        _rotation   = rotation;</span>
-<span class="fc" id="L116">        _fractions  = Objects.requireNonNull(fractions);</span>
-<span class="fc" id="L117">    }</span>
+<span class="fc" id="L109">    ) {</span>
+<span class="fc" id="L110">        _function   = Objects.requireNonNull(function);</span>
+<span class="fc" id="L111">        _colors     = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L112">        _offset     = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L113">        _scale      = Objects.requireNonNull(scale);</span>
+<span class="fc" id="L114">        _area       = Objects.requireNonNull(area);</span>
+<span class="fc" id="L115">        _boundary   = Objects.requireNonNull(boundary);</span>
+<span class="fc" id="L116">        _rotation   = rotation;</span>
+<span class="fc" id="L117">        _fractions  = Objects.requireNonNull(fractions);</span>
+<span class="fc" id="L118">    }</span>
 
-<span class="fc" id="L119">    NoiseFunction function() { return _function; }</span>
+<span class="fc" id="L120">    NoiseFunction function() { return _function; }</span>
     
-<span class="fc" id="L121">    Color[] colors() { return _colors; }</span>
+<span class="fc" id="L122">    Color[] colors() { return _colors; }</span>
 
-<span class="fc" id="L123">    Offset offset() { return _offset; }</span>
+<span class="fc" id="L124">    Offset offset() { return _offset; }</span>
 
-<span class="fc" id="L125">    Scale scale() { return _scale; }</span>
+<span class="fc" id="L126">    Scale scale() { return _scale; }</span>
 
-<span class="fc" id="L127">    UI.ComponentArea area() { return _area; }</span>
+<span class="fc" id="L128">    UI.ComponentArea area() { return _area; }</span>
 
-<span class="fc" id="L129">    UI.ComponentBoundary boundary() { return _boundary; }</span>
+<span class="fc" id="L130">    UI.ComponentBoundary boundary() { return _boundary; }</span>
 
-<span class="fc" id="L131">    float rotation() { return _rotation; }</span>
+<span class="fc" id="L132">    float rotation() { return _rotation; }</span>
 
-<span class="fc" id="L133">    float[] fractions() { return _fractions; }</span>
+<span class="fc" id="L134">    float[] fractions() { return _fractions; }</span>
 
 
     boolean isOpaque() {
-<span class="fc bfc" id="L137" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
-<span class="fc" id="L138">            return false;</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
+<span class="fc" id="L139">            return false;</span>
 
-<span class="fc" id="L140">        boolean foundTransparentColor = false;</span>
-<span class="fc bfc" id="L141" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">            if ( c.getAlpha() &lt; 255 ) {</span>
-<span class="nc" id="L143">                foundTransparentColor = true;</span>
-<span class="nc" id="L144">                break;</span>
+<span class="fc" id="L141">        boolean foundTransparentColor = false;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">            if ( c.getAlpha() &lt; 255 ) {</span>
+<span class="nc" id="L144">                foundTransparentColor = true;</span>
+<span class="nc" id="L145">                break;</span>
             }
         }
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        return !foundTransparentColor;</span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        return !foundTransparentColor;</span>
     }
 
     NoiseConf _scale( double scale ) {
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if ( scale == 1 )</span>
-<span class="nc" id="L152">            return this;</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if ( scale == 1 )</span>
+<span class="nc" id="L153">            return this;</span>
 
-<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L155">            return _NONE;</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L156">            return _NONE;</span>
 
-<span class="nc" id="L157">        return of(</span>
+<span class="fc" id="L158">        return of(</span>
             _function,
             _colors,
             _offset,
-<span class="nc" id="L161">            _scale.scale(scale),</span>
+<span class="fc" id="L162">            _scale.scale(scale),</span>
             _area,
             _boundary,
             _rotation,
@@ -178,7 +179,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified noise function.
      */
     public NoiseConf function( NoiseFunction function ) {
-<span class="fc" id="L181">        return of(function, _colors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L182">        return of(function, _colors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -192,10 +193,10 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public NoiseConf colors( Color... colors ) {
-<span class="fc" id="L195">        Objects.requireNonNull(colors);</span>
-<span class="fc bfc" id="L196" title="All 2 branches covered.">        for ( Color color : colors )</span>
-<span class="fc" id="L197">            Objects.requireNonNull(color, &quot;Use UI.Color.UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
-<span class="fc" id="L198">        return of(_function, colors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L196">        Objects.requireNonNull(colors);</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        for ( Color color : colors )</span>
+<span class="fc" id="L198">            Objects.requireNonNull(color, &quot;Use UI.Color.UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc" id="L199">        return of(_function, colors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -209,16 +210,16 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public NoiseConf colors( String... colors ) {
-<span class="fc" id="L212">        Objects.requireNonNull(colors);</span>
+<span class="fc" id="L213">        Objects.requireNonNull(colors);</span>
         try {
-<span class="fc" id="L214">            Color[] actualColors = new Color[colors.length];</span>
-<span class="fc bfc" id="L215" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="fc" id="L216">                actualColors[i] = UI.color(colors[i]);</span>
+<span class="fc" id="L215">            Color[] actualColors = new Color[colors.length];</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L217">                actualColors[i] = UI.color(colors[i]);</span>
 
-<span class="fc" id="L218">            return of(_function, actualColors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
-<span class="nc" id="L219">        } catch ( Exception e ) {</span>
-<span class="nc" id="L220">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
-<span class="nc" id="L221">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="fc" id="L219">            return of(_function, actualColors, _offset, _scale, _area, _boundary, _rotation, _fractions);</span>
+<span class="nc" id="L220">        } catch ( Exception e ) {</span>
+<span class="nc" id="L221">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
+<span class="nc" id="L222">            return this; // We want to avoid side effects other than a wrong color</span>
         }
     }
 
@@ -232,7 +233,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified offset.
      */
     public NoiseConf offset(double x, double y ) {
-<span class="fc" id="L235">        return of(_function, _colors, Offset.of(x,y), _scale, _area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L236">        return of(_function, _colors, Offset.of(x,y), _scale, _area, _boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -243,7 +244,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified size.
      */
     public NoiseConf scale( double scale ) {
-<span class="fc" id="L246">        return of(_function, _colors, _offset, Scale.of(scale, scale), _area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L247">        return of(_function, _colors, _offset, Scale.of(scale, scale), _area, _boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -255,7 +256,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified size.
      */
     public NoiseConf scale( double x, double y ) {
-<span class="fc" id="L258">        return of(_function, _colors, _offset, Scale.of(x,y), _area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L259">        return of(_function, _colors, _offset, Scale.of(x,y), _area, _boundary, _rotation, _fractions);</span>
     }
     
     /**
@@ -267,7 +268,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified area.
      */
     public NoiseConf clipTo( UI.ComponentArea area ) {
-<span class="fc" id="L270">        return of(_function, _colors, _offset, _scale, area, _boundary, _rotation, _fractions);</span>
+<span class="fc" id="L271">        return of(_function, _colors, _offset, _scale, area, _boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -312,7 +313,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      * @return A new noise gradient style with the specified boundary.
      */
     public NoiseConf boundary( UI.ComponentBoundary boundary ) {
-<span class="fc" id="L315">        return of(_function, _colors, _offset, _scale, _area, boundary, _rotation, _fractions);</span>
+<span class="fc" id="L316">        return of(_function, _colors, _offset, _scale, _area, boundary, _rotation, _fractions);</span>
     }
 
     /**
@@ -323,7 +324,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      *  @return A new noise gradient style with the specified rotation.
      */
     public NoiseConf rotation( float rotation ) {
-<span class="fc" id="L326">        return of(_function, _colors, _offset, _scale, _area, _boundary, rotation, _fractions);</span>
+<span class="fc" id="L327">        return of(_function, _colors, _offset, _scale, _area, _boundary, rotation, _fractions);</span>
     }
 
     /**
@@ -338,85 +339,85 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
      *  @return A new noise gradient style with the specified fractions.
      */
     public NoiseConf fractions( double... fractions ) {
-<span class="nc" id="L341">        float[] actualFractions = new float[fractions.length];</span>
-<span class="nc bnc" id="L342" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
-<span class="nc" id="L343">            actualFractions[i] = (float) fractions[i];</span>
+<span class="nc" id="L342">        float[] actualFractions = new float[fractions.length];</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
+<span class="nc" id="L344">            actualFractions[i] = (float) fractions[i];</span>
 
-<span class="nc" id="L345">        return of(_function, _colors, _offset, _scale, _area, _boundary, _rotation, actualFractions);</span>
+<span class="nc" id="L346">        return of(_function, _colors, _offset, _scale, _area, _boundary, _rotation, actualFractions);</span>
     }
 
     @Override
     public String toString() {
-<span class="pc bpc" id="L350" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L351">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="nc" id="L352">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L352">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="nc" id="L353">        return getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;function=&quot;    + _function + &quot;, &quot; +
-<span class="nc" id="L354">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+<span class="nc" id="L355">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
                     &quot;offset=&quot;     + _offset + &quot;, &quot; +
                     &quot;scale=&quot;      + _scale + &quot;, &quot; +
                     &quot;area=&quot;       + _area + &quot;, &quot; +
                     &quot;boundary=&quot;   + _boundary + &quot;, &quot; +
                     &quot;rotation=&quot;   + _rotation + &quot;, &quot; +
-<span class="nc" id="L360">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) +</span>
+<span class="nc" id="L361">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) +</span>
                 &quot;]&quot;;
     }
 
     @Override
     public boolean equals( @Nullable Object o ) {
-<span class="fc bfc" id="L366" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="fc bfc" id="L367" title="All 2 branches covered.">        if ( !(o instanceof NoiseConf) ) return false;</span>
-<span class="fc" id="L368">        NoiseConf that = (NoiseConf) o;</span>
-<span class="fc bfc" id="L369" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
-<span class="fc bfc" id="L370" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
-<span class="pc bpc" id="L371" title="1 of 2 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
-<span class="pc bpc" id="L372" title="4 of 8 branches missed.">                Objects.equals(_scale, that._scale)   &amp;&amp;</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">        if ( !(o instanceof NoiseConf) ) return false;</span>
+<span class="fc" id="L369">        NoiseConf that = (NoiseConf) o;</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
+<span class="fc bfc" id="L371" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+<span class="pc bpc" id="L373" title="3 of 8 branches missed.">                Objects.equals(_scale, that._scale)   &amp;&amp;</span>
                _area       == that._area             &amp;&amp;
                _boundary   == that._boundary         &amp;&amp;
                _rotation   == that._rotation         &amp;&amp;
-<span class="pc bpc" id="L376" title="1 of 2 branches missed.">               Arrays.equals(_fractions, that._fractions);</span>
+<span class="pc bpc" id="L377" title="1 of 2 branches missed.">               Arrays.equals(_fractions, that._fractions);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L381">        return Objects.hash(</span>
+<span class="fc" id="L382">        return Objects.hash(</span>
                 _function,
-<span class="fc" id="L383">                Arrays.hashCode(_colors),</span>
+<span class="fc" id="L384">                Arrays.hashCode(_colors),</span>
                 _offset,
                 _scale,
                 _area,
                 _boundary,
-<span class="fc" id="L388">                _rotation,</span>
-<span class="fc" id="L389">                Arrays.hashCode(_fractions)</span>
+<span class="fc" id="L389">                _rotation,</span>
+<span class="fc" id="L390">                Arrays.hashCode(_fractions)</span>
             );
     }
 
     @Override
     public NoiseConf simplified() {
-<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L396">            return _NONE;</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L397">            return _NONE;</span>
 
-<span class="pc bpc" id="L398" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
-<span class="nc" id="L399">            return _NONE;</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L400">            return _NONE;</span>
 
-<span class="pc bpc" id="L401" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
-<span class="fc" id="L402">            return _NONE;</span>
+<span class="pc bpc" id="L402" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )</span>
+<span class="fc" id="L403">            return _NONE;</span>
 
-<span class="fc bfc" id="L404" title="All 2 branches covered.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();</span>
+<span class="fc bfc" id="L405" title="All 2 branches covered.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();</span>
 
-<span class="pc bpc" id="L406" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
-<span class="nc" id="L407">            return _NONE;</span>
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L408">            return _NONE;</span>
 
-<span class="fc bfc" id="L409" title="All 2 branches covered.">        if ( numberOfRealColors != _colors.length ) {</span>
-<span class="fc" id="L410">            Color[] realColors = new Color[numberOfRealColors];</span>
-<span class="fc" id="L411">            int index = 0;</span>
-<span class="fc bfc" id="L412" title="All 2 branches covered.">            for ( Color color : _colors )</span>
-<span class="fc bfc" id="L413" title="All 2 branches covered.">                if ( !StyleUtil.isUndefinedColor(color) )</span>
-<span class="fc" id="L414">                    realColors[index++] = color;</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="fc" id="L411">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="fc" id="L412">            int index = 0;</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">            for ( Color color : _colors )</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">                if ( !StyleUtil.isUndefinedColor(color) )</span>
+<span class="fc" id="L415">                    realColors[index++] = color;</span>
 
-<span class="fc" id="L416">            return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );</span>
+<span class="fc" id="L417">            return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );</span>
         }
 
-<span class="fc" id="L419">        return this;</span>
+<span class="fc" id="L420">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

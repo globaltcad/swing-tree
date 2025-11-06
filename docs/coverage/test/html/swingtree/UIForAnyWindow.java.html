@@ -71,7 +71,7 @@ import java.util.function.Consumer;
 	 * @param onClose The operation to be executed when the window is closed.
 	 * @return This declarative builder instance to enable method chaining.
 	 */
-	public final I withOnCloseOperation(UI.OnWindowClose onClose ) {
+	public final I withOnCloseOperation( UI.OnWindowClose onClose ) {
 <span class="nc" id="L75">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, UI.OnWindowClose.class);</span>
 <span class="nc" id="L76">		return _with( thisWindow -&gt; {</span>
 <span class="nc bnc" id="L77" title="All 2 branches missed.">					if ( thisWindow instanceof JFrame )</span>
@@ -79,7 +79,7 @@ import java.util.function.Consumer;
 <span class="nc bnc" id="L79" title="All 2 branches missed.">					else if ( thisWindow instanceof JDialog )</span>
 <span class="nc" id="L80">						((JDialog)thisWindow).setDefaultCloseOperation(onClose.forSwing());</span>
 					else
-<span class="nc" id="L82">						log.warn(&quot;Cannot set close operation on window of type: {}&quot;, thisWindow.getClass().getName());</span>
+<span class="nc" id="L82">						log.warn(SwingTree.get().logMarker(), &quot;Cannot set close operation on window of type: {}&quot;, thisWindow.getClass().getName());</span>
 <span class="nc" id="L83">		       })</span>
 <span class="nc" id="L84">			   ._this();</span>
 	}
@@ -115,14 +115,16 @@ import java.util.function.Consumer;
 <span class="fc" id="L115">		NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, sprouts.Action.class);</span>
 <span class="fc" id="L116">		return _with( thisWindow -&gt; {</span>
 <span class="fc" id="L117">					_onKeyStroke( key.code, e -&gt; {</span>
-						try {
-<span class="nc" id="L119">							onKeyPressed.accept(_createDelegate(thisWindow, null));</span>
-<span class="nc" id="L120">						} catch (Exception ex) {</span>
-<span class="nc" id="L121">							log.error(&quot;Error occurred while processing key press event.&quot;, ex);</span>
-<span class="nc" id="L122">						}</span>
-<span class="nc" id="L123">					}, thisWindow );</span>
-<span class="fc" id="L124">		       })</span>
-<span class="fc" id="L125">			   ._this();</span>
+<span class="nc" id="L118">                        _runInApp(()-&gt; {</span>
+                            try {
+<span class="nc" id="L120">                                onKeyPressed.accept(_createDelegate(thisWindow, null));</span>
+<span class="nc" id="L121">                            } catch (Exception ex) {</span>
+<span class="nc" id="L122">                                log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing key press event.&quot;, ex);</span>
+<span class="nc" id="L123">                            }</span>
+<span class="nc" id="L124">                        });</span>
+<span class="nc" id="L125">					}, thisWindow );</span>
+<span class="fc" id="L126">		       })</span>
+<span class="fc" id="L127">			   ._this();</span>
 	}
 
 	/**
@@ -133,21 +135,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onFocusGain( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
-<span class="fc" id="L136">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, sprouts.Action.class);</span>
-<span class="fc" id="L137">		return _with( thisWindow -&gt; {</span>
-<span class="fc" id="L138">					thisWindow.addFocusListener(new FocusAdapter() {</span>
+<span class="fc" id="L138">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, sprouts.Action.class);</span>
+<span class="fc" id="L139">		return _with( thisWindow -&gt; {</span>
+<span class="fc" id="L140">					thisWindow.addFocusListener(new FocusAdapter() {</span>
 						@Override public void focusGained(FocusEvent e) {
-<span class="nc" id="L140">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L142">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L142">									onFocus.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L143">								} catch (Exception ex) {</span>
-<span class="nc" id="L144">									log.error(&quot;Error occurred while processing focus gain event.&quot;, ex);</span>
-<span class="nc" id="L145">								}</span>
-<span class="nc" id="L146">							});</span>
-<span class="nc" id="L147">						}</span>
+<span class="nc" id="L144">									onFocus.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L145">								} catch (Exception ex) {</span>
+<span class="nc" id="L146">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing focus gain event.&quot;, ex);</span>
+<span class="nc" id="L147">								}</span>
+<span class="nc" id="L148">							});</span>
+<span class="nc" id="L149">						}</span>
 					});
-<span class="fc" id="L149">		       })</span>
-<span class="fc" id="L150">			   ._this();</span>
+<span class="fc" id="L151">		       })</span>
+<span class="fc" id="L152">			   ._this();</span>
 	}
 
 	/**
@@ -158,21 +160,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onFocusLoss( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
-<span class="fc" id="L161">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
-<span class="fc" id="L162">		return _with( thisWindow -&gt; {</span>
-<span class="fc" id="L163">					thisWindow.addFocusListener(new FocusAdapter() {</span>
+<span class="fc" id="L163">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
+<span class="fc" id="L164">		return _with( thisWindow -&gt; {</span>
+<span class="fc" id="L165">					thisWindow.addFocusListener(new FocusAdapter() {</span>
 						@Override public void focusLost(FocusEvent e) {
-<span class="nc" id="L165">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L167">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L167">									onFocus.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L168">								} catch (Exception ex) {</span>
-<span class="nc" id="L169">									log.error(&quot;Error occurred while processing focus loss event.&quot;, ex);</span>
-<span class="nc" id="L170">								}</span>
-<span class="nc" id="L171">							});</span>
-<span class="nc" id="L172">						}</span>
+<span class="nc" id="L169">									onFocus.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L170">								} catch (Exception ex) {</span>
+<span class="nc" id="L171">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing focus loss event.&quot;, ex);</span>
+<span class="nc" id="L172">								}</span>
+<span class="nc" id="L173">							});</span>
+<span class="nc" id="L174">						}</span>
 					});
-<span class="fc" id="L174">		       })</span>
-<span class="fc" id="L175">			   ._this();</span>
+<span class="fc" id="L176">		       })</span>
+<span class="fc" id="L177">			   ._this();</span>
 	}
 
 	/**
@@ -187,21 +189,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onClose( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onClose ) {
-<span class="nc" id="L190">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
-<span class="nc" id="L191">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L192">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L192">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
+<span class="nc" id="L193">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L194">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowClosing( WindowEvent e ) {
-<span class="nc" id="L194">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L196">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L196">									onClose.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L197">								} catch (Exception ex) {</span>
-<span class="nc" id="L198">									log.error(&quot;Error occurred while processing window closing event.&quot;, ex);</span>
-<span class="nc" id="L199">								}</span>
-<span class="nc" id="L200">							});</span>
-<span class="nc" id="L201">						}</span>
+<span class="nc" id="L198">									onClose.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L199">								} catch (Exception ex) {</span>
+<span class="nc" id="L200">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window closing event.&quot;, ex);</span>
+<span class="nc" id="L201">								}</span>
+<span class="nc" id="L202">							});</span>
+<span class="nc" id="L203">						}</span>
 					});
-<span class="nc" id="L203">		       })</span>
-<span class="nc" id="L204">			   ._this();</span>
+<span class="nc" id="L205">		       })</span>
+<span class="nc" id="L206">			   ._this();</span>
 	}
 
 	/**
@@ -215,21 +217,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onClosed( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onClose ) {
-<span class="nc" id="L218">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
-<span class="nc" id="L219">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L220">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L220">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
+<span class="nc" id="L221">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L222">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowClosed( WindowEvent e ) {
-<span class="nc" id="L222">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L224">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L224">									onClose.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L225">								} catch (Exception ex) {</span>
-<span class="nc" id="L226">									log.error(&quot;Error occurred while processing window closed event.&quot;, ex);</span>
-<span class="nc" id="L227">								}</span>
-<span class="nc" id="L228">							});</span>
-<span class="nc" id="L229">						}</span>
+<span class="nc" id="L226">									onClose.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L227">								} catch (Exception ex) {</span>
+<span class="nc" id="L228">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window closed event.&quot;, ex);</span>
+<span class="nc" id="L229">								}</span>
+<span class="nc" id="L230">							});</span>
+<span class="nc" id="L231">						}</span>
 					});
-<span class="nc" id="L231">		       })</span>
-<span class="nc" id="L232">			   ._this();</span>
+<span class="nc" id="L233">		       })</span>
+<span class="nc" id="L234">			   ._this();</span>
 	}
 
 	/**
@@ -243,21 +245,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onOpened( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onOpen ) {
-<span class="nc" id="L246">		NullUtil.nullArgCheck(onOpen, &quot;onOpen&quot;, Action.class);</span>
-<span class="nc" id="L247">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L248">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L248">		NullUtil.nullArgCheck(onOpen, &quot;onOpen&quot;, Action.class);</span>
+<span class="nc" id="L249">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L250">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowOpened( WindowEvent e ) {
-<span class="nc" id="L250">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L252">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L252">									onOpen.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L253">								} catch (Exception ex) {</span>
-<span class="nc" id="L254">									log.error(&quot;Error occurred while processing window opened event.&quot;, ex);</span>
-<span class="nc" id="L255">								}</span>
-<span class="nc" id="L256">							});</span>
-<span class="nc" id="L257">						}</span>
+<span class="nc" id="L254">									onOpen.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L255">								} catch (Exception ex) {</span>
+<span class="nc" id="L256">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window opened event.&quot;, ex);</span>
+<span class="nc" id="L257">								}</span>
+<span class="nc" id="L258">							});</span>
+<span class="nc" id="L259">						}</span>
 					});
-<span class="nc" id="L259">		       })</span>
-<span class="nc" id="L260">			   ._this();</span>
+<span class="nc" id="L261">		       })</span>
+<span class="nc" id="L262">			   ._this();</span>
 	}
 
 	/**
@@ -274,21 +276,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onIconified( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onIconify ) {
-<span class="nc" id="L277">		NullUtil.nullArgCheck(onIconify, &quot;onIconify&quot;, Action.class);</span>
-<span class="nc" id="L278">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L279">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L279">		NullUtil.nullArgCheck(onIconify, &quot;onIconify&quot;, Action.class);</span>
+<span class="nc" id="L280">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L281">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowIconified( WindowEvent e ) {
-<span class="nc" id="L281">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L283">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L283">									onIconify.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L284">								} catch (Exception ex) {</span>
-<span class="nc" id="L285">									log.error(&quot;Error occurred while processing window iconified event.&quot;, ex);</span>
-<span class="nc" id="L286">								}</span>
-<span class="nc" id="L287">							});</span>
-<span class="nc" id="L288">						}</span>
+<span class="nc" id="L285">									onIconify.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L286">								} catch (Exception ex) {</span>
+<span class="nc" id="L287">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window iconified event.&quot;, ex);</span>
+<span class="nc" id="L288">								}</span>
+<span class="nc" id="L289">							});</span>
+<span class="nc" id="L290">						}</span>
 					});
-<span class="nc" id="L290">		       })</span>
-<span class="nc" id="L291">			   ._this();</span>
+<span class="nc" id="L292">		       })</span>
+<span class="nc" id="L293">			   ._this();</span>
 	}
 
 	/**
@@ -301,21 +303,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onDeiconified( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onDeiconify ) {
-<span class="nc" id="L304">		NullUtil.nullArgCheck(onDeiconify, &quot;onDeiconify&quot;, Action.class);</span>
-<span class="nc" id="L305">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L306">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L306">		NullUtil.nullArgCheck(onDeiconify, &quot;onDeiconify&quot;, Action.class);</span>
+<span class="nc" id="L307">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L308">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowDeiconified( WindowEvent e ) {
-<span class="nc" id="L308">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L310">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L310">									onDeiconify.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L311">								} catch (Exception ex) {</span>
-<span class="nc" id="L312">									log.error(&quot;Error occurred while processing window deiconified event.&quot;, ex);</span>
-<span class="nc" id="L313">								}</span>
-<span class="nc" id="L314">							});</span>
-<span class="nc" id="L315">						}</span>
+<span class="nc" id="L312">									onDeiconify.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L313">								} catch (Exception ex) {</span>
+<span class="nc" id="L314">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window deiconified event.&quot;, ex);</span>
+<span class="nc" id="L315">								}</span>
+<span class="nc" id="L316">							});</span>
+<span class="nc" id="L317">						}</span>
 					});
-<span class="nc" id="L317">		       })</span>
-<span class="nc" id="L318">			   ._this();</span>
+<span class="nc" id="L319">		       })</span>
+<span class="nc" id="L320">			   ._this();</span>
 	}
 
 	/**
@@ -334,21 +336,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onActivated( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onActivate ) {
-<span class="nc" id="L337">		NullUtil.nullArgCheck(onActivate, &quot;onActivate&quot;, Action.class);</span>
-<span class="nc" id="L338">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L339">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L339">		NullUtil.nullArgCheck(onActivate, &quot;onActivate&quot;, Action.class);</span>
+<span class="nc" id="L340">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L341">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowActivated( WindowEvent e ) {
-<span class="nc" id="L341">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L343">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L343">									onActivate.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L344">								} catch (Exception ex) {</span>
-<span class="nc" id="L345">									log.error(&quot;Error occurred while processing window activated event.&quot;, ex);</span>
-<span class="nc" id="L346">								}</span>
-<span class="nc" id="L347">							});</span>
-<span class="nc" id="L348">						}</span>
+<span class="nc" id="L345">									onActivate.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L346">								} catch (Exception ex) {</span>
+<span class="nc" id="L347">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window activated event.&quot;, ex);</span>
+<span class="nc" id="L348">								}</span>
+<span class="nc" id="L349">							});</span>
+<span class="nc" id="L350">						}</span>
 					});
-<span class="nc" id="L350">		       })</span>
-<span class="nc" id="L351">			   ._this();</span>
+<span class="nc" id="L352">		       })</span>
+<span class="nc" id="L353">			   ._this();</span>
 	}
 
 	/**
@@ -367,21 +369,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onDeactivated( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onDeactivate ) {
-<span class="nc" id="L370">		NullUtil.nullArgCheck(onDeactivate, &quot;onDeactivate&quot;, Action.class);</span>
-<span class="nc" id="L371">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L372">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L372">		NullUtil.nullArgCheck(onDeactivate, &quot;onDeactivate&quot;, Action.class);</span>
+<span class="nc" id="L373">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L374">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowDeactivated( WindowEvent e ) {
-<span class="nc" id="L374">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L376">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L376">									onDeactivate.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L377">								} catch (Exception ex) {</span>
-<span class="nc" id="L378">									log.error(&quot;Error occurred while processing window deactivated event.&quot;, ex);</span>
-<span class="nc" id="L379">								}</span>
-<span class="nc" id="L380">							});</span>
-<span class="nc" id="L381">						}</span>
+<span class="nc" id="L378">									onDeactivate.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L379">								} catch (Exception ex) {</span>
+<span class="nc" id="L380">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window deactivated event.&quot;, ex);</span>
+<span class="nc" id="L381">								}</span>
+<span class="nc" id="L382">							});</span>
+<span class="nc" id="L383">						}</span>
 					});
-<span class="nc" id="L383">		       })</span>
-<span class="nc" id="L384">			   ._this();</span>
+<span class="nc" id="L385">		       })</span>
+<span class="nc" id="L386">			   ._this();</span>
 	}
 
 	/**
@@ -395,21 +397,21 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onStateChanged( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onStateChanged ) {
-<span class="nc" id="L398">		NullUtil.nullArgCheck(onStateChanged, &quot;onStateChanged&quot;, Action.class);</span>
-<span class="nc" id="L399">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L400">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L400">		NullUtil.nullArgCheck(onStateChanged, &quot;onStateChanged&quot;, Action.class);</span>
+<span class="nc" id="L401">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L402">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowStateChanged( WindowEvent e ) {
-<span class="nc" id="L402">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L404">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L404">									onStateChanged.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L405">								} catch (Exception ex) {</span>
-<span class="nc" id="L406">									log.error(&quot;Error occurred while processing window state changed event.&quot;, ex);</span>
-<span class="nc" id="L407">								}</span>
-<span class="nc" id="L408">							});</span>
-<span class="nc" id="L409">						}</span>
+<span class="nc" id="L406">									onStateChanged.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L407">								} catch (Exception ex) {</span>
+<span class="nc" id="L408">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing window state changed event.&quot;, ex);</span>
+<span class="nc" id="L409">								}</span>
+<span class="nc" id="L410">							});</span>
+<span class="nc" id="L411">						}</span>
 					});
-<span class="nc" id="L411">		       })</span>
-<span class="nc" id="L412">			   ._this();</span>
+<span class="nc" id="L413">		       })</span>
+<span class="nc" id="L414">			   ._this();</span>
 	}
 
 	/**
@@ -424,22 +426,22 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onInputFocusGained( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onFocusGained ) {
-<span class="nc" id="L427">		NullUtil.nullArgCheck(onFocusGained, &quot;onFocusGained&quot;, Action.class);</span>
-<span class="nc" id="L428">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L429">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
+<span class="nc" id="L429">		NullUtil.nullArgCheck(onFocusGained, &quot;onFocusGained&quot;, Action.class);</span>
+<span class="nc" id="L430">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L431">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
 						@Override public void windowGainedFocus( WindowEvent e ) {
-<span class="nc" id="L431">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L433">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L433">									onFocusGained.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L434">								} catch (Exception ex) {</span>
-<span class="nc" id="L435">									log.error(&quot;Error occurred while processing focus gain event.&quot;, ex);</span>
-<span class="nc" id="L436">								}</span>
-<span class="nc" id="L437">							});</span>
-<span class="nc" id="L438">						}</span>
-<span class="nc" id="L439">						@Override public void windowLostFocus( WindowEvent e ) {}</span>
+<span class="nc" id="L435">									onFocusGained.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L436">								} catch (Exception ex) {</span>
+<span class="nc" id="L437">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing focus gain event.&quot;, ex);</span>
+<span class="nc" id="L438">								}</span>
+<span class="nc" id="L439">							});</span>
+<span class="nc" id="L440">						}</span>
+<span class="nc" id="L441">						@Override public void windowLostFocus( WindowEvent e ) {}</span>
 					});
-<span class="nc" id="L441">		       })</span>
-<span class="nc" id="L442">			   ._this();</span>
+<span class="nc" id="L443">		       })</span>
+<span class="nc" id="L444">			   ._this();</span>
 	}
 
 	/**
@@ -454,28 +456,28 @@ import java.util.function.Consumer;
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onInputFocusLost( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onFocusLost ) {
-<span class="nc" id="L457">		NullUtil.nullArgCheck(onFocusLost, &quot;onFocusLost&quot;, Action.class);</span>
-<span class="nc" id="L458">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L459">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
-<span class="nc" id="L460">						@Override public void windowGainedFocus( WindowEvent e ) {}</span>
+<span class="nc" id="L459">		NullUtil.nullArgCheck(onFocusLost, &quot;onFocusLost&quot;, Action.class);</span>
+<span class="nc" id="L460">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L461">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
+<span class="nc" id="L462">						@Override public void windowGainedFocus( WindowEvent e ) {}</span>
 						@Override public void windowLostFocus( WindowEvent e ) {
-<span class="nc" id="L462">							_runInApp(()-&gt;{</span>
+<span class="nc" id="L464">							_runInApp(()-&gt;{</span>
 								try {
-<span class="nc" id="L464">									onFocusLost.accept(_createDelegate(thisWindow, e));</span>
-<span class="nc" id="L465">								} catch (Exception ex) {</span>
-<span class="nc" id="L466">									log.error(&quot;Error occurred while processing focus loss event.&quot;, ex);</span>
-<span class="nc" id="L467">								}</span>
-<span class="nc" id="L468">							});</span>
-<span class="nc" id="L469">						}</span>
+<span class="nc" id="L466">									onFocusLost.accept(_createDelegate(thisWindow, e));</span>
+<span class="nc" id="L467">								} catch (Exception ex) {</span>
+<span class="nc" id="L468">									log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing focus loss event.&quot;, ex);</span>
+<span class="nc" id="L469">								}</span>
+<span class="nc" id="L470">							});</span>
+<span class="nc" id="L471">						}</span>
 					});
-<span class="nc" id="L471">		       })</span>
-<span class="nc" id="L472">			   ._this();</span>
+<span class="nc" id="L473">		       })</span>
+<span class="nc" id="L474">			   ._this();</span>
 	}
 
 	private &lt;E&gt; WindowDelegate&lt;W, E&gt; _createDelegate( W window, @Nullable E event ) {
-<span class="nc" id="L476">		return new WindowDelegate&lt;W, E&gt;() {</span>
-<span class="nc" id="L477">			@Override public W get() { return window; }</span>
-<span class="nc" id="L478">			@Override public @Nullable E getEvent() { return event; }</span>
+<span class="nc" id="L478">		return new WindowDelegate&lt;W, E&gt;() {</span>
+<span class="nc" id="L479">			@Override public W get() { return window; }</span>
+<span class="nc" id="L480">			@Override public @Nullable E getEvent() { return event; }</span>
 		};
 	}
 

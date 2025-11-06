@@ -7,8 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *  The lifespan defines when an {@link Animation} starts and for how long it should run.
- *  It consists of a start time and {@link LifeTime}, which defines a delay, interval and duration
- *  as well as a unique id which ensures that two instances of this class are never equal.
+ *  It consists of a start time and {@link LifeTime}, which defines a delay, interval and duration.
  *  <br>
  *  This object is intended to be accessed as part of an {@link AnimationStatus} within
  *  an {@link Animation} and is typically used to decide how an animation should behave.
@@ -16,15 +15,35 @@ import java.util.concurrent.TimeUnit;
 @Immutable
 public final class LifeSpan
 {
+    /**
+     * Creates a lifespan that starts now and has the specified lifetime.
+     *
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that starts now and has the specified lifetime.
+     */
     public static LifeSpan startingNowWith( LifeTime lifeTime ) {
         return new LifeSpan(lifeTime, System.currentTimeMillis() + lifeTime.getDelayIn(TimeUnit.MILLISECONDS));
     }
 
+    /**
+     * Creates a lifespan that starts after the specified offset starting from now and has the specified lifetime.
+     *
+     * @param offset The offset from now when the animation should start.
+     * @param unit The time unit of the offset.
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that starts after the specified offset from now, with the specified lifetime.
+     */
     public static LifeSpan startingNowWithOffset( long offset, TimeUnit unit, LifeTime lifeTime ) {
         long inMillis = unit.toMillis(offset);
         return new LifeSpan(lifeTime, System.currentTimeMillis() + inMillis);
     }
 
+    /**
+     * Creates a lifespan that ends now and has the specified lifetime.
+     *
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that ends now and has the specified lifetime.
+     */
     public static LifeSpan endingNowWith( LifeTime lifeTime ) {
         return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));
     }

@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
@@ -107,13 +108,13 @@ final class DynamicLaF
             try {
                 result = _installCustomLaF(owner, false);
             } catch ( Exception e ) {
-                log.error("Failed to install custom LaF for component '"+owner+"'!", e);
+                log.error(SwingTree.get().logMarker(), "Failed to install custom LaF for component '"+owner+"'!", e);
             }
         } else if ( customLookAndFeelIsInstalled() ) {
             try {
                 result = _uninstallCustomLaF(owner);
             } catch ( Exception e ) {
-                log.error("Failed to uninstall custom LaF for component '"+owner+"'!", e);
+                log.error(SwingTree.get().logMarker(), "Failed to uninstall custom LaF for component '"+owner+"'!", e);
             }
         }
 
@@ -271,7 +272,7 @@ final class DynamicLaF
                 return true;
             }
         } catch (Exception e) {
-            log.error("Failed to install custom SwingTree UI for component '"+owner+"'!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to install custom SwingTree UI for component '"+owner+"'!", e);
         }
         return false;
     }
@@ -406,7 +407,7 @@ final class DynamicLaF
                 }
             }
         } catch ( Exception ex ) {
-            log.error("Failed to paint component through former UI", ex);
+            log.error(SwingTree.get().logMarker(), "Failed to paint component through former UI", ex);
             ex.printStackTrace();
         }
     }

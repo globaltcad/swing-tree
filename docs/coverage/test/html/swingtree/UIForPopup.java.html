@@ -89,7 +89,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
                             try {
 <span class="nc" id="L90">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L91">                            } catch (Exception ex) {</span>
-<span class="nc" id="L92">                                log.error(&quot;Error while executing action on popup open!&quot;, ex);</span>
+<span class="nc" id="L92">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup open!&quot;, ex);</span>
 <span class="nc" id="L93">                            }</span>
 <span class="nc" id="L94">                        })</span>
                     );
@@ -126,7 +126,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
                             try {
 <span class="nc" id="L127">                                action.accept(new ComponentDelegate&lt;&gt;((P) thisComponent, e));</span>
 <span class="nc" id="L128">                            } catch (Exception ex) {</span>
-<span class="nc" id="L129">                                log.error(&quot;Error while executing action on popup close!&quot;, ex);</span>
+<span class="nc" id="L129">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup close!&quot;, ex);</span>
 <span class="nc" id="L130">                            }</span>
 <span class="nc" id="L131">                        })</span>
                     );
@@ -162,7 +162,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
                             try {
 <span class="nc" id="L163">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L164">                            } catch (Exception ex) {</span>
-<span class="nc" id="L165">                                log.error(&quot;Error while executing action on popup cancel!&quot;, ex);</span>
+<span class="nc" id="L165">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup cancel!&quot;, ex);</span>
 <span class="nc" id="L166">                            }</span>
 <span class="nc" id="L167">                        })</span>
                     );

@@ -20,7 +20,7 @@ println "Static analysis enabled: $WE_CAN_DO_STATIC_ANALYSIS"
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
-String VERSION  = "0.15.0"
+String VERSION  = "0.16.0"
 
 group GROUP_ID
 version VERSION
@@ -141,7 +141,7 @@ check.dependsOn jacocoTestReport
 // CUSTOM DEPLOYMENT TASKS :
 
 // 0: Cleanup
-task cleanForDeployment(type: Delete) {
+tasks.register('cleanForDeployment', Delete) {
     delete "$rootDir/build"
     delete fileTree("$rootDir/docs/jdocs/") { include '**/*' }
     delete fileTree("$rootDir/docs/spock/json/") { include '**/*' }
@@ -150,7 +150,7 @@ task cleanForDeployment(type: Delete) {
 }
 
 // 1:
-task deploy() {
+tasks.register('deploy') {
     dependsOn 'clean'
     dependsOn 'jar'
     dependsOn 'releaseJDocs'
@@ -179,7 +179,7 @@ task deploy() {
       ```
 */
 
-task releaseJDocs(type: Copy) {
+tasks.register('releaseJDocs', Copy) {
     dependsOn 'javadoc'
     from "$rootDir/build/docs/javadoc"
     into "$rootDir/docs/jdocs"
@@ -187,21 +187,21 @@ task releaseJDocs(type: Copy) {
 
 // JAR CREATION :
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     archiveClassifier.set("sources")
     from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar) {
+tasks.register('javadocJar', Jar) {
     archiveClassifier.set("javadoc")
     from javadoc
 }
 
 // JDOC CREATION:
 
-task createJDocs(type: Javadoc){
+tasks.register('createJDocs', Javadoc) {
     destinationDir = new File("$projectDir/docs/jdocs")
-    if(JavaVersion.current().isJava9Compatible()) {
+    if (JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
 }
@@ -219,7 +219,7 @@ java {
 
 ext.genOutputDir = file("$buildDir/generated-resources")
 
-task generateVersionTxt()  {
+tasks.register('generateVersionTxt') {
     ext.outputFile = file("$genOutputDir/version.txt")
     outputs.file(outputFile)
     doLast {

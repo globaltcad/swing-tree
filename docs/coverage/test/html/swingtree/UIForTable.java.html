@@ -127,7 +127,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         try {
 <span class="fc" id="L128">            builder = renderBuilder.configure(builder);</span>
 <span class="nc" id="L129">        } catch (Exception e) {</span>
-<span class="nc" id="L130">            log.error(&quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L130">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
 <span class="nc" id="L131">            return this;</span>
 <span class="fc" id="L132">        }</span>
 <span class="fc" id="L133">        CellBuilder&lt;T, Object&gt; finalBuilder = builder;</span>
@@ -238,7 +238,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         try {
 <span class="fc" id="L239">            builder = renderBuilder.configure(builder);</span>
 <span class="nc" id="L240">        } catch (Exception e) {</span>
-<span class="nc" id="L241">            log.error(&quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L241">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
 <span class="nc" id="L242">            return this;</span>
 <span class="fc" id="L243">        }</span>
 <span class="fc" id="L244">        CellBuilder&lt;T, Object&gt; finalBuilder = builder;</span>
@@ -399,7 +399,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         try {
 <span class="fc" id="L400">            builder = renderBuilder.configure(builder);</span>
 <span class="nc" id="L401">        } catch (Exception e) {</span>
-<span class="nc" id="L402">            log.error(&quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L402">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
 <span class="nc" id="L403">            return this;</span>
 <span class="fc" id="L404">        }</span>
 <span class="fc" id="L405">        Objects.requireNonNull(builder);</span>
@@ -519,7 +519,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         try {
 <span class="fc" id="L520">            return this.withModel(dataModelBuilder.build());</span>
 <span class="nc" id="L521">        } catch (Exception e) {</span>
-<span class="nc" id="L522">            log.error(&quot;Error while building a table model.&quot;, e);</span>
+<span class="nc" id="L522">            log.error(SwingTree.get().logMarker(), &quot;Error while building a table model.&quot;, e);</span>
 <span class="nc" id="L523">            return this;</span>
         }
     }
@@ -551,7 +551,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         try {
 <span class="fc" id="L552">            builder = dataModelBuilder.configure(builder);</span>
 <span class="nc" id="L553">        } catch (Exception e) {</span>
-<span class="nc" id="L554">            log.error(&quot;Error while building table model.&quot;, e);</span>
+<span class="nc" id="L554">            log.error(SwingTree.get().logMarker(), &quot;Error while building table model.&quot;, e);</span>
 <span class="fc" id="L555">        }</span>
 <span class="fc" id="L556">        return this.withModel(builder.build());</span>
     }
@@ -593,7 +593,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         try {
 <span class="nc" id="L594">            builder = dataModelBuilder.configure(builder);</span>
 <span class="nc" id="L595">        } catch (Exception e) {</span>
-<span class="nc" id="L596">            log.error(&quot;Error while building table model.&quot;, e);</span>
+<span class="nc" id="L596">            log.error(SwingTree.get().logMarker(), &quot;Error while building table model.&quot;, e);</span>
 <span class="nc" id="L597">        }</span>
 <span class="nc" id="L598">        return this.withModel(builder.build());</span>
     }
@@ -834,7 +834,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
             try {
 <span class="nc" id="L835">                column.set(rowIndex, (E) aValue);</span>
 <span class="nc" id="L836">            } catch (Exception e) {</span>
-<span class="nc" id="L837">                log.warn(&quot;Failed to set value in hash table based table model.&quot;, e);</span>
+<span class="nc" id="L837">                log.warn(SwingTree.get().logMarker(), &quot;Failed to set value in hash table based table model.&quot;, e);</span>
 <span class="nc" id="L838">            }</span>
 <span class="nc" id="L839">        }</span>
 

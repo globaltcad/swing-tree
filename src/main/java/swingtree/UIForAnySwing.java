@@ -426,7 +426,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  then visibility of the underlying {@link JComponent} type will be updated accordingly.
      *  <p>
      * <i>
-     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to
+     *     Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to
      *           send the property value to this view component.
      * </i>
      *
@@ -456,7 +456,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  If the supplied {@link Val} property is {@code false}, the component will be visible.
      *  <p>
      *  <i>
-     *      Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to
+     *      Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to
      *            send the property value to this view component.
      *  </i>
      * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
@@ -483,7 +483,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  then the underlying {@link JComponent} type will be visible,
      *  otherwise it will be invisible.
      * <i>
-     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your
+     *     Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your
      *           view model to send the property value to this view component.
      * </i>
      *
@@ -514,7 +514,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  then the underlying {@link JComponent} type will be invisible,
      *  otherwise it will be visible.
      * <i>
-     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your
+     *     Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your
      *           view model to send the property value to this view component.
      * </i>
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component invisible.
@@ -596,7 +596,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to make the wrapped UI component dynamically enabled or disabled,
      *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component enabled.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component enabled.
@@ -620,7 +620,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #isEnabledIf(Enum, Val)}.
      *  Use this to make the wrapped UI component dynamically disabled or enabled,
      *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component disabled.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component disabled.
@@ -672,7 +672,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to dynamically make the wrapped UI component focusable.
      *  This is useful if you want to make a component focusable only if a certain condition is met.
      *  <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
@@ -703,7 +703,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to dynamically make the wrapped UI component focusable.
      *  This is useful if you want to make a component focusable only if a certain condition is met.
      *  <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not, wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
@@ -724,7 +724,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to make the wrapped UI component dynamically focusable or non-focusable
      *  based on the equality between the supplied enum value and enum property. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component focusable.
      *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component focusable.
@@ -749,7 +749,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #isFocusableIf(Enum, Val)}.
      *  Use this to make the wrapped UI component dynamically focusable or non-focusable
      *  based on the equality between the supplied enum value and enum property. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component non-focusable.
      *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component non-focusable.
@@ -869,7 +869,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Use this to dynamically attach a border to the wrapped component. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -1650,7 +1650,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -1671,7 +1671,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder
      *  based on boolean property determining if the provided cursor should be set ot not. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The boolean property determining if the provided cursor should be set ot not.
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
@@ -1694,7 +1694,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to dynamically set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder
      *  based on boolean property determining if the provided cursor should be set ot not. <br>
-     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The boolean property determining if the provided cursor should be set ot not.
      * @param type The {@link UI.Cursor} type property defined by a simple enum exposed by this API.
@@ -2169,7 +2169,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          button.setToolTipText(tip.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
@@ -2250,7 +2250,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          button.setBackground(bg.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -2270,7 +2270,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to a background color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param colorIfTrue The background color which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -2295,7 +2295,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a background color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param color The background color property which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -2321,7 +2321,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to 2 colors to the background of the component
      *  which sre set based on the value of a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
      * @param colorIfTrue The background color which should be set for the UI component.
@@ -2335,7 +2335,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to 2 color properties to the background of the component
      *  which sre set based on the value of a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
      * @param colorIfTrue The background color which should be set for the UI component.
@@ -2555,7 +2555,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          button.setForeground(fg.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -2578,7 +2578,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component.
      * @param condition The condition property which determines whether the foreground color should be set or not.
@@ -2605,7 +2605,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param color The foreground color property which should be set for the UI component.
      * @param condition The condition property which determines whether the foreground color should be set or not.
@@ -2633,7 +2633,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the foreground color should be set or not.
      * @param colorIfTrue The foreground color which should be set for the UI component.
@@ -2660,7 +2660,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the foreground color should be set or not.
      * @param colorIfTrue The foreground color property which should be set for the UI component.
@@ -3799,7 +3799,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 try {
                                     onClick.accept(new ComponentMouseEventDelegate<>(c, e));
                                 } catch ( Exception ex ) {
-                                    log.error("Error in mouse click event action handler!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error in mouse click event action handler!", ex);
                                 }
                             });
                         }
@@ -3826,7 +3826,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 try {
                                     onRelease.accept(new ComponentMouseEventDelegate<>( thisComponent, e ));
                                 } catch ( Exception ex ) {
-                                    log.error("Error in mouse release event action handler!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error in mouse release event action handler!", ex);
                                 }
                             });
                         }
@@ -3853,7 +3853,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 try {
                                     onPress.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
                                 } catch ( Exception ex ) {
-                                    log.error("Error in mouse press event action handler!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error in mouse press event action handler!", ex);
                                 }
                             });
                         }
@@ -3915,7 +3915,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                     try {
                                         onEnter.accept(new ComponentMouseEventDelegate<>(localComponent, e));
                                     } catch ( Exception ex ) {
-                                        log.error("Error in mouse enter event action handler!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error in mouse enter event action handler!", ex);
                                     }
                                 });
                         }
@@ -3954,7 +3954,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 try {
                                     onEnter.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
                                 } catch ( Exception ex ) {
-                                    log.error("Error in greedy mouse enter event action handler!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error in greedy mouse enter event action handler!", ex);
                                 }
                             });
                         }
@@ -4022,7 +4022,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                     try {
                                         onExit.accept(new ComponentMouseEventDelegate<>(localComponent, e));
                                     } catch ( Exception ex ) {
-                                        log.error("Error in mouse exit event action handler!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error in mouse exit event action handler!", ex);
                                     }
                                 });
                         }
@@ -4061,7 +4061,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 try {
                                 onExit.accept(new ComponentMouseEventDelegate<>( thisComponent, e ));
                                 } catch ( Exception ex ) {
-                                    log.error("Error in greedy mouse exit event action handler!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error in greedy mouse exit event action handler!", ex);
                                 }
                             });
                         }
@@ -4101,7 +4101,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onDrag.accept(new ComponentDragEventDelegate<>(thisComponent, e, dragEventHistory));
                                } catch ( Exception ex ) {
-                                   log.error("Error in mouse drag event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in mouse drag event action handler!", ex);
                                }
                            });
                        }
@@ -4130,7 +4130,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onMove.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in mouse move event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in mouse move event action handler!", ex);
                                }
                            });
                        }
@@ -4141,7 +4141,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onMove.accept(new ComponentMouseEventDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in mouse move event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in mouse move event action handler!", ex);
                                }
                            });
                        }
@@ -4167,7 +4167,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                            try {
                                onWheel.accept(new ComponentDelegate<>(thisComponent, e));
                            } catch ( Exception ex ) {
-                               log.error("Error in mouse wheel event action handler!", ex);
+                               log.error(SwingTree.get().logMarker(), "Error in mouse wheel event action handler!", ex);
                            }
                        });
                    });
@@ -4192,7 +4192,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onWheelUp.accept(new ComponentDelegate<>(thisComponent, e ));
                                } catch ( Exception ex ) {
-                                   log.error("Error in mouse wheel up event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in mouse wheel up event action handler!", ex);
                                }
                            });
                    });
@@ -4217,7 +4217,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                    try {
                                        onWheelDown.accept(new ComponentDelegate<>(thisComponent, e));
                                    } catch ( Exception ex ) {
-                                       log.error("Error in mouse wheel down event action handler!", ex);
+                                       log.error(SwingTree.get().logMarker(), "Error in mouse wheel down event action handler!", ex);
                                    }
                                });
                    });
@@ -4242,7 +4242,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onResize.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in resize event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in resize event action handler!", ex);
                                }
                            });
                        }
@@ -4267,7 +4267,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onMoved.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in move event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in move event action handler!", ex);
                                }
                            });
                        }
@@ -4298,7 +4298,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onShown.accept(new ComponentDelegate<>(thisComponent, event));
                                } catch ( Exception ex ) {
-                                   log.error("Error in show event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in show event action handler!", ex);
                                }
                            });
                        }
@@ -4332,7 +4332,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                  try {
                                       onHidden.accept(new ComponentDelegate<>(thisComponent, event));
                                  } catch ( Exception ex ) {
-                                      log.error("Error in hide event action handler!", ex);
+                                      log.error(SwingTree.get().logMarker(), "Error in hide event action handler!", ex);
                                  }
                             });
                           }
@@ -4378,7 +4378,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onFocus.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in focus gain event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in focus gain event action handler!", ex);
                                }
                            });
                        }
@@ -4403,7 +4403,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onFocus.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in focus loss event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in focus loss event action handler!", ex);
                                }
                            });
                        }
@@ -4428,7 +4428,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onKeyPressed.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in key press event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in key press event action handler!", ex);
                                }
                            });
                        }
@@ -4457,7 +4457,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                    try {
                                        onKeyPressed.accept(new ComponentDelegate<>(thisComponent, e));
                                    } catch ( Exception ex ) {
-                                       log.error("Error in key press event action handler!", ex);
+                                       log.error(SwingTree.get().logMarker(), "Error in key press event action handler!", ex);
                                    }
                                });
                        }
@@ -4483,7 +4483,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onKeyReleased.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in key release event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in key release event action handler!", ex);
                                }
                            });
                        }
@@ -4514,7 +4514,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                    try {
                                        onKeyReleased.accept(new ComponentDelegate<>(thisComponent, e));
                                    } catch ( Exception ex ) {
-                                       log.error("Error in key release event action handler!", ex);
+                                       log.error(SwingTree.get().logMarker(), "Error in key release event action handler!", ex);
                                    }
                                });
                        }
@@ -4540,7 +4540,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                            try {
                                onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
                            } catch ( Exception ex ) {
-                               log.error("Error in key typed event action handler!", ex);
+                               log.error(SwingTree.get().logMarker(), "Error in key typed event action handler!", ex);
                            }
                        });
                    });
@@ -4570,7 +4570,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in key typed event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in key typed event action handler!", ex);
                                }
                            });
                    });
@@ -4620,7 +4620,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
                                } catch ( Exception ex ) {
-                                   log.error("Error in key typed event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in key typed event action handler!", ex);
                                }
                            });
                    });
@@ -4651,7 +4651,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                            try {
                                onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e));
                            } catch ( Exception ex ) {
-                               log.error("Error in key typed event action handler!", ex);
+                               log.error(SwingTree.get().logMarker(), "Error in key typed event action handler!", ex);
                            }
                        });
                    });
@@ -4701,7 +4701,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         try {
                             return configurator.configure(conf);
                         } catch (Exception e) {
-                            log.error("Failed to configure drag away!", e);
+                            log.error(SwingTree.get().logMarker(), "Failed to configure drag away!", e);
                         }
                         return conf;
                     });
@@ -4810,7 +4810,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
                                 } catch ( Exception ex ) {
-                                    log.error("Error in view event action handler!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error in view event action handler!", ex);
                                 }
                             });
                         })
@@ -4863,7 +4863,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
                                } catch ( Exception ex ) {
-                                   log.error("Error in custom event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in custom event action handler!", ex);
                                }
                            });
                        })
@@ -4921,7 +4921,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                try {
                                    action.accept(new ComponentDelegate<>(thisComponent, observableEvent));
                                } catch ( Exception ex ) {
-                                   log.error("Error in custom event action handler!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error in custom event action handler!", ex);
                                }
                            });
                        })
@@ -4950,7 +4950,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                        try {
                            onUpdate.accept(new ComponentDelegate<>(thisComponent, e));
                        } catch ( Exception ex ) {
-                           log.error("Error in update action handler!", ex);
+                           log.error(SwingTree.get().logMarker(), "Error in update action handler!", ex);
                        }
                    });
                    {
@@ -5050,7 +5050,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Object constraints = attr.toConstraintForLayoutManager();
         if ( _isBorderLayout(constraints) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
-                log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
+                log.warn(SwingTree.get().logMarker(), "Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             thisComponent.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
         for ( UIForAnySwing<?, ?> b : builders )
@@ -5103,7 +5103,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                    LayoutManager layout = thisComponent.getLayout();
                    if ( !(layout instanceof MigLayout) )
-                       log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
+                       log.warn(SwingTree.get().logMarker(), "Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
 
                    for ( UIForAnySwing<?, ?> b : builders )
                        _addBuilderTo(thisComponent, b, ()->attr);
@@ -5282,7 +5282,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a property list not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a property list not supported.", new Throwable());
                     } else {
                     _bindTo( models, null, viewSupplier, thisComponent );
                     }
@@ -5322,7 +5322,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a property list not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a property list not supported.", new Throwable());
                     } else {
                         _bindTo(models, () -> attr, viewSupplier, thisComponent);
                     }
@@ -5362,7 +5362,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a property list not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a property list not supported.", new Throwable());
                     } else {
                         _bindTo(models, attr, viewSupplier, thisComponent);
                     }
@@ -5400,7 +5400,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
                     } else {
                         _bindTo(models, null, viewSupplier, thisComponent);
                     }
@@ -5441,7 +5441,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
                     } else {
                         _bindTo(models, () -> attr, viewSupplier, thisComponent);
                     }
@@ -5481,7 +5481,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
                     } else {
                         _bindTo(models, attr, viewSupplier, thisComponent);
                     }
@@ -5522,7 +5522,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
                     } else {
                         _bindTo(models, null, viewSupplier, thisComponent);
                     }
@@ -5566,7 +5566,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
                     } else {
                         _bindTo(models, () -> attr, viewSupplier, thisComponent);
                     }
@@ -5609,7 +5609,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error("Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
                     } else {
                         _bindTo(models, attr, viewSupplier, thisComponent);
                     }
@@ -5694,7 +5694,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _checkComponentStateBeforeBinding(thisComponent);
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
-                log.error("Error while creating view for '"+model+"'.", exception);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+model+"'.", exception);
                 return UI.box().get(JBox.class);
             }), thisComponent);
     }
@@ -5711,7 +5711,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(v);
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+v+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -5732,7 +5732,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         switch ( delegate.change() ) {
             case SET:
                 if ( index < 0 ) {
-                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    log.error(SwingTree.get().logMarker(), "Missing index for change type: {}", delegate.change(), new Throwable());
                     _clearComponentsOf(innerComponent);
                     for ( int i = 0; i < delegate.currentValues().size(); i++ )
                         _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
@@ -5759,7 +5759,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 break;
             case REMOVE:
                 if ( index < 0 ) {
-                    log.error("Missing index for change type: {}", delegate.change(), new Throwable());
+                    log.error(SwingTree.get().logMarker(), "Missing index for change type: {}", delegate.change(), new Throwable());
                     _clearComponentsOf(innerComponent);
                     for ( int i = 0; i < delegate.currentValues().size(); i++ )
                         _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
@@ -5774,7 +5774,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case REVERSE: _reverseComponentsOf(innerComponent); break;
             case NONE: break;
             default:
-                log.error("Unknown change type: {}", delegate.change(), new Throwable());
+                log.error(SwingTree.get().logMarker(), "Unknown change type: {}", delegate.change(), new Throwable());
                 // We do a simple rebuild:
                 Vals<M> currentValues = delegate.currentValues();
                 _clearComponentsOf(innerComponent);
@@ -5798,7 +5798,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M> void _bindTo( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _checkComponentStateBeforeBinding(thisComponent);
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
-            log.error("Error while creating view for '"+model+"'.", exception);
+            log.error(SwingTree.get().logMarker(), "Error while creating view for '"+model+"'.", exception);
             return UI.box().get(JBox.class);
         }), thisComponent);
     }
@@ -5806,7 +5806,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M extends HasId<?>> void _bindTo(Var<Tuple<M>> models, @Nullable AddConstraint attr, BoundViewSupplier<M> viewSupplier, C thisComponent ) {
         _checkComponentStateBeforeBinding(thisComponent);
         _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, (ViewHandle<M> handle)->viewSupplier.createViewFor(handle.property()), (model, exception)->{
-            log.error("Error while creating view for '"+model+"'.", exception);
+            log.error(SwingTree.get().logMarker(), "Error while creating view for '"+model+"'.", exception);
             return UI.box().get(JBox.class);
         }), thisComponent);
     }
@@ -5859,7 +5859,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         if (child == currentSubView)
                             return i;
                     } catch (Exception e) {
-                        log.error("Failed to check if child component is current.", e);
+                        log.error(SwingTree.get().logMarker(), "Failed to check if child component is current.", e);
                     }
                 }
                 return -1;
@@ -6073,7 +6073,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case NONE:
                 break;
             default:
-                log.error("Unknown change type: {}", change, new Throwable());
+                log.error(SwingTree.get().logMarker(), "Unknown change type: {}", change, new Throwable());
                 // We do a simple rebuild:
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
@@ -6184,7 +6184,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case NONE:
                 break;
             default:
-                log.error("Unknown change type: {}", change, new Throwable());
+                log.error(SwingTree.get().logMarker(), "Unknown change type: {}", change, new Throwable());
                 // We do a simple rebuild:
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
@@ -6197,7 +6197,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(tupleOfModels.get(i));
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+tupleOfModels.get(i)+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+tupleOfModels.get(i)+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -6215,7 +6215,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(ViewHandle.of(tupleOfModels, i, thisComponent));
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+tupleOfModels.get().get(i)+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+tupleOfModels.get().get(i)+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -6239,7 +6239,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 try {
                     view = viewSupplier.createViewFor(viewable.get());
                 } catch ( Exception e ) {
-                    log.error("Error while creating view for '{}'.", viewable.orElseNull(), e);
+                    log.error(SwingTree.get().logMarker(), "Error while creating view for '{}'.", viewable.orElseNull(), e);
                 }
                 if ( view == null )
                     view = UI.box(); // We add a dummy component to the list of children.
@@ -6253,7 +6253,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 try {
                     view = viewSupplier.createViewFor(viewable.get());
                 } catch ( Exception e ) {
-                    log.error("Error while creating view for '{}'.", viewable.orElseNull(), e);
+                    log.error(SwingTree.get().logMarker(), "Error while creating view for '{}'.", viewable.orElseNull(), e);
                 }
                 if ( view == null )
                     view = UI.box(); // We add a dummy component to the list of children.
@@ -6285,7 +6285,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(v);
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+v+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -6332,7 +6332,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(ViewHandle.of(v, index, c));
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+v+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -6373,7 +6373,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(v);
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+v+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -6401,7 +6401,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             try {
                 view = viewSupplier.createViewFor(ViewHandle.of(v, index, thisComponent));
             } catch ( Exception e ) {
-                log.error("Error while creating view for '"+v+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.

@@ -2,7 +2,6 @@ package swingtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sprouts.Event;
 import sprouts.Val;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationDispatcher;
@@ -1444,10 +1443,10 @@ public class AbstractDelegate<C extends JComponent>
                     AbstractDelegate<JComponent> delegate = new AbstractDelegate<>( false, (JComponent) parent, (JComponent) parent );
                     action.accept(delegate);
                 } catch( Exception e ) {
-                    log.error("Error while processing parent delegate!", e);
+                    log.error(SwingTree.get().logMarker(), "Error while processing parent delegate!", e);
                 }
             } else {
-                log.warn("Parent of component is not a JComponent, cannot apply parent delegate!");
+                log.warn(SwingTree.get().logMarker(), "Parent of component is not a JComponent, cannot apply parent delegate!");
             }
         });
     }
@@ -1470,7 +1469,7 @@ public class AbstractDelegate<C extends JComponent>
      *        .borderRadius( (int)(60 * state.progress()) )
      *    ))
      *  }</pre>
-     *  <b>Not that the effect of this method can also be modelled using {@link #animateFor(LifeTime, Animation)}
+     *  <b>You can achieve the same effect using {@link #animateFor(LifeTime, Animation)}
      *  and {@link #style(AnimationStatus, Styler)} as follows:</b>
      *  <pre>{@code
      *    UI.button("Click me").withPrefSize(400, 400)
@@ -1480,10 +1479,12 @@ public class AbstractDelegate<C extends JComponent>
      *        );
      *    }))
      *  }</pre>
-     *  Also see {@link #animateStyleFor(LifeTime, AnimatedStyler)} for a version of this method which uses a {@link LifeTime} instead of a duration.
+     *  Also see {@link #animateStyleFor(LifeTime, AnimatedStyler)} for a version of this method which
+     *  uses a {@link LifeTime} instead of a duration.
      *  If you are interested in doing more advanced style animations, consider taking a look at
-     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event based styling animations
-     *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
+     *  {@link UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} to see how to do event
+     *  based styling animations and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to
+     *  see how to do 2 state switch based styling animations.
      *
      * @param duration The duration of the animation.
      * @param unit The time unit of the duration.

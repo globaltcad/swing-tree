@@ -848,7 +848,7 @@ public final class UI extends UIFactoryMethods
 <span class="fc bfc" id="L848" title="All 2 branches covered.">            if ( laf.contains(&quot;Metal&quot;)   ) return LookAndFeel.METAL;</span>
         }
 <span class="nc" id="L850">        catch (Exception e) {</span>
-<span class="nc" id="L851">            log.warn(&quot;Failed to determine current look and feel.&quot;, e);</span>
+<span class="nc" id="L851">            log.warn(SwingTree.get().logMarker(), &quot;Failed to determine current look and feel.&quot;, e);</span>
 <span class="fc" id="L852">        }</span>
 
 <span class="fc" id="L854">        return LookAndFeel.OTHER;</span>
@@ -2847,7 +2847,7 @@ public final class UI extends UIFactoryMethods
             try {
 <span class="fc" id="L2848">                return ColorUtility.parseColor(colorString);</span>
 <span class="nc" id="L2849">            } catch ( Exception e ) {</span>
-<span class="nc" id="L2850">                log.error(&quot;Could not parse color '&quot; + colorString + &quot;'.&quot;, e);</span>
+<span class="nc" id="L2850">                log.error(SwingTree.get().logMarker(), &quot;Could not parse color '&quot; + colorString + &quot;'.&quot;, e);</span>
 <span class="nc" id="L2851">                return Color.UNDEFINED;</span>
             }
         }

@@ -32,7 +32,7 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
      *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
      *  and deselected otherwise. <br>
      *  <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param state The reference value which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used

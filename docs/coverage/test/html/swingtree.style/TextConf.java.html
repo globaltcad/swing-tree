@@ -3,13 +3,13 @@
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Styler;
 
 import java.awt.Font;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  *  An immutable configuration type which holds custom
@@ -204,7 +204,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
         try {
 <span class="fc" id="L205">            return _fontConf(fontConfFunction.configure(_fontConf));</span>
 <span class="nc" id="L206">        } catch ( Exception e ) {</span>
-<span class="nc" id="L207">            log.error(&quot;Error configuring font style.&quot;, e);</span>
+<span class="nc" id="L207">            log.error(SwingTree.get().logMarker(), &quot;Error configuring font style.&quot;, e);</span>
 <span class="nc" id="L208">            return this;</span>
         }
     }

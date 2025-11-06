@@ -123,7 +123,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
-            log.error("Error while building table renderer.", e);
+            log.error(SwingTree.get().logMarker(), "Error while building table renderer.", e);
             return this;
         }
         Objects.requireNonNull(builder);

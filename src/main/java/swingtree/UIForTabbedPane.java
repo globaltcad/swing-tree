@@ -82,7 +82,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                     try {
                                         onClick.accept(new TabDelegate(thisComponent, e));
                                     } catch (Exception ex) {
-                                        log.error("Error while executing action on tab click!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error while executing action on tab click!", ex);
                                     }
                                 });
                         }
@@ -113,7 +113,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                     try {
                                         onPress.accept(new TabDelegate(thisComponent, e));
                                     } catch (Exception ex) {
-                                        log.error("Error while executing action on tab press!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error while executing action on tab press!", ex);
                                     }
                                 });
                         }
@@ -144,7 +144,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                     try {
                                         onRelease.accept(new TabDelegate(thisComponent, e));
                                     } catch (Exception ex) {
-                                        log.error("Error while executing action on tab release!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error while executing action on tab release!", ex);
                                     }
                                 });
                         }
@@ -175,7 +175,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                     try {
                                         onEnter.accept(new TabDelegate(thisComponent, e));
                                     } catch (Exception ex) {
-                                        log.error("Error while executing action on tab enter!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error while executing action on tab enter!", ex);
                                     }
                                 });
                         }
@@ -206,7 +206,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                     try {
                                         onExit.accept(new TabDelegate(thisComponent, e));
                                     } catch (Exception ex) {
-                                        log.error("Error while executing action on tab exit!", ex);
+                                        log.error(SwingTree.get().logMarker(), "Error while executing action on tab exit!", ex);
                                     }
                                 });
                         }
@@ -403,7 +403,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                try {
                                    onSelection.accept(new ComponentDelegate<>(tabbedPane, e));
                                } catch (Exception ex) {
-                                   log.error("Error while executing action on tab selection!", ex);
+                                   log.error(SwingTree.get().logMarker(), "Error while executing action on tab selection!", ex);
                                }
                            });
                    })
@@ -554,7 +554,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             case NONE:
                 break;
             default:
-                log.warn("Unknown change type: {}", delegate.change(), new Throwable());
+                log.warn(SwingTree.get().logMarker(), "Unknown change type: {}", delegate.change(), new Throwable());
                 // We do a simple rebuild:
                 pane.removeAll();
                 delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
@@ -676,7 +676,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 case NONE:
                     break;
                 default:
-                    log.warn("Unknown change type: {}", diff.change(), new Throwable());
+                    log.warn(SwingTree.get().logMarker(), "Unknown change type: {}", diff.change(), new Throwable());
                     // We do a simple rebuild:
                     pane.removeAll();
                     tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
@@ -784,7 +784,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                 try {
                                     mouseClickAction.accept(new ComponentDelegate<>(pane, e));
                                 } catch (Exception ex) {
-                                    log.error("Error while executing action on tab click!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error while executing action on tab click!", ex);
                                 }
                             });
                     }
@@ -807,7 +807,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     try {
                         mouseClickAction.accept(new ComponentDelegate<>(pane, e));
                     } catch (Exception ex) {
-                        log.error("Error while executing action on tab click!", ex);
+                        log.error(SwingTree.get().logMarker(), "Error while executing action on tab click!", ex);
                     }
                 });
             if ( indexOfThis < pane.getTabCount() )
@@ -867,7 +867,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                         try {
                             onChange.accept(new ComponentDelegate<>(thisComponent, e));
                         } catch (Exception ex) {
-                            log.error("Error while executing action on tab change!", ex);
+                            log.error(SwingTree.get().logMarker(), "Error while executing action on tab change!", ex);
                         }
                     }));
                 })
@@ -897,7 +897,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             try {
                                 onSelection.accept(new ComponentDelegate<>(tabbedPane, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on tab selection!", ex);
+                                log.error(SwingTree.get().logMarker(), "Error while executing action on tab selection!", ex);
                             }
                         });
                 });
@@ -973,7 +973,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 try {
                     listener.stateChanged(e);
                 } catch (Exception ex) {
-                    log.error("Error while executing action on tab selection!", ex);
+                    log.error(SwingTree.get().logMarker(), "Error while executing action on tab selection!", ex);
                 }
             }
         }
@@ -999,12 +999,12 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         try {
             Tab tab = tabSupplier.createTabFor(m);
             if ( tab == null ) {
-                log.warn("Tab supplier returned null for '{}'.", m, new Throwable());
+                log.warn(SwingTree.get().logMarker(), "Tab supplier returned null for '{}'.", m, new Throwable());
                 return UIForTabbedPane.TAB_NULL;
             }
             return tab;
         } catch (Exception e) {
-            log.error("Error while creating tab for '{}'.", m, e);
+            log.error(SwingTree.get().logMarker(), "Error while creating tab for '{}'.", m, e);
             return UIForTabbedPane.TAB_ERROR;
         }
     }

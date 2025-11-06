@@ -166,14 +166,14 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      */
     public final I withFont( Font font ) {
-<span class="nc" id="L169">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
-<span class="nc" id="L170">        return _with( thisComponent -&gt; {</span>
-<span class="nc bnc" id="L171" title="All 2 branches missed.">                    if ( _isUndefinedFont(font) )</span>
+<span class="fc" id="L169">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="fc" id="L170">        return _with( thisComponent -&gt; {</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(font) )</span>
 <span class="nc" id="L172">                        thisComponent.setFont(null);</span>
                     else
-<span class="nc" id="L174">                        thisComponent.setFont(font);</span>
-<span class="nc" id="L175">                })</span>
-<span class="nc" id="L176">                ._this();</span>
+<span class="fc" id="L174">                        thisComponent.setFont(SwingTree.get().scale(font));</span>
+<span class="fc" id="L175">                })</span>
+<span class="fc" id="L176">                ._this();</span>
     }
 
     /**
@@ -194,14 +194,14 @@ import java.util.function.Consumer;
 <span class="pc bpc" id="L194" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(v) )</span>
 <span class="nc" id="L195">                        c.setFont(null);</span>
                     else
-<span class="fc" id="L197">                        c.setFont(v);</span>
+<span class="fc" id="L197">                        c.setFont(SwingTree.get().scale(v));</span>
 <span class="fc" id="L198">                })</span>
 <span class="fc" id="L199">                ._with( thisComponent -&gt; {</span>
 <span class="fc" id="L200">                    Font newFont = font.orElseThrowUnchecked();</span>
 <span class="pc bpc" id="L201" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(newFont) )</span>
 <span class="nc" id="L202">                        thisComponent.setFont( null );</span>
                     else
-<span class="fc" id="L204">                        thisComponent.setFont( newFont );</span>
+<span class="fc" id="L204">                        thisComponent.setFont( SwingTree.get().scale(newFont) );</span>
 <span class="fc" id="L205">                })</span>
 <span class="fc" id="L206">                ._this();</span>
 
@@ -279,7 +279,7 @@ import java.util.function.Consumer;
                                 try {
 <span class="fc" id="L280">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L281">                                } catch (Exception ex) {</span>
-<span class="nc" id="L282">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
+<span class="nc" id="L282">                                    log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text component content change!&quot;, ex);</span>
 <span class="fc" id="L283">                                }</span>
 <span class="fc" id="L284">                            });</span>
 <span class="fc" id="L285">                        }</span>
@@ -288,7 +288,7 @@ import java.util.function.Consumer;
                                 try {
 <span class="fc" id="L289">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L290">                                } catch (Exception ex) {</span>
-<span class="nc" id="L291">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
+<span class="nc" id="L291">                                    log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text component content change!&quot;, ex);</span>
 <span class="fc" id="L292">                                }</span>
 <span class="fc" id="L293">                            });</span>
 <span class="fc" id="L294">                        }</span>
@@ -297,7 +297,7 @@ import java.util.function.Consumer;
                                 try {
 <span class="nc" id="L298">                                    action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L299">                                } catch (Exception ex) {</span>
-<span class="nc" id="L300">                                    log.error(&quot;Error while executing action on text component content change!&quot;, ex);</span>
+<span class="nc" id="L300">                                    log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text component content change!&quot;, ex);</span>
 <span class="nc" id="L301">                                }</span>
 <span class="nc" id="L302">                            });</span>
 <span class="nc" id="L303">                        }</span>
@@ -320,7 +320,7 @@ import java.util.function.Consumer;
                         try {
 <span class="fc" id="L321">                            action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L322">                        } catch (Exception ex) {</span>
-<span class="nc" id="L323">                            log.error(&quot;Error while executing action on text change!&quot;, ex);</span>
+<span class="nc" id="L323">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text change!&quot;, ex);</span>
 <span class="fc" id="L324">                        }</span>
 <span class="fc" id="L325">                    }));</span>
 <span class="fc" id="L326">                })</span>
@@ -355,7 +355,7 @@ import java.util.function.Consumer;
                         try {
 <span class="fc" id="L356">                            action.accept(new TextRemoveDelegate(thisComponent, fb, offset, length));</span>
 <span class="nc" id="L357">                        } catch (Exception e) {</span>
-<span class="nc" id="L358">                            log.error(&quot;Error while executing action on text remove!&quot;, e);</span>
+<span class="nc" id="L358">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text remove!&quot;, e);</span>
 <span class="fc" id="L359">                        }</span>
 <span class="fc" id="L360">                    });</span>
 <span class="pc bpc" id="L361" title="1 of 2 branches missed.">                    if ( state.removes.isEmpty() ) fb.remove(offset, length);</span>
@@ -369,7 +369,7 @@ import java.util.function.Consumer;
                         try {
 <span class="fc" id="L370">                            action.accept(new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr));</span>
 <span class="nc" id="L371">                        } catch (Exception e) {</span>
-<span class="nc" id="L372">                            log.error(&quot;Error while executing action on text insert!&quot;, e);</span>
+<span class="nc" id="L372">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text insert!&quot;, e);</span>
 <span class="fc" id="L373">                        }</span>
 <span class="fc" id="L374">                    });</span>
 <span class="pc bpc" id="L375" title="1 of 2 branches missed.">                    if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);</span>
@@ -383,7 +383,7 @@ import java.util.function.Consumer;
                         try {
 <span class="fc" id="L384">                            action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs));</span>
 <span class="nc" id="L385">                        } catch (Exception e) {</span>
-<span class="nc" id="L386">                            log.error(&quot;Error while executing action on text replace!&quot;, e);</span>
+<span class="nc" id="L386">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on text replace!&quot;, e);</span>
 <span class="fc" id="L387">                        }</span>
 <span class="fc" id="L388">                    });</span>
 <span class="pc bpc" id="L389" title="1 of 2 branches missed.">                    if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);</span>

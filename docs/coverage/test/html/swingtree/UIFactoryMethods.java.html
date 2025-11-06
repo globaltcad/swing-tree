@@ -222,16 +222,16 @@ import java.util.function.Supplier;
 <span class="fc" id="L222">        }</span>
 <span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if ( font == null ) {</span>
 <span class="nc bnc" id="L224" title="All 2 branches missed.">            if ( potentialProblem1 != null )</span>
-<span class="nc" id="L225">                log.error(&quot;Could not parse font string '&quot; + fontString + &quot;' using 'Font.decode(String)'.&quot;, potentialProblem1);</span>
+<span class="nc" id="L225">                log.error(SwingTree.get().logMarker(), &quot;Could not parse font string '&quot; + fontString + &quot;' using 'Font.decode(String)'.&quot;, potentialProblem1);</span>
 <span class="nc bnc" id="L226" title="All 2 branches missed.">            if ( potentialProblem2 != null )</span>
-<span class="nc" id="L227">                log.error(&quot;Could not parse font string '&quot; + fontString + &quot;' from 'System.getProperty(String)'.&quot;, potentialProblem2);</span>
+<span class="nc" id="L227">                log.error(SwingTree.get().logMarker(), &quot;Could not parse font string '&quot; + fontString + &quot;' from 'System.getProperty(String)'.&quot;, potentialProblem2);</span>
 
-<span class="nc" id="L229">            log.error(&quot;Could not parse font string '&quot; + fontString + &quot;' using 'Font.decode(String)' or 'System.getProperty(String)'.&quot;, new Throwable());</span>
+<span class="nc" id="L229">            log.error(SwingTree.get().logMarker(), &quot;Could not parse font string '&quot; + fontString + &quot;' using 'Font.decode(String)' or 'System.getProperty(String)'.&quot;, new Throwable());</span>
 
             try {
 <span class="nc" id="L232">                return UI.Font.of(fontString, UI.FontStyle.PLAIN, UI.scale(12));</span>
 <span class="nc" id="L233">            } catch (Exception e) {</span>
-<span class="nc" id="L234">                log.error(&quot;Could not create font with name '&quot; + fontString + &quot;' and size 12.&quot;, e);</span>
+<span class="nc" id="L234">                log.error(SwingTree.get().logMarker(), &quot;Could not create font with name '&quot; + fontString + &quot;' and size 12.&quot;, e);</span>
 <span class="nc" id="L235">                return UI.Font.of(Font.DIALOG, UI.FontStyle.PLAIN, UI.scale(12));</span>
             }
         }
@@ -5598,7 +5598,7 @@ import java.util.function.Supplier;
         try {
 <span class="fc" id="L5599">            modifiedBuilder = tableModelBuildable.configure(builder);</span>
 <span class="nc" id="L5600">        } catch (Exception e) {</span>
-<span class="nc" id="L5601">            log.error(&quot;Failed to configure table model!&quot;, e);</span>
+<span class="nc" id="L5601">            log.error(SwingTree.get().logMarker(), &quot;Failed to configure table model!&quot;, e);</span>
 <span class="nc" id="L5602">            return table();</span>
 <span class="fc" id="L5603">        }</span>
 <span class="fc" id="L5604">        return table().withModel(modifiedBuilder);</span>
@@ -5637,7 +5637,7 @@ import java.util.function.Supplier;
         try {
 <span class="nc" id="L5638">            modifiedBuilder = tableModelBuildable.configure(builder);</span>
 <span class="nc" id="L5639">        } catch (Exception e) {</span>
-<span class="nc" id="L5640">            log.error(&quot;Failed to configure table model!&quot;, e);</span>
+<span class="nc" id="L5640">            log.error(SwingTree.get().logMarker(), &quot;Failed to configure table model!&quot;, e);</span>
 <span class="nc" id="L5641">            return table();</span>
 <span class="nc" id="L5642">        }</span>
 <span class="nc" id="L5643">        return table().withModel(modifiedBuilder.build());</span>
@@ -6282,7 +6282,7 @@ import java.util.function.Supplier;
             try {
 <span class="nc" id="L6283">                return uiSupplier.apply(frame);</span>
 <span class="nc" id="L6284">            } catch (Exception e) {</span>
-<span class="nc" id="L6285">                log.error(&quot;Error trying to create a UI component for a new JFrame.&quot;, e);</span>
+<span class="nc" id="L6285">                log.error(SwingTree.get().logMarker(), &quot;Error trying to create a UI component for a new JFrame.&quot;, e);</span>
 <span class="nc" id="L6286">                return panel(&quot;fill&quot;)</span>
 <span class="nc" id="L6287">                        .add(&quot;grow&quot;, label(&quot;Error: &quot; + e.getMessage()) )</span>
 <span class="nc" id="L6288">                        .get(JPanel.class);</span>
@@ -6414,7 +6414,7 @@ import java.util.function.Supplier;
                 try {
 <span class="nc" id="L6415">                    c = UI.runAndGet(() -&gt; uiSupplier.apply(frame));</span>
 <span class="nc" id="L6416">                } catch (Exception e) {</span>
-<span class="nc" id="L6417">                    log.error(&quot;Error trying to create UI component for display in new JFrame, using supplier function '{}'.&quot;, uiSupplier, e);</span>
+<span class="nc" id="L6417">                    log.error(SwingTree.get().logMarker(), &quot;Error trying to create UI component for display in new JFrame, using supplier function '{}'.&quot;, uiSupplier, e);</span>
 <span class="nc" id="L6418">                }</span>
             }
             else
@@ -6643,7 +6643,7 @@ import java.util.function.Supplier;
         try {
 <span class="fc" id="L6644">            icon = _loadIcon(declaration);</span>
 <span class="nc" id="L6645">        } catch (Exception e) {</span>
-<span class="nc" id="L6646">            log.error(&quot;Failed to load icon from declaration: &quot; + declaration, e);</span>
+<span class="nc" id="L6646">            log.error(SwingTree.get().logMarker(), &quot;Failed to load icon from declaration: &quot; + declaration, e);</span>
 <span class="fc" id="L6647">        }</span>
 <span class="fc" id="L6648">        return icon;</span>
     }
@@ -6686,7 +6686,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L6686">                SVGLoader loader = new SVGLoader();</span>
 <span class="fc" id="L6687">                tempSVGDocument = Objects.requireNonNull(loader.load(url));</span>
 <span class="fc" id="L6688">            } catch (Exception e) {</span>
-<span class="fc" id="L6689">                log.error(&quot;Failed to load SVG document from URL: &quot; + url, e);</span>
+<span class="fc" id="L6689">                log.error(SwingTree.get().logMarker(), &quot;Failed to load SVG document from URL: &quot; + url, e);</span>
 <span class="fc" id="L6690">                return null;</span>
 <span class="fc" id="L6691">            }</span>
 <span class="fc" id="L6692">            return new SvgIcon(tempSVGDocument).withIconSize(declaration.size());</span>

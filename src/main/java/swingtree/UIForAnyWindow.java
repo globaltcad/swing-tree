@@ -79,7 +79,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 					else if ( thisWindow instanceof JDialog )
 						((JDialog)thisWindow).setDefaultCloseOperation(onClose.forSwing());
 					else
-						log.warn("Cannot set close operation on window of type: {}", thisWindow.getClass().getName());
+						log.warn(SwingTree.get().logMarker(), "Cannot set close operation on window of type: {}", thisWindow.getClass().getName());
 		       })
 			   ._this();
 	}
@@ -119,7 +119,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
                             try {
                                 onKeyPressed.accept(_createDelegate(thisWindow, null));
                             } catch (Exception ex) {
-                                log.error("Error occurred while processing key press event.", ex);
+                                log.error(SwingTree.get().logMarker(), "Error occurred while processing key press event.", ex);
                             }
                         });
 					}, thisWindow );
@@ -143,7 +143,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onFocus.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing focus gain event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing focus gain event.", ex);
 								}
 							});
 						}
@@ -168,7 +168,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onFocus.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing focus loss event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing focus loss event.", ex);
 								}
 							});
 						}
@@ -197,7 +197,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onClose.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window closing event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window closing event.", ex);
 								}
 							});
 						}
@@ -225,7 +225,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onClose.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window closed event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window closed event.", ex);
 								}
 							});
 						}
@@ -253,7 +253,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onOpen.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window opened event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window opened event.", ex);
 								}
 							});
 						}
@@ -284,7 +284,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onIconify.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window iconified event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window iconified event.", ex);
 								}
 							});
 						}
@@ -311,7 +311,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onDeiconify.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window deiconified event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window deiconified event.", ex);
 								}
 							});
 						}
@@ -344,7 +344,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onActivate.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window activated event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window activated event.", ex);
 								}
 							});
 						}
@@ -377,7 +377,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onDeactivate.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window deactivated event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window deactivated event.", ex);
 								}
 							});
 						}
@@ -405,7 +405,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onStateChanged.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing window state changed event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing window state changed event.", ex);
 								}
 							});
 						}
@@ -434,7 +434,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onFocusGained.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing focus gain event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing focus gain event.", ex);
 								}
 							});
 						}
@@ -465,7 +465,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 								try {
 									onFocusLost.accept(_createDelegate(thisWindow, e));
 								} catch (Exception ex) {
-									log.error("Error occurred while processing focus loss event.", ex);
+									log.error(SwingTree.get().logMarker(), "Error occurred while processing focus loss event.", ex);
 								}
 							});
 						}

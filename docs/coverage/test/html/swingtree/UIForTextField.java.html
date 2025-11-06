@@ -60,7 +60,7 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
                            try {
 <span class="fc" id="L61">                               action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L62">                           } catch (Exception ex) {</span>
-<span class="nc" id="L63">                               log.error(&quot;An error occurred while executing on enter action.&quot;, ex);</span>
+<span class="nc" id="L63">                               log.error(SwingTree.get().logMarker(), &quot;An error occurred while executing on enter action.&quot;, ex);</span>
 <span class="fc" id="L64">                           }</span>
 <span class="fc" id="L65">                       })</span>
                    );

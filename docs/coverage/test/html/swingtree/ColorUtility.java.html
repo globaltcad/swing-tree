@@ -149,13 +149,13 @@ import java.util.Map;
 <span class="fc" id="L149">            int start = colorString.indexOf('(');</span>
 <span class="fc" id="L150">            int end = colorString.indexOf(')');</span>
 <span class="pc bpc" id="L151" title="3 of 6 branches missed.">            if (start &lt; 0 || end &lt; 0 || end &lt; start) {</span>
-<span class="nc" id="L152">                log.error(&quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
+<span class="nc" id="L152">                log.error(SwingTree.get().logMarker(), &quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
 <span class="nc" id="L153">                return UI.Color.UNDEFINED;</span>
             }
 
 <span class="fc" id="L156">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;, -1);</span>
 <span class="pc bpc" id="L157" title="2 of 4 branches missed.">            if (parts.length &lt; 3 || parts.length &gt; 4) {</span>
-<span class="nc" id="L158">                log.error(&quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
+<span class="nc" id="L158">                log.error(SwingTree.get().logMarker(), &quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
 <span class="nc" id="L159">                return UI.Color.UNDEFINED;</span>
             }
 
@@ -170,7 +170,7 @@ import java.util.Map;
 <span class="fc" id="L170">                    part = part.substring(0, part.length() - 1);</span>
 <span class="fc" id="L171">                    values[i] = Integer.parseInt(part);</span>
 <span class="pc bpc" id="L172" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 100) {</span>
-<span class="nc" id="L173">                        log.error(&quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
+<span class="nc" id="L173">                        log.error(SwingTree.get().logMarker(), &quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
 <span class="nc" id="L174">                        return UI.Color.UNDEFINED;</span>
                     }
 <span class="fc" id="L176">                    values[i] = (int) Math.ceil(values[i] * 2.55);</span>
@@ -191,13 +191,13 @@ import java.util.Map;
 <span class="fc" id="L191">            int start = colorString.indexOf('(');</span>
 <span class="fc" id="L192">            int end = colorString.indexOf(')');</span>
 <span class="pc bpc" id="L193" title="3 of 6 branches missed.">            if (start &lt; 0 || end &lt; 0 || end &lt; start) {</span>
-<span class="nc" id="L194">                log.error(&quot;Invalid hsb() or hsba() color: &quot; + colorString, new Throwable());</span>
+<span class="nc" id="L194">                log.error(SwingTree.get().logMarker(), &quot;Invalid hsb() or hsba() color: &quot; + colorString, new Throwable());</span>
 <span class="nc" id="L195">                return UI.Color.UNDEFINED;</span>
             }
 
 <span class="fc" id="L198">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;, -1);</span>
 <span class="pc bpc" id="L199" title="2 of 4 branches missed.">            if (parts.length &lt; 3 || parts.length &gt; 4) {</span>
-<span class="nc" id="L200">                log.error(&quot;Invalid hsb() or hsba() color: &quot; + colorString, new Throwable());</span>
+<span class="nc" id="L200">                log.error(SwingTree.get().logMarker(), &quot;Invalid hsb() or hsba() color: &quot; + colorString, new Throwable());</span>
 <span class="nc" id="L201">                return UI.Color.UNDEFINED;</span>
             }
 

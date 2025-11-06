@@ -109,7 +109,7 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 				So we need to protect the GUI's control flow from any possible exceptions.
 			 */
 <span class="nc" id="L111">		} catch (Exception e) {</span>
-<span class="nc" id="L112">			log.error(&quot;Failed to fetch selected combo box item from bound property '{}', due to exception.&quot;, _selectedItem, e);</span>
+<span class="nc" id="L112">			log.error(SwingTree.get().logMarker(), &quot;Failed to fetch selected combo box item from bound property '{}', due to exception.&quot;, _selectedItem, e);</span>
 		}
 <span class="nc" id="L114">		return null;</span>
 	}
@@ -127,7 +127,7 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 <span class="fc" id="L127">					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())</span>
 				);
 <span class="fc" id="L129">		} catch ( Exception e ) {</span>
-<span class="fc" id="L130">			log.error(&quot;An exception occurred while firing combo box model listeners!&quot;, e);</span>
+<span class="fc" id="L130">			log.error(SwingTree.get().logMarker(), &quot;An exception occurred while firing combo box model listeners!&quot;, e);</span>
 <span class="fc" id="L131">		}</span>
 <span class="fc" id="L132">    }</span>
 
@@ -137,7 +137,7 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 		try {
 <span class="fc" id="L138">			task.run();</span>
 <span class="nc" id="L139">		} catch ( Exception e ) {</span>
-<span class="nc" id="L140">			log.error(&quot;An exception occurred while running a combo box model task!&quot;, e);</span>
+<span class="nc" id="L140">			log.error(SwingTree.get().logMarker(), &quot;An exception occurred while running a combo box model task!&quot;, e);</span>
 <span class="fc" id="L141">		}</span>
 <span class="fc bfc" id="L142" title="All 2 branches covered.">		if ( !alreadyWithinQuietTask )</span>
 <span class="fc" id="L143">			_acceptsEditorChanges = true;</span>
@@ -235,31 +235,31 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 			try {
 <span class="nc" id="L236">				return type.cast(Enum.valueOf(enumType, name));</span>
 <span class="nc" id="L237">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L238">				log.debug(&quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L238">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
 <span class="nc" id="L240">			name = o.toUpperCase(Locale.ENGLISH);</span>
 			try {
 <span class="nc" id="L242">				return type.cast(Enum.valueOf(enumType, name));</span>
 <span class="nc" id="L243">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L244">				log.debug(&quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L244">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
 <span class="nc" id="L246">			name = o.toLowerCase(Locale.ENGLISH);</span>
 			try {
 <span class="nc" id="L248">				return type.cast(Enum.valueOf(enumType, name));</span>
 <span class="nc" id="L249">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L250">				log.debug(&quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L250">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
 <span class="nc" id="L252">			name = name.toUpperCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');</span>
 			try {
 <span class="nc" id="L254">				return type.cast(Enum.valueOf(enumType, name));</span>
 <span class="nc" id="L255">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L256">				log.debug(&quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L256">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
 <span class="nc" id="L258">			name = name.toLowerCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');</span>
 			try {
 <span class="nc" id="L260">				return type.cast(Enum.valueOf(enumType, name));</span>
 <span class="nc" id="L261">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L262">				log.debug(&quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L262">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
 			// We failed to parse the enum... the input is invalid!
 			// So we cannot update the model, and simply return the old value:

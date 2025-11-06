@@ -123,7 +123,7 @@ public final class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIFo
         try {
 <span class="nc" id="L124">            builder = renderBuilder.configure(builder);</span>
 <span class="nc" id="L125">        } catch (Exception e) {</span>
-<span class="nc" id="L126">            log.error(&quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L126">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
 <span class="nc" id="L127">            return this;</span>
 <span class="nc" id="L128">        }</span>
 <span class="nc" id="L129">        Objects.requireNonNull(builder);</span>

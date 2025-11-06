@@ -115,7 +115,7 @@ final class FlipFlopStyler&lt;C extends JComponent&gt;
 <span class="pc bpc" id="L115" title="1 of 2 branches missed.">                if ( _animation != null )</span>
 <span class="fc" id="L116">                    _animation.run(status);</span>
 <span class="nc" id="L117">            } catch ( Exception e ) {</span>
-<span class="nc" id="L118">                log.error(&quot;Error while running animation.&quot;, e);</span>
+<span class="nc" id="L118">                log.error(SwingTree.get().logMarker(), &quot;Error while running animation.&quot;, e);</span>
 <span class="fc" id="L119">            }</span>
 <span class="fc" id="L120">        }</span>
 
@@ -125,7 +125,7 @@ final class FlipFlopStyler&lt;C extends JComponent&gt;
 <span class="pc bpc" id="L125" title="1 of 2 branches missed.">                if (_animation != null)</span>
 <span class="fc" id="L126">                    _animation.finish(status);</span>
 <span class="nc" id="L127">            } catch (Exception e) {</span>
-<span class="nc" id="L128">                log.error(&quot;Error while finishing animation.&quot;, e);</span>
+<span class="nc" id="L128">                log.error(SwingTree.get().logMarker(), &quot;Error while finishing animation.&quot;, e);</span>
             } finally {
 <span class="fc" id="L130">                dispose();</span>
             }

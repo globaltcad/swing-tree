@@ -72,7 +72,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
                         try {
 <span class="nc" id="L73">                            action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
 <span class="nc" id="L74">                        } catch (Exception ex) {</span>
-<span class="nc" id="L75">                            log.error(&quot;Error while executing action on popup open!&quot;, ex);</span>
+<span class="nc" id="L75">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup open!&quot;, ex);</span>
 <span class="nc" id="L76">                        }</span>
 <span class="nc" id="L77">                    }));</span>
 <span class="fc" id="L78">                })</span>
@@ -108,7 +108,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
                             try {
 <span class="nc" id="L109">                                action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
 <span class="nc" id="L110">                            } catch (Exception ex) {</span>
-<span class="nc" id="L111">                                log.error(&quot;Error while executing action on popup close!&quot;, ex);</span>
+<span class="nc" id="L111">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup close!&quot;, ex);</span>
 <span class="nc" id="L112">                            }</span>
 <span class="nc" id="L113">                        })</span>
                     );
@@ -145,7 +145,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
                             try {
 <span class="nc" id="L146">                                action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
 <span class="nc" id="L147">                            } catch (Exception ex) {</span>
-<span class="nc" id="L148">                                log.error(&quot;Error while executing action on popup cancel!&quot;, ex);</span>
+<span class="nc" id="L148">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup cancel!&quot;, ex);</span>
 <span class="nc" id="L149">                            }</span>
 <span class="nc" id="L150">                        })</span>
                     );
@@ -185,7 +185,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
                            try {
 <span class="fc" id="L186">                               action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L187">                           } catch (Exception ex) {</span>
-<span class="nc" id="L188">                               log.error(&quot;Error while executing action on selection!&quot;, ex);</span>
+<span class="nc" id="L188">                               log.error(SwingTree.get().logMarker(), &quot;Error while executing action on selection!&quot;, ex);</span>
 <span class="fc" id="L189">                           }</span>
 <span class="fc" id="L190">                       })</span>
                    );
@@ -264,7 +264,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
                        try {
 <span class="nc" id="L265">                           action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
 <span class="nc" id="L266">                       } catch (Exception ex) {</span>
-<span class="nc" id="L267">                           log.error(&quot;Error while executing action on enter!&quot;, ex);</span>
+<span class="nc" id="L267">                           log.error(SwingTree.get().logMarker(), &quot;Error while executing action on enter!&quot;, ex);</span>
 <span class="nc" id="L268">                       }</span>
 <span class="nc" id="L269">                   }));</span>
 <span class="nc" id="L270">               })</span>
@@ -363,7 +363,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
 <span class="pc bpc" id="L363" title="1 of 2 branches missed.">                                toolTip = result == null ? null : result.toString();</span>
 <span class="pc bpc" id="L364" title="2 of 4 branches missed.">                                toolTip = toolTip == null || &quot;&quot;.equals(toolTip) ? null : toolTip;</span>
 <span class="nc" id="L365">                            } catch (Exception ex) {</span>
-<span class="nc" id="L366">                                log.error(&quot;Error while fetching tooltip for cell '{}'.&quot;, it, ex);</span>
+<span class="nc" id="L366">                                log.error(SwingTree.get().logMarker(), &quot;Error while fetching tooltip for cell '{}'.&quot;, it, ex);</span>
 <span class="fc" id="L367">                            }</span>
 <span class="pc bpc" id="L368" title="1 of 2 branches missed.">                            if ( !Objects.equals(toolTip, jcomp.getToolTipText()) ) {</span>
 <span class="fc" id="L369">                                jcomp.setToolTipText(toolTip);</span>
@@ -416,7 +416,7 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
         try {
 <span class="fc" id="L417">            render = renderBuilder.configure(render);</span>
 <span class="nc" id="L418">        } catch (Exception e) {</span>
-<span class="nc" id="L419">            log.error(&quot;Error while building renderer.&quot;, e);</span>
+<span class="nc" id="L419">            log.error(SwingTree.get().logMarker(), &quot;Error while building renderer.&quot;, e);</span>
 <span class="nc" id="L420">            return this;</span>
 <span class="fc" id="L421">        }</span>
 <span class="fc" id="L422">        Objects.requireNonNull(render);</span>

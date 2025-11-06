@@ -241,7 +241,7 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
                             try {
 <span class="nc" id="L242">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L243">                            } catch (Exception ex) {</span>
-<span class="nc" id="L244">                                log.error(&quot;Error occurred while processing list selection event.&quot;, ex);</span>
+<span class="nc" id="L244">                                log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing list selection event.&quot;, ex);</span>
 <span class="nc" id="L245">                            }</span>
 <span class="nc" id="L246">                        })</span>
                     );
@@ -313,7 +313,7 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
         try {
 <span class="fc" id="L314">            render = renderBuilder.configure(render);</span>
 <span class="nc" id="L315">        } catch (Exception e) {</span>
-<span class="nc" id="L316">            log.error(&quot;Error while building renderer.&quot;, e);</span>
+<span class="nc" id="L316">            log.error(SwingTree.get().logMarker(), &quot;Error while building renderer.&quot;, e);</span>
 <span class="nc" id="L317">            return this;</span>
 <span class="fc" id="L318">        }</span>
 <span class="fc" id="L319">        Objects.requireNonNull(render);</span>

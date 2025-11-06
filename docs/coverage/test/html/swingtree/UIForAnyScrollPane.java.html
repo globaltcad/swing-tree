@@ -380,7 +380,7 @@ import java.util.Objects;
 <span class="pc bpc" id="L380" title="1 of 2 branches missed.">                if ( layout != null)</span>
 <span class="fc" id="L381">                    prefChildSize = layout.preferredLayoutSize(_child);</span>
 <span class="nc" id="L382">            } catch (Exception e) {</span>
-<span class="nc" id="L383">                log.warn(&quot;Failed to compute preferred size from the layout manager of the child component.&quot;, e);</span>
+<span class="nc" id="L383">                log.warn(SwingTree.get().logMarker(), &quot;Failed to compute preferred size from the layout manager of the child component.&quot;, e);</span>
 <span class="fc" id="L384">            }</span>
 <span class="pc bpc" id="L385" title="1 of 2 branches missed.">            if ( prefChildSize == null )</span>
 <span class="nc" id="L386">                prefChildSize = _child.getPreferredSize();</span>

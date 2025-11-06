@@ -180,7 +180,7 @@ import java.util.List;
                 try {
 <span class="fc" id="L181">                    listener.mouseEntered(mouseEvent);</span>
 <span class="nc" id="L182">                } catch (Exception e) {</span>
-<span class="nc" id="L183">                    log.error(&quot;Failed to process mouseEntered event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
+<span class="nc" id="L183">                    log.error(SwingTree.get().logMarker(), &quot;Failed to process mouseEntered event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
 <span class="fc" id="L184">                }</span>
 <span class="fc" id="L185">            }</span>
 <span class="fc" id="L186">        }</span>
@@ -209,7 +209,7 @@ import java.util.List;
                 try {
 <span class="nc" id="L210">                    listener.mouseExited(mouseEvent);</span>
 <span class="nc" id="L211">                } catch (Exception e) {</span>
-<span class="nc" id="L212">                    log.error(&quot;Failed to process mouseExited event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
+<span class="nc" id="L212">                    log.error(SwingTree.get().logMarker(), &quot;Failed to process mouseExited event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
 <span class="nc" id="L213">                }</span>
 <span class="nc" id="L214">            }</span>
 <span class="nc" id="L215">        }</span>

@@ -135,14 +135,14 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L135">                int horizontalBlockIncrement = _parent.getHorizontalScrollBar().getBlockIncrement();</span>
 <span class="fc" id="L136">                averageBlockIncrement = (verticalBlockIncrement + horizontalBlockIncrement) / 2;</span>
 <span class="nc" id="L137">            } catch ( Exception e ) {</span>
-<span class="nc" id="L138">                log.error(&quot;Error while calculating average block increment for scrollable component.&quot;, e);</span>
+<span class="nc" id="L138">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating average block increment for scrollable component.&quot;, e);</span>
 <span class="fc" id="L139">            }</span>
             try {
 <span class="fc" id="L141">                int verticalUnitIncrement   = _parent.getVerticalScrollBar().getUnitIncrement();</span>
 <span class="fc" id="L142">                int horizontalUnitIncrement = _parent.getHorizontalScrollBar().getUnitIncrement();</span>
 <span class="fc" id="L143">                averageUnitIncrement = (verticalUnitIncrement + horizontalUnitIncrement) / 2;</span>
 <span class="nc" id="L144">            } catch ( Exception e ) {</span>
-<span class="nc" id="L145">                log.error(&quot;Error while calculating average unit increment for scrollable component.&quot;, e);</span>
+<span class="nc" id="L145">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating average unit increment for scrollable component.&quot;, e);</span>
 <span class="fc" id="L146">            }</span>
 <span class="fc" id="L147">            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(</span>
                                                             _parent, _child,
@@ -153,7 +153,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
             try {
 <span class="fc" id="L154">                delegate = _configurator.configure(delegate);</span>
 <span class="nc" id="L155">            } catch ( Exception e ) {</span>
-<span class="nc" id="L156">                log.error(&quot;Error while configuring scrollable component.&quot;, e);</span>
+<span class="nc" id="L156">                log.error(SwingTree.get().logMarker(), &quot;Error while configuring scrollable component.&quot;, e);</span>
 <span class="fc" id="L157">            }</span>
 <span class="fc" id="L158">            return delegate;</span>
         }
@@ -164,7 +164,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
             try {
 <span class="fc" id="L165">                return delegate.preferredSize().toDimension();</span>
 <span class="nc" id="L166">            } catch ( Exception e ) {</span>
-<span class="nc" id="L167">                log.error(&quot;Error while calculating preferred size for scrollable component.&quot;, e);</span>
+<span class="nc" id="L167">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating preferred size for scrollable component.&quot;, e);</span>
 <span class="nc" id="L168">                return new Dimension(0, 0);</span>
             }
         }
@@ -179,7 +179,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="pc bpc" id="L179" title="1 of 2 branches missed.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
 <span class="fc" id="L180">                return delegate.unitIncrement(bounds, align, direction);</span>
 <span class="nc" id="L181">            } catch ( Exception e ) {</span>
-<span class="nc" id="L182">                log.error(&quot;Error while calculating unit increment for scrollable component.&quot;, e);</span>
+<span class="nc" id="L182">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating unit increment for scrollable component.&quot;, e);</span>
 <span class="nc" id="L183">                return 0;</span>
             }
         }
@@ -194,7 +194,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="pc bpc" id="L194" title="1 of 2 branches missed.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
 <span class="fc" id="L195">                return delegate.blockIncrement(bounds, align, direction);</span>
 <span class="nc" id="L196">            } catch ( Exception e ) {</span>
-<span class="nc" id="L197">                log.error(&quot;Error while calculating block increment for scrollable component.&quot;, e);</span>
+<span class="nc" id="L197">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating block increment for scrollable component.&quot;, e);</span>
 <span class="nc" id="L198">                return 0;</span>
             }
         }
@@ -205,7 +205,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L205">                ScrollableComponentDelegate delegate = _createNewScrollableConf();</span>
 <span class="fc" id="L206">                return delegate.fitWidth();</span>
 <span class="nc" id="L207">            } catch ( Exception e ) {</span>
-<span class="nc" id="L208">                log.error(&quot;Error while calculating fit width for scrollable component.&quot;, e);</span>
+<span class="nc" id="L208">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit width for scrollable component.&quot;, e);</span>
 <span class="nc" id="L209">                return false;</span>
             }
         }
@@ -216,7 +216,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L216">                ScrollableComponentDelegate delegate = _createNewScrollableConf();</span>
 <span class="fc" id="L217">                return delegate.fitHeight();</span>
 <span class="nc" id="L218">            } catch ( Exception e ) {</span>
-<span class="nc" id="L219">                log.error(&quot;Error while calculating fit height for scrollable component.&quot;, e);</span>
+<span class="nc" id="L219">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit height for scrollable component.&quot;, e);</span>
 <span class="nc" id="L220">                return false;</span>
             }
         }

@@ -3,6 +3,7 @@
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 import java.awt.Color;
@@ -75,15 +76,15 @@ import java.util.Optional;
 @SuppressWarnings(&quot;ReferenceEquality&quot;)
 public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
 {
-<span class="fc" id="L78">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);</span>
-<span class="fc" id="L79">    static final UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;</span>
+<span class="fc" id="L79">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);</span>
+<span class="fc" id="L80">    static final UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;</span>
 
-<span class="fc" id="L81">    private static final ShadowConf _NONE = new ShadowConf(</span>
-<span class="fc" id="L82">                                                    Offset.none(),0, 0,</span>
+<span class="fc" id="L82">    private static final ShadowConf _NONE = new ShadowConf(</span>
+<span class="fc" id="L83">                                                    Offset.none(),0, 0,</span>
                                                     null, true
                                                 );
 
-<span class="fc" id="L86">    public static ShadowConf none() { return _NONE; }</span>
+<span class="fc" id="L87">    public static ShadowConf none() { return _NONE; }</span>
     
     static ShadowConf of(
         Offset          offset,
@@ -92,16 +93,16 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
         @Nullable Color shadowColor,
         boolean         isOutset
     ) {
-<span class="fc bfc" id="L95" title="All 10 branches covered.">        if ( </span>
+<span class="fc bfc" id="L96" title="All 10 branches covered.">        if ( </span>
             offset == _NONE._offset &amp;&amp;
             shadowBlurRadius == _NONE._blurRadius &amp;&amp;
             shadowSpreadRadius == _NONE._spreadRadius &amp;&amp;
             shadowColor == _NONE._color &amp;&amp;
             isOutset == _NONE._isOutset
         )
-<span class="fc" id="L102">            return _NONE;</span>
+<span class="fc" id="L103">            return _NONE;</span>
         else
-<span class="fc" id="L104">            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);</span>
+<span class="fc" id="L105">            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);</span>
     }
 
     private final Offset          _offset;
@@ -117,27 +118,27 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
         float           shadowSpreadRadius,
         @Nullable Color shadowColor,
         boolean         isOutset
-<span class="fc" id="L120">    ) {</span>
-<span class="fc" id="L121">        _offset           = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L122">        _blurRadius       = shadowBlurRadius;</span>
-<span class="fc" id="L123">        _spreadRadius     = shadowSpreadRadius;</span>
-<span class="fc" id="L124">        _color            = shadowColor;</span>
-<span class="fc" id="L125">        _isOutset         = isOutset;</span>
-<span class="fc" id="L126">    }</span>
+<span class="fc" id="L121">    ) {</span>
+<span class="fc" id="L122">        _offset           = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L123">        _blurRadius       = shadowBlurRadius;</span>
+<span class="fc" id="L124">        _spreadRadius     = shadowSpreadRadius;</span>
+<span class="fc" id="L125">        _color            = shadowColor;</span>
+<span class="fc" id="L126">        _isOutset         = isOutset;</span>
+<span class="fc" id="L127">    }</span>
 
-<span class="fc" id="L128">    float horizontalOffset() { return _offset.x(); }</span>
+<span class="fc" id="L129">    float horizontalOffset() { return _offset.x(); }</span>
 
-<span class="fc" id="L130">    float verticalOffset() { return _offset.y(); }</span>
+<span class="fc" id="L131">    float verticalOffset() { return _offset.y(); }</span>
 
-<span class="fc" id="L132">    float blurRadius() { return _blurRadius; }</span>
+<span class="fc" id="L133">    float blurRadius() { return _blurRadius; }</span>
 
-<span class="fc" id="L134">    public float spreadRadius() { return _spreadRadius; }</span>
+<span class="fc" id="L135">    public float spreadRadius() { return _spreadRadius; }</span>
 
-<span class="fc" id="L136">    Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
+<span class="fc" id="L137">    Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
 
-<span class="fc" id="L138">    boolean isOutset() { return _isOutset; }</span>
+<span class="fc" id="L139">    boolean isOutset() { return _isOutset; }</span>
 
-<span class="fc bfc" id="L140" title="All 2 branches covered.">    boolean isInset() { return !_isOutset; }</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">    boolean isInset() { return !_isOutset; }</span>
 
     /**
      *  Use this to offset the shadow position along the X axis.
@@ -149,7 +150,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
      */
     public ShadowConf horizontalOffset( double horizontalShadowOffset ) {
-<span class="fc" id="L152">        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L153">        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -161,7 +162,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified vertical shadow offset.
      */
     public ShadowConf verticalOffset( double verticalShadowOffset ) {
-<span class="fc" id="L164">        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L165">        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -177,7 +178,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double horizontalShadowOffset, double verticalShadowOffset ) {
-<span class="fc" id="L180">        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L181">        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -190,7 +191,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double shadowOffset ) {
-<span class="fc" id="L193">        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L194">        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -204,7 +205,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified blur radius.
      */
     public ShadowConf blurRadius( double shadowBlurRadius ) {
-<span class="fc" id="L207">        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L208">        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -220,7 +221,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified spread radius.
      */
     public ShadowConf spreadRadius( double shadowSpreadRadius ) {
-<span class="fc" id="L223">        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L224">        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -229,12 +230,12 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( Color shadowColor ) {
-<span class="fc" id="L232">        Objects.requireNonNull(shadowColor, &quot;Use UI.Color.UNDEFINED to specify no color instead of null&quot;);</span>
-<span class="fc bfc" id="L233" title="All 2 branches covered.">        if ( shadowColor == UI.Color.UNDEFINED)</span>
-<span class="fc" id="L234">            shadowColor = null;</span>
-<span class="fc bfc" id="L235" title="All 2 branches covered.">        if ( Objects.equals(shadowColor, _color) )</span>
-<span class="fc" id="L236">            return this;</span>
-<span class="fc" id="L237">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);</span>
+<span class="fc" id="L233">        Objects.requireNonNull(shadowColor, &quot;Use UI.Color.UNDEFINED to specify no color instead of null&quot;);</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        if ( shadowColor == UI.Color.UNDEFINED)</span>
+<span class="fc" id="L235">            shadowColor = null;</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if ( Objects.equals(shadowColor, _color) )</span>
+<span class="fc" id="L237">            return this;</span>
+<span class="fc" id="L238">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);</span>
     }
 
     /**
@@ -256,15 +257,15 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( String shadowColor ) {
-<span class="fc" id="L259">        Objects.requireNonNull(shadowColor);</span>
+<span class="fc" id="L260">        Objects.requireNonNull(shadowColor);</span>
         Color newColor;
         try {
-<span class="fc" id="L262">            newColor = UI.color(shadowColor);</span>
-<span class="nc" id="L263">        } catch ( Exception e ) {</span>
-<span class="nc" id="L264">            log.error(&quot;Failed to parse color string: '{}'&quot;, shadowColor, e);</span>
-<span class="nc" id="L265">            return this; // We want to avoid side effects other than a wrong color</span>
-<span class="fc" id="L266">        }</span>
-<span class="fc" id="L267">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);</span>
+<span class="fc" id="L263">            newColor = UI.color(shadowColor);</span>
+<span class="nc" id="L264">        } catch ( Exception e ) {</span>
+<span class="nc" id="L265">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '{}'&quot;, shadowColor, e);</span>
+<span class="nc" id="L266">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="fc" id="L267">        }</span>
+<span class="fc" id="L268">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);</span>
     }
 
     /**
@@ -280,7 +281,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( double red, double green, double blue ) {
-<span class="nc" id="L283">        return color(red, green, blue, 1.0);</span>
+<span class="nc" id="L284">        return color(red, green, blue, 1.0);</span>
     }
 
     /**
@@ -297,7 +298,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( double red, double green, double blue, double alpha ) {
-<span class="fc" id="L300">        return color(new Color((float) red, (float) green, (float) blue, (float) alpha));</span>
+<span class="fc" id="L301">        return color(new Color((float) red, (float) green, (float) blue, (float) alpha));</span>
     }
 
     /**
@@ -315,7 +316,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified inset/outset state.
      */
     public ShadowConf isInset(boolean shadowInset ) {
-<span class="fc bfc" id="L318" title="All 2 branches covered.">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);</span>
     }
 
     /**
@@ -334,12 +335,12 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified outset/inset state.
      */
     public ShadowConf isOutset( boolean shadowOutset ) {
-<span class="fc" id="L337">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);</span>
+<span class="fc" id="L338">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);</span>
     }
 
     ShadowConf _scale( double scaleFactor ) {
-<span class="fc" id="L341">        return ShadowConf.of(</span>
-<span class="fc" id="L342">                            _offset.scale(scaleFactor),</span>
+<span class="fc" id="L342">        return ShadowConf.of(</span>
+<span class="fc" id="L343">                            _offset.scale(scaleFactor),</span>
                             (float) (_blurRadius * scaleFactor),
                             (float) (_spreadRadius * scaleFactor),
                             _color,
@@ -349,58 +350,58 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
 
     @Override
     public int hashCode() {
-<span class="fc" id="L352">        int hash = 7;</span>
-<span class="fc" id="L353">        hash = 31 * hash + _offset.hashCode();</span>
-<span class="fc" id="L354">        hash = 31 * hash + Float.hashCode(_blurRadius);</span>
-<span class="fc" id="L355">        hash = 31 * hash + Float.hashCode(_spreadRadius);</span>
-<span class="fc" id="L356">        hash = 31 * hash + Objects.hashCode(_color);</span>
-<span class="pc bpc" id="L357" title="1 of 2 branches missed.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
-<span class="fc" id="L358">        return hash;</span>
+<span class="fc" id="L353">        int hash = 7;</span>
+<span class="fc" id="L354">        hash = 31 * hash + _offset.hashCode();</span>
+<span class="fc" id="L355">        hash = 31 * hash + Float.hashCode(_blurRadius);</span>
+<span class="fc" id="L356">        hash = 31 * hash + Float.hashCode(_spreadRadius);</span>
+<span class="fc" id="L357">        hash = 31 * hash + Objects.hashCode(_color);</span>
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
+<span class="fc" id="L359">        return hash;</span>
     }
 
     @Override
     public boolean equals(Object obj) {
-<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L364" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L365" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L366">        ShadowConf rhs = (ShadowConf) obj;</span>
-<span class="fc bfc" id="L367" title="All 6 branches covered.">        return Objects.equals(_offset, rhs._offset)       &amp;&amp;</span>
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L365" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L367">        ShadowConf rhs = (ShadowConf) obj;</span>
+<span class="fc bfc" id="L368" title="All 6 branches covered.">        return Objects.equals(_offset, rhs._offset)       &amp;&amp;</span>
                _blurRadius       == rhs._blurRadius       &amp;&amp;
                _spreadRadius     == rhs._spreadRadius     &amp;&amp;
-<span class="fc bfc" id="L370" title="All 4 branches covered.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
+<span class="fc bfc" id="L371" title="All 4 branches covered.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
                _isOutset         == rhs._isOutset;
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L376" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L377">            return this.getClass().getSimpleName()+&quot;[NONE]&quot;;</span>
-<span class="fc" id="L378">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
-<span class="fc" id="L379">                    &quot;horizontalOffset=&quot; + _toString(_offset.x()  ) + &quot;, &quot; +</span>
-<span class="fc" id="L380">                    &quot;verticalOffset=&quot;   + _toString(_offset.y()  ) + &quot;, &quot; +</span>
-<span class="fc" id="L381">                    &quot;blurRadius=&quot;       + _toString(_blurRadius  ) + &quot;, &quot; +</span>
-<span class="fc" id="L382">                    &quot;spreadRadius=&quot;     + _toString(_spreadRadius) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L383" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtil.toString(_color) + &quot;, &quot; +</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L378">            return this.getClass().getSimpleName()+&quot;[NONE]&quot;;</span>
+<span class="fc" id="L379">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="fc" id="L380">                    &quot;horizontalOffset=&quot; + _toString(_offset.x()  ) + &quot;, &quot; +</span>
+<span class="fc" id="L381">                    &quot;verticalOffset=&quot;   + _toString(_offset.y()  ) + &quot;, &quot; +</span>
+<span class="fc" id="L382">                    &quot;blurRadius=&quot;       + _toString(_blurRadius  ) + &quot;, &quot; +</span>
+<span class="fc" id="L383">                    &quot;spreadRadius=&quot;     + _toString(_spreadRadius) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L384" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtil.toString(_color) + &quot;, &quot; +</span>
                     &quot;isInset=&quot;          + !_isOutset +
                 &quot;]&quot;;
     }
 
     private static String _toString( float value ) {
-<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
     public ShadowConf simplified() {
-<span class="fc bfc" id="L394" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L395">            return _NONE;</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L396">            return _NONE;</span>
 
-<span class="fc bfc" id="L397" title="All 4 branches covered.">        if ( _color == null || _color.getAlpha() == 0 )</span>
-<span class="fc" id="L398">            return _NONE;</span>
+<span class="fc bfc" id="L398" title="All 4 branches covered.">        if ( _color == null || _color.getAlpha() == 0 )</span>
+<span class="fc" id="L399">            return _NONE;</span>
 
-<span class="pc bpc" id="L400" title="1 of 2 branches missed.">        if ( _color == UI.Color.UNDEFINED)</span>
-<span class="nc" id="L401">            return _NONE;</span>
+<span class="pc bpc" id="L401" title="1 of 2 branches missed.">        if ( _color == UI.Color.UNDEFINED)</span>
+<span class="nc" id="L402">            return _NONE;</span>
 
-<span class="fc" id="L403">        return this;</span>
+<span class="fc" id="L404">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

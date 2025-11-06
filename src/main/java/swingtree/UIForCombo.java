@@ -72,7 +72,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                         try {
                             action.accept(new ComponentDelegate<>((C) thisComponent, e));
                         } catch (Exception ex) {
-                            log.error("Error while executing action on popup open!", ex);
+                            log.error(SwingTree.get().logMarker(), "Error while executing action on popup open!", ex);
                         }
                     }));
                 })
@@ -108,7 +108,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                             try {
                                 action.accept(new ComponentDelegate<>((C) thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup close!", ex);
+                                log.error(SwingTree.get().logMarker(), "Error while executing action on popup close!", ex);
                             }
                         })
                     );
@@ -145,7 +145,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                             try {
                                 action.accept(new ComponentDelegate<>((C) thisComponent, e));
                             } catch (Exception ex) {
-                                log.error("Error while executing action on popup cancel!", ex);
+                                log.error(SwingTree.get().logMarker(), "Error while executing action on popup cancel!", ex);
                             }
                         })
                     );
@@ -185,7 +185,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                            try {
                                action.accept(new ComponentDelegate<>(thisComponent, e));
                            } catch (Exception ex) {
-                               log.error("Error while executing action on selection!", ex);
+                               log.error(SwingTree.get().logMarker(), "Error while executing action on selection!", ex);
                            }
                        })
                    );
@@ -264,7 +264,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                        try {
                            action.accept(new ComponentDelegate<>((C) thisComponent, e));
                        } catch (Exception ex) {
-                           log.error("Error while executing action on enter!", ex);
+                           log.error(SwingTree.get().logMarker(), "Error while executing action on enter!", ex);
                        }
                    }));
                })
@@ -363,7 +363,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                                 toolTip = result == null ? null : result.toString();
                                 toolTip = toolTip == null || "".equals(toolTip) ? null : toolTip;
                             } catch (Exception ex) {
-                                log.error("Error while fetching tooltip for cell '{}'.", it, ex);
+                                log.error(SwingTree.get().logMarker(), "Error while fetching tooltip for cell '{}'.", it, ex);
                             }
                             if ( !Objects.equals(toolTip, jcomp.getToolTipText()) ) {
                                 jcomp.setToolTipText(toolTip);
@@ -416,7 +416,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {
-            log.error("Error while building renderer.", e);
+            log.error(SwingTree.get().logMarker(), "Error while building renderer.", e);
             return this;
         }
         Objects.requireNonNull(render);

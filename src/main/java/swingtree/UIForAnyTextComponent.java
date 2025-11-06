@@ -279,7 +279,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, e));
                                 } catch (Exception ex) {
-                                    log.error("Error while executing action on text component content change!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error while executing action on text component content change!", ex);
                                 }
                             });
                         }
@@ -288,7 +288,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, e));
                                 } catch (Exception ex) {
-                                    log.error("Error while executing action on text component content change!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error while executing action on text component content change!", ex);
                                 }
                             });
                         }
@@ -297,7 +297,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, e));
                                 } catch (Exception ex) {
-                                    log.error("Error while executing action on text component content change!", ex);
+                                    log.error(SwingTree.get().logMarker(), "Error while executing action on text component content change!", ex);
                                 }
                             });
                         }
@@ -320,7 +320,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                         try {
                             action.accept(new ComponentDelegate<>(thisComponent, e));
                         } catch (Exception ex) {
-                            log.error("Error while executing action on text change!", ex);
+                            log.error(SwingTree.get().logMarker(), "Error while executing action on text change!", ex);
                         }
                     }));
                 })
@@ -355,7 +355,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                         try {
                             action.accept(new TextRemoveDelegate(thisComponent, fb, offset, length));
                         } catch (Exception e) {
-                            log.error("Error while executing action on text remove!", e);
+                            log.error(SwingTree.get().logMarker(), "Error while executing action on text remove!", e);
                         }
                     });
                     if ( state.removes.isEmpty() ) fb.remove(offset, length);
@@ -369,7 +369,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                         try {
                             action.accept(new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr));
                         } catch (Exception e) {
-                            log.error("Error while executing action on text insert!", e);
+                            log.error(SwingTree.get().logMarker(), "Error while executing action on text insert!", e);
                         }
                     });
                     if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);
@@ -383,7 +383,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                         try {
                             action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs));
                         } catch (Exception e) {
-                            log.error("Error while executing action on text replace!", e);
+                            log.error(SwingTree.get().logMarker(), "Error while executing action on text replace!", e);
                         }
                     });
                     if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);

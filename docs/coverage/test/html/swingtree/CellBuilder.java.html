@@ -305,7 +305,7 @@ public final class CellBuilder&lt;C extends JComponent, E&gt; {
 <span class="pc bpc" id="L305" title="1 of 2 branches missed.">                else if ( currentCell.view().isEmpty() )</span>
 <span class="nc bnc" id="L306" title="All 2 branches missed.">                    _basicEditor.setEntry(currentCell.entry().orElse(null), entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());</span>
 <span class="nc" id="L307">            } catch (Exception e) {</span>
-<span class="nc" id="L308">                log.error(&quot;Failed to populate cell editor!&quot;, e);</span>
+<span class="nc" id="L308">                log.error(SwingTree.get().logMarker(), &quot;Failed to populate cell editor!&quot;, e);</span>
 <span class="fc" id="L309">            }</span>
 <span class="fc" id="L310">        }</span>
 
@@ -340,7 +340,7 @@ public final class CellBuilder&lt;C extends JComponent, E&gt; {
                     }
                 }
 <span class="nc" id="L342">            } catch (Exception e) {</span>
-<span class="nc" id="L343">                log.error(&quot;Failed to populate cell editor!&quot;, e);</span>
+<span class="nc" id="L343">                log.error(SwingTree.get().logMarker(), &quot;Failed to populate cell editor!&quot;, e);</span>
 <span class="fc" id="L344">            }</span>
 <span class="fc" id="L345">        }</span>
 
@@ -365,7 +365,7 @@ public final class CellBuilder&lt;C extends JComponent, E&gt; {
 <span class="fc" id="L365">                        table.setRowHeight(row, minSize.height);</span>
                 }
 <span class="nc" id="L367">            } catch (Exception e) {</span>
-<span class="nc" id="L368">                log.error(&quot;Failed to fit cell size&quot;, e);</span>
+<span class="nc" id="L368">                log.error(SwingTree.get().logMarker(), &quot;Failed to fit cell size&quot;, e);</span>
 <span class="fc" id="L369">            }</span>
 <span class="fc" id="L370">            return view;</span>
         }
@@ -777,7 +777,7 @@ public final class CellBuilder&lt;C extends JComponent, E&gt; {
             try {
 <span class="fc" id="L778">                return renderer.apply(cell);</span>
 <span class="nc" id="L779">            } catch (Exception e) {</span>
-<span class="nc" id="L780">                log.error(&quot;Failed to convert cell to displayable String!&quot;, e);</span>
+<span class="nc" id="L780">                log.error(SwingTree.get().logMarker(), &quot;Failed to convert cell to displayable String!&quot;, e);</span>
 <span class="nc" id="L781">                return &quot;&quot;;</span>
             }
         };

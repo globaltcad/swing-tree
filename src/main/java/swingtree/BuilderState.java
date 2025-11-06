@@ -214,7 +214,7 @@ final class BuilderState<C extends java.awt.Component>
                     componentMutator.accept(_componentFetcher.get());
             } catch ( Exception e ) {
                 e.printStackTrace();
-                log.error("Exception while building component of type '{}'.", _componentType.getSimpleName(), e);
+                log.error(SwingTree.get().logMarker(), "Exception while building component of type '{}'.", _componentType.getSimpleName(), e);
                 /*
                     If individual steps in the builder chain throw exceptions,
                     we do not want the entire GUI declaration to fail

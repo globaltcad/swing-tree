@@ -3,6 +3,7 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -189,7 +190,7 @@ final class LayerCache
                 StyleUtil.transferConfigurations(g, g2);
             }
             catch ( Exception ignored ) {
-                log.debug("Error while transferring configurations to the cached image graphics context.");
+                log.debug(SwingTree.get().logMarker(), "Error while transferring configurations to the cached image graphics context.");
             }
             finally {
                 renderer.accept(_layerRenderData, g2);

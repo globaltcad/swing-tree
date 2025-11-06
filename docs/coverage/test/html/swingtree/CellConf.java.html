@@ -201,7 +201,7 @@ public final class CellConf&lt;C extends JComponent, V&gt;
         try {
 <span class="fc" id="L202">            return entry().map(Object::toString).orElse(&quot;&quot;);</span>
 <span class="nc" id="L203">        } catch (Exception e) {</span>
-<span class="nc" id="L204">            log.error(&quot;Failed to convert entry to string!&quot;, e);</span>
+<span class="nc" id="L204">            log.error(SwingTree.get().logMarker(), &quot;Failed to convert entry to string!&quot;, e);</span>
         }
 <span class="nc" id="L206">        return &quot;&quot;;</span>
     }
@@ -372,7 +372,7 @@ public final class CellConf&lt;C extends JComponent, V&gt;
         try {
 <span class="fc" id="L373">            newRenderer = configurator.configure(view());</span>
 <span class="nc" id="L374">        } catch (Exception e) {</span>
-<span class="nc" id="L375">            log.error(&quot;Failed to configure view!&quot;, e);</span>
+<span class="nc" id="L375">            log.error(SwingTree.get().logMarker(), &quot;Failed to configure view!&quot;, e);</span>
 <span class="fc" id="L376">        }</span>
 <span class="fc" id="L377">        return _withRenderer(newRenderer.orElseNullable(null));</span>
     }
@@ -492,7 +492,7 @@ public final class CellConf&lt;C extends JComponent, V&gt;
         try {
 <span class="nc" id="L493">            return this.view(this.defaultRenderSource.get());</span>
 <span class="nc" id="L494">        } catch (Exception e) {</span>
-<span class="nc" id="L495">            log.error(&quot;Failed to create default renderer!&quot;, e);</span>
+<span class="nc" id="L495">            log.error(SwingTree.get().logMarker(), &quot;Failed to create default renderer!&quot;, e);</span>
         }
 <span class="nc" id="L497">        return this;</span>
     }
@@ -616,7 +616,7 @@ public final class CellConf&lt;C extends JComponent, V&gt;
         try {
 <span class="nc" id="L617">            return presentationEntry(presenter.apply(entry));</span>
 <span class="nc" id="L618">        } catch (Exception e) {</span>
-<span class="nc" id="L619">            log.error(&quot;Failed to convert entry to presentation entry!&quot;, e);</span>
+<span class="nc" id="L619">            log.error(SwingTree.get().logMarker(), &quot;Failed to convert entry to presentation entry!&quot;, e);</span>
         }
 <span class="nc" id="L621">        return this;</span>
     }

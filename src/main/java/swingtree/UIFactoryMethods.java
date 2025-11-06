@@ -222,16 +222,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         }
         if ( font == null ) {
             if ( potentialProblem1 != null )
-                log.error("Could not parse font string '" + fontString + "' using 'Font.decode(String)'.", potentialProblem1);
+                log.error(SwingTree.get().logMarker(), "Could not parse font string '" + fontString + "' using 'Font.decode(String)'.", potentialProblem1);
             if ( potentialProblem2 != null )
-                log.error("Could not parse font string '" + fontString + "' from 'System.getProperty(String)'.", potentialProblem2);
+                log.error(SwingTree.get().logMarker(), "Could not parse font string '" + fontString + "' from 'System.getProperty(String)'.", potentialProblem2);
 
-            log.error("Could not parse font string '" + fontString + "' using 'Font.decode(String)' or 'System.getProperty(String)'.", new Throwable());
+            log.error(SwingTree.get().logMarker(), "Could not parse font string '" + fontString + "' using 'Font.decode(String)' or 'System.getProperty(String)'.", new Throwable());
 
             try {
                 return UI.Font.of(fontString, UI.FontStyle.PLAIN, UI.scale(12));
             } catch (Exception e) {
-                log.error("Could not create font with name '" + fontString + "' and size 12.", e);
+                log.error(SwingTree.get().logMarker(), "Could not create font with name '" + fontString + "' and size 12.", e);
                 return UI.Font.of(Font.DIALOG, UI.FontStyle.PLAIN, UI.scale(12));
             }
         }
@@ -5598,7 +5598,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         try {
             modifiedBuilder = tableModelBuildable.configure(builder);
         } catch (Exception e) {
-            log.error("Failed to configure table model!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure table model!", e);
             return table();
         }
         return table().withModel(modifiedBuilder);
@@ -5637,7 +5637,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         try {
             modifiedBuilder = tableModelBuildable.configure(builder);
         } catch (Exception e) {
-            log.error("Failed to configure table model!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to configure table model!", e);
             return table();
         }
         return table().withModel(modifiedBuilder.build());
@@ -6282,7 +6282,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             try {
                 return uiSupplier.apply(frame);
             } catch (Exception e) {
-                log.error("Error trying to create a UI component for a new JFrame.", e);
+                log.error(SwingTree.get().logMarker(), "Error trying to create a UI component for a new JFrame.", e);
                 return panel("fill")
                         .add("grow", label("Error: " + e.getMessage()) )
                         .get(JPanel.class);
@@ -6414,7 +6414,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 try {
                     c = UI.runAndGet(() -> uiSupplier.apply(frame));
                 } catch (Exception e) {
-                    log.error("Error trying to create UI component for display in new JFrame, using supplier function '{}'.", uiSupplier, e);
+                    log.error(SwingTree.get().logMarker(), "Error trying to create UI component for display in new JFrame, using supplier function '{}'.", uiSupplier, e);
                 }
             }
             else
@@ -6643,7 +6643,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         try {
             icon = _loadIcon(declaration);
         } catch (Exception e) {
-            log.error("Failed to load icon from declaration: " + declaration, e);
+            log.error(SwingTree.get().logMarker(), "Failed to load icon from declaration: " + declaration, e);
         }
         return icon;
     }
@@ -6686,7 +6686,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 SVGLoader loader = new SVGLoader();
                 tempSVGDocument = Objects.requireNonNull(loader.load(url));
             } catch (Exception e) {
-                log.error("Failed to load SVG document from URL: " + url, e);
+                log.error(SwingTree.get().logMarker(), "Failed to load SVG document from URL: " + url, e);
                 return null;
             }
             return new SvgIcon(tempSVGDocument).withIconSize(declaration.size());

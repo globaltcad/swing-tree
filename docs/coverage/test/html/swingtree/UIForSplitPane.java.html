@@ -210,9 +210,9 @@ public final class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAnySw
 <span class="fc" id="L210">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
                         @Override
                         public void componentResized( ComponentEvent e ) {
-<span class="nc" id="L213">                            _calculateDividerLocationFrom(thisComponent, percentage);</span>
-<span class="nc" id="L214">                            thisComponent.removeComponentListener(this);</span>
-<span class="nc" id="L215">                        }</span>
+<span class="fc" id="L213">                            _calculateDividerLocationFrom(thisComponent, percentage);</span>
+<span class="fc" id="L214">                            thisComponent.removeComponentListener(this);</span>
+<span class="fc" id="L215">                        }</span>
                     });
 <span class="fc" id="L217">                })</span>
 <span class="fc" id="L218">                ._this();</span>
@@ -303,8 +303,8 @@ public final class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAnySw
 <span class="fc" id="L303">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
                         @Override
                         public void componentResized( ComponentEvent e ) {
-<span class="nc" id="L306">                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
-<span class="nc" id="L307">                        }</span>
+<span class="fc" id="L306">                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
+<span class="fc" id="L307">                        }</span>
                     });
                     // We listen for slider movement as well, so that we can recalculate the divider location
 <span class="fc" id="L310">                    thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -&gt; {</span>

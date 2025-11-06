@@ -2,6 +2,7 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import org.slf4j.Marker;
 import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.api.IconDeclaration;
@@ -115,7 +116,7 @@ public final class SwingTree
             Objects.requireNonNull(config);
             return config;
         } catch (Exception ex) {
-            log.error("Error resolving SwingTree configuration", ex);
+            log.error(SwingTree.get().logMarker(), "Error resolving SwingTree configuration", ex);
             ex.printStackTrace();
             return SwingTreeInitConfig.standard();
         }
@@ -131,7 +132,7 @@ public final class SwingTree
                         _installFontInUIManager(new FontUIResource(font));
                 });
         } catch (Exception ex) {
-            log.error("Error installing font in UIManager", ex);
+            log.error(config.logMarker(), "Error installing font in UIManager", ex);
             ex.printStackTrace();
         }
     }
@@ -199,7 +200,7 @@ public final class SwingTree
      * @param scaleFactor The user scale factor.
      */
     public void setUiScaleFactor( float scaleFactor ) {
-        log.debug("Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
+        log.debug(SwingTree.get().logMarker(), "Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
         if ( UI.thisIsUIThread() )
             _uiScale.get().setUserScaleFactor(scaleFactor);
         else
@@ -343,7 +344,7 @@ public final class SwingTree
         try {
             _config = _config.eventProcessor(Objects.requireNonNull(eventProcessor));
         } catch (Exception ex) {
-            log.error("Error setting event processor", ex);
+            log.error(_config.logMarker(), "Error setting event processor", ex);
             ex.printStackTrace();
         }
 	}
@@ -371,7 +372,7 @@ public final class SwingTree
         try {
             _config = _config.styleSheet(Objects.requireNonNull(styleSheet));
         } catch ( Exception ex ) {
-            log.error("Error setting style sheet", ex);
+            log.error(_config.logMarker(), "Error setting style sheet", ex);
             ex.printStackTrace();
         }
 	}
@@ -425,6 +426,21 @@ public final class SwingTree
      */
     public String getSystemInfo() {
         return SystemInfo.getAsPrettyString();
+    }
+
+    /**
+     *  Exposes the library wide logging {@link Marker} used by SwingTree for all its logging.
+     *  You may use this marker to channel SwingTree logs to a separate log file
+     *  or to filter them in any other way you like.<br>
+     *  To configure the logging {@link Marker}, check out the
+     *  {@link SwingTree#initialiseUsing(SwingTreeConfigurator)} method,
+     *  where you may provide a custom {@link SwingTreeConfigurator} that sets the logging {@link Marker}
+     *  through the {@link SwingTreeInitConfig}.
+     *
+     * @return The logging {@link Marker} which is passed to methods of the SLF4J logger.
+     */
+    public Marker logMarker() {
+        return _config.logMarker();
     }
 
     /**
@@ -489,17 +505,17 @@ public final class SwingTree
                     Font uiScaleReferenceFont = config.defaultFont().orElse(null);
                     if ( uiScaleReferenceFont != null ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
-                        log.debug("Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, uiScaleReferenceFont);
+                        log.debug(config.logMarker(), "Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, uiScaleReferenceFont);
                     }
                 }
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
                     float defaultScale = this.scaleFactor.get();
-                    Font highDPIFont = _calculateDPIAwarePlatformFont();
+                    Font highDPIFont = _calculateDPIAwarePlatformFont(config.logMarker());
                     boolean updated = _initialize( highDPIFont );
                     if ( this.scaleFactor.isNot(defaultScale) ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
-                        log.debug("Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
+                        log.debug(config.logMarker(), "Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
                     }
                     if ( updated )
                         _setScalePropertyListeners();
@@ -508,13 +524,13 @@ public final class SwingTree
                     _initialize();
 
             } catch (Exception ex) {
-                log.error("Error initializing "+ UiScale.class.getSimpleName(), ex);
+                log.error(config.logMarker(), "Error initializing "+ UiScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
                 // the UI may not be scaled correctly. Please report this exception to the library author.
             }
         }
 
-        private Font _calculateDPIAwarePlatformFont()
+        private Font _calculateDPIAwarePlatformFont(Marker marker)
         {
             FontUIResource dpiAwareFont = null;
 
@@ -555,10 +571,10 @@ public final class SwingTree
 
             } else if( SystemInfo.isLinux ) {
                 try {
-                    Font font = LinuxFontPolicy.getFont();
+                    Font font = LinuxFontPolicy.getFont(marker);
                     dpiAwareFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
                 } catch (Exception e) {
-                    log.error("Failed to find linux font for scaling!", e);
+                    log.error(marker, "Failed to find linux font for scaling!", e);
                 }
             }
 
@@ -1046,8 +1062,8 @@ public final class SwingTree
 
     private static class LinuxFontPolicy
     {
-        static Font getFont() {
-            return SystemInfo.isKDE ? getKDEFont() : getGnomeFont();
+        static Font getFont(Marker marker) {
+            return SystemInfo.isKDE ? getKDEFont(marker) : getGnomeFont();
         }
 
         /**
@@ -1226,9 +1242,9 @@ public final class SwingTree
          * If user changes "display scale factor" (System Settings > Display and Monitors >
          * Displays > Scale Display), the forceFontDPI is also changed to reflect the scale factor.
          */
-        private static Font getKDEFont() {
-            List<String> kdeglobals = readConfig( "kdeglobals" );
-            List<String> kcmfonts   = readConfig( "kcmfonts" );
+        private static Font getKDEFont(Marker marker) {
+            List<String> kdeglobals = readConfig( "kdeglobals", marker );
+            List<String> kcmfonts   = readConfig( "kcmfonts", marker );
 
             String generalFont  = getConfigEntry( kdeglobals, "General", "font" );
             String forceFontDPI = getConfigEntry( kcmfonts, "General", "forceFontDPI" );
@@ -1247,7 +1263,7 @@ public final class SwingTree
                     if( "1".equals( strs.get( 5 ) ) )
                         style |= Font.ITALIC;
                 } catch ( RuntimeException ex ) {
-                    log.error("Failed to parse KDE system font from String '"+generalFont+"'.", ex);
+                    log.error(marker, "Failed to parse KDE system font from String '"+generalFont+"'.", ex);
                 }
             }
 
@@ -1261,7 +1277,7 @@ public final class SwingTree
                     if( dpi < 50 )
                         dpi = 50;
                 } catch( NumberFormatException ex ) {
-                    log.error("Failed to parse DPI scale from font size String '"+forceFontDPI+"'", ex);
+                    log.error(marker, "Failed to parse DPI scale from font size String '"+forceFontDPI+"'", ex);
                 }
             }
 
@@ -1275,7 +1291,7 @@ public final class SwingTree
             return createFont( family, style, size, dsize );
         }
 
-        private static List<String> readConfig( String filename ) {
+        private static List<String> readConfig( String filename, Marker marker ) {
             File userHome = new File( System.getProperty( "user.home" ) );
 
             // search for config file
@@ -1300,7 +1316,7 @@ public final class SwingTree
                 while( (line = reader.readLine()) != null )
                     lines.add( line );
             } catch( IOException ex ) {
-                log.error("Failed to read KDE font config files for determining DPI scale factor.", ex);
+                log.error(marker, "Failed to read KDE font config files for determining DPI scale factor.", ex);
             }
             return Collections.unmodifiableList(lines);
         }

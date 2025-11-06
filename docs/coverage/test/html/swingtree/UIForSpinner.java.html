@@ -165,7 +165,7 @@ public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&
                             try {
 <span class="nc" id="L166">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L167">                            } catch (Exception ex) {</span>
-<span class="nc" id="L168">                                log.error(&quot;Error while executing action on spinner change!&quot;, ex);</span>
+<span class="nc" id="L168">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on spinner change!&quot;, ex);</span>
 <span class="nc" id="L169">                            }</span>
 <span class="nc" id="L170">                        })</span>
                     )

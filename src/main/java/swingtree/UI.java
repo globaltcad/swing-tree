@@ -848,7 +848,7 @@ public final class UI extends UIFactoryMethods
             if ( laf.contains("Metal")   ) return LookAndFeel.METAL;
         }
         catch (Exception e) {
-            log.warn("Failed to determine current look and feel.", e);
+            log.warn(SwingTree.get().logMarker(), "Failed to determine current look and feel.", e);
         }
 
         return LookAndFeel.OTHER;
@@ -2847,7 +2847,7 @@ public final class UI extends UIFactoryMethods
             try {
                 return ColorUtility.parseColor(colorString);
             } catch ( Exception e ) {
-                log.error("Could not parse color '" + colorString + "'.", e);
+                log.error(SwingTree.get().logMarker(), "Could not parse color '" + colorString + "'.", e);
                 return Color.UNDEFINED;
             }
         }

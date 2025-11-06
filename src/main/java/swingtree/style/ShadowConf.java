@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 import java.awt.Color;
@@ -261,7 +262,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         try {
             newColor = UI.color(shadowColor);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", shadowColor, e);
+            log.error(SwingTree.get().logMarker(), "Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
         return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);

@@ -1,6 +1,7 @@
 package swingtree.threading;
 
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 final class AWTEventProcessor extends BasicSingleThreadedEventProcessor
@@ -12,13 +13,13 @@ final class AWTEventProcessor extends BasicSingleThreadedEventProcessor
             _checkIfThreadIsCorrect( expectedToBeInvokedFromUIThread );
         } catch (Exception e) {
             // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
-            log.error("The current thread is not the UI thread!", e);
+            log.error(SwingTree.get().logMarker(), "The current thread is not the UI thread!", e);
         }
         try {
             runnable.run();
         } catch (Exception e) {
             // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
-            log.error("An exception occurred while running a task in the UI thread!", e);
+            log.error(SwingTree.get().logMarker(), "An exception occurred while running a task in the UI thread!", e);
         }
     }
 

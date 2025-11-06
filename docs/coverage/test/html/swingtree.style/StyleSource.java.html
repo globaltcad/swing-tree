@@ -68,7 +68,7 @@ final class StyleSource&lt;C extends JComponent&gt;
     StyleConf gatherStyleFor(C owner )
     {
 <span class="fc" id="L70">        StyleConf styleConf = Optional.ofNullable(owner.getParent())</span>
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                              .map( p -&gt; p instanceof JComponent ? (JComponent) p : null )</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">                              .map( p -&gt; p instanceof JComponent ? (JComponent) p : null )</span>
 <span class="fc" id="L72">                              .map(ComponentExtension::from)</span>
 <span class="fc" id="L73">                              .map(ComponentExtension::getStyle)</span>
 <span class="fc" id="L74">                              .map(StyleConf::font)</span>
@@ -79,7 +79,7 @@ final class StyleSource&lt;C extends JComponent&gt;
         try {
 <span class="fc" id="L80">            styleConf = _styleSheet.applyTo( owner, styleConf );</span>
 <span class="nc" id="L81">        } catch (Exception e) {</span>
-<span class="nc" id="L82">            log.error(&quot;An exception occurred while applying the style sheet for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="nc" id="L82">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while applying the style sheet for component '&quot;+owner+&quot;'.&quot;, e);</span>
             /*
                  If any exceptions happen in a StyleSheet implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
@@ -92,7 +92,7 @@ final class StyleSource&lt;C extends JComponent&gt;
 <span class="fc" id="L92">            Objects.requireNonNull(updated);</span>
 <span class="fc" id="L93">            styleConf = updated.style();</span>
 <span class="nc" id="L94">        } catch (Exception e) {</span>
-<span class="nc" id="L95">            log.error(&quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="nc" id="L95">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
             /*
                  If any exceptions happen in a Styler implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
@@ -105,7 +105,7 @@ final class StyleSource&lt;C extends JComponent&gt;
             try {
 <span class="fc" id="L106">                styleConf = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
 <span class="nc" id="L107">            } catch ( Exception e ) {</span>
-<span class="nc" id="L108">                log.warn(&quot;An exception occurred while applying an animation styler!&quot;, e);</span>
+<span class="nc" id="L108">                log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while applying an animation styler!&quot;, e);</span>
                 /*
                      If any exceptions happen in a Styler implementation provided by a user,
                      then we don't want to prevent the other Stylers from doing their job,

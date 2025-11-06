@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
@@ -86,7 +88,8 @@ public final class SwingTreeInitConfig
                         SystemProperties.getFloat(SystemProperties.UI_SCALE,                 -1    ),
                         SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),
                         SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),
-                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    )
+                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    ),
+                        MarkerFactory.getMarker("")
                     );
                     /*
                         Note that we want the refresh rate to be as high as possible so that the animation
@@ -108,6 +111,7 @@ public final class SwingTreeInitConfig
     private final boolean          _uiScaleEnabled;
     private final boolean          _uiScaleAllowScaleDown;
     private final long             _defaultAnimationInterval;
+    private final Marker           _logMarker;
 
 
     private SwingTreeInitConfig(
@@ -118,7 +122,8 @@ public final class SwingTreeInitConfig
         float            uiScale,
         boolean          uiScaleEnabled,
         boolean          uiScaleAllowScaleDown,
-        long             defaultAnimationInterval
+        long             defaultAnimationInterval,
+        Marker           logMarker
     ) {
         _defaultFont              = defaultFont;
         _fontInstallation         = Objects.requireNonNull(fontInstallation);
@@ -128,6 +133,7 @@ public final class SwingTreeInitConfig
         _uiScaleEnabled           = uiScaleEnabled;
         _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;
         _defaultAnimationInterval = defaultAnimationInterval;
+        _logMarker                = logMarker;
     }
 
     /**
@@ -232,6 +238,16 @@ public final class SwingTreeInitConfig
     }
 
     /**
+     *  Returns the logging {@link Marker} used by SwingTree for all its logging.
+     *  You may use this marker to channel SwingTree logs to a separate log file
+     *  or to filter them in any other way you like.
+     * @return The logging {@link Marker} which is passed to methods of the SLF4J logger.
+     */
+    Marker logMarker() {
+        return _logMarker;
+    }
+
+    /**
      *  Used to configure the default font, which may be used by the {@link SwingTree}
      *  to derive the UI scaling factor and or to install the font in the {@link javax.swing.UIManager}
      *  depending on the {@link FontInstallation} mode (see {@link #defaultFont(Font, FontInstallation)}).
@@ -239,7 +255,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -259,7 +275,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -273,7 +289,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -284,7 +300,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -303,7 +319,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
      */
     public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -317,7 +333,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -331,7 +347,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown, _defaultAnimationInterval);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
     }
 
     /**
@@ -351,7 +367,21 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default animation interval.
      */
     public SwingTreeInitConfig defaultAnimationInterval( long newDefaultAnimationInterval ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, newDefaultAnimationInterval);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker);
+    }
+
+    /**
+     *  Allows you to configure the logging {@link Marker} used by SwingTree for all its logging.
+     *  This is typically passed to methods like {@code logger.debug(Marker, String)},
+     *  {@code logger.info(Marker, String)} and so on.<br>
+     *  You may use this marker to channel SwingTree logs to a separate log file
+     *  or to filter them in any other way you like.
+     *
+     * @param newLogMarker The new logging {@link Marker} which is passed to methods of the SLF4J logger.
+     * @return A new {@link SwingTreeInitConfig} instance with the new logging {@link Marker}.
+     */
+    public SwingTreeInitConfig logMarker( Marker newLogMarker ) {
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker);
     }
 
     /**

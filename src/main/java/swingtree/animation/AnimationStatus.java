@@ -1,6 +1,7 @@
 package swingtree.animation;
 
 import org.slf4j.Logger;
+import swingtree.SwingTree;
 
 import java.awt.event.ActionEvent;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +55,7 @@ public final class AnimationStatus implements Progress
                 break;
             default:
                 progress = howLongCurrentLoop / (double) duration;
-                log.warn("Unknown stride: {}", stride);
+                log.warn(SwingTree.get().logMarker(), "Unknown stride: {}", stride);
         }
         long steps = duration / interval;
         if ( steps > 0 )
@@ -118,15 +119,15 @@ public final class AnimationStatus implements Progress
             return this;
         }
         if ( from == to ) {
-            log.warn("Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
         }
         if ( from < 0 || from > 1 || to < 0 || to > 1 ) {
-            log.warn("Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
             from = Math.min(1, Math.max(0, from));
             to   = Math.min(1, Math.max(0, to));
         }
         if ( from > to ) {
-            log.warn("Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
             double tmp = from;
             from = to;
             to = tmp;
