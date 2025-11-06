@@ -1,0 +1,943 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentExtension.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ComponentExtension.java</span></div><h1>ComponentExtension.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import sprouts.From;
+import sprouts.Observable;
+import sprouts.Tuple;
+import sprouts.Viewable;
+import swingtree.DragAwayComponentConf;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.animation.AnimationStatus;
+import swingtree.api.Configurator;
+import swingtree.api.Painter;
+import swingtree.api.Styler;
+import swingtree.layout.Position;
+
+import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+/**
+ *  Is attached to UI components in the form of a client property.
+ *  It exists to give Swing-Tree components some custom style and animation capabilities.
+ *
+ * @param &lt;C&gt; The type of the component to which this extension is attached
+ *            as a client property (see {@link JComponent#putClientProperty(Object, Object)}).
+ */
+public final class ComponentExtension&lt;C extends JComponent&gt;
+{
+<span class="fc" id="L38">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);</span>
+
+<span class="fc" id="L40">    private static long _anonymousPainterCounter = 0;</span>
+
+    /**
+     * Returns the {@link ComponentExtension} associated with the given component.
+     * If the component does not have an extension, a new one is created and associated with the component.
+     *
+     * @param comp The component for which to get the extension.
+     * @return The extension associated with the component.
+     * @param &lt;C&gt; The type of the component.
+     */
+    public static &lt;C extends JComponent&gt; ComponentExtension&lt;C&gt; from( C comp ) {
+<span class="fc" id="L51">        ComponentExtension&lt;C&gt; ext = (ComponentExtension&lt;C&gt;) comp.getClientProperty( ComponentExtension.class );</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if ( ext == null ) {</span>
+<span class="fc" id="L53">            ext = new ComponentExtension&lt;&gt;(comp);</span>
+<span class="fc" id="L54">            comp.putClientProperty( ComponentExtension.class, ext );</span>
+        }
+<span class="fc" id="L56">        return ext;</span>
+    }
+
+    /**
+     *  Initializes the given component with a new {@link ComponentExtension}.
+     *  This method is called by a SwingTree builder node when it
+     *  receives and builds a new component.
+     *  The former extension of the component is replaced by a new one.
+     *
+     * @param comp The component to initialize.
+     */
+    public static void initializeFor( JComponent comp ) {
+<span class="fc" id="L68">        from(comp);</span>
+<span class="fc" id="L69">    }</span>
+
+    private final C _owner;
+    private final Viewable&lt;Float&gt; _localUiScaleFactor;
+<span class="fc" id="L73">    private final List&lt;Observable&gt;  _boundProps = new ArrayList&lt;&gt;(0);</span>
+<span class="fc" id="L74">    private final List&lt;Object&gt;      _extraState = new ArrayList&lt;&gt;(0);</span>
+<span class="fc" id="L75">    private final List&lt;String&gt;      _styleGroups = new ArrayList&lt;&gt;(0);</span>
+<span class="fc" id="L76">    private final StyleInstaller&lt;C&gt; _styleInstaller = new StyleInstaller&lt;&gt;();</span>
+
+<span class="fc" id="L78">    private StyleEngine     _styleEngine = StyleEngine.create();</span>
+<span class="fc" id="L79">    private StyleSource&lt;C&gt;  _styleSource  = StyleSource.create();</span>
+<span class="fc" id="L80">    private @Nullable Shape _outerBaseClip = null;</span>
+<span class="fc" id="L81">    private PaintStep _lastPaintStep = PaintStep.UNDEFINED;</span>
+<span class="fc" id="L82">    private @Nullable BufferedImage _bufferedImage = null;</span>
+<span class="fc" id="L83">    private @Nullable Function&lt;Position, DragAwayComponentConf&lt;C&gt;&gt; _dragAwayConfigurator = null;</span>
+
+
+<span class="fc" id="L86">    private ComponentExtension( C owner ) {</span>
+<span class="fc" id="L87">        _owner = Objects.requireNonNull(owner);</span>
+<span class="fc" id="L88">        @Nullable Font defaultFont = UIManager.getDefaults().getFont(&quot;defaultFont&quot;);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        @Nullable Integer defaultFontSize = (defaultFont != null ? defaultFont.getSize() : null);</span>
+<span class="fc" id="L90">        AtomicReference&lt;@Nullable Font&gt; referenceFont = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L91">        AtomicReference&lt;Boolean&gt; hasDefaultSize = new AtomicReference&lt;&gt;(false);</span>
+<span class="fc" id="L92">        _localUiScaleFactor = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L93">            Font currentFont = referenceFont.get();</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            if ( currentFont == null ) {</span>
+<span class="fc" id="L95">                currentFont = owner.getFont();</span>
+<span class="fc" id="L96">                referenceFont.set(currentFont);</span>
+<span class="pc bpc" id="L97" title="1 of 6 branches missed.">                if ( defaultFontSize != null &amp;&amp; currentFont != null &amp;&amp; defaultFontSize == currentFont.getSize() ) {</span>
+<span class="fc" id="L98">                    hasDefaultSize.set(true);</span>
+                }
+            }
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if ( currentFont != null ) {</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">                if ( Boolean.TRUE.equals(hasDefaultSize.get()) )</span>
+<span class="fc" id="L103">                    owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));</span>
+                else
+<span class="fc" id="L105">                    owner.setFont(scale(currentFont, it.oldValue().orElseThrowUnchecked()));</span>
+            }
+<span class="fc" id="L107">            gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L108">            UI.runLater(()-&gt;{</span>
+<span class="fc" id="L109">                owner.revalidate();</span>
+<span class="fc" id="L110">            });</span>
+<span class="fc" id="L111">        });</span>
+<span class="fc" id="L112">    }</span>
+
+    private Font scale(Font font, float previousScale) {
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if( !SwingTree.get().isUiScaleFactorEnabled() )</span>
+<span class="nc" id="L116">            return font;</span>
+
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if( previousScale &lt;= 0 )</span>
+<span class="nc" id="L119">            return font;</span>
+
+<span class="fc" id="L121">        float scaleFactor = SwingTree.get().getUiScaleFactor() / previousScale;</span>
+<span class="pc bpc" id="L122" title="2 of 4 branches missed.">        if( scaleFactor &lt;= 0 || scaleFactor == 1 )</span>
+<span class="nc" id="L123">            return font;</span>
+
+<span class="fc" id="L125">        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );</span>
+<span class="fc" id="L126">        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );</span>
+    }
+
+<span class="fc" id="L129">    C getOwner() { return _owner; }</span>
+
+<span class="fc" id="L131">    public Viewable&lt;Float&gt; localUiScaleFactor() { return _localUiScaleFactor; }</span>
+
+    /**
+     *  Stores the given observable in the extension in order to ensure that
+     *  it is not garbage collected before the component is garbage collected.
+     *  The Sprouts library is based on the idea of event systems being weakly referenced
+     *  by theirs event sources, which means that if the observable is not stored in the extension,
+     *  the binding will be lost when the observable is garbage collected.
+     * @param observable The observable to store using a strong reference
+     *                   to ensure it is not garbage collected.
+     */
+    public void storeBoundObservable(Observable observable ) {
+<span class="fc" id="L143">        _boundProps.add(observable);</span>
+<span class="fc" id="L144">    }</span>
+
+    /**
+     *  Frees all bound observables from the extension.
+     *  This is useful when the component is no longer needed and is about to be garbage collected.
+     */
+    public void freeBoundObservables() {
+<span class="nc" id="L151">        _boundProps.forEach(Observable::unsubscribeAll);</span>
+<span class="nc" id="L152">        _boundProps.clear();</span>
+<span class="nc" id="L153">    }</span>
+
+    BoxModelConf getBoxModelConf() {
+<span class="fc" id="L156">        return _styleEngine.getBoxModelConf();</span>
+    }
+
+    void updateDynamicLookAndFeel( Configurator&lt;DynamicLaF&gt; updater ) {
+<span class="fc" id="L160">        _styleInstaller.updateDynamicLookAndFeel(updater);</span>
+<span class="fc" id="L161">    }</span>
+
+    Optional&lt;BufferedImage&gt; getBufferedImage() {
+<span class="fc" id="L164">        return Optional.ofNullable(_bufferedImage);</span>
+    }
+
+    public void addDragAwayConf( Function&lt;Position, DragAwayComponentConf&lt;C&gt;&gt; supplier ) {
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if ( _dragAwayConfigurator == null )</span>
+<span class="fc" id="L169">            _dragAwayConfigurator = supplier;</span>
+        else {
+<span class="nc" id="L171">            throw new IllegalStateException(&quot;Drag away configurator already set!&quot;);</span>
+        }
+<span class="fc" id="L173">    }</span>
+
+    /**
+     *  If it exists, this method invokes the user internal configurator function previously
+     *  set by the {@link #addDragAwayConf(Function)} method and returns an optional
+     *  of the resulting {@link DragAwayComponentConf} object, which holds the configuration
+     *  for starting a drag away operation using the AWT native {@link java.awt.dnd.DragSource}.
+     *
+     * @param mousePosition The current mouse position.
+     * @return An optional of the resulting {@link DragAwayComponentConf} object.
+     */
+    public Optional&lt;DragAwayComponentConf&lt;C&gt;&gt; getDragAwayConf( Position mousePosition ) {
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if ( _dragAwayConfigurator == null )</span>
+<span class="nc" id="L186">            return Optional.empty();</span>
+
+        try {
+<span class="nc" id="L189">            return Optional.of(_dragAwayConfigurator.apply(mousePosition));</span>
+<span class="nc" id="L190">        } catch ( Exception e ) {</span>
+<span class="nc" id="L191">            log.error(SwingTree.get().logMarker(), &quot;Error while configuring drag away component!&quot;, e);</span>
+<span class="nc" id="L192">            return Optional.empty();</span>
+        }
+    }
+
+    /**
+     *  Allows for extra state to be attached to the component extension.
+     *  (Conceptually similar to how Swing components can have client properties.)&lt;br&gt;
+     *  If the component already has an object of the given type attached,
+     *  that object is returned. Otherwise, the given fetcher is used to create
+     *  a new object of the given type, which is then attached to the component
+     *  and returned.
+     *
+     * @param type The type of the extra state to attach.
+     * @param fetcher A supplier which is used to create a new object of the given type.
+     * @return The extra state object of the given type which is attached to the component.
+     * @param &lt;P&gt; The type of the extra state.
+     */
+    public &lt;P&gt; P getOrSet( Class&lt;P&gt; type, Supplier&lt;P&gt; fetcher ) {
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for ( Object plugin : _extraState)</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if ( type.isInstance(plugin) )</span>
+<span class="fc" id="L212">                return (P) plugin;</span>
+
+<span class="fc" id="L214">        P plugin = fetcher.get();</span>
+<span class="fc" id="L215">        _extraState.add(plugin);</span>
+<span class="fc" id="L216">        return plugin;</span>
+    }
+
+    /**
+     *   This method is used by {@link swingtree.UIForAnySwing#group(String...)} to attach
+     *   so called &lt;i&gt;group tags&lt;/i&gt; to a component. &lt;br&gt;
+     *   They are used by the SwingTree style engine to apply
+     *   styles with the same tags, which
+     *   is conceptually similar to CSS classes. &lt;br&gt;
+     *   &lt;b&gt;It is advised to use the {@link #setStyleGroups(Enum[])} method
+     *   instead of this method, as the usage of enums for modelling
+     *   group tags offers much better compile time type safety!&lt;/b&gt;
+     *
+     * @param groupTags An array of group tags.
+     */
+    public void setStyleGroups( String... groupTags ) {
+<span class="fc" id="L232">        Objects.requireNonNull(groupTags);</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">        boolean alreadyHasGroupTags = !_styleGroups.isEmpty();</span>
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        if ( alreadyHasGroupTags )</span>
+<span class="nc" id="L235">            _styleGroups.clear();</span>
+
+<span class="fc" id="L237">        _styleGroups.addAll( java.util.Arrays.asList(groupTags) );</span>
+
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if ( alreadyHasGroupTags )</span>
+<span class="nc" id="L240">            gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L241">    }</span>
+
+    /**
+     *   This method is used by {@link swingtree.UIForAnySwing#group(String...)}
+     *   to attach so-called &lt;i&gt;group tags&lt;/i&gt; to a component. &lt;br&gt;
+     *   They are used by the SwingTree style engine to apply
+     *   styles with the same tags, which
+     *   is conceptually similar to CSS classes. &lt;br&gt;
+     *   It is advised to use this method over the {@link #setStyleGroups(String[])}
+     *   method, as the usage of enums for modelling
+     *   group tags offers much better compile time type safety!
+     *
+     * @param groupTags An array of group tags.
+     * @param &lt;E&gt; The type of the enum.
+     */
+    @SafeVarargs
+    public final &lt;E extends Enum&lt;E&gt;&gt; void setStyleGroups( E... groupTags ) {
+<span class="fc" id="L258">        String[] stringTags = new String[groupTags.length];</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        for ( int i = 0; i &lt; groupTags.length; i++ ) {</span>
+<span class="fc" id="L260">            E group = groupTags[i];</span>
+<span class="fc" id="L261">            Objects.requireNonNull(group);</span>
+<span class="fc" id="L262">            stringTags[i] = StyleUtil.toString(group);</span>
+        }
+<span class="fc" id="L264">        setStyleGroups(stringTags);</span>
+<span class="fc" id="L265">    }</span>
+
+    /**
+     *  Sets the id of the component.
+     *  The id is used by the SwingTree style engine to apply styles
+     *  to components with the same id, which is conceptually similar to CSS ids.&lt;br&gt;
+     *  The preferred way to set the id is by using an enum
+     *  to avoid typos and to get better compile time type safety.
+     *
+     * @param id The id to set.
+     */
+    public final void setId( String id ) {
+<span class="fc" id="L277">        _owner.setName(id);</span>
+<span class="fc" id="L278">    }</span>
+
+    /**
+     *  Sets the id of the component based on an enum.
+     *  The id is used by the SwingTree style engine to apply styles
+     *  to components with the same id, which is conceptually similar to CSS ids.&lt;br&gt;
+     *  This is the preferred way to set the id, as it offers better compile time type safety.
+     *  Also check out the {@link swingtree.UIForAnySwing#id(Enum)} to set
+     *  the id as part of a UI declaration.
+     *
+     * @param id The id to set.
+     * @param &lt;E&gt; The type of the enum.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; void setId( E id ) {
+<span class="fc" id="L292">        this.setId(StyleUtil.toString(id));</span>
+<span class="fc" id="L293">    }</span>
+
+    /**
+     *  Checks if the component has the given id.
+     *
+     * @param id The id to check.
+     * @return {@code true} if the component has the given id.
+     */
+    public final boolean hasId( String id ) {
+<span class="fc" id="L302">        return Objects.equals(_owner.getName(), id);</span>
+    }
+
+    /**
+     *  Checks if the component has the given id.
+     *
+     * @param id The id to check.
+     * @return {@code true} if the component has the given id.
+     */
+    public final boolean hasId( Enum&lt;?&gt; id ) {
+<span class="nc" id="L312">        return hasId(StyleUtil.toString(id));</span>
+    }
+
+    final UI.Placement preferredIconPlacement() {
+<span class="fc" id="L316">        UI.Placement preferredPlacement = UI.Placement.UNDEFINED;</span>
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if ( _hasText(_owner) )</span>
+<span class="nc" id="L318">            preferredPlacement = UI.Placement.LEFT;</span>
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">        if ( !Objects.equals(ComponentOrientation.UNKNOWN, _owner.getComponentOrientation()) ) {</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, _owner.getComponentOrientation()) )</span>
+<span class="nc" id="L321">                preferredPlacement = UI.Placement.LEFT;</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, _owner.getComponentOrientation()) )</span>
+<span class="nc" id="L323">                preferredPlacement = UI.Placement.RIGHT;</span>
+        }
+<span class="fc" id="L325">        return preferredPlacement;</span>
+    }
+
+    private boolean _hasText( Component component ) {
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);</span>
+    }
+
+    private String _findTextOf( Component component ) {
+        // We go through all the components which can display text and return the first one we find:
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...</span>
+<span class="fc" id="L335">            return ((javax.swing.AbstractButton) component).getText();</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">        if ( component instanceof javax.swing.JLabel )</span>
+<span class="nc" id="L337">            return ((javax.swing.JLabel) component).getText();</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        if ( component instanceof JTextComponent )</span>
+<span class="nc" id="L339">            return ((JTextComponent) component).getText();</span>
+
+<span class="nc" id="L341">        return &quot;&quot;;</span>
+    }
+
+    /**
+     *  A component can have multiple group tags, which are used by the SwingTree style engine
+     *  to apply styles with the same tags, which is conceptually similar to CSS classes.
+     *  This method returns the group tags associated with the component.
+     *
+     * @return The group tags associated with the component
+     *         in the form of an unmodifiable tuple of {@link String}s.
+     */
+<span class="fc" id="L352">    public Tuple&lt;String&gt; getStyleGroups() { return Tuple.of(String.class, _styleGroups); }</span>
+
+    /**
+     *  A style group is a tag which is used by the SwingTree style engine
+     *  to apply styles to things with the same tags making it conceptually similar to CSS classes.
+     *  This method lets you check if the component belongs to a given String based group.
+     *
+     * @param group The group to check.
+     * @return {@code true} if the component belongs to the given group.
+     */
+<span class="fc" id="L362">    public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }</span>
+
+    /**
+     *  A style group is a tag which is used by the SwingTree style engine
+     *  to apply styles to things with the same tags making it conceptually similar to CSS classes.
+     *  This method lets you check if the component belongs to a given enum based group.
+     *
+     * @param group The group to check.
+     * @return {@code true} if the component belongs to the given group.
+     */
+    public boolean belongsToGroup( Enum&lt;?&gt; group ) {
+<span class="nc" id="L373">        return belongsToGroup(StyleUtil.toString(group));</span>
+    }
+
+    /**
+     *  Exposes the current {@link StyleConf} configuration of the component,
+     *  which holds all the SwingTree style information needed to render the component.
+     *
+     * @return The current {@link StyleConf} configuration of the component
+     *         which is calculated based on the {@link Styler} lambdas
+     *         associated with the component.
+     */
+<span class="fc" id="L384">    public StyleConf getStyle() { return _styleEngine.getComponentConf().style(); }</span>
+
+    ComponentConf getConf() {
+<span class="fc" id="L387">        return _styleEngine.getComponentConf();</span>
+    }
+
+    /**
+     *  Allows for the retrieval of a specific {@link Shape} which represents
+     *  a specific area of the component identified by the given {@link UI.ComponentArea}.
+     *  The following areas are available:
+     *  &lt;ul&gt;
+     *      &lt;li&gt;{@link swingtree.UI.ComponentArea#ALL} -
+     *      The entire component, which is the union of all other clip
+     *      areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link swingtree.UI.ComponentArea#INTERIOR} -
+     *      The inner component area, which is defined as {@code ALL - EXTERIOR - BORDER}.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link swingtree.UI.ComponentArea#EXTERIOR} -
+     *      The outer component area, which can be expressed as {@code ALL - INTERIOR - BORDER},
+     *      or {@code ALL - CONTENT}.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link swingtree.UI.ComponentArea#BORDER} -
+     *      The border of the component, which is the area between the inner and outer component area
+     *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link swingtree.UI.ComponentArea#BODY} -
+     *      The body of the component is the inner component area including the border area.
+     *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     * @param area The area of the component to retrieve.
+     * @return An optional {@link Shape} which represents the given area of the component or an empty optional.
+     *         If the area is not available, then this means that the style of the component
+     *         did not lead to the calculation of the given area. This may happen for the {@code EXTERIOR}
+     *         in case of there being no margin or corner radius, and the {@code BORDER} in case of there being
+     *         no border width.
+     */
+    public Optional&lt;Shape&gt; getComponentArea( UI.ComponentArea area ) {
+<span class="fc" id="L423">        Optional&lt;Shape&gt; areaShape = _styleEngine.componentAreaIfCalculated(area);</span>
+<span class="fc bfc" id="L424" title="All 2 branches covered.">        if ( !areaShape.isPresent() ) {</span>
+<span class="fc bfc" id="L425" title="All 2 branches covered.">            if ( area.isOneOf( UI.ComponentArea.BODY, UI.ComponentArea.ALL, UI.ComponentArea.INTERIOR) ) {</span>
+<span class="fc" id="L426">                return Optional.of(_owner.getBounds());</span>
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">            } else if ( area.isOneOf(UI.ComponentArea.EXTERIOR, UI.ComponentArea.BORDER) ) {</span>
+<span class="fc" id="L428">                return Optional.empty();</span>
+            }
+        }
+<span class="fc" id="L431">        return areaShape;</span>
+    }
+
+    /**
+     *  Removes all animations from the component.
+     *  This includes both {@link Painter} based animations
+     *  as well as {@link Styler} based animations.
+     */
+    public void clearAnimations() {
+<span class="fc" id="L440">        _styleEngine = _styleEngine.withoutAnimationPainters();</span>
+<span class="fc" id="L441">        _styleSource = _styleSource.withoutAnimationStylers();</span>
+<span class="fc" id="L442">    }</span>
+
+    /**
+     *  Use this to add a {@link Painter} based animation to the component.
+     *
+     * @param status The {@link AnimationStatus} which defines when the animation is active.
+     * @param layer The {@link UI.Layer} which defines the layer on which the animation is rendered.
+     * @param clipArea The {@link UI.ComponentArea} which defines the area of the component which is animated.
+     * @param painter The {@link Painter} which defines how the animation is rendered.
+     */
+    public void addAnimatedPainter(
+        AnimationStatus       status,
+        UI.Layer              layer,
+        UI.ComponentArea      clipArea,
+        swingtree.api.Painter painter
+    ) {
+<span class="nc" id="L458">        _anonymousPainterCounter++;</span>
+<span class="nc" id="L459">        String painterName = &quot;anonymous-painter-&quot;+_anonymousPainterCounter;</span>
+<span class="nc" id="L460">        _styleSource = _styleSource.withAnimationStyler(status.lifeSpan(), it -&gt; it.painter(layer, clipArea, painterName, painter));</span>
+<span class="nc" id="L461">        _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());</span>
+<span class="nc" id="L462">        _styleInstaller.recalculateInsets(_owner, _styleEngine.getComponentConf().style());</span>
+        /*
+            We need to install the custom SwingTree border which is used to render the animations!
+        */
+<span class="nc" id="L466">    }</span>
+
+    /**
+     *  Use this to add a {@link Styler} based animation to the component.
+     *
+     * @param state The {@link AnimationStatus} which defines when the animation is active.
+     * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
+     */
+    public void addAnimatedStyler( AnimationStatus state, Styler&lt;C&gt; styler ) {
+<span class="fc" id="L475">        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);</span>
+<span class="fc" id="L476">    }</span>
+
+    /**
+     *  SwingTree overrides the default Swing look and feel
+     *  to enable custom styling and animation capabilities.
+     *  This method is used to install the custom look and feel
+     *  for the component, if possible.
+     */
+    public void installCustomUIIfPossible() {
+<span class="fc" id="L485">        _styleInstaller.installCustomUIFor(_owner);</span>
+<span class="fc" id="L486">    }</span>
+
+    Insets getMarginInsets() {
+<span class="pc bpc" id="L489" title="1 of 2 branches missed.">        if ( _owner.getBorder() instanceof StyleAndAnimationBorder ) {</span>
+<span class="fc" id="L490">            StyleAndAnimationBorder&lt;?&gt; styleBorder = (StyleAndAnimationBorder&lt;?&gt;) _owner.getBorder();</span>
+<span class="fc" id="L491">            return styleBorder.getMarginInsets();</span>
+        }
+        else
+<span class="nc" id="L494">            return new Insets(0,0,0,0);</span>
+    }
+
+    /**
+     *  Adds a {@link Styler} to the component.
+     *  The styler will be used to calculate the style of the component.
+     *
+     * @param styler The styler to add.
+     */
+    public void addStyler( Styler&lt;C&gt; styler ) {
+<span class="fc" id="L504">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L505">        _styleSource = _styleSource.withLocalStyler(styler);</span>
+<span class="fc" id="L506">        gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L507">    }</span>
+
+    /**
+     *  Calculates a new {@link StyleConf} object based on the {@link Styler} lambdas associated
+     *  with the component...
+     *
+     * @return A new immutable {@link StyleConf} configuration.
+     */
+    public StyleConf gatherStyle() {
+<span class="fc" id="L516">        return _styleSource.gatherStyleFor(_owner);</span>
+    }
+
+    /**
+     *  Calculates a new {@link StyleConf} object based on the {@link Styler} lambdas associated
+     *  with the component and then applies it to the component after which
+     *  a new {@link StyleEngine} is installed for the component.
+     *  If the calculated style is the same as the current style, nothing happens
+     *  except in case the &lt;code&gt;force&lt;/code&gt; parameter is set to &lt;code&gt;true&lt;/code&gt;.
+     *
+     * @param force If set to &lt;code&gt;true&lt;/code&gt;, the style will be applied even if it is the same as the current style.
+     */
+    public void gatherApplyAndInstallStyle( boolean force ) {
+<span class="fc" id="L529">        _applyStyleToComponentState(gatherStyle(), force);</span>
+<span class="fc" id="L530">    }</span>
+
+    /**
+     *  Applies the given {@link StyleConf} to the component after which
+     *  a new {@link StyleEngine} is installed for the component.
+     *  If the given style is the same as the current style, nothing happens
+     *  except in case the &lt;code&gt;force&lt;/code&gt; parameter is set to &lt;code&gt;true&lt;/code&gt;.
+     *
+     * @param styleConf The style to apply.
+     * @param force If set to &lt;code&gt;true&lt;/code&gt;, the style will be applied even if it is the same as the current style.
+     */
+    public void applyAndInstallStyle(StyleConf styleConf, boolean force ) {
+<span class="fc" id="L542">        _applyStyleToComponentState(styleConf, force);</span>
+<span class="fc" id="L543">    }</span>
+
+    void gatherApplyAndInstallStyleConfig() {
+<span class="fc" id="L546">        _applyStyleToComponentState(gatherStyle(), false);</span>
+<span class="fc" id="L547">    }</span>
+
+    private void _applyStyleToComponentState( StyleConf newStyle, boolean force )
+    {
+<span class="fc" id="L551">        Objects.requireNonNull(newStyle);</span>
+<span class="fc" id="L552">        _styleEngine = _styleInstaller.applyStyleToComponentState(</span>
+                                    _owner,
+                                    _styleEngine,
+                                    _styleSource,
+                                    newStyle,
+                                    force
+                                );
+<span class="fc" id="L559">    }</span>
+
+    private void _doPaintStep(
+        final PaintStep            step,
+        final Graphics             graphics,
+        final Consumer&lt;Graphics2D&gt; superPaint
+    ) {
+<span class="fc" id="L566">        final int newStep  = step.getStepOrder();</span>
+<span class="fc" id="L567">        final int lastStep = _lastPaintStep.getStepOrder();</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">        final boolean isNewPaintCycle = newStep &lt;= lastStep;</span>
+<span class="fc bfc" id="L569" title="All 2 branches covered.">        if ( isNewPaintCycle )</span>
+<span class="fc" id="L570">            gatherApplyAndInstallStyleConfig();</span>
+            /*
+                If the new step is less than or equal to the last step,
+                we consider it a new paint cycle and apply the style
+            */
+
+<span class="fc" id="L576">        _lastPaintStep = step;</span>
+
+        try {
+<span class="fc bfc" id="L579" title="All 6 branches covered.">            if ( isNewPaintCycle &amp;&amp; step == PaintStep.BACKGROUND &amp;&amp; _hasChildWithParentFilter() ) {</span>
+<span class="fc" id="L580">                int w = _owner.getWidth();</span>
+<span class="fc" id="L581">                int h = _owner.getHeight();</span>
+<span class="fc" id="L582">                _bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L583">                _renderInto(_bufferedImage, step, graphics, superPaint);</span>
+<span class="fc bfc" id="L584" title="All 4 branches covered.">            } else if ( _bufferedImage != null &amp;&amp; step == PaintStep.BORDER ) {</span>
+<span class="fc" id="L585">                _renderInto(_bufferedImage, step, graphics, superPaint);</span>
+            } else {
+<span class="fc" id="L587">                superPaint.accept((Graphics2D) graphics);</span>
+            }
+<span class="nc" id="L589">        } catch ( Exception e ) {</span>
+<span class="nc" id="L590">            log.error(SwingTree.get().logMarker(), &quot;Error while painting step '&quot;+step+&quot;'!&quot;, e);</span>
+<span class="fc" id="L591">        }</span>
+<span class="fc" id="L592">    }</span>
+
+    private void _renderInto(BufferedImage buffer, PaintStep step, Graphics graphics, Consumer&lt;Graphics2D&gt; superPaint ) {
+<span class="fc" id="L595">        Graphics2D bufferGraphics = buffer.createGraphics();</span>
+<span class="fc" id="L596">        StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);</span>
+<span class="fc" id="L597">        bufferGraphics.setClip(graphics.getClip());</span>
+        try {
+<span class="fc" id="L599">            superPaint.accept(bufferGraphics);</span>
+<span class="nc" id="L600">        } catch ( Exception e ) {</span>
+<span class="nc" id="L601">            log.error(SwingTree.get().logMarker(), &quot;Error while painting step '&quot;+step+&quot;' into component buffer!&quot;, e);</span>
+<span class="fc" id="L602">        }</span>
+<span class="fc" id="L603">        graphics.drawImage(buffer, 0, 0, null);</span>
+<span class="fc" id="L604">    }</span>
+
+    private boolean _hasChildWithParentFilter() {
+<span class="fc bfc" id="L607" title="All 2 branches covered.">        for ( Component child : _owner.getComponents() ) {</span>
+<span class="fc bfc" id="L608" title="All 4 branches covered.">            if ( !child.isOpaque() &amp;&amp; child instanceof JComponent ) {</span>
+<span class="fc bfc" id="L609" title="All 2 branches covered.">                if ( _hasParentFilter((JComponent) child) )</span>
+<span class="fc" id="L610">                    return true;</span>
+            }
+        }
+<span class="fc" id="L613">        _bufferedImage = null;</span>
+<span class="fc" id="L614">        return false;</span>
+    }
+
+    private boolean _hasParentFilter( JComponent aComponent ) {
+<span class="fc" id="L618">        ComponentExtension&lt;?&gt; extension = from(aComponent);</span>
+<span class="fc" id="L619">        ComponentConf conf = extension.getConf();</span>
+<span class="fc bfc" id="L620" title="All 2 branches covered.">        if ( conf.equals(ComponentConf.none()) )</span>
+<span class="fc" id="L621">            return false;</span>
+<span class="fc" id="L622">        StyleConf style = conf.style();</span>
+<span class="fc bfc" id="L623" title="All 2 branches covered.">        if ( style.equals(StyleConf.none()) )</span>
+<span class="fc" id="L624">            return false;</span>
+<span class="fc bfc" id="L625" title="All 2 branches covered.">        return !style.layers().filter().equals(FilterConf.none());</span>
+    }
+
+    /**
+     *  This method is used to paint the background style of the component
+     *  using the provided {@link Graphics} object.
+     *  The method is designed for components for which SwingTree could not install a custom UI,
+     *  and it is intended to be used by custom {@link JComponent#paint(Graphics)}
+     *  overrides, before calling the super implementation.
+     *
+     * @param g The {@link Graphics} object to use for rendering.
+     * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
+     */
+    void paintBackgroundIfNeeded( Graphics g, Consumer&lt;Graphics&gt; lookAndFeelPaint )
+    {
+<span class="fc bfc" id="L640" title="All 2 branches covered.">        if ( _styleInstaller.customLookAndFeelIsInstalled() ) {</span>
+<span class="pc bpc" id="L641" title="1 of 2 branches missed.">            if ( lookAndFeelPaint != null )</span>
+<span class="fc" id="L642">                lookAndFeelPaint.accept(g);</span>
+<span class="fc" id="L643">            return; // We render ĥere through the custom installed UI!</span>
+            // So the method call below will be called within lookAndFeelPaint.run();
+        }
+<span class="fc" id="L646">        paintBackground(g, false, lookAndFeelPaint);</span>
+<span class="fc" id="L647">    }</span>
+
+    /**
+     *  Does a SwingTree based background painting call with a call bck for look and feel based
+     *  drawing...
+     *  If The {@code needsCustomWipe} flag is true, then it is assumed that SwingTree is the
+     *  sole owner of this components look and feel, in which case it will fill the component area
+     *  to cover up what was previously rendered (which is necessary in case of the component being opaque).
+     *
+     * @param graphics The {@link Graphics2D} API used for doing the 2D draw calls...
+     * @param needsCustomWipe If this is true, then this means it is up to this SwingTree method to overwrite
+     *                          what is in the graphics buffer by filling the rectangle in case of the
+     *                          component being opaque. If this is false, we trust the look and feel to do it.
+     * @param lookAndFeelPainting The look and feel background painting (usually just filling the component rectangle).
+     *                            If this is null, then the {@code needsCustomWipe} flag should be true as well.
+     */
+    void paintBackground( Graphics graphics, boolean needsCustomWipe, @Nullable Consumer&lt;Graphics&gt; lookAndFeelPainting )
+    {
+<span class="fc" id="L665">        _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -&gt; {</span>
+<span class="fc bfc" id="L666" title="All 2 branches covered.">            if ( needsCustomWipe ) {</span>
+<span class="fc bfc" id="L667" title="All 2 branches covered.">                if ( _owner.isOpaque() ) {</span>
+<span class="fc" id="L668">                    internalGraphics.setColor(_owner.getBackground());</span>
+<span class="fc" id="L669">                    int width = _owner.getWidth();</span>
+<span class="fc" id="L670">                    int height = _owner.getHeight();</span>
+<span class="fc" id="L671">                    internalGraphics.fillRect(0, 0, width, height);</span>
+                    /*
+                        If &quot;lookAndFeelPainting&quot; is null then this means there is no
+                        native ComponentUI, instead it is upd to SwingTree to override what was
+                        rendered previously in the buffer.
+                    */
+                }
+            }
+
+<span class="fc" id="L680">            Shape baseClip = internalGraphics.getClip();</span>
+<span class="fc" id="L681">            _outerBaseClip = baseClip;</span>
+
+<span class="pc bpc" id="L683" title="3 of 4 branches missed.">            if ( _outerBaseClip == null &amp;&amp; _owner.getParent() == null ) {</span>
+                // Happens when rendering individual components (usually unit tests)!
+<span class="nc" id="L685">                int x = (int) internalGraphics.getTransform().getTranslateX();</span>
+<span class="nc" id="L686">                int y = (int) internalGraphics.getTransform().getTranslateY();</span>
+<span class="nc" id="L687">                int w = _owner.getWidth();</span>
+<span class="nc" id="L688">                int h = _owner.getHeight();</span>
+<span class="nc" id="L689">                _outerBaseClip = new Rectangle(x,y,w,h);</span>
+            }
+
+<span class="fc" id="L692">            Font componentFont = _owner.getFont();</span>
+<span class="fc bfc" id="L693" title="All 4 branches covered.">            if ( componentFont != null &amp;&amp; !componentFont.equals(internalGraphics.getFont()) )</span>
+<span class="fc" id="L694">                internalGraphics.setFont( componentFont );</span>
+
+            // Sometimes needed to render filtered backgrounds:
+<span class="fc" id="L697">            BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())</span>
+<span class="pc bpc" id="L698" title="1 of 2 branches missed.">                                            .map( c -&gt; c instanceof JComponent ? (JComponent) c : null )</span>
+<span class="fc" id="L699">                                            .map(ComponentExtension::from)</span>
+<span class="fc" id="L700">                                            .map(e -&gt; e._bufferedImage)</span>
+<span class="fc" id="L701">                                            .orElse(null);</span>
+
+            // Location relative to the parent:
+<span class="fc" id="L704">            _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());</span>
+
+<span class="fc bfc" id="L706" title="All 2 branches covered.">            if ( lookAndFeelPainting != null ) {</span>
+<span class="fc" id="L707">                Shape contentClip = _styleEngine.componentAreaIfCalculated(UI.ComponentArea.BODY).orElse(null);</span>
+
+<span class="fc" id="L709">                contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );</span>
+
+<span class="fc" id="L711">                paintWithClip(internalGraphics, contentClip, () -&gt; {</span>
+                    try {
+<span class="fc" id="L713">                        lookAndFeelPainting.accept(internalGraphics);</span>
+<span class="nc" id="L714">                    } catch (Exception e) {</span>
+<span class="nc" id="L715">                        String componentAsString = &quot;?&quot;;</span>
+                        try {
+                            // Anything can happen in client code...
+<span class="nc" id="L718">                            componentAsString = _owner.toString();</span>
+<span class="nc" id="L719">                        } catch (Exception e2) {</span>
+<span class="nc" id="L720">                            log.error(SwingTree.get().logMarker(), &quot;Error while converting component to string!&quot;, e2);</span>
+<span class="nc" id="L721">                        }</span>
+<span class="nc" id="L722">                        log.error(SwingTree.get().logMarker(), &quot;Error while painting look and feel of component '&quot;+componentAsString+&quot;'!&quot;, e);</span>
+<span class="fc" id="L723">                    }</span>
+<span class="fc" id="L724">                });</span>
+            }
+
+<span class="fc" id="L727">            internalGraphics.setClip(baseClip);</span>
+<span class="fc" id="L728">        });</span>
+<span class="fc" id="L729">    }</span>
+
+    void paintBorder( Graphics2D graphics, Consumer&lt;Graphics&gt; formerBorderPainter )
+    {
+<span class="fc" id="L733">        _doPaintStep(PaintStep.BORDER, graphics, internalGraphics -&gt; {</span>
+<span class="fc" id="L734">            Shape former = internalGraphics.getClip();</span>
+                try {
+<span class="pc bpc" id="L736" title="1 of 2 branches missed.">                    if ( _outerBaseClip != null )</span>
+<span class="fc" id="L737">                        internalGraphics.setClip(_outerBaseClip);</span>
+
+<span class="fc" id="L739">                    _styleEngine.paintBorder(internalGraphics, formerBorderPainter);</span>
+<span class="nc" id="L740">                } catch (Exception e) {</span>
+<span class="nc" id="L741">                    log.error(SwingTree.get().logMarker(), &quot;Error while painting border!&quot;, e);</span>
+                }
+                finally {
+<span class="fc" id="L744">                    internalGraphics.setClip(former);</span>
+                }
+<span class="fc" id="L746">        });</span>
+<span class="fc" id="L747">    }</span>
+
+    /**
+     *  This method is used to paint the foreground style of the component
+     *  using the provided {@link Graphics2D} object.
+     *
+     * @param graphics The {@link Graphics2D} object to use for rendering.
+     * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
+     */
+    void paintForeground( Graphics2D graphics, Consumer&lt;Graphics&gt; superPaint )
+    {
+<span class="fc" id="L758">        _doPaintStep(PaintStep.FOREGROUND, graphics, internalGraphics -&gt; {</span>
+            // We remember the clip:
+<span class="fc" id="L760">            Shape formerClip = internalGraphics.getClip();</span>
+<span class="fc bfc" id="L761" title="All 2 branches covered.">            if ( _owner instanceof JScrollPane) {</span>
+                /*
+                    Scroll panes are not like other components, they have a viewport
+                    which clips the children.
+                    Now if we have a round border for the scroll pane, we want the
+                    children to be clipped by the round border (and the viewport).
+                    So we use the inner component area as the clip for the children.
+                */
+<span class="fc" id="L769">                Shape localClip = StyleUtil.intersect( _styleEngine.componentAreaIfCalculated(UI.ComponentArea.BODY).orElse(formerClip), formerClip );</span>
+<span class="fc" id="L770">                paintWithClip(internalGraphics, localClip, ()-&gt;{</span>
+<span class="fc" id="L771">                    superPaint.accept(internalGraphics);</span>
+<span class="fc" id="L772">                });</span>
+<span class="fc" id="L773">            }</span>
+            else
+<span class="fc" id="L775">                superPaint.accept(internalGraphics);</span>
+
+            // We remember if antialiasing was enabled before we render:
+<span class="pc bpc" id="L778" title="1 of 2 branches missed.">            boolean antialiasingWasEnabled = internalGraphics.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;</span>
+            // Reset antialiasing to its previous state:
+<span class="fc bfc" id="L780" title="All 2 branches covered.">            if ( StyleEngine.IS_ANTIALIASING_ENABLED() )</span>
+<span class="fc" id="L781">                internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );</span>
+
+<span class="fc" id="L783">            Font componentFont = _owner.getFont();</span>
+<span class="fc bfc" id="L784" title="All 4 branches covered.">            if ( componentFont != null &amp;&amp; !componentFont.equals(internalGraphics.getFont()) )</span>
+<span class="fc" id="L785">                internalGraphics.setFont( componentFont );</span>
+
+<span class="fc" id="L787">            _styleEngine.paintForeground(internalGraphics);</span>
+
+            // Reset antialiasing to its previous state:
+<span class="pc bpc" id="L790" title="1 of 2 branches missed.">            internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );</span>
+
+            // We restore the clip:
+<span class="pc bpc" id="L793" title="1 of 2 branches missed.">            if ( internalGraphics.getClip() != formerClip )</span>
+<span class="fc" id="L794">                internalGraphics.setClip(formerClip);</span>
+<span class="fc" id="L795">        });</span>
+<span class="fc" id="L796">    }</span>
+
+    void gatherStyleAndPaintInScope( Graphics g, Runnable painter ) {
+<span class="fc" id="L799">        gatherApplyAndInstallStyleConfig();</span>
+<span class="fc" id="L800">        Shape oldClip = g.getClip();</span>
+        try {
+<span class="fc" id="L802">            painter.run();</span>
+<span class="nc" id="L803">        } catch (Exception e) {</span>
+<span class="nc" id="L804">            log.warn(SwingTree.get().logMarker(), &quot;Error while rendering component of type '&quot;+_owner.getClass().getName()+&quot;'.&quot;, e);</span>
+<span class="fc" id="L805">        }</span>
+<span class="fc" id="L806">        g.setClip(oldClip);</span>
+<span class="fc" id="L807">    }</span>
+
+    static void paintWithClip( Graphics2D g2d, @Nullable Shape clip, Runnable paintTask ) {
+<span class="fc" id="L810">        Shape formerClip = g2d.getClip();</span>
+<span class="fc" id="L811">        g2d.setClip(clip);</span>
+        try {
+<span class="fc" id="L813">            paintTask.run();</span>
+<span class="nc" id="L814">        } catch (Exception e) {</span>
+<span class="nc" id="L815">            log.error(SwingTree.get().logMarker(), &quot;Error during clipped painting task.&quot;, e);</span>
+        } finally {
+<span class="fc" id="L817">            g2d.setClip(formerClip);</span>
+        }
+<span class="fc" id="L819">    }</span>
+
+<span class="fc" id="L821">    private enum PaintStep</span>
+    {
+<span class="fc" id="L823">        BACKGROUND, BORDER, FOREGROUND, UNDEFINED;</span>
+
+
+        private int getStepOrder() {
+<span class="pc bpc" id="L827" title="1 of 5 branches missed.">            switch ( this ) {</span>
+<span class="fc" id="L828">                case BACKGROUND: return 0;</span>
+<span class="fc" id="L829">                case BORDER:     return 1;</span>
+<span class="fc" id="L830">                case FOREGROUND: return 2;</span>
+<span class="fc" id="L831">                case UNDEFINED:  return 3;</span>
+<span class="nc" id="L832">                default: return -1;</span>
+            }
+        }
+
+    }
+
+    /**
+     *  This method tries to hash everything relevant in the visual appearance
+     *  of the component and it subcomponents into a single integer value.
+     *  It is based on the current SwingTree style information as
+     *  well as more general component information like the current value of a slider,
+     *  text of a text component, etc. &lt;br&gt;
+     *  &lt;p&gt;
+     *  You may use this for rough cache invalidation purposes.
+     *  So when you want to render the component into a {@link BufferedImage}
+     *  and then only rerender it if the state hash changes, you can use this method.&lt;br&gt;
+     *  &lt;p&gt;
+     *  But keep in mind however, it cannot capture look and feel related changes
+     *  which are not controlled by SwingTree. &lt;br&gt;
+     *  So this hash code is not a perfect solution, but it can be useful in some cases.
+     *  Like visualizing a drag and drop of a component...
+     *
+     * @return The current state hash of the component and all of it subcomponents, which includes
+     *          SwingTree style information, as well as component specific information.
+     */
+    public int viewStateHashCode() {
+<span class="fc bfc" id="L858" title="All 2 branches covered.">        if ( _owner.getWidth() &lt;= 0 )</span>
+<span class="fc" id="L859">            return 0;</span>
+<span class="fc bfc" id="L860" title="All 2 branches covered.">        if ( _owner.getHeight() &lt;= 0 )</span>
+<span class="fc" id="L861">            return 0;</span>
+
+<span class="fc" id="L863">        int hashCode = _styleEngine.getComponentConf().hashCode();</span>
+        // Common stuff:
+<span class="pc bpc" id="L865" title="1 of 2 branches missed.">        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );</span>
+<span class="fc" id="L866">        java.awt.Color background = _owner.getBackground();</span>
+<span class="fc" id="L867">        java.awt.Color foreground = _owner.getForeground();</span>
+<span class="pc bpc" id="L868" title="1 of 2 branches missed.">        hashCode = hashCode * 31 + (background == null ? -1 : background.hashCode());</span>
+<span class="pc bpc" id="L869" title="1 of 2 branches missed.">        hashCode = hashCode * 31 + (foreground == null ? -1 : foreground.hashCode());</span>
+
+        // Subtype component specific stuff:
+<span class="fc bfc" id="L872" title="All 2 branches covered.">        if ( _owner instanceof JSlider ) {</span>
+<span class="fc" id="L873">            JSlider slider = (JSlider) _owner;</span>
+<span class="fc" id="L874">            hashCode = hashCode * 31 + slider.getValue();</span>
+<span class="fc" id="L875">            hashCode = hashCode * 31 + slider.getMinimum();</span>
+<span class="fc" id="L876">            hashCode = hashCode * 31 + slider.getMaximum();</span>
+            // alignment:
+<span class="fc bfc" id="L878" title="All 2 branches covered.">            hashCode = hashCode * 31 + (slider.getOrientation() == JSlider.HORIZONTAL ? 0 : 1);</span>
+        }
+<span class="fc bfc" id="L880" title="All 2 branches covered.">        if ( _owner instanceof JProgressBar ) {</span>
+<span class="fc" id="L881">            JProgressBar bar = (JProgressBar) _owner;</span>
+<span class="fc" id="L882">            hashCode = hashCode * 31 + bar.getValue();</span>
+<span class="fc" id="L883">            hashCode = hashCode * 31 + bar.getMinimum();</span>
+<span class="fc" id="L884">            hashCode = hashCode * 31 + bar.getMaximum();</span>
+        }
+<span class="fc bfc" id="L886" title="All 2 branches covered.">        if ( _owner instanceof JTextComponent ) {</span>
+<span class="fc" id="L887">            JTextComponent textComp = (JTextComponent) _owner;</span>
+<span class="fc" id="L888">            String text = textComp.getText();</span>
+<span class="pc bpc" id="L889" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());</span>
+<span class="fc" id="L890">            hashCode = hashCode * 31 + textComp.getCaretPosition();</span>
+        }
+<span class="fc bfc" id="L892" title="All 2 branches covered.">        if ( _owner instanceof AbstractButton ) {</span>
+<span class="fc" id="L893">            AbstractButton button = (AbstractButton) _owner;</span>
+<span class="fc" id="L894">            String text = button.getText();</span>
+<span class="fc bfc" id="L895" title="All 2 branches covered.">            hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);</span>
+<span class="pc bpc" id="L896" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());</span>
+        }
+<span class="fc bfc" id="L898" title="All 2 branches covered.">        if ( _owner instanceof JList ) {</span>
+<span class="fc" id="L899">            JList&lt;?&gt; list = (JList&lt;?&gt;) _owner;</span>
+<span class="fc" id="L900">            hashCode = hashCode * 31 + list.getSelectedIndex();</span>
+        }
+<span class="pc bpc" id="L902" title="1 of 2 branches missed.">        if ( _owner instanceof JTabbedPane ) {</span>
+<span class="nc" id="L903">            JTabbedPane tabbedPane = (JTabbedPane) _owner;</span>
+<span class="nc" id="L904">            hashCode = hashCode * 31 + tabbedPane.getSelectedIndex();</span>
+        }
+<span class="pc bpc" id="L906" title="1 of 2 branches missed.">        if ( _owner instanceof JTree ) {</span>
+<span class="nc" id="L907">            JTree tree = (JTree) _owner;</span>
+<span class="nc" id="L908">            hashCode = hashCode * 31 + tree.getSelectionCount();</span>
+        }
+<span class="pc bpc" id="L910" title="1 of 2 branches missed.">        if ( _owner instanceof JTable ) {</span>
+<span class="nc" id="L911">            JTable table = (JTable) _owner;</span>
+<span class="nc" id="L912">            hashCode = hashCode * 31 + table.getSelectedRow();</span>
+<span class="nc" id="L913">            hashCode = hashCode * 31 + table.getSelectedColumn();</span>
+        }
+<span class="fc bfc" id="L915" title="All 2 branches covered.">        if ( _owner instanceof JSpinner ) {</span>
+<span class="fc" id="L916">            JSpinner spinner = (JSpinner) _owner;</span>
+<span class="fc" id="L917">            hashCode = hashCode * 31 + spinner.getValue().hashCode();</span>
+        }
+<span class="fc bfc" id="L919" title="All 2 branches covered.">        if ( _owner instanceof JComboBox ) {</span>
+<span class="fc" id="L920">            JComboBox&lt;?&gt; comboBox = (JComboBox&lt;?&gt;) _owner;</span>
+<span class="fc" id="L921">            hashCode = hashCode * 31 + comboBox.getSelectedIndex();</span>
+        }
+<span class="fc bfc" id="L923" title="All 2 branches covered.">        if ( _owner instanceof JCheckBox ) {</span>
+<span class="fc" id="L924">            JCheckBox checkBox = (JCheckBox) _owner;</span>
+<span class="fc bfc" id="L925" title="All 2 branches covered.">            hashCode = hashCode * 31 + (checkBox.isSelected() ? 1 : 0);</span>
+        }
+
+        // Hashing the children recursively:
+        try {
+<span class="fc bfc" id="L930" title="All 2 branches covered.">            for ( Component child : _owner.getComponents() ) {</span>
+<span class="fc bfc" id="L931" title="All 2 branches covered.">                if ( child instanceof JComponent ) {</span>
+<span class="fc" id="L932">                    ComponentExtension&lt;?&gt; childExtension = from((JComponent) child);</span>
+<span class="fc" id="L933">                    hashCode = hashCode * 31 + childExtension.viewStateHashCode();</span>
+                }
+            }
+<span class="nc" id="L936">        } catch ( Exception e ) {</span>
+<span class="nc" id="L937">            log.error(SwingTree.get().logMarker(), &quot;Error while hashing children of component '&quot;+_owner+&quot;'.&quot;, e);</span>
+<span class="fc" id="L938">        }</span>
+<span class="fc" id="L939">        return hashCode;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

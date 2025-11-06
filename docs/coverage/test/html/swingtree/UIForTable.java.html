@@ -1,0 +1,844 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTable.java</span></div><h1>UIForTable.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import sprouts.Event;
+import swingtree.api.Buildable;
+import swingtree.api.Configurator;
+import swingtree.api.model.BasicTableModel;
+import swingtree.api.model.TableListDataSource;
+import swingtree.api.model.TableMapDataSource;
+import swingtree.style.ComponentExtension;
+
+import javax.swing.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.List;
+import java.util.function.Function;
+
+/**
+ *  A SwingTree declarative builder designed for configuring {@link JTable} instances allowing
+ *  for a fluent API to build tables in a declarative way.
+ *
+ * @param &lt;T&gt; The type of {@link JTable} being built by this builder.
+ */
+public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;UIForTable&lt;T&gt;, T&gt;
+{
+<span class="fc" id="L29">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForTable.class);</span>
+
+    private final BuilderState&lt;T&gt; _state;
+
+
+    /**
+     * Extensions of the {@link  UIForAnySwing} always wrap
+     * a single component for which they are responsible.
+     *
+     * @param state The {@link BuilderState} modelling how the component is built.
+     */
+<span class="fc" id="L40">    UIForTable( BuilderState&lt;T&gt; state ) {</span>
+<span class="fc" id="L41">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L42">        _state = state;</span>
+<span class="fc" id="L43">    }</span>
+
+    @Override
+    protected BuilderState&lt;T&gt; _state() {
+<span class="fc" id="L47">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForTable&lt;T&gt; _newBuilderWithState(BuilderState&lt;T&gt; newState ) {
+<span class="fc" id="L52">        return new UIForTable&lt;&gt;(newState);</span>
+    }
+
+    /**
+     *  Use this to set the table header.
+     *
+     * @param header The table header to be set.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withHeader( UIForTableHeader&lt;?&gt; header ) {
+<span class="nc" id="L62">        NullUtil.nullArgCheck(header, &quot;header&quot;, UIForTableHeader.class);</span>
+<span class="nc" id="L63">        return withHeader(header.getComponent());</span>
+    }
+
+    /**
+     *  Use this to set the table header.
+     *
+     * @param header The table header to be set.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withHeader( JTableHeader header ) {
+<span class="nc" id="L73">        NullUtil.nullArgCheck(header, &quot;header&quot;, JTableHeader.class);</span>
+<span class="nc" id="L74">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L75">                    thisComponent.setTableHeader(header);</span>
+<span class="nc" id="L76">                })</span>
+<span class="nc" id="L77">                ._this();</span>
+    }
+
+    private static &lt;T extends JTable&gt; CellBuilder&lt;T, Object&gt; _renderTable() {
+<span class="fc" id="L81">        return (CellBuilder) CellBuilder.forTable(Object.class);</span>
+    }
+
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument accepts a lambda function which exposes the builder API for a cell renderer.
+     *  Here is an example of how to use this method:
+     * &lt;pre&gt;{@code
+     *     UI.table(myModel)
+     *     .withCellsForColumn(&quot;column1&quot;, it -&gt; it
+     *         .when(String.class)
+     *         .asText( cell -&gt; &quot;[&quot; + cell.valueAsString().orElse(&quot;&quot;) + &quot;]&quot; ) )
+     *     )
+     *     .withCellsForColumn(&quot;column2&quot;, it -&gt; it
+     *         .when(Float.class)
+     *         .asText( cell -&gt; &quot;(&quot; + cell.valueAsString().orElse(&quot;&quot;) + &quot;f)&quot; ) )
+     *         .when(Double.class)
+     *         .asText( cell -&gt; &quot;(&quot; + cell.valueAsString().orElse(&quot;&quot;) + &quot;d)&quot; ) )
+     *     );
+     * }&lt;/pre&gt;
+     * The above example would render the first column of the table as a string surrounded by square brackets,
+     * and the second column as a float or double value surrounded by parentheses.
+     * Note that the API allows you to specify how specific types of table entry values
+     * should be rendered. This is done by calling the {@link CellBuilder#when(Class)} method
+     * before calling the {@link RenderAs#asText(Function)} method.
+     * &lt;br&gt;
+     * &lt;b&gt;
+     *     Due to this method being inherently based on the expectation of type ambiguity it is
+     *     a rather verbose way of defining how your cells should look and behave. The simpler and
+     *     preferred way of defining cell views is through the {@link #withCell(Configurator)},
+     *     {@link #withCellForColumn(String, Configurator)} and {@link #withCellForColumn(int, Configurator)}
+     *     methods.
+     * &lt;/b&gt;
+     *
+     * @param columnName The name of the column for which the cell renderer will be built.
+     * @param renderBuilder A lambda function which exposes a fluent builder API for a cell renderer
+     *                      and returns the builder API for a cell renderer.
+     *                      Call the appropriate methods on the builder API to configure the cell renderer.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withCellsForColumn(
+        String columnName,
+        Configurator&lt;CellBuilder&lt;T, Object&gt;&gt; renderBuilder
+    ) {
+<span class="fc" id="L125">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, CellBuilder.class);</span>
+<span class="fc" id="L126">        CellBuilder&lt;T, Object&gt; builder = _renderTable();</span>
+        try {
+<span class="fc" id="L128">            builder = renderBuilder.configure(builder);</span>
+<span class="nc" id="L129">        } catch (Exception e) {</span>
+<span class="nc" id="L130">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L131">            return this;</span>
+<span class="fc" id="L132">        }</span>
+<span class="fc" id="L133">        CellBuilder&lt;T, Object&gt; finalBuilder = builder;</span>
+<span class="fc" id="L134">        return _with(thisComponent -&gt; {</span>
+<span class="fc" id="L135">                        CellBuilder.SimpleTableCellRenderer renderer = finalBuilder.getForTable(thisComponent.getColumn(columnName).getCellRenderer());</span>
+<span class="fc" id="L136">                        thisComponent.getColumn(columnName).setCellRenderer(renderer);</span>
+<span class="fc" id="L137">                        thisComponent.getColumn(columnName).setCellEditor(renderer);</span>
+<span class="fc" id="L138">                    })</span>
+<span class="fc" id="L139">                    ._this();</span>
+    }
+
+    /**
+     *  Use this to build a basic table cell renderer for a particular column.
+     *  The second argument passed to this method is a lambda function
+     *  which accepts a {@link CellConf} representing the cell to be rendered.
+     *  You may then return an updated cell with a desired view component
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
+     *  Here an example of how this method may be used:
+     * &lt;pre&gt;{@code
+     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()-&gt;List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     .withCellForColumn(0, cell -&gt; cell
+     *          .updateView( comp -&gt; comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, l -&gt; {
+     *                  l.setText(cell.valueAsString().orElse(&quot;&quot;));
+     *                  l.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return l;
+     *              })
+     *              //...
+     *          )
+     *     )
+     *     .withCellForColumn(1, cell -&gt; cell
+     *          .updateView( comp -&gt; comp
+     *              //...
+     *          )
+     *     );
+     * }&lt;/pre&gt;
+     * Also see {@link #withCellForColumn(int, Configurator)} method to build a cell renderer for a column by index,
+     * and {@link #withCell(Configurator)} method to build a cell renderer for all columns of the table.
+     * &lt;br&gt;
+     * This API also supports the configuration of cell editors as the supplied lambda will also be
+     * called by an underlying {@link TableCellEditor} implementation when the cell is in editing mode.
+     * The cell will indicate that it needs an editor component by having the {@link CellConf#isEditing()}
+     * set to true. You can then decide to return a different view component for the cell editor
+     * by checking this property. The next time the lambda is invoked with the {@link CellConf#isEditing()}
+     * flag is set to true, then the cell will still contain the same editor component as previously specified.
+     * In case of the flag being false, the cell will contain the view component
+     * that was provided the last time the cell was not in editing mode.
+     *
+     *
+     * @param columnName The name of the column for which the cell renderer will be built.
+     * @param cellConfigurator A lambda function which configures the cell view.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withCellForColumn(
+        String columnName,
+        Configurator&lt;CellConf&lt;T, Object&gt;&gt; cellConfigurator
+    ) {
+<span class="nc" id="L189">        Objects.requireNonNull(cellConfigurator);</span>
+<span class="nc" id="L190">        Objects.requireNonNull(columnName);</span>
+<span class="nc" id="L191">        return withCellsForColumn(columnName, it -&gt; it.when((Class)Object.class).as(cellConfigurator));</span>
+    }
+
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument accepts a lambda function which exposes the builder API for a cell renderer.
+     *  Here an example of how this method may be used:
+     * &lt;pre&gt;{@code
+     *     UI.table(myModel)
+     *     .withCellForColumn(0, it -&gt; it
+     *         .when(String.class)
+     *         .asText( cell -&gt; &quot;[&quot; + cell.valueAsString().orElse(&quot;&quot;) + &quot;]&quot; ) )
+     *     )
+     *     .withCellForColumn(1, it -&gt; it
+     *         .when(Float.class)
+     *         .asText( cell -&gt; &quot;(&quot; + cell.valueAsString().orElse(&quot;&quot;) + &quot;f)&quot; ) )
+     *         .when(Double.class)
+     *         .asText( cell -&gt; &quot;(&quot; + cell.valueAsString().orElse(&quot;&quot;) + &quot;d)&quot; ) )
+     *     );
+     * }&lt;/pre&gt;
+     * The above example would render the first column of the table as a string surrounded by square brackets,
+     * and the second column as a float or double value surrounded by parentheses.
+     * Note that the API allows you to specify how specific types of table entry values
+     * should be rendered. This is done by calling the {@link CellBuilder#when(Class)} method
+     * before calling the {@link RenderAs#asText(Function)} method. &lt;br&gt;
+     * &lt;br&gt;
+     * &lt;b&gt;
+     *      Due to this method being inherently based on the expectation of type ambiguity it is
+     *      a rather verbose way of defining how your cells should look and behave. The simpler and
+     *      preferred way of defining cell views is through the {@link #withCell(Configurator)},
+     *      {@link #withCellForColumn(String, Configurator)} and {@link #withCellForColumn(int, Configurator)}
+     *      methods.
+     * &lt;/b&gt;
+     *
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be built.
+     * @param renderBuilder A lambda function which exposes a fluent builder API for a cell renderer
+     *                      and returns the builder API for a cell renderer.
+     *                      Call the appropriate methods on the builder API to configure the cell renderer.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withCellsForColumn(
+        int columnIndex,
+        Configurator&lt;CellBuilder&lt;T, Object&gt;&gt; renderBuilder
+    ) {
+<span class="fc" id="L236">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, CellBuilder.class);</span>
+<span class="fc" id="L237">        CellBuilder&lt;T, Object&gt; builder = _renderTable();</span>
+        try {
+<span class="fc" id="L239">            builder = renderBuilder.configure(builder);</span>
+<span class="nc" id="L240">        } catch (Exception e) {</span>
+<span class="nc" id="L241">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L242">            return this;</span>
+<span class="fc" id="L243">        }</span>
+<span class="fc" id="L244">        CellBuilder&lt;T, Object&gt; finalBuilder = builder;</span>
+<span class="fc" id="L245">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L246">            CellBuilder.SimpleTableCellRenderer renderer = finalBuilder.getForTable(thisComponent.getColumnModel().getColumn(columnIndex).getCellRenderer());</span>
+<span class="fc" id="L247">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);</span>
+<span class="fc" id="L248">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(renderer);</span>
+<span class="fc" id="L249">                })</span>
+<span class="fc" id="L250">                ._this();</span>
+    }
+
+    /**
+     *  Use this to build a basic table cell view for a particular column.
+     *  The second argument passed to this method is a lambda function
+     *  which accepts a {@link CellConf} representing the cell to be rendered and possibly even edited.
+     *  You may then return an updated cell with a desired view component
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
+     *  Here an example of how this method may be used:
+     * &lt;pre&gt;{@code
+     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()-&gt;List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     .withCellForColumn(0, cell -&gt; cell
+     *          .updateView( comp -&gt; comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, l -&gt; {
+     *                  l.setText(cell.valueAsString().orElse(&quot;&quot;));
+     *                  l.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return l;
+     *              })
+     *              //...
+     *          )
+     *     )
+     *     .withCellForColumn(1, cell -&gt; cell
+     *          .updateView( comp -&gt; comp
+     *              //...
+     *          )
+     *     );
+     * }&lt;/pre&gt;
+     * Also see {@link #withCellForColumn(String, Configurator)} method to build a cell renderer for a column by name,
+     * and {@link #withCell(Configurator)} method to build a cell renderer for all columns of the table.
+     * &lt;br&gt;
+     * This API also supports the configuration of cell editors as the supplied lambda will also be
+     * called by an underlying {@link TableCellEditor} implementation when the cell is in editing mode.
+     * The cell will indicate that it needs an editor component by having the {@link CellConf#isEditing()}
+     * set to true. You can then decide to return a different view component for the cell editor
+     * by checking this property. The next time the lambda is invoked with the {@link CellConf#isEditing()}
+     * flag is set to true, then the cell will still contain the same editor component as previously specified.
+     * In case of the flag being false, the cell will contain the view component
+     * that was provided the last time the cell was not in editing mode.
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be built.
+     * @param cellConfigurator A lambda function which configures the cell view.
+     *                         The lambda is invoked in two main situations: when the cell is in editing mode
+     *                         and when the cell is not in editing mode (only rendering).
+     *                         You may decide what to store in the cell based on its state.
+     * @return This instance of the builder, to allow for declarative method chaining.
+     */
+    public final UIForTable&lt;T&gt; withCellForColumn(
+        int columnIndex,
+        Configurator&lt;CellConf&lt;T, Object&gt;&gt; cellConfigurator
+    ) {
+<span class="nc" id="L302">        Objects.requireNonNull(cellConfigurator);</span>
+<span class="nc" id="L303">        return withCellsForColumn(columnIndex, it -&gt; it.when((Class)Object.class).as(cellConfigurator));</span>
+    }
+
+    /**
+     * Use this to register a table cell renderer for a particular column.
+     * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
+     * the cells of a table.
+     * &lt;b&gt;Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
+     * {@link #withCellForColumn(String, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell renderers as well as editors.&lt;/b&gt;
+     *
+     * @param columnName The name of the column for which the cell renderer will be registered.
+     * @param renderer The cell renderer to be registered.
+     * @return This builder node, to allow for builder-style method chaining.
+     */
+    public final UIForTable&lt;T&gt; withCellRendererForColumn( String columnName, TableCellRenderer renderer ) {
+<span class="nc" id="L319">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
+<span class="nc" id="L320">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="nc" id="L321">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L322">                    thisComponent.getColumn(columnName).setCellRenderer(renderer);</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                    if ( renderer instanceof TableCellEditor )</span>
+<span class="nc" id="L324">                        thisComponent.getColumn(columnName).setCellEditor((TableCellEditor)renderer);</span>
+<span class="nc" id="L325">                })</span>
+<span class="nc" id="L326">                ._this();</span>
+    }
+
+    /**
+     * Use this to register a table cell renderer for a particular column. &lt;br&gt;
+     * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
+     * the cells of a table.
+     * &lt;b&gt;Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
+     * {@link #withCellForColumn(int, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell renderers. It also supports both cell rendering and editing.&lt;/b&gt;
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be registered.
+     * @param renderer The cell renderer to be registered.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForTable&lt;T&gt; withCellRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
+<span class="nc" id="L342">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="nc" id="L343">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L344">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);</span>
+<span class="nc" id="L345">                })</span>
+<span class="nc" id="L346">                ._this();</span>
+    }
+
+    /**
+     *  Use this to register a {@link TableCellRenderer} for all columns of this table.&lt;br&gt;
+     *  A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
+     *  the cells of a table.&lt;br&gt;&lt;br&gt;
+     *  &lt;b&gt;Note that in SwingTree, the preferred way of defining a cell renderer is through the
+     *  {@link #withCell(Configurator)} method, which allows for a more fluent and declarative
+     *  way of defining cell renderers and also supports both cell rendering and editing.&lt;/b&gt;
+     *
+     * @param renderer A provider of {@link java.awt.Component} instances which are used to render the cells of a table.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForTable&lt;T&gt; withCellRenderer( TableCellRenderer renderer ) {
+<span class="nc" id="L361">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="nc" id="L362">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L363">                    thisComponent.setDefaultRenderer(Object.class, renderer);</span>
+<span class="nc" id="L364">                })</span>
+<span class="nc" id="L365">                ._this();</span>
+    }
+
+    /**
+     *  Use this to define a table cell renderer for all columns of this table
+     *  using the fluent builder API exposed to the provided lambda function.&lt;br&gt;
+     *  Here is an example of how this method is used:
+     *  &lt;pre&gt;{@code
+     *    UI.table()
+     *    .withCells( it -&gt; it
+     *        .when(SomeDataType.class)
+     *        .asText( cell -&gt; cell.value().get().toString() )
+     *    )
+     *    // ...
+     *  }&lt;/pre&gt;
+     *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
+     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withCells(Configurator)},
+     *  {@link UIForCombo#withCells(Configurator)} for more information.
+     *  &lt;p&gt;
+     *  &lt;b&gt;
+     *      Also see {@link #withCell(Configurator)} method, which constitutes the preferred way
+     *      to build a list cell renderer as it is simpler, more concise and less error-prone.
+     *  &lt;/b&gt;
+     *
+     * @param renderBuilder A lambda function which exposes the builder API for a cell renderer
+     *                      and returns the builder API for a cell renderer.
+     *                      Call the appropriate methods on the builder API to configure the cell renderer.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withCells(
+        Configurator&lt;CellBuilder&lt;T, Object&gt;&gt; renderBuilder
+    ) {
+<span class="fc" id="L397">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, CellBuilder.class);</span>
+<span class="fc" id="L398">        CellBuilder&lt;T, Object&gt; builder = _renderTable();</span>
+        try {
+<span class="fc" id="L400">            builder = renderBuilder.configure(builder);</span>
+<span class="nc" id="L401">        } catch (Exception e) {</span>
+<span class="nc" id="L402">            log.error(SwingTree.get().logMarker(), &quot;Error while building table renderer.&quot;, e);</span>
+<span class="nc" id="L403">            return this;</span>
+<span class="fc" id="L404">        }</span>
+<span class="fc" id="L405">        Objects.requireNonNull(builder);</span>
+<span class="fc" id="L406">        CellBuilder&lt;T, Object&gt; finalBuilder = builder;</span>
+<span class="fc" id="L407">        return _with(thisComponent -&gt; {</span>
+<span class="fc" id="L408">                    CellBuilder.SimpleTableCellRenderer renderer = finalBuilder.getForTable(thisComponent.getDefaultRenderer(Object.class));</span>
+<span class="fc" id="L409">                    thisComponent.setDefaultRenderer(Object.class, renderer);</span>
+<span class="fc" id="L410">                    thisComponent.setDefaultEditor(Object.class, renderer);</span>
+<span class="fc" id="L411">                })</span>
+<span class="fc" id="L412">                ._this();</span>
+    }
+
+    /**
+     *  Allows for the configuration of a cell view for the items of the {@link JTable} instance.
+     *  The {@link Configurator} lambda function passed to this method receives a {@link CellConf}
+     *  exposing a wide range of properties describing the state of the cell, like
+     *  its current item, its index, its selection state, etc.
+     *  You may update return an updated cell with a desired view component
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
+     *  &lt;p&gt;
+     *  Here code snippet demonstrating how this method may be used
+     *  as part of a UI declaration:
+     *  &lt;pre&gt;{@code
+     *      UI.table(UI.MapData.EDITABLE,()-&gt;{
+     *          Map&lt;String, List&lt;String&gt;&gt; data = new LinkedHashMap&lt;&gt;();
+     *          data.put(&quot;A&quot;, List.of(&quot;A1&quot;, &quot;A2&quot;, &quot;A3&quot;));
+     *          data.put(&quot;B&quot;, List.of(&quot;B1&quot;, &quot;B2&quot;, &quot;B3&quot;));
+     *          data.put(&quot;C&quot;, List.of(&quot;C1&quot;, &quot;C2&quot;, &quot;C3&quot;));
+     *          return data;
+     *      })
+     *      .withCell( cell -&gt; cell
+     *          .updateView( comp -&gt; comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, tf -&gt; {
+     *                  tf.setText(cell.valueAsString().orElse(&quot;&quot;));
+     *                  tf.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return tf;
+     *              })
+     *          )
+     *      )
+     *  }&lt;/pre&gt;
+     *  In this example, a new {@link JTable} is created from a map of column names to lists of strings.
+     *  The {@link Configurator} lambda function passed to this method configures the cell view
+     *  by setting the text of a {@link JLabel} to the value of the cell, and setting the background
+     *  color of the label to yellow if the cell is selected, and white otherwise.
+     *  &lt;br&gt;
+     *  This API also supports the configuration of cell editors as the supplied lambda will also be
+     *  called by an underlying {@link TableCellEditor} implementation when the cell is in editing mode.
+     *  The cell will indicate that it needs an editor component by having the {@link CellConf#isEditing()}
+     *  set to true. You can then decide to return a different view component for the cell editor
+     *  by checking this property. The next time the lambda is invoked with the {@link CellConf#isEditing()}
+     *  flag is set to true, then the cell will still contain the same editor component as previously specified.
+     *  In case of the flag being false, the cell will contain the view component
+     *  that was provided the last time the cell was not in editing mode.
+     *
+     *
+     * @param cellConfigurator The {@link Configurator} lambda function that configures the cell view.
+     * @return This instance of the builder node to allow for fluent method chaining.
+     * @param &lt;V&gt; The type of the value that is being rendered in this combo box.
+     */
+    public final &lt;V&gt; UIForTable&lt;T&gt; withCell(
+            Configurator&lt;CellConf&lt;T, V&gt;&gt; cellConfigurator
+    ) {
+<span class="fc" id="L466">        return withCells( it -&gt; it.when((Class)Object.class).as(cellConfigurator) );</span>
+    }
+
+    /**
+     * Use this to register a table cell editor for a particular column.
+     * &lt;b&gt;Note that in SwingTree, the preferred way of defining a cell editor for a particular column is through the
+     * {@link #withCellForColumn(String, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell editors.&lt;/b&gt;
+     *
+     * @param columnName The name of the column for which the cell editor will be registered.
+     * @param editor The cell editor to be registered.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForTable&lt;T&gt; withCellEditorForColumn( String columnName, TableCellEditor editor ) {
+<span class="nc" id="L480">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
+<span class="nc" id="L481">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
+<span class="nc" id="L482">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L483">                    thisComponent.getColumn(columnName).setCellEditor(editor);</span>
+<span class="nc" id="L484">                })</span>
+<span class="nc" id="L485">                ._this();</span>
+    }
+
+    /**
+     * Use this to register a table cell editor for a particular column.
+     * &lt;b&gt;Note that in SwingTree, the preferred way of defining a cell editor for a particular column is through the
+     * {@link #withCellForColumn(int, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell editors.&lt;/b&gt;
+     * @param columnIndex The index of the column for which the cell editor will be registered.
+     * @param editor The cell editor to be registered.
+     * @return This builder node, to allow for builder-style method chaining.
+     */
+    public final UIForTable&lt;T&gt; withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
+<span class="nc" id="L498">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
+<span class="nc" id="L499">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L500">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(editor);</span>
+<span class="nc" id="L501">                })</span>
+<span class="nc" id="L502">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set a table model.
+     *  The provided argument is a builder object whose build method will be called
+     *  for you instead of having to call the build method on the builder object yourself.
+     *  &lt;b&gt;
+     *      The preferred way of setting a table model is through the {@link #withModel(Configurator)}
+     *      which exposes a fluent builder API for binding the table model to a data source
+     *      without any boilerplate code.
+     *  &lt;/b&gt;
+     * @param dataModelBuilder The builder object which will be used to build and then set the table model.
+     * @return This builder object.
+     */
+    public final UIForTable&lt;T&gt; withModel( Buildable&lt;BasicTableModel&gt; dataModelBuilder ) {
+<span class="fc" id="L518">        Objects.requireNonNull(dataModelBuilder);</span>
+        try {
+<span class="fc" id="L520">            return this.withModel(dataModelBuilder.build());</span>
+<span class="nc" id="L521">        } catch (Exception e) {</span>
+<span class="nc" id="L522">            log.error(SwingTree.get().logMarker(), &quot;Error while building a table model.&quot;, e);</span>
+<span class="nc" id="L523">            return this;</span>
+        }
+    }
+
+    /**
+     *  Exposes a fluent builder API for a table model. &lt;br&gt;
+     *  Here an example demonstrating how this API
+     *  is typically used as part of a UI declaration:
+     *  &lt;pre&gt;{@code
+     *  UI.table().withModel( m -&gt; m
+     *      .colName( col -&gt; new String[]{&quot;X&quot;, &quot;Y&quot;, &quot;Z&quot;}[col] )
+     *      .colCount( () -&gt; 3 )
+     *      .rowCount( () -&gt; data.size() )
+     *      .getsEntryAt( (r, c) -&gt; data[r][c] )
+     *      .updateOn(update)
+     *  )
+     *  }&lt;/pre&gt;
+     *  The builder API is exposed to the lambda function passed to this method.
+     *  The actually {@link TableModel} is built internally and then set on the table.
+     *
+     * @param dataModelBuilder A lambda function which receives a builder API for a table model
+     * @return This builder instance, to allow for further method chaining.
+     */
+    public final UIForTable&lt;T&gt; withModel(
+        Configurator&lt;BasicTableModel.Builder&lt;Object&gt;&gt; dataModelBuilder
+    ) {
+<span class="fc" id="L549">        Objects.requireNonNull(dataModelBuilder);</span>
+<span class="fc" id="L550">        BasicTableModel.Builder&lt;Object&gt; builder = new BasicTableModel.Builder&lt;&gt;(Object.class);</span>
+        try {
+<span class="fc" id="L552">            builder = dataModelBuilder.configure(builder);</span>
+<span class="nc" id="L553">        } catch (Exception e) {</span>
+<span class="nc" id="L554">            log.error(SwingTree.get().logMarker(), &quot;Error while building table model.&quot;, e);</span>
+<span class="fc" id="L555">        }</span>
+<span class="fc" id="L556">        return this.withModel(builder.build());</span>
+    }
+
+    /**
+     *  Exposes a fluent builder API for a table model holding a specific type of entry. &lt;br&gt;
+     *  Here an example demonstrating how this API
+     *  is typically used as part of a UI declaration:
+     *  &lt;pre&gt;{@code
+     *  UI.table().withModel(Double.class, m -&gt; m
+     *      .colName( col -&gt; new String[]{&quot;X&quot;, &quot;Y&quot;, &quot;Z&quot;}[col] )
+     *      .colCount( () -&gt; 3 )
+     *      .rowCount( () -&gt; data.size() )
+     *      .getsEntryAt( (r, c) -&gt; data[r][c] )
+     *      .updateOn(update)
+     *  )
+     *  }&lt;/pre&gt;
+     *  In this example, the table model is built for a {@link Double} based data source.
+     *  So here the data array is a two-dimensional array of {@link Double}s. &lt;br&gt;
+     *  &lt;br&gt;
+     *  Note that the builder API is exposed to the lambda function passed to this method.
+     *  The actual {@link TableModel} is built internally and then installed on the table component.
+     *  &lt;p&gt;
+     *  You can also use the {@link UI#table(Configurator)} factory method to directly create a table
+     *  with a custom table model. &lt;br&gt;
+     *
+     * @param &lt;E&gt; The type of the table entry {@link Object}s.
+     * @param itemType The type of the table entry {@link Object}s.
+     * @param dataModelBuilder A lambda function which receives a builder API for a table model
+     * @return This builder instance, to allow for further method chaining.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel(
+        Class&lt;E&gt; itemType,
+        Configurator&lt;BasicTableModel.Builder&lt;E&gt;&gt; dataModelBuilder
+    ) {
+<span class="nc" id="L590">        Objects.requireNonNull(itemType);</span>
+<span class="nc" id="L591">        Objects.requireNonNull(dataModelBuilder);</span>
+<span class="nc" id="L592">        BasicTableModel.Builder&lt;E&gt; builder = new BasicTableModel.Builder&lt;&gt;(itemType);</span>
+        try {
+<span class="nc" id="L594">            builder = dataModelBuilder.configure(builder);</span>
+<span class="nc" id="L595">        } catch (Exception e) {</span>
+<span class="nc" id="L596">            log.error(SwingTree.get().logMarker(), &quot;Error while building table model.&quot;, e);</span>
+<span class="nc" id="L597">        }</span>
+<span class="nc" id="L598">        return this.withModel(builder.build());</span>
+    }
+    /**
+     * Use this to set a basic table model for this table.
+     * @param model The model for the table model.
+     * @return This builder object.
+     */
+    public final UIForTable&lt;T&gt; withModel( BasicTableModel model ) {
+<span class="fc" id="L606">        NullUtil.nullArgCheck(model, &quot;model&quot;, BasicTableModel.class);</span>
+<span class="fc" id="L607">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L608">                    thisComponent.setModel(model);</span>
+<span class="fc" id="L609">                })</span>
+<span class="fc" id="L610">                ._this();</span>
+    }
+
+    /**
+     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented by
+     *  either a row major {@link List} of {@link List}s of entry {@link Object}s (a list of rows)      &lt;br&gt;
+     *  or a columns major {@link List} of {@link List}s of entry {@link Object}s (a list of columns).  &lt;br&gt;
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *  &lt;p&gt;
+     *      &lt;b&gt;Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link List} and the list is modified), the table model will not be updated automatically!
+     *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.&lt;/b&gt;
+     *
+     * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param &lt;E&gt; The type of the table entry {@link Object}s.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.ListData mode, TableListDataSource&lt;E&gt; dataSource ) {
+<span class="fc" id="L629">        boolean isRowMajor = mode.isRowMajor();</span>
+<span class="fc" id="L630">        boolean isEditable = mode.isEditable();</span>
+<span class="fc bfc" id="L631" title="All 2 branches covered.">        if ( isRowMajor )</span>
+<span class="fc" id="L632">            return _with( thisComponent -&gt;</span>
+<span class="fc" id="L633">                    thisComponent.setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L634">                    {</span>
+<span class="fc" id="L635">                        @Override public int getRowCount() { return getData().size(); }</span>
+                        @Override public int getColumnCount() {
+<span class="fc" id="L637">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L638" title="1 of 2 branches missed.">                            return ( data.isEmpty() ? 0 : data.get(0).size() );</span>
+                        }
+                        @Override public @Nullable Object getValueAt(int rowIndex, int columnIndex) {
+<span class="fc" id="L641">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L642" title="1 of 2 branches missed.">                            if (isNotWithinBounds(rowIndex, columnIndex)) return null;</span>
+<span class="fc" id="L643">                            return data.get(rowIndex).get(columnIndex);</span>
+                        }
+                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L646">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L647" title="All 4 branches missed.">                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
+<span class="nc" id="L648">                            data.get(rowIndex).set(columnIndex, (E)aValue);</span>
+<span class="nc" id="L649">                        }</span>
+                    })
+                )
+<span class="fc" id="L652">                ._this();</span>
+        else // isColumnMajor
+<span class="fc" id="L654">            return _with( thisComponent -&gt;</span>
+<span class="fc" id="L655">                    thisComponent.setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L656">                    {</span>
+                        @Override public int getRowCount() {
+<span class="fc" id="L658">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L659" title="1 of 2 branches missed.">                            return (data.isEmpty() ? 0 : data.get(0).size());</span>
+                        }
+<span class="fc" id="L661">                        @Override public int getColumnCount() { return getData().size(); }</span>
+                        @Override public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
+<span class="fc" id="L663">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L664" title="1 of 2 branches missed.">                            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;</span>
+<span class="fc" id="L665">                            return data.get(columnIndex).get(rowIndex);</span>
+                        }
+                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L668">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L669" title="All 4 branches missed.">                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
+<span class="nc" id="L670">                            data.get(columnIndex).set(rowIndex, (E)aValue);</span>
+<span class="nc" id="L671">                        }</span>
+                    })
+                )
+<span class="fc" id="L674">                ._this();</span>
+    }
+
+    /**
+     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented based
+     *  on a map of column names to lists of table entries (basically a column major matrix).  &lt;br&gt;
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *  &lt;p&gt;
+     *      &lt;b&gt;Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link Map} which gets modified), the table model will not be updated automatically!
+     *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.&lt;/b&gt;
+     *
+     * @param mode An enum which configures the modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param &lt;E&gt; The type of the table entry {@link Object}s.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.MapData mode, TableMapDataSource&lt;E&gt; dataSource ) {
+<span class="fc" id="L692">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L693">                    thisComponent.setModel(new MapBasedColumnMajorTableModel&lt;&gt;(mode.isEditable(), dataSource));</span>
+<span class="fc" id="L694">                })</span>
+<span class="fc" id="L695">                ._this();</span>
+    }
+
+    /**
+     *  Use this to bind an {@link sprouts.Event} to the {@link TableModel} of this table
+     *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method.
+     *  This is useful if you want to update the table when the data source changes.
+     *
+     * @param event The event to be bound.
+     * @return This builder node, for chaining.
+     */
+    public final UIForTable&lt;T&gt; updateTableOn( Event event ) {
+<span class="fc" id="L707">        NullUtil.nullArgCheck(event, &quot;event&quot;, Event.class);</span>
+<span class="fc" id="L708">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L709">                    WeakReference&lt;T&gt; thisComponentRef = new WeakReference&lt;&gt;(thisComponent);</span>
+<span class="fc" id="L710">                    ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="fc" id="L711">                        event.observable().subscribe(()-&gt;</span>
+<span class="fc" id="L712">                            _runInUI(()-&gt;{</span>
+<span class="fc" id="L713">                                T innerComponent = thisComponentRef.get();</span>
+<span class="pc bpc" id="L714" title="1 of 2 branches missed.">                                if (innerComponent == null)</span>
+<span class="nc" id="L715">                                    return;</span>
+<span class="fc" id="L716">                                TableModel model = innerComponent.getModel();</span>
+<span class="pc bpc" id="L717" title="1 of 2 branches missed.">                                if ( model instanceof AbstractTableModel ) {</span>
+                                    // We want the table model update to be as thorough as possible, so we
+                                    // will fire a table structure changed event, followed by a table data
+                                    // changed event.
+<span class="fc" id="L721">                                    ((AbstractTableModel)model).fireTableStructureChanged();</span>
+<span class="fc" id="L722">                                    ((AbstractTableModel)model).fireTableDataChanged();</span>
+                                }
+                                else
+<span class="nc" id="L725">                                    throw new IllegalStateException(&quot;The table model is not an AbstractTableModel instance.&quot;);</span>
+<span class="fc" id="L726">                            })</span>
+                        )
+                    );
+<span class="fc" id="L729">                })</span>
+<span class="fc" id="L730">                ._this();</span>
+    }
+
+
+    private static abstract class ListBasedTableModel&lt;E&gt; extends AbstractTableModel
+    {
+        private final TableListDataSource&lt;E&gt; dataSource;
+        private final boolean isEditable;
+
+<span class="fc" id="L739">        ListBasedTableModel(boolean isEditable, TableListDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L740">            this.isEditable = isEditable;</span>
+<span class="fc" id="L741">            this.dataSource = dataSource;</span>
+<span class="fc" id="L742">        }</span>
+
+<span class="nc" id="L744">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+
+        protected List&lt;List&lt;E&gt;&gt; getData() {
+<span class="fc" id="L747">            List&lt;List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L748" title="1 of 2 branches missed.">            if ( data == null ) return new ArrayList&lt;&gt;(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L749">            return data;</span>
+        }
+        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
+<span class="pc bpc" id="L752" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
+<span class="pc bpc" id="L753" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
+<span class="fc" id="L754">            return false;</span>
+        }
+    }
+
+
+    private abstract static class MapBasedTableModel&lt;E&gt; extends AbstractTableModel
+    {
+        private final TableMapDataSource&lt;E&gt; dataSource;
+        private final boolean isEditable;
+
+<span class="fc" id="L764">        MapBasedTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L765">            this.isEditable = isEditable;</span>
+<span class="fc" id="L766">            this.dataSource = dataSource;</span>
+<span class="fc" id="L767">        }</span>
+
+        protected Map&lt;String, List&lt;E&gt;&gt; getData() {
+<span class="fc" id="L770">            Map&lt;String, List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L771" title="1 of 2 branches missed.">            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L772">            return data;</span>
+        }
+
+        @Override
+        public @Nullable String getColumnName(int column) {
+<span class="fc" id="L777">            List&lt;String&gt; columnNames = new ArrayList&lt;&gt;(getData().keySet());</span>
+<span class="pc bpc" id="L778" title="2 of 4 branches missed.">            if ( column &lt; 0 || column &gt;= columnNames.size() ) return null;</span>
+<span class="fc" id="L779">            return columnNames.get(column);</span>
+        }
+
+<span class="nc" id="L782">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+
+
+        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
+<span class="pc bpc" id="L786" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
+<span class="pc bpc" id="L787" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
+<span class="fc" id="L788">            return false;</span>
+        }
+
+    }
+
+    private static class MapBasedColumnMajorTableModel&lt;E&gt; extends MapBasedTableModel&lt;E&gt;
+    {
+        MapBasedColumnMajorTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {
+<span class="fc" id="L796">            super(isEditable, dataSource);</span>
+<span class="fc" id="L797">        }</span>
+
+        @Override
+        public int getRowCount() {
+<span class="fc" id="L801">            Map&lt;String, List&lt;E&gt;&gt; data = getData();</span>
+<span class="fc" id="L802">            return data.values()</span>
+<span class="fc" id="L803">                        .stream()</span>
+<span class="fc" id="L804">                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.</span>
+<span class="fc" id="L805">                        .mapToInt(List::size)</span>
+<span class="fc" id="L806">                        .max()</span>
+<span class="fc" id="L807">                        .orElse(0);</span>
+        }
+
+        @Override
+<span class="fc" id="L811">        public int getColumnCount() { return getData().size(); }</span>
+
+        @Override
+        public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
+<span class="pc bpc" id="L815" title="1 of 2 branches missed.">            if ( isNotWithinBounds(rowIndex, columnIndex) )</span>
+<span class="nc" id="L816">                return null;</span>
+<span class="fc" id="L817">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
+<span class="pc bpc" id="L818" title="1 of 2 branches missed.">            if ( column == null )</span>
+<span class="nc" id="L819">                return null;</span>
+<span class="pc bpc" id="L820" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() )</span>
+<span class="nc" id="L821">                return null;</span>
+<span class="fc" id="L822">            return column.get(rowIndex);</span>
+        }
+
+        @Override
+        public void setValueAt( Object aValue, int rowIndex, int columnIndex ) {
+<span class="nc bnc" id="L827" title="All 2 branches missed.">            if ( isNotWithinBounds(rowIndex, columnIndex) )</span>
+<span class="nc" id="L828">                return;</span>
+<span class="nc" id="L829">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
+<span class="nc bnc" id="L830" title="All 2 branches missed.">            if ( column == null )</span>
+<span class="nc" id="L831">                return;</span>
+<span class="nc bnc" id="L832" title="All 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() )</span>
+<span class="nc" id="L833">                return;</span>
+            try {
+<span class="nc" id="L835">                column.set(rowIndex, (E) aValue);</span>
+<span class="nc" id="L836">            } catch (Exception e) {</span>
+<span class="nc" id="L837">                log.warn(SwingTree.get().logMarker(), &quot;Failed to set value in hash table based table model.&quot;, e);</span>
+<span class="nc" id="L838">            }</span>
+<span class="nc" id="L839">        }</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
