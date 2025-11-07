@@ -200,10 +200,10 @@ final class ComponentAreas
             Arc bottomLeftArc  = border.bottomLeftArc().orElse(null);
             Area area = new Area();
 
-            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  );
-            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight);
-            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight);
-            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft );
+            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  ) * 2f;
+            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight) * 2f;
+            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight) * 2f;
+            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft ) * 2f;
 
             float arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);
             float arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);
