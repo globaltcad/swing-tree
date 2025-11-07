@@ -182,8 +182,8 @@ final class ComponentAreas
         if ( border.allCornersShareTheSameArc() && insAllTheSame ) {
             float arcWidth  = border.topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0f);
             float arcHeight = border.topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0f);
-            arcWidth  = Math.max(0, arcWidth  - insTop);
-            arcHeight = Math.max(0, arcHeight - insTop);
+            arcWidth  = Math.max(0, arcWidth  - insTop * 2f);
+            arcHeight = Math.max(0, arcHeight - insTop * 2f);
             if ( arcWidth == 0 || arcHeight == 0 )
                 return new Area(new Rectangle2D.Float(left, top, width - left - right, height - top - bottom));
 
