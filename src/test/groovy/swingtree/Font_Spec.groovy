@@ -68,7 +68,7 @@ class Font_Spec extends Specification
             with the given font family name that has a default size of 12 multiplied by the
             current look and feel's scaling factor.
         """
-        given: 'We first initialise SwingTree suing the given scaling factor'
+        given: 'We first initialise SwingTree using the given scaling factor'
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'A new font object based on the Buggie font family.'
             var font = UI.font('Buggie').toAwtFont()
@@ -88,7 +88,7 @@ class Font_Spec extends Specification
             definitions from system properties if parsing fails. When fetching fonts from
             system properties, the correct scaling factor is also applied to the font size.
         """
-        given: 'We first initialise SwingTree suing the given scaling factor'
+        given: 'We first initialise SwingTree using the given scaling factor'
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'We setup a system property for a font'
             System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')
@@ -110,7 +110,7 @@ class Font_Spec extends Specification
             the font family name. In this case, the default size of 12 multiplied by
             the current look and feel's scaling factor is used.
         """
-        given: 'We first initialise SwingTree suing the given scaling factor'
+        given: 'We first initialise SwingTree using the given scaling factor'
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
         when : 'We create a font using only the family name'
             var font = UI.font('Dancing Script').toAwtFont()

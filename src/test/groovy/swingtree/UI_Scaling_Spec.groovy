@@ -1098,9 +1098,9 @@ class UI_Scaling_Spec extends Specification
         given : 'We set the scaling factor to 1.5f'
             SwingTree.get().setUiScaleFactor(1.5f)
         and : 'We create reactive properties for fonts'
-            var buttonFont = Var.of(new Font("Arial", Font.BOLD, 12))
-            var labelFont = Var.of(new Font("Serif", Font.ITALIC, 14))
-            var fieldFont = Var.of(new Font("Monospaced", Font.PLAIN, 16))
+            var buttonFont = Var.of(UI.Font.of("Arial", UI.FontStyle.BOLD, 12))
+            var labelFont = Var.of(UI.Font.of("Serif", UI.FontStyle.ITALIC, 14))
+            var fieldFont = Var.of(UI.Font.of("Monospaced", UI.FontStyle.PLAIN, 16))
 
         when : 'We create components with bound fonts'
             var panel =
@@ -1121,9 +1121,9 @@ class UI_Scaling_Spec extends Specification
             textField.font.size == 24 // 16 * 1.5
 
         when : 'We update the font properties with new sizes'
-            buttonFont.set(new Font("Arial", Font.BOLD, 16))
-            labelFont.set(new Font("Serif", Font.ITALIC, 18))
-            fieldFont.set(new Font("Monospaced", Font.PLAIN, 20))
+            buttonFont.set(UI.Font.of("Arial", UI.FontStyle.BOLD, 16))
+            labelFont.set(UI.Font.of("Serif", UI.FontStyle.ITALIC, 18))
+            fieldFont.set(UI.Font.of("Monospaced", UI.FontStyle.PLAIN, 20))
             UI.sync() // Wait for UI updates
 
         then : 'The updated font sizes are also scaled by the scaling factor'
@@ -1209,7 +1209,7 @@ class UI_Scaling_Spec extends Specification
         """
         given : 'We start with scale factor 1.0 and a reactive font property'
             SwingTree.get().setUiScaleFactor(1.0f)
-            var dynamicFont = Var.of(new Font("Arial", Font.PLAIN, 14))
+            var dynamicFont = Var.of(UI.Font.of("Arial", UI.FontStyle.PLAIN, 14))
 
         and : 'A component with bound custom font'
             var label = UI.label("Dynamic Custom Font").withFont(dynamicFont).get(JLabel)
@@ -1227,7 +1227,7 @@ class UI_Scaling_Spec extends Specification
             label.font.size == 21
 
         when : 'Only the font property changes to a different font with new size'
-            dynamicFont.set(new Font("Times New Roman", Font.BOLD, 16))
+            dynamicFont.set(UI.Font.of("Times New Roman", UI.FontStyle.BOLD, 16))
             UI.sync()
 
         then : 'Font updates with new property value at current scale'
@@ -1236,7 +1236,7 @@ class UI_Scaling_Spec extends Specification
 
         when : 'Both scale factor and font property change'
             SwingTree.get().setUiScaleFactor(2.0f)
-            dynamicFont.set(new Font("Courier New", Font.ITALIC, 18))
+            dynamicFont.set(UI.Font.of("Courier New", UI.FontStyle.ITALIC, 18))
             UI.sync()
 
         then : 'Font reflects both changes - new family, style, and scaled size'
@@ -1254,7 +1254,7 @@ class UI_Scaling_Spec extends Specification
         """
         given : 'We set scale factor to 1.0 and create reactive properties'
             SwingTree.get().setUiScaleFactor(1.0f)
-            var dynamicFont = Var.of(new Font("Arial", Font.BOLD, 16))
+            var dynamicFont = Var.of(UI.Font.of("Arial", UI.FontStyle.BOLD, 16))
             var dynamicSize = Var.of(14)
 
         when : 'We create a panel with mixed font specification approaches'
@@ -1298,7 +1298,7 @@ class UI_Scaling_Spec extends Specification
             textArea.font.size == 18   // 12 * 1.5
 
         when : 'Dynamic properties change at scaled factor'
-            dynamicFont.set(new Font("Verdana", Font.PLAIN, 20))
+            dynamicFont.set(UI.Font.of("Verdana", UI.FontStyle.PLAIN, 20))
             dynamicSize.set(18)
             UI.sync()
 

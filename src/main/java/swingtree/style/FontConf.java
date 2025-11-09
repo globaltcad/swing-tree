@@ -176,8 +176,8 @@ public final class FontConf
     private static final FontConf _NONE = new FontConf(
                                                         "",    // Font name (family)
                                                         0,     // size
-                                                        0,     // posture
-                                                        0,     // weight
+                                                        -1,     // posture
+                                                        -1,     // weight
                                                         0,     // spacing
                                                         null,  // selection color
                                                         null,  // is underlined
@@ -901,10 +901,16 @@ public final class FontConf
         if ( _posture > 0 ) {
             isChange = isChange || !Float.valueOf(_posture).equals(currentAttributes.get(TextAttribute.POSTURE));
             attributes.put(TextAttribute.POSTURE, _posture);
+        } else if (_posture == 0) {
+            isChange = isChange || !Objects.equals(0f, currentAttributes.get(TextAttribute.POSTURE));
+            attributes.put(TextAttribute.POSTURE, null);
         }
         if ( _weight > 0 ) {
             isChange = isChange || !Float.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));
             attributes.put(TextAttribute.WEIGHT, _weight);
+        } else if ( _weight == 0 ) {
+            isChange = isChange || !Objects.equals(0f, currentAttributes.get(TextAttribute.WEIGHT));
+            attributes.put(TextAttribute.WEIGHT, null);
         }
         if ( _spacing != 0 ) {
             isChange = isChange || !Float.valueOf(_spacing).equals(currentAttributes.get(TextAttribute.TRACKING));

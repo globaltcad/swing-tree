@@ -3784,21 +3784,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
      */
-    public final I withFont( Val<Font> font ) {
+    public final I withFont( Val<UI.Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         return _withOnShow( font, (c,v) -> {
                     if ( _isUndefinedFont(v) )
                         c.setFont(null);
                     else
-                        c.setFont(SwingTree.get().scale(v));
+                        c.setFont(v.toAwtFont());
                 })
                 ._with( thisComponent -> {
-                    Font newFont = font.orElseThrowUnchecked();
+                    UI.Font newFont = font.orElseThrowUnchecked();
                     if ( _isUndefinedFont(newFont) )
                         thisComponent.setFont( null );
                     else
-                        thisComponent.setFont( SwingTree.get().scale(newFont) );
+                        thisComponent.setFont( newFont.toAwtFont() );
                 })
                 ._this();
 
