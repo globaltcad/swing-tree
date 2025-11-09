@@ -1728,52 +1728,6 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
-     *  Use this to set the font of the wrapped button type.
-     * @param font The font of the text which should be displayed on the button.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     */
-    public final I withFont( Font font ) {
-        NullUtil.nullArgCheck(font, "font", Font.class);
-        return _with( button -> {
-                        if ( _isUndefinedFont(font) )
-                            button.setFont(null);
-                        else
-                            button.setFont(SwingTree.get().scale(font));
-                    })._this();
-    }
-
-    /**
-     *  Use this to dynamically set the font of the wrapped button type
-     *  through the provided view model property.
-     *  When the font wrapped by the provided property changes,
-     *  then so does the font of the text displayed on this button.
-     *
-     * @param font The font property of the text which should be displayed on the button type.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
-     */
-    public final I withFont( Val<Font> font ) {
-        NullUtil.nullArgCheck(font, "font", Val.class);
-        NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        return _withOnShow( font, (c,v) -> {
-                    if ( _isUndefinedFont(v) )
-                        c.setFont(null);
-                    else
-                        c.setFont(SwingTree.get().scale(v));
-                })
-               ._with( thisComponent -> {
-                   Font newFont = font.orElseThrowUnchecked();
-                   if ( _isUndefinedFont(newFont) )
-                       thisComponent.setFont( null );
-                   else
-                       thisComponent.setFont( SwingTree.get().scale(newFont) );
-               } )
-               ._this();
-    }
-
-    /**
      *  Use this to set the selection state of the wrapped button type.
      *
      * @param isSelected The selection state of the wrapped button type, which translates to {@link AbstractButton#setSelected(boolean)}.
