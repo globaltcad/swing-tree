@@ -5,6 +5,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Result;
 import swingtree.api.Configurator;
 import swingtree.api.Layout;
 import swingtree.api.NoiseFunction;
@@ -27,11 +28,9 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.event.MouseEvent;
-import java.awt.font.TextAttribute;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.text.AttributedCharacterIterator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -3241,10 +3240,11 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  This class represents a SwingTree font and is used to specify the font of a component.
-     *  It is a subclass of {@link java.awt.Font} and provides additional functionality.
+     *  It is a wrapper around a {@link FontConf} object holding all fron properties which are
+     *  used to create {@link java.awt.Font} instances for Swing components.
      *  The appearance of a font is primarily based on the font family name which is used to find a font on the system.
      */
-    public static final class Font extends java.awt.Font
+    public static final class Font
     {
         /**
          *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),
@@ -3255,7 +3255,9 @@ public final class UI extends UIFactoryMethods
          *  the {@link java.awt.Component#setFont(java.awt.Font)} method as null.
          *  Passing null to this method means that the look and feel determines the font.
          */
-        public static final java.awt.Font UNDEFINED = new Font("", -1, 0);
+        public static final java.awt.Font UNDEFINED = new java.awt.Font("", -1, 0);
+
+        private final FontConf conf;
 
         /**
          *  A factory method that creates a new {@code Font} object with the specified font name
@@ -3292,15 +3294,66 @@ public final class UI extends UIFactoryMethods
         }
 
         private Font(String name, int style, int size) {
-            super(name, style, size);
+            this(new java.awt.Font(name, style, size));
         }
 
         private Font(Map<? extends AttributedCharacterIterator.Attribute, ?> attributes) {
-            super(attributes);
+            this(new java.awt.Font(attributes));
         }
 
         private Font(java.awt.Font font) {
-            super(font);
+            this(conf->conf.withPropertiesFromFont(font));
+        }
+
+        private Font(Configurator<FontConf> configurator) {
+            this(Result.ofTry(FontConf.class, ()->configurator.configure(FontConf.none()))
+                                    .logProblemsAsError()
+                                    .orElse(FontConf.none()));
+        }
+
+        private Font(FontConf conf) {
+            this.conf = conf;
+        }
+
+        /**
+         *  Converts this font to a {@link java.awt.Font} object
+         *  that can be used in Swing components.
+         *  Note that this method creates a new {@link java.awt.Font} object
+         *  which will always be scaled according to the current DPI settings
+         *  of SwingTree, which you can access using {@link UI#scale()}.
+         *
+         *  @return The {@link java.awt.Font} object representing this font.
+         */
+        public java.awt.Font toAwtFont() {
+            return SwingTree.get().scale(this.conf.toAwtFont());
+        }
+
+        /**
+         *  Returns the configuration of this font which
+         *  encapsulates all properties of the font and can
+         *  be used to convert to a {@link java.awt.Font} object
+         *  using the {@link FontConf#toAwtFont()} method.
+         *
+         *  @return The configuration of this font.
+         */
+        public FontConf conf() {
+            return this.conf;
+        }
+
+        /**
+         *  Allows configuring this font using a configurator function
+         *  to a new {@code Font} object with the desired changes.
+         *  @param configurator The configurator function that applies changes to the font configuration.
+         *                      It receives a {@link FontConf} object representing the current configuration
+         *                      of the font and should return the modified {@code FontConf} object.
+         * @return A new {@code Font} object with the applied changes.
+         * @throws NullPointerException If the configurator is null.
+         */
+        public Font with( Configurator<FontConf> configurator ) {
+            Objects.requireNonNull(configurator, "The font configurator cannot be null.");
+            return new Font(Result.ofTry(FontConf.class, ()-> configurator.configure(this.conf))
+                    .logProblemsAsError()
+                    .orElse(this.conf));
         }
 
         /**
@@ -3311,9 +3364,7 @@ public final class UI extends UIFactoryMethods
          */
         public Font withName( String name ) {
             Objects.requireNonNull(name, "The font name cannot be null.");
-            Map<TextAttribute, Object> attributes = new HashMap<>(getAttributes());
-            attributes.put(TextAttribute.FAMILY, name);
-            return new Font(attributes);
+            return with(conf->conf.family(name));
         }
 
         /**
@@ -3323,24 +3374,7 @@ public final class UI extends UIFactoryMethods
          *  @return A new {@code Font} object with the font style changed.
          */
         public Font withStyle( FontStyle style ) {
-            Map<TextAttribute, Object> attributes = new HashMap<>(getAttributes());
-            switch (style) {
-                case PLAIN:
-                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
-                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
-                    break;
-                case BOLD:
-                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-                    break;
-                case ITALIC:
-                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
-                    break;
-                case BOLD_ITALIC:
-                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
-                    break;
-            }
-            return new Font(attributes);
+            return with(conf->conf.style(style));
         }
 
         /**
@@ -3349,9 +3383,7 @@ public final class UI extends UIFactoryMethods
          *  @return A new {@code Font} object with the font size changed.
          */
         public Font withSize( int size ) {
-            Map<TextAttribute, Object> attributes = new HashMap<>(getAttributes());
-            attributes.put(TextAttribute.SIZE, (float) size);
-            return new Font(attributes);
+            return with(conf->conf.size(size));
         }
 
     }

@@ -207,16 +207,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         Exception potentialProblem1 = null;
         Exception potentialProblem2 = null;
         String mayBeProperty = System.getProperty(fontString);
-        UI.Font font = null;
+        Font font = null;
         try {
             if ( mayBeProperty == null )
-                font = _decodeFont(fontString);
+                font = Font.decode(fontString);
         } catch( Exception e ) {
             potentialProblem1 = e;
         }
         try {
             if ( mayBeProperty != null )
-                font = _decodeFont(mayBeProperty);
+                font = Font.decode(mayBeProperty);
         } catch( Exception e ) {
             potentialProblem2 = e;
         }
@@ -235,17 +235,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 return UI.Font.of(Font.DIALOG, UI.FontStyle.PLAIN, UI.scale(12));
             }
         } else {
-            return font;
+            return UI.Font.of(font);
         }
-    }
-
-    private static UI.Font _decodeFont( String fontString ) {
-        Font font = Font.decode(fontString);
-        Font scaledFont = SwingTree.get().scale(font);
-        if (scaledFont instanceof UI.Font)
-            return (UI.Font) scaledFont;
-        else
-            return UI.Font.of(scaledFont);
     }
 
     /**

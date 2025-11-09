@@ -545,6 +545,23 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     }
 
     /**
+     *  Use this to set the font of the wrapped {@link JLabel}.
+     * @param font The font of the text which should be displayed on the label.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final UIForLabel<L> withFont( UI.Font font ) {
+        NullUtil.nullArgCheck(font, "font", Font.class, "Use 'UI.FONT_UNDEFINED' instead of null!");
+        return _with( thisComponent -> {
+            if ( _isUndefinedFont(font) )
+                thisComponent.setFont(null);
+            else
+                thisComponent.setFont(font.toAwtFont());
+        })
+        ._this();
+    }
+
+    /**
      *  Use this to dynamically set the font of the wrapped {@link JLabel}
      *  through the provided view model property.
      *  When the font wrapped by the provided property changes,

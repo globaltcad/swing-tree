@@ -36,8 +36,8 @@ class Font_Spec extends Specification
             multiplied by the current look and feel's scaling factor is used.
         """
         given:
-            var font1 = UI.font('Ubuntu-PLAIN-14')
-            var font2 = UI.font('Dancing Script-ITALIC-24')
+            var font1 = UI.font('Ubuntu-PLAIN-14').toAwtFont()
+            var font2 = UI.font('Dancing Script-ITALIC-24').toAwtFont()
         expect :
             font1.family == 'Ubuntu'
             font1.style == Font.PLAIN
@@ -53,7 +53,7 @@ class Font_Spec extends Specification
         given: 'First we setup a system property'
             System.setProperty('my.fonts.AlloyInk', 'Alloy Ink-ITALIC-42')
         when: 'We use the `UI.font(String)` method to access the font'
-            var font = UI.font('my.fonts.AlloyInk')
+            var font = UI.font('my.fonts.AlloyInk').toAwtFont()
         then: 'The font is correctly parsed'
             font.family == 'a Alloy Ink'
             font.style == Font.ITALIC
@@ -71,7 +71,7 @@ class Font_Spec extends Specification
         given: 'We first initialise SwingTree suing the given scaling factor'
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'A new font object based on the Buggie font family.'
-            var font = UI.font('Buggie')
+            var font = UI.font('Buggie').toAwtFont()
         expect: 'The font object has the correct family and size.'
             font.family == 'Buggie'
             font.size == (int)(12 * scalingFactor)
@@ -93,7 +93,7 @@ class Font_Spec extends Specification
         and : 'We setup a system property for a font'
             System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')
         when : 'We fetch the font using the UI.font factory method'
-            var font = UI.font('my.fonts.TestFont')
+            var font = UI.font('my.fonts.TestFont').toAwtFont()
         then : 'The font has the correct family, style, and scaled size'
             font.family == 'Ubuntu'
             font.style == Font.BOLD
@@ -113,7 +113,7 @@ class Font_Spec extends Specification
         given: 'We first initialise SwingTree suing the given scaling factor'
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
         when : 'We create a font using only the family name'
-            var font = UI.font('Dancing Script')
+            var font = UI.font('Dancing Script').toAwtFont()
         then : 'The font has the correct family and scaled size'
             font.family == 'Dancing Script'
             font.style == Font.PLAIN

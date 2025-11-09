@@ -28,6 +28,7 @@ import swingtree.layout.LayoutConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
+import swingtree.style.FontConf;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -71,6 +72,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
         return font == UI.Font.UNDEFINED;
+    }
+    protected final boolean _isUndefinedFont( UI.Font font ) {
+        return font.conf().equals(FontConf.none());
     }
 
     @SuppressWarnings("ReferenceEquality")

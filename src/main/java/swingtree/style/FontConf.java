@@ -743,8 +743,17 @@ public final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
     }
 
-    FontConf withPropertiesFromFont( Font font )
+    /**
+     * Creates a new {@link FontConf} instance by extracting the font properties
+     * from the provided {@link Font} instance.
+     *
+     * @param font The {@link Font} instance to extract the properties from.
+     * @return A new {@link FontConf} instance with the extracted properties.
+     * @throws NullPointerException if the provided font is null.
+     */
+    public FontConf withPropertiesFromFont( Font font )
     {
+        Objects.requireNonNull(font);
         if ( StyleUtil.isUndefinedFont(font) )
             return this;
 
@@ -845,6 +854,25 @@ public final class FontConf
                 );
     }
 
+    /**
+     * Creates a new {@link Font} instance based on this font config,
+     * using the default system font as the base font.
+     *
+     * @return A new {@link Font} instance based on this font config.
+     */
+    public java.awt.Font toAwtFont() {
+        java.awt.Font defaultFont = UIManager.getDefaults().getFont("defaultFont");
+        if ( defaultFont == null ) {
+            Object obj = UIManager.getLookAndFeelDefaults().get("defaultFont");
+            if ( obj instanceof java.awt.Font )
+                defaultFont = (java.awt.Font) obj;
+        }
+        if ( defaultFont == null )
+            defaultFont = new JLabel().getFont();
+        return _createDerivedFrom(defaultFont, null)
+                .orElse(defaultFont);
+    }
+
     Optional<Font> createDerivedFrom( Font existingFont, JComponent component ) {
         return _createDerivedFrom(existingFont, component);
     }
@@ -853,7 +881,7 @@ public final class FontConf
         return _createDerivedFrom(existingFont, boxModel);
     }
 
-    private Optional<Font> _createDerivedFrom( Font existingFont, Object boxModelOrComponent )
+    private Optional<Font> _createDerivedFrom( Font existingFont, @Nullable Object boxModelOrComponent )
     {
         if ( this.equals(_NONE) )
             return Optional.empty();
