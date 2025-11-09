@@ -79,4 +79,46 @@ class Font_Spec extends Specification
         where :
             scalingFactor << [1f, 1.25f, 1.5f, 1.75f, 2f]
     }
+
+    def 'The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor.'(
+        float scalingFactor
+    ) {
+        reportInfo """
+            The `UI.font(String)` not only parses font strings, but it can also fetch font
+            definitions from system properties if parsing fails. When fetching fonts from
+            system properties, the correct scaling factor is also applied to the font size.
+        """
+        given: 'We first initialise SwingTree suing the given scaling factor'
+            SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
+        and : 'We setup a system property for a font'
+            System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')
+        when : 'We fetch the font using the UI.font factory method'
+            var font = UI.font('my.fonts.TestFont')
+        then : 'The font has the correct family, style, and scaled size'
+            font.family == 'Ubuntu'
+            font.style == Font.BOLD
+            font.size == Math.round(42 * scalingFactor)
+        where :
+            scalingFactor << [1f, 1.25f, 1.5f, 1.75f, 2f]
+    }
+
+    def 'The `UI.font(String)` factory method can create a font merely bz specifying the family.'(
+        float scalingFactor
+    ) {
+        reportInfo """
+            The `UI.font(String)` factory method can create a font merely by specifying
+            the font family name. In this case, the default size of 12 multiplied by
+            the current look and feel's scaling factor is used.
+        """
+        given: 'We first initialise SwingTree suing the given scaling factor'
+            SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
+        when : 'We create a font using only the family name'
+            var font = UI.font('Dancing Script')
+        then : 'The font has the correct family and scaled size'
+            font.family == 'Dancing Script'
+            font.style == Font.PLAIN
+            font.size == Math.round(12 * scalingFactor)
+        where :
+            scalingFactor << [1f, 1.25f, 1.5f, 1.75f, 2f]
+    }
 }

@@ -234,18 +234,18 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 log.error(SwingTree.get().logMarker(), "Could not create font with name '" + fontString + "' and size 12.", e);
                 return UI.Font.of(Font.DIALOG, UI.FontStyle.PLAIN, UI.scale(12));
             }
+        } else {
+            return font;
         }
-        return font;
     }
 
     private static UI.Font _decodeFont( String fontString ) {
-        if ( !_endsWithFontSize(fontString) )
-            fontString += ( "-" + UI.scale(12) );
-        return UI.Font.of(Font.decode(fontString));
-    }
-
-    private static boolean _endsWithFontSize( String fontString ) {
-        return fontString.matches(".*-+\\d+$");
+        Font font = Font.decode(fontString);
+        Font scaledFont = SwingTree.get().scale(font);
+        if (scaledFont instanceof UI.Font)
+            return (UI.Font) scaledFont;
+        else
+            return UI.Font.of(scaledFont);
     }
 
     /**
