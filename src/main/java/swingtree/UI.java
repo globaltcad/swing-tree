@@ -6,6 +6,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Result;
+import sprouts.Val;
 import swingtree.api.Configurator;
 import swingtree.api.Layout;
 import swingtree.api.NoiseFunction;
@@ -3233,16 +3234,28 @@ public final class UI extends UIFactoryMethods
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #brightness()
          */
-        public Color withBrightness(double brightness ) {
+        public Color withBrightness( double brightness ) {
             return Color.ofHsb(hue(), saturation(), brightness, opacity());
         }
     }
 
     /**
-     *  This class represents a SwingTree font and is used to specify the font of a component.
-     *  It is a wrapper around a {@link FontConf} object holding all fron properties which are
-     *  used to create {@link java.awt.Font} instances for Swing components.
-     *  The appearance of a font is primarily based on the font family name which is used to find a font on the system.
+     *  An immutable and value based font configuration object, which is used to configure component fonts
+     *  in a UI declaration. SwingTree can dynamically generate {@link java.awt.Font}s for
+     *  components using the {@link Font#toAwtFont()} method. This may be done reactively, like for
+     *  example when the look and feel changes its UI scale and SwingTree scales and re-installs your fonts.<br>
+     *  This is a wrapper around a {@link FontConf} object, which is also used in the {@link UIForAnySwing#withStyle(Styler)}
+     *  API, and it holds all font properties needed to create {@link java.awt.Font} instances for Swing components.
+     *  The appearance of a font is primarily based on the font family name which is used to find a font on the system,
+     *  but there is a variety of other properties which you can configure using {@link #with(Configurator)}.<br>
+     *  <b>
+     *      We recommend using this class instead of classical AWT Font instances in your code,
+     *      as it allows SwingTree to scale your UI more reliably.
+     *  </b><br>
+     * @see UIForAnySwing#withFont(Font) For the most common usecase of this class.
+     * @see UIForAnySwing#withFont(Val) To configure a reactive font for a component.
+     * @see UIForAnySwing#withStyle(Styler) and more specifically {@link ComponentStyleDelegate#font(UI.Font)}
+     *      to configure the font of a component through the SwingTree style API.
      */
     public static final class Font
     {

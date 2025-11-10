@@ -1927,7 +1927,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that font styles will only apply if the component that is being rendered
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
-     *  Note that this font style will be applied to both the component font property
+     *  Also note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
      *  {@link #componentFont(Configurator)}.
@@ -1940,6 +1940,26 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> font( Font font ) {
         Objects.requireNonNull(font, "The font cannot be null! Use UI.FONT_UNDEFINED to remove the font style.");
         return _withFont( f -> f.withPropertiesFromFont(font) );
+    }
+
+    /**
+     *  Returns a new {@link StyleConf} with the provided {@link UI.Font}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
+     *  <p>
+     *  Also note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Configurator)} or more generally {@link UIForAnySwing#withFont(UI.Font)}.
+     *
+     * @param font The {@link UI.Font} object holding your desired font style.
+     * @return A new {@link ComponentStyleDelegate} with the supplied {@link UI.Font}.
+     * @throws NullPointerException If the supplied font is {@code null}.
+     *         Use {@link UI.Font#UNDEFINED} to remove the font style.
+     */
+    public ComponentStyleDelegate<C> font( UI.Font font ) {
+        Objects.requireNonNull(font, "The font cannot be null! Use UI.FONT_UNDEFINED to remove the font style.");
+        return _withFont( f -> font.conf() );
     }
 
     /**
