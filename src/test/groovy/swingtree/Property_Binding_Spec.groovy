@@ -9,6 +9,7 @@ import sprouts.Var
 import swingtree.components.JSplitButton
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
+import utility.SwingTreeTestConfigurator
 
 import javax.swing.JPanel
 import java.awt.*
@@ -29,6 +30,7 @@ class Property_Binding_Spec extends Specification
     enum Accept { YES, NO, MAYBE }
 
     def setupSpec() {
+        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
@@ -260,7 +262,7 @@ class Property_Binding_Spec extends Specification
         given: 'We first initialise SwingTree using the given scaling factor'
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'We create a property representing the font of a component.'
-            Val<UI.Font> property = Var.of(UI.Font.of("Arial", UI.FontStyle.PLAIN, 12))
+            Val<UI.Font> property = Var.of(UI.Font.of("Ubuntu", UI.FontStyle.PLAIN, 12))
             property.get().toAwtFont()
         and : 'We create a UI to which we want to bind:'
             var ui = UI.panel("fill, wrap 1")
@@ -271,19 +273,19 @@ class Property_Binding_Spec extends Specification
             var panel = ui.get(JPanel)
 
         expect : 'The text field will have the font of the property.'
-            panel.components[1].font.toString() == new Font("Arial", Font.PLAIN, Math.round(12 * scalingFactor) as int).toString()
+            panel.components[1].font.toString() == new Font("Ubuntu", Font.PLAIN, Math.round(12 * scalingFactor) as int).toString()
         and : 'The text area will have the slightly derived font from the property.'
-            panel.components[2].font.toString() == new Font("Arial", Font.ITALIC, Math.round(12 * scalingFactor) as int).toString()
+            panel.components[2].font.toString() == new Font("Ubuntu", Font.ITALIC, Math.round(12 * scalingFactor) as int).toString()
 
         when : 'We change the value of the property.'
-            property.set(UI.Font.of("Times New Roman", UI.FontStyle.BOLD, 16))
+            property.set(UI.Font.of("Buggie", UI.FontStyle.BOLD, 16))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
 
         then : 'The text field will have the new font.'
-            panel.components[1].font.toString() == new Font("Times New Roman", Font.BOLD, Math.round(16 * scalingFactor) as int).toString()
+            panel.components[1].font.toString() == new Font("Buggie", Font.BOLD, Math.round(16 * scalingFactor) as int).toString()
         and : 'The text area will again have the slightly derived font from the property.'
-            panel.components[2].font.toString() == new Font("Times New Roman", Font.ITALIC, Math.round(16 * scalingFactor) as int).toString()
+            panel.components[2].font.toString() == new Font("Buggie", Font.ITALIC, Math.round(16 * scalingFactor) as int).toString()
         where :
             scalingFactor << [1f, 1.25f, 1.5f, 1.75f, 2f]
     }
