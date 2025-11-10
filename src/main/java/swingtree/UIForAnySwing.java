@@ -3742,7 +3742,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Use this to set the font of the wrapped {@link JComponent}.
-     * @param font The font of the text which should be displayed on the component.
+     *  If the library and look and feel has a {@link UI#scale()} facter
+     *  other than {@code 1.0}, then the font size fill be scaled accordingly...<br>
+     *  <b>
+     *      To ensure reliable and consistent scaling when working with font,
+     *      we recommend using {@link #withFont(UI.Font)} instead of
+     *      this method. When passing a {@link UI.Font} to SwingTree, then
+     *      it will reliably be converted to a native font with the correct scale.
+     *  </b>
+     *
+     * @param font The {@link java.awt.Font} of the text which should be displayed on the component.
      * @return This builder instance, to allow for method chaining.
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      */
@@ -3759,6 +3768,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Use this to set the font of the wrapped component type.
+     *  Using an {@link UI.Font} over an AWT font allows SwingTree to ensure that
+     *  the current look and feel scale (for high DPI environments) is correctly applied.
+     *
      * @param font The font of the text which should be displayed on the component.
      * @return This builder instance, to allow for method chaining.
      * @throws IllegalArgumentException if {@code font} is {@code null}.
