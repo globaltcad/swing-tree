@@ -176,8 +176,8 @@ public final class FontConf
     private static final FontConf _NONE = new FontConf(
                                                         "",    // Font name (family)
                                                         0,     // size
-                                                        -1,     // posture
-                                                        -1,     // weight
+                                                        -1,    // posture
+                                                        -1,    // weight
                                                         0,     // spacing
                                                         null,  // selection color
                                                         null,  // is underlined
@@ -278,8 +278,8 @@ public final class FontConf
     ) {
         _familyName = Objects.requireNonNull(name);
         _size    = fontSize;
-        _posture = posture;
-        _weight  = weight;
+        _posture = posture < 0 ? -1 : posture;
+        _weight  = weight < 0 ? -1 : weight;
         _spacing = spacing;
         _selectionColor  = selectionColor;
         _isUnderlined    = isUnderline;
@@ -295,9 +295,9 @@ public final class FontConf
 
     int size() { return _size; }
 
-    float posture() { return _posture; }
+    Optional<Float> posture() { return Optional.ofNullable(_posture < 0 ? null : _posture); }
 
-    float weight() { return _weight; }
+    Optional<Float> weight() { return Optional.ofNullable(_weight < 0 ? null : _weight); }
 
     float spacing() { return _spacing; }
 
@@ -1057,8 +1057,8 @@ public final class FontConf
         return this.getClass().getSimpleName() + "[" +
                     "family="              + _familyName + ", " +
                     "size="                + _size                                   + ", " +
-                    "posture="             + _posture                                + ", " +
-                    "weight="              + _weight                                 + ", " +
+                    "posture="             + (_posture < 0 ? "?" : _posture)         + ", " +
+                    "weight="              + (_weight < 0 ? "?" : _weight)           + ", " +
                     "spacing="             + _spacing                                + ", " +
                     "underlined="          + underline                               + ", " +
                     "strikeThrough="       + strike                                  + ", " +

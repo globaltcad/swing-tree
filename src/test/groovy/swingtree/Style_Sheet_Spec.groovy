@@ -746,7 +746,7 @@ class Style_Sheet_Spec extends Specification
             s.shadow(UI.Layer.FOREGROUND, "named shadow") == ShadowConf.none()
             s.font().family() == "Ubuntu"
             s.font().size() == 12
-            s.font().posture() == 0
+            s.font().posture().get() == 0
     }
     
     

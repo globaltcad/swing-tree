@@ -4,6 +4,8 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.api.Configurator
+import swingtree.style.FontConf
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
@@ -12,8 +14,8 @@ import java.awt.Font
 @Title("Fonts")
 @Narrative('''
 
-    As part of the `UI` namespace, SwingTree ships with a custom `Font` 
-    sub-type that exposes a set of additional convenience methods for 
+    As part of the `UI` namespace, SwingTree ships with a custom `Font` class,
+    which is an immutable value object containing a lot of properties and methods for 
     working with fonts in Swing applications.
 
 ''')
@@ -120,5 +122,63 @@ class Font_Spec extends Specification
             font.size == Math.round(12 * scalingFactor)
         where :
             scalingFactor << [1f, 1.25f, 1.5f, 1.75f, 2f]
+    }
+
+    def 'A SwingTree `Font` object has value semantics.'()
+    {
+        reportInfo """
+            Two `UI.Font`s with the same contents will be considered
+            equal, and if they do not have the same contents, then they are
+            not reported as equal by the `equal` and `hashCode` methods...
+        """
+        given : 'We create two reference fonts:'
+            var f1 = UI.Font.of("Ubuntu", UI.FontStyle.BOLD, 14)
+            var f2 = UI.Font.of("Dialog", UI.FontStyle.ITALIC, 13)
+        expect :
+            f1 != f2
+            f1.conf() != f2.conf()
+
+        when :
+            f2 = f2.withName("Ubuntu").withSize(14).withStyle(UI.FontStyle.BOLD)
+        then :
+            f1 == f2
+            f1.conf() == f2.conf()
+            f1.hashCode() == f2.hashCode()
+            f1.conf().hashCode() == f2.conf().hashCode()
+    }
+
+    def 'A SwingTree `Font` object has insightful String representations.'()
+    {
+        given : 'We create two reference fonts:'
+            var f1 = UI.Font.of("Ubuntu", UI.FontStyle.PLAIN, 14)
+            var f2 = UI.Font.of("Dialog", UI.FontStyle.ITALIC, 11)
+            var f3 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 17).with((Configurator<FontConf>){FontConf c -> c.strikeThrough(true)})
+        expect :
+            f1.toString() == "UI.Font[" +
+                                    "family=Ubuntu, size=14, posture=0.0, weight=0.0, spacing=0.0, underlined=false, " +
+                                    "strikeThrough=false, selectionColor=?, transform=?, paint=FontPaintConf[NONE], " +
+                                    "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
+                                "]"
+        and :
+            f2.toString() == "UI.Font[" +
+                                    "family=Dialog, size=11, posture=0.2, weight=0.0, spacing=0.0, underlined=false, " +
+                                    "strikeThrough=false, selectionColor=?, transform=?, paint=FontPaintConf[NONE], " +
+                                    "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
+                                "]"
+        and :
+            f3.toString() == "UI.Font[" +
+                                    "family=Buggie, size=17, posture=0.2, weight=2.0, spacing=0.0, underlined=false, " +
+                                    "strikeThrough=true, selectionColor=?, transform=?, paint=FontPaintConf[NONE], " +
+                                    "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
+                                "]"
+
+        when : 'We create a font with "unknown" posture and weight...'
+            var f4 = f3.with((Configurator<FontConf>){FontConf c -> c.weight(-11).posture(-12)})
+        then : 'The string representation will represent such unknown properties with a "?":'
+            f4.toString() == "UI.Font[" +
+                                "family=Buggie, size=17, posture=?, weight=?, spacing=0.0, underlined=false, " +
+                                "strikeThrough=true, selectionColor=?, transform=?, paint=FontPaintConf[NONE], " +
+                                "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
+                            "]"
     }
 }

@@ -203,7 +203,7 @@ class Styles_Spec extends Specification
                                         "FontConf[" +
                                             "family=Times New Roman, " +
                                             "size=" + Math.round(12*uiScale) + ", " +
-                                            "posture=-1.0, " +
+                                            "posture=?, " +
                                             "weight=2.0, " +
                                             "spacing=0.0, " +
                                             "underlined=true, " +
@@ -270,8 +270,8 @@ class Styles_Spec extends Specification
                                         "FontConf[" +
                                             "family=, " +
                                             "size=0, " +
-                                            "posture=-1.0, " +
-                                            "weight=-1.0, " +
+                                            "posture=?, " +
+                                            "weight=?, " +
                                             "spacing=0.0, " +
                                             "underlined=?, " +
                                             "strikeThrough=?, " +

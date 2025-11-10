@@ -3386,6 +3386,22 @@ public final class UI extends UIFactoryMethods
             return with(conf->conf.size(size));
         }
 
+        @Override
+        public int hashCode() {
+            return this.conf.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof Font && this.conf.equals(((Font)obj).conf);
+        }
+
+        @Override
+        public String toString() {
+            String confString = this.conf.toString();
+            return "UI.Font[" + confString.substring(9, confString.length() - 1) + "]";
+        }
+
     }
 
 }
