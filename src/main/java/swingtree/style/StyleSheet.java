@@ -107,13 +107,14 @@ public abstract class StyleSheet
     }
 
     /**
-     *  Essentially (re)initiates the style sheet by clearing all the traits and
-     *  then calling the {@link #configure()} method to add new traits to the style sheet.
-     *  Use this method if your style sheet has a more advanced meta configuration
-     *  which requires that the {@link StyleTrait}s and {@link Styler}s of this style sheet to change dynamically.
-     *  For example, during the new configuration you may want to add
+     *  Essentially (re)initiates the style sheet by clearing all previously registered
+     *  {@link StyleTrait}s and {@link Styler}s, and then calling the {@link #configure()}
+     *  method again to establish a potentially completely new style.<br>
+     *  You can use this method to build highly dynamic styling behavior.
+     *  For example, during the new configuration you may want to add switch to a completely
      *  a different set of traits with different {@link Styler}s depending on the current
-     *  theme of the application, which the user can change at runtime (don't forget to repaint the components).
+     *  theme of the application, which you also want the user to change at runtime
+     *  (but don't forget to repaint the components to see the effect).
      */
     public final void reconfigure() {
         _traitGraphBuilt = false;
