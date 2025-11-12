@@ -692,6 +692,11 @@ final class StyleInstaller<C extends JComponent>
                         owner.setFont( newFont );
                 });
 
+        _installLayoutInfoFromFontConf(fontConf, owner);
+    }
+
+    @SuppressWarnings("DoNotCall")
+    private static void _installLayoutInfoFromFontConf(FontConf fontConf, JComponent owner) {
         LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(fontConf, owner);
     }
 

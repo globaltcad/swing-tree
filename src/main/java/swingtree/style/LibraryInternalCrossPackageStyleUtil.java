@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.DoNotCall;
+
 import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -11,8 +13,10 @@ import java.util.Objects;
  *  <b>This class is technically public, but NOT INTENDED TO BE CALLED BY CLIENT CODE!</b>
  *  It has to be public to allow for code reuse between the {@link swingtree} and {@link swingtree.style} packages.
  */
-public class LibraryInternalCrossPackageStyleUtil {
+@Deprecated
+public final class LibraryInternalCrossPackageStyleUtil {
 
+    @DoNotCall @Deprecated
     public static void applyFontConfAlignmentsToComponent(FontConf fontConf, JComponent owner) {
         fontConf.horizontalAlignment().forSwing().ifPresent( forSwing -> {
             if ( owner instanceof JLabel ) {

@@ -3818,6 +3818,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private static void _installLayoutInfoFromFontConf(UI.Font font, JComponent owner) {
         LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(font.conf(), owner);
     }
