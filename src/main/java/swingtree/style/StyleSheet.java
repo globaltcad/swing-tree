@@ -2,11 +2,13 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.SwingTreeConfigurator;
 import swingtree.api.Styler;
 
 import javax.swing.JComponent;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  *  An abstract class intended to be extended to create custom CSS look-alike
@@ -56,8 +58,14 @@ import java.util.function.BiFunction;
  *  Note that the {@link #configure()} method, here the {@link Styler} lambdas
  *  are intended to be registered, is not called eagerly in the constructor of the style sheet,
  *  but rather lazily when the style sheet is first used to calculate
- *  the style for a particular component through the
- *  {@link #applyTo(JComponent)} or {@link #applyTo(JComponent, StyleConf)} methods.
+ *  the style configuration for a particular component, which happens through the
+ *  {@link #computeStyleFrom(JComponent)} or {@link #computeStyleFrom(JComponent, StyleConf)} methods.
+ *  <br>
+ *  The intended way to use a {@link StyleSheet} is by configuring it globally
+ *  through {@link swingtree.SwingTree#initialiseUsing(SwingTreeConfigurator)}, or if
+ *  you want to apply ste sheets to specific scopes through {@link swingtree.UI#use(StyleSheet, Supplier)}.
+ *  The second argument is a supplier lambda for your SwingTree GUI declaration where each component
+ *  will be bound to the {@link StyleSheet} you supplied!
  */
 public abstract class StyleSheet
 {
@@ -81,10 +89,18 @@ public abstract class StyleSheet
     private boolean _traitGraphBuilt = false;
     private boolean _initialized     = false;
 
+
     protected StyleSheet() {
         _defaultStyle = (c, startingStyle) -> startingStyle;
     }
 
+    /**
+     *  Use this method to inherit styles from the supplied {@code parentStyleSheet}.
+     *  All styles in the parent will be reused in this style, but you may overwrite
+     *  parent styles in the local {@link #configure()} method...
+     *
+     * @param parentStyleSheet Another {@link StyleSheet} from which this one should inherit all styles!
+     */
     protected StyleSheet( StyleSheet parentStyleSheet ) {
         Objects.requireNonNull(parentStyleSheet, "Use StyleSheet.none() instead of null.");
         _defaultStyle = parentStyleSheet::_applyTo;
@@ -265,41 +281,59 @@ public abstract class StyleSheet
     protected abstract void configure();
 
     /**
-     *  Applies the style sheet to the given component.
-     *  Note that the style sheet is already configured at this point,
+     *  Uses this style sheet to compute the {@link StyleConf} for a component
+     *  derived from the {@link StyleConf#none()} constant as a basis.
+     *  Note that the style sheet is expected to already be configured at this point,
      *  because the {@link #configure()} method is called in the constructor of the style sheet.
      *  <br><br>
      *  Example:
      *  <pre>{@code
      *      MyStyleSheet styleSheet = new MyStyleSheet();
      *      JComboBox<String> comboBox = new JComboBox<>();
-     *      styleSheet.applyTo(comboBox);
+     *      var style = styleSheet.computeStyleFrom(comboBox);
      * }</pre>
+     * <b>
+     *     Note that this method does NOT install the style
+     *     on the supplied component! Style installation is
+     *     intended to happen when you SwingTree UI declarations
+     *     are bound to a particular {@link StyleSheet} through
+     *     the {@link swingtree.UI#use(StyleSheet, Supplier)} method.
+     * </b>
      *
      * @param toBeStyled The component to apply the style sheet to.
      * @return The {@link StyleConf} that was applied to the component.
      */
-    public StyleConf applyTo(JComponent toBeStyled ) { return applyTo( toBeStyled, StyleConf.none() ); }
+    public final StyleConf computeStyleFrom( JComponent toBeStyled ) {
+        return computeStyleFrom( toBeStyled, StyleConf.none() );
+    }
 
     /**
-     *  Applies the style sheet to the given component using the
-     *  supplied starting {@link StyleConf} as a basis.
-     *  Note that the style sheet is already configured at this point,
-     *  because the {@link #configure()} method is called in the constructor of the style sheet.
+     *  Uses this style sheet to compute the {@link StyleConf} for a component
+     *  derived from the supplied {@link StyleConf} as a basis.
+     *  Note that the style sheet must already be configured at this point,
+     *  because the {@link #configure()} method needs to be called before
+     *  in the constructor of the style sheet to bei able to compute the style.
      *  <p>
      *  Example:
      *  <pre>{@code
      *      MyStyleSheet styleSheet = new MyStyleSheet();
      *      JComboBox<String> comboBox = new JComboBox<>();
-     *      styleSheet.applyTo(comboBox, Style.none());
+     *      var style = styleSheet.computeStyleFrom(comboBox, Style.none());
      * }</pre>
+     * <b>
+     *     Note that this method does NOT install the style
+     *     on the supplied component! Style installation is
+     *     intended to happen when you SwingTree UI declarations
+     *     are bound to a particular {@link StyleSheet} through
+     *     the {@link swingtree.UI#use(StyleSheet, Supplier)} method.
+     * </b>
      *
-     * @param toBeStyled The component to apply the style sheet to.
+     * @param toBeStyled The component for which a style ought to be computed and returned.
      * @param startingStyle The {@link StyleConf} to start with when applying the style sheet.
      * @return The {@link StyleConf} that was applied to the component.
      * @throws NullPointerException If either argument is null.
      */
-    public StyleConf applyTo(JComponent toBeStyled, StyleConf startingStyle ) {
+    public final StyleConf computeStyleFrom( JComponent toBeStyled, StyleConf startingStyle ) {
         Objects.requireNonNull(toBeStyled);
         Objects.requireNonNull(startingStyle);
         return _applyTo( toBeStyled, _defaultStyle.apply(toBeStyled, startingStyle) );
