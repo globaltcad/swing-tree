@@ -3286,6 +3286,18 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
+         *  A factory method that creates a new {@code Font} object with the specified font name
+         *  and size where the {@link FontStyle} defaults to {@code PLAIN}.
+         *  This maps directly to the constructor of {@link java.awt.Font#Font(String, int, int)}.
+         * @param name The font name, which may be anything depending on what fonts are loaded on the system.
+         * @param size The point size of the font.
+         * @return A new {@code Font} object with the specified font name, style and size.
+         */
+        public static Font of( String name, int size ) {
+            return new Font(name, FontStyle.PLAIN.toAWTFontStyle(), size);
+        }
+
+        /**
          *  Creates a new {@code Font} object from a map of attributes
          *  where the key is an attribute and the value is the value of the attribute.
          *  See {@link java.awt.font.TextAttribute} for a list of common attributes.

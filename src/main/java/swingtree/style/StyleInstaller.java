@@ -692,36 +692,7 @@ final class StyleInstaller<C extends JComponent>
                         owner.setFont( newFont );
                 });
 
-        fontConf.horizontalAlignment().forSwing().ifPresent( forSwing -> {
-                if ( owner instanceof JLabel ) {
-                    JLabel label = (JLabel) owner;
-                    if ( !Objects.equals( label.getHorizontalAlignment(), forSwing ) )
-                        label.setHorizontalAlignment( forSwing );
-                }
-                if ( owner instanceof AbstractButton ) {
-                    AbstractButton button = (AbstractButton) owner;
-                    if ( !Objects.equals( button.getHorizontalAlignment(), forSwing ) )
-                        button.setHorizontalAlignment( forSwing );
-                }
-                if ( owner instanceof JTextField ) {
-                    JTextField textField = (JTextField) owner;
-                    if ( !Objects.equals( textField.getHorizontalAlignment(), forSwing ) )
-                        textField.setHorizontalAlignment( forSwing );
-                }
-            });
-
-        fontConf.verticalAlignment().forSwing().ifPresent( forSwing -> {
-                if ( owner instanceof JLabel ) {
-                    JLabel label = (JLabel) owner;
-                    if ( !Objects.equals( label.getVerticalAlignment(), forSwing ) )
-                        label.setVerticalAlignment( forSwing );
-                }
-                if ( owner instanceof AbstractButton ) {
-                    AbstractButton button = (AbstractButton) owner;
-                    if ( !Objects.equals( button.getVerticalAlignment(), forSwing ) )
-                        button.setVerticalAlignment( forSwing );
-                }
-            });
+        LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(fontConf, owner);
     }
 
     private void _applyPropertiesTo( final C owner, final StyleConf styleConf ) {

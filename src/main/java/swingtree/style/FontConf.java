@@ -3,9 +3,11 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Val;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
+import swingtree.api.Styler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -291,37 +293,235 @@ public final class FontConf
         _verticalAlignment   = verticalAlignment;
     }
 
-    String family() { return _familyName; }
+    /**
+     * Returns the font family name for this font configuration.
+     * This corresponds to the {@link Font#getFamily()} property in {@link java.awt.Font}
+     * and determines the visual style category of the typeface.
+     * <p>
+     * The font family represents a group of related typefaces that share common design characteristics
+     * but may vary in weight, style, or other attributes. Common examples include:
+     * <ul>
+     *   <li>"Arial" - A clean, sans-serif font</li>
+     *   <li>"Times New Roman" - A classic serif font</li>
+     *   <li>"Courier New" - A monospaced font</li>
+     *   <li>"Verdana" - A sans-serif font designed for screen readability</li>
+     * </ul>
+     * <p>
+     * From a user perspective, the font family defines the overall visual personality of the text.
+     *
+     * @return The font family name as a String. Returns an empty string if no specific family is defined,
+     *         which typically means the system default font family should be used.
+     * @see Font#getFamily()
+     */
+    public String family() { return _familyName; }
 
-    int size() { return _size; }
+    /**
+     * Returns the font size in points for this font configuration.
+     * This corresponds to the {@link Font#getSize()} property in {@link java.awt.Font}
+     * and determines the visual height of the text characters.
+     * <p>
+     * In typography, a "point" is a physical unit of measurement where 1 point equals 1/72 of an inch.
+     * However, in digital typography, the actual rendered size may vary based on screen resolution,
+     * display density (DPI), and the current UI scaling factor.
+     * <p>
+     * The perceived size may also be influenced by the specific font family, as some typefaces
+     * appear larger than others at the same point size due to differences in x-height and character proportions.
+     *
+     * @return The font size in points. Returns 0 if no specific size is defined,
+     *         which typically means the system default font size should be used.
+     * @see Font#getSize()
+     */
+    public int size() { return _size; }
 
-    Optional<Float> posture() { return Optional.ofNullable(_posture < 0 ? null : _posture); }
+    /**
+     * Returns the posture (italic) attribute of this font configuration.
+     * This corresponds to the {@link TextAttribute#POSTURE} property and influences
+     * whether the font appears in regular upright or italic (slanted) form.
+     * <p>
+     * The posture is represented as a floating-point value where:
+     * <ul>
+     *   <li><b>0.0</b> - Regular upright posture (non-italic)</li>
+     *   <li><b>0.2</b> - Standard italic posture</li>
+     *   <li>Values between 0.0 and 0.2 represent varying degrees of slant</li>
+     * </ul>
+     * <p>
+     * From a user perspective, italic text serves several purposes:
+     * <ul>
+     *   <li><b>Emphasis</b> - Drawing attention to specific words or phrases within a body of text</li>
+     *   <li><b>Distinction</b> - Differentiating certain types of content, such as book titles,
+     *       foreign words, or technical terms</li>
+     *   <li><b>Visual variety</b> - Adding stylistic variation to break visual monotony</li>
+     *   <li><b>Hierarchy</b> - Creating subtle visual distinctions in complex layouts</li>
+     * </ul>
+     * <p>
+     * It's important to note that true italic fonts are specifically designed with unique character shapes,
+     * while oblique fonts are simply slanted versions of the regular font. The visual quality
+     * depends on whether the font family includes dedicated italic variants.
+     *
+     * @return An {@link Optional} containing the posture value if defined, or empty if no specific
+     *         posture is configured (system default should be used).
+     * @see TextAttribute#POSTURE
+     * @see Font#isItalic()
+     */
+    public Optional<Float> posture() { return Optional.ofNullable(_posture < 0 ? null : _posture); }
 
-    Optional<Float> weight() { return Optional.ofNullable(_weight < 0 ? null : _weight); }
+    /**
+     * Returns the weight (boldness) attribute of this font configuration.
+     * This corresponds to the {@link TextAttribute#WEIGHT} property and determines
+     * the thickness of the character strokes.
+     * <p>
+     * The weight is represented as a floating-point value where:
+     * <ul>
+     *   <li><b>0.0</b> - Light weight (thin strokes)</li>
+     *   <li><b>1.0</b> - Regular/standard weight (equivalent to {@link Font#PLAIN})</li>
+     *   <li><b>2.0</b> - Bold weight (equivalent to {@link Font#BOLD})</li>
+     *   <li>Values between these represent intermediate weights (semibold, etc.)</li>
+     * </ul>
+     * <p>
+     * The actual availability of different weights depends on the font family.
+     * Some families only support regular and bold, while professional typefaces
+     * may offer multiple weights from thin to black.
+     *
+     * @return An {@link Optional} containing the weight value if defined, or empty if no specific
+     *         weight is configured (system default should be used).
+     * @see TextAttribute#WEIGHT
+     * @see Font#isBold()
+     */
+    public Optional<Float> weight() { return Optional.ofNullable(_weight < 0 ? null : _weight); }
 
-    float spacing() { return _spacing; }
+    /**
+     * Returns the character spacing (tracking) attribute of this font configuration.
+     * This corresponds to the {@link TextAttribute#TRACKING} property and controls
+     * the uniform adjustment of space between characters.
+     * <p>
+     * The spacing value is a multiplier that affects the space between all characters:
+     * <ul>
+     *   <li><b>0.0</b> - Normal, font-default spacing</li>
+     *   <li><b>Negative values</b> (-0.04 to 0.0) - Tighter spacing, characters are closer together</li>
+     *   <li><b>Positive values</b> (0.0 to 0.04) - Looser spacing, characters are farther apart</li>
+     * </ul>
+     * <p>
+     * Useful predefined constants include:
+     * <ul>
+     *   <li>{@link TextAttribute#TRACKING_TIGHT} (-0.04)</li>
+     *   <li>{@link TextAttribute#TRACKING_LOOSE} (0.04)</li>
+     * </ul>
+     * <p>
+     * Typical values range from -0.1 to 0.3, with values outside this range generally
+     * producing undesirable results for continuous text. Tighter spacing can make text feel denser and more compact,
+     * while looser spacing can improve legibility, especially at small sizes or for
+     * users with visual impairments
+     *
+     * @return The character spacing value. Returns 0.0 if normal, font-default spacing should be used.
+     * @see TextAttribute#TRACKING
+     */
+    public float spacing() { return _spacing; }
 
-    Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
+    /**
+     * Returns the text selection color for this font configuration.
+     * This property is specifically relevant for text components that support
+     * user text selection, such as {@link JTextField}, {@link JTextArea}, and {@link JTextPane}.
+     * <p>
+     * The selection color determines the background color applied to text when users
+     * highlight it with mouse dragging or keyboard navigation. This visual feedback
+     * is crucial for indicating which text is currently selected for operations like
+     * copy, cut, or formatting changes.
+     * <p>
+     * This property typically maps to component methods like
+     * {@link javax.swing.text.JTextComponent#setSelectionColor(Color)}.
+     * When not specified, components use their default selection colors, which are
+     * often derived from the current look and feel or system preferences.
+     *
+     * @return An {@link Optional} containing the selection {@link Color} if defined,
+     *         or empty if no specific selection color is configured (component default should be used).
+     * @see javax.swing.text.JTextComponent#setSelectionColor(Color)
+     * @see javax.swing.text.JTextComponent#getSelectionColor()
+     */
+    public Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
 
-    boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }
+    /**
+     * Returns whether the font should be rendered with an underline.
+     * This corresponds to the {@link TextAttribute#UNDERLINE} property and controls
+     * the presence of a horizontal line beneath the text baseline.
+     * <p>
+     * The underline is a binary attribute - text is either underlined or not.
+     * When enabled, a continuous line is drawn below the text characters, typically
+     * positioned to avoid descending characters (like 'g', 'j', 'p', 'q', 'y').
+     * <p>
+     * It's important to use underlining judiciously, as excessive use can reduce
+     * readability and create visual noise. In modern UI design, underlining is
+     * primarily reserved for link identification.
+     *
+     * @return {@code true} if the font should be rendered with an underline,
+     *         {@code false} if no underline should be applied. Returns the default
+     *         value (false) if no specific underline preference is configured.
+     * @see TextAttribute#UNDERLINE
+     * @see TextAttribute#UNDERLINE_ON
+     */
+    public boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }
 
-    Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
+    Optional<AffineTransform> transform() { // Deliberately package private to prevent leaking mutable state!
+        return Optional.ofNullable(_transform);
+    }
 
-    Optional<Paint> paint() {
+    Optional<Paint> paint() { // Deliberately package private to prevent leaking mutable state!
         if ( FontPaintConf.none().equals(_paint) )
             return Optional.empty();
         return Optional.ofNullable(_paint.getFor(BoxModelConf.none()));
     }
 
-    Optional<Paint> backgroundPaint() {
+    Optional<Paint> backgroundPaint() { // Deliberately package private to prevent leaking mutable state!
         if ( FontPaintConf.none().equals(_backgroundPaint) )
             return Optional.empty();
         return Optional.ofNullable(_backgroundPaint.getFor(BoxModelConf.none()));
     }
 
-    UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }
+    /**
+     *  The horizontal alignment of a font configuration is an enum constant which
+     *  express how text should be positioned within components that support
+     *  text alignment in terms of left/right/center positioning along
+     *  the x-axis.
+     *
+     * <p><b>Component Support Limitations:</b><br>
+     * Note that horizontal alignment is only applicable to specific Swing components that
+     * expose alignment methods or other means of styling, such as:
+     * <ul>
+     *   <li>{@link JLabel#setHorizontalAlignment(int)}</li>
+     *   <li>{@link AbstractButton#setHorizontalAlignment(int)}</li>
+     *   <li>{@link JTextField#setHorizontalAlignment(int)} (vertical alignment not supported)</li>
+     *   <li>{@link JTextPane#getStyledDocument()} (vertical alignment not supported)</li>
+     * </ul>
+     * This property will have no effect on components that don't support text alignment,
+     * except for when you use this property to render text through the SwingTree style API
+     * (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
+     * </p>
+     *
+     * @return The horizontal alignment constant of this conf, which
+     *         may be NONE, LEFT, CENTER, RIGHT... among others.
+     */
+    public UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }
 
-    UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }
+    /**
+     *  The vertical alignment of a font configuration is an enum constant which
+     *  express how text should be positioned within components that support
+     *  text alignment in terms of top/bottom/center positioning along the y-axis.
+     *
+     * <p><b>Component Support Limitations:</b><br>
+     * Note that vertical alignment is only applicable to specific Swing components that
+     * expose alignment methods or other means of styling, such as:
+     * <ul>
+     *   <li>{@link JLabel#setVerticalAlignment(int)}</li>
+     *   <li>{@link AbstractButton#setVerticalAlignment(int)}</li>
+     * </ul>
+     * This property will have no effect on components that don't support text alignment,
+     * except for when you use this property to render text through the SwingTree style API
+     * (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
+     * </p>
+     *
+     * @return The vertical alignment constant of this conf, which
+     *         may be NONE, TOP, CENTER, BOTTOM... among others.
+     */
+    public UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }
 
     /**
      * Returns an updated font config with the specified font family name.
@@ -694,53 +894,106 @@ public final class FontConf
     }
 
     /**
-     * Returns an updated font config with the specified horizontal alignment.
-     * This property is not relevant for all components,
-     * It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
-     * types or maybe some custom components.
-     * Not all components support horizontal alignment.
-     * This will also not have an effect for font configs which
-     * are part of the {@link TextConf}.
+     * Returns an updated font config with the specified horizontal alignment policy, that
+     * expresses text to be placed in certain positions alongside the horizontal axis.
+     * This property is not relevant for all components, as it can only be applied to methods
+     * like {@link JLabel#setHorizontalAlignment(int)} {@link AbstractButton#setHorizontalAlignment(int)} and
+     * {@link JTextField#setHorizontalAlignment(int)}, which not all components have.
      * <b>
-     *     This method is deliberately package-private as it is not relevant for the
-     *     {@link ComponentStyleDelegate#componentFont(Configurator)} or
-     *     {@link TextConf#font(Configurator)} methods. <br>
-     *     <br>
-     *     It only makes sense to specify this property 
-     *     through the {@link ComponentStyleDelegate#fontAlignment(UI.HorizontalAlignment)}
-     *     method!!
+     *     You can specify this horizontal text alignment property effectively
+     *     through the {@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)}
+     *     or through the {@link FontConf} in a {@link UI.Font} passed to methods like
+     *     {@link swingtree.UIForAnySwing#withFont(UI.Font)} or {@link swingtree.UIForAnySwing#withFont(Val)}.
      * </b>
      *
      * @param horizontalAlignment The horizontal alignment to use for the font.
      * @return A new font style with the specified horizontal alignment.
+     * @throws NullPointerException if the supplied enum constant is null.
      */
-    FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
+    public FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
+        Objects.requireNonNull(horizontalAlignment);
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);
     }
 
     /**
-     * Returns an updated font config with the specified vertical alignment.
-     * This property is not relevant for all components,
-     * It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
-     * types or maybe some custom components.
-     * Not all components support vertical alignment.
-     * This will also not have an effect for font configs which
-     * are part of the {@link TextConf}.
+     * Returns an updated font config with the specified vertical alignment policy, that
+     *      * expresses text to be placed in certain positions alongside the certical axis.
+     * This property is not relevant for all components, as it can only be applied to methods
+     * like {@link JLabel#setVerticalAlignment(int)} and {@link AbstractButton#setVerticalAlignment(int)},
+     * which not all components have!
      * <b>
-     *     This method is deliberately package-private as it is not relevant for the
-     *     {@link ComponentStyleDelegate#componentFont(Configurator)} or
-     *     {@link TextConf#font(Configurator)} methods. <br>
-     *     <br>
-     *     It only makes sense to specify this property 
+     *     You can specify this property effectively
      *     through the {@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)}
-     *     method!!
+     *     or through the {@link FontConf} in a {@link UI.Font} passed to methods like
+     *     {@link swingtree.UIForAnySwing#withFont(UI.Font)} or {@link swingtree.UIForAnySwing#withFont(Val)}.
      * </b>
      *
      * @param verticalAlignment The vertical alignment to use for the font.
      * @return A new font style with the specified vertical alignment.
+     * @throws NullPointerException if the supplied enum constant is null.
      */
-    FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
+    public FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
+        Objects.requireNonNull(verticalAlignment);
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
+    }
+
+    /**
+     * Returns a new font configuration with both horizontal and vertical alignment policies
+     * specified through a unified alignment object. This method provides a convenient way
+     * to set both alignment dimensions simultaneously while ensuring consistency between
+     * horizontal and vertical alignment settings.
+     *
+     * <p>The alignment properties control how text is positioned within components that support
+     * text alignment. The horizontal alignment determines left/right/center positioning along
+     * the x-axis, while vertical alignment controls top/bottom/center positioning along the
+     * y-axis.</p>
+     *
+     * <p><b>Component Support Limitations:</b><br>
+     * Note that alignment properties are only applicable to specific Swing components that
+     * expose alignment methods, such as:
+     * <ul>
+     *   <li>{@link JLabel#setHorizontalAlignment(int)} and {@link JLabel#setVerticalAlignment(int)}</li>
+     *   <li>{@link AbstractButton#setHorizontalAlignment(int)} and {@link AbstractButton#setVerticalAlignment(int)}</li>
+     *   <li>{@link JTextField#setHorizontalAlignment(int)} (vertical alignment not supported)</li>
+     * </ul>
+     * This property will have no effect on components that don't support text alignment,
+     * except for when you use this property to render text through the SwingTree style API.
+     * (see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)})
+     * </p>
+     *
+     * <p><b>Recommended Usage:</b><br>
+     * For effective alignment specification, use either:
+     * <ul>
+     *   <li>{@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)} for individual alignment</li>
+     *   <li>{@link FontConf} within a {@link UI.Font} passed to:
+     *     <ul>
+     *       <li>see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)}</li>
+     *       <li>{@link swingtree.UIForAnySwing#withFont(UI.Font)}</li>
+     *       <li>{@link swingtree.UIForAnySwing#withFont(Val)}</li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     * </p>
+     *
+     * @param alignment The unified alignment object containing both horizontal and vertical
+     *                  alignment specifications. Must not be {@code null}.
+     *
+     * @return A new {@link FontConf} instance with the specified horizontal and vertical
+     *         alignment properties applied, preserving all other font attributes from the
+     *         current configuration.
+     *
+     * @throws NullPointerException if the provided {@code alignment} parameter is {@code null}.
+     *
+     * @see #horizontalAlignment(UI.HorizontalAlignment)
+     * @see #verticalAlignment(UI.VerticalAlignment)
+     * @see UI.Alignment
+     * @see UI.HorizontalAlignment
+     * @see UI.VerticalAlignment
+     * @throws NullPointerException if the supplied enum constant is null.
+     */
+    public FontConf alignment( UI.Alignment alignment ) {
+        Objects.requireNonNull(alignment);
+        return verticalAlignment(alignment.getVertical()).horizontalAlignment(alignment.getHorizontal());
     }
 
     /**

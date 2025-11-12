@@ -4,11 +4,23 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.Var
 import swingtree.api.Configurator
 import swingtree.style.FontConf
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JTextField
+import javax.swing.JTextPane
+import javax.swing.JToggleButton
+import javax.swing.text.AttributeSet
+import javax.swing.text.Element
+import javax.swing.text.StyleConstants
+import javax.swing.text.StyledDocument
 import java.awt.Font
 
 @Title("Fonts")
@@ -180,5 +192,491 @@ class Font_Spec extends Specification
                                 "strikeThrough=true, selectionColor=?, transform=?, paint=FontPaintConf[NONE], " +
                                 "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
                             "]"
+    }
+
+    def 'A SwingTree `UI.Font` can define text placement information for labels.'()
+    {
+        reportInfo """
+            On top of what a regular `java.awt.Font` has to offer in terms of properties,
+            a SwingTree `UI.Font` also offers to configure text layout information in the form
+            of vertical and horizontal alignment modes!
+            These additional properties are used by some components, like labels for example,
+            to place you text at a desired location in the component bounds.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+                          .verticalAlignment(UI.VerticalAlignment.CENTER)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.alignment(UI.Alignment.TOP_CENTER)
+            })
+            var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+                          .verticalAlignment(UI.VerticalAlignment.BOTTOM)
+            })
+        and : 'A UI declaration where is font is assigned to a label:'
+            var panel =
+                    UI.panel()
+                    .add(UI.label("How").withFont(font1))
+                    .add(UI.label("are").withFont(font2))
+                    .add(UI.label("you?").withFont(font3))
+                    .get(JPanel)
+        and :
+            var label1 = panel.components[0] as JLabel
+            var label2 = panel.components[1] as JLabel
+            var label3 = panel.components[2] as JLabel
+
+        expect : 'The components report the correct alignment codes!'
+            label1.getHorizontalAlignment() == JLabel.LEFT
+            label1.getVerticalAlignment() == JLabel.CENTER
+
+            label2.getHorizontalAlignment() == JLabel.CENTER
+            label2.getVerticalAlignment() == JLabel.TOP
+
+            label3.getHorizontalAlignment() == JLabel.RIGHT
+            label3.getVerticalAlignment() == JLabel.BOTTOM
+    }
+
+    def 'A SwingTree `UI.Font` can define text placement information for button types.'()
+    {
+        reportInfo """
+            On top of what a regular `java.awt.Font` has to offer in terms of properties,
+            a SwingTree `UI.Font` also offers to configure text layout information in the form
+            of vertical and horizontal alignment modes!
+            These additional properties are used by some components, like buttons for example,
+            to place you text at a desired location in the component bounds.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+                          .verticalAlignment(UI.VerticalAlignment.CENTER)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+                            .verticalAlignment(UI.VerticalAlignment.TOP)
+            })
+            var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+                          .verticalAlignment(UI.VerticalAlignment.BOTTOM)
+            })
+        and : 'A UI declaration where is font is assigned to a label:'
+            var panel =
+                    UI.panel()
+                    .add(UI.button("How").withFont(font1))
+                    .add(UI.toggleButton("are").withFont(font2))
+                    .add(UI.checkBox("you?").withFont(font3))
+                    .get(JPanel)
+        and :
+            var button = panel.components[0] as JButton
+            var toggle = panel.components[1] as JToggleButton
+            var check = panel.components[2] as JCheckBox
+
+        expect : 'The button components report the correct alignment codes!'
+            button.getHorizontalAlignment() == JLabel.LEFT
+            button.getVerticalAlignment() == JLabel.CENTER
+
+            toggle.getHorizontalAlignment() == JLabel.CENTER
+            toggle.getVerticalAlignment() == JLabel.TOP
+
+            check.getHorizontalAlignment() == JLabel.RIGHT
+            check.getVerticalAlignment() == JLabel.BOTTOM
+    }
+
+    def 'A SwingTree `UI.Font` can define text placement information for text fields.'()
+    {
+        reportInfo """
+            On top of what a regular `java.awt.Font` has to offer in terms of properties,
+            a SwingTree `UI.Font` also offers to configure text layout information in the form
+            of vertical and horizontal alignment modes!
+            These additional properties are used by some components, like text fields for example,
+            to place you text at a desired location in the component bounds.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.alignment(UI.Alignment.CENTER_LEFT)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+                            .verticalAlignment(UI.VerticalAlignment.TOP)
+            })
+            var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+                          .verticalAlignment(UI.VerticalAlignment.BOTTOM)
+            })
+        and : 'A UI declaration where is font is assigned to a label:'
+            var panel =
+                    UI.panel()
+                    .add(UI.textField("How").withFont(font1))
+                    .add(UI.textField("are").withFont(font2))
+                    .add(UI.textField("you?").withFont(font3))
+                    .get(JPanel)
+        and :
+            var textField1 = panel.components[0] as JTextField
+            var textField2 = panel.components[1] as JTextField
+            var textField3 = panel.components[2] as JTextField
+
+        expect : 'The text fields report the correct alignment codes!'
+            textField1.getHorizontalAlignment() == JLabel.LEFT
+            textField2.getHorizontalAlignment() == JLabel.CENTER
+            textField3.getHorizontalAlignment() == JLabel.RIGHT
+    }
+
+    // ---
+
+    def 'A SwingTree `UI.Font` can define text placement information for labels reactively.'()
+    {
+        reportInfo """
+            On top of what a regular `java.awt.Font` has to offer in terms of properties,
+            a SwingTree `UI.Font` also offers to configure text layout information in the form
+            of vertical and horizontal alignment modes!
+            These additional properties are used by some components, like labels for example,
+            to place you text at a desired location in the component bounds.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+                          .verticalAlignment(UI.VerticalAlignment.CENTER)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.alignment(UI.Alignment.TOP_CENTER)
+            })
+            var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+                          .verticalAlignment(UI.VerticalAlignment.BOTTOM)
+            })
+            var fontProp1 = Var.of(font1)
+            var fontProp2 = Var.of(font2)
+            var fontProp3 = Var.of(font3)
+        and : 'A UI declaration where is font is assigned to a label:'
+            var panel =
+                    UI.panel()
+                    .add(UI.label("How").withFont(fontProp1))
+                    .add(UI.label("are").withFont(fontProp2))
+                    .add(UI.label("you?").withFont(fontProp3))
+                    .get(JPanel)
+        and :
+            var label1 = panel.components[0] as JLabel
+            var label2 = panel.components[1] as JLabel
+            var label3 = panel.components[2] as JLabel
+
+        expect : 'The components report the correct alignment codes!'
+            label1.getHorizontalAlignment() == JLabel.LEFT
+            label1.getVerticalAlignment() == JLabel.CENTER
+
+            label2.getHorizontalAlignment() == JLabel.CENTER
+            label2.getVerticalAlignment() == JLabel.TOP
+
+            label3.getHorizontalAlignment() == JLabel.RIGHT
+            label3.getVerticalAlignment() == JLabel.BOTTOM
+
+        when : 'We swap the fonts...'
+            fontProp1.set(font2)
+            fontProp2.set(font3)
+            fontProp3.set(font1)
+            UI.sync()
+        then : 'The alignments are updated accordingly!'
+            label1.getHorizontalAlignment() == JLabel.CENTER
+            label1.getVerticalAlignment() == JLabel.TOP
+
+            label2.getHorizontalAlignment() == JLabel.RIGHT
+            label2.getVerticalAlignment() == JLabel.BOTTOM
+
+            label3.getHorizontalAlignment() == JLabel.LEFT
+            label3.getVerticalAlignment() == JLabel.CENTER
+    }
+
+    def 'A SwingTree `UI.Font` can define text placement information for button types reactively.'()
+    {
+        reportInfo """
+            On top of what a regular `java.awt.Font` has to offer in terms of properties,
+            a SwingTree `UI.Font` also offers to configure text layout information in the form
+            of vertical and horizontal alignment modes!
+            These additional properties are used by some components, like buttons for example,
+            to place you text at a desired location in the component bounds.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+                          .verticalAlignment(UI.VerticalAlignment.CENTER)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+                            .verticalAlignment(UI.VerticalAlignment.TOP)
+            })
+            var font3 = UI.Font.of("Dialog", 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+                          .verticalAlignment(UI.VerticalAlignment.BOTTOM)
+            })
+            var fontProp1 = Var.of(font1)
+            var fontProp2 = Var.of(font2)
+            var fontProp3 = Var.of(font3)
+        and : 'A UI declaration where is font is assigned to a label:'
+            var panel =
+                    UI.panel()
+                    .add(UI.button("How").withFont(fontProp1))
+                    .add(UI.toggleButton("are").withFont(fontProp2))
+                    .add(UI.checkBox("you?").withFont(fontProp3))
+                    .get(JPanel)
+        and :
+            var button = panel.components[0] as JButton
+            var toggle = panel.components[1] as JToggleButton
+            var check = panel.components[2] as JCheckBox
+
+        expect : 'The button components report the correct alignment codes!'
+            button.getHorizontalAlignment() == JLabel.LEFT
+            button.getVerticalAlignment() == JLabel.CENTER
+
+            toggle.getHorizontalAlignment() == JLabel.CENTER
+            toggle.getVerticalAlignment() == JLabel.TOP
+
+            check.getHorizontalAlignment() == JLabel.RIGHT
+            check.getVerticalAlignment() == JLabel.BOTTOM
+
+        when : 'We swap the fonts...'
+            fontProp1.set(font2)
+            fontProp2.set(font3)
+            fontProp3.set(font1)
+            UI.sync()
+        then : 'The alignments are updated accordingly!'
+            check.getHorizontalAlignment() == JLabel.LEFT
+            check.getVerticalAlignment() == JLabel.CENTER
+
+            button.getHorizontalAlignment() == JLabel.CENTER
+            button.getVerticalAlignment() == JLabel.TOP
+
+            toggle.getHorizontalAlignment() == JLabel.RIGHT
+            toggle.getVerticalAlignment() == JLabel.BOTTOM
+    }
+
+    def 'A SwingTree `UI.Font` can define text placement information for text fields reactively.'()
+    {
+        reportInfo """
+            On top of what a regular `java.awt.Font` has to offer in terms of properties,
+            a SwingTree `UI.Font` also offers to configure text layout information in the form
+            of vertical and horizontal alignment modes!
+            These additional properties are used by some components, like text fields for example,
+            to place you text at a desired location in the component bounds.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+                          .verticalAlignment(UI.VerticalAlignment.CENTER)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+                            .verticalAlignment(UI.VerticalAlignment.TOP)
+            })
+            var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.alignment(UI.Alignment.BOTTOM_RIGHT)
+            })
+            var fontProp1 = Var.of(font1)
+            var fontProp2 = Var.of(font2)
+            var fontProp3 = Var.of(font3)
+        and : 'A UI declaration where is font is assigned to a label:'
+            var panel =
+                    UI.panel()
+                    .add(UI.textField("How").withFont(fontProp1))
+                    .add(UI.textField("are").withFont(fontProp2))
+                    .add(UI.textField("you?").withFont(fontProp3))
+                    .get(JPanel)
+        and :
+            var textField1 = panel.components[0] as JTextField
+            var textField2 = panel.components[1] as JTextField
+            var textField3 = panel.components[2] as JTextField
+
+        expect : 'The text fields report the correct alignment codes!'
+            textField1.getHorizontalAlignment() == JLabel.LEFT
+            textField2.getHorizontalAlignment() == JLabel.CENTER
+            textField3.getHorizontalAlignment() == JLabel.RIGHT
+
+        when : 'We swap the fonts...'
+            fontProp1.set(font2)
+            fontProp2.set(font3)
+            fontProp3.set(font1)
+            UI.sync()
+        then : 'The alignments are updated accordingly!'
+            textField1.getHorizontalAlignment() == JLabel.CENTER
+            textField2.getHorizontalAlignment() == JLabel.RIGHT
+            textField3.getHorizontalAlignment() == JLabel.LEFT
+    }
+
+    // ---
+
+    def 'A SwingTree UI.Font can define text placement information for JTextPane components.'()
+    {
+        reportInfo """
+            The JTextPane component supports paragraph alignment through StyledDocument attributes.
+            SwingTree UI.Font alignment properties are applied to JTextPane using StyleConstants.setAlignment().
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+            })
+            var font3 = UI.Font.of("Dialog", 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+            })
+            var font4 = UI.Font.of("Arial", UI.FontStyle.PLAIN, 12).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.TRAILING)
+            })
+        and : 'A UI declaration where fonts are assigned to text panes:'
+            var panel =
+                    UI.panel()
+                    .add(UI.textPane().withText("Left aligned text").withFont(font1))
+                    .add(UI.textPane().withText("Center aligned text").withFont(font2))
+                    .add(UI.textPane().withText("Right aligned text").withFont(font3))
+                    .add(UI.textPane().withText("Justified text").withFont(font4))
+                    .get(JPanel)
+        and :
+            var textPane1 = panel.components[0] as JTextPane
+            var textPane2 = panel.components[1] as JTextPane
+            var textPane3 = panel.components[2] as JTextPane
+            var textPane4 = panel.components[3] as JTextPane
+
+        expect : 'The text panes report the correct alignment through their styled documents!'
+            getTextPaneAlignment(textPane1) == StyleConstants.ALIGN_LEFT
+            getTextPaneAlignment(textPane2) == StyleConstants.ALIGN_CENTER
+            getTextPaneAlignment(textPane3) == StyleConstants.ALIGN_RIGHT
+            getTextPaneAlignment(textPane4) == StyleConstants.ALIGN_JUSTIFIED
+    }
+
+    def 'A SwingTree UI.Font can define text placement information for JTextPane components reactively.'()
+    {
+        reportInfo """
+            JTextPane alignment should update reactively when the font property changes.
+            This ensures dynamic alignment updates work properly with reactive programming.
+        """
+        given : 'We create various fonts with custom alignments:'
+            var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+            })
+            var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+            })
+            var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
+                return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+            })
+            var fontProp = Var.of(font1)
+        and : 'A UI declaration with a reactive font property:'
+            var textPane = UI.textPane().withText("Dynamic alignment text").withFont(fontProp).get(JTextPane)
+
+        expect : 'The text pane starts with left alignment'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_LEFT
+
+        when : 'We change the font property to center alignment'
+            fontProp.set(font2)
+            UI.sync()
+        then : 'The text pane alignment updates to center'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_CENTER
+
+        when : 'We change the font property to right alignment'
+            fontProp.set(font3)
+            UI.sync()
+        then : 'The text pane alignment updates to right'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT
+
+        when : 'We change back to left alignment'
+            fontProp.set(font1)
+            UI.sync()
+        then : 'The text pane alignment returns to left'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_LEFT
+    }
+
+    def 'JTextPane alignment handles edge cases correctly.'()
+    {
+        reportInfo """
+            Test edge cases like empty text, very long text, and alignment changes with existing content.
+        """
+        given : 'We create fonts with different alignments:'
+            var leftFont = UI.Font.of("Arial", 12).with((Configurator<FontConf>){
+                it.horizontalAlignment(UI.HorizontalAlignment.LEFT)
+            })
+            var centerFont = UI.Font.of("Arial", 12).with((Configurator<FontConf>){
+                it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
+            })
+            var fontProp = Var.of(leftFont)
+        and : 'A text pane with empty content'
+            var emptyTextPane = UI.textPane().withText("").withFont(fontProp).get(JTextPane)
+        and : 'A text pane with very long content'
+            var longText = "This is a very long text that should wrap and demonstrate alignment behavior " * 10
+            var longTextPane = UI.textPane().withText(longText).withFont(fontProp).get(JTextPane)
+
+        expect : 'Empty text pane has correct initial alignment'
+            getTextPaneAlignment(emptyTextPane) == StyleConstants.ALIGN_LEFT
+            getTextPaneAlignment(longTextPane) == StyleConstants.ALIGN_LEFT
+
+        when : 'We change alignment on empty text pane'
+            fontProp.set(centerFont)
+            UI.sync()
+        then : 'Empty text pane alignment updates correctly'
+            getTextPaneAlignment(emptyTextPane) == StyleConstants.ALIGN_CENTER
+            getTextPaneAlignment(longTextPane) == StyleConstants.ALIGN_CENTER
+    }
+
+    def 'JTextPane alignment is preserved when text content changes.'()
+    {
+        reportInfo """
+            Verify that alignment settings persist when the text content of JTextPane is modified.
+        """
+        given : 'A font with right alignment'
+            var rightFont = UI.Font.of("Arial", UI.FontStyle.PLAIN, 12).with((Configurator<FontConf>){
+                it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
+            })
+        and : 'A text pane with initial content'
+            var textPane = UI.textPane().withText("Initial text").withFont(rightFont).get(JTextPane)
+
+        expect : 'Text pane starts with right alignment'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT
+
+        when : 'We modify the text content'
+            textPane.setText("Modified text content")
+        then : 'Alignment is preserved after text modification'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT
+
+        when : 'We append more text'
+            textPane.setText(textPane.text + " with additional content")
+        then : 'Alignment remains right-aligned'
+            getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT
+    }
+
+    // ---
+
+    def 'Text alignment for JTextPane components can be configured through the style API.'()
+    {
+        reportInfo """
+            The JTextPane component supports paragraph alignment through StyledDocument attributes.
+            If you specify the alignment in the style API, then SwingTree will correctly install this property for you.
+        """
+        given : 'A UI declaration where text pane have their text alignment specified through the Style API:'
+            var panel =
+                    UI.panel()
+                    .add(UI.textPane().withText("Left aligned text").withStyle({it.fontAlignment(UI.HorizontalAlignment.LEFT)}))
+                    .add(UI.textPane().withText("Center aligned text").withStyle({it.fontAlignment(UI.HorizontalAlignment.CENTER)}))
+                    .add(UI.textPane().withText("Right aligned text").withStyle({it.fontAlignment(UI.HorizontalAlignment.RIGHT)}))
+                    .add(UI.textPane().withText("Justified text").withStyle({it.fontAlignment(UI.HorizontalAlignment.TRAILING)}))
+                    .get(JPanel)
+        and :
+            var textPane1 = panel.components[0] as JTextPane
+            var textPane2 = panel.components[1] as JTextPane
+            var textPane3 = panel.components[2] as JTextPane
+            var textPane4 = panel.components[3] as JTextPane
+
+        expect : 'The text panes report the correct alignment through their styled documents!'
+            getTextPaneAlignment(textPane1) == StyleConstants.ALIGN_LEFT
+            getTextPaneAlignment(textPane2) == StyleConstants.ALIGN_CENTER
+            getTextPaneAlignment(textPane3) == StyleConstants.ALIGN_RIGHT
+            getTextPaneAlignment(textPane4) == StyleConstants.ALIGN_JUSTIFIED
+    }
+
+
+    // Helper method to extract alignment from JTextPane
+    private static int getTextPaneAlignment(JTextPane textPane) {
+        StyledDocument doc = textPane.getStyledDocument()
+        Element paragraph = doc.getParagraphElement(0)
+        AttributeSet attr = paragraph.getAttributes()
+        return StyleConstants.getAlignment(attr)
     }
 }

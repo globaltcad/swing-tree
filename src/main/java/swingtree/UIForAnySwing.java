@@ -29,6 +29,7 @@ import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 import swingtree.style.FontConf;
+import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -36,7 +37,6 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
@@ -3777,11 +3777,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFont( UI.Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
-        return _with( button -> {
+        return _with( thisComponent -> {
+            _installLayoutInfoFromFontConf(font, thisComponent);
             if ( _isUndefinedFont(font) )
-                button.setFont(null);
+                thisComponent.setFont(null);
             else
-                button.setFont(font.toAwtFont());
+                thisComponent.setFont(font.toAwtFont());
         })._this();
     }
 
@@ -3800,6 +3801,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         return _withOnShow( font, (c,v) -> {
+                    _installLayoutInfoFromFontConf(v, c);
                     if ( _isUndefinedFont(v) )
                         c.setFont(null);
                     else
@@ -3807,13 +3809,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( thisComponent -> {
                     UI.Font newFont = font.orElseThrowUnchecked();
+                    _installLayoutInfoFromFontConf(newFont, thisComponent);
                     if ( _isUndefinedFont(newFont) )
                         thisComponent.setFont( null );
                     else
                         thisComponent.setFont( newFont.toAwtFont() );
                 })
                 ._this();
+    }
 
+    private static void _installLayoutInfoFromFontConf(UI.Font font, JComponent owner) {
+        LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(font.conf(), owner);
     }
 
     /**
