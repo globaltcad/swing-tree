@@ -527,48 +527,5 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                 ._this();
     }
 
-    /**
-     *  Use this to set the font of the wrapped {@link JLabel}.
-     * @param font The font of the text which should be displayed on the label.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     */
-    public final UIForLabel<L> withFont( Font font ) {
-        NullUtil.nullArgCheck(font, "font", Font.class, "Use 'UI.FONT_UNDEFINED' instead of null!");
-        return _with( thisComponent -> {
-                    if ( _isUndefinedFont(font) )
-                        thisComponent.setFont(null);
-                    else
-                        thisComponent.setFont(SwingTree.get().scale(font));
-                })
-                ._this();
-    }
-
-    /**
-     *  Use this to dynamically set the font of the wrapped {@link JLabel}
-     *  through the provided view model property.
-     *  When the font wrapped by the provided property changes,
-     *  then so does the font of this label.
-     *
-     * @param font The font property of the text which should be displayed on the label.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
-     */
-    public final UIForLabel<L> withFont( Val<Font> font ) {
-        NullUtil.nullArgCheck(font, "font", Val.class);
-        NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        return _withOnShow( font, (thisComponent,v) -> {
-                    if ( _isUndefinedFont(v) )
-                        thisComponent.setFont(null);
-                    else
-                        thisComponent.setFont(SwingTree.get().scale(v));
-                })
-                ._with( thisComponent -> {
-                    thisComponent.setFont(SwingTree.get().scale(font.orElseThrowUnchecked()));
-                })
-                ._this();
-    }
-
 }
 

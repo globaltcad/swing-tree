@@ -262,7 +262,7 @@ public final class SwingTree
             return font;
 
         int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );
-        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
+        return font.deriveFont( (float) newFontSize );
     }
 
     /**

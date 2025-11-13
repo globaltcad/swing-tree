@@ -113,9 +113,9 @@ class Style_Sheet_Spec extends Specification
             var button2 = UI.button("wassup?").get(JButton)
             var panel = UI.panel().get(JPanel)
         when :
-            var s1 = ss.applyTo(button)
-            var s2 = ss.applyTo(button2)
-            var s3 = ss.applyTo(panel)
+            var s1 = ss.computeStyleFrom(button)
+            var s2 = ss.computeStyleFrom(button2)
+            var s3 = ss.computeStyleFrom(panel)
         then :
             s1.border().topLeftArc().get() == Arc.of(3, 3)
             s1.border().topRightArc().get() == Arc.of(3, 3)
@@ -166,7 +166,7 @@ class Style_Sheet_Spec extends Specification
             var textArea = UI.textArea("type some more!").get(JTextArea)
 
         when : 'We first run the text field through the style sheet...'
-            var fieldStyle  = ss.applyTo(textField).shadow()
+            var fieldStyle  = ss.computeStyleFrom(textField).shadow()
         then : 'The resulting style has the expected properties:'
             fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
@@ -175,7 +175,7 @@ class Style_Sheet_Spec extends Specification
             fieldStyle.horizontalOffset() == 42
 
         when : 'We then run the button through the style sheet...'
-            var buttonStyle = ss.applyTo(button).shadow()
+            var buttonStyle = ss.computeStyleFrom(button).shadow()
         then : 'Again, the resulting style is as expected:'
             buttonStyle.color().get() == Color.RED
             buttonStyle.blurRadius() == 17
@@ -184,7 +184,7 @@ class Style_Sheet_Spec extends Specification
             buttonStyle.horizontalOffset() != 24 // a button is not a text component
 
         when : 'We now run the panel through the style sheet...'
-            var panelStyle  = ss.applyTo(panel).shadow()
+            var panelStyle  = ss.computeStyleFrom(panel).shadow()
         then : 'Also no surprises here:'
             panelStyle.color().get() == Color.RED
             panelStyle.blurRadius() == 17
@@ -193,7 +193,7 @@ class Style_Sheet_Spec extends Specification
             panelStyle.horizontalOffset() != 24 // a panel is not a text component
 
         when : 'We finally run the text area through the style sheet...'
-            var areaStyle   = ss.applyTo(textArea).shadow()
+            var areaStyle   = ss.computeStyleFrom(textArea).shadow()
         then : 'It too has the expected style:'
             areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             areaStyle.blurRadius() == 17
@@ -234,9 +234,9 @@ class Style_Sheet_Spec extends Specification
             var toggle = UI.toggleButton("click me!").group("group2").get(JToggleButton)
             var panel = UI.panel().group("group1", "group2").get(JPanel)
         when : 'We run them all through the style sheet...'
-            var s1 = ss.applyTo(label)
-            var s2 = ss.applyTo(toggle)
-            var s3 = ss.applyTo(panel)
+            var s1 = ss.computeStyleFrom(label)
+            var s2 = ss.computeStyleFrom(toggle)
+            var s3 = ss.computeStyleFrom(panel)
         then : 'We can verify that the colors are applied correctly.'
             s1.base().backgroundColor().get() == Color.BLUE
             s2.base().foundationColor().get() == Color.CYAN
@@ -271,8 +271,8 @@ class Style_Sheet_Spec extends Specification
             var textField = ui1.get(JTextField)
             var textArea = ui2.get(JTextArea)
         when : 'We run them all through the style sheet...'
-            var s1 = ss.applyTo(textField)
-            var s2 = ss.applyTo(textArea)
+            var s1 = ss.computeStyleFrom(textField)
+            var s2 = ss.computeStyleFrom(textArea)
         then : 'We can indeed verify that style 2 inherits from style 1.'
             s1.padding() == Outline.of(1, 2, 3, 4)
             s2.padding() == Outline.of(1, 2, 3, 4)
@@ -406,19 +406,19 @@ class Style_Sheet_Spec extends Specification
             var label1 = UI.label(":)").group("A").get(JLabel)
             var label2 = UI.label(":D").group("B").get(JLabel)
         and : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(slider1)
-            var s2 = ss.applyTo(slider2)
-            var s3 = ss.applyTo(slider3)
-            var s4 = ss.applyTo(label1)
-            var s5 = ss.applyTo(label2)
+            var s1 = ss.computeStyleFrom(slider1)
+            var s2 = ss.computeStyleFrom(slider2)
+            var s3 = ss.computeStyleFrom(slider3)
+            var s4 = ss.computeStyleFrom(label1)
+            var s5 = ss.computeStyleFrom(label2)
         then : 'We first verify that they are not equal to another:'
             s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5
         and : 'They are equal to recalculated instances of themselves:'
-            s1 == ss.applyTo(slider1)
-            s2 == ss.applyTo(slider2)
-            s3 == ss.applyTo(slider3)
-            s4 == ss.applyTo(label1)
-            s5 == ss.applyTo(label2)
+            s1 == ss.computeStyleFrom(slider1)
+            s2 == ss.computeStyleFrom(slider2)
+            s3 == ss.computeStyleFrom(slider3)
+            s4 == ss.computeStyleFrom(label1)
+            s5 == ss.computeStyleFrom(label2)
         and : 'Then we check the results:'
             s1.base().foundationColor().get() == Color.BLUE
             s1.border().widths().top().get() == 11
@@ -524,11 +524,11 @@ class Style_Sheet_Spec extends Specification
             var textField = UI.textField().group("A").get(JTextField)
             var textArea = UI.textArea("").group("B").get(JTextArea)
         when : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(label1)
-            var s2 = ss.applyTo(label2)
-            var s3 = ss.applyTo(label3)
-            var s4 = ss.applyTo(textField)
-            var s5 = ss.applyTo(textArea)
+            var s1 = ss.computeStyleFrom(label1)
+            var s2 = ss.computeStyleFrom(label2)
+            var s3 = ss.computeStyleFrom(label3)
+            var s4 = ss.computeStyleFrom(textField)
+            var s5 = ss.computeStyleFrom(textArea)
         then : '...and we check the results'
             s1.font().family() == "Arial"
             s1.font().size() == 12
@@ -582,8 +582,8 @@ class Style_Sheet_Spec extends Specification
             var label1 = UI.label(":)").group("Gradient").get(JLabel)
             var label2 = UI.label(":D").group("ChessBoard").get(JLabel)
         and : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(label1)
-            var s2 = ss.applyTo(label2)
+            var s1 = ss.computeStyleFrom(label1)
+            var s2 = ss.computeStyleFrom(label2)
         then : '...and we check the results'
             s1.hasPaintersOnLayer(UI.Layer.BACKGROUND)
             s1.painters(UI.Layer.BACKGROUND).size() == 1
@@ -643,7 +643,7 @@ class Style_Sheet_Spec extends Specification
         when : 'We create a single UI component using style group "A":'
             var label = UI.label(":)").group("A").get(JLabel)
         and : 'We run it through the style sheet...'
-            var s = ss.applyTo(label)
+            var s = ss.computeStyleFrom(label)
         then : '...and we check the results'
             s.border().widths().top().get() == 10
             s.border().widths().left().get() == 10
@@ -728,7 +728,7 @@ class Style_Sheet_Spec extends Specification
         when : 'We create a single UI component using style group "A":'
             var button = UI.toggleButton(":)").group("A").get(JToggleButton)
         and : 'We run it through the style sheet...'
-            var s = ss.applyTo(button)
+            var s = ss.computeStyleFrom(button)
         then : '...and we check the results'
             s.border().widths().top().get() == 5
             s.border().widths().left().get() == 5
@@ -746,7 +746,7 @@ class Style_Sheet_Spec extends Specification
             s.shadow(UI.Layer.FOREGROUND, "named shadow") == ShadowConf.none()
             s.font().family() == "Ubuntu"
             s.font().size() == 12
-            s.font().posture() == 0
+            s.font().posture().get() == 0
     }
     
     
@@ -793,19 +793,19 @@ class Style_Sheet_Spec extends Specification
             var label1 = UI.label(":)").group("A").get(JLabel)
             var label2 = UI.label(":D").group("B").get(JLabel)
         and : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(button1)
-            var s2 = ss.applyTo(button2)
-            var s3 = ss.applyTo(button3)
-            var s4 = ss.applyTo(label1)
-            var s5 = ss.applyTo(label2)
+            var s1 = ss.computeStyleFrom(button1)
+            var s2 = ss.computeStyleFrom(button2)
+            var s3 = ss.computeStyleFrom(button3)
+            var s4 = ss.computeStyleFrom(label1)
+            var s5 = ss.computeStyleFrom(label2)
         then : 'We first verify that they are not equal to another:'
             s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5
         and : 'They are equal to recalculated instances of themselves:'
-            s1 == ss.applyTo(button1)
-            s2 == ss.applyTo(button2)
-            s3 == ss.applyTo(button3)
-            s4 == ss.applyTo(label1)
-            s5 == ss.applyTo(label2)
+            s1 == ss.computeStyleFrom(button1)
+            s2 == ss.computeStyleFrom(button2)
+            s3 == ss.computeStyleFrom(button3)
+            s4 == ss.computeStyleFrom(label1)
+            s5 == ss.computeStyleFrom(label2)
         and : 'We also check that they have the expected commonalities:'
             [s1, s2, s3, s4, s5].every { it.padding() == Outline.of(24, 72, 42, 12) }
             [s1, s2, s3, s4, s5].every { it.border().widths().bottom().get() == 42 }

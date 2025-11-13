@@ -289,10 +289,10 @@ public class NoteGuesserView extends Panel
                             int fontSize = key.h / 6;
                             Font font = Font.of("Arial", FontStyle.BOLD, fontSize);
                             // Now we estimate the height and width of the note label:
-                            java.awt.FontMetrics metrics = g2d.getFontMetrics(font);
+                            java.awt.FontMetrics metrics = g2d.getFontMetrics(font.toAwtFont());
                             int noteWidth  = metrics.stringWidth(note);
                             int noteHeight = metrics.getHeight();
-                            g2d.setFont(font);
+                            g2d.setFont(font.toAwtFont());
                             g2d.setColor(Color.BLACK);
                             int noteLabelX = key.x + key.w / 2 - noteWidth / 2;
                             int noteLabelY = key.y + key.h - noteHeight / 2;
@@ -321,7 +321,7 @@ public class NoteGuesserView extends Panel
                     if ( oi == 1 ) label = "Small Octave";
                     if ( oi == 2 ) label = "One-line Octave";
                     if ( oi == 3 ) label = "Two-line Octave";
-                    g2d.setFont(Font.of("Arial", FontStyle.BOLD, 16));
+                    g2d.setFont(Font.of("Arial", FontStyle.BOLD, 16).toAwtFont());
                     java.awt.FontMetrics metrics = g2d.getFontMetrics();
                     int estimatedWidth  = metrics.stringWidth(label);
                     int estimatedHeight = metrics.getHeight();
@@ -389,7 +389,7 @@ public class NoteGuesserView extends Panel
                 if ( shouldDrawHelp ) {
                     int noteLabelX = x - 30 + ( isActuallyALine ? 15 : 0 );
                     int noteLabelY = lineY + distanceBetween2Lines / 5;
-                    g2d.setFont(Font.of("Arial", FontStyle.BOLD, distanceBetween2Lines / 2));
+                    g2d.setFont(Font.of("Arial", FontStyle.BOLD, distanceBetween2Lines / 2).toAwtFont());
                     g2d.setColor(color);
                     g2d.drawString(note, noteLabelX, noteLabelY);
                 }

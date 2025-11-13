@@ -28,6 +28,8 @@ import swingtree.layout.LayoutConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
+import swingtree.style.FontConf;
+import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -71,6 +73,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
         return font == UI.Font.UNDEFINED;
+    }
+    protected final boolean _isUndefinedFont( UI.Font font ) {
+        return font.conf().equals(FontConf.none());
     }
 
     @SuppressWarnings("ReferenceEquality")
@@ -3733,6 +3738,89 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         self = UIForAnySwing.class.cast(self.withMaxHeight(height));
         self = UIForAnySwing.class.cast(self.withPrefHeight(height));
         return self._this();
+    }
+
+    /**
+     *  Use this to set the font of the wrapped {@link JComponent}.
+     *  If the library and look and feel has a {@link UI#scale()} facter
+     *  other than {@code 1.0}, then the font size fill be scaled accordingly...<br>
+     *  <b>
+     *      To ensure reliable and consistent scaling when working with font,
+     *      we recommend using {@link #withFont(UI.Font)} instead of
+     *      this method. When passing a {@link UI.Font} to SwingTree, then
+     *      it will reliably be converted to a native font with the correct scale.
+     *  </b>
+     *
+     * @param font The {@link java.awt.Font} of the text which should be displayed on the component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final I withFont( Font font ) {
+        NullUtil.nullArgCheck(font, "font", Font.class);
+        return _with( thisComponent -> {
+                    if ( _isUndefinedFont(font) )
+                        thisComponent.setFont(null);
+                    else
+                        thisComponent.setFont(SwingTree.get().scale(font));
+                })
+                ._this();
+    }
+
+    /**
+     *  Use this to set the font of the wrapped component type.
+     *  Using an {@link UI.Font} over an AWT font allows SwingTree to ensure that
+     *  the current look and feel scale (for high DPI environments) is correctly applied.
+     *
+     * @param font The font of the text which should be displayed on the component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final I withFont( UI.Font font ) {
+        NullUtil.nullArgCheck(font, "font", Font.class);
+        return _with( thisComponent -> {
+            _installLayoutInfoFromFontConf(font, thisComponent);
+            if ( _isUndefinedFont(font) )
+                thisComponent.setFont(null);
+            else
+                thisComponent.setFont(font.toAwtFont());
+        })._this();
+    }
+
+    /**
+     *  Use this to dynamically set the font of the wrapped {@link JComponent}
+     *  through the provided view model property.
+     *  When the font wrapped by the provided property changes,
+     *  then so does the font of this text component.
+     *
+     * @param font The font property of the text which should be displayed on the component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
+     */
+    public final I withFont( Val<UI.Font> font ) {
+        NullUtil.nullArgCheck(font, "font", Val.class);
+        NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
+        return _withOnShow( font, (c,v) -> {
+                    _installLayoutInfoFromFontConf(v, c);
+                    if ( _isUndefinedFont(v) )
+                        c.setFont(null);
+                    else
+                        c.setFont(v.toAwtFont());
+                })
+                ._with( thisComponent -> {
+                    UI.Font newFont = font.orElseThrowUnchecked();
+                    _installLayoutInfoFromFontConf(newFont, thisComponent);
+                    if ( _isUndefinedFont(newFont) )
+                        thisComponent.setFont( null );
+                    else
+                        thisComponent.setFont( newFont.toAwtFont() );
+                })
+                ._this();
+    }
+
+    @SuppressWarnings("DoNotCall")
+    private static void _installLayoutInfoFromFontConf(UI.Font font, JComponent owner) {
+        LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(font.conf(), owner);
     }
 
     /**

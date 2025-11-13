@@ -77,7 +77,7 @@ final class StyleSource<C extends JComponent>
                               .orElse(StyleConf.none());
 
         try {
-            styleConf = _styleSheet.applyTo( owner, styleConf );
+            styleConf = _styleSheet.computeStyleFrom( owner, styleConf );
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "An exception occurred while applying the style sheet for component '"+owner+"'.", e);
             /*
