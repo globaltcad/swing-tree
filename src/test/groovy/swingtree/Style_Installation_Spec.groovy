@@ -250,4 +250,118 @@ class Style_Installation_Spec extends Specification
             false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
             false    | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
     }
+
+    def 'Different `Styler`s may or may not override the `JButton.setContentAreaFilled(boolean)` property.'(
+        boolean isFilled, Styler<JButton> styler
+    ){
+        reportInfo """
+            This is a data driven test that takes a `Styler` 
+            which will be applied to a `JButton` by passing it to the
+            `withStyle(Styler)` method.
+            Then we build the component and check if the "isContentAreaFilled" property
+            of a button was or was not modified.
+            
+            Although not intuitive from the outside perspective, but internally
+            SwingTree sometimes needs to set this flag to false in order to
+            prevent the look and feel from rendering it so that SwingTree can take over
+            and paint its style instead!
+            
+            This specification may not be relevant to you if you are not interested
+            in the details of the SwingTree library internals.
+            But it demonstrates the complexity of the style installation process
+            and can give you a good idea of what it took to build the SwingTree library.
+        """
+        given: 'We create a button UI with the given styler turned off initially!'
+            var applyStyle = false
+            var ui =
+                    UI.button()
+                    .withSize(80,50)
+                    .withStyle( it -> applyStyle ? styler(it) : it )
+
+        when: 'We build the button'
+            var button = ui.get(JButton)
+        then: 'Initially, the `isContentAreaFilled` is set to true:'
+            button.isContentAreaFilled()
+
+        when : """
+            The style is activated and updated, then we expect
+            SwingTree to evaluate if it is necessary to overrde the look and feel.
+        """
+            applyStyle = true
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics()) // We need to simulate the component being painted
+        then : """
+            The flag has the expected value:
+        """
+            button.isContentAreaFilled() == isFilled
+
+        when : 'We now turn off the style and update the component...'
+            applyStyle = false
+            image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics()) // We need to simulate the component being painted
+        then: 'The `isContentAreaFilled` is set to true like it was initially:'
+            button.isContentAreaFilled()
+
+        where :
+            isFilled | styler
+            true     | { it }
+            true     | { it.backgroundColor(Color.BLACK) }
+            true     | { it.foregroundColor(Color.BLUE) }
+            true     | { it.foundationColor(Color.GREEN) }
+            true     | { it.cursor(UI.Cursor.HAND) }
+            true     | { it.margin(5) }
+            true     | { it.padding(5).margin(5) }
+            true     | { it.border(2, "black") }
+            true     | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
+            true     | { it.shadowColor("green") }
+            true     | { it.shadowColor("blue").shadowBlurRadius(5) }
+            true     | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
+            true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+
+            false    | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
+            true     | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }
+            true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([] as Color[])) }
+            true     | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            false    | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+
+            false    | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.ALL, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+
+            true     | { it.parentFilter( conf -> conf.blur(1) ) }
+            true     | { it.parentFilter( conf -> conf.blur(0.75) ) }
+            true     | { it.parentFilter( conf -> conf.blur(0.0) ) }
+            true     | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+    }
 }
