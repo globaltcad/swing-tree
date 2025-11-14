@@ -226,8 +226,15 @@ final class StyleInstaller<C extends JComponent>
         if ( weNeedToInstallTheCustomBorder ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
             newStyle = recalculateInsets(owner, newStyle);
-        } else if ( styleSource.hasNoAnimationStylers() )
+        } else if ( styleSource.hasNoAnimationStylers() ) {
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
+            if ( owner instanceof AbstractButton && _initialContentAreaFilled != null ) {
+                AbstractButton button = (AbstractButton) owner;
+                if ( button.isContentAreaFilled() != _initialContentAreaFilled)
+                    button.setContentAreaFilled(_initialContentAreaFilled);
+                _initialContentAreaFilled = null;
+            }
+        }
 
         if ( weNeedToInstallTheCustomUI ) {
             _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
