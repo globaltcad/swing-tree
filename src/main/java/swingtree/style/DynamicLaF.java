@@ -131,8 +131,10 @@ final class DynamicLaF
         ComponentUI styleLaF  = _styleLaF;
 
         if ( !customLookAndFeelIsInstalled() || isUpdate ) {
-            if ( !isUpdate )
+            if ( !isUpdate && !_UI_UPDATE_LISTENER.isRegisteredOnComponent) {
                 owner.addPropertyChangeListener("UI", _UI_UPDATE_LISTENER);
+                _UI_UPDATE_LISTENER.isRegisteredOnComponent = true;
+            }
 
             if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.
                 JBox p = (JBox) owner;
@@ -210,6 +212,7 @@ final class DynamicLaF
 
         if ( customLookAndFeelIsInstalled() ) {
             _owner.removePropertyChangeListener(_UI_UPDATE_LISTENER);
+            _UI_UPDATE_LISTENER.isRegisteredOnComponent = false;
             if ( _owner instanceof JPanel ) {
                 JPanel p = (JPanel) _owner;
                 boolean success = _tryInstallingUISilently(p, _formerLaF);
@@ -430,6 +433,7 @@ final class DynamicLaF
      *  }</pre>
      */
     private static final class UIUpdateListenerAndSwingTreeLookAndFeelRestorer implements PropertyChangeListener {
+        boolean isRegisteredOnComponent = false;
         @Override
         public void propertyChange(PropertyChangeEvent event) {
             Object oldValue = event.getOldValue();
