@@ -46,6 +46,10 @@ final class StyleSource<C extends JComponent>
         _styleSheet       = Objects.requireNonNull(styleSheet);
     }
 
+    StyleSheet styleSheet() {
+        return _styleSheet;
+    }
+
     public boolean hasNoAnimationStylers() {
         return _animationStylers.length == 0;
     }

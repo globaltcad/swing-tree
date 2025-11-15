@@ -2,6 +2,8 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Event;
+import sprouts.Observable;
 import swingtree.SwingTreeConfigurator;
 import swingtree.api.Styler;
 
@@ -82,6 +84,7 @@ public abstract class StyleSheet
     public static StyleSheet none() { return _NONE; }
 
 
+    private final Event _styleSheetChangeEvent = Event.create();
     private final BiFunction<JComponent, StyleConf, StyleConf> _defaultStyle;
     private final Map<StyleTrait<?>, Styler<?>> _styleDeclarations = new LinkedHashMap<>();
     private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
@@ -104,6 +107,25 @@ public abstract class StyleSheet
     protected StyleSheet( StyleSheet parentStyleSheet ) {
         Objects.requireNonNull(parentStyleSheet, "Use StyleSheet.none() instead of null.");
         _defaultStyle = parentStyleSheet::_applyTo;
+    }
+
+    /**
+     *  Creates and returns an {@link Observable} on an internal
+     *  {@link Event} which is triggered after every time this {@link StyleSheet}
+     *  is being configured through the {@link #configure()} method.<br>
+     *  Components created from SwingTree use this observable to recompute
+     *  and apply their style from this style sheet...<br>
+     *  <b>
+     *      Note that the instance returned by this method is weakly referenced
+     *      by the source {@link Event}. This means that when a call-site no longer
+     *      holds on to their observer, then it will be garbage collected alongside
+     *      all of the {@link sprouts.Observer} (event listeners) registered on it!
+     *  </b>
+     * @return A weakly referenced {@link Observable} which can be used to react to
+     *         {@link StyleSheet} re-configurations...
+     */
+    public final Observable observable() {
+        return _styleSheetChangeEvent.observable();
     }
 
     /**
@@ -138,6 +160,7 @@ public abstract class StyleSheet
         }
         _buildAndSetStyleTraitPaths();
         _initialized = true;
+        _styleSheetChangeEvent.fire(); // Triggers GUI repaints...
     }
 
     /**

@@ -109,6 +109,11 @@ public final class ComponentExtension<C extends JComponent>
                 owner.revalidate();
             });
         });
+        if ( _styleSource.styleSheet() != StyleSheet.none() ) {
+            storeBoundObservable(_styleSource.styleSheet().observable().subscribe(()->{
+                gatherApplyAndInstallStyleConfig();
+            }));
+        }
     }
 
     private Font scale(Font font, float previousScale) {

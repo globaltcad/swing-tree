@@ -6332,12 +6332,22 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         swingTreeContext.setStyleSheet(styleSheet);
         try {
             T result = scope.get();
+            JComponent component = null;
             if ( result instanceof JComponent )
-                ComponentExtension.from((JComponent) result).gatherApplyAndInstallStyle(true);
+                component = (JComponent) result;
             if ( result instanceof UIForAnySwing ) {
                 UIForAnySwing<?,JComponent> resultSwing = (UIForAnySwing) result;
-                ComponentExtension.from(resultSwing.get(resultSwing.getType()))
-                        .gatherApplyAndInstallStyle(true);
+                component = resultSwing.get(resultSwing.getType());
+            }
+            if ( component != null ) {
+                ComponentExtension<JComponent> extension = ComponentExtension.from(component);
+                extension.gatherApplyAndInstallStyle(true);
+                if ( styleSheet != StyleSheet.none() ) {
+                    JComponent finalComponent = component;
+                    extension.storeBoundObservable(styleSheet.observable().subscribe(() -> {
+                        finalComponent.repaint();
+                    }));
+                }
             }
             return result;
         } finally {
