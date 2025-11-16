@@ -275,6 +275,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackground                  = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                      = newStyle.margin().isPositive();
         final boolean hasOpaqueBorder                = newStyle.border().colors().isFullyOpaue();
+        final boolean isNaturallyTransparent         = (owner instanceof JBox || owner instanceof JLabel);
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret the tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background
@@ -419,9 +420,9 @@ final class StyleInstaller<C extends JComponent>
                     if ( !Objects.equals( owner.getBackground(), UI.Color.UNDEFINED ) )
                         owner.setBackground(UI.Color.UNDEFINED);
                 };
-                if ( !hasBackground && owner instanceof JBox )
-                    shouldBeOpaque = false;
             }
+            if ( !hasBackground && isNaturallyTransparent )
+                shouldBeOpaque = false;
             if ( owner.isOpaque() != shouldBeOpaque )
                 owner.setOpaque(shouldBeOpaque);
             /*

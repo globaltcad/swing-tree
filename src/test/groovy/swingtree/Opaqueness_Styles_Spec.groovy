@@ -1201,6 +1201,7 @@ class Opaqueness_Styles_Spec extends Specification
             true   | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "blue")}
             false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "transparent blue")}
             true   | {it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}
+            true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
     }
 
     def 'A plain button will be opaque, even if it has a custom painter.'(
@@ -1280,6 +1281,54 @@ class Opaqueness_Styles_Spec extends Specification
             false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
             true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
             false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            false  | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+    }
+
+    def 'A `JLabel` may or may not be opaque, depending on its style.'(
+        boolean opaque, Styler<JBox> styler
+    ) {
+        reportInfo """
+ 
+            A `JLabel` is a component that is opaque by default.
+            This test demonstrates that it may or may not change its opaqueness
+            depending on what kind of styles are applied to it.
+
+        """
+        given : 'We first define a boolean flag that we will use to control the style:'
+            var isOn = false
+        and : 'Then we create the box based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.label("Hi!").withSize(100, 100)
+                    .withStyle({ isOn ? styler(it) : it })
+        and : 'We build the underlying box:'
+            var label = ui.get(JLabel)
+        expect : 'A plain label is transparent (not opaque) by default:'
+            !label.isOpaque()
+        when : 'We set the `isOn` flag to true and then refresh the UI:'
+            isOn = true
+            UI.runNow(()->{
+                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The label has the expected opaqueness:'
+            label.isOpaque() == opaque
+        when : 'We set the `isOn` flag to false and then refresh the UI:'
+            isOn = false
+            UI.runNow(()->{
+                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The label has the expected opaqueness:'
+            !label.isOpaque()
+        where :
+            opaque | styler
+            false  | {it}
+            true   | {it.backgroundColor("red")}
+            false  | {it.backgroundColor("transparent red")}
+            true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            false  | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
     }
 }
 
