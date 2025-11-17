@@ -182,8 +182,8 @@ final class ComponentAreas
         if ( border.allCornersShareTheSameArc() && insAllTheSame ) {
             float arcWidth  = border.topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0f);
             float arcHeight = border.topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0f);
-            arcWidth  = Math.max(0, arcWidth  - insTop);
-            arcHeight = Math.max(0, arcHeight - insTop);
+            arcWidth  = Math.max(0, arcWidth  - insTop * 2f);
+            arcHeight = Math.max(0, arcHeight - insTop * 2f);
             if ( arcWidth == 0 || arcHeight == 0 )
                 return new Area(new Rectangle2D.Float(left, top, width - left - right, height - top - bottom));
 
@@ -200,10 +200,10 @@ final class ComponentAreas
             Arc bottomLeftArc  = border.bottomLeftArc().orElse(null);
             Area area = new Area();
 
-            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  );
-            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight);
-            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight);
-            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft );
+            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  ) * 2f;
+            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight) * 2f;
+            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight) * 2f;
+            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft ) * 2f;
 
             float arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);
             float arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);
