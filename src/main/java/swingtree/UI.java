@@ -2874,7 +2874,7 @@ public final class UI extends UIFactoryMethods
         }
 
         private Color(java.awt.Color color) {
-            super(color.getRGB());
+            super(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
         }
 
         private Color(int r, int g, int b) {

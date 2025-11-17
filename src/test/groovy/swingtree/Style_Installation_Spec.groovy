@@ -6,8 +6,12 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.api.Styler
 import swingtree.layout.Size
+import swingtree.style.ComponentExtension
+import swingtree.style.StyleSheet
 
 import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.JPanel
 import javax.swing.plaf.metal.MetalButtonUI
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -249,5 +253,272 @@ class Style_Installation_Spec extends Specification
             false    | { it.parentFilter( conf -> conf.blur(0.75) ) }
             false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
             false    | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+    }
+
+    def 'Different `Styler`s may or may not override the `JButton.setContentAreaFilled(boolean)` property.'(
+        boolean isFilled, Styler<JButton> styler
+    ){
+        reportInfo """
+            This is a data driven test that takes a `Styler` 
+            which will be applied to a `JButton` by passing it to the
+            `withStyle(Styler)` method.
+            Then we build the component and check if the "isContentAreaFilled" property
+            of a button was or was not modified.
+            
+            Although not intuitive from the outside perspective, but internally
+            SwingTree sometimes needs to set this flag to false in order to
+            prevent the look and feel from rendering it so that SwingTree can take over
+            and paint its style instead!
+            
+            This specification may not be relevant to you if you are not interested
+            in the details of the SwingTree library internals.
+            But it demonstrates the complexity of the style installation process
+            and can give you a good idea of what it took to build the SwingTree library.
+        """
+        given: 'We create a button UI with the given styler turned off initially!'
+            var applyStyle = false
+            var ui =
+                    UI.button()
+                    .withSize(80,50)
+                    .withStyle( it -> applyStyle ? styler(it) : it )
+
+        when: 'We build the button'
+            var button = ui.get(JButton)
+        then: 'Initially, the `isContentAreaFilled` is set to true:'
+            button.isContentAreaFilled()
+
+        when : """
+            The style is activated and updated, then we expect
+            SwingTree to evaluate if it is necessary to overrde the look and feel.
+        """
+            applyStyle = true
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics()) // We need to simulate the component being painted
+        then : """
+            The flag has the expected value:
+        """
+            button.isContentAreaFilled() == isFilled
+
+        when : 'We now turn off the style and update the component...'
+            applyStyle = false
+            image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics()) // We need to simulate the component being painted
+        then: 'The `isContentAreaFilled` is set to true like it was initially:'
+            button.isContentAreaFilled()
+
+        where :
+            isFilled | styler
+            true     | { it }
+            true     | { it.backgroundColor(Color.BLACK) }
+            true     | { it.foregroundColor(Color.BLUE) }
+            true     | { it.foundationColor(Color.GREEN) }
+            true     | { it.cursor(UI.Cursor.HAND) }
+            true     | { it.margin(5) }
+            true     | { it.padding(5).margin(5) }
+            true     | { it.border(2, "black") }
+            true     | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
+            true     | { it.shadowColor("green") }
+            true     | { it.shadowColor("blue").shadowBlurRadius(5) }
+            true     | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
+            true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
+            true     | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+
+            false    | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
+            true     | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }
+            true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([] as Color[])) }
+            true     | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            false    | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+
+            false    | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.ALL, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
+            true     | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+
+            true     | { it.parentFilter( conf -> conf.blur(1) ) }
+            true     | { it.parentFilter( conf -> conf.blur(0.75) ) }
+            true     | { it.parentFilter( conf -> conf.blur(0.0) ) }
+            true     | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+    }
+
+    def 'Style sheets can be dynamically reconfigured at runtime to switch between different visual themes.'()
+    {
+        reportInfo """
+            This test demonstrates how to create a dynamic style sheet that can switch between
+            different visual themes at runtime. This is achieved by:
+            
+            1. Creating a custom StyleSheet implementation with a configure() method that
+               uses a switch statement to apply different styles based on a current theme
+            2. Binding a SwingTree GUI to this style sheet using UI.use(StyleSheet, Supplier)
+            3. Calling reconfigure() on the style sheet to switch themes
+            4. Verifying that components receive the new styles
+            
+            This powerful feature allows you to create applications with dynamic theming
+            capabilities, similar to what you might find in modern web applications.
+            
+            The style sheet in this test switches between three themes:
+            - LIGHT: Bright colors with dark text
+            - DARK: Dark colors with light text  
+            - RAINBOW: A colorful, playful theme
+            
+            Each theme applies distinct styles to JButton and JLabel components,
+            demonstrating how different visual identities can be achieved through
+            style sheet reconfiguration.
+        """
+        given: 'A custom style sheet with theme switching capability'
+            var currentTheme = "LIGHT"
+            var styleSheet = new StyleSheet() {
+                @Override
+                protected void configure() {
+                    switch (currentTheme) {
+                        case "LIGHT":
+                            add(type(JButton.class), it -> it
+                                .backgroundColor(Color.WHITE)
+                                .foregroundColor(Color.BLACK)
+                                .border(2, "darkgray")
+                                .borderRadius(8)
+                                .fontBold(true)
+                            )
+                            add(type(JLabel.class), it -> it
+                                .backgroundColor(new Color(240, 240, 240))
+                                .foregroundColor(Color.DARK_GRAY)
+                                .fontSize(14)
+                                .padding(5)
+                            )
+                            break
+                        case "DARK":
+                            add(type(JButton.class), it -> it
+                                .backgroundColor(new Color(45, 45, 45))
+                                .foregroundColor(Color.WHITE)
+                                .border(2, "lightgray")
+                                .borderRadius(8)
+                                .fontBold(true)
+                                .shadowColor("white")
+                                .shadowBlurRadius(3)
+                            )
+                            add(type(JLabel.class), it -> it
+                                .backgroundColor(new Color(30, 30, 30))
+                                .foregroundColor(Color.LIGHT_GRAY)
+                                .fontSize(14)
+                                .padding(5)
+                            )
+                            break
+                        case "RAINBOW":
+                            add(type(JButton.class), it -> it
+                                .gradient(UI.Layer.BACKGROUND, "rainbow", grad -> grad
+                                    .colors(Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA)
+                                    .span(UI.Span.LEFT_TO_RIGHT)
+                                )
+                                .backgroundColor(Color.PINK)
+                                .foregroundColor(Color.BLACK)
+                                .borderRadius(12)
+                                .fontBold(true)
+                                .padding(10)
+                            )
+                            add(type(JLabel.class), it -> it
+                                .backgroundColor(Color.PINK)
+                                .foregroundColor(Color.DARK_GRAY)
+                                .fontSize(16)
+                                .borderRadius(5)
+                                .padding(8)
+                            )
+                            break
+                    }
+                }
+            }
+
+        and: 'A SwingTree GUI bound to our custom style sheet'
+            var panel = UI.use(styleSheet) { ->
+                                    UI.panel("fill, wrap 1")
+                                        .add(UI.button("Test Button"))
+                                        .add(UI.label("Test Label"))
+                                        .get(JPanel)
+                                }
+
+        when: 'We build the UI components with the initial LIGHT theme'
+            var button = panel.getComponent(0) as JButton
+            var label = panel.getComponent(1) as JLabel
+
+        then: 'The components should have the LIGHT theme styles'
+            button.background == Color.WHITE
+            button.foreground == Color.BLACK
+            label.foreground == Color.DARK_GRAY
+
+        when: 'We switch to DARK theme and reconfigure the style sheet'
+            currentTheme = "DARK"
+            styleSheet.reconfigure()
+
+            // Force style re-evaluation by simulating a component update
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics())
+            label.paint(image.createGraphics())
+
+        then: 'The components should now have the DARK theme styles'
+            button.background == new Color(45, 45, 45)
+            button.foreground == Color.WHITE
+            label.foreground == Color.LIGHT_GRAY
+
+        when: 'We switch to RAINBOW theme and reconfigure again'
+            currentTheme = "RAINBOW"
+            styleSheet.reconfigure()
+
+            // Force style re-evaluation
+            image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics())
+            label.paint(image.createGraphics())
+
+        then: 'The components should now have the RAINBOW theme styles'
+            // For the button, we check that a gradient was installed (custom UI)
+            !(button.getUI() instanceof MetalButtonUI)
+            label.foreground == Color.DARK_GRAY
+
+        and: 'The style configurations reflect the theme changes'
+            var buttonStyle = ComponentExtension.from(button).getStyle()
+            var labelStyle = ComponentExtension.from(label).getStyle()
+
+            buttonStyle.base().backgroundColor().get() == Color.PINK // Gradient primer color
+            labelStyle.base().backgroundColor().get() == Color.PINK
+
+        when: 'We switch back to LIGHT theme to complete the cycle'
+            currentTheme = "LIGHT"
+            styleSheet.reconfigure()
+
+            // Force style re-evaluation
+            image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics())
+            label.paint(image.createGraphics())
+
+        then: 'The components should return to their original LIGHT theme styles'
+            button.background == Color.WHITE
+            button.foreground == Color.BLACK
+            label.foreground == Color.DARK_GRAY
     }
 }
