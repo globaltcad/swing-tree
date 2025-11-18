@@ -128,27 +128,9 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         }
 
         private ScrollableComponentDelegate _createNewScrollableConf() {
-            int averageBlockIncrement  = 10;
-            int averageUnitIncrement   = 10;
-            try {
-                int verticalBlockIncrement   = _parent.getVerticalScrollBar().getBlockIncrement();
-                int horizontalBlockIncrement = _parent.getHorizontalScrollBar().getBlockIncrement();
-                averageBlockIncrement = (verticalBlockIncrement + horizontalBlockIncrement) / 2;
-            } catch ( Exception e ) {
-                log.error(SwingTree.get().logMarker(), "Error while calculating average block increment for scrollable component.", e);
-            }
-            try {
-                int verticalUnitIncrement   = _parent.getVerticalScrollBar().getUnitIncrement();
-                int horizontalUnitIncrement = _parent.getHorizontalScrollBar().getUnitIncrement();
-                averageUnitIncrement = (verticalUnitIncrement + horizontalUnitIncrement) / 2;
-            } catch ( Exception e ) {
-                log.error(SwingTree.get().logMarker(), "Error while calculating average unit increment for scrollable component.", e);
-            }
             ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
                                                             _parent, _child,
-                                                            Size.of(_child.getPreferredSize()),
-                                                            averageUnitIncrement,
-                                                            averageBlockIncrement
+                                                            Size.of(_child.getPreferredSize())
                                                        );
             try {
                 delegate = _configurator.configure(delegate);

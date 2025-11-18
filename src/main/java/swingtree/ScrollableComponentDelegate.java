@@ -1,14 +1,13 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.api.Configurator;
 import swingtree.api.ScrollIncrementSupplier;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
-import javax.swing.JComponent;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JViewport;
+import javax.swing.*;
 import java.awt.Component;
 import java.util.Objects;
 
@@ -56,19 +55,59 @@ import java.util.Objects;
  */
 public final class ScrollableComponentDelegate
 {
+    private static final Logger log = LoggerFactory.getLogger(ScrollableComponentDelegate.class);
+
     static ScrollableComponentDelegate of(
         JScrollPane scrollPane,
         JComponent content,
-        Size preferredSize,
-        int unitIncrement, int blockIncrement
+        Size preferredSize
     ) {
         Component view     = scrollPane.getViewport().getView();
         JViewport viewport = scrollPane.getViewport();
-        boolean fitWidth  = viewport.getWidth()  >  view.getPreferredSize().width;
-        boolean fitHeight = viewport.getHeight() > view.getPreferredSize().height;
+
+        boolean fitWidth ;
+        boolean fitHeight;
+        ScrollIncrementSupplier unitIncrementSupplier;
+        ScrollIncrementSupplier blockIncrementSupplier;
+        if ( content instanceof Scrollable) {
+            Scrollable scrollable = (Scrollable)content;
+            fitWidth = scrollable.getScrollableTracksViewportWidth();
+            fitHeight = scrollable.getScrollableTracksViewportHeight();
+            unitIncrementSupplier = (a,b,c) -> {
+                int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
+                return scrollable.getScrollableUnitIncrement(a.toRectangle(),orientation,c);
+            };
+            blockIncrementSupplier = (a,b,c) -> {
+                int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
+                return scrollable.getScrollableBlockIncrement(a.toRectangle(),orientation,c);
+            };
+        } else {
+            int averageBlockIncrement  = 10;
+            int averageUnitIncrement   = 10;
+            try {
+                int verticalBlockIncrement   = scrollPane.getVerticalScrollBar().getBlockIncrement();
+                int horizontalBlockIncrement = scrollPane.getHorizontalScrollBar().getBlockIncrement();
+                averageBlockIncrement = (verticalBlockIncrement + horizontalBlockIncrement) / 2;
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating average block increment for scrollable component.", e);
+            }
+            try {
+                int verticalUnitIncrement   = scrollPane.getVerticalScrollBar().getUnitIncrement();
+                int horizontalUnitIncrement = scrollPane.getHorizontalScrollBar().getUnitIncrement();
+                averageUnitIncrement = (verticalUnitIncrement + horizontalUnitIncrement) / 2;
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating average unit increment for scrollable component.", e);
+            }
+            fitWidth  = viewport.getWidth()  >  view.getPreferredSize().width;
+            fitHeight = viewport.getHeight() > view.getPreferredSize().height;
+            int unitIncrement  = averageUnitIncrement;
+            int blockIncrement = averageBlockIncrement;
+            unitIncrementSupplier = (a,b,c) -> {return unitIncrement;};
+            blockIncrementSupplier = (a,b,c) -> {return blockIncrement;};
+        }
         return new ScrollableComponentDelegate(
                     scrollPane, content, view, preferredSize,
-                    (a,b,c)->unitIncrement, (a,b,c)->blockIncrement,
+                    unitIncrementSupplier, blockIncrementSupplier,
                     fitWidth, fitHeight
                 );
     }
