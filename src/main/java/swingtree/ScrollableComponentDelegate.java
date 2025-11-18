@@ -38,19 +38,25 @@ import java.util.Objects;
  * )
  * }</pre>
  * <p>
- * Note that the provided {@link Configurator} will be called
+ * In most cases, the supplied {@link Configurator} will be called
  * for every call to a method of the underlying {@link javax.swing.Scrollable}
  * component implementation, so the settings you provide can
  * also change dynamically based on the context captured by the lambda.<br>
+ * <b>
+ *     This however is NOT true in case of the scroll pane wrapping
+ *     a {@link JTable} for which the configurator will be called once initially.
+ * </b><br>
+ * <i>(This is because a table expects to be tightly wrapped by the scroll pane in order to
+ * function properly, and so we cannot install a delegation mechanism for you...)</i><br>
  * <p>
- * Also note that this configuration object also exposes some context
+ * Also note that this configuration object exposes some additional context
  * information you may find useful when defining its properties like {@link #fitWidth(boolean)},
  * {@link #fitHeight(boolean)}, {@link #unitIncrement(int)}, and so on...<br>
  * Like for example the current {@link #view()}, which implements the {@link javax.swing.Scrollable}
  * and wraps your {@link #content} component. You can also access the {@link #viewport()} as
  * well as the overarching {@link #scrollPane()} overall!<br>
  * Again, the configurator you pass to {@link UI#scrollPane(Configurator)} will be
- * called eagerly, so everything you define in there will be completely dynamic,
+ * called eagerly (except for tables), so everything you define in there will be completely dynamic,
  * which means your scroll behaviour can dynamically react to the involved components.
  */
 public final class ScrollableComponentDelegate
@@ -166,8 +172,9 @@ public final class ScrollableComponentDelegate
     }
 
     /**
-     * Creates an updated scrollable config with the
-     * preferred size of the viewport for a view component.
+     * Configures the preferred <b>viewport size</b> which the view component may or may not
+     * fill out depending on other configurations (see {@link #fitWidth(boolean)}, {@link #fitHeight(boolean)}).
+     * Internally this translates to {@link Scrollable#getPreferredScrollableViewportSize()}.
      * For example, the preferred size of a <code>JList</code> component
      * is the size required to accommodate all the cells in its list.
      * However, the value of <code>preferredScrollableViewportSize</code>
