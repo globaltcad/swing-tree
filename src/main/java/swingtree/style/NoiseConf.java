@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *  A noise gradient configuration which is used to define a noise gradient style
@@ -26,6 +27,11 @@ import java.util.Objects;
 @SuppressWarnings("Immutable")
 public final class NoiseConf implements Simplifiable<NoiseConf>
 {
+    /*
+        SwingTree Developer Note:
+            Careful when converting this into a value class. It is used as cache key in a WEAK HASH MAP!
+            So the identity of instances of this are technically used for effective caching.
+     */
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(NoiseConf.class);
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
 
@@ -95,6 +101,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     private final UI.ComponentBoundary _boundary;
     private final float                _rotation;
     private final float[]              _fractions;
+    private final AtomicReference<@Nullable Integer> _hashCodeCache = new AtomicReference<>();
 
 
     private NoiseConf(
@@ -379,7 +386,11 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     @Override
     public int hashCode() {
-        return Objects.hash(
+        Integer foundHashCode = _hashCodeCache.get();
+        if ( foundHashCode != null ) {
+            return foundHashCode;
+        }
+        int hashCode = Objects.hash(
                 _function,
                 Arrays.hashCode(_colors),
                 _offset,
@@ -389,6 +400,8 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
                 _rotation,
                 Arrays.hashCode(_fractions)
             );
+        _hashCodeCache.set(hashCode);
+        return hashCode;
     }
 
     @Override

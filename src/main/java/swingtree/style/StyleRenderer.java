@@ -14,9 +14,8 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -28,6 +27,7 @@ import java.util.function.Function;
 final class StyleRenderer
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
+    private static final Map<NoiseConf, Map<Point2D,NoiseGradientPaint>> _NOISE_PAINT_CACHE = new WeakHashMap<>();
 
     private StyleRenderer() {} // Un-instantiable!
 
@@ -767,6 +767,16 @@ final class StyleRenderer
         final Point2D.Float  center,
         final NoiseConf      noise
     ) {
+        Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.get(noise);
+        if ( cachedPaints == null ) {
+            cachedPaints = new HashMap<>();
+        }
+        _NOISE_PAINT_CACHE.put(noise, cachedPaints); // Ensure the cache has a reference to a used noise conf...
+        NoiseGradientPaint paint = cachedPaints.get(center);
+        if ( paint != null ) {
+            return paint;
+        }
+
         final Color[] colors    = noise.colors();
         final float[] fractions = _fractionsFrom(colors, noise.fractions());
         float rotation = noise.rotation();
@@ -774,7 +784,7 @@ final class StyleRenderer
         float scaleX = scale.x();
         float scaleY = scale.y();
 
-        return new NoiseGradientPaint(
+        paint = new NoiseGradientPaint(
                         center,
                         scaleX,
                         scaleY,
@@ -783,6 +793,8 @@ final class StyleRenderer
                         colors,
                         noise.function()
                     );
+        cachedPaints.put(center, paint);
+        return paint;
     }
 
 
