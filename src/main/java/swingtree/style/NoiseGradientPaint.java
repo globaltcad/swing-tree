@@ -305,7 +305,7 @@ final class NoiseGradientPaint implements Paint
                 long index = ((long)X << 32) | (long)Y;
                 WritableRaster raster = cachedRasters.get(index);
 
-                if (raster == null)
+                if (raster == null || raster.getWidth() < TILE_WIDTH || raster.getHeight() < TILE_HEIGHT)
                     raster = getColorModel().createCompatibleWritableRaster(TILE_WIDTH, TILE_HEIGHT);  // Create raster for given colormodel
                 else
                     return raster;
