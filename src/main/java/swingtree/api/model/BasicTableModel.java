@@ -3,6 +3,7 @@ package swingtree.api.model;
 import org.jspecify.annotations.Nullable;
 import sprouts.Observable;
 import sprouts.Event;
+import sprouts.Tuple;
 import swingtree.UI;
 import swingtree.api.Buildable;
 
@@ -83,15 +84,39 @@ public interface BasicTableModel extends TableModel
      */
      class Builder<E> implements Buildable<BasicTableModel>
      {
+         private static class FixedColumnNames implements ColumnName {
+            final Tuple<String> names;
+             private FixedColumnNames(String... names) {
+                 this.names = Tuple.of(String.class, names);
+             }
+             @Override
+             public String get(int colIndex) {
+                 return colIndex < 0 || colIndex >= names.size() ? "" : names.get(colIndex);
+             }
+         }
+
+         private static class FixedColumnClasses implements ColumnClass {
+             private final Class<?> commonEntryType;
+             final Tuple<Class> classes;
+             private FixedColumnClasses(Class<?> commonEntryType, Class<?>... names) {
+                 this.commonEntryType = commonEntryType;
+                 this.classes = Tuple.of(Class.class, names);
+             }
+             @Override
+             public Class get(int colIndex) {
+                 return colIndex < 0 || colIndex >= classes.size() ? commonEntryType : classes.get(colIndex);
+             }
+         }
+
         private final Class<E>       commonEntryType;
-        private final RowCount       rowCount;
-        private final ColumnCount    colCount;
-        private final EntryGetter<E> entryGetter;
-        private final EntrySetter<E> entrySetter;
-        private final ColumnClass<E> columnClass;
-        private final CellEditable   cellEditable;
-        private final ColumnName     columnName;
-        private final Observable     observableEvent;
+        private final @Nullable RowCount       rowCount;
+        private final @Nullable ColumnCount    colCount;
+        private final @Nullable EntryGetter<E> entryGetter;
+        private final @Nullable EntrySetter<E> entrySetter;
+        private final @Nullable ColumnClass<E> columnClass;
+        private final @Nullable CellEditable   cellEditable;
+        private final @Nullable ColumnName     columnName;
+        private final @Nullable Observable     observableEvent;
 
          public Builder( Class<E> commonEntryType ) {
              this(
@@ -201,7 +226,7 @@ public interface BasicTableModel extends TableModel
          */
         public Builder<E> colClasses( Class<? extends E>... classes ) {
             if ( classes == null ) throw new IllegalArgumentException("classes cannot be null");
-            return colClass((colIndex) -> colIndex >= classes.length ? commonEntryType : classes[colIndex]);
+            return colClass(new FixedColumnClasses(commonEntryType, classes));
         }
         /**
          *  Accepts a lambda allowing the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
@@ -237,7 +262,7 @@ public interface BasicTableModel extends TableModel
          */
         public Builder<E> colNames( String... names ) {
             if ( names == null ) throw new IllegalArgumentException("names cannot be null");
-            return colName((colIndex) -> names[colIndex]);
+            return colName(new FixedColumnNames(names));
         }
         /**
          *  Use this to define the event which will be fired when the table model is updated.
@@ -271,12 +296,29 @@ public interface BasicTableModel extends TableModel
 
          private class FunTableModel extends AbstractTableModel implements BasicTableModel {
              @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }
-             @Override public int getColumnCount() { return colCount == null ? 0 : colCount.get(); }
+             @Override public int getColumnCount() {
+                 if (colCount == null) {
+                     if ( columnClass instanceof FixedColumnClasses ) {
+                         return ((FixedColumnClasses)columnClass).classes.size();
+                     }
+                     if ( columnName instanceof FixedColumnNames ) {
+                         return ((FixedColumnNames)columnName).names.size();
+                     }
+                 }
+                 return colCount == null ? 0 : colCount.get();
+             }
              @Override public Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }
              @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }
              @Override public Class<?> getColumnClass(int colIndex) { return columnClass == null ? super.getColumnClass(colIndex) : columnClass.get(colIndex); }
              @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
-             @Override public String getColumnName(int colIndex) { return columnName == null ? super.getColumnName(colIndex) : columnName.get(colIndex); }
+             @Override public String getColumnName(int colIndex) {
+                 if (columnName == null) {
+                     if ( columnClass instanceof FixedColumnClasses ) {
+                         return ((FixedColumnClasses)columnClass).get(colIndex).getSimpleName();
+                     }
+                 }
+                 return columnName == null ? super.getColumnName(colIndex) : columnName.get(colIndex);
+             }
          }
 
      }

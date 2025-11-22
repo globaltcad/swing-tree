@@ -81,30 +81,45 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
     @Override
     protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints ) {
         if ( _configurator != null ) {
-            if ( addedComponent instanceof Scrollable ) {
+            if ( addedComponent instanceof JTable ) {
+                /*
+                    Note that we cannot delegate the table like we do in
+                    the below case. This is because a table only installs itself
+                    properly in a scroll pane (with header) if its DIRECT parent is the
+                    scroll pane. (with indirection, the header will be missing)
+                */
+                JTable jTable = (JTable)addedComponent;
+                ScrollableComponentDelegate conf = _createNewScrollableConf(thisComponent, jTable, _configurator);
+                jTable.setPreferredScrollableViewportSize(conf.preferredSize().toDimension());
+                jTable.setFillsViewportHeight(conf.fitHeight());
+                int newMode = conf.fitWidth() ? JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS : JTable.AUTO_RESIZE_OFF;
+                jTable.setAutoResizeMode(newMode);
+                super._addComponentTo(thisComponent, addedComponent, constraints);
+            } else if ( addedComponent instanceof Scrollable ) {
                 log.warn(
                     "Trying to add a 'Scrollable' component to a declarative scroll pane UI which is already " +
                     "configured with a SwingTree based Scrollable through the 'UI.scrollPane(Configurator)' method. " +
                     "The provided component of type '"+addedComponent.getClass().getName()+"' is most likely not intended to be used this way.",
                     new Throwable()
                 );
-            }
-            ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);
-            if ( constraints != null ) {
-                wrapper.add(addedComponent, constraints.toConstraintForLayoutManager());
             } else {
-                wrapper.add(addedComponent, "grow");
-                /*
-                    If we do not use a Scrollable panel and add the component directly
-                    it will be placed and sized to fill the viewport by default.
-                    But when using a Scrollable wrapper, we have an indirection which causes the
-                    content to NOT fill out the viewport.
+                ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);
+                if ( constraints != null ) {
+                    wrapper.add(addedComponent, constraints.toConstraintForLayoutManager());
+                } else {
+                    wrapper.add(addedComponent, "grow");
+                    /*
+                        If we do not use a Scrollable panel and add the component directly
+                        it will be placed and sized to fill the viewport by default.
+                        But when using a Scrollable wrapper, we have an indirection which causes the
+                        content to NOT fill out the viewport.
 
-                    This "grow" keyword ensures that MigLayout produces a layout
-                    that mimics what is expected...
-                */
+                        This "grow" keyword ensures that MigLayout produces a layout
+                        that mimics what is expected...
+                    */
+                }
+                super._addComponentTo(thisComponent, wrapper, null);
             }
-            super._addComponentTo(thisComponent, wrapper, null);
         }
         else
             super._addComponentTo(thisComponent, addedComponent, constraints);
@@ -127,40 +142,9 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
             _configurator = configurator;
         }
 
-        private ScrollableComponentDelegate _createNewScrollableConf() {
-            int averageBlockIncrement  = 10;
-            int averageUnitIncrement   = 10;
-            try {
-                int verticalBlockIncrement   = _parent.getVerticalScrollBar().getBlockIncrement();
-                int horizontalBlockIncrement = _parent.getHorizontalScrollBar().getBlockIncrement();
-                averageBlockIncrement = (verticalBlockIncrement + horizontalBlockIncrement) / 2;
-            } catch ( Exception e ) {
-                log.error(SwingTree.get().logMarker(), "Error while calculating average block increment for scrollable component.", e);
-            }
-            try {
-                int verticalUnitIncrement   = _parent.getVerticalScrollBar().getUnitIncrement();
-                int horizontalUnitIncrement = _parent.getHorizontalScrollBar().getUnitIncrement();
-                averageUnitIncrement = (verticalUnitIncrement + horizontalUnitIncrement) / 2;
-            } catch ( Exception e ) {
-                log.error(SwingTree.get().logMarker(), "Error while calculating average unit increment for scrollable component.", e);
-            }
-            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
-                                                            _parent, _child,
-                                                            Size.of(_child.getPreferredSize()),
-                                                            averageUnitIncrement,
-                                                            averageBlockIncrement
-                                                       );
-            try {
-                delegate = _configurator.configure(delegate);
-            } catch ( Exception e ) {
-                log.error(SwingTree.get().logMarker(), "Error while configuring scrollable component.", e);
-            }
-            return delegate;
-        }
-
         @Override
         public Dimension getPreferredScrollableViewportSize() {
-            ScrollableComponentDelegate delegate = _createNewScrollableConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);
             try {
                 return delegate.preferredSize().toDimension();
             } catch ( Exception e ) {
@@ -171,7 +155,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public int getScrollableUnitIncrement( java.awt.@Nullable Rectangle visibleRect, int orientation, int direction ) {
-            ScrollableComponentDelegate delegate = _createNewScrollableConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);
             try {
                 Bounds bounds = Bounds.none();
                 if ( visibleRect != null )
@@ -186,7 +170,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
 
         @Override
         public int getScrollableBlockIncrement( java.awt.@Nullable Rectangle visibleRect, int orientation, int direction ) {
-            ScrollableComponentDelegate delegate = _createNewScrollableConf();
+            ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);
             try {
                 Bounds bounds = Bounds.none();
                 if ( visibleRect != null )
@@ -202,7 +186,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         @Override
         public boolean getScrollableTracksViewportWidth() {
             try {
-                ScrollableComponentDelegate delegate = _createNewScrollableConf();
+                ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);
                 return delegate.fitWidth();
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating fit width for scrollable component.", e);
@@ -213,13 +197,27 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
         @Override
         public boolean getScrollableTracksViewportHeight() {
             try {
-                ScrollableComponentDelegate delegate = _createNewScrollableConf();
+                ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);
                 return delegate.fitHeight();
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating fit height for scrollable component.", e);
                 return false;
             }
         }
+    }
+
+    private static ScrollableComponentDelegate _createNewScrollableConf(
+            JScrollPane parent, JComponent child, Configurator<ScrollableComponentDelegate> configurator
+    ) {
+        ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
+                                                    parent, child, Size.of(child.getPreferredSize())
+                                                );
+        try {
+            delegate = configurator.configure(delegate);
+        } catch ( Exception e ) {
+            log.error(SwingTree.get().logMarker(), "Error while configuring scrollable component.", e);
+        }
+        return delegate;
     }
 
 }
