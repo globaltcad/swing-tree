@@ -1160,14 +1160,14 @@ public final class FontConf
         }
         if ( _weight > 0 ) {
             isChange = isChange || !Float.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));
-            attributes.put(TextAttribute.WEIGHT, _weight);
+            attributes.put(TextAttribute.WEIGHT, Math.min(_weight, 9)); // Valid if: weight > 0 && weight < 10
         } else if ( _weight == 0 ) {
             isChange = isChange || !Objects.equals(0f, currentAttributes.get(TextAttribute.WEIGHT));
             attributes.put(TextAttribute.WEIGHT, null);
         }
         if ( _spacing != 0 ) {
             isChange = isChange || !Float.valueOf(_spacing).equals(currentAttributes.get(TextAttribute.TRACKING));
-            attributes.put(TextAttribute.TRACKING, _spacing);
+            attributes.put(TextAttribute.TRACKING, Math.min(_spacing, 10)); // Valid if:  tracking >= -1 && tracking <= 10
         }
         if ( _isUnderlined != null ) {
             isChange = isChange || !Objects.equals(_isUnderlined, currentAttributes.get(TextAttribute.UNDERLINE));

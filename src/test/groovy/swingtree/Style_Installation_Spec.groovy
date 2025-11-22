@@ -12,6 +12,7 @@ import swingtree.style.StyleSheet
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTextField
 import javax.swing.plaf.metal.MetalButtonUI
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -289,7 +290,7 @@ class Style_Installation_Spec extends Specification
 
         when : """
             The style is activated and updated, then we expect
-            SwingTree to evaluate if it is necessary to overrde the look and feel.
+            SwingTree to evaluate if it is necessary to override the look and feel.
         """
             applyStyle = true
             BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
@@ -521,4 +522,90 @@ class Style_Installation_Spec extends Specification
             button.foreground == Color.BLACK
             label.foreground == Color.DARK_GRAY
     }
+
+    def 'A SwingTree can install as well as uninstall a custom font defined in the style API.'(
+        boolean fontChanged, Styler<JTextField> styler
+    ){
+        reportInfo """
+            
+        """
+        given: 'We create a text field UI with the given styler turned off initially!'
+            var applyStyle = false
+            var ui =
+                    UI.textField("I am simply text... :)")
+                    .withSize(110,32)
+                    .withStyle( it -> applyStyle ? styler(it) : it )
+
+        and: 'We build the text field...'
+            var textField = ui.get(JTextField)
+        and: 'We get the initial font installed on the text field:'
+            var initialFont = textField.getFont()
+
+        when : """
+            The style is activated and updated, then we expect
+            SwingTree to evaluate if it is necessary to override the look and feel
+            as well as the font property of the component.
+        """
+            applyStyle = true
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            textField.paint(image.createGraphics()) // We need to simulate the component being painted
+        then : 'The font may or may not be changed:'
+            ( initialFont != textField.getFont() ) == fontChanged
+
+        when : 'We now turn off the style and update the text field...'
+            applyStyle = false
+            image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            textField.paint(image.createGraphics()) // We need to simulate the component being painted
+        then: 'The text field has the initial font again:'
+            initialFont == textField.getFont()
+
+        where :
+            fontChanged | styler
+             false      | { it }
+             false      | { it.backgroundColor(Color.BLACK) }
+             false      | { it.foregroundColor(Color.BLUE) }
+             false      | { it.cursor(UI.Cursor.HAND) }
+             false      | { it.margin(5) }
+             false      | { it.padding(5).margin(5) }
+             false      | { it.border(2, "black") }
+             false      | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
+             false      | { it.shadowColor("green") }
+             false      | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
+             false      | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+             false      | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+             false      | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
+             false      | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+             false      | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+             false      | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+             false      | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
+             false      | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+             false      | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+             false      | { it.parentFilter( conf -> conf.blur(0.0) ) }
+             false      | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+
+             true       | { it.fontColor("oak").fontBackgroundColor("orange") }
+             true       | { it.backgroundColor(Color.BLACK).fontColor("oak") }
+             true       | { it.foregroundColor(Color.BLUE).fontSize(42) }
+             true       | { it.cursor(UI.Cursor.HAND).fontSize(42) }
+             true       | { it.margin(5).fontWeight(73).fontColor("oak") }
+             true       | { it.border(2, "black").fontBackgroundColor("orange") }
+             true       | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS).fontBackgroundColor("orange") }
+             true       | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)).fontColor("oak") }
+             true       | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)).fontColor("oak") }
+             true       | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])).fontSize(42) }
+             true       | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)).fontColor("oak") }
+             true       | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)).fontColor("oak") }
+             true       | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}).fontColor("oak") }
+             true       | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ).fontBackgroundColor("orange") }
+             true       | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}).fontColor("oak") }
+
+             true       | { it.parentFilter( conf -> conf.blur(0.0) ).fontWeight(73) }
+             true       | { it.padding(5).margin(5).fontWeight(73) }
+             true       | { it.shadowColor("green").fontSpacing(24) }
+             true       | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7).fontSpacing(42) }
+             true       | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)).fontWeight(73) }
+             true       | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}).fontWeight(73) }
+    }
+
+
 }
