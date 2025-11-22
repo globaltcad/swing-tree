@@ -58,6 +58,7 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Color   _lastInsideBackgroundColor = null;
     private @Nullable Boolean _initialIsOpaque           = null;
     private @Nullable Boolean _initialContentAreaFilled  = null;
+    private @Nullable Font    _initialFont               = null;
 
     void updateDynamicLookAndFeel(Configurator<DynamicLaF> updater) {
         try {
@@ -255,6 +256,10 @@ final class StyleInstaller<C extends JComponent>
             }
             if ( !isStyled ) {
                 backgroundSetter.run();
+                if ( _initialFont != null && !Objects.equals(_initialFont, owner.getFont()) ) {
+                    owner.setFont(_initialFont);
+                    _initialFont = null;
+                }
                 return _updateEngine(owner, engine, newStyle, marginCorrection);
             }
         }
@@ -684,8 +689,15 @@ final class StyleInstaller<C extends JComponent>
     private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
     {
         final FontConf fontConf = styleConf.font();
-        if ( FontConf.none().equals(fontConf) )
+        if ( FontConf.none().equals(fontConf) ) {
+            if ( _initialFont != null && !Objects.equals(_initialFont, owner.getFont()) ) {
+                owner.setFont(_initialFont);
+                _initialFont = null;
+            }
             return;
+        } else if ( _initialFont == null ) {
+            _initialFont = owner.getFont();
+        }
 
         if ( owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) owner;
