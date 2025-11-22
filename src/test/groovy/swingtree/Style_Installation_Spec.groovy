@@ -605,6 +605,7 @@ class Style_Installation_Spec extends Specification
              true       | { it.parentFilter( conf -> conf.blur(0.0) ).fontWeight(73) }
              true       | { it.padding(5).margin(5).fontWeight(73) }
              true       | { it.shadowColor("green").fontSpacing(24) }
+             true       | { it.shadowColor("green").fontSpacing(-13) }
              true       | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7).fontSpacing(42) }
              true       | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)).fontWeight(73) }
              true       | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}).fontWeight(73) }
