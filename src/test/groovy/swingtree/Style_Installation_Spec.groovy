@@ -527,7 +527,10 @@ class Style_Installation_Spec extends Specification
         boolean fontChanged, Styler<JTextField> styler
     ){
         reportInfo """
-            
+            This is a data-driven test verifying that fonts defined via the style API
+            are properly installed and uninstalled when styles are toggled.
+            It ensures that activating the style changes the font as expected,
+            and deactivating the style restores the original font.
         """
         given: 'We create a text field UI with the given styler turned off initially!'
             var applyStyle = false
