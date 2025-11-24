@@ -1,15 +1,16 @@
 package examples.mvvm;
 
 
-import swingtree.threading.EventProcessor;
 import swingtree.UI;
+import swingtree.threading.EventProcessor;
 
-import javax.swing.JLabel;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.time.LocalDateTime;
 
 import static swingtree.UI.*;
+import static swingtree.UI.Panel;
 
 public class ListSearchView extends Panel
 {
@@ -23,7 +24,6 @@ public class ListSearchView extends Panel
                 .add(PUSH.and(GROW),
                     UI.list(vm.lastSearchTimes())
                     .withCells(it -> it.when(LocalDateTime.class).asText(cell -> cell.entry().get().toString() ))
-                    .withBorder(vm.listBorder())
                 )
                 .add(PUSH.and(GROW).and(WRAP),
                     UI.list(vm.searchTerms())
@@ -44,7 +44,7 @@ public class ListSearchView extends Panel
             .add(WRAP,
                 panel(FILL)
                 .add(PUSH_X,
-                    UI.textField(vm.keyword()).withBorder(vm.searchBorder())
+                    UI.textField(vm.keyword())
                 )
                 .add(
                     UI.button(vm.searchButtonText()).isEnabledIf(vm.searchEnabled()).onClick(it->vm.search())

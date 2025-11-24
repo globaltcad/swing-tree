@@ -841,31 +841,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to dynamically attach a border to the wrapped component. <br>
-     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
-     *
-     * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
-     * @return This very instance, which enables builder-style method chaining.
-     * @deprecated Because changing the {@link Border} of a component dynamically after
-     *             the component was initialized through the declarative SwingTree API,
-     *             causes issues with the style engine of a component.
-     *             (Which itself is based on using a custom border for style rendering)
-     */
-    @Deprecated
-    public final I withBorder( Val<Border> border ) {
-        NullUtil.nullArgCheck(border, "border", Val.class);
-        NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed! Use an empty border instead!");
-        return _withOnShow( border, (c,v) -> {
-                    c.setBorder(v);
-                })
-                ._with( c -> {
-                    c.setBorder( border.orElseThrowUnchecked() );
-                })
-                ._this();
-    }
-
-
-    /**
      *  Use this to define an empty {@link Border} with the provided insets.
      *
      * @param top The top inset.
