@@ -2667,20 +2667,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the minimum {@link Dimension} of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
-     * @param size The minimum {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Use {@link #withMinSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withMinSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withMinSize(Size.of(size));
-    }
-
-    /**
      *  Set the minimum {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
      * @param size The minimum {@link Size} of the component.
@@ -2868,20 +2854,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the maximum {@link Dimension} of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
-     * @param size The maximum {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Use {@link #withMaxSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withMaxSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withMaxSize(Size.of(size));
-    }
-
-    /**
      *  Set the maximum {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
      * @param size The maximum {@link Size} of the component.
@@ -3055,23 +3027,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     });
                 })
                 ._this();
-    }
-
-    /**
-     *  Set the preferred {@link Dimension} of this {@link JComponent}, which consists
-     *  of a width and a height used as a suggestion to the {@link LayoutManager} of the
-     *  parent container. <br>
-     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
-     *
-     * @param size The preferred {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Please use {@link #withPrefSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withPrefSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withPrefSize(Size.of(size));
     }
 
     /**
@@ -3260,20 +3215,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     });
                 })
                 ._this();
-    }
-
-    /**
-     *  Set the current {@link Dimension})/size (width and height) of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
-     * @param size The current {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Please use {@link #withSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withSize(Size.of(size));
     }
 
     /**
