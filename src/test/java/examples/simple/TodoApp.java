@@ -16,7 +16,7 @@ public class TodoApp extends Panel
     public TodoApp() {
         of(this).withLayout(FILL)
         .add(
-            panel(FILL).makeNonOpaque()
+            panel(FILL)
             .add(GROW.and(SPAN).and(WRAP), label("Todo List"))
             .add(GROW.and(SPAN).and(WRAP),
                 panel(FILL).add(SHRINK, button("Add"), button("Remove"))
