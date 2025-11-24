@@ -184,12 +184,12 @@ public class NoteGuesserView extends Panel
                     found = true;
                     if ( !hoveredOver.contains(key) ) {
                         hoveredOver.add(key);
-                        p.get(p.getType()).repaint();
+                        p.get(JPanel.class).repaint();
                     }
                 }
             }
             if ( !found && isHoveringOverSomething )
-                p.get(p.getType()).repaint();
+                p.get(JPanel.class).repaint();
         });
         p.onMousePress( it -> {
             int x = it.mouseX();
@@ -197,7 +197,7 @@ public class NoteGuesserView extends Panel
             for ( KeyView key : whiteNotes ) {
                 if ( key.contains(x,y) ) {
                     pressed.add(key);
-                    p.get(p.getType()).repaint();
+                    p.get(JPanel.class).repaint();
                     UI.animate(vm, m -> m.selectNoteIndex(key.note.index()));
                     play(key.note);
                 }
@@ -206,7 +206,7 @@ public class NoteGuesserView extends Panel
         p.onMouseRelease( it -> {
             if ( !pressed.isEmpty() ) {
                 pressed.clear();
-                p.get(p.getType()).repaint();
+                p.get(JPanel.class).repaint();
             }
         });
         p.withStyle( it -> it
@@ -214,8 +214,8 @@ public class NoteGuesserView extends Panel
                 int roundness = 12;
                 whiteNotes.clear();
                 blackNotes.clear();
-                int width  = p.get(p.getType()).getWidth();
-                int height = p.get(p.getType()).getHeight();
+                int width  = p.get(JPanel.class).getWidth();
+                int height = p.get(JPanel.class).getHeight();
                 int x = 0;
                 int y = - ( roundness / 2 );
                 Map<Integer,List<java.awt.Point>> octaveRanges = new HashMap<>();
