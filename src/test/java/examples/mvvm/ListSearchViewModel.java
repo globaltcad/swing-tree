@@ -3,8 +3,6 @@ package examples.mvvm;
 import sprouts.Var;
 import sprouts.Vars;
 
-import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,8 +22,6 @@ public class ListSearchViewModel {
     private final Var<Integer> found = Var.of(0);
     private final Var<Boolean> searchEnabled = Var.of(true);
     private final Var<Boolean> searchRunning = Var.of(false);
-    private final Var<Border> listBorder = Var.of(Border.class, BorderFactory.createEmptyBorder());
-    private final Var<Border> searchBorder = Var.of(Border.class, BorderFactory.createEmptyBorder());
 
     private final Var<String> searchButtonText = Var.of("Search");
 
@@ -45,10 +41,6 @@ public class ListSearchViewModel {
 
     public Var<Boolean> searchRunning() {return searchRunning;}
 
-    public Var<Border> listBorder() {return listBorder;}
-
-    public Var<Border> searchBorder() {return searchBorder;}
-
     public Var<String> searchButtonText() {return searchButtonText;}
 
     public Var<Color> validityColor() {return validityColor;}
@@ -60,8 +52,6 @@ public class ListSearchViewModel {
         searchRunning.set(true);
         searchButtonText.set("Searching...");
         searchEnabled.set(false);
-        searchBorder.set(BorderFactory.createLineBorder(Color.BLUE));
-        listBorder.set(BorderFactory.createLineBorder(Color.BLUE));
         found.set(0);
         try {
             Thread.sleep(100);
@@ -81,8 +71,6 @@ public class ListSearchViewModel {
         searchRunning.set(false);
         searchButtonText.set("Search");
         searchEnabled.set(true);
-        searchBorder.set(BorderFactory.createEmptyBorder());
-        listBorder.set(BorderFactory.createEmptyBorder());
         lastSearchTimes.add(LocalDateTime.now());
         searchTerms.add(keyword.get());
     }

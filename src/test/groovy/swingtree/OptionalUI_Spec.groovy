@@ -28,7 +28,7 @@ class OptionalUI_Spec extends Specification
     {
         given:
             var component = new JButton()
-            var optionalUI = UI.of(component).component()
+            var optionalUI = OptionalUI.of(()->UI.of(component))
         expect:
             optionalUI instanceof OptionalUI
             optionalUI.isPresent()
@@ -39,7 +39,7 @@ class OptionalUI_Spec extends Specification
     def 'OptionalUI can be mapped to a regular empty optional.'()
     {
         given:
-            var optionalUI = UI.panel().component().map({ it -> null })
+            var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })
         expect:
             !optionalUI.isPresent()
     }
@@ -47,7 +47,7 @@ class OptionalUI_Spec extends Specification
     def 'An OptionalUI can be mapped to a regular non-empty optional.'()
     {
         given:
-            var optionalUI = UI.runAndGet({UI.panel().component().map({ p -> new JButton() })})
+            var optionalUI = OptionalUI.of(()->UI.panel()).map({ p -> new JButton() })
         expect:
             optionalUI.isPresent()
     }
@@ -55,7 +55,7 @@ class OptionalUI_Spec extends Specification
     def 'An empty OptionalUI will throw an exception when orElseThrow is called.'()
     {
         given:
-            var optionalUI = UI.panel().component().map({ it -> null })
+            var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })
         when:
             optionalUI.orElseThrow({new NoSuchElementException()})
         then:
@@ -65,7 +65,7 @@ class OptionalUI_Spec extends Specification
     def 'An empty OptionalUI will return a default value when orElse is called.'()
     {
         given:
-            var optionalUI = UI.panel().component().map({ it -> null })
+            var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })
         expect:
             optionalUI.orElse(new JButton()) instanceof JButton
     }
@@ -73,7 +73,7 @@ class OptionalUI_Spec extends Specification
     def 'An empty OptionalUI will return a default value when orElseGet is called.'()
     {
         given:
-            var optionalUI = UI.panel().component().map({ it -> null })
+            var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })
         expect:
             optionalUI.orElseGet({ new JButton() }) instanceof JButton
     }

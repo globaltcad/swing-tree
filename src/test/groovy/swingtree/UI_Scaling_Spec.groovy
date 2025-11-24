@@ -5,6 +5,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.From
+import sprouts.Val
 import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
@@ -68,10 +69,10 @@ class UI_Scaling_Spec extends Specification
                 )
                 .add(
                     UI.slider(UI.Align.HORIZONTAL)
-                    .withPrefSize(new Dimension(60, 20))
-                    .withMinSize(new Dimension(70, 80))
-                    .withMaxSize(new Dimension(80, 42))
-                    .withSize(new Dimension(120, 40))
+                    .withPrefSize(Val.of(Size.of(60, 20)))
+                    .withMinSize(Val.of(Size.of(70, 80)))
+                    .withMaxSize(Val.of(Size.of(80, 42)))
+                    .withSize(Val.of(Size.of(120, 40)))
                 )
                 .add(
                     UI.label("Label")

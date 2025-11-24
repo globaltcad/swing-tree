@@ -775,38 +775,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
-
-    /**
-     *  Use this to make the wrapped UI component opaque.
-     *  This is the inverse of {@link #makeNonOpaque()}.
-     *
-     *  @return This very instance, which enables builder-style method chaining.
-     *  @deprecated SwingTree considers the opaqueness a property which emerges from the
-     *              style configuration of the component. Therefore, it is not recommended
-     *              to set the opaqueness directly. Instead, use the {@link #withBackground(Color)}
-     *              method to set the style of the component so that it becomes opaque.
-     */
-    @Deprecated
-    public final I makeOpaque() {
-        return _with( c -> c.setOpaque( true ) )._this();
-    }
-
-    /**
-     *  Use this to make the wrapped UI component transparent.
-     *  This is the inverse of {@link #makeOpaque()}.
-     *
-     *  @return This very instance, which enables builder-style method chaining.
-     *  @deprecated Use {@link #withBackground(Color)} instead, by passing
-     *             it the {@link UI.Color#TRANSPARENT} constant.<br>
-     *             Alternatively, you may use the {@link #peek(Peeker)}
-     *             method to peek into the builder's component
-     *             and set the flag directly.
-     */
-    @Deprecated
-    public final I makeNonOpaque() {
-        return _with( c -> c.setOpaque( false ) )._this();
-    }
-
     /**
      *  This allows you to register validation logic for the wrapped UI component.
      *  Although the delegate exposed to the {@link UIVerifier} lambda
@@ -871,31 +839,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(border, "Null value for border is not allowed! Use an empty border instead!");
         return _with( c -> c.setBorder(border) )._this();
     }
-
-    /**
-     *  Use this to dynamically attach a border to the wrapped component. <br>
-     *  <i>Hint: Use {@code myProperty.fireChange(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
-     *
-     * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
-     * @return This very instance, which enables builder-style method chaining.
-     * @deprecated Because changing the {@link Border} of a component dynamically after
-     *             the component was initialized through the declarative SwingTree API,
-     *             causes issues with the style engine of a component.
-     *             (Which itself is based on using a custom border for style rendering)
-     */
-    @Deprecated
-    public final I withBorder( Val<Border> border ) {
-        NullUtil.nullArgCheck(border, "border", Val.class);
-        NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed! Use an empty border instead!");
-        return _withOnShow( border, (c,v) -> {
-                    c.setBorder(v);
-                })
-                ._with( c -> {
-                    c.setBorder( border.orElseThrowUnchecked() );
-                })
-                ._this();
-    }
-
 
     /**
      *  Use this to define an empty {@link Border} with the provided insets.
@@ -2724,20 +2667,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the minimum {@link Dimension} of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
-     * @param size The minimum {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Use {@link #withMinSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withMinSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withMinSize(Size.of(size));
-    }
-
-    /**
      *  Set the minimum {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
      * @param size The minimum {@link Size} of the component.
@@ -2925,20 +2854,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Set the maximum {@link Dimension} of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
-     * @param size The maximum {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Use {@link #withMaxSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withMaxSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withMaxSize(Size.of(size));
-    }
-
-    /**
      *  Set the maximum {@link Size} of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
      * @param size The maximum {@link Size} of the component.
@@ -3112,23 +3027,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     });
                 })
                 ._this();
-    }
-
-    /**
-     *  Set the preferred {@link Dimension} of this {@link JComponent}, which consists
-     *  of a width and a height used as a suggestion to the {@link LayoutManager} of the
-     *  parent container. <br>
-     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
-     *
-     * @param size The preferred {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Please use {@link #withPrefSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withPrefSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withPrefSize(Size.of(size));
     }
 
     /**
@@ -3317,20 +3215,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     });
                 })
                 ._this();
-    }
-
-    /**
-     *  Set the current {@link Dimension})/size (width and height) of this {@link JComponent}. <br>
-     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
-     * @param size The current {@link Dimension} of the component.
-     * @return This very builder to allow for method chaining.
-     * @deprecated Due to the inherent pitfalls that come along with the {@link Dimension} being mutable!<br>
-     *             Please use {@link #withSize(Size)} instead.
-     */
-    @Deprecated
-    public final I withSize( Dimension size ) {
-        NullUtil.nullArgCheck(size, "size", Dimension.class);
-        return withSize(Size.of(size));
     }
 
     /**
