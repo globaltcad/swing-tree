@@ -194,29 +194,6 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
     }
 
     /**
-     * Show the dropdown menu, if attached, even if the button part is clicked.
-     *
-     * @return true if alwaysDropdown, false otherwise.
-     * @deprecated use {@link #isAlwaysPopup() } instead.
-     */
-    @Deprecated
-    public boolean isAlwaysDropDown() {
-        return alwaysPopup;
-    }
-
-    /**
-     * Show the dropdown menu, if attached, even if the button part is clicked.
-     *
-     * @param alwaysDropDown true to show the attached dropdown even if the
-     *                       button part is clicked, false otherwise
-     * @deprecated use {@link #setAlwaysPopup(boolean) } instead.
-     */
-    @Deprecated
-    public void setAlwaysDropDown(final boolean alwaysDropDown) {
-        this.alwaysPopup = alwaysDropDown;
-    }
-
-    /**
      * Gets the color of the arrow.
      *
      * @return the color of the arrow
