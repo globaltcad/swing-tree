@@ -103,6 +103,22 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
+     *  Allows you to resolve a SwingTree declaration on the GUI thread
+     *  by providing a supplier of a {@link UIForAnything} builder node.
+     * @param ui A supplier of a SwingTree declaration to be executed on the GUI thread.
+     * @return An optional of a component.
+     * @param <C> The component type to fetch.
+     * @param <T> A generic supertype of the component, but usually the component type itself.
+     */
+    static <@Nullable C extends T, T extends Component> OptionalUI<C> of(Supplier<UIForAnything<?,C,T>> ui) {
+        return UI.runAndGet(()-> {
+            C component = (C) ui.get().get((Class) java.awt.Component.class);
+            return component == null ? (OptionalUI<C>) EMPTY
+                    : new OptionalUI<>(component);
+        });
+    }
+
+    /**
      * If a component is present, returns {@code true}, otherwise {@code false}.
      *
      * @return {@code true} if a component is present, otherwise {@code false}
@@ -214,10 +230,7 @@ public final class OptionalUI<C extends Component> {
                     return Optional.ofNullable(mapper.apply(_component));
                 else {
                     try {
-                        Optional<U> opt = UI.runAndGet(() -> map(mapper));
-                        if (opt.isPresent() && (opt.get() instanceof Component || opt.get() instanceof UIForAnySwing))
-                            throw new RuntimeException("A Swing component may not leak to another thread!");
-                        else return opt;
+                        return UI.runAndGet(() -> map(mapper));
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }

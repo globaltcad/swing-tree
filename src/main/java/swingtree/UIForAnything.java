@@ -83,20 +83,6 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
-     *  The optional component managed by this builder.
-     *
-     * @return An {@link OptionalUI} wrapping a component or null.
-     *         This optional will throw an exception if the
-     *         application has an application thread (see {@link UI#use(EventProcessor, Supplier)})
-     *         and this method is called from a thread other than the EDT.
-     * @deprecated Use {@link #get(Class)} instead.
-     */
-    @Deprecated
-    public final OptionalUI<C> component() {
-        return OptionalUI.ofNullable(_state().component());
-    }
-
-    /**
      *  Use this if you wish to access the component wrapped by this builder directly.
      *  This is useful for more fine-grained control, like for example calling
      *  methods like "setName", "setTitle", and so on... <br>
