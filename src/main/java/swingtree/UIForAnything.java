@@ -69,7 +69,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
      * @deprecated Use {@link #get(Class)} instead.
      */
     @Deprecated
-    public final C getComponent() {
+    final C getComponent() {
         boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
         boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
 
@@ -298,6 +298,8 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
      *
      * @param type The type class of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
+     * @throws IllegalArgumentException if the specified {@code type} is not the same, or a supertype of
+     *                                  the component built by this SwingTree builder node.
      */
     public final C get( Class<C> type ) {
         if ( type != _state().componentType() && !type.isAssignableFrom(_state().componentType()) )
