@@ -271,7 +271,7 @@ final class DynamicLaF
         try {
             if ( owner instanceof StylableComponent) {
                 ((StylableComponent) owner).setUISilently(laf);
-                laf.installUI(owner);
+                laf.installUI(owner); // WARNING: This has side effects on the opaque flag, among other properties...
                 return true;
             }
         } catch (Exception e) {

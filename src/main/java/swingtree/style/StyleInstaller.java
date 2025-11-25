@@ -148,6 +148,7 @@ final class StyleInstaller<C extends JComponent>
         StyleConf            newStyle,
         final boolean        force
     ) {
+        boolean initialIsOpaqueFlagState = owner.isOpaque();
         Runnable backgroundSetter = ()->{
             if ( StyleUtil.isUndefinedColor(owner.getBackground()) )
                 _establishDefaultBackgroundColorFor(owner);
@@ -252,7 +253,6 @@ final class StyleInstaller<C extends JComponent>
             if ( _initialIsOpaque != null ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
                     owner.setOpaque(_initialIsOpaque);
-                _initialIsOpaque = null;
             }
             if ( !isStyled ) {
                 backgroundSetter.run();
@@ -265,7 +265,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         if ( _initialIsOpaque == null )
-            _initialIsOpaque = owner.isOpaque();
+            _initialIsOpaque = initialIsOpaqueFlagState; // Important: Use the state of the flag before SwingTree did anything!
 
         if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
             _initialContentAreaFilled = ((AbstractButton) owner).isContentAreaFilled();
@@ -280,7 +280,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackground                  = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                      = newStyle.margin().isPositive();
         final boolean hasOpaqueBorder                = newStyle.border().colors().isFullyOpaue();
-        final boolean isNaturallyTransparent         = (owner instanceof JBox || owner instanceof JLabel);
+        final boolean isNaturallyTransparent         = (owner instanceof JBox || owner instanceof JLabel || _initialIsOpaque == false);
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret the tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background
