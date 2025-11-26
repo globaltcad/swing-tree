@@ -91,7 +91,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
-    public I withIcon( Icon icon ) {
+    public final I withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
         return _with( c -> c.setIcon(_ensureIconIsScalable(icon)) )._this();
     }
@@ -114,7 +114,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The desired icon to be displayed on top of the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( IconDeclaration icon ) {
+    public final I withIcon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
         return _with( c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setIcon) )._this();
     }
@@ -157,7 +157,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
-    public I withIcon( Val<IconDeclaration> icon ) {
+    public final I withIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow( icon, UIForAnyButton::_setIconFromDeclaration)
@@ -178,7 +178,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link Icon} which should be scaled and displayed on the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( int width, int height, Icon icon ) {
+    public final I withIcon( int width, int height, Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
         icon = _fitTo( width, height, icon );
         return withIcon(icon);
@@ -201,7 +201,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( int width, int height, IconDeclaration icon ) {
+    public final I withIcon( int width, int height, IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
         return icon.find()
                    .map( i -> withIcon(width, height, i) )
@@ -226,7 +226,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
         return icon.find()
                 .map( i -> withIcon(_fitTo(width, height, i), fitComponent) )
@@ -248,7 +248,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *                     be scaled to fit the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( Icon icon, UI.FitComponent fitComponent ) {
+    public final I withIcon( Icon icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", Icon.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
         return _with( thisComponent -> {
@@ -273,7 +273,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
         return icon.find()
@@ -298,7 +298,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnPress( Icon icon ) {
+    public final I withIconOnPress( Icon icon ) {
         Objects.requireNonNull(icon);
         return _with( c -> c.setPressedIcon(_ensureIconIsScalable(icon)) )._this();
     }
@@ -317,7 +317,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnPress( int width, int height, Icon icon ) {
+    public final I withIconOnPress( int width, int height, Icon icon ) {
         Objects.requireNonNull(icon);
         icon = _fitTo( width, height, icon );
         return withIconOnPress(icon);
@@ -342,7 +342,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnPress( int width, int height, IconDeclaration icon ) {
+    public final I withIconOnPress( int width, int height, IconDeclaration icon ) {
         Objects.requireNonNull(icon);
         return icon.find()
                 .map( i -> withIconOnPress(width, height, i) )
@@ -363,7 +363,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -383,7 +383,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return _with( thisComponent -> {
@@ -403,7 +403,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -421,7 +421,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnPress( IconDeclaration icon ) {
+    public final I withIconOnPress( IconDeclaration icon ) {
         Objects.requireNonNull(icon);
         return _with( c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setPressedIcon) )._this();
     }
@@ -468,7 +468,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnPress( Val<IconDeclaration> icon ) {
+    public final I withIconOnPress( Val<IconDeclaration> icon ) {
         Objects.requireNonNull(icon);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow( icon, UIForAnyButton::_setIconOnPressFromDeclaration)
@@ -499,7 +499,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHover( Icon icon ) {
+    public final I withIconOnHover( Icon icon ) {
         Objects.requireNonNull(icon);
         return _with( c -> c.setRolloverIcon(_ensureIconIsScalable(icon)) )._this();
     }
@@ -519,7 +519,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHover( int width, int height, Icon icon ) {
+    public final I withIconOnHover( int width, int height, Icon icon ) {
         Objects.requireNonNull(icon);
         icon = _fitTo( width, height, icon );
         return withIconOnHover(icon);
@@ -554,7 +554,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHover( int width, int height, IconDeclaration icon ) {
+    public final I withIconOnHover( int width, int height, IconDeclaration icon ) {
         Objects.requireNonNull(icon);
         return icon.find()
                 .map( i -> withIconOnHover(width, height, i) )
@@ -584,7 +584,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon); 
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -604,7 +604,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHover( Icon icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnHover( Icon icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return _with( thisComponent -> {
@@ -625,7 +625,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent ) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -644,7 +644,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHover( IconDeclaration icon ) {
+    public final I withIconOnHover( IconDeclaration icon ) {
         Objects.requireNonNull(icon);
         return _with( c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setRolloverIcon) )._this();
     }
@@ -689,7 +689,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHover( Val<IconDeclaration> icon ) {
+    public final I withIconOnHover( Val<IconDeclaration> icon ) {
         Objects.requireNonNull(icon);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow( icon, UIForAnyButton::_setIconOnHoverFromDeclaration)
@@ -717,7 +717,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHoverAndSelected(Icon icon) {
+    public final I withIconOnHoverAndSelected(Icon icon) {
         Objects.requireNonNull(icon);
         return _with(c -> c.setRolloverSelectedIcon(_ensureIconIsScalable(icon)))._this();
     }
@@ -736,7 +736,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHoverAndSelected(int width, int height, Icon icon) {
+    public final I withIconOnHoverAndSelected(int width, int height, Icon icon) {
         Objects.requireNonNull(icon);
         icon = _fitTo(width, height, icon);
         return withIconOnHoverAndSelected(icon);
@@ -761,7 +761,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon) {
+    public final I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return icon.find()
                 .map(i -> withIconOnHoverAndSelected(width, height, i))
@@ -788,7 +788,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -808,7 +808,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHoverAndSelected(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnHoverAndSelected(Icon icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return _with(thisComponent -> {
@@ -833,7 +833,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHoverAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnHoverAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -857,7 +857,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHoverAndSelected(IconDeclaration icon) {
+    public final I withIconOnHoverAndSelected(IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return _with(c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setRolloverSelectedIcon))._this();
     }
@@ -904,7 +904,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHoverAndSelected(Val<IconDeclaration> icon) {
+    public final I withIconOnHoverAndSelected(Val<IconDeclaration> icon) {
         Objects.requireNonNull(icon);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow(icon, UIForAnyButton::_setIconOnHoverAndSelectedFromDeclaration)
@@ -932,7 +932,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnSelected(Icon icon) {
+    public final I withIconOnSelected(Icon icon) {
         Objects.requireNonNull(icon);
         return _with(c -> c.setSelectedIcon(_ensureIconIsScalable(icon)))._this();
     }
@@ -951,7 +951,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnSelected(int width, int height, Icon icon) {
+    public final I withIconOnSelected(int width, int height, Icon icon) {
         Objects.requireNonNull(icon);
         icon = _fitTo(width, height, icon);
         return withIconOnSelected(icon);
@@ -976,7 +976,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnSelected(int width, int height, IconDeclaration icon) {
+    public final I withIconOnSelected(int width, int height, IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return icon.find()
                 .map(i -> withIconOnSelected(width, height, i))
@@ -1003,7 +1003,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -1023,7 +1023,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnSelected(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnSelected(Icon icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return _with(thisComponent -> {
@@ -1048,7 +1048,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -1072,7 +1072,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnSelected(IconDeclaration icon) {
+    public final I withIconOnSelected(IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return _with(c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setSelectedIcon))._this();
     }
@@ -1119,7 +1119,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnSelected(Val<IconDeclaration> icon) {
+    public final I withIconOnSelected(Val<IconDeclaration> icon) {
         Objects.requireNonNull(icon);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow(icon, UIForAnyButton::_setIconOnSelectedFromDeclaration)
@@ -1147,7 +1147,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabled(Icon icon) {
+    public final I withIconOnDisabled(Icon icon) {
         Objects.requireNonNull(icon);
         return _with(c -> c.setDisabledIcon(_ensureIconIsScalable(icon)))._this();
     }
@@ -1166,7 +1166,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabled(int width, int height, Icon icon) {
+    public final I withIconOnDisabled(int width, int height, Icon icon) {
         Objects.requireNonNull(icon);
         icon = _fitTo(width, height, icon);
         return withIconOnDisabled(icon);
@@ -1191,7 +1191,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabled(int width, int height, IconDeclaration icon) {
+    public final I withIconOnDisabled(int width, int height, IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return icon.find()
                 .map(i -> withIconOnDisabled(width, height, i))
@@ -1218,7 +1218,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabled(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabled(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -1238,7 +1238,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabled(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabled(Icon icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return _with(thisComponent -> {
@@ -1263,7 +1263,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabled(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabled(IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -1287,7 +1287,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabled(IconDeclaration icon) {
+    public final I withIconOnDisabled(IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return _with(c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setDisabledIcon))._this();
     }
@@ -1334,7 +1334,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabled(Val<IconDeclaration> icon) {
+    public final I withIconOnDisabled(Val<IconDeclaration> icon) {
         Objects.requireNonNull(icon);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow(icon, UIForAnyButton::_setIconOnDisabledFromDeclaration)
@@ -1362,7 +1362,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabledAndSelected(Icon icon) {
+    public final I withIconOnDisabledAndSelected(Icon icon) {
         Objects.requireNonNull(icon);
         return _with(c -> c.setDisabledSelectedIcon(_ensureIconIsScalable(icon)))._this();
     }
@@ -1381,7 +1381,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabledAndSelected(int width, int height, Icon icon) {
+    public final I withIconOnDisabledAndSelected(int width, int height, Icon icon) {
         Objects.requireNonNull(icon);
         icon = _fitTo(width, height, icon);
         return withIconOnDisabledAndSelected(icon);
@@ -1406,7 +1406,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon) {
+    public final I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return icon.find()
                 .map(i -> withIconOnDisabledAndSelected(width, height, i))
@@ -1433,7 +1433,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -1453,7 +1453,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabledAndSelected(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabledAndSelected(Icon icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return _with(thisComponent -> {
@@ -1478,7 +1478,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabledAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabledAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
         Objects.requireNonNull(icon);
         Objects.requireNonNull(fitComponent);
         return icon.find()
@@ -1502,7 +1502,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabledAndSelected(IconDeclaration icon) {
+    public final I withIconOnDisabledAndSelected(IconDeclaration icon) {
         Objects.requireNonNull(icon);
         return _with(c -> icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setDisabledSelectedIcon))._this();
     }
@@ -1549,7 +1549,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabledAndSelected(Val<IconDeclaration> icon) {
+    public final I withIconOnDisabledAndSelected(Val<IconDeclaration> icon) {
         Objects.requireNonNull(icon);
         NullUtil.nullPropertyCheck(icon, "icon");
         return _withOnShow(icon, UIForAnyButton::_setIconOnDisabledAndSelectedFromDeclaration)
