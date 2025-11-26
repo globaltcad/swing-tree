@@ -91,7 +91,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
-    public I withIcon( Icon icon ) {
+    public final I withIcon( Icon icon ) {
 <span class="fc" id="L95">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
 <span class="fc" id="L96">        return _with( c -&gt; c.setIcon(_ensureIconIsScalable(icon)) )._this();</span>
     }
@@ -114,7 +114,7 @@ import java.util.function.Consumer;
      * @param icon The desired icon to be displayed on top of the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( IconDeclaration icon ) {
+    public final I withIcon( IconDeclaration icon ) {
 <span class="fc" id="L118">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
 <span class="fc" id="L119">        return _with( c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setIcon) )._this();</span>
     }
@@ -157,7 +157,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
-    public I withIcon( Val&lt;IconDeclaration&gt; icon ) {
+    public final I withIcon( Val&lt;IconDeclaration&gt; icon ) {
 <span class="fc" id="L161">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, Val.class);</span>
 <span class="fc" id="L162">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L163">        return _withOnShow( icon, UIForAnyButton::_setIconFromDeclaration)</span>
@@ -178,7 +178,7 @@ import java.util.function.Consumer;
      * @param icon The {@link Icon} which should be scaled and displayed on the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( int width, int height, Icon icon ) {
+    public final I withIcon( int width, int height, Icon icon ) {
 <span class="fc" id="L182">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
 <span class="fc" id="L183">        icon = _fitTo( width, height, icon );</span>
 <span class="fc" id="L184">        return withIcon(icon);</span>
@@ -201,7 +201,7 @@ import java.util.function.Consumer;
      * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( int width, int height, IconDeclaration icon ) {
+    public final I withIcon( int width, int height, IconDeclaration icon ) {
 <span class="fc" id="L205">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,IconDeclaration.class);</span>
 <span class="fc" id="L206">        return icon.find()</span>
 <span class="fc" id="L207">                   .map( i -&gt; withIcon(width, height, i) )</span>
@@ -226,7 +226,7 @@ import java.util.function.Consumer;
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L230">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,IconDeclaration.class);</span>
 <span class="fc" id="L231">        return icon.find()</span>
 <span class="fc" id="L232">                .map( i -&gt; withIcon(_fitTo(width, height, i), fitComponent) )</span>
@@ -248,7 +248,7 @@ import java.util.function.Consumer;
      *                     be scaled to fit the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( Icon icon, UI.FitComponent fitComponent ) {
+    public final I withIcon( Icon icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L252">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, Icon.class);</span>
 <span class="fc" id="L253">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
 <span class="fc" id="L254">        return _with( thisComponent -&gt; {</span>
@@ -273,7 +273,7 @@ import java.util.function.Consumer;
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
      */
-    public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L277">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
 <span class="fc" id="L278">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
 <span class="fc" id="L279">        return icon.find()</span>
@@ -298,7 +298,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnPress( Icon icon ) {
+    public final I withIconOnPress( Icon icon ) {
 <span class="fc" id="L302">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L303">        return _with( c -&gt; c.setPressedIcon(_ensureIconIsScalable(icon)) )._this();</span>
     }
@@ -317,7 +317,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnPress( int width, int height, Icon icon ) {
+    public final I withIconOnPress( int width, int height, Icon icon ) {
 <span class="fc" id="L321">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L322">        icon = _fitTo( width, height, icon );</span>
 <span class="fc" id="L323">        return withIconOnPress(icon);</span>
@@ -342,7 +342,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnPress( int width, int height, IconDeclaration icon ) {
+    public final I withIconOnPress( int width, int height, IconDeclaration icon ) {
 <span class="fc" id="L346">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L347">        return icon.find()</span>
 <span class="fc" id="L348">                .map( i -&gt; withIconOnPress(width, height, i) )</span>
@@ -363,7 +363,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnPress( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L367">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L368">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L369">        return icon.find()</span>
@@ -383,7 +383,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnPress( Icon icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L387">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L388">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L389">        return _with( thisComponent -&gt; {</span>
@@ -403,7 +403,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnPress( IconDeclaration icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L407">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L408">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L409">        return icon.find()</span>
@@ -421,7 +421,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnPress( IconDeclaration icon ) {
+    public final I withIconOnPress( IconDeclaration icon ) {
 <span class="fc" id="L425">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L426">        return _with( c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setPressedIcon) )._this();</span>
     }
@@ -468,7 +468,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnPress( Val&lt;IconDeclaration&gt; icon ) {
+    public final I withIconOnPress( Val&lt;IconDeclaration&gt; icon ) {
 <span class="fc" id="L472">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L473">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L474">        return _withOnShow( icon, UIForAnyButton::_setIconOnPressFromDeclaration)</span>
@@ -499,7 +499,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHover( Icon icon ) {
+    public final I withIconOnHover( Icon icon ) {
 <span class="fc" id="L503">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L504">        return _with( c -&gt; c.setRolloverIcon(_ensureIconIsScalable(icon)) )._this();</span>
     }
@@ -519,7 +519,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHover( int width, int height, Icon icon ) {
+    public final I withIconOnHover( int width, int height, Icon icon ) {
 <span class="fc" id="L523">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L524">        icon = _fitTo( width, height, icon );</span>
 <span class="fc" id="L525">        return withIconOnHover(icon);</span>
@@ -554,7 +554,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHover( int width, int height, IconDeclaration icon ) {
+    public final I withIconOnHover( int width, int height, IconDeclaration icon ) {
 <span class="fc" id="L558">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L559">        return icon.find()</span>
 <span class="fc" id="L560">                .map( i -&gt; withIconOnHover(width, height, i) )</span>
@@ -584,7 +584,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnHover( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L588">        Objects.requireNonNull(icon); </span>
 <span class="fc" id="L589">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L590">        return icon.find()</span>
@@ -604,7 +604,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHover( Icon icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnHover( Icon icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L608">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L609">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L610">        return _with( thisComponent -&gt; {</span>
@@ -625,7 +625,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent ) {
+    public final I withIconOnHover( IconDeclaration icon, UI.FitComponent fitComponent ) {
 <span class="fc" id="L629">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L630">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L631">        return icon.find()</span>
@@ -644,7 +644,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHover( IconDeclaration icon ) {
+    public final I withIconOnHover( IconDeclaration icon ) {
 <span class="fc" id="L648">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L649">        return _with( c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setRolloverIcon) )._this();</span>
     }
@@ -689,7 +689,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHover( Val&lt;IconDeclaration&gt; icon ) {
+    public final I withIconOnHover( Val&lt;IconDeclaration&gt; icon ) {
 <span class="fc" id="L693">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L694">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L695">        return _withOnShow( icon, UIForAnyButton::_setIconOnHoverFromDeclaration)</span>
@@ -717,7 +717,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHoverAndSelected(Icon icon) {
+    public final I withIconOnHoverAndSelected(Icon icon) {
 <span class="fc" id="L721">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L722">        return _with(c -&gt; c.setRolloverSelectedIcon(_ensureIconIsScalable(icon)))._this();</span>
     }
@@ -736,7 +736,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHoverAndSelected(int width, int height, Icon icon) {
+    public final I withIconOnHoverAndSelected(int width, int height, Icon icon) {
 <span class="fc" id="L740">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L741">        icon = _fitTo(width, height, icon);</span>
 <span class="fc" id="L742">        return withIconOnHoverAndSelected(icon);</span>
@@ -761,7 +761,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon) {
+    public final I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon) {
 <span class="fc" id="L765">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L766">        return icon.find()</span>
 <span class="fc" id="L767">                .map(i -&gt; withIconOnHoverAndSelected(width, height, i))</span>
@@ -788,7 +788,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnHoverAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L792">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L793">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L794">        return icon.find()</span>
@@ -808,7 +808,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHoverAndSelected(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnHoverAndSelected(Icon icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L812">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L813">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L814">        return _with(thisComponent -&gt; {</span>
@@ -833,7 +833,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnHoverAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnHoverAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L837">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L838">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L839">        return icon.find()</span>
@@ -857,7 +857,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnHoverAndSelected(IconDeclaration icon) {
+    public final I withIconOnHoverAndSelected(IconDeclaration icon) {
 <span class="fc" id="L861">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L862">        return _with(c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setRolloverSelectedIcon))._this();</span>
     }
@@ -904,7 +904,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnHoverAndSelected(Val&lt;IconDeclaration&gt; icon) {
+    public final I withIconOnHoverAndSelected(Val&lt;IconDeclaration&gt; icon) {
 <span class="fc" id="L908">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L909">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L910">        return _withOnShow(icon, UIForAnyButton::_setIconOnHoverAndSelectedFromDeclaration)</span>
@@ -932,7 +932,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnSelected(Icon icon) {
+    public final I withIconOnSelected(Icon icon) {
 <span class="fc" id="L936">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L937">        return _with(c -&gt; c.setSelectedIcon(_ensureIconIsScalable(icon)))._this();</span>
     }
@@ -951,7 +951,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnSelected(int width, int height, Icon icon) {
+    public final I withIconOnSelected(int width, int height, Icon icon) {
 <span class="fc" id="L955">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L956">        icon = _fitTo(width, height, icon);</span>
 <span class="fc" id="L957">        return withIconOnSelected(icon);</span>
@@ -976,7 +976,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnSelected(int width, int height, IconDeclaration icon) {
+    public final I withIconOnSelected(int width, int height, IconDeclaration icon) {
 <span class="fc" id="L980">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L981">        return icon.find()</span>
 <span class="fc" id="L982">                .map(i -&gt; withIconOnSelected(width, height, i))</span>
@@ -1003,7 +1003,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1007">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1008">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1009">        return icon.find()</span>
@@ -1023,7 +1023,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnSelected(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnSelected(Icon icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1027">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1028">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1029">        return _with(thisComponent -&gt; {</span>
@@ -1048,7 +1048,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1052">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1053">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1054">        return icon.find()</span>
@@ -1072,7 +1072,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnSelected(IconDeclaration icon) {
+    public final I withIconOnSelected(IconDeclaration icon) {
 <span class="fc" id="L1076">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1077">        return _with(c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setSelectedIcon))._this();</span>
     }
@@ -1119,7 +1119,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnSelected(Val&lt;IconDeclaration&gt; icon) {
+    public final I withIconOnSelected(Val&lt;IconDeclaration&gt; icon) {
 <span class="fc" id="L1123">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1124">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L1125">        return _withOnShow(icon, UIForAnyButton::_setIconOnSelectedFromDeclaration)</span>
@@ -1147,7 +1147,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabled(Icon icon) {
+    public final I withIconOnDisabled(Icon icon) {
 <span class="fc" id="L1151">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1152">        return _with(c -&gt; c.setDisabledIcon(_ensureIconIsScalable(icon)))._this();</span>
     }
@@ -1166,7 +1166,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabled(int width, int height, Icon icon) {
+    public final I withIconOnDisabled(int width, int height, Icon icon) {
 <span class="fc" id="L1170">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1171">        icon = _fitTo(width, height, icon);</span>
 <span class="fc" id="L1172">        return withIconOnDisabled(icon);</span>
@@ -1191,7 +1191,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabled(int width, int height, IconDeclaration icon) {
+    public final I withIconOnDisabled(int width, int height, IconDeclaration icon) {
 <span class="fc" id="L1195">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1196">        return icon.find()</span>
 <span class="fc" id="L1197">                .map(i -&gt; withIconOnDisabled(width, height, i))</span>
@@ -1218,7 +1218,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabled(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabled(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1222">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1223">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1224">        return icon.find()</span>
@@ -1238,7 +1238,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabled(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabled(Icon icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1242">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1243">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1244">        return _with(thisComponent -&gt; {</span>
@@ -1263,7 +1263,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabled(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabled(IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1267">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1268">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1269">        return icon.find()</span>
@@ -1287,7 +1287,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabled(IconDeclaration icon) {
+    public final I withIconOnDisabled(IconDeclaration icon) {
 <span class="fc" id="L1291">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1292">        return _with(c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setDisabledIcon))._this();</span>
     }
@@ -1334,7 +1334,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabled(Val&lt;IconDeclaration&gt; icon) {
+    public final I withIconOnDisabled(Val&lt;IconDeclaration&gt; icon) {
 <span class="fc" id="L1338">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1339">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L1340">        return _withOnShow(icon, UIForAnyButton::_setIconOnDisabledFromDeclaration)</span>
@@ -1362,7 +1362,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabledAndSelected(Icon icon) {
+    public final I withIconOnDisabledAndSelected(Icon icon) {
 <span class="fc" id="L1366">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1367">        return _with(c -&gt; c.setDisabledSelectedIcon(_ensureIconIsScalable(icon)))._this();</span>
     }
@@ -1381,7 +1381,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabledAndSelected(int width, int height, Icon icon) {
+    public final I withIconOnDisabledAndSelected(int width, int height, Icon icon) {
 <span class="fc" id="L1385">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1386">        icon = _fitTo(width, height, icon);</span>
 <span class="fc" id="L1387">        return withIconOnDisabledAndSelected(icon);</span>
@@ -1406,7 +1406,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon) {
+    public final I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon) {
 <span class="fc" id="L1410">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1411">        return icon.find()</span>
 <span class="fc" id="L1412">                .map(i -&gt; withIconOnDisabledAndSelected(width, height, i))</span>
@@ -1433,7 +1433,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabledAndSelected(int width, int height, IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1437">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1438">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1439">        return icon.find()</span>
@@ -1453,7 +1453,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabledAndSelected(Icon icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabledAndSelected(Icon icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1457">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1458">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1459">        return _with(thisComponent -&gt; {</span>
@@ -1478,7 +1478,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if any of the supplied arguments are {@code null}!
      */
-    public I withIconOnDisabledAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
+    public final I withIconOnDisabledAndSelected(IconDeclaration icon, UI.FitComponent fitComponent) {
 <span class="fc" id="L1482">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1483">        Objects.requireNonNull(fitComponent);</span>
 <span class="fc" id="L1484">        return icon.find()</span>
@@ -1502,7 +1502,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}!
      */
-    public I withIconOnDisabledAndSelected(IconDeclaration icon) {
+    public final I withIconOnDisabledAndSelected(IconDeclaration icon) {
 <span class="fc" id="L1506">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1507">        return _with(c -&gt; icon.find().map(UIForAnyButton::_ensureIconIsScalable).ifPresent(c::setDisabledSelectedIcon))._this();</span>
     }
@@ -1549,7 +1549,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      * @throws NullPointerException if {@code icon} is {@code null}.
      */
-    public I withIconOnDisabledAndSelected(Val&lt;IconDeclaration&gt; icon) {
+    public final I withIconOnDisabledAndSelected(Val&lt;IconDeclaration&gt; icon) {
 <span class="fc" id="L1553">        Objects.requireNonNull(icon);</span>
 <span class="fc" id="L1554">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
 <span class="fc" id="L1555">        return _withOnShow(icon, UIForAnyButton::_setIconOnDisabledAndSelectedFromDeclaration)</span>
@@ -1557,7 +1557,46 @@ import java.util.function.Consumer;
 <span class="fc" id="L1557">                ._this();</span>
     }
 
+    /**
+     *  Sets the gap between icon and text for the wrapped button type,
+     *  if both the icon and text properties are set.
+     *  The gap is specified in &quot;developer pixels&quot; where the look and feel is expected
+     *  to automatically scale the gap according to the current {@link UI#scale()} factor.
+     *  &lt;p&gt;
+     *  The default value of this property is 4 pixels.
+     *
+     * @param gap The desired gap between icon and text in &quot;developer pixels&quot;.
+     * @return This very builder to allow for method chaining.
+     * @see AbstractButton#setIconTextGap(int)
+     */
+    public final I withIconTextGap( int gap ) {
+<span class="fc" id="L1573">        return _with(c -&gt; {</span>
+<span class="fc" id="L1574">            c.setIconTextGap(gap);</span>
+<span class="fc" id="L1575">        })._this();</span>
+    }
 
+    /**
+     *  Binds an integer property to the gap between icon and text for the wrapped button type,
+     *  if both the icon and text properties are set.
+     *  The gap is specified in &quot;developer pixels&quot; where the look and feel is expected
+     *  to automatically scale the gap according to the current {@link UI#scale()} factor.
+     *  &lt;p&gt;
+     *  The default value of this property is 4 pixels.
+     *
+     * @param gap The integer property which determines the gap between icon and text in &quot;developer pixels&quot;.
+     * @return This very builder to allow for method chaining.
+     * @see AbstractButton#setIconTextGap(int)
+     * @throws NullPointerException if {@code gap} is {@code null}!
+     * @throws IllegalArgumentException if {@code gap} is a {@code Val} property
+     *                                  that permits {@code null} values.
+     */
+    public final I withIconTextGap( Val&lt;Integer&gt; gap ) {
+<span class="fc" id="L1594">        Objects.requireNonNull(gap);</span>
+<span class="fc" id="L1595">        NullUtil.nullPropertyCheck(gap,&quot;gap&quot;, &quot;The gap between a button icon and text may not be modelled using null!&quot;);</span>
+<span class="fc" id="L1596">        return _withOnShow( gap, AbstractButton::setIconTextGap)</span>
+<span class="fc" id="L1597">                ._with( c -&gt; c.setIconTextGap(gap.get()))</span>
+<span class="fc" id="L1598">                ._this();</span>
+    }
 
     private static void _installAutomaticIconApplier(
         AbstractButton thisComponent,
@@ -1565,16 +1604,16 @@ import java.util.function.Consumer;
         UI.FitComponent fitComponent,
         BiConsumer&lt;AbstractButton, Icon&gt; iconApplier
     ) {
-<span class="fc bfc" id="L1568" title="All 2 branches covered.">        if ( icon instanceof SvgIcon) {</span>
-<span class="fc" id="L1569">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="fc" id="L1570">            iconApplier.accept(thisComponent, svgIcon.withFitComponent(fitComponent));</span>
-<span class="fc" id="L1571">            return; // An SvgIcon already scales dynamically!</span>
+<span class="fc bfc" id="L1607" title="All 2 branches covered.">        if ( icon instanceof SvgIcon) {</span>
+<span class="fc" id="L1608">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="fc" id="L1609">            iconApplier.accept(thisComponent, svgIcon.withFitComponent(fitComponent));</span>
+<span class="fc" id="L1610">            return; // An SvgIcon already scales dynamically!</span>
         }
-<span class="fc" id="L1573">        Runnable dynamicSizer = _createDynamicIconApplier(thisComponent, icon, fitComponent, iconApplier);</span>
-<span class="fc" id="L1574">        dynamicSizer.run(); // Initial sizing</span>
-<span class="fc" id="L1575">        UI.runLater(dynamicSizer); // Run later to ensure correct sizing after layout</span>
+<span class="fc" id="L1612">        Runnable dynamicSizer = _createDynamicIconApplier(thisComponent, icon, fitComponent, iconApplier);</span>
+<span class="fc" id="L1613">        dynamicSizer.run(); // Initial sizing</span>
+<span class="fc" id="L1614">        UI.runLater(dynamicSizer); // Run later to ensure correct sizing after layout</span>
         // TODO: make ScalableImageIcon use FitComponent to automatically resize itself
-<span class="fc" id="L1577">    }</span>
+<span class="fc" id="L1616">    }</span>
 
     private static Runnable _createDynamicIconApplier(
         AbstractButton thisComponent,
@@ -1582,130 +1621,130 @@ import java.util.function.Consumer;
         UI.FitComponent fitComponent,
         BiConsumer&lt;AbstractButton, Icon&gt; iconApplier
     ) {
-<span class="fc" id="L1585">        AtomicReference&lt;Size&gt; lastSize = new AtomicReference&lt;&gt;(Size.of(-1,-1));</span>
-<span class="fc" id="L1586">        return ()-&gt;{</span>
-<span class="fc" id="L1587">            Size size = _determineIconSize(thisComponent, icon, fitComponent);</span>
-<span class="fc bfc" id="L1588" title="All 2 branches covered.">            if ( !Objects.equals(size,lastSize.get()) ) {</span>
-<span class="fc" id="L1589">                lastSize.set(size);</span>
-<span class="fc" id="L1590">                int width = size.width().map(Number::intValue).orElse(-1);</span>
-<span class="fc" id="L1591">                int height = size.height().map(Number::intValue).orElse(-1);</span>
-<span class="pc bpc" id="L1592" title="1 of 4 branches missed.">                if ( width &gt; 0 &amp;&amp; height &gt; 0 )</span>
-<span class="fc" id="L1593">                    iconApplier.accept(thisComponent, _fitTo( size, icon ));</span>
+<span class="fc" id="L1624">        AtomicReference&lt;Size&gt; lastSize = new AtomicReference&lt;&gt;(Size.of(-1,-1));</span>
+<span class="fc" id="L1625">        return ()-&gt;{</span>
+<span class="fc" id="L1626">            Size size = _determineIconSize(thisComponent, icon, fitComponent);</span>
+<span class="fc bfc" id="L1627" title="All 2 branches covered.">            if ( !Objects.equals(size,lastSize.get()) ) {</span>
+<span class="fc" id="L1628">                lastSize.set(size);</span>
+<span class="fc" id="L1629">                int width = size.width().map(Number::intValue).orElse(-1);</span>
+<span class="fc" id="L1630">                int height = size.height().map(Number::intValue).orElse(-1);</span>
+<span class="pc bpc" id="L1631" title="1 of 4 branches missed.">                if ( width &gt; 0 &amp;&amp; height &gt; 0 )</span>
+<span class="fc" id="L1632">                    iconApplier.accept(thisComponent, _fitTo( size, icon ));</span>
             }
-<span class="fc" id="L1595">        };</span>
+<span class="fc" id="L1634">        };</span>
     }
 
     private static Size _determineIconSize(JComponent thisComponent, Icon icon, UI.FitComponent fitComponent) {
         float width ;
         float height;
-<span class="fc" id="L1601">        Insets insets = thisComponent.getInsets();</span>
-<span class="fc" id="L1602">        float fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);</span>
-<span class="fc" id="L1603">        float fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);</span>
-<span class="fc" id="L1604">        fittedWidth  = Math.max(0, UI.unscale((float) fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally</span>
-<span class="fc" id="L1605">        fittedHeight = Math.max(0, UI.unscale((float) fittedHeight - insets.top  - insets.bottom));</span>
-<span class="fc" id="L1606">        int iconWidth  = icon.getIconWidth();</span>
-<span class="fc" id="L1607">        int iconHeight = icon.getIconHeight();</span>
+<span class="fc" id="L1640">        Insets insets = thisComponent.getInsets();</span>
+<span class="fc" id="L1641">        float fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);</span>
+<span class="fc" id="L1642">        float fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);</span>
+<span class="fc" id="L1643">        fittedWidth  = Math.max(0, UI.unscale((float) fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally</span>
+<span class="fc" id="L1644">        fittedHeight = Math.max(0, UI.unscale((float) fittedHeight - insets.top  - insets.bottom));</span>
+<span class="fc" id="L1645">        int iconWidth  = icon.getIconWidth();</span>
+<span class="fc" id="L1646">        int iconHeight = icon.getIconHeight();</span>
         // We need to determine and return a base size to be scaled later on...
         // But some icon types already do the scaling internally, so we need to check for that:
-<span class="fc bfc" id="L1610" title="All 2 branches covered.">        if ( icon instanceof ScalableImageIcon ) {</span>
-<span class="fc" id="L1611">            ScalableImageIcon scalableIcon = (ScalableImageIcon) icon;</span>
-<span class="pc bpc" id="L1612" title="1 of 2 branches missed.">            if ( scalableIcon.getBaseWidth() &gt; 0 )</span>
-<span class="fc" id="L1613">                iconWidth = scalableIcon.getBaseWidth();</span>
-<span class="pc bpc" id="L1614" title="1 of 2 branches missed.">            if ( scalableIcon.getBaseHeight() &gt; 0 )</span>
-<span class="fc" id="L1615">                iconHeight = scalableIcon.getBaseHeight();</span>
-<span class="pc bpc" id="L1616" title="1 of 2 branches missed.">        } else if ( icon instanceof SvgIcon ) {</span>
-<span class="nc" id="L1617">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="nc bnc" id="L1618" title="All 2 branches missed.">            if ( svgIcon.getBaseWidth() &gt; 0 )</span>
-<span class="nc" id="L1619">                iconWidth = svgIcon.getBaseWidth();</span>
-<span class="nc bnc" id="L1620" title="All 2 branches missed.">            if ( svgIcon.getBaseHeight() &gt; 0 )</span>
-<span class="nc" id="L1621">                iconHeight = svgIcon.getBaseHeight();</span>
+<span class="fc bfc" id="L1649" title="All 2 branches covered.">        if ( icon instanceof ScalableImageIcon ) {</span>
+<span class="fc" id="L1650">            ScalableImageIcon scalableIcon = (ScalableImageIcon) icon;</span>
+<span class="pc bpc" id="L1651" title="1 of 2 branches missed.">            if ( scalableIcon.getBaseWidth() &gt; 0 )</span>
+<span class="fc" id="L1652">                iconWidth = scalableIcon.getBaseWidth();</span>
+<span class="pc bpc" id="L1653" title="1 of 2 branches missed.">            if ( scalableIcon.getBaseHeight() &gt; 0 )</span>
+<span class="fc" id="L1654">                iconHeight = scalableIcon.getBaseHeight();</span>
+<span class="pc bpc" id="L1655" title="1 of 2 branches missed.">        } else if ( icon instanceof SvgIcon ) {</span>
+<span class="nc" id="L1656">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="nc bnc" id="L1657" title="All 2 branches missed.">            if ( svgIcon.getBaseWidth() &gt; 0 )</span>
+<span class="nc" id="L1658">                iconWidth = svgIcon.getBaseWidth();</span>
+<span class="nc bnc" id="L1659" title="All 2 branches missed.">            if ( svgIcon.getBaseHeight() &gt; 0 )</span>
+<span class="nc" id="L1660">                iconHeight = svgIcon.getBaseHeight();</span>
         }
-<span class="fc bfc" id="L1623" title="All 2 branches covered.">        if ( fitComponent == UI.FitComponent.NO ) {</span>
-<span class="fc" id="L1624">            width  = iconWidth;</span>
-<span class="fc" id="L1625">            height = iconHeight;</span>
-<span class="fc bfc" id="L1626" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT) {</span>
-<span class="fc" id="L1627">            width  = fittedWidth;</span>
-<span class="fc" id="L1628">            height = fittedHeight;</span>
-<span class="fc bfc" id="L1629" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.WIDTH ) {</span>
-<span class="fc" id="L1630">            width  = fittedWidth;</span>
-<span class="fc" id="L1631">            height = iconHeight;</span>
-<span class="fc bfc" id="L1632" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.HEIGHT ) {</span>
-<span class="fc" id="L1633">            width = iconWidth;</span>
-<span class="fc" id="L1634">            height = fittedHeight;</span>
-<span class="fc bfc" id="L1635" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.MAX_DIM ) {</span>
-<span class="fc" id="L1636">            width  = Math.max(fittedWidth, fittedHeight);</span>
-<span class="fc" id="L1637">            height = Math.max(fittedWidth, fittedHeight);</span>
-<span class="pc bpc" id="L1638" title="1 of 2 branches missed.">        } else if ( fitComponent == UI.FitComponent.MIN_DIM ) {</span>
-<span class="fc" id="L1639">            width  = Math.min(fittedWidth, fittedHeight);</span>
-<span class="fc" id="L1640">            height = Math.min(fittedWidth, fittedHeight);</span>
+<span class="fc bfc" id="L1662" title="All 2 branches covered.">        if ( fitComponent == UI.FitComponent.NO ) {</span>
+<span class="fc" id="L1663">            width  = iconWidth;</span>
+<span class="fc" id="L1664">            height = iconHeight;</span>
+<span class="fc bfc" id="L1665" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT) {</span>
+<span class="fc" id="L1666">            width  = fittedWidth;</span>
+<span class="fc" id="L1667">            height = fittedHeight;</span>
+<span class="fc bfc" id="L1668" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.WIDTH ) {</span>
+<span class="fc" id="L1669">            width  = fittedWidth;</span>
+<span class="fc" id="L1670">            height = iconHeight;</span>
+<span class="fc bfc" id="L1671" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.HEIGHT ) {</span>
+<span class="fc" id="L1672">            width = iconWidth;</span>
+<span class="fc" id="L1673">            height = fittedHeight;</span>
+<span class="fc bfc" id="L1674" title="All 2 branches covered.">        } else if ( fitComponent == UI.FitComponent.MAX_DIM ) {</span>
+<span class="fc" id="L1675">            width  = Math.max(fittedWidth, fittedHeight);</span>
+<span class="fc" id="L1676">            height = Math.max(fittedWidth, fittedHeight);</span>
+<span class="pc bpc" id="L1677" title="1 of 2 branches missed.">        } else if ( fitComponent == UI.FitComponent.MIN_DIM ) {</span>
+<span class="fc" id="L1678">            width  = Math.min(fittedWidth, fittedHeight);</span>
+<span class="fc" id="L1679">            height = Math.min(fittedWidth, fittedHeight);</span>
         } else {
-<span class="nc" id="L1642">            log.error(SwingTree.get().logMarker(), &quot;Unknown 'UI.FitComponent' value: '{}'. Using 'NO' instead.&quot;, fitComponent);</span>
-<span class="nc" id="L1643">            width  = icon.getIconWidth();</span>
-<span class="nc" id="L1644">            height = icon.getIconHeight();</span>
+<span class="nc" id="L1681">            log.error(SwingTree.get().logMarker(), &quot;Unknown 'UI.FitComponent' value: '{}'. Using 'NO' instead.&quot;, fitComponent);</span>
+<span class="nc" id="L1682">            width  = icon.getIconWidth();</span>
+<span class="nc" id="L1683">            height = icon.getIconHeight();</span>
         }
-<span class="fc" id="L1646">        return Size.of(width, height);</span>
+<span class="fc" id="L1685">        return Size.of(width, height);</span>
     }
 
     private static Icon _fitTo(int width, int height, Icon icon) {
-<span class="fc" id="L1650">        return _fitTo(Size.of(width, height), icon);</span>
+<span class="fc" id="L1689">        return _fitTo(Size.of(width, height), icon);</span>
     }
 
     private static Icon _fitTo(Size size, Icon icon) {
-<span class="fc" id="L1654">        float width = size.width().orElse(0f);</span>
-<span class="fc" id="L1655">        float height = size.height().orElse(0f);</span>
-<span class="fc bfc" id="L1656" title="All 2 branches covered.">        if ( icon instanceof SvgIcon ) {</span>
-<span class="fc" id="L1657">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="fc" id="L1658">            svgIcon = svgIcon.withIconWidth((int) width);</span>
-<span class="fc" id="L1659">            return svgIcon.withIconHeight((int) height);</span>
+<span class="fc" id="L1693">        float width = size.width().orElse(0f);</span>
+<span class="fc" id="L1694">        float height = size.height().orElse(0f);</span>
+<span class="fc bfc" id="L1695" title="All 2 branches covered.">        if ( icon instanceof SvgIcon ) {</span>
+<span class="fc" id="L1696">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="fc" id="L1697">            svgIcon = svgIcon.withIconWidth((int) width);</span>
+<span class="fc" id="L1698">            return svgIcon.withIconHeight((int) height);</span>
         }
-<span class="fc bfc" id="L1661" title="All 2 branches covered.">        else if ( icon instanceof ScalableImageIcon ) {</span>
-<span class="fc" id="L1662">            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));</span>
-<span class="pc bpc" id="L1663" title="1 of 2 branches missed.">        } else if ( icon instanceof ImageIcon ) {</span>
-<span class="fc" id="L1664">            return ScalableImageIcon.of(Size.of(width, height), (ImageIcon) icon);</span>
+<span class="fc bfc" id="L1700" title="All 2 branches covered.">        else if ( icon instanceof ScalableImageIcon ) {</span>
+<span class="fc" id="L1701">            return ((ScalableImageIcon)icon).withSize(Size.of(width, height));</span>
+<span class="pc bpc" id="L1702" title="1 of 2 branches missed.">        } else if ( icon instanceof ImageIcon ) {</span>
+<span class="fc" id="L1703">            return ScalableImageIcon.of(Size.of(width, height), (ImageIcon) icon);</span>
         }
-<span class="nc" id="L1666">        return icon;</span>
+<span class="nc" id="L1705">        return icon;</span>
     }
 
     private static Icon _ensureIconIsScalable(Icon icon) {
-<span class="fc bfc" id="L1670" title="All 2 branches covered.">        if ( icon instanceof ScalableImageIcon ) {</span>
-<span class="fc" id="L1671">            return icon; // Already scalable</span>
+<span class="fc bfc" id="L1709" title="All 2 branches covered.">        if ( icon instanceof ScalableImageIcon ) {</span>
+<span class="fc" id="L1710">            return icon; // Already scalable</span>
         }
-<span class="fc bfc" id="L1673" title="All 2 branches covered.">        if ( icon instanceof SvgIcon ) {</span>
-<span class="fc" id="L1674">            return icon; // Already scalable</span>
+<span class="fc bfc" id="L1712" title="All 2 branches covered.">        if ( icon instanceof SvgIcon ) {</span>
+<span class="fc" id="L1713">            return icon; // Already scalable</span>
         }
-<span class="pc bpc" id="L1676" title="1 of 2 branches missed.">        if ( icon instanceof ImageIcon ) {</span>
-<span class="fc" id="L1677">            return ScalableImageIcon.of(Size.of(icon.getIconWidth(), icon.getIconHeight()), (ImageIcon) icon);</span>
+<span class="pc bpc" id="L1715" title="1 of 2 branches missed.">        if ( icon instanceof ImageIcon ) {</span>
+<span class="fc" id="L1716">            return ScalableImageIcon.of(Size.of(icon.getIconWidth(), icon.getIconHeight()), (ImageIcon) icon);</span>
         }
-<span class="nc" id="L1679">        return icon; // Not yet supported</span>
+<span class="nc" id="L1718">        return icon; // Not yet supported</span>
     }
 
     private static void _setIconFromDeclaration( AbstractButton button, IconDeclaration icon ) {
-<span class="fc" id="L1683">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setIcon);</span>
-<span class="fc" id="L1684">    }</span>
+<span class="fc" id="L1722">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setIcon);</span>
+<span class="fc" id="L1723">    }</span>
 
     private static void _setIconOnPressFromDeclaration( AbstractButton button, IconDeclaration icon ) {
-<span class="fc" id="L1687">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setPressedIcon);</span>
-<span class="fc" id="L1688">    }</span>
+<span class="fc" id="L1726">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setPressedIcon);</span>
+<span class="fc" id="L1727">    }</span>
 
     private static void _setIconOnHoverFromDeclaration( AbstractButton button, IconDeclaration icon ) {
-<span class="fc" id="L1691">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setRolloverIcon);</span>
-<span class="fc" id="L1692">    }</span>
+<span class="fc" id="L1730">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setRolloverIcon);</span>
+<span class="fc" id="L1731">    }</span>
 
     private static void _setIconOnHoverAndSelectedFromDeclaration(AbstractButton button, IconDeclaration icon) {
-<span class="fc" id="L1695">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setRolloverSelectedIcon);</span>
-<span class="fc" id="L1696">    }</span>
+<span class="fc" id="L1734">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setRolloverSelectedIcon);</span>
+<span class="fc" id="L1735">    }</span>
 
     private static void _setIconOnSelectedFromDeclaration(AbstractButton button, IconDeclaration icon) {
-<span class="fc" id="L1699">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setSelectedIcon);</span>
-<span class="fc" id="L1700">    }</span>
+<span class="fc" id="L1738">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setSelectedIcon);</span>
+<span class="fc" id="L1739">    }</span>
 
     private static void _setIconOnDisabledFromDeclaration(AbstractButton button, IconDeclaration icon) {
-<span class="fc" id="L1703">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setDisabledIcon);</span>
-<span class="fc" id="L1704">    }</span>
+<span class="fc" id="L1742">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setDisabledIcon);</span>
+<span class="fc" id="L1743">    }</span>
 
     private static void _setIconOnDisabledAndSelectedFromDeclaration(AbstractButton button, IconDeclaration icon) {
-<span class="fc" id="L1707">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setDisabledSelectedIcon);</span>
-<span class="fc" id="L1708">    }</span>
+<span class="fc" id="L1746">        _setAnyIconFromDeclaration(button, icon, AbstractButton::setDisabledSelectedIcon);</span>
+<span class="fc" id="L1747">    }</span>
 
 
     private static void _setAnyIconFromDeclaration(
@@ -1713,65 +1752,19 @@ import java.util.function.Consumer;
         IconDeclaration icon,
         BiConsumer&lt;AbstractButton, @Nullable Icon&gt; iconSetter
     ) {
-<span class="fc" id="L1716">        Optional&lt;ImageIcon&gt; optIcon = icon.find();</span>
-<span class="pc bpc" id="L1717" title="1 of 2 branches missed.">        if ( optIcon.isPresent() )</span>
-<span class="fc" id="L1718">            iconSetter.accept(button, optIcon.get());</span>
+<span class="fc" id="L1755">        Optional&lt;ImageIcon&gt; optIcon = icon.find();</span>
+<span class="pc bpc" id="L1756" title="1 of 2 branches missed.">        if ( optIcon.isPresent() )</span>
+<span class="fc" id="L1757">            iconSetter.accept(button, optIcon.get());</span>
         else {
-<span class="nc" id="L1720">            log.warn(</span>
+<span class="nc" id="L1759">            log.warn(</span>
                     &quot;Failed to load from 'IconDeclaration' instance '{}', &quot; +
                             &quot;with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.&quot;,
-<span class="nc" id="L1723">                    icon, icon.path(), icon.size(), button,</span>
+<span class="nc" id="L1762">                    icon, icon.path(), icon.size(), button,</span>
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
             );
-<span class="nc" id="L1726">            iconSetter.accept(button, null);</span>
+<span class="nc" id="L1765">            iconSetter.accept(button, null);</span>
         }
-<span class="fc" id="L1728">    }</span>
-
-    /**
-     *  Use this to set the font of the wrapped button type.
-     * @param font The font of the text which should be displayed on the button.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     */
-    public final I withFont( Font font ) {
-<span class="fc" id="L1737">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
-<span class="fc" id="L1738">        return _with( button -&gt; {</span>
-<span class="pc bpc" id="L1739" title="1 of 2 branches missed.">                        if ( _isUndefinedFont(font) )</span>
-<span class="nc" id="L1740">                            button.setFont(null);</span>
-                        else
-<span class="fc" id="L1742">                            button.setFont(SwingTree.get().scale(font));</span>
-<span class="fc" id="L1743">                    })._this();</span>
-    }
-
-    /**
-     *  Use this to dynamically set the font of the wrapped button type
-     *  through the provided view model property.
-     *  When the font wrapped by the provided property changes,
-     *  then so does the font of the text displayed on this button.
-     *
-     * @param font The font property of the text which should be displayed on the button type.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
-     */
-    public final I withFont( Val&lt;Font&gt; font ) {
-<span class="fc" id="L1758">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
-<span class="fc" id="L1759">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
-<span class="fc" id="L1760">        return _withOnShow( font, (c,v) -&gt; {</span>
-<span class="pc bpc" id="L1761" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(v) )</span>
-<span class="nc" id="L1762">                        c.setFont(null);</span>
-                    else
-<span class="fc" id="L1764">                        c.setFont(SwingTree.get().scale(v));</span>
-<span class="fc" id="L1765">                })</span>
-<span class="fc" id="L1766">               ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L1767">                   Font newFont = font.orElseThrowUnchecked();</span>
-<span class="pc bpc" id="L1768" title="1 of 2 branches missed.">                   if ( _isUndefinedFont(newFont) )</span>
-<span class="nc" id="L1769">                       thisComponent.setFont( null );</span>
-                   else
-<span class="fc" id="L1771">                       thisComponent.setFont( SwingTree.get().scale(newFont) );</span>
-<span class="fc" id="L1772">               } )</span>
-<span class="fc" id="L1773">               ._this();</span>
-    }
+<span class="fc" id="L1767">    }</span>
 
     /**
      *  Use this to set the selection state of the wrapped button type.
@@ -1780,7 +1773,7 @@ import java.util.function.Consumer;
      * @return This builder instance, to allow for method chaining.
      */
     public final I isSelectedIf( boolean isSelected ) {
-<span class="fc" id="L1783">        return _with( button -&gt; _setSelectedSilently(button, isSelected) )._this();</span>
+<span class="fc" id="L1776">        return _with( button -&gt; _setSelectedSilently(button, isSelected) )._this();</span>
     }
 
     void _setSelectedSilently( B thisButton, boolean isSelected ) {
@@ -1789,16 +1782,16 @@ import java.util.function.Consumer;
             any action listeners. We need this because we want to construct the
             GUI and the state of its properties without side effects.
          */
-<span class="fc" id="L1792">        ItemListener[] listeners = thisButton.getItemListeners();</span>
-<span class="fc bfc" id="L1793" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
-<span class="fc" id="L1794">            thisButton.removeItemListener(l);</span>
+<span class="fc" id="L1785">        ItemListener[] listeners = thisButton.getItemListeners();</span>
+<span class="fc bfc" id="L1786" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
+<span class="fc" id="L1787">            thisButton.removeItemListener(l);</span>
 
-<span class="fc" id="L1796">        thisButton.setSelected(isSelected);</span>
+<span class="fc" id="L1789">        thisButton.setSelected(isSelected);</span>
 
-<span class="fc bfc" id="L1798" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
-<span class="fc" id="L1799">            thisButton.addItemListener(l);</span>
+<span class="fc bfc" id="L1791" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
+<span class="fc" id="L1792">            thisButton.addItemListener(l);</span>
 
-<span class="fc" id="L1801">    }</span>
+<span class="fc" id="L1794">    }</span>
 
     /**
      *  Use this to bind to a {@link sprouts.Var}
@@ -1810,10 +1803,10 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Val&lt;Boolean&gt; selected ) {
-<span class="nc" id="L1813">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
-<span class="nc" id="L1814">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc" id="L1815">        return _withOnShow(selected, this::_setSelectedSilently)</span>
-<span class="nc" id="L1816">               ._with( button -&gt; _setSelectedSilently(button, selected.get()) )._this();</span>
+<span class="nc" id="L1806">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L1807">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L1808">        return _withOnShow(selected, this::_setSelectedSilently)</span>
+<span class="nc" id="L1809">               ._with( button -&gt; _setSelectedSilently(button, selected.get()) )._this();</span>
     }
 
     /**
@@ -1827,10 +1820,10 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Val&lt;Boolean&gt; selected ) {
-<span class="nc" id="L1830">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
-<span class="nc" id="L1831">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc bnc" id="L1832" title="All 2 branches missed.">        return _withOnShow( selected, (c, v) -&gt; _setSelectedSilently(c, !v) )</span>
-<span class="nc bnc" id="L1833" title="All 2 branches missed.">               ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )._this();</span>
+<span class="nc" id="L1823">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L1824">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc bnc" id="L1825" title="All 2 branches missed.">        return _withOnShow( selected, (c, v) -&gt; _setSelectedSilently(c, !v) )</span>
+<span class="nc bnc" id="L1826" title="All 2 branches missed.">               ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )._this();</span>
     }
 
     /**
@@ -1843,19 +1836,19 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var&lt;Boolean&gt; selected ) {
-<span class="fc" id="L1846">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
-<span class="fc" id="L1847">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="fc" id="L1848">        return _withOnShow( selected, this::_setSelectedSilently )</span>
-<span class="fc" id="L1849">                ._with( button -&gt; {</span>
-<span class="fc" id="L1850">                    _onClick(button,</span>
-<span class="fc" id="L1851">                        e -&gt; _runInApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L1839">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="fc" id="L1840">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="fc" id="L1841">        return _withOnShow( selected, this::_setSelectedSilently )</span>
+<span class="fc" id="L1842">                ._with( button -&gt; {</span>
+<span class="fc" id="L1843">                    _onClick(button,</span>
+<span class="fc" id="L1844">                        e -&gt; _runInApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="fc" id="L1853">                    _onChange(button,</span>
-<span class="fc" id="L1854">                        v -&gt; _runInApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L1846">                    _onChange(button,</span>
+<span class="fc" id="L1847">                        v -&gt; _runInApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="fc" id="L1856">                })</span>
-<span class="fc" id="L1857">                ._with( button -&gt; _setSelectedSilently(button, selected.get()) )</span>
-<span class="fc" id="L1858">                ._this();</span>
+<span class="fc" id="L1849">                })</span>
+<span class="fc" id="L1850">                ._with( button -&gt; _setSelectedSilently(button, selected.get()) )</span>
+<span class="fc" id="L1851">                ._this();</span>
     }
 
     /**
@@ -1869,21 +1862,21 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Var&lt;Boolean&gt; selected ) {
-<span class="fc" id="L1872">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
-<span class="nc" id="L1873">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc" id="L1874">        return _withOnShow( selected, (c, v) -&gt; {</span>
-<span class="nc bnc" id="L1875" title="All 2 branches missed.">                    _setSelectedSilently(c, !v);</span>
-<span class="nc" id="L1876">                })</span>
-<span class="nc" id="L1877">                ._with( button -&gt; {</span>
-<span class="nc" id="L1878">                    _onClick(button,</span>
-<span class="nc bnc" id="L1879" title="All 2 branches missed.">                        e -&gt; _runInApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L1865">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="nc" id="L1866">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L1867">        return _withOnShow( selected, (c, v) -&gt; {</span>
+<span class="nc bnc" id="L1868" title="All 2 branches missed.">                    _setSelectedSilently(c, !v);</span>
+<span class="nc" id="L1869">                })</span>
+<span class="nc" id="L1870">                ._with( button -&gt; {</span>
+<span class="nc" id="L1871">                    _onClick(button,</span>
+<span class="nc bnc" id="L1872" title="All 2 branches missed.">                        e -&gt; _runInApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="nc" id="L1881">                    _onChange(button,</span>
-<span class="nc bnc" id="L1882" title="All 2 branches missed.">                        v -&gt; _runInApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="nc" id="L1874">                    _onChange(button,</span>
+<span class="nc bnc" id="L1875" title="All 2 branches missed.">                        v -&gt; _runInApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="nc" id="L1884">                })</span>
-<span class="nc bnc" id="L1885" title="All 2 branches missed.">                ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )</span>
-<span class="nc" id="L1886">                ._this();</span>
+<span class="nc" id="L1877">                })</span>
+<span class="nc bnc" id="L1878" title="All 2 branches missed.">                ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )</span>
+<span class="nc" id="L1879">                ._this();</span>
     }
 
     /**
@@ -1915,13 +1908,13 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final &lt;T&gt; I isSelectedIf( T state, Val&lt;T&gt; selection ) {
-<span class="fc" id="L1918">        NullUtil.nullArgCheck(state, &quot;state&quot;, Object.class);</span>
-<span class="fc" id="L1919">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
-<span class="fc" id="L1920">        return _withOnShow( selection, (c,v) -&gt; _setSelectedSilently(c, state.equals(v)) )</span>
-<span class="fc" id="L1921">                ._with( button -&gt;</span>
-<span class="fc" id="L1922">                     _setSelectedSilently(button, state.equals(selection.orElseThrowUnchecked()))</span>
+<span class="fc" id="L1911">        NullUtil.nullArgCheck(state, &quot;state&quot;, Object.class);</span>
+<span class="fc" id="L1912">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
+<span class="fc" id="L1913">        return _withOnShow( selection, (c,v) -&gt; _setSelectedSilently(c, state.equals(v)) )</span>
+<span class="fc" id="L1914">                ._with( button -&gt;</span>
+<span class="fc" id="L1915">                     _setSelectedSilently(button, state.equals(selection.orElseThrowUnchecked()))</span>
                 )
-<span class="fc" id="L1924">                ._this();</span>
+<span class="fc" id="L1917">                ._this();</span>
     }
 
     /**
@@ -1948,13 +1941,13 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;T&gt; I isSelectedIfNot( T state, Val&lt;T&gt; selection ) {
-<span class="fc" id="L1951">        NullUtil.nullArgCheck(state, &quot;state&quot;, Object.class);</span>
-<span class="fc" id="L1952">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
-<span class="pc bpc" id="L1953" title="1 of 2 branches missed.">        return _withOnShow( selection, (c, v) -&gt; _setSelectedSilently(c, !state.equals(v)) )</span>
-<span class="fc" id="L1954">                ._with( button -&gt;</span>
-<span class="pc bpc" id="L1955" title="1 of 2 branches missed.">                     _setSelectedSilently(button, !state.equals(selection.orElseThrowUnchecked()))</span>
+<span class="fc" id="L1944">        NullUtil.nullArgCheck(state, &quot;state&quot;, Object.class);</span>
+<span class="fc" id="L1945">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
+<span class="pc bpc" id="L1946" title="1 of 2 branches missed.">        return _withOnShow( selection, (c, v) -&gt; _setSelectedSilently(c, !state.equals(v)) )</span>
+<span class="fc" id="L1947">                ._with( button -&gt;</span>
+<span class="pc bpc" id="L1948" title="1 of 2 branches missed.">                     _setSelectedSilently(button, !state.equals(selection.orElseThrowUnchecked()))</span>
                 )
-<span class="fc" id="L1957">                ._this();</span>
+<span class="fc" id="L1950">                ._this();</span>
     }
 
     /**
@@ -1967,23 +1960,23 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code var} is {@code null}.
      */
     public final I isPressedIf( Var&lt;Boolean&gt; var ) {
-<span class="fc" id="L1970">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
-<span class="fc" id="L1971">        return _withOnShow( var, (c,v) -&gt; {</span>
-<span class="pc bpc" id="L1972" title="1 of 2 branches missed.">                    if ( v != c.getModel().isPressed() )</span>
-<span class="nc" id="L1973">                        c.getModel().setPressed(v);</span>
-<span class="fc" id="L1974">                })</span>
-<span class="fc" id="L1975">                ._with( button -&gt; {</span>
-<span class="fc" id="L1976">                    _onModelChange(button, e -&gt;</span>
-<span class="fc" id="L1977">                        _runInApp(button.getModel().isPressed(), pressed-&gt;{</span>
-<span class="fc" id="L1978">                            var.set(From.VIEW, pressed);</span>
-<span class="fc" id="L1979">                        })</span>
+<span class="fc" id="L1963">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
+<span class="fc" id="L1964">        return _withOnShow( var, (c,v) -&gt; {</span>
+<span class="pc bpc" id="L1965" title="1 of 2 branches missed.">                    if ( v != c.getModel().isPressed() )</span>
+<span class="nc" id="L1966">                        c.getModel().setPressed(v);</span>
+<span class="fc" id="L1967">                })</span>
+<span class="fc" id="L1968">                ._with( button -&gt; {</span>
+<span class="fc" id="L1969">                    _onModelChange(button, e -&gt;</span>
+<span class="fc" id="L1970">                        _runInApp(button.getModel().isPressed(), pressed-&gt;{</span>
+<span class="fc" id="L1971">                            var.set(From.VIEW, pressed);</span>
+<span class="fc" id="L1972">                        })</span>
                     );
-<span class="fc" id="L1981">                })</span>
+<span class="fc" id="L1974">                })</span>
                 // on change is not needed because the pressed state is only changed by the user.
-<span class="fc" id="L1983">                ._with( button -&gt;</span>
-<span class="fc" id="L1984">                    button.setSelected(var.orElseThrowUnchecked())</span>
+<span class="fc" id="L1976">                ._with( button -&gt;</span>
+<span class="fc" id="L1977">                    button.setSelected(var.orElseThrowUnchecked())</span>
                 )
-<span class="fc" id="L1986">                ._this();</span>
+<span class="fc" id="L1979">                ._this();</span>
     }
 
     protected final void _onModelChange( B button, Consumer&lt;ChangeEvent&gt; action ) {
@@ -1998,14 +1991,14 @@ import java.util.function.Consumer;
             To solve this problem, we do the revers by making sure that our listener is added
             at the first position in the list of listeners inside the button.
         */
-<span class="fc" id="L2001">        ItemListener[] listeners = button.getItemListeners();</span>
-<span class="pc bpc" id="L2002" title="1 of 2 branches missed.">        for (ItemListener listener : listeners)</span>
-<span class="nc" id="L2003">            button.removeItemListener(listener);</span>
+<span class="fc" id="L1994">        ItemListener[] listeners = button.getItemListeners();</span>
+<span class="pc bpc" id="L1995" title="1 of 2 branches missed.">        for (ItemListener listener : listeners)</span>
+<span class="nc" id="L1996">            button.removeItemListener(listener);</span>
 
-<span class="fc" id="L2005">        button.addChangeListener(action::accept);</span>
+<span class="fc" id="L1998">        button.addChangeListener(action::accept);</span>
 
-<span class="pc bpc" id="L2007" title="1 of 2 branches missed.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="nc" id="L2008">            button.addItemListener(listeners[i]);</span>
+<span class="pc bpc" id="L2000" title="1 of 2 branches missed.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="nc" id="L2001">            button.addItemListener(listeners[i]);</span>
         /*
             The reasoning behind why Swing calls item listeners from last to first is
             the assumption that the last listener added is more interested in the event
@@ -2015,7 +2008,7 @@ import java.util.function.Consumer;
             simply because it was added first.
             This is especially true in the context of declarative UI design.
          */
-<span class="fc" id="L2018">    }</span>
+<span class="fc" id="L2011">    }</span>
 
 
     /**
@@ -2029,7 +2022,7 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( boolean borderPainted ) {
-<span class="fc" id="L2032">        return _with( button -&gt; button.setBorderPainted(borderPainted) )._this();</span>
+<span class="fc" id="L2025">        return _with( button -&gt; button.setBorderPainted(borderPainted) )._this();</span>
     }
 
     /**
@@ -2042,11 +2035,11 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L2045">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
-<span class="nc" id="L2046">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid value for the border painted property.&quot;);</span>
-<span class="nc" id="L2047">        return _withOnShow( val, AbstractButton::setBorderPainted )</span>
-<span class="nc" id="L2048">               ._with( button -&gt; button.setBorderPainted(val.orElseThrowUnchecked()) )</span>
-<span class="nc" id="L2049">               ._this();</span>
+<span class="nc" id="L2038">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L2039">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid value for the border painted property.&quot;);</span>
+<span class="nc" id="L2040">        return _withOnShow( val, AbstractButton::setBorderPainted )</span>
+<span class="nc" id="L2041">               ._with( button -&gt; button.setBorderPainted(val.orElseThrowUnchecked()) )</span>
+<span class="nc" id="L2042">               ._this();</span>
     }
 
     /**
@@ -2057,14 +2050,14 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I makePlain() {
-<span class="fc" id="L2060">        return peek( it -&gt; {</span>
-<span class="fc" id="L2061">                    it.setBorderPainted(false);</span>
-<span class="fc" id="L2062">                    it.setContentAreaFilled(false);</span>
-<span class="fc" id="L2063">                    it.setOpaque(false);</span>
-<span class="fc" id="L2064">                    it.setFocusPainted(false);</span>
-<span class="fc" id="L2065">                    it.setMargin(new Insets(0,0,0,0));</span>
-<span class="fc" id="L2066">                    _setBackground(it, UI.Color.TRANSPARENT);</span>
-<span class="fc" id="L2067">                });</span>
+<span class="fc" id="L2053">        return peek( it -&gt; {</span>
+<span class="fc" id="L2054">                    it.setBorderPainted(false);</span>
+<span class="fc" id="L2055">                    it.setContentAreaFilled(false);</span>
+<span class="fc" id="L2056">                    it.setOpaque(false);</span>
+<span class="fc" id="L2057">                    it.setFocusPainted(false);</span>
+<span class="fc" id="L2058">                    it.setMargin(new Insets(0,0,0,0));</span>
+<span class="fc" id="L2059">                    _setBackground(it, UI.Color.TRANSPARENT);</span>
+<span class="fc" id="L2060">                });</span>
     }
 
     /**
@@ -2077,19 +2070,19 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public final I onChange( Action&lt;ComponentDelegate&lt;B, ItemEvent&gt;&gt; action ) {
-<span class="fc" id="L2080">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L2081">        return _with( button -&gt; {</span>
-<span class="fc" id="L2082">                    _onChange(button, e -&gt;</span>
-<span class="fc" id="L2083">                        _runInApp(()-&gt;{</span>
+<span class="fc" id="L2073">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L2074">        return _with( button -&gt; {</span>
+<span class="fc" id="L2075">                    _onChange(button, e -&gt;</span>
+<span class="fc" id="L2076">                        _runInApp(()-&gt;{</span>
                             try {
-<span class="fc" id="L2085">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
-<span class="nc" id="L2086">                            } catch ( Exception ex ) {</span>
-<span class="nc" id="L2087">                                log.error(SwingTree.get().logMarker(), &quot;Failed to execute action on button change event.&quot;, ex);</span>
-<span class="fc" id="L2088">                            }</span>
-<span class="fc" id="L2089">                        })</span>
+<span class="fc" id="L2078">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
+<span class="nc" id="L2079">                            } catch ( Exception ex ) {</span>
+<span class="nc" id="L2080">                                log.error(SwingTree.get().logMarker(), &quot;Failed to execute action on button change event.&quot;, ex);</span>
+<span class="fc" id="L2081">                            }</span>
+<span class="fc" id="L2082">                        })</span>
                     );
-<span class="fc" id="L2091">                })</span>
-<span class="fc" id="L2092">                ._this();</span>
+<span class="fc" id="L2084">                })</span>
+<span class="fc" id="L2085">                ._this();</span>
     }
 
     protected final void _onChange( B button, Consumer&lt;ItemEvent&gt; action ) {
@@ -2104,14 +2097,14 @@ import java.util.function.Consumer;
             To solve this problem, we do the revers by making sure that our listener is added
             at the first position in the list of listeners inside the button.
         */
-<span class="fc" id="L2107">        ItemListener[] listeners = button.getItemListeners();</span>
-<span class="fc bfc" id="L2108" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
-<span class="fc" id="L2109">            button.removeItemListener(listener);</span>
+<span class="fc" id="L2100">        ItemListener[] listeners = button.getItemListeners();</span>
+<span class="fc bfc" id="L2101" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
+<span class="fc" id="L2102">            button.removeItemListener(listener);</span>
 
-<span class="fc" id="L2111">        button.addItemListener(action::accept);</span>
+<span class="fc" id="L2104">        button.addItemListener(action::accept);</span>
 
-<span class="fc bfc" id="L2113" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L2114">            button.addItemListener(listeners[i]);</span>
+<span class="fc bfc" id="L2106" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L2107">            button.addItemListener(listeners[i]);</span>
         /*
             The reasoning behind why Swing calls item listeners from last to first is
             the assumption that the last listener added is more interested in the event
@@ -2121,7 +2114,7 @@ import java.util.function.Consumer;
             simply because it was added first.
             This is especially true in the context of declarative UI design.
          */
-<span class="fc" id="L2124">    }</span>
+<span class="fc" id="L2117">    }</span>
 
     /**
      *  This method enables a more readable way of adding
@@ -2136,19 +2129,19 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public I onClick( Action&lt;ComponentDelegate&lt;B, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L2139">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L2140">        return _with( button -&gt; {</span>
-<span class="fc" id="L2141">                    _onClick(button, e -&gt;</span>
-<span class="fc" id="L2142">                        _runInApp(() -&gt; {</span>
+<span class="fc" id="L2132">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L2133">        return _with( button -&gt; {</span>
+<span class="fc" id="L2134">                    _onClick(button, e -&gt;</span>
+<span class="fc" id="L2135">                        _runInApp(() -&gt; {</span>
                             try {
-<span class="fc" id="L2144">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
-<span class="nc" id="L2145">                            } catch ( Exception ex ) {</span>
-<span class="nc" id="L2146">                                log.error(SwingTree.get().logMarker(), &quot;Failed to execute action on button click event.&quot;, ex);</span>
-<span class="fc" id="L2147">                            }</span>
-<span class="fc" id="L2148">                        })</span>
+<span class="fc" id="L2137">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
+<span class="nc" id="L2138">                            } catch ( Exception ex ) {</span>
+<span class="nc" id="L2139">                                log.error(SwingTree.get().logMarker(), &quot;Failed to execute action on button click event.&quot;, ex);</span>
+<span class="fc" id="L2140">                            }</span>
+<span class="fc" id="L2141">                        })</span>
                     );
-<span class="fc" id="L2150">                })</span>
-<span class="fc" id="L2151">                ._this();</span>
+<span class="fc" id="L2143">                })</span>
+<span class="fc" id="L2144">                ._this();</span>
     }
 
     protected final void _onClick( B button, Consumer&lt;ActionEvent&gt; action ) {
@@ -2163,15 +2156,15 @@ import java.util.function.Consumer;
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L2166">        ActionListener[] listeners = button.getActionListeners();</span>
-<span class="fc bfc" id="L2167" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L2168">            button.removeActionListener(listener);</span>
+<span class="fc" id="L2159">        ActionListener[] listeners = button.getActionListeners();</span>
+<span class="fc bfc" id="L2160" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L2161">            button.removeActionListener(listener);</span>
 
-<span class="fc" id="L2170">        button.addActionListener(action::accept);</span>
+<span class="fc" id="L2163">        button.addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L2172" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L2173">            button.addActionListener(listeners[i]);</span>
-<span class="fc" id="L2174">    }</span>
+<span class="fc bfc" id="L2165" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L2166">            button.addActionListener(listeners[i]);</span>
+<span class="fc" id="L2167">    }</span>
 
     /**
      *  A convenience method to avoid peeking into this builder like so:
@@ -2186,11 +2179,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="nc" id="L2189">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
-<span class="nc" id="L2190">        return _with( c -&gt;</span>
-<span class="nc" id="L2191">                    horizontalAlign.forSwing().ifPresent(c::setHorizontalAlignment)</span>
+<span class="nc" id="L2182">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L2183">        return _with( c -&gt;</span>
+<span class="nc" id="L2184">                    horizontalAlign.forSwing().ifPresent(c::setHorizontalAlignment)</span>
                 )
-<span class="nc" id="L2193">                ._this();</span>
+<span class="nc" id="L2186">                ._this();</span>
     }
 
     /**
@@ -2211,15 +2204,15 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="nc" id="L2214">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
-<span class="nc" id="L2215">        NullUtil.nullPropertyCheck(horizontalAlign, &quot;horizontalAlign&quot;);</span>
-<span class="nc" id="L2216">        return _withOnShow( horizontalAlign, (c, align) -&gt; {</span>
-<span class="nc" id="L2217">                    align.forSwing().ifPresent(c::setHorizontalAlignment);</span>
-<span class="nc" id="L2218">                })</span>
-<span class="nc" id="L2219">                ._with( c -&gt;</span>
-<span class="nc" id="L2220">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalAlignment)</span>
+<span class="nc" id="L2207">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L2208">        NullUtil.nullPropertyCheck(horizontalAlign, &quot;horizontalAlign&quot;);</span>
+<span class="nc" id="L2209">        return _withOnShow( horizontalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L2210">                    align.forSwing().ifPresent(c::setHorizontalAlignment);</span>
+<span class="nc" id="L2211">                })</span>
+<span class="nc" id="L2212">                ._with( c -&gt;</span>
+<span class="nc" id="L2213">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalAlignment)</span>
                 )
-<span class="nc" id="L2222">                ._this();</span>
+<span class="nc" id="L2215">                ._this();</span>
     }
 
     /**
@@ -2235,11 +2228,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
-<span class="nc" id="L2238">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
-<span class="nc" id="L2239">        return _with( c -&gt;</span>
-<span class="nc" id="L2240">                    verticalAlign.forSwing().ifPresent(c::setVerticalAlignment)</span>
+<span class="nc" id="L2231">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L2232">        return _with( c -&gt;</span>
+<span class="nc" id="L2233">                    verticalAlign.forSwing().ifPresent(c::setVerticalAlignment)</span>
                 )
-<span class="nc" id="L2242">                ._this();</span>
+<span class="nc" id="L2235">                ._this();</span>
     }
 
     /**
@@ -2260,15 +2253,15 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="nc" id="L2263">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
-<span class="nc" id="L2264">        NullUtil.nullPropertyCheck(verticalAlign, &quot;verticalAlign&quot;);</span>
-<span class="nc" id="L2265">        return _withOnShow( verticalAlign, (c, align) -&gt; {</span>
-<span class="nc" id="L2266">                    align.forSwing().ifPresent(c::setVerticalAlignment);</span>
-<span class="nc" id="L2267">                })</span>
-<span class="nc" id="L2268">                ._with( c -&gt;</span>
-<span class="nc" id="L2269">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalAlignment)</span>
+<span class="nc" id="L2256">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L2257">        NullUtil.nullPropertyCheck(verticalAlign, &quot;verticalAlign&quot;);</span>
+<span class="nc" id="L2258">        return _withOnShow( verticalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L2259">                    align.forSwing().ifPresent(c::setVerticalAlignment);</span>
+<span class="nc" id="L2260">                })</span>
+<span class="nc" id="L2261">                ._with( c -&gt;</span>
+<span class="nc" id="L2262">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalAlignment)</span>
                 )
-<span class="nc" id="L2271">                ._this();</span>
+<span class="nc" id="L2264">                ._this();</span>
     }
 
     /**
@@ -2284,11 +2277,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="nc" id="L2287">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
-<span class="nc" id="L2288">        return _with( c -&gt;</span>
-<span class="nc" id="L2289">                    horizontalAlign.forSwing().ifPresent(c::setHorizontalTextPosition)</span>
+<span class="nc" id="L2280">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L2281">        return _with( c -&gt;</span>
+<span class="nc" id="L2282">                    horizontalAlign.forSwing().ifPresent(c::setHorizontalTextPosition)</span>
                 )
-<span class="nc" id="L2291">                ._this();</span>
+<span class="nc" id="L2284">                ._this();</span>
     }
 
     /**
@@ -2309,14 +2302,14 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalTextAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="nc" id="L2312">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
-<span class="nc" id="L2313">        return _withOnShow( horizontalAlign, (c, align) -&gt; {</span>
-<span class="nc" id="L2314">                    align.forSwing().ifPresent(c::setHorizontalTextPosition);</span>
-<span class="nc" id="L2315">                })</span>
-<span class="nc" id="L2316">                ._with( c -&gt;</span>
-<span class="nc" id="L2317">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalTextPosition)</span>
+<span class="nc" id="L2305">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L2306">        return _withOnShow( horizontalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L2307">                    align.forSwing().ifPresent(c::setHorizontalTextPosition);</span>
+<span class="nc" id="L2308">                })</span>
+<span class="nc" id="L2309">                ._with( c -&gt;</span>
+<span class="nc" id="L2310">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setHorizontalTextPosition)</span>
                 )
-<span class="nc" id="L2319">                ._this();</span>
+<span class="nc" id="L2312">                ._this();</span>
     }
 
     /**
@@ -2332,11 +2325,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
-<span class="nc" id="L2335">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
-<span class="nc" id="L2336">        return _with( c -&gt;</span>
-<span class="nc" id="L2337">                    verticalAlign.forSwing().ifPresent(c::setVerticalTextPosition)</span>
+<span class="nc" id="L2328">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L2329">        return _with( c -&gt;</span>
+<span class="nc" id="L2330">                    verticalAlign.forSwing().ifPresent(c::setVerticalTextPosition)</span>
                 )
-<span class="nc" id="L2339">                ._this();</span>
+<span class="nc" id="L2332">                ._this();</span>
     }
 
     /**
@@ -2357,14 +2350,14 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalTextAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="nc" id="L2360">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
-<span class="nc" id="L2361">        return _withOnShow( verticalAlign, (c, align) -&gt; {</span>
-<span class="nc" id="L2362">                    align.forSwing().ifPresent(c::setVerticalTextPosition);</span>
-<span class="nc" id="L2363">                })</span>
-<span class="nc" id="L2364">                ._with( c -&gt;</span>
-<span class="nc" id="L2365">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalTextPosition)</span>
+<span class="nc" id="L2353">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L2354">        return _withOnShow( verticalAlign, (c, align) -&gt; {</span>
+<span class="nc" id="L2355">                    align.forSwing().ifPresent(c::setVerticalTextPosition);</span>
+<span class="nc" id="L2356">                })</span>
+<span class="nc" id="L2357">                ._with( c -&gt;</span>
+<span class="nc" id="L2358">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(c::setVerticalTextPosition)</span>
                 )
-<span class="nc" id="L2367">                ._this();</span>
+<span class="nc" id="L2360">                ._this();</span>
     }
 
     /**
@@ -2374,8 +2367,8 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I withButtonGroup( ButtonGroup group ) {
-<span class="fc" id="L2377">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
-<span class="fc" id="L2378">        return _with(group::add)._this();</span>
+<span class="fc" id="L2370">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
+<span class="fc" id="L2371">        return _with(group::add)._this();</span>
     }
 
     /**
@@ -2385,11 +2378,11 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I withMargin( Insets insets ) {
-<span class="nc" id="L2388">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
-<span class="nc" id="L2389">        return _with( thisComponent -&gt;</span>
-<span class="nc" id="L2390">                    thisComponent.setMargin(insets)</span>
+<span class="nc" id="L2381">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
+<span class="nc" id="L2382">        return _with( thisComponent -&gt;</span>
+<span class="nc" id="L2383">                    thisComponent.setMargin(insets)</span>
                 )
-<span class="nc" id="L2392">                ._this();</span>
+<span class="nc" id="L2385">                ._this();</span>
     }
 
     /**
@@ -2402,7 +2395,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I withMargin( int top, int left, int bottom, int right ) {
-<span class="nc" id="L2405">        return withMargin( new Insets(top, left, bottom, right) );</span>
+<span class="nc" id="L2398">        return withMargin( new Insets(top, left, bottom, right) );</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

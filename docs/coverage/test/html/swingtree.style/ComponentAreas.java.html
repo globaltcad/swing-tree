@@ -182,8 +182,8 @@ final class ComponentAreas
 <span class="fc bfc" id="L182" title="All 4 branches covered.">        if ( border.allCornersShareTheSameArc() &amp;&amp; insAllTheSame ) {</span>
 <span class="fc" id="L183">            float arcWidth  = border.topLeftArc().map( a -&gt; Math.max(0,a.width() ) ).orElse(0f);</span>
 <span class="fc" id="L184">            float arcHeight = border.topLeftArc().map( a -&gt; Math.max(0,a.height()) ).orElse(0f);</span>
-<span class="fc" id="L185">            arcWidth  = Math.max(0, arcWidth  - insTop);</span>
-<span class="fc" id="L186">            arcHeight = Math.max(0, arcHeight - insTop);</span>
+<span class="fc" id="L185">            arcWidth  = Math.max(0, arcWidth  - insTop * 2f);</span>
+<span class="fc" id="L186">            arcHeight = Math.max(0, arcHeight - insTop * 2f);</span>
 <span class="pc bpc" id="L187" title="1 of 4 branches missed.">            if ( arcWidth == 0 || arcHeight == 0 )</span>
 <span class="fc" id="L188">                return new Area(new Rectangle2D.Float(left, top, width - left - right, height - top - bottom));</span>
 
@@ -200,10 +200,10 @@ final class ComponentAreas
 <span class="fc" id="L200">            Arc bottomLeftArc  = border.bottomLeftArc().orElse(null);</span>
 <span class="fc" id="L201">            Area area = new Area();</span>
 
-<span class="fc" id="L203">            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  );</span>
-<span class="fc" id="L204">            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight);</span>
-<span class="fc" id="L205">            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight);</span>
-<span class="fc" id="L206">            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft );</span>
+<span class="fc" id="L203">            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  ) * 2f;</span>
+<span class="fc" id="L204">            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight) * 2f;</span>
+<span class="fc" id="L205">            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight) * 2f;</span>
+<span class="fc" id="L206">            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft ) * 2f;</span>
 
 <span class="fc bfc" id="L208" title="All 2 branches covered.">            float arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);</span>
 <span class="fc bfc" id="L209" title="All 2 branches covered.">            float arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);</span>

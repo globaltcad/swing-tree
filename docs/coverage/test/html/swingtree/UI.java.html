@@ -5,6 +5,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Result;
+import sprouts.Val;
 import swingtree.api.Configurator;
 import swingtree.api.Layout;
 import swingtree.api.NoiseFunction;
@@ -27,11 +29,9 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.event.MouseEvent;
-import java.awt.font.TextAttribute;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.text.AttributedCharacterIterator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -271,23 +271,23 @@ public final class UI extends UIFactoryMethods
 <span class="fc" id="L271">        BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_LEADING, BOTTOM_TRAILING;</span>
 
         public VerticalAlignment getVertical() {
-<span class="pc bpc" id="L274" title="3 of 5 branches missed.">            switch ( this ) {</span>
+<span class="pc bpc" id="L274" title="2 of 5 branches missed.">            switch ( this ) {</span>
 <span class="nc" id="L275">                case UNDEFINED : return VerticalAlignment.UNDEFINED;</span>
                 case TOP_LEFT: case TOP_CENTER: case TOP_RIGHT: case TOP_LEADING: case TOP_TRAILING:
 <span class="fc" id="L277">                    return VerticalAlignment.TOP;</span>
                 case CENTER_LEFT: case CENTER: case CENTER_RIGHT: case CENTER_LEADING: case CENTER_TRAILING:
 <span class="fc" id="L279">                    return VerticalAlignment.CENTER;</span>
                 case BOTTOM_LEFT: case BOTTOM_CENTER: case BOTTOM_RIGHT: case BOTTOM_LEADING: case BOTTOM_TRAILING:
-<span class="nc" id="L281">                    return VerticalAlignment.BOTTOM;</span>
+<span class="fc" id="L281">                    return VerticalAlignment.BOTTOM;</span>
             }
 <span class="nc" id="L283">            throw new RuntimeException();</span>
         }
 
         public HorizontalAlignment getHorizontal() {
-<span class="pc bpc" id="L287" title="5 of 7 branches missed.">            switch ( this ) {</span>
+<span class="pc bpc" id="L287" title="4 of 7 branches missed.">            switch ( this ) {</span>
 <span class="nc" id="L288">                case UNDEFINED : return HorizontalAlignment.UNDEFINED;</span>
                 case TOP_LEFT: case CENTER_LEFT: case BOTTOM_LEFT:
-<span class="nc" id="L290">                    return HorizontalAlignment.LEFT;</span>
+<span class="fc" id="L290">                    return HorizontalAlignment.LEFT;</span>
                 case TOP_CENTER: case CENTER: case BOTTOM_CENTER:
 <span class="fc" id="L292">                    return HorizontalAlignment.CENTER;</span>
                 case TOP_RIGHT: case CENTER_RIGHT: case BOTTOM_RIGHT:
@@ -743,11 +743,11 @@ public final class UI extends UIFactoryMethods
 <span class="fc" id="L743">        PLAIN, BOLD, ITALIC, BOLD_ITALIC;</span>
 
         int toAWTFontStyle() {
-<span class="pc bpc" id="L746" title="4 of 5 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L747">                case PLAIN:        return java.awt.Font.PLAIN;</span>
+<span class="pc bpc" id="L746" title="1 of 5 branches missed.">            switch ( this ) {</span>
+<span class="fc" id="L747">                case PLAIN:        return java.awt.Font.PLAIN;</span>
 <span class="fc" id="L748">                case BOLD:         return java.awt.Font.BOLD;</span>
-<span class="nc" id="L749">                case ITALIC:       return java.awt.Font.ITALIC;</span>
-<span class="nc" id="L750">                case BOLD_ITALIC:  return java.awt.Font.BOLD + java.awt.Font.ITALIC;</span>
+<span class="fc" id="L749">                case ITALIC:       return java.awt.Font.ITALIC;</span>
+<span class="fc" id="L750">                case BOLD_ITALIC:  return java.awt.Font.BOLD + java.awt.Font.ITALIC;</span>
             }
 <span class="nc" id="L752">            throw new RuntimeException();</span>
         }
@@ -1496,10 +1496,10 @@ public final class UI extends UIFactoryMethods
 <span class="nc" id="L1496">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L1499">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {</span>
+<span class="fc" id="L1499">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {</span>
 <span class="nc" id="L1500">         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
 <span class="nc" id="L1501">         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1502">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1502">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
      }
     /** {inheritDoc} */
 <span class="fc" id="L1505">    public static class Menu extends JMenu implements StylableComponent {</span>
@@ -2874,7 +2874,7 @@ public final class UI extends UIFactoryMethods
 <span class="fc" id="L2874">        }</span>
 
         private Color(java.awt.Color color) {
-<span class="fc" id="L2877">            super(color.getRGB());</span>
+<span class="fc" id="L2877">            super(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());</span>
 <span class="fc" id="L2878">        }</span>
 
         private Color(int r, int g, int b) {
@@ -3234,17 +3234,30 @@ public final class UI extends UIFactoryMethods
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #brightness()
          */
-        public Color withBrightness(double brightness ) {
+        public Color withBrightness( double brightness ) {
 <span class="nc" id="L3238">            return Color.ofHsb(hue(), saturation(), brightness, opacity());</span>
         }
     }
 
     /**
-     *  This class represents a SwingTree font and is used to specify the font of a component.
-     *  It is a subclass of {@link java.awt.Font} and provides additional functionality.
-     *  The appearance of a font is primarily based on the font family name which is used to find a font on the system.
+     *  An immutable and value based font configuration object, which is used to configure component fonts
+     *  in a UI declaration. SwingTree can dynamically generate {@link java.awt.Font}s for
+     *  components using the {@link Font#toAwtFont()} method. This may be done reactively, like for
+     *  example when the look and feel changes its UI scale and SwingTree scales and re-installs your fonts.&lt;br&gt;
+     *  This is a wrapper around a {@link FontConf} object, which is also used in the {@link UIForAnySwing#withStyle(Styler)}
+     *  API, and it holds all font properties needed to create {@link java.awt.Font} instances for Swing components.
+     *  The appearance of a font is primarily based on the font family name which is used to find a font on the system,
+     *  but there is a variety of other properties which you can configure using {@link #with(Configurator)}.&lt;br&gt;
+     *  &lt;b&gt;
+     *      We recommend using this class instead of classical AWT Font instances in your code,
+     *      as it allows SwingTree to scale your UI more reliably.
+     *  &lt;/b&gt;&lt;br&gt;
+     * @see UIForAnySwing#withFont(Font) For the most common usecase of this class.
+     * @see UIForAnySwing#withFont(Val) To configure a reactive font for a component.
+     * @see UIForAnySwing#withStyle(Styler) and more specifically {@link ComponentStyleDelegate#font(UI.Font)}
+     *      to configure the font of a component through the SwingTree style API.
      */
-    public static final class Font extends java.awt.Font
+    public static final class Font
     {
         /**
          *  This constant is a {@link java.awt.Font} object with a font name of &quot;&quot; (empty string),
@@ -3255,7 +3268,9 @@ public final class UI extends UIFactoryMethods
          *  the {@link java.awt.Component#setFont(java.awt.Font)} method as null.
          *  Passing null to this method means that the look and feel determines the font.
          */
-<span class="fc" id="L3258">        public static final java.awt.Font UNDEFINED = new Font(&quot;&quot;, -1, 0);</span>
+<span class="fc" id="L3271">        public static final java.awt.Font UNDEFINED = new java.awt.Font(&quot;&quot;, -1, 0);</span>
+
+        private final FontConf conf;
 
         /**
          *  A factory method that creates a new {@code Font} object with the specified font name
@@ -3267,7 +3282,19 @@ public final class UI extends UIFactoryMethods
          * @return A new {@code Font} object with the specified font name, style and size.
          */
         public static Font of( String name, FontStyle style, int size ) {
-<span class="fc" id="L3270">            return new Font(name, style.toAWTFontStyle(), size);</span>
+<span class="fc" id="L3285">            return new Font(name, style.toAWTFontStyle(), size);</span>
+        }
+
+        /**
+         *  A factory method that creates a new {@code Font} object with the specified font name
+         *  and size where the {@link FontStyle} defaults to {@code PLAIN}.
+         *  This maps directly to the constructor of {@link java.awt.Font#Font(String, int, int)}.
+         * @param name The font name, which may be anything depending on what fonts are loaded on the system.
+         * @param size The point size of the font.
+         * @return A new {@code Font} object with the specified font name, style and size.
+         */
+        public static Font of( String name, int size ) {
+<span class="fc" id="L3297">            return new Font(name, FontStyle.PLAIN.toAWTFontStyle(), size);</span>
         }
 
         /**
@@ -3279,7 +3306,7 @@ public final class UI extends UIFactoryMethods
          * @return A new {@code Font} object with the specified attributes.
          */
         public static Font of( Map&lt;? extends AttributedCharacterIterator.Attribute, ?&gt; attributes ) {
-<span class="nc" id="L3282">            return new Font(attributes);</span>
+<span class="nc" id="L3309">            return new Font(attributes);</span>
         }
 
         /**
@@ -3288,20 +3315,71 @@ public final class UI extends UIFactoryMethods
          * @return The SwingTree native font object.
          */
         public static Font of( java.awt.Font font ) {
-<span class="fc" id="L3291">            return new Font(font);</span>
+<span class="fc" id="L3318">            return new Font(font);</span>
         }
 
         private Font(String name, int style, int size) {
-<span class="fc" id="L3295">            super(name, style, size);</span>
-<span class="fc" id="L3296">        }</span>
+<span class="fc" id="L3322">            this(new java.awt.Font(name, style, size));</span>
+<span class="fc" id="L3323">        }</span>
 
         private Font(Map&lt;? extends AttributedCharacterIterator.Attribute, ?&gt; attributes) {
-<span class="nc" id="L3299">            super(attributes);</span>
-<span class="nc" id="L3300">        }</span>
+<span class="nc" id="L3326">            this(new java.awt.Font(attributes));</span>
+<span class="nc" id="L3327">        }</span>
 
         private Font(java.awt.Font font) {
-<span class="fc" id="L3303">            super(font);</span>
-<span class="fc" id="L3304">        }</span>
+<span class="fc" id="L3330">            this(conf-&gt;conf.withPropertiesFromFont(font));</span>
+<span class="fc" id="L3331">        }</span>
+
+        private Font(Configurator&lt;FontConf&gt; configurator) {
+<span class="fc" id="L3334">            this(Result.ofTry(FontConf.class, ()-&gt;configurator.configure(FontConf.none()))</span>
+<span class="fc" id="L3335">                                    .logProblemsAsError()</span>
+<span class="fc" id="L3336">                                    .orElse(FontConf.none()));</span>
+<span class="fc" id="L3337">        }</span>
+
+<span class="fc" id="L3339">        private Font(FontConf conf) {</span>
+<span class="fc" id="L3340">            this.conf = conf;</span>
+<span class="fc" id="L3341">        }</span>
+
+        /**
+         *  Converts this font to a {@link java.awt.Font} object
+         *  that can be used in Swing components.
+         *  Note that this method creates a new {@link java.awt.Font} object
+         *  which will always be scaled according to the current DPI settings
+         *  of SwingTree, which you can access using {@link UI#scale()}.
+         *
+         *  @return The {@link java.awt.Font} object representing this font.
+         */
+        public java.awt.Font toAwtFont() {
+<span class="fc" id="L3353">            return SwingTree.get().scale(this.conf.toAwtFont());</span>
+        }
+
+        /**
+         *  Returns the configuration of this font which
+         *  encapsulates all properties of the font and can
+         *  be used to convert to a {@link java.awt.Font} object
+         *  using the {@link FontConf#toAwtFont()} method.
+         *
+         *  @return The configuration of this font.
+         */
+        public FontConf conf() {
+<span class="fc" id="L3365">            return this.conf;</span>
+        }
+
+        /**
+         *  Allows configuring this font using a configurator function
+         *  to a new {@code Font} object with the desired changes.
+         *  @param configurator The configurator function that applies changes to the font configuration.
+         *                      It receives a {@link FontConf} object representing the current configuration
+         *                      of the font and should return the modified {@code FontConf} object.
+         * @return A new {@code Font} object with the applied changes.
+         * @throws NullPointerException If the configurator is null.
+         */
+        public Font with( Configurator&lt;FontConf&gt; configurator ) {
+<span class="fc" id="L3378">            Objects.requireNonNull(configurator, &quot;The font configurator cannot be null.&quot;);</span>
+<span class="fc" id="L3379">            return new Font(Result.ofTry(FontConf.class, ()-&gt; configurator.configure(this.conf))</span>
+<span class="fc" id="L3380">                    .logProblemsAsError()</span>
+<span class="fc" id="L3381">                    .orElse(this.conf));</span>
+        }
 
         /**
          *  Returns an updated version of this font with the font (family) name changed to the specified value.
@@ -3310,10 +3388,8 @@ public final class UI extends UIFactoryMethods
          *  @throws NullPointerException If the font name is null.
          */
         public Font withName( String name ) {
-<span class="nc" id="L3313">            Objects.requireNonNull(name, &quot;The font name cannot be null.&quot;);</span>
-<span class="nc" id="L3314">            Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;(getAttributes());</span>
-<span class="nc" id="L3315">            attributes.put(TextAttribute.FAMILY, name);</span>
-<span class="nc" id="L3316">            return new Font(attributes);</span>
+<span class="fc" id="L3391">            Objects.requireNonNull(name, &quot;The font name cannot be null.&quot;);</span>
+<span class="fc" id="L3392">            return with(conf-&gt;conf.family(name));</span>
         }
 
         /**
@@ -3323,24 +3399,7 @@ public final class UI extends UIFactoryMethods
          *  @return A new {@code Font} object with the font style changed.
          */
         public Font withStyle( FontStyle style ) {
-<span class="nc" id="L3326">            Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;(getAttributes());</span>
-<span class="nc bnc" id="L3327" title="All 5 branches missed.">            switch (style) {</span>
-                case PLAIN:
-<span class="nc" id="L3329">                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);</span>
-<span class="nc" id="L3330">                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);</span>
-<span class="nc" id="L3331">                    break;</span>
-                case BOLD:
-<span class="nc" id="L3333">                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);</span>
-<span class="nc" id="L3334">                    break;</span>
-                case ITALIC:
-<span class="nc" id="L3336">                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);</span>
-<span class="nc" id="L3337">                    break;</span>
-                case BOLD_ITALIC:
-<span class="nc" id="L3339">                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);</span>
-<span class="nc" id="L3340">                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);</span>
-                    break;
-            }
-<span class="nc" id="L3343">            return new Font(attributes);</span>
+<span class="fc" id="L3402">            return with(conf-&gt;conf.style(style));</span>
         }
 
         /**
@@ -3349,9 +3408,23 @@ public final class UI extends UIFactoryMethods
          *  @return A new {@code Font} object with the font size changed.
          */
         public Font withSize( int size ) {
-<span class="nc" id="L3352">            Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;(getAttributes());</span>
-<span class="nc" id="L3353">            attributes.put(TextAttribute.SIZE, (float) size);</span>
-<span class="nc" id="L3354">            return new Font(attributes);</span>
+<span class="fc" id="L3411">            return with(conf-&gt;conf.size(size));</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="fc" id="L3416">            return this.conf.hashCode();</span>
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+<span class="pc bpc" id="L3421" title="1 of 4 branches missed.">            return obj instanceof Font &amp;&amp; this.conf.equals(((Font)obj).conf);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc" id="L3426">            String confString = this.conf.toString();</span>
+<span class="fc" id="L3427">            return &quot;UI.Font[&quot; + confString.substring(9, confString.length() - 1) + &quot;]&quot;;</span>
         }
 
     }

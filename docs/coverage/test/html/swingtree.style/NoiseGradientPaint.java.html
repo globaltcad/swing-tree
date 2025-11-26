@@ -42,10 +42,10 @@ final class NoiseGradientPaint implements Paint
 <span class="fc" id="L42">        }</span>
 
         private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
-<span class="nc bnc" id="L45" title="All 6 branches missed.">            if (this.bounds.equals(bounds) &amp;&amp; this.center.equals(center) &amp;&amp; this.transform.equals(transform))</span>
-<span class="nc" id="L46">                return cachedContext;</span>
+<span class="pc bpc" id="L45" title="2 of 6 branches missed.">            if (this.bounds.equals(bounds) &amp;&amp; this.center.equals(center) &amp;&amp; this.transform.equals(transform))</span>
+<span class="fc" id="L46">                return cachedContext;</span>
             else
-<span class="nc" id="L48">                return null;</span>
+<span class="fc" id="L48">                return null;</span>
         }
     }
 
@@ -217,10 +217,10 @@ final class NoiseGradientPaint implements Paint
         final RenderingHints  HINTS
     ) {
 
-<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if (cached != null) {</span>
-<span class="nc" id="L221">            NoiseGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);</span>
-<span class="nc bnc" id="L222" title="All 2 branches missed.">            if (c != null)</span>
-<span class="nc" id="L223">                return c;</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (cached != null) {</span>
+<span class="fc" id="L221">            NoiseGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">            if (c != null)</span>
+<span class="fc" id="L223">                return c;</span>
         }
 
 <span class="fc" id="L226">        NoiseGradientPaintContext context = new NoiseGradientPaintContext(center, TRANSFORM);</span>
@@ -305,10 +305,10 @@ final class NoiseGradientPaint implements Paint
 <span class="fc" id="L305">                long index = ((long)X &lt;&lt; 32) | (long)Y;</span>
 <span class="fc" id="L306">                WritableRaster raster = cachedRasters.get(index);</span>
 
-<span class="pc bpc" id="L308" title="1 of 2 branches missed.">                if (raster == null)</span>
+<span class="pc bpc" id="L308" title="2 of 6 branches missed.">                if (raster == null || raster.getWidth() &lt; TILE_WIDTH || raster.getHeight() &lt; TILE_HEIGHT)</span>
 <span class="fc" id="L309">                    raster = getColorModel().createCompatibleWritableRaster(TILE_WIDTH, TILE_HEIGHT);  // Create raster for given colormodel</span>
                 else
-<span class="nc" id="L311">                    return raster;</span>
+<span class="fc" id="L311">                    return raster;</span>
 
 <span class="fc" id="L313">                final int MAX = localFractions.length - 1;</span>
 
@@ -329,14 +329,14 @@ final class NoiseGradientPaint implements Paint
 
 <span class="fc" id="L330">                            double localX = ( X + tileX - center.getX() ) / scaleX;</span>
 <span class="fc" id="L331">                            double localY = ( Y + tileY - center.getY() ) / scaleY;</span>
-<span class="pc bpc" id="L332" title="3 of 4 branches missed.">                            if ( rotation != 0f &amp;&amp; rotation % 360f != 0f ) {</span>
-<span class="nc" id="L333">                                final double angle = Math.toRadians(rotation);</span>
-<span class="nc" id="L334">                                final double sin   = Math.sin(angle);</span>
-<span class="nc" id="L335">                                final double cos   = Math.cos(angle);</span>
-<span class="nc" id="L336">                                final double newX = localX * cos - localY * sin;</span>
-<span class="nc" id="L337">                                final double newY = localX * sin + localY * cos;</span>
-<span class="nc" id="L338">                                localX = newX;</span>
-<span class="nc" id="L339">                                localY = newY;</span>
+<span class="pc bpc" id="L332" title="1 of 4 branches missed.">                            if ( rotation != 0f &amp;&amp; rotation % 360f != 0f ) {</span>
+<span class="fc" id="L333">                                final double angle = Math.toRadians(rotation);</span>
+<span class="fc" id="L334">                                final double sin   = Math.sin(angle);</span>
+<span class="fc" id="L335">                                final double cos   = Math.cos(angle);</span>
+<span class="fc" id="L336">                                final double newX = localX * cos - localY * sin;</span>
+<span class="fc" id="L337">                                final double newY = localX * sin + localY * cos;</span>
+<span class="fc" id="L338">                                localX = newX;</span>
+<span class="fc" id="L339">                                localY = newY;</span>
                             }
 <span class="fc" id="L341">                            float x = (float) localX;</span>
 <span class="fc" id="L342">                            float y = (float) localY;</span>

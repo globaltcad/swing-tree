@@ -4,7 +4,7 @@
   "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.",
   "subjects":["swingtree.UIForTable"],
   "statistics":{
-    "runs":"6",
+    "runs":"7",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -82,13 +82,34 @@
       "blocks":[
         {"kind":"given","text":"A simple event and some data.","code":["var event = Event.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
 
-        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
+        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event as Event)"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
         {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
 
         {"kind":"then","text":"The table UI is updated.","code":["table.getRowCount() == 2","table.getValueAt(0, 0) == 1","table.getValueAt(0, 1) == 2","table.getValueAt(0, 2) == 3","table.getValueAt(1, 0) == 7","table.getValueAt(1, 1) == 8","table.getValueAt(1, 2) == 9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A table can update itself reactively when bound to an `Observable`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Binding to an `Observable` is the most versatile and generic way of updating a table reactively.\n            This observable may be derived from things like properties, property lists or a simple `Event`.\n            You may declare them in you view model and expose observables derived from them to your view to then bind\n            to your tables. Changes in your VM will then automatically update the table!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple property holding some data.","code":["var data = Var.of([[1, 2, 3], [7, 8, 9]])"]},
+
+        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data.get() })","            .updateTableOn(data.view())"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
+
+        {"kind":"when","text":"We change the data in the property.","code":["data.set([[11, 12, 13], [17, 18, 19]])"]},
+
+        {"kind":"then","text":"The table UI is updated automatically:","code":["table.getRowCount() == 2","table.getValueAt(0, 0) == 11","table.getValueAt(0, 1) == 12","table.getValueAt(0, 2) == 13","table.getValueAt(1, 0) == 17","table.getValueAt(1, 1) == 18","table.getValueAt(1, 2) == 19"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

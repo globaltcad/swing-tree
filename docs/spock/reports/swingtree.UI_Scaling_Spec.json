@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(2.0f)"]},
 
-        {"kind":"when","text":"We build a simple panel with a number of various components and custom dimensions","code":["var panel =","    UI.panel(\"wrap 1\")","    .add(","        UI.button(\"Button\")","        .withPrefSize(100, 50)","        .withMinSize(75, 25)","        .withMaxSize(70, 50)","        .withSize(150, 50)","    )","    .add(","        UI.toggleButton(\"Toggle Button\")","        .withPrefSize(Size.of(111, 52))","        .withMinSize(Size.of(86, 23))","        .withMaxSize(Size.of(90, 67))","        .withSize(Size.of(121, 44))","    )","    .add(","        UI.slider(UI.Align.HORIZONTAL)","        .withPrefSize(new Dimension(60, 20))","        .withMinSize(new Dimension(70, 80))","        .withMaxSize(new Dimension(80, 42))","        .withSize(new Dimension(120, 40))","    )","    .add(","        UI.label(\"Label\")","        .withPrefWidth(142)","        .withMinWidth(110)","        .withMaxWidth(90)","        .withWidth(284)","    )","    .add(","        UI.textField(\"TextField\")","        .withPrefHeight(30)","        .withMinHeight(36)","        .withMaxHeight(40)","        .withHeight(60)","    )","    .add(","        UI.textArea(\"TextArea\")","        .withSizeExactly(Size.of(55, 88))","    )","    .get(JPanel)"]},
+        {"kind":"when","text":"We build a simple panel with a number of various components and custom dimensions","code":["var panel =","    UI.panel(\"wrap 1\")","    .add(","        UI.button(\"Button\")","        .withPrefSize(100, 50)","        .withMinSize(75, 25)","        .withMaxSize(70, 50)","        .withSize(150, 50)","    )","    .add(","        UI.toggleButton(\"Toggle Button\")","        .withPrefSize(Size.of(111, 52))","        .withMinSize(Size.of(86, 23))","        .withMaxSize(Size.of(90, 67))","        .withSize(Size.of(121, 44))","    )","    .add(","        UI.slider(UI.Align.HORIZONTAL)","        .withPrefSize(Val.of(Size.of(60, 20)))","        .withMinSize(Val.of(Size.of(70, 80)))","        .withMaxSize(Val.of(Size.of(80, 42)))","        .withSize(Val.of(Size.of(120, 40)))","    )","    .add(","        UI.label(\"Label\")","        .withPrefWidth(142)","        .withMinWidth(110)","        .withMaxWidth(90)","        .withWidth(284)","    )","    .add(","        UI.textField(\"TextField\")","        .withPrefHeight(30)","        .withMinHeight(36)","        .withMaxHeight(40)","        .withHeight(60)","    )","    .add(","        UI.textArea(\"TextArea\")","        .withSizeExactly(Size.of(55, 88))","    )","    .get(JPanel)"]},
 
         {"kind":"and","text":"We unpack the tree of components:","code":["var button       = panel.components[0]","var toggleButton = panel.components[1]","var slider       = panel.components[2]","var label        = panel.components[3]","var textField    = panel.components[4]","var textArea     = panel.components[5]"]},
 
@@ -548,7 +548,7 @@
       "blocks":[
         {"kind":"given","text":"We set the scaling factor to 1.5f","code":["SwingTree.get().setUiScaleFactor(1.5f)"]},
 
-        {"kind":"and","text":"We create reactive properties for fonts","code":["var buttonFont = Var.of(new Font(\"Arial\", Font.BOLD, 12))","var labelFont = Var.of(new Font(\"Serif\", Font.ITALIC, 14))","var fieldFont = Var.of(new Font(\"Monospaced\", Font.PLAIN, 16))"]},
+        {"kind":"and","text":"We create reactive properties for fonts","code":["var buttonFont = Var.of(UI.Font.of(\"Arial\", UI.FontStyle.BOLD, 12))","var labelFont = Var.of(UI.Font.of(\"Serif\", UI.FontStyle.ITALIC, 14))","var fieldFont = Var.of(UI.Font.of(\"Monospaced\", UI.FontStyle.PLAIN, 16))"]},
 
         {"kind":"when","text":"We create components with bound fonts","code":["var panel =","    UI.panel(\"wrap 1\")","    .add(UI.button(\"Button\").withFont(buttonFont))","    .add(UI.label(\"Label\").withFont(labelFont))","    .add(UI.textField(\"TextField\").withFont(fieldFont))","    .get(JPanel)"]},
 
@@ -556,7 +556,7 @@
 
         {"kind":"then","text":"The initial fonts are scaled by the scaling factor","code":["button.font.size == 18  // 12 * 1.5","label.font.size == 21   // 14 * 1.5","textField.font.size == 24 // 16 * 1.5"]},
 
-        {"kind":"when","text":"We update the font properties with new sizes","code":["buttonFont.set(new Font(\"Arial\", Font.BOLD, 16))","labelFont.set(new Font(\"Serif\", Font.ITALIC, 18))","fieldFont.set(new Font(\"Monospaced\", Font.PLAIN, 20))","UI.sync() // Wait for UI updates"]},
+        {"kind":"when","text":"We update the font properties with new sizes","code":["buttonFont.set(UI.Font.of(\"Arial\", UI.FontStyle.BOLD, 16))","labelFont.set(UI.Font.of(\"Serif\", UI.FontStyle.ITALIC, 18))","fieldFont.set(UI.Font.of(\"Monospaced\", UI.FontStyle.PLAIN, 20))","UI.sync() // Wait for UI updates"]},
 
         {"kind":"then","text":"The updated font sizes are also scaled by the scaling factor","code":["button.font.size == 24  // 16 * 1.5","label.font.size == 27   // 18 * 1.5","textField.font.size == 30 // 20 * 1.5"]}
       ],
@@ -596,7 +596,7 @@
       "tags":{},"see":[],"extraInfo":["\n            This test demonstrates the powerful combination of reactive Font properties\n            and UI scaling. When both the underlying Font property AND the UI scale factor \n            change, the component's font updates appropriately to reflect both changes.\n\n            This enables sophisticated scenarios like theme switching with custom fonts\n            that automatically adapt to different display DPI settings.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We start with scale factor 1.0 and a reactive font property","code":["SwingTree.get().setUiScaleFactor(1.0f)","var dynamicFont = Var.of(new Font(\"Arial\", Font.PLAIN, 14))"]},
+        {"kind":"given","text":"We start with scale factor 1.0 and a reactive font property","code":["SwingTree.get().setUiScaleFactor(1.0f)","var dynamicFont = Var.of(UI.Font.of(\"Arial\", UI.FontStyle.PLAIN, 14))"]},
 
         {"kind":"and","text":"A component with bound custom font","code":["var label = UI.label(\"Dynamic Custom Font\").withFont(dynamicFont).get(JLabel)"]},
 
@@ -606,11 +606,11 @@
 
         {"kind":"then","text":"Font size scales with the factor while preserving family and style","code":["label.font.style == Font.PLAIN","label.font.size == 21"]},
 
-        {"kind":"when","text":"Only the font property changes to a different font with new size","code":["dynamicFont.set(new Font(\"Times New Roman\", Font.BOLD, 16))","UI.sync()"]},
+        {"kind":"when","text":"Only the font property changes to a different font with new size","code":["dynamicFont.set(UI.Font.of(\"Times New Roman\", UI.FontStyle.BOLD, 16))","UI.sync()"]},
 
         {"kind":"then","text":"Font updates with new property value at current scale","code":["label.font.style == Font.BOLD","label.font.size == 24  // 16 * 1.5"]},
 
-        {"kind":"when","text":"Both scale factor and font property change","code":["SwingTree.get().setUiScaleFactor(2.0f)","dynamicFont.set(new Font(\"Courier New\", Font.ITALIC, 18))","UI.sync()"]},
+        {"kind":"when","text":"Both scale factor and font property change","code":["SwingTree.get().setUiScaleFactor(2.0f)","dynamicFont.set(UI.Font.of(\"Courier New\", UI.FontStyle.ITALIC, 18))","UI.sync()"]},
 
         {"kind":"then","text":"Font reflects both changes - new family, style, and scaled size","code":["label.font.style == Font.ITALIC","label.font.size == 36  // 18 * 2.0"]}
       ],
@@ -625,7 +625,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Real-world applications often use multiple methods for specifying fonts:\n            some components might use custom Font objects, others might use simple \n            font sizes, and others might use reactive properties. This test verifies\n            that all these approaches work correctly together and scale appropriately\n            when the UI scale factor changes.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We set scale factor to 1.0 and create reactive properties","code":["SwingTree.get().setUiScaleFactor(1.0f)","var dynamicFont = Var.of(new Font(\"Arial\", Font.BOLD, 16))","var dynamicSize = Var.of(14)"]},
+        {"kind":"given","text":"We set scale factor to 1.0 and create reactive properties","code":["SwingTree.get().setUiScaleFactor(1.0f)","var dynamicFont = Var.of(UI.Font.of(\"Arial\", UI.FontStyle.BOLD, 16))","var dynamicSize = Var.of(14)"]},
 
         {"kind":"when","text":"We create a panel with mixed font specification approaches","code":["var customFont = new Font(\"Georgia\", Font.ITALIC, 18)","var panel =","    UI.panel(\"wrap 1\")","    .add(UI.button(\"Custom Font\").withFont(customFont))","    .add(UI.label(\"Dynamic Font Object\").withFont(dynamicFont))","    .add(UI.textField(\"Dynamic Font Size\").withFontSize(dynamicSize))","    .add(UI.textArea(\"Static Font Size\").withFontSize(12))","    .get(JPanel)","var button = panel.components[0] as AbstractButton","var label = panel.components[1] as JLabel","var textField = panel.components[2] as JTextField","var textArea = panel.components[3] as JTextArea"]},
 
@@ -635,7 +635,7 @@
 
         {"kind":"then","text":"All font sizes scale appropriately regardless of specification method","code":["button.font.style == Font.ITALIC","button.font.size == 27","label.font.style == Font.BOLD","label.font.size == 24   // 16 * 1.5","textField.font.size == 21  // 14 * 1.5","textArea.font.size == 18   // 12 * 1.5"]},
 
-        {"kind":"when","text":"Dynamic properties change at scaled factor","code":["dynamicFont.set(new Font(\"Verdana\", Font.PLAIN, 20))","dynamicSize.set(18)","UI.sync()"]},
+        {"kind":"when","text":"Dynamic properties change at scaled factor","code":["dynamicFont.set(UI.Font.of(\"Verdana\", UI.FontStyle.PLAIN, 20))","dynamicSize.set(18)","UI.sync()"]},
 
         {"kind":"then","text":"Dynamic fonts update while static ones remain scaled","code":["button.font.size == 27  // unchanged custom font at scale","label.font.style == Font.PLAIN","label.font.size == 30   // 20 * 1.5","textField.font.size == 27  // 18 * 1.5","textArea.font.size == 18   // unchanged static size at scale"]}
       ],

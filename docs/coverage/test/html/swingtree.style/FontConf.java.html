@@ -3,9 +3,11 @@
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Val;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
+import swingtree.api.Styler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -171,20 +173,20 @@ import java.util.Optional;
 @SuppressWarnings(&quot;Immutable&quot;)
 public final class FontConf
 {
-<span class="fc" id="L174">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontConf.class);</span>
+<span class="fc" id="L176">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontConf.class);</span>
 
-<span class="fc" id="L176">    private static final FontConf _NONE = new FontConf(</span>
+<span class="fc" id="L178">    private static final FontConf _NONE = new FontConf(</span>
                                                         &quot;&quot;,    // Font name (family)
                                                         0,     // size
-                                                        0,     // posture
-                                                        0,     // weight
+                                                        -1,    // posture
+                                                        -1,    // weight
                                                         0,     // spacing
                                                         null,  // selection color
                                                         null,  // is underlined
                                                         null,  // is strike through
                                                         null,  // transform
-<span class="fc" id="L186">                                                        FontPaintConf.none(),  // paint</span>
-<span class="fc" id="L187">                                                        FontPaintConf.none(),  // background paint</span>
+<span class="fc" id="L188">                                                        FontPaintConf.none(),  // paint</span>
+<span class="fc" id="L189">                                                        FontPaintConf.none(),  // background paint</span>
                                                         UI.HorizontalAlignment.UNDEFINED,  // horizontal alignment
                                                         UI.VerticalAlignment.UNDEFINED   // vertical alignment
                                                     );
@@ -195,7 +197,7 @@ public final class FontConf
      *
      * @return A font style with all properties set to no-op default values.
      */
-<span class="fc" id="L198">    public static FontConf none() { return _NONE; }</span>
+<span class="fc" id="L200">    public static FontConf none() { return _NONE; }</span>
 
     static FontConf of(
         String                     name,
@@ -212,8 +214,8 @@ public final class FontConf
         UI.HorizontalAlignment     horizontalAlignment,
         UI.VerticalAlignment       verticalAlignment
     ) {
-<span class="fc" id="L215">        if (</span>
-<span class="pc bpc" id="L216" title="3 of 18 branches missed.">            name.isEmpty() &amp;&amp;</span>
+<span class="fc" id="L217">        if (</span>
+<span class="pc bpc" id="L218" title="13 of 18 branches missed.">            name.isEmpty() &amp;&amp;</span>
             fontSize == 0 &amp;&amp;
             posture == 0 &amp;&amp;
             weight == 0 &amp;&amp;
@@ -222,14 +224,14 @@ public final class FontConf
             isUnderline == null &amp;&amp;
             isStrike == null &amp;&amp;
             transform == null &amp;&amp;
-<span class="fc bfc" id="L225" title="All 2 branches covered.">            paint.equals(FontPaintConf.none()) &amp;&amp;</span>
-<span class="pc bpc" id="L226" title="3 of 6 branches missed.">            backgroundPaint.equals(FontPaintConf.none()) &amp;&amp;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            paint.equals(FontPaintConf.none()) &amp;&amp;</span>
+<span class="nc bnc" id="L228" title="All 6 branches missed.">            backgroundPaint.equals(FontPaintConf.none()) &amp;&amp;</span>
             horizontalAlignment == _NONE._horizontalAlignment &amp;&amp;
             verticalAlignment == _NONE._verticalAlignment
         )
-<span class="nc" id="L230">            return _NONE;</span>
+<span class="nc" id="L232">            return _NONE;</span>
         else
-<span class="fc" id="L232">            return new FontConf(</span>
+<span class="fc" id="L234">            return new FontConf(</span>
                     name,
                     fontSize,
                     posture,
@@ -275,53 +277,249 @@ public final class FontConf
         FontPaintConf             backgroundPaint,
         UI.HorizontalAlignment    horizontalAlignment,
         UI.VerticalAlignment      verticalAlignment
-<span class="fc" id="L278">    ) {</span>
-<span class="fc" id="L279">        _familyName = Objects.requireNonNull(name);</span>
-<span class="fc" id="L280">        _size    = fontSize;</span>
-<span class="fc" id="L281">        _posture = posture;</span>
-<span class="fc" id="L282">        _weight  = weight;</span>
-<span class="fc" id="L283">        _spacing = spacing;</span>
-<span class="fc" id="L284">        _selectionColor  = selectionColor;</span>
-<span class="fc" id="L285">        _isUnderlined    = isUnderline;</span>
-<span class="fc" id="L286">        _isStrike        = isStrike;</span>
-<span class="fc" id="L287">        _transform       = transform;</span>
-<span class="fc" id="L288">        _paint           = paint;</span>
-<span class="fc" id="L289">        _backgroundPaint = backgroundPaint;</span>
-<span class="fc" id="L290">        _horizontalAlignment = horizontalAlignment;</span>
-<span class="fc" id="L291">        _verticalAlignment   = verticalAlignment;</span>
-<span class="fc" id="L292">    }</span>
+<span class="fc" id="L280">    ) {</span>
+<span class="fc" id="L281">        _familyName = Objects.requireNonNull(name);</span>
+<span class="fc" id="L282">        _size    = fontSize;</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">        _posture = posture &lt; 0 ? -1 : posture;</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        _weight  = weight &lt; 0 ? -1 : weight;</span>
+<span class="fc" id="L285">        _spacing = spacing;</span>
+<span class="fc" id="L286">        _selectionColor  = selectionColor;</span>
+<span class="fc" id="L287">        _isUnderlined    = isUnderline;</span>
+<span class="fc" id="L288">        _isStrike        = isStrike;</span>
+<span class="fc" id="L289">        _transform       = transform;</span>
+<span class="fc" id="L290">        _paint           = paint;</span>
+<span class="fc" id="L291">        _backgroundPaint = backgroundPaint;</span>
+<span class="fc" id="L292">        _horizontalAlignment = horizontalAlignment;</span>
+<span class="fc" id="L293">        _verticalAlignment   = verticalAlignment;</span>
+<span class="fc" id="L294">    }</span>
 
-<span class="fc" id="L294">    String family() { return _familyName; }</span>
+    /**
+     * Returns the font family name for this font configuration.
+     * This corresponds to the {@link Font#getFamily()} property in {@link java.awt.Font}
+     * and determines the visual style category of the typeface.
+     * &lt;p&gt;
+     * The font family represents a group of related typefaces that share common design characteristics
+     * but may vary in weight, style, or other attributes. Common examples include:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&quot;Arial&quot; - A clean, sans-serif font&lt;/li&gt;
+     *   &lt;li&gt;&quot;Times New Roman&quot; - A classic serif font&lt;/li&gt;
+     *   &lt;li&gt;&quot;Courier New&quot; - A monospaced font&lt;/li&gt;
+     *   &lt;li&gt;&quot;Verdana&quot; - A sans-serif font designed for screen readability&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * From a user perspective, the font family defines the overall visual personality of the text.
+     *
+     * @return The font family name as a String. Returns an empty string if no specific family is defined,
+     *         which typically means the system default font family should be used.
+     * @see Font#getFamily()
+     */
+<span class="fc" id="L316">    public String family() { return _familyName; }</span>
 
-<span class="fc" id="L296">    int size() { return _size; }</span>
+    /**
+     * Returns the font size in points for this font configuration.
+     * This corresponds to the {@link Font#getSize()} property in {@link java.awt.Font}
+     * and determines the visual height of the text characters.
+     * &lt;p&gt;
+     * In typography, a &quot;point&quot; is a physical unit of measurement where 1 point equals 1/72 of an inch.
+     * However, in digital typography, the actual rendered size may vary based on screen resolution,
+     * display density (DPI), and the current UI scaling factor.
+     * &lt;p&gt;
+     * The perceived size may also be influenced by the specific font family, as some typefaces
+     * appear larger than others at the same point size due to differences in x-height and character proportions.
+     *
+     * @return The font size in points. Returns 0 if no specific size is defined,
+     *         which typically means the system default font size should be used.
+     * @see Font#getSize()
+     */
+<span class="fc" id="L334">    public int size() { return _size; }</span>
 
-<span class="fc" id="L298">    float posture() { return _posture; }</span>
+    /**
+     * Returns the posture (italic) attribute of this font configuration.
+     * This corresponds to the {@link TextAttribute#POSTURE} property and influences
+     * whether the font appears in regular upright or italic (slanted) form.
+     * &lt;p&gt;
+     * The posture is represented as a floating-point value where:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&lt;b&gt;0.0&lt;/b&gt; - Regular upright posture (non-italic)&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;0.2&lt;/b&gt; - Standard italic posture&lt;/li&gt;
+     *   &lt;li&gt;Values between 0.0 and 0.2 represent varying degrees of slant&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * From a user perspective, italic text serves several purposes:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&lt;b&gt;Emphasis&lt;/b&gt; - Drawing attention to specific words or phrases within a body of text&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;Distinction&lt;/b&gt; - Differentiating certain types of content, such as book titles,
+     *       foreign words, or technical terms&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;Visual variety&lt;/b&gt; - Adding stylistic variation to break visual monotony&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;Hierarchy&lt;/b&gt; - Creating subtle visual distinctions in complex layouts&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * It's important to note that true italic fonts are specifically designed with unique character shapes,
+     * while oblique fonts are simply slanted versions of the regular font. The visual quality
+     * depends on whether the font family includes dedicated italic variants.
+     *
+     * @return An {@link Optional} containing the posture value if defined, or empty if no specific
+     *         posture is configured (system default should be used).
+     * @see TextAttribute#POSTURE
+     * @see Font#isItalic()
+     */
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">    public Optional&lt;Float&gt; posture() { return Optional.ofNullable(_posture &lt; 0 ? null : _posture); }</span>
 
-<span class="nc" id="L300">    float weight() { return _weight; }</span>
+    /**
+     * Returns the weight (boldness) attribute of this font configuration.
+     * This corresponds to the {@link TextAttribute#WEIGHT} property and determines
+     * the thickness of the character strokes.
+     * &lt;p&gt;
+     * The weight is represented as a floating-point value where:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&lt;b&gt;0.0&lt;/b&gt; - Light weight (thin strokes)&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;1.0&lt;/b&gt; - Regular/standard weight (equivalent to {@link Font#PLAIN})&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;2.0&lt;/b&gt; - Bold weight (equivalent to {@link Font#BOLD})&lt;/li&gt;
+     *   &lt;li&gt;Values between these represent intermediate weights (semibold, etc.)&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * The actual availability of different weights depends on the font family.
+     * Some families only support regular and bold, while professional typefaces
+     * may offer multiple weights from thin to black.
+     *
+     * @return An {@link Optional} containing the weight value if defined, or empty if no specific
+     *         weight is configured (system default should be used).
+     * @see TextAttribute#WEIGHT
+     * @see Font#isBold()
+     */
+<span class="nc bnc" id="L390" title="All 2 branches missed.">    public Optional&lt;Float&gt; weight() { return Optional.ofNullable(_weight &lt; 0 ? null : _weight); }</span>
 
-<span class="nc" id="L302">    float spacing() { return _spacing; }</span>
+    /**
+     * Returns the character spacing (tracking) attribute of this font configuration.
+     * This corresponds to the {@link TextAttribute#TRACKING} property and controls
+     * the uniform adjustment of space between characters.
+     * &lt;p&gt;
+     * The spacing value is a multiplier that affects the space between all characters:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&lt;b&gt;0.0&lt;/b&gt; - Normal, font-default spacing&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;Negative values&lt;/b&gt; (-0.04 to 0.0) - Tighter spacing, characters are closer together&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;Positive values&lt;/b&gt; (0.0 to 0.04) - Looser spacing, characters are farther apart&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * Useful predefined constants include:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link TextAttribute#TRACKING_TIGHT} (-0.04)&lt;/li&gt;
+     *   &lt;li&gt;{@link TextAttribute#TRACKING_LOOSE} (0.04)&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;p&gt;
+     * Typical values range from -0.1 to 0.3, with values outside this range generally
+     * producing undesirable results for continuous text. Tighter spacing can make text feel denser and more compact,
+     * while looser spacing can improve legibility, especially at small sizes or for
+     * users with visual impairments
+     *
+     * @return The character spacing value. Returns 0.0 if normal, font-default spacing should be used.
+     * @see TextAttribute#TRACKING
+     */
+<span class="nc" id="L418">    public float spacing() { return _spacing; }</span>
 
-<span class="fc" id="L304">    Optional&lt;Color&gt; selectionColor() { return Optional.ofNullable(_selectionColor); }</span>
+    /**
+     * Returns the text selection color for this font configuration.
+     * This property is specifically relevant for text components that support
+     * user text selection, such as {@link JTextField}, {@link JTextArea}, and {@link JTextPane}.
+     * &lt;p&gt;
+     * The selection color determines the background color applied to text when users
+     * highlight it with mouse dragging or keyboard navigation. This visual feedback
+     * is crucial for indicating which text is currently selected for operations like
+     * copy, cut, or formatting changes.
+     * &lt;p&gt;
+     * This property typically maps to component methods like
+     * {@link javax.swing.text.JTextComponent#setSelectionColor(Color)}.
+     * When not specified, components use their default selection colors, which are
+     * often derived from the current look and feel or system preferences.
+     *
+     * @return An {@link Optional} containing the selection {@link Color} if defined,
+     *         or empty if no specific selection color is configured (component default should be used).
+     * @see javax.swing.text.JTextComponent#setSelectionColor(Color)
+     * @see javax.swing.text.JTextComponent#getSelectionColor()
+     */
+<span class="fc" id="L440">    public Optional&lt;Color&gt; selectionColor() { return Optional.ofNullable(_selectionColor); }</span>
 
-<span class="nc bnc" id="L306" title="All 2 branches missed.">    boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }</span>
+    /**
+     * Returns whether the font should be rendered with an underline.
+     * This corresponds to the {@link TextAttribute#UNDERLINE} property and controls
+     * the presence of a horizontal line beneath the text baseline.
+     * &lt;p&gt;
+     * The underline is a binary attribute - text is either underlined or not.
+     * When enabled, a continuous line is drawn below the text characters, typically
+     * positioned to avoid descending characters (like 'g', 'j', 'p', 'q', 'y').
+     * &lt;p&gt;
+     * It's important to use underlining judiciously, as excessive use can reduce
+     * readability and create visual noise. In modern UI design, underlining is
+     * primarily reserved for link identification.
+     *
+     * @return {@code true} if the font should be rendered with an underline,
+     *         {@code false} if no underline should be applied. Returns the default
+     *         value (false) if no specific underline preference is configured.
+     * @see TextAttribute#UNDERLINE
+     * @see TextAttribute#UNDERLINE_ON
+     */
+<span class="nc bnc" id="L461" title="All 2 branches missed.">    public boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }</span>
 
-<span class="nc" id="L308">    Optional&lt;AffineTransform&gt; transform() { return Optional.ofNullable(_transform); }</span>
-
-    Optional&lt;Paint&gt; paint() {
-<span class="fc bfc" id="L311" title="All 2 branches covered.">        if ( FontPaintConf.none().equals(_paint) )</span>
-<span class="fc" id="L312">            return Optional.empty();</span>
-<span class="fc" id="L313">        return Optional.ofNullable(_paint.getFor(BoxModelConf.none()));</span>
+    Optional&lt;AffineTransform&gt; transform() { // Deliberately package private to prevent leaking mutable state!
+<span class="nc" id="L464">        return Optional.ofNullable(_transform);</span>
     }
 
-    Optional&lt;Paint&gt; backgroundPaint() {
-<span class="nc bnc" id="L317" title="All 2 branches missed.">        if ( FontPaintConf.none().equals(_backgroundPaint) )</span>
-<span class="nc" id="L318">            return Optional.empty();</span>
-<span class="nc" id="L319">        return Optional.ofNullable(_backgroundPaint.getFor(BoxModelConf.none()));</span>
+    Optional&lt;Paint&gt; paint() { // Deliberately package private to prevent leaking mutable state!
+<span class="fc bfc" id="L468" title="All 2 branches covered.">        if ( FontPaintConf.none().equals(_paint) )</span>
+<span class="fc" id="L469">            return Optional.empty();</span>
+<span class="fc" id="L470">        return Optional.ofNullable(_paint.getFor(BoxModelConf.none()));</span>
     }
 
-<span class="fc" id="L322">    UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }</span>
+    Optional&lt;Paint&gt; backgroundPaint() { // Deliberately package private to prevent leaking mutable state!
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        if ( FontPaintConf.none().equals(_backgroundPaint) )</span>
+<span class="nc" id="L475">            return Optional.empty();</span>
+<span class="nc" id="L476">        return Optional.ofNullable(_backgroundPaint.getFor(BoxModelConf.none()));</span>
+    }
 
-<span class="fc" id="L324">    UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }</span>
+    /**
+     *  The horizontal alignment of a font configuration is an enum constant which
+     *  express how text should be positioned within components that support
+     *  text alignment in terms of left/right/center positioning along
+     *  the x-axis.
+     *
+     * &lt;p&gt;&lt;b&gt;Component Support Limitations:&lt;/b&gt;&lt;br&gt;
+     * Note that horizontal alignment is only applicable to specific Swing components that
+     * expose alignment methods or other means of styling, such as:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link JLabel#setHorizontalAlignment(int)}&lt;/li&gt;
+     *   &lt;li&gt;{@link AbstractButton#setHorizontalAlignment(int)}&lt;/li&gt;
+     *   &lt;li&gt;{@link JTextField#setHorizontalAlignment(int)} (vertical alignment not supported)&lt;/li&gt;
+     *   &lt;li&gt;{@link JTextPane#getStyledDocument()} (vertical alignment not supported)&lt;/li&gt;
+     * &lt;/ul&gt;
+     * This property will have no effect on components that don't support text alignment,
+     * except for when you use this property to render text through the SwingTree style API
+     * (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
+     *
+     * @return The horizontal alignment constant of this conf, which
+     *         may be NONE, LEFT, CENTER, RIGHT... among others.
+     */
+<span class="fc" id="L501">    public UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }</span>
+
+    /**
+     *  The vertical alignment of a font configuration is an enum constant which
+     *  express how text should be positioned within components that support
+     *  text alignment in terms of top/bottom/center positioning along the y-axis.
+     *
+     * &lt;p&gt;&lt;b&gt;Component Support Limitations:&lt;/b&gt;&lt;br&gt;
+     * Note that vertical alignment is only applicable to specific Swing components that
+     * expose alignment methods or other means of styling, such as:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link JLabel#setVerticalAlignment(int)}&lt;/li&gt;
+     *   &lt;li&gt;{@link AbstractButton#setVerticalAlignment(int)}&lt;/li&gt;
+     * &lt;/ul&gt;
+     * This property will have no effect on components that don't support text alignment,
+     * except for when you use this property to render text through the SwingTree style API
+     * (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
+     *
+     * @return The vertical alignment constant of this conf, which
+     *         may be NONE, TOP, CENTER, BOTTOM... among others.
+     */
+<span class="fc" id="L522">    public UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }</span>
 
     /**
      * Returns an updated font config with the specified font family name.
@@ -330,7 +528,7 @@ public final class FontConf
      * @return A new font style with the specified font family name.
      */
     public FontConf family( String fontFamily ) {
-<span class="fc" id="L333">        return FontConf.of(fontFamily, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L531">        return FontConf.of(fontFamily, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -342,7 +540,7 @@ public final class FontConf
      * @return A new font style with the specified font size.
      */
     public FontConf size( int fontSize ) {
-<span class="fc" id="L345">        return FontConf.of(_familyName, fontSize, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L543">        return FontConf.of(_familyName, fontSize, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -354,7 +552,7 @@ public final class FontConf
      * @return A new font style with the specified posture.
      */
     public FontConf posture( float posture ) {
-<span class="fc" id="L357">        return FontConf.of(_familyName, _size, posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L555">        return FontConf.of(_familyName, _size, posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -366,7 +564,7 @@ public final class FontConf
      * @return A new font style with the specified weight.
      */
     public FontConf weight( double fontWeight ) {
-<span class="fc" id="L369">        return FontConf.of(_familyName, _size, _posture, (float) fontWeight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L567">        return FontConf.of(_familyName, _size, _posture, (float) fontWeight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -381,17 +579,17 @@ public final class FontConf
      * @return An updated font config with the specified font style.
      */
     public FontConf style( UI.FontStyle fontStyle ) {
-<span class="pc bpc" id="L384" title="2 of 5 branches missed.">        switch (fontStyle) {</span>
+<span class="pc bpc" id="L582" title="2 of 5 branches missed.">        switch (fontStyle) {</span>
             case PLAIN:
-<span class="nc" id="L386">                return weight(0).posture(0);</span>
+<span class="nc" id="L584">                return weight(0).posture(0);</span>
             case BOLD:
-<span class="fc" id="L388">                return weight(2).posture(0);</span>
+<span class="fc" id="L586">                return weight(2).posture(0);</span>
             case ITALIC:
-<span class="fc" id="L390">                return weight(0).posture(0.2f);</span>
+<span class="fc" id="L588">                return weight(0).posture(0.2f);</span>
             case BOLD_ITALIC:
-<span class="fc" id="L392">                return weight(2).posture(0.2f);</span>
+<span class="fc" id="L590">                return weight(2).posture(0.2f);</span>
             default:
-<span class="nc" id="L394">                return this;</span>
+<span class="nc" id="L592">                return this;</span>
         }
     }
 
@@ -409,7 +607,7 @@ public final class FontConf
      * @return A new font style with the specified spacing.
      */
     public FontConf spacing( float spacing ) {
-<span class="fc" id="L412">        return FontConf.of(_familyName, _size, _posture, _weight, spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L610">        return FontConf.of(_familyName, _size, _posture, _weight, spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -421,15 +619,15 @@ public final class FontConf
      * @return A new font style with the specified color.
      */
     public FontConf color( Color color ) {
-<span class="fc" id="L424">        Objects.requireNonNull(color);</span>
-<span class="fc bfc" id="L425" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(color) )</span>
-<span class="fc" id="L426">            color = null;</span>
-<span class="fc bfc" id="L427" title="All 2 branches covered.">        if ( _paint.representsColor(color) )</span>
-<span class="fc" id="L428">            return this;</span>
+<span class="fc" id="L622">        Objects.requireNonNull(color);</span>
+<span class="fc bfc" id="L623" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(color) )</span>
+<span class="fc" id="L624">            color = null;</span>
+<span class="fc bfc" id="L625" title="All 2 branches covered.">        if ( _paint.representsColor(color) )</span>
+<span class="fc" id="L626">            return this;</span>
 
-<span class="fc" id="L430">        FontPaintConf paintConf = FontPaintConf.of(color, null, null, null);</span>
+<span class="fc" id="L628">        FontPaintConf paintConf = FontPaintConf.of(color, null, null, null);</span>
 
-<span class="fc" id="L432">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L630">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -441,18 +639,18 @@ public final class FontConf
      * @return A new font style with the specified color.
      */
     public FontConf color( String colorString ) {
-<span class="fc" id="L444">        Objects.requireNonNull(colorString);</span>
+<span class="fc" id="L642">        Objects.requireNonNull(colorString);</span>
         Color newColor;
         try {
-<span class="fc bfc" id="L447" title="All 2 branches covered.">            if ( colorString.isEmpty() )</span>
-<span class="fc" id="L448">                newColor = UI.Color.UNDEFINED;</span>
+<span class="fc bfc" id="L645" title="All 2 branches covered.">            if ( colorString.isEmpty() )</span>
+<span class="fc" id="L646">                newColor = UI.Color.UNDEFINED;</span>
             else
-<span class="fc" id="L450">                newColor = UI.color(colorString);</span>
-<span class="nc" id="L451">        } catch ( Exception e ) {</span>
-<span class="nc" id="L452">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '&quot;+colorString+&quot;'&quot;, e);</span>
-<span class="nc" id="L453">            return this;</span>
-<span class="fc" id="L454">        }</span>
-<span class="fc" id="L455">        return color(newColor);</span>
+<span class="fc" id="L648">                newColor = UI.color(colorString);</span>
+<span class="nc" id="L649">        } catch ( Exception e ) {</span>
+<span class="nc" id="L650">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '&quot;+colorString+&quot;'&quot;, e);</span>
+<span class="nc" id="L651">            return this;</span>
+<span class="fc" id="L652">        }</span>
+<span class="fc" id="L653">        return color(newColor);</span>
     }
 
     /**
@@ -464,15 +662,15 @@ public final class FontConf
      * @return A new font style with the specified background color.
      */
     public FontConf backgroundColor( Color backgroundColor ) {
-<span class="fc" id="L467">        Objects.requireNonNull(backgroundColor);</span>
-<span class="fc bfc" id="L468" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(backgroundColor) )</span>
-<span class="fc" id="L469">            backgroundColor = null;</span>
-<span class="fc bfc" id="L470" title="All 2 branches covered.">        if ( _backgroundPaint.representsColor(backgroundColor) )</span>
-<span class="fc" id="L471">            return this;</span>
+<span class="fc" id="L665">        Objects.requireNonNull(backgroundColor);</span>
+<span class="fc bfc" id="L666" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(backgroundColor) )</span>
+<span class="fc" id="L667">            backgroundColor = null;</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">        if ( _backgroundPaint.representsColor(backgroundColor) )</span>
+<span class="fc" id="L669">            return this;</span>
 
-<span class="fc" id="L473">        FontPaintConf backgroundPaintConf = FontPaintConf.of(backgroundColor, null, null, null);</span>
+<span class="fc" id="L671">        FontPaintConf backgroundPaintConf = FontPaintConf.of(backgroundColor, null, null, null);</span>
 
-<span class="fc" id="L475">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L673">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -484,18 +682,18 @@ public final class FontConf
      * @return A new font style with the specified background color.
      */
     public FontConf backgroundColor( String colorString ) {
-<span class="fc" id="L487">        Objects.requireNonNull(colorString);</span>
+<span class="fc" id="L685">        Objects.requireNonNull(colorString);</span>
         Color newColor;
         try {
-<span class="pc bpc" id="L490" title="1 of 2 branches missed.">            if ( colorString.isEmpty() )</span>
-<span class="nc" id="L491">                newColor = UI.Color.UNDEFINED;</span>
+<span class="pc bpc" id="L688" title="1 of 2 branches missed.">            if ( colorString.isEmpty() )</span>
+<span class="nc" id="L689">                newColor = UI.Color.UNDEFINED;</span>
             else
-<span class="fc" id="L493">                newColor = UI.color(colorString);</span>
-<span class="nc" id="L494">        } catch ( Exception e ) {</span>
-<span class="nc" id="L495">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '{}'&quot;, colorString, e);</span>
-<span class="nc" id="L496">            return this;</span>
-<span class="fc" id="L497">        }</span>
-<span class="fc" id="L498">        return backgroundColor(newColor);</span>
+<span class="fc" id="L691">                newColor = UI.color(colorString);</span>
+<span class="nc" id="L692">        } catch ( Exception e ) {</span>
+<span class="nc" id="L693">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '{}'&quot;, colorString, e);</span>
+<span class="nc" id="L694">            return this;</span>
+<span class="fc" id="L695">        }</span>
+<span class="fc" id="L696">        return backgroundColor(newColor);</span>
     }
 
     /**
@@ -508,12 +706,12 @@ public final class FontConf
      * @return A new font style with the specified selection color.
      */
     public FontConf selectionColor( Color selectionColor ) {
-<span class="fc" id="L511">        Objects.requireNonNull(selectionColor);</span>
-<span class="fc bfc" id="L512" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(selectionColor) )</span>
-<span class="fc" id="L513">            selectionColor = null;</span>
-<span class="fc bfc" id="L514" title="All 2 branches covered.">        if ( Objects.equals(selectionColor, _selectionColor) )</span>
-<span class="fc" id="L515">            return this;</span>
-<span class="fc" id="L516">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L709">        Objects.requireNonNull(selectionColor);</span>
+<span class="fc bfc" id="L710" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(selectionColor) )</span>
+<span class="fc" id="L711">            selectionColor = null;</span>
+<span class="fc bfc" id="L712" title="All 2 branches covered.">        if ( Objects.equals(selectionColor, _selectionColor) )</span>
+<span class="fc" id="L713">            return this;</span>
+<span class="fc" id="L714">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -526,18 +724,18 @@ public final class FontConf
      * @return A new font style with the specified selection color.
      */
     public FontConf selectionColor( String colorString ) {
-<span class="fc" id="L529">        Objects.requireNonNull(colorString);</span>
+<span class="fc" id="L727">        Objects.requireNonNull(colorString);</span>
         Color newColor;
         try {
-<span class="fc bfc" id="L532" title="All 2 branches covered.">            if ( colorString.isEmpty() )</span>
-<span class="fc" id="L533">                newColor = UI.Color.UNDEFINED;</span>
+<span class="fc bfc" id="L730" title="All 2 branches covered.">            if ( colorString.isEmpty() )</span>
+<span class="fc" id="L731">                newColor = UI.Color.UNDEFINED;</span>
             else
-<span class="fc" id="L535">                newColor = UI.color(colorString);</span>
-<span class="nc" id="L536">        } catch ( Exception e ) {</span>
-<span class="nc" id="L537">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '&quot;+colorString+&quot;'&quot;, e);</span>
-<span class="nc" id="L538">            return this;</span>
-<span class="fc" id="L539">        }</span>
-<span class="fc" id="L540">        return selectionColor(newColor);</span>
+<span class="fc" id="L733">                newColor = UI.color(colorString);</span>
+<span class="nc" id="L734">        } catch ( Exception e ) {</span>
+<span class="nc" id="L735">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '&quot;+colorString+&quot;'&quot;, e);</span>
+<span class="nc" id="L736">            return this;</span>
+<span class="fc" id="L737">        }</span>
+<span class="fc" id="L738">        return selectionColor(newColor);</span>
     }
 
     /**
@@ -549,7 +747,7 @@ public final class FontConf
      * @return A new font style with the specified underlined property.
      */
     public FontConf underlined( boolean underlined ) {
-<span class="fc" id="L552">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, underlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L750">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, underlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -561,7 +759,7 @@ public final class FontConf
      * @return A new font style with the specified strike through property.
      */
     public FontConf strikeThrough( boolean strike ) {
-<span class="fc" id="L564">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, strike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L762">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, strike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -573,7 +771,7 @@ public final class FontConf
      * @return A new font style with the specified transform.
      */
     public FontConf transform( @Nullable AffineTransform transform ) {
-<span class="fc" id="L576">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L774">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -592,8 +790,8 @@ public final class FontConf
      * @return A new font style with the specified paint.
      */
     public FontConf paint( @Nullable Paint paint ) {
-<span class="fc" id="L595">        FontPaintConf paintConf = FontPaintConf.of(null, paint, null, null);</span>
-<span class="fc" id="L596">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L793">        FontPaintConf paintConf = FontPaintConf.of(null, paint, null, null);</span>
+<span class="fc" id="L794">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -610,9 +808,9 @@ public final class FontConf
      * @return A new font style with the specified noise paint.
      */
     public FontConf noise( Configurator&lt;NoiseConf&gt; configurator ) {
-<span class="fc" id="L613">        Objects.requireNonNull(configurator);</span>
-<span class="fc" id="L614">        FontPaintConf paintConf = _paint.noise(configurator);</span>
-<span class="fc" id="L615">        return _withPaintConf(paintConf);</span>
+<span class="fc" id="L811">        Objects.requireNonNull(configurator);</span>
+<span class="fc" id="L812">        FontPaintConf paintConf = _paint.noise(configurator);</span>
+<span class="fc" id="L813">        return _withPaintConf(paintConf);</span>
     }
 
     /**
@@ -629,13 +827,13 @@ public final class FontConf
      * @return A new font style with the specified gradient paint.
      */
     public FontConf gradient( Configurator&lt;GradientConf&gt; configurator ) {
-<span class="fc" id="L632">        Objects.requireNonNull(configurator);</span>
-<span class="fc" id="L633">        FontPaintConf paintConf = _paint.gradient(configurator);</span>
-<span class="fc" id="L634">        return _withPaintConf(paintConf);</span>
+<span class="fc" id="L830">        Objects.requireNonNull(configurator);</span>
+<span class="fc" id="L831">        FontPaintConf paintConf = _paint.gradient(configurator);</span>
+<span class="fc" id="L832">        return _withPaintConf(paintConf);</span>
     }
 
     private FontConf _withPaintConf( FontPaintConf paintConf ) {
-<span class="fc" id="L638">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L836">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -647,8 +845,8 @@ public final class FontConf
      * @return A new font style with the specified background paint.
      */
     public FontConf backgroundPaint( @Nullable Paint backgroundPaint ) {
-<span class="fc" id="L650">        FontPaintConf backgroundPaintConf = FontPaintConf.of(null, backgroundPaint, null, null);</span>
-<span class="fc" id="L651">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L848">        FontPaintConf backgroundPaintConf = FontPaintConf.of(null, backgroundPaint, null, null);</span>
+<span class="fc" id="L849">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
@@ -665,9 +863,9 @@ public final class FontConf
      * @return A new font style with the specified noise background paint.
      */
     public FontConf backgroundNoise( Configurator&lt;NoiseConf&gt; configurator ) {
-<span class="fc" id="L668">        Objects.requireNonNull(configurator);</span>
-<span class="fc" id="L669">        FontPaintConf backgroundPaintConf = _backgroundPaint.noise(configurator);</span>
-<span class="fc" id="L670">        return _withBackgroundPaintConf(backgroundPaintConf);</span>
+<span class="fc" id="L866">        Objects.requireNonNull(configurator);</span>
+<span class="fc" id="L867">        FontPaintConf backgroundPaintConf = _backgroundPaint.noise(configurator);</span>
+<span class="fc" id="L868">        return _withBackgroundPaintConf(backgroundPaintConf);</span>
     }
 
     /**
@@ -684,159 +882,219 @@ public final class FontConf
      * @return A new font style with the specified gradient background paint.
      */
     public FontConf backgroundGradient( Configurator&lt;GradientConf&gt; configurator ) {
-<span class="fc" id="L687">        Objects.requireNonNull(configurator);</span>
-<span class="fc" id="L688">        FontPaintConf backgroundPaintConf = _backgroundPaint.gradient(configurator);</span>
-<span class="fc" id="L689">        return _withBackgroundPaintConf(backgroundPaintConf);</span>
+<span class="fc" id="L885">        Objects.requireNonNull(configurator);</span>
+<span class="fc" id="L886">        FontPaintConf backgroundPaintConf = _backgroundPaint.gradient(configurator);</span>
+<span class="fc" id="L887">        return _withBackgroundPaintConf(backgroundPaintConf);</span>
     }
 
     private FontConf _withBackgroundPaintConf( FontPaintConf backgroundPaintConf ) {
-<span class="fc" id="L693">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);</span>
+<span class="fc" id="L891">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
-     * Returns an updated font config with the specified horizontal alignment.
-     * This property is not relevant for all components,
-     * It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
-     * types or maybe some custom components.
-     * Not all components support horizontal alignment.
-     * This will also not have an effect for font configs which
-     * are part of the {@link TextConf}.
+     * Returns an updated font config with the specified horizontal alignment policy, that
+     * expresses text to be placed in certain positions alongside the horizontal axis.
+     * This property is not relevant for all components, as it can only be applied to methods
+     * like {@link JLabel#setHorizontalAlignment(int)} {@link AbstractButton#setHorizontalAlignment(int)} and
+     * {@link JTextField#setHorizontalAlignment(int)}, which not all components have.
      * &lt;b&gt;
-     *     This method is deliberately package-private as it is not relevant for the
-     *     {@link ComponentStyleDelegate#componentFont(Configurator)} or
-     *     {@link TextConf#font(Configurator)} methods. &lt;br&gt;
-     *     &lt;br&gt;
-     *     It only makes sense to specify this property 
-     *     through the {@link ComponentStyleDelegate#fontAlignment(UI.HorizontalAlignment)}
-     *     method!!
+     *     You can specify this horizontal text alignment property effectively
+     *     through the {@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)}
+     *     or through the {@link FontConf} in a {@link UI.Font} passed to methods like
+     *     {@link swingtree.UIForAnySwing#withFont(UI.Font)} or {@link swingtree.UIForAnySwing#withFont(Val)}.
      * &lt;/b&gt;
      *
      * @param horizontalAlignment The horizontal alignment to use for the font.
      * @return A new font style with the specified horizontal alignment.
+     * @throws NullPointerException if the supplied enum constant is null.
      */
-    FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
-<span class="fc" id="L718">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);</span>
+    public FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
+<span class="fc" id="L912">        Objects.requireNonNull(horizontalAlignment);</span>
+<span class="fc" id="L913">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);</span>
     }
 
     /**
-     * Returns an updated font config with the specified vertical alignment.
-     * This property is not relevant for all components,
-     * It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
-     * types or maybe some custom components.
-     * Not all components support vertical alignment.
-     * This will also not have an effect for font configs which
-     * are part of the {@link TextConf}.
+     * Returns an updated font config with the specified vertical alignment policy, that
+     *      * expresses text to be placed in certain positions alongside the certical axis.
+     * This property is not relevant for all components, as it can only be applied to methods
+     * like {@link JLabel#setVerticalAlignment(int)} and {@link AbstractButton#setVerticalAlignment(int)},
+     * which not all components have!
      * &lt;b&gt;
-     *     This method is deliberately package-private as it is not relevant for the
-     *     {@link ComponentStyleDelegate#componentFont(Configurator)} or
-     *     {@link TextConf#font(Configurator)} methods. &lt;br&gt;
-     *     &lt;br&gt;
-     *     It only makes sense to specify this property 
+     *     You can specify this property effectively
      *     through the {@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)}
-     *     method!!
+     *     or through the {@link FontConf} in a {@link UI.Font} passed to methods like
+     *     {@link swingtree.UIForAnySwing#withFont(UI.Font)} or {@link swingtree.UIForAnySwing#withFont(Val)}.
      * &lt;/b&gt;
      *
      * @param verticalAlignment The vertical alignment to use for the font.
      * @return A new font style with the specified vertical alignment.
+     * @throws NullPointerException if the supplied enum constant is null.
      */
-    FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
-<span class="fc" id="L743">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);</span>
+    public FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
+<span class="fc" id="L934">        Objects.requireNonNull(verticalAlignment);</span>
+<span class="fc" id="L935">        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);</span>
     }
 
-    FontConf withPropertiesFromFont( Font font )
+    /**
+     * Returns a new font configuration with both horizontal and vertical alignment policies
+     * specified through a unified alignment object. This method provides a convenient way
+     * to set both alignment dimensions simultaneously while ensuring consistency between
+     * horizontal and vertical alignment settings.
+     *
+     * &lt;p&gt;The alignment properties control how text is positioned within components that support
+     * text alignment. The horizontal alignment determines left/right/center positioning along
+     * the x-axis, while vertical alignment controls top/bottom/center positioning along the
+     * y-axis.&lt;/p&gt;
+     *
+     * &lt;p&gt;&lt;b&gt;Component Support Limitations:&lt;/b&gt;&lt;br&gt;
+     * Note that alignment properties are only applicable to specific Swing components that
+     * expose alignment methods, such as:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link JLabel#setHorizontalAlignment(int)} and {@link JLabel#setVerticalAlignment(int)}&lt;/li&gt;
+     *   &lt;li&gt;{@link AbstractButton#setHorizontalAlignment(int)} and {@link AbstractButton#setVerticalAlignment(int)}&lt;/li&gt;
+     *   &lt;li&gt;{@link JTextField#setHorizontalAlignment(int)} (vertical alignment not supported)&lt;/li&gt;
+     * &lt;/ul&gt;
+     * This property will have no effect on components that don't support text alignment,
+     * except for when you use this property to render text through the SwingTree style API.
+     * (see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)})
+     *
+     * &lt;p&gt;&lt;b&gt;Recommended Usage:&lt;/b&gt;&lt;br&gt;
+     * For effective alignment specification, use either:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)} for individual alignment&lt;/li&gt;
+     *   &lt;li&gt;{@link FontConf} within a {@link UI.Font} passed to:
+     *     &lt;ul&gt;
+     *       &lt;li&gt;see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)}&lt;/li&gt;
+     *       &lt;li&gt;{@link swingtree.UIForAnySwing#withFont(UI.Font)}&lt;/li&gt;
+     *       &lt;li&gt;{@link swingtree.UIForAnySwing#withFont(Val)}&lt;/li&gt;
+     *     &lt;/ul&gt;
+     *   &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param alignment The unified alignment object containing both horizontal and vertical
+     *                  alignment specifications. Must not be {@code null}.
+     *
+     * @return A new {@link FontConf} instance with the specified horizontal and vertical
+     *         alignment properties applied, preserving all other font attributes from the
+     *         current configuration.
+     *
+     * @throws NullPointerException if the provided {@code alignment} parameter is {@code null}.
+     *
+     * @see #horizontalAlignment(UI.HorizontalAlignment)
+     * @see #verticalAlignment(UI.VerticalAlignment)
+     * @see UI.Alignment
+     * @see UI.HorizontalAlignment
+     * @see UI.VerticalAlignment
+     * @throws NullPointerException if the supplied enum constant is null.
+     */
+    public FontConf alignment( UI.Alignment alignment ) {
+<span class="fc" id="L991">        Objects.requireNonNull(alignment);</span>
+<span class="fc" id="L992">        return verticalAlignment(alignment.getVertical()).horizontalAlignment(alignment.getHorizontal());</span>
+    }
+
+    /**
+     * Creates a new {@link FontConf} instance by extracting the font properties
+     * from the provided {@link Font} instance.
+     *
+     * @param font The {@link Font} instance to extract the properties from.
+     * @return A new {@link FontConf} instance with the extracted properties.
+     * @throws NullPointerException if the provided font is null.
+     */
+    public FontConf withPropertiesFromFont( Font font )
     {
-<span class="fc bfc" id="L748" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedFont(font) )</span>
-<span class="fc" id="L749">            return this;</span>
+<span class="fc" id="L1005">        Objects.requireNonNull(font);</span>
+<span class="fc bfc" id="L1006" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedFont(font) )</span>
+<span class="fc" id="L1007">            return this;</span>
 
-<span class="fc" id="L751">        Map&lt;TextAttribute, ?&gt; attributeMap = font.getAttributes();</span>
+<span class="fc" id="L1009">        Map&lt;TextAttribute, ?&gt; attributeMap = font.getAttributes();</span>
 
-<span class="fc" id="L753">        String family = font.getFamily();</span>
+<span class="fc" id="L1011">        String family = font.getFamily();</span>
 
-<span class="fc" id="L755">        int size = font.getSize();</span>
+<span class="fc" id="L1013">        int size = font.getSize();</span>
 
-<span class="pc bpc" id="L757" title="1 of 2 branches missed.">        float posture = font.isItalic() ? 0.2f : 0f;</span>
+<span class="fc bfc" id="L1015" title="All 2 branches covered.">        float posture = font.isItalic() ? 0.2f : 0f;</span>
         try {
-<span class="pc bpc" id="L759" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.POSTURE))</span>
-<span class="nc" id="L760">                posture = ((Number) attributeMap.get(TextAttribute.POSTURE)).floatValue();</span>
-<span class="fc" id="L761">        } catch (Exception e) {</span>
-<span class="fc" id="L762">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.POSTURE in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
-<span class="nc" id="L763">        }</span>
+<span class="pc bpc" id="L1017" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.POSTURE))</span>
+<span class="fc" id="L1018">                posture = ((Number) attributeMap.get(TextAttribute.POSTURE)).floatValue();</span>
+<span class="fc" id="L1019">        } catch (Exception e) {</span>
+<span class="fc" id="L1020">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.POSTURE in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
+<span class="fc" id="L1021">        }</span>
 
-<span class="fc bfc" id="L765" title="All 2 branches covered.">        float weight = font.isBold() ? 2f : 0f;</span>
+<span class="fc bfc" id="L1023" title="All 2 branches covered.">        float weight = font.isBold() ? 2f : 0f;</span>
         try {
-<span class="pc bpc" id="L767" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.WEIGHT))</span>
-<span class="fc" id="L768">                weight = ((Number) attributeMap.get(TextAttribute.WEIGHT)).floatValue();</span>
-<span class="fc" id="L769">        } catch (Exception e) {</span>
-<span class="fc" id="L770">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.WEIGHT in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
-<span class="fc" id="L771">        }</span>
+<span class="pc bpc" id="L1025" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.WEIGHT))</span>
+<span class="fc" id="L1026">                weight = ((Number) attributeMap.get(TextAttribute.WEIGHT)).floatValue();</span>
+<span class="fc" id="L1027">        } catch (Exception e) {</span>
+<span class="fc" id="L1028">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.WEIGHT in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
+<span class="fc" id="L1029">        }</span>
 
-<span class="fc" id="L773">        float spacing = _spacing;</span>
+<span class="fc" id="L1031">        float spacing = _spacing;</span>
         try {
-<span class="pc bpc" id="L775" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.TRACKING))</span>
-<span class="nc" id="L776">                spacing = ((Number) attributeMap.get(TextAttribute.TRACKING)).floatValue();</span>
-<span class="fc" id="L777">        } catch (Exception e) {</span>
-<span class="fc" id="L778">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.TRACKING in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
-<span class="nc" id="L779">        }</span>
+<span class="pc bpc" id="L1033" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.TRACKING))</span>
+<span class="nc" id="L1034">                spacing = ((Number) attributeMap.get(TextAttribute.TRACKING)).floatValue();</span>
+<span class="fc" id="L1035">        } catch (Exception e) {</span>
+<span class="fc" id="L1036">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.TRACKING in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
+<span class="nc" id="L1037">        }</span>
 
-<span class="fc" id="L781">        Color selectionColor = _selectionColor;</span>
+<span class="fc" id="L1039">        Color selectionColor = _selectionColor;</span>
         // The selection color is not a text attribute, but a component property, like for text areas.
 
-<span class="pc bpc" id="L784" title="1 of 2 branches missed.">        boolean isUnderline = ( _isUnderlined != null ? _isUnderlined : false );</span>
+<span class="pc bpc" id="L1042" title="1 of 2 branches missed.">        boolean isUnderline = ( _isUnderlined != null ? _isUnderlined : false );</span>
         try {
-<span class="pc bpc" id="L786" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.UNDERLINE))</span>
-<span class="nc" id="L787">                isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);</span>
-<span class="nc" id="L788">        } catch (Exception e) {</span>
-<span class="nc" id="L789">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.UNDERLINE in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
-<span class="fc" id="L790">        }</span>
+<span class="pc bpc" id="L1044" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.UNDERLINE))</span>
+<span class="nc" id="L1045">                isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);</span>
+<span class="nc" id="L1046">        } catch (Exception e) {</span>
+<span class="nc" id="L1047">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.UNDERLINE in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
+<span class="fc" id="L1048">        }</span>
 
-<span class="pc bpc" id="L792" title="1 of 2 branches missed.">        boolean isStriked   = ( _isStrike != null ? _isStrike : false );</span>
+<span class="pc bpc" id="L1050" title="1 of 2 branches missed.">        boolean isStriked   = ( _isStrike != null ? _isStrike : false );</span>
         try {
-<span class="pc bpc" id="L794" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.STRIKETHROUGH))</span>
-<span class="nc" id="L795">                isStriked   = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);</span>
-<span class="nc" id="L796">        } catch (Exception e) {</span>
-<span class="nc" id="L797">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.STRIKETHROUGH in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
-<span class="fc" id="L798">        }</span>
+<span class="pc bpc" id="L1052" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.STRIKETHROUGH))</span>
+<span class="nc" id="L1053">                isStriked   = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);</span>
+<span class="nc" id="L1054">        } catch (Exception e) {</span>
+<span class="nc" id="L1055">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.STRIKETHROUGH in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
+<span class="fc" id="L1056">        }</span>
 
-<span class="fc" id="L800">        AffineTransform transform = _transform;</span>
+<span class="fc" id="L1058">        AffineTransform transform = _transform;</span>
         try {
-<span class="pc bpc" id="L802" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.TRANSFORM))</span>
-<span class="fc" id="L803">                transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);</span>
-<span class="nc" id="L804">        } catch (Exception e) {</span>
-<span class="nc" id="L805">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.TRANSFORM in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
-<span class="fc" id="L806">        }</span>
+<span class="pc bpc" id="L1060" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.TRANSFORM))</span>
+<span class="fc" id="L1061">                transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);</span>
+<span class="nc" id="L1062">        } catch (Exception e) {</span>
+<span class="nc" id="L1063">            log.debug(SwingTree.get().logMarker(), &quot;Failed to fetch TextAttribute.TRANSFORM in font attributes '&quot; + attributeMap + &quot;' of font '&quot; + font + &quot;'&quot;, e);</span>
+<span class="fc" id="L1064">        }</span>
 
-<span class="fc" id="L808">        FontPaintConf paint = _paint;</span>
+<span class="fc" id="L1066">        FontPaintConf paint = _paint;</span>
         try {
-<span class="fc" id="L810">            Paint found = null;</span>
-<span class="pc bpc" id="L811" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.FOREGROUND))</span>
-<span class="nc" id="L812">                found = (Paint) attributeMap.get(TextAttribute.FOREGROUND);</span>
-<span class="pc bpc" id="L813" title="1 of 2 branches missed.">            if (found != null)</span>
-<span class="nc" id="L814">                paint = FontPaintConf.of(null, found, null, null);</span>
-<span class="nc" id="L815">        } catch (Exception e) {</span>
-<span class="nc" id="L816">            log.warn(SwingTree.get().logMarker(), &quot;Failed to extract font attributes from font: &quot; + font, e);</span>
-<span class="fc" id="L817">        }</span>
+<span class="fc" id="L1068">            Paint found = null;</span>
+<span class="pc bpc" id="L1069" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.FOREGROUND))</span>
+<span class="nc" id="L1070">                found = (Paint) attributeMap.get(TextAttribute.FOREGROUND);</span>
+<span class="pc bpc" id="L1071" title="1 of 2 branches missed.">            if (found != null)</span>
+<span class="nc" id="L1072">                paint = FontPaintConf.of(null, found, null, null);</span>
+<span class="nc" id="L1073">        } catch (Exception e) {</span>
+<span class="nc" id="L1074">            log.warn(SwingTree.get().logMarker(), &quot;Failed to extract font attributes from font: &quot; + font, e);</span>
+<span class="fc" id="L1075">        }</span>
 
-<span class="fc" id="L819">        FontPaintConf backgroundPaint = _backgroundPaint;</span>
+<span class="fc" id="L1077">        FontPaintConf backgroundPaint = _backgroundPaint;</span>
         try {
-<span class="fc" id="L821">            Paint found = null;</span>
-<span class="pc bpc" id="L822" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.BACKGROUND))</span>
-<span class="nc" id="L823">                found = (Paint) attributeMap.get(TextAttribute.BACKGROUND);</span>
-<span class="pc bpc" id="L824" title="1 of 2 branches missed.">            if (found != null)</span>
-<span class="nc" id="L825">                backgroundPaint = FontPaintConf.of(null, found, null, null);</span>
-<span class="nc" id="L826">        } catch (Exception e) {</span>
-<span class="nc" id="L827">            log.warn(SwingTree.get().logMarker(), &quot;Failed to extract font attributes from font: &quot; + font, e);</span>
-<span class="fc" id="L828">        }</span>
+<span class="fc" id="L1079">            Paint found = null;</span>
+<span class="pc bpc" id="L1080" title="1 of 2 branches missed.">            if (attributeMap.containsKey(TextAttribute.BACKGROUND))</span>
+<span class="nc" id="L1081">                found = (Paint) attributeMap.get(TextAttribute.BACKGROUND);</span>
+<span class="pc bpc" id="L1082" title="1 of 2 branches missed.">            if (found != null)</span>
+<span class="nc" id="L1083">                backgroundPaint = FontPaintConf.of(null, found, null, null);</span>
+<span class="nc" id="L1084">        } catch (Exception e) {</span>
+<span class="nc" id="L1085">            log.warn(SwingTree.get().logMarker(), &quot;Failed to extract font attributes from font: &quot; + font, e);</span>
+<span class="fc" id="L1086">        }</span>
 
-<span class="fc" id="L830">        Objects.requireNonNull(font);</span>
-<span class="fc" id="L831">        return FontConf.of(</span>
+<span class="fc" id="L1088">        Objects.requireNonNull(font);</span>
+<span class="fc" id="L1089">        return FontConf.of(</span>
                     family,
                     size,
                     posture,
                     weight,
                     spacing,
                     selectionColor,
-<span class="fc" id="L838">                    isUnderline,</span>
-<span class="fc" id="L839">                    isStriked,</span>
+<span class="fc" id="L1096">                    isUnderline,</span>
+<span class="fc" id="L1097">                    isStriked,</span>
                     transform,
                     paint,
                     backgroundPaint,
@@ -845,102 +1103,127 @@ public final class FontConf
                 );
     }
 
+    /**
+     * Creates a new {@link Font} instance based on this font config,
+     * using the default system font as the base font.
+     *
+     * @return A new {@link Font} instance based on this font config.
+     */
+    public java.awt.Font toAwtFont() {
+<span class="fc" id="L1113">        java.awt.Font defaultFont = UIManager.getDefaults().getFont(&quot;defaultFont&quot;);</span>
+<span class="pc bpc" id="L1114" title="1 of 2 branches missed.">        if ( defaultFont == null ) {</span>
+<span class="nc" id="L1115">            Object obj = UIManager.getLookAndFeelDefaults().get(&quot;defaultFont&quot;);</span>
+<span class="nc bnc" id="L1116" title="All 2 branches missed.">            if ( obj instanceof java.awt.Font )</span>
+<span class="nc" id="L1117">                defaultFont = (java.awt.Font) obj;</span>
+        }
+<span class="pc bpc" id="L1119" title="1 of 2 branches missed.">        if ( defaultFont == null )</span>
+<span class="nc" id="L1120">            defaultFont = new JLabel().getFont();</span>
+<span class="fc" id="L1121">        return _createDerivedFrom(defaultFont, null)</span>
+<span class="fc" id="L1122">                .orElse(defaultFont);</span>
+    }
+
     Optional&lt;Font&gt; createDerivedFrom( Font existingFont, JComponent component ) {
-<span class="fc" id="L849">        return _createDerivedFrom(existingFont, component);</span>
+<span class="fc" id="L1126">        return _createDerivedFrom(existingFont, component);</span>
     }
 
     Optional&lt;Font&gt; createDerivedFrom( Font existingFont, BoxModelConf boxModel ) {
-<span class="fc" id="L853">        return _createDerivedFrom(existingFont, boxModel);</span>
+<span class="fc" id="L1130">        return _createDerivedFrom(existingFont, boxModel);</span>
     }
 
-    private Optional&lt;Font&gt; _createDerivedFrom( Font existingFont, Object boxModelOrComponent )
+    private Optional&lt;Font&gt; _createDerivedFrom( Font existingFont, @Nullable Object boxModelOrComponent )
     {
-<span class="pc bpc" id="L858" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
-<span class="nc" id="L859">            return Optional.empty();</span>
+<span class="pc bpc" id="L1135" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
+<span class="nc" id="L1136">            return Optional.empty();</span>
 
-<span class="fc" id="L861">        boolean isChange = false;</span>
+<span class="fc" id="L1138">        boolean isChange = false;</span>
 
-<span class="fc bfc" id="L863" title="All 2 branches covered.">        if ( existingFont == null )</span>
-<span class="fc" id="L864">            existingFont = new JLabel().getFont();</span>
+<span class="fc bfc" id="L1140" title="All 2 branches covered.">        if ( existingFont == null )</span>
+<span class="fc" id="L1141">            existingFont = new JLabel().getFont();</span>
 
-<span class="fc" id="L866">        Map&lt;TextAttribute, Object&gt; currentAttributes = (Map&lt;TextAttribute, Object&gt;) existingFont.getAttributes();</span>
-<span class="fc" id="L867">        Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L1143">        Map&lt;TextAttribute, Object&gt; currentAttributes = (Map&lt;TextAttribute, Object&gt;) existingFont.getAttributes();</span>
+<span class="fc" id="L1144">        Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;();</span>
 
-<span class="fc bfc" id="L869" title="All 2 branches covered.">        if ( _size &gt; 0 ) {</span>
-<span class="pc bpc" id="L870" title="2 of 4 branches missed.">            isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));</span>
-<span class="fc" id="L871">            attributes.put(TextAttribute.SIZE, _size);</span>
+<span class="fc bfc" id="L1146" title="All 2 branches covered.">        if ( _size &gt; 0 ) {</span>
+<span class="pc bpc" id="L1147" title="2 of 4 branches missed.">            isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));</span>
+<span class="fc" id="L1148">            attributes.put(TextAttribute.SIZE, _size);</span>
         }
-<span class="fc bfc" id="L873" title="All 2 branches covered.">        if ( _posture &gt; 0 ) {</span>
-<span class="pc bpc" id="L874" title="3 of 4 branches missed.">            isChange = isChange || !Float.valueOf(_posture).equals(currentAttributes.get(TextAttribute.POSTURE));</span>
-<span class="fc" id="L875">            attributes.put(TextAttribute.POSTURE, _posture);</span>
+<span class="fc bfc" id="L1150" title="All 2 branches covered.">        if ( _posture &gt; 0 ) {</span>
+<span class="pc bpc" id="L1151" title="3 of 4 branches missed.">            isChange = isChange || !Float.valueOf(_posture).equals(currentAttributes.get(TextAttribute.POSTURE));</span>
+<span class="fc" id="L1152">            attributes.put(TextAttribute.POSTURE, _posture);</span>
+<span class="fc bfc" id="L1153" title="All 2 branches covered.">        } else if (_posture == 0) {</span>
+<span class="pc bpc" id="L1154" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(0f, currentAttributes.get(TextAttribute.POSTURE));</span>
+<span class="fc" id="L1155">            attributes.put(TextAttribute.POSTURE, null);</span>
         }
-<span class="fc bfc" id="L877" title="All 2 branches covered.">        if ( _weight &gt; 0 ) {</span>
-<span class="fc bfc" id="L878" title="All 4 branches covered.">            isChange = isChange || !Float.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));</span>
-<span class="fc" id="L879">            attributes.put(TextAttribute.WEIGHT, _weight);</span>
+<span class="fc bfc" id="L1157" title="All 2 branches covered.">        if ( _weight &gt; 0 ) {</span>
+<span class="fc bfc" id="L1158" title="All 4 branches covered.">            isChange = isChange || !Float.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));</span>
+<span class="fc" id="L1159">            attributes.put(TextAttribute.WEIGHT, Math.min(_weight, 9)); // Valid if: weight &gt; 0 &amp;&amp; weight &lt; 10</span>
+<span class="fc bfc" id="L1160" title="All 2 branches covered.">        } else if ( _weight == 0 ) {</span>
+<span class="pc bpc" id="L1161" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(0f, currentAttributes.get(TextAttribute.WEIGHT));</span>
+<span class="fc" id="L1162">            attributes.put(TextAttribute.WEIGHT, null);</span>
         }
-<span class="fc bfc" id="L881" title="All 2 branches covered.">        if ( _spacing != 0 ) {</span>
-<span class="fc bfc" id="L882" title="All 4 branches covered.">            isChange = isChange || !Float.valueOf(_spacing).equals(currentAttributes.get(TextAttribute.TRACKING));</span>
-<span class="fc" id="L883">            attributes.put(TextAttribute.TRACKING, _spacing);</span>
+<span class="fc bfc" id="L1164" title="All 2 branches covered.">        if ( _spacing != 0 ) {</span>
+<span class="pc bpc" id="L1165" title="1 of 4 branches missed.">            isChange = isChange || !Float.valueOf(_spacing).equals(currentAttributes.get(TextAttribute.TRACKING));</span>
+<span class="fc" id="L1166">            attributes.put(TextAttribute.TRACKING, Math.max(-1,Math.min(_spacing, 10))); // Valid if:  tracking &gt;= -1 &amp;&amp; tracking &lt;= 10</span>
         }
-<span class="fc bfc" id="L885" title="All 2 branches covered.">        if ( _isUnderlined != null ) {</span>
-<span class="pc bpc" id="L886" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_isUnderlined, currentAttributes.get(TextAttribute.UNDERLINE));</span>
-<span class="fc" id="L887">            attributes.put(TextAttribute.UNDERLINE, _isUnderlined);</span>
+<span class="fc bfc" id="L1168" title="All 2 branches covered.">        if ( _isUnderlined != null ) {</span>
+<span class="pc bpc" id="L1169" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_isUnderlined, currentAttributes.get(TextAttribute.UNDERLINE));</span>
+<span class="fc" id="L1170">            attributes.put(TextAttribute.UNDERLINE, _isUnderlined);</span>
         }
-<span class="fc bfc" id="L889" title="All 2 branches covered.">        if ( _isStrike != null ) {</span>
-<span class="pc bpc" id="L890" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_isStrike, currentAttributes.get(TextAttribute.STRIKETHROUGH));</span>
-<span class="fc" id="L891">            attributes.put(TextAttribute.STRIKETHROUGH, _isStrike);</span>
+<span class="fc bfc" id="L1172" title="All 2 branches covered.">        if ( _isStrike != null ) {</span>
+<span class="pc bpc" id="L1173" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_isStrike, currentAttributes.get(TextAttribute.STRIKETHROUGH));</span>
+<span class="fc" id="L1174">            attributes.put(TextAttribute.STRIKETHROUGH, _isStrike);</span>
         }
-<span class="fc bfc" id="L893" title="All 2 branches covered.">        if ( _transform != null ) {</span>
-<span class="pc bpc" id="L894" title="2 of 4 branches missed.">            isChange = isChange || !Objects.equals(_transform, currentAttributes.get(TextAttribute.TRANSFORM));</span>
-<span class="fc" id="L895">            attributes.put(TextAttribute.TRANSFORM, _transform);</span>
+<span class="fc bfc" id="L1176" title="All 2 branches covered.">        if ( _transform != null ) {</span>
+<span class="pc bpc" id="L1177" title="2 of 4 branches missed.">            isChange = isChange || !Objects.equals(_transform, currentAttributes.get(TextAttribute.TRANSFORM));</span>
+<span class="fc" id="L1178">            attributes.put(TextAttribute.TRANSFORM, _transform);</span>
         }
-<span class="fc bfc" id="L897" title="All 2 branches covered.">        if ( !_familyName.isEmpty() ) {</span>
-<span class="pc bpc" id="L898" title="1 of 4 branches missed.">            isChange = isChange || !Objects.equals(_familyName, currentAttributes.get(TextAttribute.FAMILY));</span>
-<span class="fc" id="L899">            attributes.put(TextAttribute.FAMILY, _familyName);</span>
+<span class="fc bfc" id="L1180" title="All 2 branches covered.">        if ( !_familyName.isEmpty() ) {</span>
+<span class="pc bpc" id="L1181" title="1 of 4 branches missed.">            isChange = isChange || !Objects.equals(_familyName, currentAttributes.get(TextAttribute.FAMILY));</span>
+<span class="fc" id="L1182">            attributes.put(TextAttribute.FAMILY, _familyName);</span>
         }
-<span class="fc bfc" id="L901" title="All 2 branches covered.">        if ( !_paint.equals(FontPaintConf.none()) ) {</span>
+<span class="fc bfc" id="L1184" title="All 2 branches covered.">        if ( !_paint.equals(FontPaintConf.none()) ) {</span>
             try {
-<span class="fc" id="L903">                Paint paint = null;</span>
-<span class="fc bfc" id="L904" title="All 2 branches covered.">                if ( boxModelOrComponent instanceof BoxModelConf )</span>
-<span class="fc" id="L905">                    paint = _paint.getFor((BoxModelConf) boxModelOrComponent);</span>
-<span class="pc bpc" id="L906" title="1 of 2 branches missed.">                else if ( boxModelOrComponent instanceof JComponent )</span>
-<span class="fc" id="L907">                    paint = _paint.getFor((JComponent) boxModelOrComponent);</span>
+<span class="fc" id="L1186">                Paint paint = null;</span>
+<span class="fc bfc" id="L1187" title="All 2 branches covered.">                if ( boxModelOrComponent instanceof BoxModelConf )</span>
+<span class="fc" id="L1188">                    paint = _paint.getFor((BoxModelConf) boxModelOrComponent);</span>
+<span class="pc bpc" id="L1189" title="1 of 2 branches missed.">                else if ( boxModelOrComponent instanceof JComponent )</span>
+<span class="fc" id="L1190">                    paint = _paint.getFor((JComponent) boxModelOrComponent);</span>
 
-<span class="fc bfc" id="L909" title="All 4 branches covered.">                isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));</span>
-<span class="fc" id="L910">                attributes.put(TextAttribute.FOREGROUND, paint);</span>
-<span class="nc" id="L911">            } catch ( Exception e ) {</span>
-<span class="nc" id="L912">                log.error(SwingTree.get().logMarker(), &quot;Failed to create paint from paint config: &quot;+_paint, e);</span>
-<span class="fc" id="L913">            }</span>
+<span class="fc bfc" id="L1192" title="All 4 branches covered.">                isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));</span>
+<span class="fc" id="L1193">                attributes.put(TextAttribute.FOREGROUND, paint);</span>
+<span class="nc" id="L1194">            } catch ( Exception e ) {</span>
+<span class="nc" id="L1195">                log.error(SwingTree.get().logMarker(), &quot;Failed to create paint from paint config: &quot;+_paint, e);</span>
+<span class="fc" id="L1196">            }</span>
         }
-<span class="fc bfc" id="L915" title="All 2 branches covered.">        if ( !_backgroundPaint.equals(FontPaintConf.none()) ) {</span>
+<span class="fc bfc" id="L1198" title="All 2 branches covered.">        if ( !_backgroundPaint.equals(FontPaintConf.none()) ) {</span>
             try {
-<span class="fc" id="L917">                Paint backgroundPaint = null;</span>
-<span class="pc bpc" id="L918" title="1 of 2 branches missed.">                if ( boxModelOrComponent instanceof BoxModelConf )</span>
-<span class="nc" id="L919">                    backgroundPaint = _backgroundPaint.getFor((BoxModelConf) boxModelOrComponent);</span>
-<span class="pc bpc" id="L920" title="1 of 2 branches missed.">                else if ( boxModelOrComponent instanceof JComponent )</span>
-<span class="fc" id="L921">                    backgroundPaint = _backgroundPaint.getFor((JComponent) boxModelOrComponent);</span>
+<span class="fc" id="L1200">                Paint backgroundPaint = null;</span>
+<span class="pc bpc" id="L1201" title="1 of 2 branches missed.">                if ( boxModelOrComponent instanceof BoxModelConf )</span>
+<span class="nc" id="L1202">                    backgroundPaint = _backgroundPaint.getFor((BoxModelConf) boxModelOrComponent);</span>
+<span class="pc bpc" id="L1203" title="1 of 2 branches missed.">                else if ( boxModelOrComponent instanceof JComponent )</span>
+<span class="fc" id="L1204">                    backgroundPaint = _backgroundPaint.getFor((JComponent) boxModelOrComponent);</span>
 
-<span class="pc bpc" id="L923" title="3 of 4 branches missed.">                isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));</span>
-<span class="fc" id="L924">                attributes.put(TextAttribute.BACKGROUND, backgroundPaint);</span>
-<span class="nc" id="L925">            } catch ( Exception e ) {</span>
-<span class="nc" id="L926">                log.error(SwingTree.get().logMarker(), &quot;Failed to create paint from paint config: &quot;+_backgroundPaint, e);</span>
-<span class="fc" id="L927">            }</span>
+<span class="fc bfc" id="L1206" title="All 4 branches covered.">                isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));</span>
+<span class="fc" id="L1207">                attributes.put(TextAttribute.BACKGROUND, backgroundPaint);</span>
+<span class="nc" id="L1208">            } catch ( Exception e ) {</span>
+<span class="nc" id="L1209">                log.error(SwingTree.get().logMarker(), &quot;Failed to create paint from paint config: &quot;+_backgroundPaint, e);</span>
+<span class="fc" id="L1210">            }</span>
         }
-<span class="fc bfc" id="L929" title="All 2 branches covered.">        if ( isChange )</span>
-<span class="fc" id="L930">            return Optional.of(existingFont.deriveFont(attributes));</span>
+<span class="fc bfc" id="L1212" title="All 2 branches covered.">        if ( isChange )</span>
+<span class="fc" id="L1213">            return Optional.of(existingFont.deriveFont(attributes));</span>
         else
-<span class="fc" id="L932">            return Optional.empty();</span>
+<span class="fc" id="L1215">            return Optional.empty();</span>
     }
 
     FontConf _scale(double scale ) {
-<span class="pc bpc" id="L936" title="1 of 2 branches missed.">        if ( scale == 1.0 )</span>
-<span class="nc" id="L937">            return this;</span>
-<span class="fc bfc" id="L938" title="All 2 branches covered.">        else if ( this.equals(_NONE) )</span>
-<span class="fc" id="L939">            return this;</span>
+<span class="pc bpc" id="L1219" title="1 of 2 branches missed.">        if ( scale == 1.0 )</span>
+<span class="nc" id="L1220">            return this;</span>
+<span class="fc bfc" id="L1221" title="All 2 branches covered.">        else if ( this.equals(_NONE) )</span>
+<span class="fc" id="L1222">            return this;</span>
         else
-<span class="fc" id="L941">            return FontConf.of(</span>
+<span class="fc" id="L1224">            return FontConf.of(</span>
                     _familyName,
-<span class="fc" id="L943">                    (int) Math.round(_size * scale),</span>
+<span class="fc" id="L1226">                    (int) Math.round(_size * scale),</span>
                     _posture,
                     _weight,
                     _spacing,
@@ -958,77 +1241,77 @@ public final class FontConf
     @Override
     public int hashCode()
     {
-<span class="fc" id="L961">        int hash = 7;</span>
-<span class="fc" id="L962">        hash = 97 * hash + Objects.hashCode(_familyName);</span>
-<span class="fc" id="L963">        hash = 97 * hash + _size;</span>
-<span class="fc" id="L964">        hash = 97 * hash + Float.hashCode(_posture);</span>
-<span class="fc" id="L965">        hash = 97 * hash + Float.hashCode(_weight);</span>
-<span class="fc" id="L966">        hash = 97 * hash + Float.hashCode(_spacing);</span>
-<span class="fc" id="L967">        hash = 97 * hash + Objects.hashCode(_selectionColor);</span>
-<span class="fc" id="L968">        hash = 97 * hash + Objects.hashCode(_isUnderlined);</span>
-<span class="fc" id="L969">        hash = 97 * hash + Objects.hashCode(_transform);</span>
-<span class="fc" id="L970">        hash = 97 * hash + Objects.hashCode(_paint);</span>
-<span class="fc" id="L971">        hash = 97 * hash + Objects.hashCode(_backgroundPaint);</span>
-<span class="fc" id="L972">        hash = 97 * hash + Objects.hashCode(_horizontalAlignment);</span>
-<span class="fc" id="L973">        hash = 97 * hash + Objects.hashCode(_verticalAlignment);</span>
-<span class="fc" id="L974">        return hash;</span>
+<span class="fc" id="L1244">        int hash = 7;</span>
+<span class="fc" id="L1245">        hash = 97 * hash + Objects.hashCode(_familyName);</span>
+<span class="fc" id="L1246">        hash = 97 * hash + _size;</span>
+<span class="fc" id="L1247">        hash = 97 * hash + Float.hashCode(_posture);</span>
+<span class="fc" id="L1248">        hash = 97 * hash + Float.hashCode(_weight);</span>
+<span class="fc" id="L1249">        hash = 97 * hash + Float.hashCode(_spacing);</span>
+<span class="fc" id="L1250">        hash = 97 * hash + Objects.hashCode(_selectionColor);</span>
+<span class="fc" id="L1251">        hash = 97 * hash + Objects.hashCode(_isUnderlined);</span>
+<span class="fc" id="L1252">        hash = 97 * hash + Objects.hashCode(_transform);</span>
+<span class="fc" id="L1253">        hash = 97 * hash + Objects.hashCode(_paint);</span>
+<span class="fc" id="L1254">        hash = 97 * hash + Objects.hashCode(_backgroundPaint);</span>
+<span class="fc" id="L1255">        hash = 97 * hash + Objects.hashCode(_horizontalAlignment);</span>
+<span class="fc" id="L1256">        hash = 97 * hash + Objects.hashCode(_verticalAlignment);</span>
+<span class="fc" id="L1257">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj )
     {
-<span class="pc bpc" id="L980" title="1 of 2 branches missed.">        if ( obj == null )</span>
-<span class="nc" id="L981">            return false;</span>
-<span class="pc bpc" id="L982" title="1 of 2 branches missed.">        if ( getClass() != obj.getClass() )</span>
-<span class="nc" id="L983">            return false;</span>
-<span class="fc" id="L984">        final FontConf other = (FontConf)obj;</span>
-<span class="fc bfc" id="L985" title="All 2 branches covered.">        if ( !Objects.equals(_familyName, other._familyName) )</span>
-<span class="fc" id="L986">            return false;</span>
-<span class="fc bfc" id="L987" title="All 2 branches covered.">        if ( _size != other._size )</span>
-<span class="fc" id="L988">            return false;</span>
-<span class="fc bfc" id="L989" title="All 2 branches covered.">        if ( _posture != other._posture)</span>
-<span class="fc" id="L990">            return false;</span>
-<span class="fc bfc" id="L991" title="All 2 branches covered.">        if ( _weight != other._weight )</span>
-<span class="fc" id="L992">            return false;</span>
-<span class="fc bfc" id="L993" title="All 2 branches covered.">        if ( _spacing != other._spacing )</span>
-<span class="fc" id="L994">            return false;</span>
-<span class="fc bfc" id="L995" title="All 2 branches covered.">        if ( !Objects.equals(_selectionColor, other._selectionColor) )</span>
-<span class="fc" id="L996">            return false;</span>
-<span class="fc bfc" id="L997" title="All 2 branches covered.">        if ( !Objects.equals(_isUnderlined, other._isUnderlined) )</span>
-<span class="fc" id="L998">            return false;</span>
-<span class="fc bfc" id="L999" title="All 2 branches covered.">        if ( !Objects.equals(_transform, other._transform) )</span>
-<span class="fc" id="L1000">            return false;</span>
-<span class="fc bfc" id="L1001" title="All 2 branches covered.">        if ( !Objects.equals(_paint, other._paint) )</span>
-<span class="fc" id="L1002">            return false;</span>
-<span class="fc bfc" id="L1003" title="All 2 branches covered.">        if ( !Objects.equals(_backgroundPaint, other._backgroundPaint) )</span>
-<span class="fc" id="L1004">            return false;</span>
-<span class="fc bfc" id="L1005" title="All 2 branches covered.">        if ( _horizontalAlignment != other._horizontalAlignment )</span>
-<span class="fc" id="L1006">            return false;</span>
-<span class="fc bfc" id="L1007" title="All 2 branches covered.">        if ( _verticalAlignment != other._verticalAlignment )</span>
-<span class="fc" id="L1008">            return false;</span>
+<span class="pc bpc" id="L1263" title="1 of 2 branches missed.">        if ( obj == null )</span>
+<span class="nc" id="L1264">            return false;</span>
+<span class="pc bpc" id="L1265" title="1 of 2 branches missed.">        if ( getClass() != obj.getClass() )</span>
+<span class="nc" id="L1266">            return false;</span>
+<span class="fc" id="L1267">        final FontConf other = (FontConf)obj;</span>
+<span class="fc bfc" id="L1268" title="All 2 branches covered.">        if ( !Objects.equals(_familyName, other._familyName) )</span>
+<span class="fc" id="L1269">            return false;</span>
+<span class="fc bfc" id="L1270" title="All 2 branches covered.">        if ( _size != other._size )</span>
+<span class="fc" id="L1271">            return false;</span>
+<span class="fc bfc" id="L1272" title="All 2 branches covered.">        if ( _posture != other._posture)</span>
+<span class="fc" id="L1273">            return false;</span>
+<span class="fc bfc" id="L1274" title="All 2 branches covered.">        if ( _weight != other._weight )</span>
+<span class="fc" id="L1275">            return false;</span>
+<span class="fc bfc" id="L1276" title="All 2 branches covered.">        if ( _spacing != other._spacing )</span>
+<span class="fc" id="L1277">            return false;</span>
+<span class="fc bfc" id="L1278" title="All 2 branches covered.">        if ( !Objects.equals(_selectionColor, other._selectionColor) )</span>
+<span class="fc" id="L1279">            return false;</span>
+<span class="fc bfc" id="L1280" title="All 2 branches covered.">        if ( !Objects.equals(_isUnderlined, other._isUnderlined) )</span>
+<span class="fc" id="L1281">            return false;</span>
+<span class="fc bfc" id="L1282" title="All 2 branches covered.">        if ( !Objects.equals(_transform, other._transform) )</span>
+<span class="fc" id="L1283">            return false;</span>
+<span class="fc bfc" id="L1284" title="All 2 branches covered.">        if ( !Objects.equals(_paint, other._paint) )</span>
+<span class="fc" id="L1285">            return false;</span>
+<span class="fc bfc" id="L1286" title="All 2 branches covered.">        if ( !Objects.equals(_backgroundPaint, other._backgroundPaint) )</span>
+<span class="fc" id="L1287">            return false;</span>
+<span class="fc bfc" id="L1288" title="All 2 branches covered.">        if ( _horizontalAlignment != other._horizontalAlignment )</span>
+<span class="fc" id="L1289">            return false;</span>
+<span class="fc bfc" id="L1290" title="All 2 branches covered.">        if ( _verticalAlignment != other._verticalAlignment )</span>
+<span class="fc" id="L1291">            return false;</span>
 
-<span class="fc" id="L1010">        return true;</span>
+<span class="fc" id="L1293">        return true;</span>
     }
 
     @Override
     public String toString()
     {
-<span class="fc bfc" id="L1016" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L1017">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc bfc" id="L1018" title="All 2 branches covered.">        String underline       = ( _isUnderlined        == null ? &quot;?&quot; : String.valueOf(_isUnderlined)   );</span>
-<span class="fc bfc" id="L1019" title="All 2 branches covered.">        String strike          = ( _isStrike            == null ? &quot;?&quot; : String.valueOf(_isStrike)       );</span>
-<span class="fc bfc" id="L1020" title="All 2 branches covered.">        String transform       = ( _transform           == null ? &quot;?&quot; : _transform.toString()           );</span>
-<span class="fc bfc" id="L1021" title="All 2 branches covered.">        String horizontalAlign = ( _horizontalAlignment == UI.HorizontalAlignment.UNDEFINED ? &quot;?&quot; : _horizontalAlignment.toString() );</span>
-<span class="fc bfc" id="L1022" title="All 2 branches covered.">        String verticalAlign   = ( _verticalAlignment   == UI.VerticalAlignment.UNDEFINED ? &quot;?&quot; : _verticalAlignment.toString()   );</span>
-<span class="fc" id="L1023">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L1299" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L1300">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc bfc" id="L1301" title="All 2 branches covered.">        String underline       = ( _isUnderlined        == null ? &quot;?&quot; : String.valueOf(_isUnderlined)   );</span>
+<span class="fc bfc" id="L1302" title="All 2 branches covered.">        String strike          = ( _isStrike            == null ? &quot;?&quot; : String.valueOf(_isStrike)       );</span>
+<span class="fc bfc" id="L1303" title="All 2 branches covered.">        String transform       = ( _transform           == null ? &quot;?&quot; : _transform.toString()           );</span>
+<span class="fc bfc" id="L1304" title="All 2 branches covered.">        String horizontalAlign = ( _horizontalAlignment == UI.HorizontalAlignment.UNDEFINED ? &quot;?&quot; : _horizontalAlignment.toString() );</span>
+<span class="fc bfc" id="L1305" title="All 2 branches covered.">        String verticalAlign   = ( _verticalAlignment   == UI.VerticalAlignment.UNDEFINED ? &quot;?&quot; : _verticalAlignment.toString()   );</span>
+<span class="fc" id="L1306">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;family=&quot;              + _familyName + &quot;, &quot; +
                     &quot;size=&quot;                + _size                                   + &quot;, &quot; +
-                    &quot;posture=&quot;             + _posture                                + &quot;, &quot; +
-                    &quot;weight=&quot;              + _weight                                 + &quot;, &quot; +
+<span class="fc bfc" id="L1309" title="All 2 branches covered.">                    &quot;posture=&quot;             + (_posture &lt; 0 ? &quot;?&quot; : _posture)         + &quot;, &quot; +</span>
+<span class="fc bfc" id="L1310" title="All 2 branches covered.">                    &quot;weight=&quot;              + (_weight &lt; 0 ? &quot;?&quot; : _weight)           + &quot;, &quot; +</span>
                     &quot;spacing=&quot;             + _spacing                                + &quot;, &quot; +
                     &quot;underlined=&quot;          + underline                               + &quot;, &quot; +
                     &quot;strikeThrough=&quot;       + strike                                  + &quot;, &quot; +
-<span class="fc" id="L1031">                    &quot;selectionColor=&quot;      + StyleUtil.toString(_selectionColor)     + &quot;, &quot; +</span>
+<span class="fc" id="L1314">                    &quot;selectionColor=&quot;      + StyleUtil.toString(_selectionColor)     + &quot;, &quot; +</span>
                     &quot;transform=&quot;           + transform                               + &quot;, &quot; +
                     &quot;paint=&quot;               + _paint                                  + &quot;, &quot; +
                     &quot;backgroundPaint=&quot;     + _backgroundPaint                        + &quot;, &quot; +

@@ -25,7 +25,7 @@
 
         {"kind":"and","text":"A few components we are going to style","code":["var button = UI.button(\"hi\").id(\"unique id!\").get(JButton)","var button2 = UI.button(\"wassup?\").get(JButton)","var panel = UI.panel().get(JPanel)"]},
 
-        {"kind":"when","text":"","code":["var s1 = ss.applyTo(button)","var s2 = ss.applyTo(button2)","var s3 = ss.applyTo(panel)"]},
+        {"kind":"when","text":"","code":["var s1 = ss.computeStyleFrom(button)","var s2 = ss.computeStyleFrom(button2)","var s3 = ss.computeStyleFrom(panel)"]},
 
         {"kind":"then","text":"","code":["s1.border().topLeftArc().get() == Arc.of(3, 3)","s1.border().topRightArc().get() == Arc.of(3, 3)","s1.border().bottomLeftArc().get() == Arc.of(3, 3)","s1.border().bottomRightArc().get() == Arc.of(3, 3)","s1.border().widths().top().get() == 7","s1.border().widths().bottom().get() == 7","s1.border().widths().left().get() == 7","s1.border().widths().right().get() == 7","s2.border().widths().top().get() == 7","s2.border().widths().bottom().get() == 7","s2.border().widths().left().get() == 7","s2.border().widths().right().get() == 7","s3.border().colors().everyColor( c -> c == Color.GREEN )"]}
       ],
@@ -44,19 +44,19 @@
 
         {"kind":"and","text":"A few components we are going to style using the style sheet.","code":["var textField = UI.textField(\"type something\").get(JTextField)","var button = UI.button(\"click me!\").get(JButton)","var panel = UI.panel().get(JPanel)","var textArea = UI.textArea(\"type some more!\").get(JTextArea)"]},
 
-        {"kind":"when","text":"We first run the text field through the style sheet...","code":["var fieldStyle  = ss.applyTo(textField).shadow()"]},
+        {"kind":"when","text":"We first run the text field through the style sheet...","code":["var fieldStyle  = ss.computeStyleFrom(textField).shadow()"]},
 
         {"kind":"then","text":"The resulting style has the expected properties:","code":["fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!","fieldStyle.spreadRadius() != 33 // a text field is not a panel","fieldStyle.verticalOffset() == 24","fieldStyle.horizontalOffset() == 42"]},
 
-        {"kind":"when","text":"We then run the button through the style sheet...","code":["var buttonStyle = ss.applyTo(button).shadow()"]},
+        {"kind":"when","text":"We then run the button through the style sheet...","code":["var buttonStyle = ss.computeStyleFrom(button).shadow()"]},
 
         {"kind":"then","text":"Again, the resulting style is as expected:","code":["buttonStyle.color().get() == Color.RED","buttonStyle.blurRadius() == 17","buttonStyle.spreadRadius() != 33 // a button is not a panel","buttonStyle.verticalOffset() != 42 // a button is not a text component","buttonStyle.horizontalOffset() != 24 // a button is not a text component"]},
 
-        {"kind":"when","text":"We now run the panel through the style sheet...","code":["var panelStyle  = ss.applyTo(panel).shadow()"]},
+        {"kind":"when","text":"We now run the panel through the style sheet...","code":["var panelStyle  = ss.computeStyleFrom(panel).shadow()"]},
 
         {"kind":"then","text":"Also no surprises here:","code":["panelStyle.color().get() == Color.RED","panelStyle.blurRadius() == 17","panelStyle.spreadRadius() == 33","panelStyle.verticalOffset() != 42 // a panel is not a text component","panelStyle.horizontalOffset() != 24 // a panel is not a text component"]},
 
-        {"kind":"when","text":"We finally run the text area through the style sheet...","code":["var areaStyle   = ss.applyTo(textArea).shadow()"]},
+        {"kind":"when","text":"We finally run the text area through the style sheet...","code":["var areaStyle   = ss.computeStyleFrom(textArea).shadow()"]},
 
         {"kind":"then","text":"It too has the expected style:","code":["areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","areaStyle.blurRadius() == 17","areaStyle.spreadRadius() != 33 // a text area is not a panel","areaStyle.verticalOffset() == 24","areaStyle.horizontalOffset() == 42"]}
       ],
@@ -75,7 +75,7 @@
 
         {"kind":"and","text":"Also, a few components we are going to style","code":["var label = UI.label(\"hi\").group(\"group1\").get(JLabel)","var toggle = UI.toggleButton(\"click me!\").group(\"group2\").get(JToggleButton)","var panel = UI.panel().group(\"group1\", \"group2\").get(JPanel)"]},
 
-        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.applyTo(label)","var s2 = ss.applyTo(toggle)","var s3 = ss.applyTo(panel)"]},
+        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.computeStyleFrom(label)","var s2 = ss.computeStyleFrom(toggle)","var s3 = ss.computeStyleFrom(panel)"]},
 
         {"kind":"then","text":"We can verify that the colors are applied correctly.","code":["s1.base().backgroundColor().get() == Color.BLUE","s2.base().foundationColor().get() == Color.CYAN","s3.base().backgroundColor().get() == Color.BLUE","s3.base().foundationColor().get() == Color.CYAN"]}
       ],
@@ -96,7 +96,7 @@
 
         {"kind":"and","text":"We build the components:","code":["var textField = ui1.get(JTextField)","var textArea = ui2.get(JTextArea)"]},
 
-        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.applyTo(textField)","var s2 = ss.applyTo(textArea)"]},
+        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.computeStyleFrom(textField)","var s2 = ss.computeStyleFrom(textArea)"]},
 
         {"kind":"then","text":"We can indeed verify that style 2 inherits from style 1.","code":["s1.padding() == Outline.of(1, 2, 3, 4)","s2.padding() == Outline.of(1, 2, 3, 4)","s2.base().foundationColor().get() == Color.CYAN"]}
       ],
@@ -164,11 +164,11 @@
 
         {"kind":"when","text":"We create a few UI components:","code":["var slider1 = UI.slider(UI.Align.HORIZONTAL).group(\"A\", \"B\").get(JSlider)","var slider2 = UI.slider(UI.Align.HORIZONTAL).group(\"A\").get(JSlider)","var slider3 = UI.slider(UI.Align.HORIZONTAL).group(\"B\").get(JSlider)","var label1 = UI.label(\":)\").group(\"A\").get(JLabel)","var label2 = UI.label(\":D\").group(\"B\").get(JLabel)"]},
 
-        {"kind":"and","text":"We run them through the style sheet...","code":["var s1 = ss.applyTo(slider1)","var s2 = ss.applyTo(slider2)","var s3 = ss.applyTo(slider3)","var s4 = ss.applyTo(label1)","var s5 = ss.applyTo(label2)"]},
+        {"kind":"and","text":"We run them through the style sheet...","code":["var s1 = ss.computeStyleFrom(slider1)","var s2 = ss.computeStyleFrom(slider2)","var s3 = ss.computeStyleFrom(slider3)","var s4 = ss.computeStyleFrom(label1)","var s5 = ss.computeStyleFrom(label2)"]},
 
         {"kind":"then","text":"We first verify that they are not equal to another:","code":["s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5"]},
 
-        {"kind":"and","text":"They are equal to recalculated instances of themselves:","code":["s1 == ss.applyTo(slider1)","s2 == ss.applyTo(slider2)","s3 == ss.applyTo(slider3)","s4 == ss.applyTo(label1)","s5 == ss.applyTo(label2)"]},
+        {"kind":"and","text":"They are equal to recalculated instances of themselves:","code":["s1 == ss.computeStyleFrom(slider1)","s2 == ss.computeStyleFrom(slider2)","s3 == ss.computeStyleFrom(slider3)","s4 == ss.computeStyleFrom(label1)","s5 == ss.computeStyleFrom(label2)"]},
 
         {"kind":"and","text":"Then we check the results:","code":["s1.base().foundationColor().get() == Color.BLUE","s1.border().widths().top().get() == 11","s1.border().widths().left().get() == 11","s1.border().widths().bottom().get() == 11","s1.border().widths().right().get() == 11","s1.border().colors().everyColor( c -> c == Color.GREEN )","s1.border().topLeftArc().get() == Arc.of(19, 19)","s1.border().topRightArc().get() == Arc.of(19, 19)","s1.border().bottomLeftArc().get() == Arc.of(19, 19)","s1.border().bottomRightArc().get() == Arc.of(19, 19)","s1.padding() == Outline.of(42, 42, 42, 42)","s1.shadow().isInset() == true","s1.shadow().blurRadius() == 22","s1.shadow().spreadRadius() == 6","s2.base().foundationColor().get() == Color.RED","s2.border().widths().top().get() == 11","s2.border().widths().left().get() == 11","s2.border().widths().bottom().get() == 11","s2.border().widths().right().get() == 11","s2.border().colors().everyColor( c -> c == Color.GREEN )","s2.border().topLeftArc().get() == Arc.of(19, 19)","s2.border().topRightArc().get() == Arc.of(19, 19)","s2.border().bottomLeftArc().get() == Arc.of(19, 19)","s2.border().bottomRightArc().get() == Arc.of(19, 19)","s2.padding() == Outline.of(42, 42, 42, 42)","s2.shadow().isInset() == false","s2.shadow().blurRadius() == 22","s2.shadow().spreadRadius() == 6","s3.base().foundationColor().get() == Color.BLUE","s3.border().widths().top().get() == 11","s3.border().widths().left().get() == 11","s3.border().widths().bottom().get() == 11","s3.border().widths().right().get() == 11","s3.border().colors().everyColor( c -> c == Color.GREEN )","s3.border().topLeftArc().get() == Arc.of(3, 3)","s3.border().topRightArc().get() == Arc.of(3, 3)","s3.border().bottomLeftArc().get() == Arc.of(3, 3)","s3.border().bottomRightArc().get() == Arc.of(3, 3)","s3.padding() == Outline.of(42, 42, 42, 42)","s3.shadow().isInset() == true","s3.shadow().blurRadius() == 22","s3.shadow().spreadRadius() == 6","s4.base().foundationColor().get() == Color.RED","s4.border().widths().top().get() == 11","s4.border().widths().left().get() == 11","s4.border().widths().bottom().get() == 11","s4.border().widths().right().get() == 11","s4.border().colors().everyColor( c -> c == Color.GREEN )","s4.border().topLeftArc().get() == Arc.of(19, 19)","s4.border().topRightArc().get() == Arc.of(19, 19)","s4.border().bottomLeftArc().get() == Arc.of(19, 19)","s4.border().bottomRightArc().get() == Arc.of(19, 19)","s4.padding() == Outline.of(42, 42, 42, 42)","s4.shadow().isInset() == false","s4.shadow().blurRadius() == 22","s4.shadow().spreadRadius() == 6","s5.base().foundationColor().get() == Color.RED","s5.border().widths().top().get() == 11","s5.border().widths().left().get() == 11","s5.border().widths().bottom().get() == 11","s5.border().widths().right().get() == 11","s5.border().colors().everyColor( c -> c == Color.GREEN )","s5.border().topLeftArc().get() == Arc.of(3, 3)","s5.border().topRightArc().get() == Arc.of(3, 3)","s5.border().bottomLeftArc().get() == Arc.of(3, 3)","s5.border().bottomRightArc().get() == Arc.of(3, 3)","s5.padding() == Outline.of(42, 42, 42, 42)","s5.shadow().isInset() == true","s5.shadow().blurRadius() == 22","s5.shadow().spreadRadius() == 6"]}
       ],
@@ -187,7 +187,7 @@
 
         {"kind":"and","text":"We create a few UI components:","code":["var label1 = UI.label(\":)\").group(\"A\").get(JLabel)","var label2 = UI.label(\":D\").group(\"B\").get(JLabel)","var label3 = UI.label(\":(\").get(JLabel) // No group","var textField = UI.textField().group(\"A\").get(JTextField)","var textArea = UI.textArea(\"\").group(\"B\").get(JTextArea)"]},
 
-        {"kind":"when","text":"We run them through the style sheet...","code":["var s1 = ss.applyTo(label1)","var s2 = ss.applyTo(label2)","var s3 = ss.applyTo(label3)","var s4 = ss.applyTo(textField)","var s5 = ss.applyTo(textArea)"]},
+        {"kind":"when","text":"We run them through the style sheet...","code":["var s1 = ss.computeStyleFrom(label1)","var s2 = ss.computeStyleFrom(label2)","var s3 = ss.computeStyleFrom(label3)","var s4 = ss.computeStyleFrom(textField)","var s5 = ss.computeStyleFrom(textArea)"]},
 
         {"kind":"then","text":"...and we check the results","code":["s1.font().family() == \"Arial\"","s1.font().size() == 12","s2.font().family() == \"Sans\"","s2.font().size() == 14","s3.font().family() == \"Papyrus\"","s3.font().size() == 15","s4.font().family() == \"Arial\"","s4.font().size() == 12","s5.font().family() == \"Sans\"","s5.font().size() == 14"]}
       ],
@@ -206,7 +206,7 @@
 
         {"kind":"when","text":"We create a few UI components:","code":["var label1 = UI.label(\":)\").group(\"Gradient\").get(JLabel)","var label2 = UI.label(\":D\").group(\"ChessBoard\").get(JLabel)"]},
 
-        {"kind":"and","text":"We run them through the style sheet...","code":["var s1 = ss.applyTo(label1)","var s2 = ss.applyTo(label2)"]},
+        {"kind":"and","text":"We run them through the style sheet...","code":["var s1 = ss.computeStyleFrom(label1)","var s2 = ss.computeStyleFrom(label2)"]},
 
         {"kind":"then","text":"...and we check the results","code":["s1.hasPaintersOnLayer(UI.Layer.BACKGROUND)","s1.painters(UI.Layer.BACKGROUND).size() == 1","s1.painters(UI.Layer.CONTENT).size() == 1","s1.painters(UI.Layer.BORDER).size() == 1","s1.painters(UI.Layer.FOREGROUND).size() == 1","s2.hasPaintersOnLayer(UI.Layer.BACKGROUND)","s2.painters(UI.Layer.BACKGROUND).size() == 1","s2.painters(UI.Layer.CONTENT).size() == 1","s2.painters(UI.Layer.BORDER).size() == 1","s2.painters(UI.Layer.FOREGROUND).size() == 1"]}
       ],
@@ -225,7 +225,7 @@
 
         {"kind":"when","text":"We create a single UI component using style group \"A\":","code":["var label = UI.label(\":)\").group(\"A\").get(JLabel)"]},
 
-        {"kind":"and","text":"We run it through the style sheet...","code":["var s = ss.applyTo(label)"]},
+        {"kind":"and","text":"We run it through the style sheet...","code":["var s = ss.computeStyleFrom(label)"]},
 
         {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 10","s.border().widths().left().get() == 10","s.border().widths().bottom().get() == 10","s.border().widths().right().get() == 10","s.border().colors().everyColor( c -> c == Color.GREEN )"]},
 
@@ -246,9 +246,9 @@
 
         {"kind":"when","text":"We create a single UI component using style group \"A\":","code":["var button = UI.toggleButton(\":)\").group(\"A\").get(JToggleButton)"]},
 
-        {"kind":"and","text":"We run it through the style sheet...","code":["var s = ss.applyTo(button)"]},
+        {"kind":"and","text":"We run it through the style sheet...","code":["var s = ss.computeStyleFrom(button)"]},
 
-        {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 5","s.border().widths().left().get() == 5","s.border().widths().bottom().get() == 5","s.border().widths().right().get() == 5","s.border().colors().everyColor( c -> c == Color.MAGENTA )","s.base().backgroundColor().get() == Color.RED","s.gradient(Layer.BORDER, \"default\").span() == UI.Span.BOTTOM_TO_TOP","s.gradient(Layer.BORDER, \"default\").colors() as java.util.List == [Color.RED, Color.BLUE]","s.shadow(UI.Layer.BACKGROUND, \"named shadow\") == ShadowConf.none()","s.shadow(UI.Layer.CONTENT, \"named shadow\").spreadRadius() == 42","s.shadow(UI.Layer.CONTENT, \"named shadow\").color().get() == Color.CYAN","s.shadow(UI.Layer.CONTENT, \"named shadow\").isInset() == false","s.shadow(UI.Layer.BORDER, \"named shadow\") == ShadowConf.none()","s.shadow(UI.Layer.FOREGROUND, \"named shadow\") == ShadowConf.none()","s.font().family() == \"Ubuntu\"","s.font().size() == 12","s.font().posture() == 0"]}
+        {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 5","s.border().widths().left().get() == 5","s.border().widths().bottom().get() == 5","s.border().widths().right().get() == 5","s.border().colors().everyColor( c -> c == Color.MAGENTA )","s.base().backgroundColor().get() == Color.RED","s.gradient(Layer.BORDER, \"default\").span() == UI.Span.BOTTOM_TO_TOP","s.gradient(Layer.BORDER, \"default\").colors() as java.util.List == [Color.RED, Color.BLUE]","s.shadow(UI.Layer.BACKGROUND, \"named shadow\") == ShadowConf.none()","s.shadow(UI.Layer.CONTENT, \"named shadow\").spreadRadius() == 42","s.shadow(UI.Layer.CONTENT, \"named shadow\").color().get() == Color.CYAN","s.shadow(UI.Layer.CONTENT, \"named shadow\").isInset() == false","s.shadow(UI.Layer.BORDER, \"named shadow\") == ShadowConf.none()","s.shadow(UI.Layer.FOREGROUND, \"named shadow\") == ShadowConf.none()","s.font().family() == \"Ubuntu\"","s.font().size() == 12","s.font().posture().get() == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -265,11 +265,11 @@
 
         {"kind":"when","text":"We create a few UI components:","code":["var button1 = UI.button(\"X\").group(\"A\", \"B\").get(JButton)","var button2 = UI.button(\"Y\").group(\"A\").get(JButton)","var button3 = UI.button(\"Z\").group(\"B\").get(JButton)","var label1 = UI.label(\":)\").group(\"A\").get(JLabel)","var label2 = UI.label(\":D\").group(\"B\").get(JLabel)"]},
 
-        {"kind":"and","text":"We run them through the style sheet...","code":["var s1 = ss.applyTo(button1)","var s2 = ss.applyTo(button2)","var s3 = ss.applyTo(button3)","var s4 = ss.applyTo(label1)","var s5 = ss.applyTo(label2)"]},
+        {"kind":"and","text":"We run them through the style sheet...","code":["var s1 = ss.computeStyleFrom(button1)","var s2 = ss.computeStyleFrom(button2)","var s3 = ss.computeStyleFrom(button3)","var s4 = ss.computeStyleFrom(label1)","var s5 = ss.computeStyleFrom(label2)"]},
 
         {"kind":"then","text":"We first verify that they are not equal to another:","code":["s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5"]},
 
-        {"kind":"and","text":"They are equal to recalculated instances of themselves:","code":["s1 == ss.applyTo(button1)","s2 == ss.applyTo(button2)","s3 == ss.applyTo(button3)","s4 == ss.applyTo(label1)","s5 == ss.applyTo(label2)"]},
+        {"kind":"and","text":"They are equal to recalculated instances of themselves:","code":["s1 == ss.computeStyleFrom(button1)","s2 == ss.computeStyleFrom(button2)","s3 == ss.computeStyleFrom(button3)","s4 == ss.computeStyleFrom(label1)","s5 == ss.computeStyleFrom(label2)"]},
 
         {"kind":"and","text":"We also check that they have the expected commonalities:","code":["[s1, s2, s3, s4, s5].every { it.padding() == Outline.of(24, 72, 42, 12) }","[s1, s2, s3, s4, s5].every { it.border().widths().bottom().get() == 42 }","[s1, s2, s3, s4, s5].every { it.border().topRightArc().get() == Arc.of(9, 9) }","[s1, s2, s3, s4, s5].every { it.border().bottomLeftArc().get() == Arc.of(9, 9) }"]},
 

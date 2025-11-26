@@ -527,49 +527,6 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
 <span class="fc" id="L527">                ._this();</span>
     }
 
-    /**
-     *  Use this to set the font of the wrapped {@link JLabel}.
-     * @param font The font of the text which should be displayed on the label.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     */
-    public final UIForLabel&lt;L&gt; withFont( Font font ) {
-<span class="fc" id="L537">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class, &quot;Use 'UI.FONT_UNDEFINED' instead of null!&quot;);</span>
-<span class="fc" id="L538">        return _with( thisComponent -&gt; {</span>
-<span class="pc bpc" id="L539" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(font) )</span>
-<span class="nc" id="L540">                        thisComponent.setFont(null);</span>
-                    else
-<span class="fc" id="L542">                        thisComponent.setFont(SwingTree.get().scale(font));</span>
-<span class="fc" id="L543">                })</span>
-<span class="fc" id="L544">                ._this();</span>
-    }
-
-    /**
-     *  Use this to dynamically set the font of the wrapped {@link JLabel}
-     *  through the provided view model property.
-     *  When the font wrapped by the provided property changes,
-     *  then so does the font of this label.
-     *
-     * @param font The font property of the text which should be displayed on the label.
-     * @return This builder instance, to allow for method chaining.
-     * @throws IllegalArgumentException if {@code font} is {@code null}.
-     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
-     */
-    public final UIForLabel&lt;L&gt; withFont( Val&lt;Font&gt; font ) {
-<span class="fc" id="L559">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
-<span class="fc" id="L560">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
-<span class="fc" id="L561">        return _withOnShow( font, (thisComponent,v) -&gt; {</span>
-<span class="pc bpc" id="L562" title="1 of 2 branches missed.">                    if ( _isUndefinedFont(v) )</span>
-<span class="nc" id="L563">                        thisComponent.setFont(null);</span>
-                    else
-<span class="fc" id="L565">                        thisComponent.setFont(SwingTree.get().scale(v));</span>
-<span class="fc" id="L566">                })</span>
-<span class="fc" id="L567">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L568">                    thisComponent.setFont(SwingTree.get().scale(font.orElseThrowUnchecked()));</span>
-<span class="fc" id="L569">                })</span>
-<span class="fc" id="L570">                ._this();</span>
-    }
-
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

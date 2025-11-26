@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var component = new JButton()","var optionalUI = UI.of(component).component()"]},
+        {"kind":"given","text":"","code":["var component = new JButton()","var optionalUI = OptionalUI.of(()->UI.of(component))"]},
 
         {"kind":"expect","text":"","code":["optionalUI instanceof OptionalUI","optionalUI.isPresent()"]},
 
@@ -38,7 +38,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+        {"kind":"given","text":"","code":["var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })"]},
 
         {"kind":"expect","text":"","code":["!optionalUI.isPresent()"]}
       ],
@@ -53,7 +53,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var optionalUI = UI.runAndGet({UI.panel().component().map({ p -> new JButton() })})"]},
+        {"kind":"given","text":"","code":["var optionalUI = OptionalUI.of(()->UI.panel()).map({ p -> new JButton() })"]},
 
         {"kind":"expect","text":"","code":["optionalUI.isPresent()"]}
       ],
@@ -68,7 +68,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+        {"kind":"given","text":"","code":["var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })"]},
 
         {"kind":"when","text":"","code":["optionalUI.orElseThrow({new NoSuchElementException()})"]},
 
@@ -85,7 +85,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+        {"kind":"given","text":"","code":["var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })"]},
 
         {"kind":"expect","text":"","code":["optionalUI.orElse(new JButton()) instanceof JButton"]}
       ],
@@ -100,7 +100,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+        {"kind":"given","text":"","code":["var optionalUI = OptionalUI.of(()->UI.panel()).map({ it -> null })"]},
 
         {"kind":"expect","text":"","code":["optionalUI.orElseGet({ new JButton() }) instanceof JButton"]}
       ],

@@ -262,7 +262,7 @@ public final class SwingTree
 <span class="fc" id="L262">            return font;</span>
 
 <span class="fc" id="L264">        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );</span>
-<span class="fc" id="L265">        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );</span>
+<span class="fc" id="L265">        return font.deriveFont( (float) newFontSize );</span>
     }
 
     /**
@@ -514,8 +514,8 @@ public final class SwingTree
 <span class="fc" id="L514">                    Font highDPIFont = _calculateDPIAwarePlatformFont(config.logMarker());</span>
 <span class="fc" id="L515">                    boolean updated = _initialize( highDPIFont );</span>
 <span class="pc bpc" id="L516" title="1 of 2 branches missed.">                    if ( this.scaleFactor.isNot(defaultScale) ) {</span>
-<span class="nc" id="L517">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
-<span class="nc" id="L518">                        log.debug(config.logMarker(), &quot;Setting default font ('{}') to in UIManager to {}&quot;, _DEFAULT_FONT, highDPIFont);</span>
+<span class="fc" id="L517">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
+<span class="fc" id="L518">                        log.debug(config.logMarker(), &quot;Setting default font ('{}') to in UIManager to {}&quot;, _DEFAULT_FONT, highDPIFont);</span>
                     }
 <span class="pc bpc" id="L520" title="1 of 2 branches missed.">                    if ( updated )</span>
 <span class="fc" id="L521">                        _setScalePropertyListeners();</span>
@@ -727,8 +727,8 @@ public final class SwingTree
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
 <span class="fc" id="L729">            Font font = UIManager.getFont( _DEFAULT_FONT );</span>
-<span class="fc bfc" id="L730" title="All 2 branches covered.">            if ( font == null )</span>
-<span class="fc" id="L731">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
+<span class="pc bpc" id="L730" title="1 of 2 branches missed.">            if ( font == null )</span>
+<span class="nc" id="L731">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
 
 <span class="fc" id="L733">            return font;</span>
         }

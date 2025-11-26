@@ -494,7 +494,6 @@ public final class FontConf
      * This property will have no effect on components that don't support text alignment,
      * except for when you use this property to render text through the SwingTree style API
      * (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
-     * </p>
      *
      * @return The horizontal alignment constant of this conf, which
      *         may be NONE, LEFT, CENTER, RIGHT... among others.
@@ -516,7 +515,6 @@ public final class FontConf
      * This property will have no effect on components that don't support text alignment,
      * except for when you use this property to render text through the SwingTree style API
      * (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
-     * </p>
      *
      * @return The vertical alignment constant of this conf, which
      *         may be NONE, TOP, CENTER, BOTTOM... among others.
@@ -959,7 +957,6 @@ public final class FontConf
      * This property will have no effect on components that don't support text alignment,
      * except for when you use this property to render text through the SwingTree style API.
      * (see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)})
-     * </p>
      *
      * <p><b>Recommended Usage:</b><br>
      * For effective alignment specification, use either:
@@ -973,7 +970,6 @@ public final class FontConf
      *     </ul>
      *   </li>
      * </ul>
-     * </p>
      *
      * @param alignment The unified alignment object containing both horizontal and vertical
      *                  alignment specifications. Must not be {@code null}.

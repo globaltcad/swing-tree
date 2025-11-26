@@ -4,7 +4,7 @@
   "narrative":"This specification focuses on the opaqueness of Swing components and\n    how the SwingTree style engine relates to it.\n    The opaqueness flag of a component is an interesting property.\n    You might think that it merely controls whether the background of\n    the component is painted or not.\n\n    But it is actually more than that.\n\n    This flag is at the center of some important rendering optimizations in Swing.\n    If a component is reporting itself as opaque, then Swing assumes that a repaint\n    only needs to be done on that component and not on any of its ancestors.\n    This is a big deal because it means that Swing can avoid repainting a lot of\n    components in the hierarchy.\n\n    This sound relatively straightforward, but it becomes a lot more complicated together\n    with the SwingTree style API and its underlying styling engine.\n    So for example, if a component has rounded corners, and no foundational background\n    color, then it is technically not opaque.\n    Leaving it opaque will cause strange rendering artifacts, due to the parent component\n    not being repainted.\n\n    In this specification we will explore the different scenarios and how the SwingTree\n    style engine deals with them.",
   "subjects":[],
   "statistics":{
-    "runs":"69",
+    "runs":"110",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -1357,7 +1357,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1390,7 +1390,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1423,7 +1423,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1456,7 +1456,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1489,7 +1489,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1522,7 +1522,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1555,7 +1555,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1588,7 +1588,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1621,7 +1621,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1654,7 +1654,7 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1687,7 +1687,40 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}"]}}
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JComboBox` (which is typically opaque) may become non-opaque when transitioning to various styles. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A simple combo box is a component that is opaque by default,\n            but when you style it through the style API then it may\n            become non-opaque/transparent to accommodate that style.\n\n            When reverting the style, the openness should revert to the\n            initial opaqueness.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the combo box based UI declaration, which is temporarily styled:","code":["var ui =","        UI.comboBox()","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) ->","            state.progress() == 1 ? styler.style(it) : it","        )"]},
+
+        {"kind":"and","text":"We then build the combo box:","code":["var comboBox = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque initially because it was not yet styled and it is also opaque by default.\n            This flag tells us that the parent component will not be visible behind the background.\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The combo box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n\n            We check if the combo box has the correct opaqueness:\n        ","code":["comboBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the text pane is now opaque again\n        ","code":["comboBox.isOpaque() == true","comboBox.getBackground() == new JComboBox().getBackground()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","false","false","true","false","true","false","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(UI.color(255,255,255, 254))}","{it.backgroundColor(UI.Color.TRANSPARENT)}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"transparent green\"))}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"blue\")}","{it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors(\"red\", \"green\")).border(1, \"transparent blue\")}","{it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, g2d -> {})}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1811,7 +1844,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -1830,7 +1863,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1840,7 +1873,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -1859,7 +1892,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1869,7 +1902,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -1888,7 +1921,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1898,7 +1931,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -1917,7 +1950,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1927,7 +1960,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -1946,7 +1979,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1956,7 +1989,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -1975,7 +2008,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1985,7 +2018,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -2004,7 +2037,7 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -2014,7 +2047,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
@@ -2033,7 +2066,1143 @@
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
-        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}"]}}
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JBox` may or may not be opaque, depending on its style. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the box based UI declaration, which is temporarily styled:","code":["var ui =","        UI.box().withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying box:","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JBox` may or may not be opaque, depending on its style. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the box based UI declaration, which is temporarily styled:","code":["var ui =","        UI.box().withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying box:","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JBox` may or may not be opaque, depending on its style. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the box based UI declaration, which is temporarily styled:","code":["var ui =","        UI.box().withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying box:","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JBox` may or may not be opaque, depending on its style. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JBox` is a component that is npn-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the box based UI declaration, which is temporarily styled:","code":["var ui =","        UI.box().withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying box:","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JLabel` may or may not be opaque, depending on its style. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JLabel` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the label based UI declaration, which is temporarily styled:","code":["var ui =","        UI.label(\"Hi!\").withSize(100, 100)","        .withStyle({ isOn ? styler(it) : it })"]},
+
+        {"kind":"and","text":"We build the underlying label:","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In Nimbus, a `JCheckBoxMenuItem` is initially transparent, but may or may not be opaque, depending on its style. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            In Nimbus, a `JCheckBoxMenuItem` is a component that is non-opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["UI.runNow(()->{","    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {","        if (\"Nimbus\" == info.getName()) {","            UIManager.setLookAndFeel(info.getClassName());","        }","    }","})","UI.sync()"]},
+
+        {"kind":"and","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","true","true","false","true","false","false","true","false","false"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JCheckBoxMenuItem` is a component that is opaque by default.\n            This test demonstrates that it may or may not change its opaqueness\n            depending on what kind of styles are applied to it.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag that we will use to control the style:","code":["var isOn = false"]},
+
+        {"kind":"and","text":"Then we create the menu item based UI declaration, which is temporarily styled:","code":["var checkBoxMenuItem = UI.runAndGet(()->{","    UI.checkBoxMenuItem(\"Check me out!\").withSize(200, 30)","    .withStyle({ isOn ? styler(it) : it })","    .get(JCheckBoxMenuItem)","})"]},
+
+        {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+
+        {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
+
+        {"kind":"where","text":"","code":{"opaque":["true","true","false","true","true","false","true","true","false","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

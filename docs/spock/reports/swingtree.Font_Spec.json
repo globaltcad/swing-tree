@@ -1,10 +1,10 @@
 {
   "className":"swingtree.Font_Spec",
   "title":"Fonts",
-  "narrative":"As part of the `UI` namespace, SwingTree ships with a custom `Font`\n    sub-type that exposes a set of additional convenience methods for\n    working with fonts in Swing applications.",
+  "narrative":"As part of the `UI` namespace, SwingTree ships with a custom `Font` class,\n    which is an immutable value object containing a lot of properties and methods for\n    working with fonts in Swing applications.",
   "subjects":["swingtree.UI$Font","swingtree.UI","swingtree.UIFactoryMethods"],
   "statistics":{
-    "runs":"7",
+    "runs":"30",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` decodes a font string based on the following\n            format: `family-style-size`. The `style` part is optional and can\n            be one of the following: PLAIN, BOLD, ITALIC, or BOLD_ITALIC.\n            You can also omit the size, in which case the default size of 12\n            multiplied by the current look and feel's scaling factor is used.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var font1 = UI.font('Ubuntu-PLAIN-14')","var font2 = UI.font('Dancing Script-ITALIC-24')"]},
+        {"kind":"given","text":"","code":["var font1 = UI.font('Ubuntu-PLAIN-14').toAwtFont()","var font2 = UI.font('Dancing Script-ITALIC-24').toAwtFont()"]},
 
         {"kind":"expect","text":"","code":["font1.family == 'Ubuntu'","font1.style == Font.PLAIN","font1.size == 14"]},
 
@@ -40,7 +40,7 @@
       "blocks":[
         {"kind":"given","text":"First we setup a system property","code":["System.setProperty('my.fonts.AlloyInk', 'Alloy Ink-ITALIC-42')"]},
 
-        {"kind":"when","text":"We use the `UI.font(String)` method to access the font","code":["var font = UI.font('my.fonts.AlloyInk')"]},
+        {"kind":"when","text":"We use the `UI.font(String)` method to access the font","code":["var font = UI.font('my.fonts.AlloyInk').toAwtFont()"]},
 
         {"kind":"then","text":"The font is correctly parsed","code":["font.family == 'a Alloy Ink'","font.style == Font.ITALIC","font.size == 42"]}
       ],
@@ -55,9 +55,9 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree suing the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
-        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie')"]},
+        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
         {"kind":"expect","text":"The font object has the correct family and size.","code":["font.family == 'Buggie'","font.size == (int)(12 * scalingFactor)","font.style == Font.PLAIN"]},
 
@@ -74,9 +74,9 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree suing the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
-        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie')"]},
+        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
         {"kind":"expect","text":"The font object has the correct family and size.","code":["font.family == 'Buggie'","font.size == (int)(12 * scalingFactor)","font.style == Font.PLAIN"]},
 
@@ -93,9 +93,9 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree suing the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
-        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie')"]},
+        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
         {"kind":"expect","text":"The font object has the correct family and size.","code":["font.family == 'Buggie'","font.size == (int)(12 * scalingFactor)","font.style == Font.PLAIN"]},
 
@@ -112,9 +112,9 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree suing the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
-        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie')"]},
+        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
         {"kind":"expect","text":"The font object has the correct family and size.","code":["font.family == 'Buggie'","font.size == (int)(12 * scalingFactor)","font.style == Font.PLAIN"]},
 
@@ -131,13 +131,494 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree suing the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
-        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie')"]},
+        {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
         {"kind":"expect","text":"The font object has the correct family and size.","code":["font.family == 'Buggie'","font.size == (int)(12 * scalingFactor)","font.style == Font.PLAIN"]},
 
         {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
+
+        {"kind":"when","text":"We fetch the font using the UI.font factory method","code":["var font = UI.font('my.fonts.TestFont').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family, style, and scaled size","code":["font.family == 'Ubuntu'","font.style == Font.BOLD","font.size == Math.round(42 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
+
+        {"kind":"when","text":"We fetch the font using the UI.font factory method","code":["var font = UI.font('my.fonts.TestFont').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family, style, and scaled size","code":["font.family == 'Ubuntu'","font.style == Font.BOLD","font.size == Math.round(42 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
+
+        {"kind":"when","text":"We fetch the font using the UI.font factory method","code":["var font = UI.font('my.fonts.TestFont').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family, style, and scaled size","code":["font.family == 'Ubuntu'","font.style == Font.BOLD","font.size == Math.round(42 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
+
+        {"kind":"when","text":"We fetch the font using the UI.font factory method","code":["var font = UI.font('my.fonts.TestFont').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family, style, and scaled size","code":["font.family == 'Ubuntu'","font.style == Font.BOLD","font.size == Math.round(42 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
+
+        {"kind":"when","text":"We fetch the font using the UI.font factory method","code":["var font = UI.font('my.fonts.TestFont').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family, style, and scaled size","code":["font.family == 'Ubuntu'","font.style == Font.BOLD","font.size == Math.round(42 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can create a font merely bz specifying the family. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family and scaled size","code":["font.family == 'Dancing Script'","font.style == Font.PLAIN","font.size == Math.round(12 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can create a font merely bz specifying the family. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family and scaled size","code":["font.family == 'Dancing Script'","font.style == Font.PLAIN","font.size == Math.round(12 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can create a font merely bz specifying the family. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family and scaled size","code":["font.family == 'Dancing Script'","font.style == Font.PLAIN","font.size == Math.round(12 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can create a font merely bz specifying the family. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family and scaled size","code":["font.family == 'Dancing Script'","font.style == Font.PLAIN","font.size == Math.round(12 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UI.font(String)` factory method can create a font merely bz specifying the family. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+
+        {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
+
+        {"kind":"then","text":"The font has the correct family and scaled size","code":["font.family == 'Dancing Script'","font.style == Font.PLAIN","font.size == Math.round(12 * scalingFactor)"]},
+
+        {"kind":"where","text":"","code":{"scalingFactor":["1f","1.25f","1.5f","1.75f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `Font` object has value semantics.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two `UI.Font`s with the same contents will be considered\n            equal, and if they do not have the same contents, then they are\n            not reported as equal by the `equal` and `hashCode` methods...\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create two reference fonts:","code":["var f1 = UI.Font.of(\"Ubuntu\", UI.FontStyle.BOLD, 14)","var f2 = UI.Font.of(\"Dialog\", UI.FontStyle.ITALIC, 13)"]},
+
+        {"kind":"expect","text":"","code":["f1 != f2","f1.conf() != f2.conf()"]},
+
+        {"kind":"when","text":"","code":["f2 = f2.withName(\"Ubuntu\").withSize(14).withStyle(UI.FontStyle.BOLD)"]},
+
+        {"kind":"then","text":"","code":["f1 == f2","f1.conf() == f2.conf()","f1.hashCode() == f2.hashCode()","f1.conf().hashCode() == f2.conf().hashCode()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `Font` object has insightful String representations.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create two reference fonts:","code":["var f1 = UI.Font.of(\"Ubuntu\", UI.FontStyle.PLAIN, 14)","var f2 = UI.Font.of(\"Dialog\", UI.FontStyle.ITALIC, 11)","var f3 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 17).with((Configurator<FontConf>){FontConf c -> c.strikeThrough(true)})"]},
+
+        {"kind":"expect","text":"","code":["f1.toString() == \"UI.Font[\" +","                        \"family=Ubuntu, size=14, posture=0.0, weight=0.0, spacing=0.0, underlined=false, \" +","                        \"strikeThrough=false, selectionColor=?, transform=?, paint=FontPaintConf[NONE], \" +","                        \"backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?\" +","                    \"]\""]},
+
+        {"kind":"and","text":"","code":["f2.toString() == \"UI.Font[\" +","                        \"family=Dialog, size=11, posture=0.2, weight=0.0, spacing=0.0, underlined=false, \" +","                        \"strikeThrough=false, selectionColor=?, transform=?, paint=FontPaintConf[NONE], \" +","                        \"backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?\" +","                    \"]\""]},
+
+        {"kind":"and","text":"","code":["f3.toString() == \"UI.Font[\" +","                        \"family=Buggie, size=17, posture=0.2, weight=2.0, spacing=0.0, underlined=false, \" +","                        \"strikeThrough=true, selectionColor=?, transform=?, paint=FontPaintConf[NONE], \" +","                        \"backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?\" +","                    \"]\""]},
+
+        {"kind":"when","text":"We create a font with \"unknown\" posture and weight...","code":["var f4 = f3.with((Configurator<FontConf>){FontConf c -> c.weight(-11).posture(-12)})"]},
+
+        {"kind":"then","text":"The string representation will represent such unknown properties with a \"?\":","code":["f4.toString() == \"UI.Font[\" +","                    \"family=Buggie, size=17, posture=?, weight=?, spacing=0.0, underlined=false, \" +","                    \"strikeThrough=true, selectionColor=?, transform=?, paint=FontPaintConf[NONE], \" +","                    \"backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?\" +","                \"]\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `UI.Font` can define text placement information for labels.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On top of what a regular `java.awt.Font` has to offer in terms of properties,\n            a SwingTree `UI.Font` also offers to configure text layout information in the form\n            of vertical and horizontal alignment modes!\n            These additional properties are used by some components, like labels for example,\n            to place you text at a desired location in the component bounds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","              .verticalAlignment(UI.VerticalAlignment.CENTER)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.alignment(UI.Alignment.TOP_CENTER)","})","var font3 = UI.Font.of(\"Dialog\", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","              .verticalAlignment(UI.VerticalAlignment.BOTTOM)","})"]},
+
+        {"kind":"and","text":"A UI declaration where is font is assigned to a label:","code":["var panel =","        UI.panel()","        .add(UI.label(\"How\").withFont(font1))","        .add(UI.label(\"are\").withFont(font2))","        .add(UI.label(\"you?\").withFont(font3))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var label1 = panel.components[0] as JLabel","var label2 = panel.components[1] as JLabel","var label3 = panel.components[2] as JLabel"]},
+
+        {"kind":"expect","text":"The components report the correct alignment codes!","code":["label1.getHorizontalAlignment() == JLabel.LEFT","label1.getVerticalAlignment() == JLabel.CENTER","label2.getHorizontalAlignment() == JLabel.CENTER","label2.getVerticalAlignment() == JLabel.TOP","label3.getHorizontalAlignment() == JLabel.RIGHT","label3.getVerticalAlignment() == JLabel.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `UI.Font` can define text placement information for button types.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On top of what a regular `java.awt.Font` has to offer in terms of properties,\n            a SwingTree `UI.Font` also offers to configure text layout information in the form\n            of vertical and horizontal alignment modes!\n            These additional properties are used by some components, like buttons for example,\n            to place you text at a desired location in the component bounds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","              .verticalAlignment(UI.VerticalAlignment.CENTER)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","                .verticalAlignment(UI.VerticalAlignment.TOP)","})","var font3 = UI.Font.of(\"Dialog\", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","              .verticalAlignment(UI.VerticalAlignment.BOTTOM)","})"]},
+
+        {"kind":"and","text":"A UI declaration where is font is assigned to a label:","code":["var panel =","        UI.panel()","        .add(UI.button(\"How\").withFont(font1))","        .add(UI.toggleButton(\"are\").withFont(font2))","        .add(UI.checkBox(\"you?\").withFont(font3))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var button = panel.components[0] as JButton","var toggle = panel.components[1] as JToggleButton","var check = panel.components[2] as JCheckBox"]},
+
+        {"kind":"expect","text":"The button components report the correct alignment codes!","code":["button.getHorizontalAlignment() == JLabel.LEFT","button.getVerticalAlignment() == JLabel.CENTER","toggle.getHorizontalAlignment() == JLabel.CENTER","toggle.getVerticalAlignment() == JLabel.TOP","check.getHorizontalAlignment() == JLabel.RIGHT","check.getVerticalAlignment() == JLabel.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `UI.Font` can define text placement information for text fields.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On top of what a regular `java.awt.Font` has to offer in terms of properties,\n            a SwingTree `UI.Font` also offers to configure text layout information in the form\n            of vertical and horizontal alignment modes!\n            These additional properties are used by some components, like text fields for example,\n            to place you text at a desired location in the component bounds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.alignment(UI.Alignment.CENTER_LEFT)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","                .verticalAlignment(UI.VerticalAlignment.TOP)","})","var font3 = UI.Font.of(\"Dialog\", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","              .verticalAlignment(UI.VerticalAlignment.BOTTOM)","})"]},
+
+        {"kind":"and","text":"A UI declaration where is font is assigned to a label:","code":["var panel =","        UI.panel()","        .add(UI.textField(\"How\").withFont(font1))","        .add(UI.textField(\"are\").withFont(font2))","        .add(UI.textField(\"you?\").withFont(font3))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var textField1 = panel.components[0] as JTextField","var textField2 = panel.components[1] as JTextField","var textField3 = panel.components[2] as JTextField"]},
+
+        {"kind":"expect","text":"The text fields report the correct alignment codes!","code":["textField1.getHorizontalAlignment() == JLabel.LEFT","textField2.getHorizontalAlignment() == JLabel.CENTER","textField3.getHorizontalAlignment() == JLabel.RIGHT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `UI.Font` can define text placement information for labels reactively.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On top of what a regular `java.awt.Font` has to offer in terms of properties,\n            a SwingTree `UI.Font` also offers to configure text layout information in the form\n            of vertical and horizontal alignment modes!\n            These additional properties are used by some components, like labels for example,\n            to place you text at a desired location in the component bounds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","              .verticalAlignment(UI.VerticalAlignment.CENTER)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.alignment(UI.Alignment.TOP_CENTER)","})","var font3 = UI.Font.of(\"Dialog\", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","              .verticalAlignment(UI.VerticalAlignment.BOTTOM)","})","var fontProp1 = Var.of(font1)","var fontProp2 = Var.of(font2)","var fontProp3 = Var.of(font3)"]},
+
+        {"kind":"and","text":"A UI declaration where is font is assigned to a label:","code":["var panel =","        UI.panel()","        .add(UI.label(\"How\").withFont(fontProp1))","        .add(UI.label(\"are\").withFont(fontProp2))","        .add(UI.label(\"you?\").withFont(fontProp3))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var label1 = panel.components[0] as JLabel","var label2 = panel.components[1] as JLabel","var label3 = panel.components[2] as JLabel"]},
+
+        {"kind":"expect","text":"The components report the correct alignment codes!","code":["label1.getHorizontalAlignment() == JLabel.LEFT","label1.getVerticalAlignment() == JLabel.CENTER","label2.getHorizontalAlignment() == JLabel.CENTER","label2.getVerticalAlignment() == JLabel.TOP","label3.getHorizontalAlignment() == JLabel.RIGHT","label3.getVerticalAlignment() == JLabel.BOTTOM"]},
+
+        {"kind":"when","text":"We swap the fonts...","code":["fontProp1.set(font2)","fontProp2.set(font3)","fontProp3.set(font1)","UI.sync()"]},
+
+        {"kind":"then","text":"The alignments are updated accordingly!","code":["label1.getHorizontalAlignment() == JLabel.CENTER","label1.getVerticalAlignment() == JLabel.TOP","label2.getHorizontalAlignment() == JLabel.RIGHT","label2.getVerticalAlignment() == JLabel.BOTTOM","label3.getHorizontalAlignment() == JLabel.LEFT","label3.getVerticalAlignment() == JLabel.CENTER"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `UI.Font` can define text placement information for button types reactively.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On top of what a regular `java.awt.Font` has to offer in terms of properties,\n            a SwingTree `UI.Font` also offers to configure text layout information in the form\n            of vertical and horizontal alignment modes!\n            These additional properties are used by some components, like buttons for example,\n            to place you text at a desired location in the component bounds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","              .verticalAlignment(UI.VerticalAlignment.CENTER)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","                .verticalAlignment(UI.VerticalAlignment.TOP)","})","var font3 = UI.Font.of(\"Dialog\", 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","              .verticalAlignment(UI.VerticalAlignment.BOTTOM)","})","var fontProp1 = Var.of(font1)","var fontProp2 = Var.of(font2)","var fontProp3 = Var.of(font3)"]},
+
+        {"kind":"and","text":"A UI declaration where is font is assigned to a label:","code":["var panel =","        UI.panel()","        .add(UI.button(\"How\").withFont(fontProp1))","        .add(UI.toggleButton(\"are\").withFont(fontProp2))","        .add(UI.checkBox(\"you?\").withFont(fontProp3))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var button = panel.components[0] as JButton","var toggle = panel.components[1] as JToggleButton","var check = panel.components[2] as JCheckBox"]},
+
+        {"kind":"expect","text":"The button components report the correct alignment codes!","code":["button.getHorizontalAlignment() == JLabel.LEFT","button.getVerticalAlignment() == JLabel.CENTER","toggle.getHorizontalAlignment() == JLabel.CENTER","toggle.getVerticalAlignment() == JLabel.TOP","check.getHorizontalAlignment() == JLabel.RIGHT","check.getVerticalAlignment() == JLabel.BOTTOM"]},
+
+        {"kind":"when","text":"We swap the fonts...","code":["fontProp1.set(font2)","fontProp2.set(font3)","fontProp3.set(font1)","UI.sync()"]},
+
+        {"kind":"then","text":"The alignments are updated accordingly!","code":["check.getHorizontalAlignment() == JLabel.LEFT","check.getVerticalAlignment() == JLabel.CENTER","button.getHorizontalAlignment() == JLabel.CENTER","button.getVerticalAlignment() == JLabel.TOP","toggle.getHorizontalAlignment() == JLabel.RIGHT","toggle.getVerticalAlignment() == JLabel.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree `UI.Font` can define text placement information for text fields reactively.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On top of what a regular `java.awt.Font` has to offer in terms of properties,\n            a SwingTree `UI.Font` also offers to configure text layout information in the form\n            of vertical and horizontal alignment modes!\n            These additional properties are used by some components, like text fields for example,\n            to place you text at a desired location in the component bounds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","              .verticalAlignment(UI.VerticalAlignment.CENTER)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","                .verticalAlignment(UI.VerticalAlignment.TOP)","})","var font3 = UI.Font.of(\"Dialog\", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->","    return it.alignment(UI.Alignment.BOTTOM_RIGHT)","})","var fontProp1 = Var.of(font1)","var fontProp2 = Var.of(font2)","var fontProp3 = Var.of(font3)"]},
+
+        {"kind":"and","text":"A UI declaration where is font is assigned to a label:","code":["var panel =","        UI.panel()","        .add(UI.textField(\"How\").withFont(fontProp1))","        .add(UI.textField(\"are\").withFont(fontProp2))","        .add(UI.textField(\"you?\").withFont(fontProp3))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var textField1 = panel.components[0] as JTextField","var textField2 = panel.components[1] as JTextField","var textField3 = panel.components[2] as JTextField"]},
+
+        {"kind":"expect","text":"The text fields report the correct alignment codes!","code":["textField1.getHorizontalAlignment() == JLabel.LEFT","textField2.getHorizontalAlignment() == JLabel.CENTER","textField3.getHorizontalAlignment() == JLabel.RIGHT"]},
+
+        {"kind":"when","text":"We swap the fonts...","code":["fontProp1.set(font2)","fontProp2.set(font3)","fontProp3.set(font1)","UI.sync()"]},
+
+        {"kind":"then","text":"The alignments are updated accordingly!","code":["textField1.getHorizontalAlignment() == JLabel.CENTER","textField2.getHorizontalAlignment() == JLabel.RIGHT","textField3.getHorizontalAlignment() == JLabel.LEFT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree UI.Font can define text placement information for JTextPane components.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The JTextPane component supports paragraph alignment through StyledDocument attributes.\n            SwingTree UI.Font alignment properties are applied to JTextPane using StyleConstants.setAlignment().\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","})","var font3 = UI.Font.of(\"Dialog\", 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","})","var font4 = UI.Font.of(\"Arial\", UI.FontStyle.PLAIN, 12).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.TRAILING)","})"]},
+
+        {"kind":"and","text":"A UI declaration where fonts are assigned to text panes:","code":["var panel =","        UI.panel()","        .add(UI.textPane().withText(\"Left aligned text\").withFont(font1))","        .add(UI.textPane().withText(\"Center aligned text\").withFont(font2))","        .add(UI.textPane().withText(\"Right aligned text\").withFont(font3))","        .add(UI.textPane().withText(\"Justified text\").withFont(font4))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var textPane1 = panel.components[0] as JTextPane","var textPane2 = panel.components[1] as JTextPane","var textPane3 = panel.components[2] as JTextPane","var textPane4 = panel.components[3] as JTextPane"]},
+
+        {"kind":"expect","text":"The text panes report the correct alignment through their styled documents!","code":["getTextPaneAlignment(textPane1) == StyleConstants.ALIGN_LEFT","getTextPaneAlignment(textPane2) == StyleConstants.ALIGN_CENTER","getTextPaneAlignment(textPane3) == StyleConstants.ALIGN_RIGHT","getTextPaneAlignment(textPane4) == StyleConstants.ALIGN_JUSTIFIED"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A SwingTree UI.Font can define text placement information for JTextPane components reactively.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            JTextPane alignment should update reactively when the font property changes.\n            This ensures dynamic alignment updates work properly with reactive programming.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create various fonts with custom alignments:","code":["var font1 = UI.Font.of(\"Buggie\", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","})","var font2 = UI.Font.of(\"Ubuntu\", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","})","var font3 = UI.Font.of(\"Dialog\", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->","    return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","})","var fontProp = Var.of(font1)"]},
+
+        {"kind":"and","text":"A UI declaration with a reactive font property:","code":["var textPane = UI.textPane().withText(\"Dynamic alignment text\").withFont(fontProp).get(JTextPane)"]},
+
+        {"kind":"expect","text":"The text pane starts with left alignment","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_LEFT"]},
+
+        {"kind":"when","text":"We change the font property to center alignment","code":["fontProp.set(font2)","UI.sync()"]},
+
+        {"kind":"then","text":"The text pane alignment updates to center","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_CENTER"]},
+
+        {"kind":"when","text":"We change the font property to right alignment","code":["fontProp.set(font3)","UI.sync()"]},
+
+        {"kind":"then","text":"The text pane alignment updates to right","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT"]},
+
+        {"kind":"when","text":"We change back to left alignment","code":["fontProp.set(font1)","UI.sync()"]},
+
+        {"kind":"then","text":"The text pane alignment returns to left","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_LEFT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"JTextPane alignment handles edge cases correctly.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Test edge cases like empty text, very long text, and alignment changes with existing content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create fonts with different alignments:","code":["var leftFont = UI.Font.of(\"Arial\", 12).with((Configurator<FontConf>){","    it.horizontalAlignment(UI.HorizontalAlignment.LEFT)","})","var centerFont = UI.Font.of(\"Arial\", 12).with((Configurator<FontConf>){","    it.horizontalAlignment(UI.HorizontalAlignment.CENTER)","})","var fontProp = Var.of(leftFont)"]},
+
+        {"kind":"and","text":"A text pane with empty content","code":["var emptyTextPane = UI.textPane().withText(\"\").withFont(fontProp).get(JTextPane)"]},
+
+        {"kind":"and","text":"A text pane with very long content","code":["var longText = \"This is a very long text that should wrap and demonstrate alignment behavior \" * 10","var longTextPane = UI.textPane().withText(longText).withFont(fontProp).get(JTextPane)"]},
+
+        {"kind":"expect","text":"Empty text pane has correct initial alignment","code":["getTextPaneAlignment(emptyTextPane) == StyleConstants.ALIGN_LEFT","getTextPaneAlignment(longTextPane) == StyleConstants.ALIGN_LEFT"]},
+
+        {"kind":"when","text":"We change alignment on empty text pane","code":["fontProp.set(centerFont)","UI.sync()"]},
+
+        {"kind":"then","text":"Empty text pane alignment updates correctly","code":["getTextPaneAlignment(emptyTextPane) == StyleConstants.ALIGN_CENTER","getTextPaneAlignment(longTextPane) == StyleConstants.ALIGN_CENTER"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"JTextPane alignment is preserved when text content changes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Verify that alignment settings persist when the text content of JTextPane is modified.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A font with right alignment","code":["var rightFont = UI.Font.of(\"Arial\", UI.FontStyle.PLAIN, 12).with((Configurator<FontConf>){","    it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)","})"]},
+
+        {"kind":"and","text":"A text pane with initial content","code":["var textPane = UI.textPane().withText(\"Initial text\").withFont(rightFont).get(JTextPane)"]},
+
+        {"kind":"expect","text":"Text pane starts with right alignment","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT"]},
+
+        {"kind":"when","text":"We modify the text content","code":["textPane.setText(\"Modified text content\")"]},
+
+        {"kind":"then","text":"Alignment is preserved after text modification","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT"]},
+
+        {"kind":"when","text":"We append more text","code":["textPane.setText(textPane.text + \" with additional content\")"]},
+
+        {"kind":"then","text":"Alignment remains right-aligned","code":["getTextPaneAlignment(textPane) == StyleConstants.ALIGN_RIGHT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Text alignment for JTextPane components can be configured through the style API.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The JTextPane component supports paragraph alignment through StyledDocument attributes.\n            If you specify the alignment in the style API, then SwingTree will correctly install this property for you.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI declaration where text pane have their text alignment specified through the Style API:","code":["var panel =","        UI.panel()","        .add(UI.textPane().withText(\"Left aligned text\").withStyle({it.fontAlignment(UI.HorizontalAlignment.LEFT)}))","        .add(UI.textPane().withText(\"Center aligned text\").withStyle({it.fontAlignment(UI.HorizontalAlignment.CENTER)}))","        .add(UI.textPane().withText(\"Right aligned text\").withStyle({it.fontAlignment(UI.HorizontalAlignment.RIGHT)}))","        .add(UI.textPane().withText(\"Justified text\").withStyle({it.fontAlignment(UI.HorizontalAlignment.TRAILING)}))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"","code":["var textPane1 = panel.components[0] as JTextPane","var textPane2 = panel.components[1] as JTextPane","var textPane3 = panel.components[2] as JTextPane","var textPane4 = panel.components[3] as JTextPane"]},
+
+        {"kind":"expect","text":"The text panes report the correct alignment through their styled documents!","code":["getTextPaneAlignment(textPane1) == StyleConstants.ALIGN_LEFT","getTextPaneAlignment(textPane2) == StyleConstants.ALIGN_CENTER","getTextPaneAlignment(textPane3) == StyleConstants.ALIGN_RIGHT","getTextPaneAlignment(textPane4) == StyleConstants.ALIGN_JUSTIFIED"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

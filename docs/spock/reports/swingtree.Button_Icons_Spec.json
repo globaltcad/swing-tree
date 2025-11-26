@@ -4,7 +4,7 @@
   "narrative":"In SwingTree there are various kinds of\n    button based widget types. All of these\n    button types can have different kinds of icons\n    for different parts of a user interaction:\n\n    - A standard icon for most situation.\n    - An on rollover / hover icon for when the mouse\n      cursor moves over the button type.\n    - A on press icon, which is shown when the user\n      presses the button.\n    - An icon shown when the component is disabled\n    - An icon shown when the component is selected\n    - An icon shown when the component is selected AND disabled\n    - An icon shown when the component is selected AND being hovered over\n\n    In this specification we show you all of the methods\n    for specifying these icons and ensure that they wor as intended.",
   "subjects":["swingtree.UIForAnyButton","swingtree.UIForToggleButton","swingtree.UIForRadioButton","swingtree.UIForMenuItem"],
   "statistics":{
-    "runs":"154",
+    "runs":"178",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -4223,6 +4223,510 @@
         {"kind":"then","text":"The disabled and selected icon of the `JToggleButton` has the expected dimensions!","code":["int maxDim = Math.max(UI.scale(80) - toggleButton.insets.left - toggleButton.insets.right, UI.scale(30) - toggleButton.insets.top - toggleButton.insets.bottom)","toggleButton.getDisabledSelectedIcon().getIconWidth() == maxDim","toggleButton.getDisabledSelectedIcon().getIconHeight() == maxDim"]},
 
         {"kind":"where","text":"We test this with different UI scaling factors.","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(int)` to define the gap between a button icon and text. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gap)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.\n            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,\n            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,\n            without any additional scaling applied by SwingTree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(uiScale)","var gapProperty = Var.of(gap)"]},
+
+        {"kind":"and","text":"","code":["var check = UI.checkBoxMenuItem(\"I have a text gap!\")","                    .withIconTextGap(gapProperty)","                    .get(JCheckBoxMenuItem)"]},
+
+        {"kind":"expect","text":"","code":["check.getIconTextGap() == expectedGap"]},
+
+        {"kind":"when","text":"","code":["gapProperty.update( n -> n + 2 )","UI.sync()"]},
+
+        {"kind":"then","text":"","code":["check.getIconTextGap() == expectedGap + 2"]},
+
+        {"kind":"where","text":"We test this with different UI scaling factors.","code":{"gap":["0","0","0","0","2","2","2","2","3","3","3","3"],"uiScale":["1","2","2.5","3","1","2","2.5","3","1","2","2.5","3"],"expectedGap":["0","0","0","0","2","2","2","2","3","3","3","3"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
