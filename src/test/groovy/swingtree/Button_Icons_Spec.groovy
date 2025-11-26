@@ -2158,4 +2158,79 @@ class Button_Icons_Spec extends Specification
             uiScale << [1, 2, 3]
     }
 
+    def 'Use `withIconTextGap(int)` to define the gap between a button icon and text.'(
+        int gap, float uiScale, int expectedGap
+    ) {
+        reportInfo """
+            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.
+            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,
+            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,
+            without any additional scaling applied by SwingTree.
+        """
+        given :
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and :
+            var check = UI.checkBoxMenuItem("I have a text gap!")
+                                .withIconTextGap(gap)
+                                .get(JCheckBoxMenuItem)
+        expect :
+            check.getIconTextGap() == expectedGap
+
+        where : 'We test this with different UI scaling factors.'
+            gap | uiScale | expectedGap
+             0  | 1       | 0
+             0  | 2       | 0
+             0  | 2.5     | 0
+             0  | 3       | 0
+             2  | 1       | 2
+             2  | 2       | 2
+             2  | 2.5     | 2
+             2  | 3       | 2
+             3  | 1       | 3
+             3  | 2       | 3
+             3  | 2.5     | 3
+             3  | 3       | 3
+    }
+
+    def 'Use `withIconTextGap(Val<Integer>)` to dynamically define the gap between a button icon and text.'(
+        int gap, float uiScale, int expectedGap
+    ) {
+        reportInfo """
+            Note that the icon-text gap is not scaled automatically based on the UI scaling factor by SwingTree.
+            Instead, SwingTree expects the LookAndFeel to handle the scaling of the icon-text gap internally,
+            when rendering the component. Therefore, when you set a custom gap, the value you provide is used as-is,
+            without any additional scaling applied by SwingTree.
+        """
+        given :
+            SwingTree.get().setUiScaleFactor(uiScale)
+            var gapProperty = Var.of(gap)
+        and :
+            var check = UI.checkBoxMenuItem("I have a text gap!")
+                                .withIconTextGap(gapProperty)
+                                .get(JCheckBoxMenuItem)
+        expect :
+            check.getIconTextGap() == expectedGap
+
+        when :
+            gapProperty.update( n -> n + 2 )
+            UI.sync()
+        then :
+            check.getIconTextGap() == expectedGap + 2
+
+        where : 'We test this with different UI scaling factors.'
+            gap | uiScale | expectedGap
+             0  | 1       | 0
+             0  | 2       | 0
+             0  | 2.5     | 0
+             0  | 3       | 0
+             2  | 1       | 2
+             2  | 2       | 2
+             2  | 2.5     | 2
+             2  | 3       | 2
+             3  | 1       | 3
+             3  | 2       | 3
+             3  | 2.5     | 3
+             3  | 3       | 3
+    }
+
 }
