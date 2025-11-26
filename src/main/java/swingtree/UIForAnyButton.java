@@ -1557,7 +1557,46 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 ._this();
     }
 
+    /**
+     *  Sets the gap between icon and text for the wrapped button type,
+     *  if both the icon and text properties are set.
+     *  The gap is specified in "developer pixels" where the look and feel is expected
+     *  to automatically scale the gap according to the current {@link UI#scale()} factor.
+     *  <p>
+     *  The default value of this property is 4 pixels.
+     *
+     * @param gap The desired gap between icon and text in "developer pixels".
+     * @return This very builder to allow for method chaining.
+     * @see AbstractButton#setIconTextGap(int)
+     */
+    public final I withIconTextGap( int gap ) {
+        return _with(c -> {
+            c.setIconTextGap(gap);
+        })._this();
+    }
 
+    /**
+     *  Binds an integer property to the gap between icon and text for the wrapped button type,
+     *  if both the icon and text properties are set.
+     *  The gap is specified in "developer pixels" where the look and feel is expected
+     *  to automatically scale the gap according to the current {@link UI#scale()} factor.
+     *  <p>
+     *  The default value of this property is 4 pixels.
+     *
+     * @param gap The integer property which determines the gap between icon and text in "developer pixels".
+     * @return This very builder to allow for method chaining.
+     * @see AbstractButton#setIconTextGap(int)
+     * @throws NullPointerException if {@code gap} is {@code null}!
+     * @throws IllegalArgumentException if {@code gap} is a {@code Val} property
+     *                                  that permits {@code null} values.
+     */
+    public final I withIconTextGap( Val<Integer> gap ) {
+        Objects.requireNonNull(gap);
+        NullUtil.nullPropertyCheck(gap,"gap", "The gap between a button icon and text may not be modelled using null!");
+        return _withOnShow( gap, AbstractButton::setIconTextGap)
+                ._with( c -> c.setIconTextGap(gap.get()))
+                ._this();
+    }
 
     private static void _installAutomaticIconApplier(
         AbstractButton thisComponent,
