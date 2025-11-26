@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FontPaintConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">FontPaintConf.java</span></div><h1>FontPaintConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.SwingTree;
+import swingtree.api.Configurator;
+
+import javax.swing.JComponent;
+import java.awt.*;
+import java.lang.ref.WeakReference;
+import java.util.Objects;
+
+/**
+ *  An internal class that holds immutable configuration data
+ *  needed for defining the {@link java.awt.Paint} for
+ *  the font of a UI component.
+ *  &lt;p&gt;
+ *  Instances of this hold either a {@link Color}, a {@link Paint}, a {@link NoiseConf},
+ *  or a {@link GradientConf} object, but not more than one,
+ *  so this means that only one of these objects can be non-null
+ *  at a time the other three must be null.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class FontPaintConf
+{
+<span class="fc" id="L28">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontPaintConf.class);</span>
+<span class="fc" id="L29">    private static final FontPaintConf _NONE = new FontPaintConf(null, null, null, null);</span>
+
+<span class="fc" id="L31">    public static FontPaintConf none() { return _NONE; }</span>
+
+    public static FontPaintConf of(
+            @Nullable Color        color,
+            @Nullable Paint        paint,
+            @Nullable NoiseConf    noise,
+            @Nullable GradientConf gradient
+    ) {
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        color    = StyleUtil.isUndefinedColor(color)    ? null : color;</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        noise    = NoiseConf.none().equals(noise)       ? null : noise;</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        gradient = GradientConf.none().equals(gradient) ? null : gradient;</span>
+<span class="pc bpc" id="L42" title="1 of 8 branches missed.">        if ( color == null &amp;&amp; paint == null &amp;&amp; noise == null &amp;&amp; gradient == null )</span>
+<span class="nc" id="L43">            return _NONE;</span>
+
+<span class="fc" id="L45">        return new FontPaintConf(color, paint, noise, gradient);</span>
+    }
+
+    private final @Nullable Color _color;
+    private final @Nullable Paint _paint;
+    private final @Nullable NoiseConf _noise;
+    private final @Nullable GradientConf _gradient;
+
+
+    FontPaintConf(
+        @Nullable Color color,
+        @Nullable Paint paint,
+        @Nullable NoiseConf noise,
+        @Nullable GradientConf gradient
+<span class="fc" id="L59">    ) {</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if ( color != null ) {</span>
+<span class="fc" id="L61">            paint    = null;</span>
+<span class="fc" id="L62">            noise    = null;</span>
+<span class="fc" id="L63">            gradient = null;</span>
+        }
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if ( paint != null ) {</span>
+<span class="fc" id="L66">            color    = null;</span>
+<span class="fc" id="L67">            noise    = null;</span>
+<span class="fc" id="L68">            gradient = null;</span>
+        }
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if ( noise != null ) {</span>
+<span class="fc" id="L71">            color    = null;</span>
+<span class="fc" id="L72">            paint    = null;</span>
+<span class="fc" id="L73">            gradient = null;</span>
+        }
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if ( gradient != null ) {</span>
+<span class="fc" id="L76">            color = null;</span>
+<span class="fc" id="L77">            paint = null;</span>
+<span class="fc" id="L78">            noise = null;</span>
+        }
+<span class="fc" id="L80">        _color    = color;</span>
+<span class="fc" id="L81">        _paint    = paint;</span>
+<span class="fc" id="L82">        _noise    = noise;</span>
+<span class="fc" id="L83">        _gradient = gradient;</span>
+<span class="fc" id="L84">    }</span>
+
+    FontPaintConf color( Color color ) {
+<span class="nc" id="L87">        return of(color, null, null, null);</span>
+    }
+
+    FontPaintConf paint( Paint paint ) {
+<span class="nc" id="L91">        return of(null, paint, null, null);</span>
+    }
+
+    FontPaintConf noise( Configurator&lt;NoiseConf&gt; noiseConfigurator ) {
+<span class="fc" id="L95">        Objects.requireNonNull(noiseConfigurator);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        NoiseConf noise = _noise == null ? NoiseConf.none() : _noise;</span>
+        try {
+<span class="fc" id="L98">            noise = noiseConfigurator.configure(noise);</span>
+<span class="fc" id="L99">            return of(null, null, noise, null);</span>
+<span class="nc" id="L100">        } catch ( Exception e ) {</span>
+<span class="nc" id="L101">            log.error(SwingTree.get().logMarker(), &quot;Failed to apply noise configuration.&quot;, e);</span>
+        }
+<span class="nc" id="L103">        return this;</span>
+    }
+
+    FontPaintConf gradient( Configurator&lt;GradientConf&gt; gradientConfigurator ) {
+<span class="fc" id="L107">        Objects.requireNonNull(gradientConfigurator);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        GradientConf gradient = _gradient == null ? GradientConf.none() : _gradient;</span>
+        try {
+<span class="fc" id="L110">            gradient = gradientConfigurator.configure(gradient);</span>
+<span class="fc" id="L111">            return of(null, null, null, gradient);</span>
+<span class="nc" id="L112">        } catch ( Exception e ) {</span>
+<span class="nc" id="L113">            log.error(SwingTree.get().logMarker(), &quot;Failed to apply gradient configuration.&quot;, e);</span>
+        }
+<span class="nc" id="L115">        return this;</span>
+    }
+
+    @Nullable Paint getFor( BoxModelConf boxModelConf ) {
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (_color != null)</span>
+<span class="fc" id="L120">            return _color;</span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (_paint != null)</span>
+<span class="nc" id="L122">            return _paint;</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if (_noise != null)</span>
+<span class="fc" id="L124">            return StyleRenderer._createNoisePaint(boxModelConf, _noise);</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (_gradient != null)</span>
+<span class="fc" id="L126">            return StyleRenderer._createGradientPaint(boxModelConf, _gradient);</span>
+<span class="nc" id="L127">        return null;</span>
+    }
+
+    @Nullable Paint getFor(JComponent component) {
+<span class="fc" id="L131">        return new FontPaint(this, new WeakReference&lt;&gt;(component));</span>
+    }
+
+    public boolean representsColor( @Nullable Color color ) {
+<span class="pc bpc" id="L135" title="3 of 8 branches missed.">        return Objects.equals(color, _color) &amp;&amp;</span>
+                _paint    == null &amp;&amp;
+                _gradient == null &amp;&amp;
+                _noise    == null;
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L144" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
+<span class="fc" id="L145">        FontPaintConf that = (FontPaintConf) o;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        return Objects.equals(_color, that._color) &amp;&amp;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">               Objects.equals(_paint, that._paint) &amp;&amp;</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">               Objects.equals(_noise, that._noise) &amp;&amp;</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">               Objects.equals(_gradient, that._gradient);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L154">        return Objects.hash(_color, _paint, _noise, _gradient);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L160">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L161">        String paint = &quot;?&quot;;</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (_color != null)</span>
+<span class="fc" id="L163">            paint = StyleUtil.toString(_color);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (_paint != null)</span>
+<span class="fc" id="L165">            paint = StyleUtil.toString(_paint);</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        if (_noise != null)</span>
+<span class="nc" id="L167">            paint = _noise.toString();</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (_gradient != null)</span>
+<span class="nc" id="L169">            paint = _gradient.toString();</span>
+<span class="fc" id="L170">        return this.getClass().getSimpleName() + &quot;[&quot; + paint + &quot;]&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

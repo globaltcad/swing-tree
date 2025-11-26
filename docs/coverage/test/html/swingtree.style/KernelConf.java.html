@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KernelConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">KernelConf.java</span></div><h1>KernelConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.layout.Size;
+
+import java.awt.image.Kernel;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class KernelConf
+{
+<span class="fc" id="L15">    private static final KernelConf _NONE = new KernelConf(0, 0, new float[0]);</span>
+
+    public static KernelConf none() {
+<span class="fc" id="L18">        return _NONE;</span>
+    }
+
+    static KernelConf of( int width, int height, float[] data ) {
+<span class="pc bpc" id="L22" title="3 of 4 branches missed.">        if (</span>
+            _NONE._width == width &amp;&amp;
+            _NONE._height == height &amp;&amp;
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            Arrays.equals(_NONE._data, data)</span>
+        ) {
+<span class="nc" id="L27">            return _NONE;</span>
+        }
+<span class="fc" id="L29">        int size = width * height;</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if ( data.length != size ) {</span>
+<span class="nc" id="L31">            return none();</span>
+        }
+<span class="fc" id="L33">        return new KernelConf(width, height, data);</span>
+    }
+
+    public static KernelConf of(
+            Size size,
+            double... data
+    ) {
+<span class="fc" id="L40">        Optional&lt;Float&gt; width = size.width();</span>
+<span class="fc" id="L41">        Optional&lt;Float&gt; height = size.height();</span>
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        if ( !width.isPresent() || !height.isPresent() ) {</span>
+<span class="nc" id="L43">            return none();</span>
+        }
+<span class="fc" id="L45">        float[] saveCopy = new float[data.length];</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for ( int i = 0; i &lt; data.length; i++ ) {</span>
+<span class="fc" id="L47">            saveCopy[i] = (float)data[i];</span>
+        }
+<span class="fc" id="L49">        return of(</span>
+<span class="fc" id="L50">            width.get().intValue(),</span>
+<span class="fc" id="L51">            height.get().intValue(),</span>
+            saveCopy
+        );
+    }
+
+    private final int     _width;
+    private final int     _height;
+    private final float[] _data;
+
+
+<span class="fc" id="L61">    private KernelConf( int width, int height, float[] data ) {</span>
+<span class="fc" id="L62">        _width  = width;</span>
+<span class="fc" id="L63">        _height = height;</span>
+<span class="fc" id="L64">        _data   = Objects.requireNonNull(data);</span>
+<span class="fc" id="L65">    }</span>
+
+    public int width() {
+<span class="nc" id="L68">        return _width;</span>
+    }
+
+    public int height() {
+<span class="nc" id="L72">        return _height;</span>
+    }
+
+    public float[] data() {
+<span class="nc" id="L76">        return _data;</span>
+    }
+
+    KernelConf simplified() {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if ( _data.length == 0 ) {</span>
+<span class="fc" id="L81">            return none();</span>
+        }
+        // No width or height, so we can't simplify
+<span class="pc bpc" id="L84" title="2 of 4 branches missed.">        if ( _width == 0 || _height == 0 ) {</span>
+<span class="nc" id="L85">            return this;</span>
+        }
+        // If the kernel is 1x1, we can simplify
+<span class="pc bpc" id="L88" title="5 of 6 branches missed.">        if ( _width == 1 &amp;&amp; _height == 1 &amp;&amp; _data[0] == 1.0f ) {</span>
+<span class="nc" id="L89">            return none();</span>
+        }
+<span class="fc" id="L91">        return this;</span>
+    }
+
+    Kernel toAwtKernel() {
+<span class="nc" id="L95">        return new Kernel(_width, _height, _data);</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if ( this == obj ) {</span>
+<span class="fc" id="L101">            return true;</span>
+        }
+<span class="pc bpc" id="L103" title="2 of 4 branches missed.">        if ( obj == null || getClass() != obj.getClass() ) {</span>
+<span class="nc" id="L104">            return false;</span>
+        }
+<span class="fc" id="L106">        KernelConf that = (KernelConf) obj;</span>
+<span class="pc bpc" id="L107" title="3 of 4 branches missed.">        return _width == that._width &amp;&amp;</span>
+               _height == that._height &amp;&amp;
+<span class="pc bnc" id="L109" title="All 2 branches missed.">               Arrays.equals(_data, that._data);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L114">        int result = Objects.hash(_width, _height);</span>
+<span class="fc" id="L115">        result = 31 * result + Arrays.hashCode(_data);</span>
+<span class="fc" id="L116">        return result;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if ( this.equals(none()) )</span>
+<span class="nc" id="L122">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+
+<span class="nc" id="L124">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+                &quot;width=&quot;  + _width                 + &quot;, &quot; +
+                &quot;height=&quot; + _height                + &quot;, &quot; +
+<span class="nc" id="L127">                &quot;data=&quot;   + Arrays.toString(_data) +</span>
+            ']';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
