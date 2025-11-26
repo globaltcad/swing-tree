@@ -130,7 +130,7 @@ class Declarative_Tables_Spec extends Specification
         and : 'A simple table UI with a nested list based data table model.'
             var ui =
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
-                        .updateTableOn(event)
+                        .updateTableOn(event as Event)
         and : 'We actually build the component:'
             var table = ui.get(JTable)
         when : 'We fire the event.'
