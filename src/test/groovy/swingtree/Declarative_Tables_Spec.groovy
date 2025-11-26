@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Event
+import sprouts.Var
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -129,7 +130,7 @@ class Declarative_Tables_Spec extends Specification
         and : 'A simple table UI with a nested list based data table model.'
             var ui =
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
-                        .updateTableOn(event)
+                        .updateTableOn(event as Event)
         and : 'We actually build the component:'
             var table = ui.get(JTable)
         when : 'We fire the event.'
@@ -142,6 +143,35 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(1, 0) == 7
             table.getValueAt(1, 1) == 8
             table.getValueAt(1, 2) == 9
+    }
+
+    def 'A table can update itself reactively when bound to an `Observable`.'()
+    {
+        reportInfo """
+            Binding to an `Observable` is the most versatile and generic way of updating a table reactively.
+            This observable may be derived from things like properties, property lists or a simple `Event`.
+            You may declare them in you view model and expose observables derived from them to your view to then bind
+            to your tables. Changes in your VM will then automatically update the table!
+        """
+        given : 'A simple property holding some data.'
+            var data = Var.of([[1, 2, 3], [7, 8, 9]])
+
+        and : 'A simple table UI with a nested list based data table model.'
+            var ui =
+                        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data.get() })
+                        .updateTableOn(data.view())
+        and : 'We actually build the component:'
+            var table = ui.get(JTable)
+        when : 'We change the data in the property.'
+            data.set([[11, 12, 13], [17, 18, 19]])
+        then : 'The table UI is updated automatically:'
+            table.getRowCount() == 2
+            table.getValueAt(0, 0) == 11
+            table.getValueAt(0, 1) == 12
+            table.getValueAt(0, 2) == 13
+            table.getValueAt(1, 0) == 17
+            table.getValueAt(1, 1) == 18
+            table.getValueAt(1, 2) == 19
     }
 
     def 'Configure which cells are editable or not as part of the table model declaration.'()

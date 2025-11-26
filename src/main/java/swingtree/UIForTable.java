@@ -3,6 +3,9 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
+import sprouts.Observable;
+import sprouts.Vals;
+import sprouts.Var;
 import swingtree.api.Buildable;
 import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
@@ -697,18 +700,37 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
     /**
      *  Use this to bind an {@link sprouts.Event} to the {@link TableModel} of this table
-     *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method.
-     *  This is useful if you want to update the table when the data source changes.
+     *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method when
+     *  the {@link Event} triggers a change event through {@link Event#fire()}.
+     *  This is useful when you want to update the table after the data source changes.
      *
      * @param event The event to be bound.
      * @return This builder node, for chaining.
+     * @see #updateTableOn(Observable) To access a more general API that can update the table from any
+     *                                 kind of reative source like a {@link Var#view()} or {@link Vals#view()}...
      */
     public final UIForTable<T> updateTableOn( Event event ) {
-        NullUtil.nullArgCheck(event, "event", Event.class);
+        Objects.requireNonNull(event);
+        return this.updateTableOn(event.observable());
+    }
+
+    /**
+     *  Use this to bind an {@link sprouts.Observable} to the {@link TableModel} of this table
+     *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method when the source
+     *  of the observable changes in some way.
+     *  This is useful if you want to update the table when the data source changes.
+     *  You may derive the observable from a {@link sprouts.Var} property or {@link Event}.
+     *
+     * @param observable The observable to be bound.
+     * @return This builder node, for chaining.
+     * @see #updateTableOn(Event) For a convenience method specifically for the {@link Event} type.
+     */
+    public final UIForTable<T> updateTableOn( Observable observable ) {
+        Objects.requireNonNull(observable);
         return _with( thisComponent -> {
                     WeakReference<T> thisComponentRef = new WeakReference<>(thisComponent);
                     ComponentExtension.from(thisComponent).storeBoundObservable(
-                        event.observable().subscribe(()->
+                        observable.subscribe(()->
                             _runInUI(()->{
                                 T innerComponent = thisComponentRef.get();
                                 if (innerComponent == null)
