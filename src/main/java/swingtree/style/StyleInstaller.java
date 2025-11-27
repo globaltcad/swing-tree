@@ -149,6 +149,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean        force
     ) {
         boolean initialIsOpaqueFlagState = owner.isOpaque();
+        boolean initialIsContentAreaFilled = ( owner instanceof AbstractButton && ((AbstractButton) owner).isContentAreaFilled() );
         Runnable backgroundSetter = ()->{
             if ( StyleUtil.isUndefinedColor(owner.getBackground()) )
                 _establishDefaultBackgroundColorFor(owner);
@@ -230,12 +231,6 @@ final class StyleInstaller<C extends JComponent>
             newStyle = recalculateInsets(owner, newStyle);
         } else if ( styleSource.hasNoAnimationStylers() ) {
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
-            if ( owner instanceof AbstractButton && _initialContentAreaFilled != null ) {
-                AbstractButton button = (AbstractButton) owner;
-                if ( button.isContentAreaFilled() != _initialContentAreaFilled)
-                    button.setContentAreaFilled(_initialContentAreaFilled);
-                _initialContentAreaFilled = null;
-            }
         }
 
         if ( weNeedToInstallTheCustomUI ) {
@@ -250,6 +245,12 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !isStyled || !weNeedToInstallTheCustomUI ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
+            if ( owner instanceof AbstractButton && _initialContentAreaFilled != null ) {
+                AbstractButton button = (AbstractButton) owner;
+                if ( button.isContentAreaFilled() != _initialContentAreaFilled)
+                    button.setContentAreaFilled(_initialContentAreaFilled);
+                _initialContentAreaFilled = null;
+            }
             if ( _initialIsOpaque != null ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
                     owner.setOpaque(_initialIsOpaque);
@@ -268,7 +269,7 @@ final class StyleInstaller<C extends JComponent>
             _initialIsOpaque = initialIsOpaqueFlagState; // Important: Use the state of the flag before SwingTree did anything!
 
         if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
-            _initialContentAreaFilled = ((AbstractButton) owner).isContentAreaFilled();
+            _initialContentAreaFilled = initialIsContentAreaFilled;
 
         final List<UI.ComponentArea> opaqueGradAreas = newStyle.noiseAndGradientCoveredAreas();
         final boolean hasBackgroundGradients         = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
