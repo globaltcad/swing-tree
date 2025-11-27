@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
 {
     private final int _selectedTabIndex = _component().getSelectedIndex();
-    private final int _tabIndex = _component().indexAtLocation(mouseX(), mouseY());
+    private final int _tabIndex = _component().indexAtLocation(getEvent().getX(), getEvent().getY());
 
 
     public TabDelegate(
