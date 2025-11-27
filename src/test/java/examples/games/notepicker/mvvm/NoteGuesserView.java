@@ -95,8 +95,8 @@ public class NoteGuesserView extends Panel
                  .shadowSpreadRadius(1)
                  .shadowIsInset(true)
                  .painter(Layer.BACKGROUND, g2d -> {
-                     int w = it.component().getWidth() - 25 - 25 - 100;
-                     int h = it.component().getHeight() - 20 - 20 - 30;
+                     int w = it.componentWidth() - 25 - 25 - 100;
+                     int h = it.componentHeight() - 20 - 20 - 30;
                      int x = 25 + 50;
                      int y = 15 + 15;
                      noteLines(vm, g2d, x, y, w, h);
