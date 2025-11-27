@@ -186,8 +186,8 @@ public class BoxShadowPickerView extends Panel
                          .foundationColor(foundationColor.get())
                          .painter(Layer.BACKGROUND, g2d -> {
                              if ( drawSmiley.is(false) ) return;
-                             int w = it.component().getWidth() - marginLeft.get() - marginRight.get() - 100;
-                             int h = it.component().getHeight() - marginTop.get() - marginBottom.get() - 100;
+                             int w = it.componentWidth() - marginLeft.get() - marginRight.get() - 100;
+                             int h = it.componentHeight() - marginTop.get() - marginBottom.get() - 100;
                              int x = marginLeft.get() + 50;
                              int y = marginTop.get() + 50;
                              drawASmiley(g2d, x, y, w, h);
