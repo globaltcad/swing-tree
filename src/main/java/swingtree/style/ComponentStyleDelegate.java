@@ -52,8 +52,58 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  whether it is selected or not...
      * 
      * @return The {@link JComponent} this {@link ComponentStyleDelegate} is for.
+     * @deprecated because it introduces the following two issues:<br>
+     *             <ul>
+     *                 <li>
+     *                     SwingTree styles are expected to be side effect free functions.
+     *                     The {@link JComponent} however is mutable and very sensitive to repaints.
+     *                     Mutating a component in a styler can lead to things like endless repaints
+     *                     and other bugs which are extremely hard to track...
+     *                 </li>
+     *                 <li>
+     *                     A developer may want to access the dimensions of a component to perform
+     *                     rendering in a custom {@link Painter}. Unfortunately, the dimensions of a component are
+     *                     not in "developer pixels"! Instead, they are already scaled to the current {@link UI#scale()}.
+     *                     <b>To prevent scaling issues, use {@link #componentWidth()} and {@link #componentHeight()}. These are scaled to "developer pixel"</b>
+     *                 </li>
+     *             </ul>
      */
+    @Deprecated
     public C component() { return _component; }
+
+    /**
+     *  This method delegates to the {@link JComponent#getWidth()} property but also
+     *  scales it to "developer pixel" by passing it through the {@link UI#unscale(int)} method.
+     *  The opposite is true for methods like {@link swingtree.UIForAnySwing#withWidthExactly(int)}
+     *  or {@link #width(double)}, which scale the supplied values using {@link UI#scale(int)}.
+     *  <b>
+     *      So whatever size you specified there,
+     *      is what you get back here without sacrificing DPI scaling.
+     *  </b>
+     *  This method is especially useful when doing custom rendering through a {@link Painter}.
+     *
+     * @return The width of the underlying {@link JComponent} in "developer pixel".
+     */
+    public int componentWidth() {
+        return UI.unscale(_component.getWidth());
+    }
+
+    /**
+     *  This method delegates to the {@link JComponent#getHeight()} property but also
+     *  scales it to "developer pixel" by passing it through the {@link UI#unscale(int)} method.
+     *  The opposite is true for methods like {@link swingtree.UIForAnySwing#withHeightExactly(int)}
+     *  or {@link #height(double)}, which scale the supplied values using {@link UI#scale(int)}.
+     *  <b>
+     *      So whatever size you specified there,
+     *      is what you get back here without sacrificing DPI scaling.
+     *  </b>
+     *  This method is especially useful when doing custom rendering through a {@link Painter}.
+     *
+     * @return The height of the underlying {@link JComponent} in "developer pixel".
+     */
+    public int componentHeight() {
+        return UI.unscale(_component.getHeight());
+    }
 
     /**
      *  Exposes the parent {@link Container} of the {@link JComponent} delegated by this {@link ComponentStyleDelegate}
@@ -61,6 +111,20 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  You may use this to make your styling dependent on the properties of the parent container.
      *
      * @return An optional parent {@link Container} of the {@link JComponent} this {@link ComponentStyleDelegate} is for.
+     * @deprecated because it introduces the following two issues:<br>
+     *             <ul>
+     *                 <li>
+     *                     SwingTree styles are expected to be side effect free functions.
+     *                     The parent of a {@link JComponent} however is mutable and very sensitive to repaints.
+     *                     Mutating a component in a styler can lead to things like endless repaints
+     *                     and other bugs which are extremely hard to track...
+     *                 </li>
+     *                 <li>
+     *                     A developer may want to access the dimensions of a component to perform
+     *                     rendering in a custom {@link Painter}. Unfortunately, the dimensions of a parent component are
+     *                     not in "developer pixels"! Instead, they are already scaled to the current {@link UI#scale()}.
+     *                 </li>
+     *             </ul>
      */
     public Optional<Container> parent() { return Optional.ofNullable(_component.getParent()); }
 
@@ -71,7 +135,22 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *
      * @param peeker A {@link Peeker} that takes the {@link JComponent} of this {@link ComponentStyleDelegate}
      * @return This {@link ComponentStyleDelegate} instance.
+     * @deprecated because it introduces the following two issues:<br>
+     *             <ul>
+     *                 <li>
+     *                     SwingTree styles are expected to be side effect free functions.
+     *                     The parent of a {@link JComponent} however is mutable and very sensitive to repaints.
+     *                     Mutating a component in a styler can lead to things like endless repaints
+     *                     and other bugs which are extremely hard to track...
+     *                 </li>
+     *                 <li>
+     *                     A developer may want to access the dimensions of a component to perform
+     *                     rendering in a custom {@link Painter}. Unfortunately, the dimensions of a parent component are
+     *                     not in "developer pixels"! Instead, they are already scaled to the current {@link UI#scale()}.
+     *                 </li>
+     *             </ul>
      */
+    @Deprecated
     public ComponentStyleDelegate<C> peek( Peeker<C> peeker )
     {
         Objects.requireNonNull(peeker);
