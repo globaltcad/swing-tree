@@ -53,8 +53,8 @@ public class ModelledAnimationView extends Panel
                             .type(GradientType.RADIAL)
                             .boundary(ComponentBoundary.BORDER_TO_INTERIOR)
                             .offset(
-                                it.component().getWidth()*0.5,
-                                it.component().getHeight()*0.5
+                                it.componentWidth()*0.5,
+                                it.componentHeight()*0.5
                             )
                             .colors(
                                 color(0.75, 1, 0.5, 0.5),
