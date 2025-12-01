@@ -6,7 +6,7 @@ import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
 
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,9 +65,9 @@ import java.util.Optional;
  *      <li><b>Fit-Mode:</b>
  *          If this enum determines how the image will be stretched or shrunk
  *          to fill the inner component area dependent on the specified width and height,
- *          meaning that if the width was not specified explicitly through {@link #width(Integer)}
+ *          meaning that if the width was not specified explicitly through {@link #width(int)}
  *          then the image will be scaled to fit the inner component width,
- *          and if a height was not specified through {@link #height(Integer)} then
+ *          and if a height was not specified through {@link #height(int)} then
  *          the image will be scaled to fit the inner component height. <br>
  *          <b>Note that the inner component area is the area enclosed by the border, which
  *          is itself not part of said area!</b>
@@ -295,7 +295,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
      */
-    public ImageConf image(Image image ) {
+    public ImageConf image( Image image ) {
         return ImageConf.of(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -306,7 +306,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
      */
-    public ImageConf image(ImageIcon image ) {
+    public ImageConf image( ImageIcon image ) {
         return ImageConf.of(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -320,7 +320,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified image.
      * @throws NullPointerException If the specified {@code image} is null.
      */
-    public ImageConf image(IconDeclaration image ) {
+    public ImageConf image( IconDeclaration image ) {
         Objects.requireNonNull(image);
         return image.find().map(this::image).orElse(this);
     }
@@ -390,7 +390,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param placement The placement of the image onto the component.
      * @return A new {@link ImageConf} instance with the specified placement.
      */
-    public ImageConf placement(UI.Placement placement ) {
+    public ImageConf placement( UI.Placement placement ) {
         return ImageConf.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -403,16 +403,16 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param repeat Weather the image should be painted repeatedly across the inner component area.
      * @return A new {@link ImageConf} instance with the specified {@code repeat} flag value.
      */
-    public ImageConf repeat(boolean repeat ) {
+    public ImageConf repeat( boolean repeat ) {
         return ImageConf.of(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
      *  If this flag is set to {@code true}, then the image will be stretched or shrunk
      *  to fill the inner component area dependent on the specified width and height,
-     *  meaning that if the width was not specified explicitly through {@link #width(Integer)}
+     *  meaning that if the width was not specified explicitly through {@link #width(int)}
      *  then the image will be scaled to fit the inner component width,
-     *  and if a height was not specified through {@link #height(Integer)} then
+     *  and if a height was not specified through {@link #height(int)} then
      *  the image will be scaled to fit the inner component height. <br>
      *  <b>Note that the inner component area is the area enclosed by the border, which
      *  is itself not part of said area!</b>
@@ -422,7 +422,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *                otherwise the image will not be scaled to fit the inner component area.
      * @return A new {@link ImageConf} instance with the specified {@code autoFit} flag value.
      */
-    public ImageConf autoFit(boolean autoFit ) {
+    public ImageConf autoFit( boolean autoFit ) {
         UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;
         return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
@@ -466,7 +466,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param width The width of the image.
      * @return A new {@link ImageConf} instance with the specified {@code width}.
      */
-    public ImageConf width(Integer width ) {
+    public ImageConf width( int width ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
     }
 
@@ -476,7 +476,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param height The height of the image.
      * @return A new {@link ImageConf} instance with the specified {@code height}.
      */
-    public ImageConf height( Integer height ) {
+    public ImageConf height( int height ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
     }
 
@@ -487,7 +487,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param height The height of the image.
      * @return A new {@link ImageConf} instance with the specified {@code width} and {@code height}.
      */
-    public ImageConf size(int width, int height ) {
+    public ImageConf size( int width, int height ) {
         return size(Size.of(width, height));
     }
 
@@ -497,7 +497,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param size The size of the image.
      * @return A new {@link ImageConf} instance with the specified {@code size}.
      */
-    public ImageConf size(Size size ) {
+    public ImageConf size( Size size ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -509,7 +509,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param opacity The opacity of the image.
      * @return A new {@link ImageConf} instance with the specified opacity.
      */
-    public ImageConf opacity(float opacity ) {
+    public ImageConf opacity( float opacity ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
     }
 
@@ -520,7 +520,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    ImageConf padding(Outline padding ) {
+    ImageConf padding( Outline padding ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
     }
 
@@ -534,7 +534,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param left The left padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageConf padding(int top, int right, int bottom, int left ) {
+    public ImageConf padding( int top, int right, int bottom, int left ) {
         return padding(Outline.of(top, right, bottom, left));
     }
 
@@ -546,7 +546,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param leftRight The left and right padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageConf padding(int topBottom, int leftRight ) {
+    public ImageConf padding( int topBottom, int leftRight ) {
         return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));
     }
 
@@ -557,41 +557,50 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageConf padding(int padding ) {
+    public ImageConf padding( int padding ) {
         return padding(Outline.of(padding, padding, padding, padding));
     }
 
     /**
      *  Use this to specify the vertical and horizontal offset by which the image will be moved
-     *  and drawn onto the component.
+     *  and drawn onto the component. Note that this is relative to the {@link swingtree.UI.Placement} policy
+     *  of the image specified through {@link #placement(UI.Placement)}.<br>
+     *  The default placement of an image is {@link UI.Placement#CENTER}, and so the offset will
+     *  start from there...
      *
-     *  @param x The horizontal offset.
-     *  @param y The vertical offset.
+     *  @param x The horizontal offset relative to the {@link #placement(UI.Placement)} of the image.
+     *  @param y The vertical offset relative to the {@link #placement(UI.Placement)} of the image.
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageConf offset(int x, int y ) {
+    public ImageConf offset( int x, int y ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
     }
 
     /**
      *  Use this to specify the horizontal offset by which the image will be moved
-     *  and drawn onto the component.
+     *  and drawn onto the component. Note that this is relative to the {@link swingtree.UI.Placement} policy
+     *  of the image specified through {@link #placement(UI.Placement)}.<br>
+     *  The default placement of an image is {@link UI.Placement#CENTER}, and so the offset will
+     *  start from there...
      *
-     *  @param x The horizontal offset.
+     *  @param x The horizontal offset relative to the {@link #placement(UI.Placement)} of the image.
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageConf horizontalOffset(int x ) {
+    public ImageConf horizontalOffset( int x ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
     }
 
     /**
      *  Use this to specify the vertical offset by which the image will be moved
-     *  and drawn onto the component.
+     *  and drawn onto the component. Note that this is relative to the {@link swingtree.UI.Placement} policy
+     *  of the image specified through {@link #placement(UI.Placement)}.<br>
+     *  The default placement of an image is {@link UI.Placement#CENTER}, and so the offset will
+     *  start from there...
      *
-     *  @param y The vertical offset.
+     *  @param y The vertical offset relative to the {@link #placement(UI.Placement)} of the image.
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageConf verticalOffset(int y ) {
+    public ImageConf verticalOffset( int y ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
     }
 
