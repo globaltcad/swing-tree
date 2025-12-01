@@ -1407,7 +1407,7 @@ class Opaqueness_Styles_Spec extends Specification
             false  | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
     }
 
-    def 'In manu LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style.'(
+    def 'In many LaFs, a `JCheckBoxMenuItem` is initially opaque, but may or may not be non-opaque, depending on its style.'(
         boolean opaque, Styler<JBox> styler
     ) {
         reportInfo """
@@ -1456,5 +1456,134 @@ class Opaqueness_Styles_Spec extends Specification
             true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
             true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
     }
+
+    def 'A `JLabel`, which is normally non-opaque, can be opaque through an opaque default background color and depending on additional styling.'(
+        java.awt.Color color, boolean opaque, Styler<JBox> styler
+    ) {
+        reportInfo """
+ 
+            A `JLabel` is a component that is non-opaque by default but can be turned
+            into an opaque component by passing a opaque color to it initially.
+            This test demonstrates that this default opaqueness may or may not change
+            depending on what kind of styles are applied to it on top of that.
+
+        """
+        given : 'We first define a boolean flag that we will use to control the style:'
+            var isOn = false
+        and : 'Then we create the opaque colored label based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.label("Hi!").withSize(100, 100)
+                    .withBackground(color)
+                    .withStyle({ isOn ? styler(it) : it })
+        and : 'We build the underlying label:'
+            var label = ui.get(JLabel)
+        expect : 'The label is opaque if the color is opaque:'
+            label.isOpaque() == (color.alpha == 255)
+        when : 'We set the `isOn` flag to true and then refresh the UI:'
+            isOn = true
+            UI.runNow(()->{
+                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The label has the expected opaqueness:'
+            label.isOpaque() == opaque
+        when : 'We set the `isOn` flag to false and then refresh the UI:'
+            isOn = false
+            UI.runNow(()->{
+                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The label has the initial opaqueness again:'
+            label.isOpaque() == (color.alpha == 255)
+        where :
+                color                   | opaque | styler
+            UI.Color.GREEN              | true   | {it}
+            UI.Color.GREEN              | true   | {it.backgroundColor("red")}
+            UI.Color.GREEN              | false  | {it.backgroundColor("transparent red")}
+            UI.Color.GREEN              | true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            UI.Color.GREEN              | true   | {it.backgroundColor("blue").foundationColor("red")}
+            UI.Color.GREEN              | false  | {it.backgroundColor("blue").foundationColor("red").border(2, "transparent oak")}
+            UI.Color.GREEN              | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.GREEN              | false  | {it.foundationColor("transparent light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+            UI.Color.RED.withAlpha(100) | false  | {it}
+            UI.Color.RED.withAlpha(200) | true   | {it.backgroundColor("red")}
+            UI.Color.RED.withAlpha(240) | false  | {it.backgroundColor("transparent red")}
+            UI.Color.RED.withAlpha(245) | true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            UI.Color.RED.withAlpha(13 ) | true   | {it.backgroundColor("blue").foundationColor("red")}
+            UI.Color.RED.withAlpha(0  ) | false  | {it.backgroundColor("blue").foundationColor("red").border(2, "transparent oak")}
+            UI.Color.RED.withAlpha(245) | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(245) | false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(245) | false  | {it.foundationColor("transparent light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(254) | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(254) | false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(254) | false  | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+    }
+
+    def 'A `JPanel`, which is normally opaque, can be non-opaque due to a default background color or depending on additional styling.'(
+        java.awt.Color color, boolean opaque, Styler<JBox> styler
+    ) {
+        reportInfo """
+ 
+            A `JPanel` is a component that is opaque by default but can be turned
+            into a non-opaque component by passing a transparent color to it initially.
+            This test demonstrates that this default opaqueness may or may not change
+            depending on what kind of styles are applied to a panel on top of that.
+
+        """
+        given : 'We first define a boolean flag that we will use to control the style:'
+            var isOn = false
+        and : 'Then we create the opaque colored panel based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.panel().withSize(100, 100)
+                    .withBackground(color)
+                    .withStyle({ isOn ? styler(it) : it })
+        and : 'We build the underlying panel:'
+            var panel = ui.get(JPanel)
+        expect : 'The panel is opaque if the color is opaque:'
+            panel.isOpaque() == (color.alpha == 255)
+        when : 'We set the `isOn` flag to true and then refresh the UI:'
+            isOn = true
+            UI.runNow(()->{
+                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The panel has the expected opaqueness:'
+            panel.isOpaque() == opaque
+        when : 'We set the `isOn` flag to false and then refresh the UI:'
+            isOn = false
+            UI.runNow(()->{
+                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The panel has the initial opaqueness again:'
+            panel.isOpaque() == (color.alpha == 255)
+        where :
+                color                   | opaque | styler
+            UI.Color.GREEN              | true   | {it}
+            UI.Color.GREEN              | true   | {it.backgroundColor("red")}
+            UI.Color.GREEN              | false  | {it.backgroundColor("transparent red")}
+            UI.Color.GREEN              | true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            UI.Color.GREEN              | true   | {it.backgroundColor("blue").foundationColor("red")}
+            UI.Color.GREEN              | false  | {it.backgroundColor("blue").foundationColor("red").border(2, "transparent oak")}
+            UI.Color.GREEN              | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.GREEN              | false  | {it.foundationColor("transparent light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.GREEN              | true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+            UI.Color.RED.withAlpha(100) | false  | {it}
+            UI.Color.RED.withAlpha(200) | true   | {it.backgroundColor("red")}
+            UI.Color.RED.withAlpha(240) | false  | {it.backgroundColor("transparent red")}
+            UI.Color.RED.withAlpha(245) | true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            UI.Color.RED.withAlpha(13 ) | true   | {it.backgroundColor("blue").foundationColor("red")}
+            UI.Color.RED.withAlpha(0  ) | false  | {it.backgroundColor("blue").foundationColor("red").border(2, "transparent oak")}
+            UI.Color.RED.withAlpha(245) | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(245) | false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(245) | false  | {it.foundationColor("transparent light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(254) | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(254) | false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+            UI.Color.RED.withAlpha(254) | false  | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+    }
+
 }
 
