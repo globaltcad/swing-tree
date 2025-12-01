@@ -2183,6 +2183,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         // ^ If the provided color is null the component may inherit the color from its parent!
         if ( color == UI.Color.TRANSPARENT ) {
             thisComponent.setOpaque(false);
+        } else {
+            boolean isTransparent = color.getAlpha() < 255;
+            thisComponent.setOpaque(!isTransparent);
         }
     }
 
