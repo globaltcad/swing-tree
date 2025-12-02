@@ -2181,11 +2181,22 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         thisComponent.setBackground( color );
         color = thisComponent.getBackground();
         // ^ If the provided color is null the component may inherit the color from its parent!
-        if ( color == UI.Color.TRANSPARENT ) {
-            thisComponent.setOpaque(false);
-        } else {
-            boolean isTransparent = color.getAlpha() < 255;
-            thisComponent.setOpaque(!isTransparent);
+        if (
+            color != null && (
+            // Components which may be non-opaque AND which use the background color consistently as background color!
+            thisComponent instanceof JLabel       ||
+            thisComponent instanceof JPanel       ||
+            thisComponent instanceof JBox         ||
+            thisComponent instanceof JMenuItem    ||
+            thisComponent instanceof JCheckBox    ||
+            thisComponent instanceof JRadioButton
+        )) {
+            if (color == UI.Color.TRANSPARENT) {
+                thisComponent.setOpaque(false);
+            } else {
+                boolean isTransparent = color.getAlpha() < 255;
+                thisComponent.setOpaque(!isTransparent);
+            }
         }
     }
 
@@ -2209,9 +2220,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withBackground( Val<Color> bg ) {
         NullUtil.nullArgCheck(bg, "bg", Val.class);
         NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
-        return _withOnShow( bg, (c,v) -> {
-                    c.setBackground( _isUndefinedColor(v) ? null : v );
-                })
+        return _withOnShow( bg, this::_setBackground)
                 ._with( c -> {
                     c.setBackground( _isUndefinedColor(bg.get()) ? null : bg.get() );
                 })
