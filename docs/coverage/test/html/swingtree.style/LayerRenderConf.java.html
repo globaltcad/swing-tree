@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LayerRenderConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LayerRenderConf.java</span></div><h1>LayerRenderConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
+
+import java.awt.Graphics2D;
+import java.util.Objects;
+
+/**
+ *  An immutable snapshot of essential component state needed for rendering
+ *  the style of a particular component layer using the {@link StyleRenderer} and its
+ *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, Graphics2D)} ethod. &lt;br&gt;
+ *  This (and all of its parts) is immutable to use it as a basis for caching.
+ *  When the config changes compared to the previous one, the image buffer based
+ *  render cache is being invalidated and the component is rendered again
+ *  (potentially with a new cached image buffer).
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class LayerRenderConf
+{
+<span class="fc" id="L22">    private static final LayerRenderConf _NONE = new LayerRenderConf(</span>
+<span class="fc" id="L23">                                                    BoxModelConf.none(),</span>
+<span class="fc" id="L24">                                                    BaseColorConf.none(),</span>
+<span class="fc" id="L25">                                                    StyleConfLayer.empty()</span>
+                                                );
+
+<span class="fc" id="L28">    public static LayerRenderConf none() { return _NONE; }</span>
+
+    private final BoxModelConf   _boxModelConf;
+    private final BaseColorConf  _baseColor;
+    private final StyleConfLayer _layer;
+
+<span class="fc" id="L34">    private boolean _wasAlreadyHashed = false;</span>
+<span class="fc" id="L35">    private int     _hashCode         = 0; // cached hash code</span>
+
+
+    private LayerRenderConf(
+        BoxModelConf   boxModelConf,
+        BaseColorConf  base,
+        StyleConfLayer layers
+<span class="fc" id="L42">    ) {</span>
+<span class="fc" id="L43">        _boxModelConf = ComponentAreas.intern(Objects.requireNonNull(boxModelConf));</span>
+<span class="fc" id="L44">        _baseColor    = Objects.requireNonNull(base);</span>
+<span class="fc" id="L45">        _layer        = Objects.requireNonNull(layers);</span>
+<span class="fc" id="L46">    }</span>
+
+    static LayerRenderConf of(
+        BoxModelConf   boxModelConf,
+        BaseColorConf  base,
+        StyleConfLayer layers
+    ) {
+<span class="fc" id="L53">        if (</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            boxModelConf .equals( BoxModelConf.none()  ) &amp;&amp;</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            base         .equals( BaseColorConf.none() ) &amp;&amp;</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            layers       .equals( _NONE._layer )</span>
+        )
+<span class="fc" id="L58">            return _NONE;</span>
+        else
+<span class="fc" id="L60">            return new LayerRenderConf(boxModelConf, base, layers);</span>
+    }
+
+    static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
+<span class="fc" id="L64">        BoxModelConf boxModelConf = BoxModelConf.of(</span>
+<span class="fc" id="L65">                                        fullConf.style().border(),</span>
+<span class="fc" id="L66">                                        fullConf.areaMarginCorrection(),</span>
+<span class="fc" id="L67">                                        fullConf.currentBounds().size()</span>
+                                    );
+<span class="fc" id="L69">        BaseColorConf colorConf = BaseColorConf.of(</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                                    fullConf.style().base().foundationColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">                                    fullConf.style().base().backgroundColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()</span>
+                                );
+<span class="fc" id="L74">        return of(</span>
+                    boxModelConf,
+                    colorConf,
+<span class="fc" id="L77">                    fullConf.style().layer(layer)</span>
+                );
+    }
+
+<span class="fc" id="L81">    BoxModelConf boxModel() { return _boxModelConf; }</span>
+
+<span class="fc" id="L83">    BaseColorConf baseColors() { return _baseColor; }</span>
+
+<span class="fc" id="L85">    StyleConfLayer layer() { return _layer; }</span>
+
+<span class="fc" id="L87">    ComponentAreas areas() { return _boxModelConf.areas(); }</span>
+
+
+    @Override
+    public int hashCode() {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if ( _wasAlreadyHashed )</span>
+<span class="fc" id="L93">            return _hashCode;</span>
+
+<span class="fc" id="L95">        _hashCode = Objects.hash(_boxModelConf, _baseColor, _layer);</span>
+<span class="fc" id="L96">        _wasAlreadyHashed = true;</span>
+<span class="fc" id="L97">        return _hashCode;</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L105">        LayerRenderConf other = (LayerRenderConf) o;</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        return Objects.equals(_boxModelConf, other._boxModelConf) &amp;&amp;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">               Objects.equals(_baseColor, other._baseColor) &amp;&amp;</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">               Objects.equals(_layer, other._layer);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L113">        return getClass().getSimpleName()+&quot;[&quot; +</span>
+                    &quot;boxModel=&quot; + _boxModelConf + &quot;, &quot; +
+                    &quot;baseColor=&quot; + _baseColor + &quot;, &quot; +
+                    &quot;layer=&quot; + _layer +
+                ']';
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

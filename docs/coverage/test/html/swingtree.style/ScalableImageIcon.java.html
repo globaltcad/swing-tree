@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScalableImageIcon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ScalableImageIcon.java</span></div><h1>ScalableImageIcon.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.layout.Size;
+
+import javax.swing.ImageIcon;
+import java.awt.Image;
+import java.util.Objects;
+
+/**
+ *  A wrapper for {@link ImageIcon} that automatically scales the image to the
+ *  current {@link UI#scale()} value defined in the current {@link swingtree.SwingTree}
+ *  library context singleton.&lt;br&gt;
+ *
+ */
+public final class ScalableImageIcon extends ImageIcon
+{
+<span class="fc" id="L21">    private static final Logger log = LoggerFactory.getLogger(ScalableImageIcon.class);</span>
+
+    /**
+     *  A factory method that creates a new {@link ScalableImageIcon} that will render
+     *  the supplied {@link ImageIcon} using the given base size scaled according to the current DPI settings.
+     *  &lt;p&gt;
+     *      If the given {@link ImageIcon} is already a {@link ScalableImageIcon},
+     *      a new instance will be created from the existing one
+     *      using {@link ScalableImageIcon#withSize(Size)}.
+     *  &lt;/p&gt;
+     * @param size The size to render the icon at.
+     * @param icon The icon to render.
+     * @return A new {@link ScalableImageIcon} that will render the image
+     *          scaled according to the current DPI settings.
+     */
+    public static ScalableImageIcon of( Size size, ImageIcon icon ) {
+<span class="fc" id="L37">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L38">        Objects.requireNonNull(icon);</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( icon instanceof ScalableImageIcon )</span>
+<span class="nc" id="L40">            return ((ScalableImageIcon) icon).withSize(size);</span>
+<span class="fc" id="L41">        return new ScalableImageIcon(size, icon);</span>
+    }
+
+    private final ImageIcon _sourceIcon;
+    private final Size      _relativeScale;
+    private final Size      _baseSize;
+
+    private ImageIcon _scaled;
+    private float     _currentScale;
+
+<span class="fc" id="L51">    private ScalableImageIcon( Size size, ImageIcon original ) {</span>
+<span class="fc" id="L52">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L53">        Objects.requireNonNull(original);</span>
+<span class="fc" id="L54">        Size relativeScale = Size.unknown();</span>
+<span class="fc" id="L55">        double targetWidth = -1;</span>
+<span class="fc" id="L56">        double targetHeight = -1;</span>
+        try {
+<span class="fc" id="L58">            double originalIconWidth = original.getIconWidth();</span>
+<span class="fc" id="L59">            double originalIconHeight = original.getIconHeight();</span>
+<span class="fc" id="L60">            double ratio = originalIconWidth / originalIconHeight;</span>
+<span class="fc bfc" id="L61" title="All 4 branches covered.">            if (size.hasPositiveWidth() &amp;&amp; size.hasPositiveHeight()) {</span>
+<span class="fc" id="L62">                targetWidth = size.width().orElse(0.0f);</span>
+<span class="fc" id="L63">                targetHeight = size.height().orElse(0.0f);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            } else if (size.hasPositiveWidth()) {</span>
+<span class="fc" id="L65">                targetWidth = size.width().orElse(0.0f);</span>
+<span class="fc" id="L66">                targetHeight = targetWidth / ratio;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            } else if (size.hasPositiveHeight()) {</span>
+<span class="fc" id="L68">                targetHeight = size.height().orElse(0.0f);</span>
+<span class="fc" id="L69">                targetWidth = targetHeight * ratio;</span>
+            } else {
+<span class="fc" id="L71">                targetWidth = originalIconWidth;</span>
+<span class="fc" id="L72">                targetHeight = originalIconHeight;</span>
+            }
+<span class="fc" id="L74">            relativeScale = Size.of(targetWidth / originalIconWidth, targetHeight / originalIconHeight);</span>
+<span class="nc" id="L75">        } catch ( Exception e ) {</span>
+<span class="nc" id="L76">            log.error(SwingTree.get().logMarker(), &quot;An error occurred while calculating the size of a ScalableImageIcon.&quot;, e);</span>
+<span class="fc" id="L77">        }</span>
+<span class="fc" id="L78">        _baseSize      = Size.of(targetWidth, targetHeight);</span>
+<span class="fc" id="L79">        _sourceIcon = original;</span>
+<span class="fc" id="L80">        _relativeScale = relativeScale;</span>
+<span class="fc" id="L81">        _currentScale  = UI.scale();</span>
+<span class="fc" id="L82">        _scaled        = _scaleTo(_currentScale, _relativeScale, original);</span>
+<span class="fc" id="L83">    }</span>
+
+    private ImageIcon _scaleTo( float scale, Size relativeScale, ImageIcon original ) {
+<span class="pc bpc" id="L86" title="1 of 4 branches missed.">        if ( !_relativeScale.hasPositiveWidth() || !_relativeScale.hasPositiveHeight() )</span>
+<span class="fc" id="L87">            return original;</span>
+        try {
+<span class="fc" id="L89">            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));</span>
+<span class="fc" id="L90">            int height = Math.round(original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));</span>
+<span class="fc" id="L91">            Image originalImage = original.getImage();</span>
+<span class="fc bfc" id="L92" title="All 4 branches covered.">            if ( width == original.getIconWidth() &amp;&amp; height == original.getIconHeight() )</span>
+<span class="fc" id="L93">                return original;</span>
+<span class="pc bpc" id="L94" title="2 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
+                // We create the smallest possible image to avoid exceptions.
+<span class="nc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
+            }
+<span class="fc" id="L98">            return new ImageIcon(originalImage.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH));</span>
+<span class="nc" id="L99">        } catch ( Exception e ) {</span>
+<span class="nc" id="L100">            log.error(SwingTree.get().logMarker(), &quot;An error occurred while scaling an image icon.&quot;, e);</span>
+<span class="nc" id="L101">            return original;</span>
+        }
+    }
+
+    private void _updateScale() {
+<span class="fc" id="L106">        float newScale = UI.scale();</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if ( newScale != _currentScale ) {</span>
+<span class="fc" id="L108">            _scaled = _scaleTo(newScale, _relativeScale, _sourceIcon);</span>
+<span class="fc" id="L109">            _currentScale = newScale;</span>
+        }
+<span class="fc" id="L111">    }</span>
+
+    /**
+     *  Returns a new {@link ScalableImageIcon} that will render the image
+     *  at the given size.&lt;br&gt;
+     *  &lt;p&gt;
+     *      Note that the returned icon will be a new instance and will not
+     *      affect the current icon.
+     *  &lt;/p&gt;
+     * @param size The size to render the icon at.
+     * @return A new {@link ScalableImageIcon} that will render the image
+     *  at the given size.
+     */
+    public ScalableImageIcon withSize( Size size ) {
+<span class="fc" id="L125">        return new ScalableImageIcon(size, _sourceIcon);</span>
+    }
+
+    /**
+     *  Exposes the width of the icon, or -1 if the icon does not have a fixed width.&lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that the returned width is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled width, use {@link #getBaseWidth()}.
+     *  &lt;/b&gt;
+     * @return The width of the icon, or -1 if the icon does not have a width.
+     */
+    @Override
+    public int getIconWidth() {
+<span class="fc" id="L141">        _updateScale();</span>
+<span class="fc" id="L142">        return _scaled.getIconWidth();</span>
+    }
+
+    /**
+     *  Exposes the height of the icon, or -1 if the icon does not have a fixed height.&lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that the returned height is dynamically scaled according to
+     *      the current {@link swingtree.UI#scale()} value.
+     *      This is to ensure that the icon is rendered at the correct size
+     *      according to the current DPI settings.
+     *      If you want the unscaled height, use {@link #getBaseHeight()}.
+     *  &lt;/b&gt;
+     * @return The height of the icon, or -1 if the icon does not have a height.
+     */
+    @Override
+    public int getIconHeight() {
+<span class="fc" id="L158">        _updateScale();</span>
+<span class="fc" id="L159">        return _scaled.getIconHeight();</span>
+    }
+
+    /**
+     *  Returns the unscaled width of the icon.
+     *  This is the width of the icon as it was originally loaded
+     *  and is not affected by the current {@link swingtree.UI#scale()} value.&lt;br&gt;
+     *  &lt;p&gt;
+     *      If you want a width that is more suited for rendering
+     *      according to the current DPI settings, use {@link #getIconWidth()}.
+     *  &lt;/p&gt;
+     *
+     * @return The unscaled width of the icon.
+     */
+    public int getBaseWidth() {
+<span class="fc" id="L174">        return _baseSize.width().map(Math::round).orElse(0);</span>
+    }
+
+    /**
+     *  Returns the unscaled height of the icon.
+     *  This is the height of the icon as it was originally loaded
+     *  and is not affected by the current {@link swingtree.UI#scale()} value.&lt;br&gt;
+     *  &lt;p&gt;
+     *      If you want a height that is more suited for rendering
+     *      according to the current DPI settings, use {@link #getIconHeight()}.
+     *  &lt;/p&gt;
+     *
+     * @return The unscaled height of the icon.
+     */
+    public int getBaseHeight() {
+<span class="fc" id="L189">        return _baseSize.height().map(Math::round).orElse(0);</span>
+    }
+
+    @Override
+    public synchronized void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
+<span class="fc" id="L194">        _updateScale();</span>
+<span class="fc" id="L195">        _scaled.paintIcon(c, g, x, y);</span>
+<span class="fc" id="L196">    }</span>
+
+    @Override
+    public Image getImage() {
+<span class="nc" id="L200">        _updateScale();</span>
+<span class="nc" id="L201">        return _scaled.getImage();</span>
+    }
+
+    @Override
+    public void setImage( Image image ) {
+<span class="nc" id="L206">        log.warn(SwingTree.get().logMarker(), &quot;Setting the image of a &quot;+this.getClass().getSimpleName()+&quot; is not supported.&quot;, new Throwable());</span>
+<span class="nc" id="L207">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L211">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+                    &quot;baseSize=&quot; + _baseSize + &quot;, &quot; +
+<span class="nc" id="L213">                    &quot;displaySize=&quot; + Size.of(getIconWidth(), getIconHeight()) + &quot;, &quot; +</span>
+                    &quot;scale=&quot; + _currentScale + &quot;, &quot; +
+<span class="nc" id="L215">                    &quot;sourceSize=&quot; + Size.of(_sourceIcon.getIconWidth(), _sourceIcon.getIconHeight()) +</span>
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        if ( obj == this )</span>
+<span class="nc" id="L222">            return true;</span>
+<span class="fc bfc" id="L223" title="All 4 branches covered.">        if ( obj == null || obj.getClass() != this.getClass() )</span>
+<span class="fc" id="L224">            return false;</span>
+<span class="fc" id="L225">        ScalableImageIcon other = (ScalableImageIcon) obj;</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        return _sourceIcon.equals(other._sourceIcon) &amp;&amp;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">               _relativeScale.equals(other._relativeScale) &amp;&amp;</span>
+<span class="pc bnc" id="L228" title="All 2 branches missed.">               _baseSize.equals(other._baseSize);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L233">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
