@@ -6,7 +6,7 @@ import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
 
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,9 +65,9 @@ import java.util.Optional;
  *      &lt;li&gt;&lt;b&gt;Fit-Mode:&lt;/b&gt;
  *          If this enum determines how the image will be stretched or shrunk
  *          to fill the inner component area dependent on the specified width and height,
- *          meaning that if the width was not specified explicitly through {@link #width(Integer)}
+ *          meaning that if the width was not specified explicitly through {@link #width(int)}
  *          then the image will be scaled to fit the inner component width,
- *          and if a height was not specified through {@link #height(Integer)} then
+ *          and if a height was not specified through {@link #height(int)} then
  *          the image will be scaled to fit the inner component height. &lt;br&gt;
  *          &lt;b&gt;Note that the inner component area is the area enclosed by the border, which
  *          is itself not part of said area!&lt;/b&gt;
@@ -295,7 +295,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
      */
-    public ImageConf image(Image image ) {
+    public ImageConf image( Image image ) {
 <span class="pc bpc" id="L299" title="1 of 2 branches missed.">        return ImageConf.of(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -306,7 +306,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
      */
-    public ImageConf image(ImageIcon image ) {
+    public ImageConf image( ImageIcon image ) {
 <span class="fc" id="L310">        return ImageConf.of(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -320,7 +320,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @return A new {@link ImageConf} instance with the specified image.
      * @throws NullPointerException If the specified {@code image} is null.
      */
-    public ImageConf image(IconDeclaration image ) {
+    public ImageConf image( IconDeclaration image ) {
 <span class="fc" id="L324">        Objects.requireNonNull(image);</span>
 <span class="fc" id="L325">        return image.find().map(this::image).orElse(this);</span>
     }
@@ -390,7 +390,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param placement The placement of the image onto the component.
      * @return A new {@link ImageConf} instance with the specified placement.
      */
-    public ImageConf placement(UI.Placement placement ) {
+    public ImageConf placement( UI.Placement placement ) {
 <span class="fc" id="L394">        return ImageConf.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -403,16 +403,16 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param repeat Weather the image should be painted repeatedly across the inner component area.
      * @return A new {@link ImageConf} instance with the specified {@code repeat} flag value.
      */
-    public ImageConf repeat(boolean repeat ) {
+    public ImageConf repeat( boolean repeat ) {
 <span class="fc" id="L407">        return ImageConf.of(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
      *  If this flag is set to {@code true}, then the image will be stretched or shrunk
      *  to fill the inner component area dependent on the specified width and height,
-     *  meaning that if the width was not specified explicitly through {@link #width(Integer)}
+     *  meaning that if the width was not specified explicitly through {@link #width(int)}
      *  then the image will be scaled to fit the inner component width,
-     *  and if a height was not specified through {@link #height(Integer)} then
+     *  and if a height was not specified through {@link #height(int)} then
      *  the image will be scaled to fit the inner component height. &lt;br&gt;
      *  &lt;b&gt;Note that the inner component area is the area enclosed by the border, which
      *  is itself not part of said area!&lt;/b&gt;
@@ -422,7 +422,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      *                otherwise the image will not be scaled to fit the inner component area.
      * @return A new {@link ImageConf} instance with the specified {@code autoFit} flag value.
      */
-    public ImageConf autoFit(boolean autoFit ) {
+    public ImageConf autoFit( boolean autoFit ) {
 <span class="pc bpc" id="L426" title="1 of 2 branches missed.">        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;</span>
 <span class="fc" id="L427">        return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
@@ -466,7 +466,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param width The width of the image.
      * @return A new {@link ImageConf} instance with the specified {@code width}.
      */
-    public ImageConf width(Integer width ) {
+    public ImageConf width( int width ) {
 <span class="fc" id="L470">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -476,7 +476,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param height The height of the image.
      * @return A new {@link ImageConf} instance with the specified {@code height}.
      */
-    public ImageConf height( Integer height ) {
+    public ImageConf height( int height ) {
 <span class="fc" id="L480">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -487,7 +487,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param height The height of the image.
      * @return A new {@link ImageConf} instance with the specified {@code width} and {@code height}.
      */
-    public ImageConf size(int width, int height ) {
+    public ImageConf size( int width, int height ) {
 <span class="fc" id="L491">        return size(Size.of(width, height));</span>
     }
 
@@ -497,7 +497,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param size The size of the image.
      * @return A new {@link ImageConf} instance with the specified {@code size}.
      */
-    public ImageConf size(Size size ) {
+    public ImageConf size( Size size ) {
 <span class="fc" id="L501">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -509,7 +509,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param opacity The opacity of the image.
      * @return A new {@link ImageConf} instance with the specified opacity.
      */
-    public ImageConf opacity(float opacity ) {
+    public ImageConf opacity( float opacity ) {
 <span class="fc" id="L513">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);</span>
     }
 
@@ -520,7 +520,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    ImageConf padding(Outline padding ) {
+    ImageConf padding( Outline padding ) {
 <span class="fc" id="L524">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);</span>
     }
 
@@ -534,7 +534,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param left The left padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageConf padding(int top, int right, int bottom, int left ) {
+    public ImageConf padding( int top, int right, int bottom, int left ) {
 <span class="nc" id="L538">        return padding(Outline.of(top, right, bottom, left));</span>
     }
 
@@ -546,7 +546,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param leftRight The left and right padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageConf padding(int topBottom, int leftRight ) {
+    public ImageConf padding( int topBottom, int leftRight ) {
 <span class="nc" id="L550">        return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));</span>
     }
 
@@ -557,42 +557,51 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageConf padding(int padding ) {
+    public ImageConf padding( int padding ) {
 <span class="fc" id="L561">        return padding(Outline.of(padding, padding, padding, padding));</span>
     }
 
     /**
      *  Use this to specify the vertical and horizontal offset by which the image will be moved
-     *  and drawn onto the component.
+     *  and drawn onto the component. Note that this is relative to the {@link swingtree.UI.Placement} policy
+     *  of the image specified through {@link #placement(UI.Placement)}.&lt;br&gt;
+     *  The default placement of an image is {@link UI.Placement#CENTER}, and so the offset will
+     *  start from there...
      *
-     *  @param x The horizontal offset.
-     *  @param y The vertical offset.
+     *  @param x The horizontal offset relative to the {@link #placement(UI.Placement)} of the image.
+     *  @param y The vertical offset relative to the {@link #placement(UI.Placement)} of the image.
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageConf offset(int x, int y ) {
-<span class="nc" id="L573">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);</span>
+    public ImageConf offset( int x, int y ) {
+<span class="nc" id="L576">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);</span>
     }
 
     /**
      *  Use this to specify the horizontal offset by which the image will be moved
-     *  and drawn onto the component.
+     *  and drawn onto the component. Note that this is relative to the {@link swingtree.UI.Placement} policy
+     *  of the image specified through {@link #placement(UI.Placement)}.&lt;br&gt;
+     *  The default placement of an image is {@link UI.Placement#CENTER}, and so the offset will
+     *  start from there...
      *
-     *  @param x The horizontal offset.
+     *  @param x The horizontal offset relative to the {@link #placement(UI.Placement)} of the image.
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageConf horizontalOffset(int x ) {
-<span class="nc" id="L584">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);</span>
+    public ImageConf horizontalOffset( int x ) {
+<span class="nc" id="L590">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);</span>
     }
 
     /**
      *  Use this to specify the vertical offset by which the image will be moved
-     *  and drawn onto the component.
+     *  and drawn onto the component. Note that this is relative to the {@link swingtree.UI.Placement} policy
+     *  of the image specified through {@link #placement(UI.Placement)}.&lt;br&gt;
+     *  The default placement of an image is {@link UI.Placement#CENTER}, and so the offset will
+     *  start from there...
      *
-     *  @param y The vertical offset.
+     *  @param y The vertical offset relative to the {@link #placement(UI.Placement)} of the image.
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageConf verticalOffset(int y ) {
-<span class="nc" id="L595">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);</span>
+    public ImageConf verticalOffset( int y ) {
+<span class="nc" id="L604">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);</span>
     }
 
     /**
@@ -634,28 +643,28 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      *  @return A new {@link ImageConf} instance with the specified clip area.
      */
     public ImageConf clipTo(UI.ComponentArea clipArea ) {
-<span class="nc" id="L637">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);</span>
+<span class="nc" id="L646">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);</span>
     }
 
     ImageConf _scale(double scaleFactor ) {
-<span class="fc" id="L641">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);</span>
+<span class="fc" id="L650">        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);</span>
     }
 
     @Override
     public ImageConf simplified() {
-<span class="fc bfc" id="L646" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L647">            return _NONE;</span>
+<span class="fc bfc" id="L655" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L656">            return _NONE;</span>
 
-<span class="fc bfc" id="L649" title="All 2 branches covered.">        ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;</span>
-<span class="fc bfc" id="L650" title="All 4 branches covered.">        Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;</span>
+<span class="fc bfc" id="L658" title="All 2 branches covered.">        ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;</span>
+<span class="fc bfc" id="L659" title="All 4 branches covered.">        Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;</span>
 
-<span class="pc bpc" id="L652" title="1 of 2 branches missed.">        if ( StyleUtil.isUndefinedColor(simplifiedPrimer) )</span>
-<span class="nc" id="L653">            simplifiedPrimer = null;</span>
+<span class="pc bpc" id="L661" title="1 of 2 branches missed.">        if ( StyleUtil.isUndefinedColor(simplifiedPrimer) )</span>
+<span class="nc" id="L662">            simplifiedPrimer = null;</span>
 
-<span class="fc bfc" id="L655" title="All 4 branches covered.">        if ( simplifiedImage == null &amp;&amp; simplifiedPrimer == null )</span>
-<span class="fc" id="L656">            return none();</span>
+<span class="fc bfc" id="L664" title="All 4 branches covered.">        if ( simplifiedImage == null &amp;&amp; simplifiedPrimer == null )</span>
+<span class="fc" id="L665">            return none();</span>
 
-<span class="fc" id="L658">        return ImageConf.of(</span>
+<span class="fc" id="L667">        return ImageConf.of(</span>
                     simplifiedPrimer,
                     simplifiedImage,
                     _placement,
@@ -663,7 +672,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
                     _fitMode,
                     _size,
                     _opacity,
-<span class="fc" id="L666">                    _padding.simplified(),</span>
+<span class="fc" id="L675">                    _padding.simplified(),</span>
                     _offset,
                     _clipArea
                 );
@@ -671,38 +680,38 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
 
     @Override
     public int hashCode() {
-<span class="fc" id="L674">        return Objects.hash(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L683">        return Objects.hash(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L679" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L680" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L681" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L682">        ImageConf rhs = (ImageConf) obj;</span>
-<span class="fc bfc" id="L683" title="All 2 branches covered.">        return Objects.equals(_primer,    rhs._primer)    &amp;&amp;</span>
-<span class="fc bfc" id="L684" title="All 2 branches covered.">               Objects.equals(_image,     rhs._image)     &amp;&amp;</span>
-<span class="pc bpc" id="L685" title="2 of 4 branches missed.">               Objects.equals(_placement, rhs._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L688" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L689" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L690" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L691">        ImageConf rhs = (ImageConf) obj;</span>
+<span class="fc bfc" id="L692" title="All 2 branches covered.">        return Objects.equals(_primer,    rhs._primer)    &amp;&amp;</span>
+<span class="fc bfc" id="L693" title="All 2 branches covered.">               Objects.equals(_image,     rhs._image)     &amp;&amp;</span>
+<span class="pc bpc" id="L694" title="2 of 4 branches missed.">               Objects.equals(_placement, rhs._placement) &amp;&amp;</span>
                _repeat == rhs._repeat    &amp;&amp;
-<span class="pc bpc" id="L687" title="1 of 2 branches missed.">               Objects.equals(_fitMode,   rhs._fitMode)   &amp;&amp;</span>
-<span class="pc bpc" id="L688" title="1 of 4 branches missed.">               Objects.equals(_size,      rhs._size)      &amp;&amp;</span>
+<span class="pc bpc" id="L696" title="1 of 2 branches missed.">               Objects.equals(_fitMode,   rhs._fitMode)   &amp;&amp;</span>
+<span class="pc bpc" id="L697" title="1 of 4 branches missed.">               Objects.equals(_size,      rhs._size)      &amp;&amp;</span>
                _opacity == rhs._opacity   &amp;&amp;
-<span class="pc bpc" id="L690" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding)   &amp;&amp;</span>
-<span class="pc bpc" id="L691" title="1 of 2 branches missed.">               Objects.equals(_offset,    rhs._offset)    &amp;&amp;</span>
-<span class="pc bpc" id="L692" title="1 of 2 branches missed.">               Objects.equals(_clipArea,  rhs._clipArea);</span>
+<span class="pc bpc" id="L699" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding)   &amp;&amp;</span>
+<span class="pc bpc" id="L700" title="1 of 2 branches missed.">               Objects.equals(_offset,    rhs._offset)    &amp;&amp;</span>
+<span class="pc bpc" id="L701" title="1 of 2 branches missed.">               Objects.equals(_clipArea,  rhs._clipArea);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L697" title="All 2 branches covered.">        if ( this.equals(_NONE) ) return this.getClass().getSimpleName()+&quot;[NONE]&quot;;</span>
-<span class="fc" id="L698">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
-<span class="fc" id="L699">                    &quot;primer=&quot;        + StyleUtil.toString(_primer)                          + &quot;, &quot; +</span>
-<span class="pc bpc" id="L700" title="1 of 2 branches missed.">                    &quot;image=&quot;         + ( _image == null ? &quot;?&quot; : _image.toString() )            + &quot;, &quot; +</span>
+<span class="fc bfc" id="L706" title="All 2 branches covered.">        if ( this.equals(_NONE) ) return this.getClass().getSimpleName()+&quot;[NONE]&quot;;</span>
+<span class="fc" id="L707">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L708">                    &quot;primer=&quot;        + StyleUtil.toString(_primer)                          + &quot;, &quot; +</span>
+<span class="pc bpc" id="L709" title="1 of 2 branches missed.">                    &quot;image=&quot;         + ( _image == null ? &quot;?&quot; : _image.toString() )            + &quot;, &quot; +</span>
                     &quot;placement=&quot;     + _placement                                              + &quot;, &quot; +
                     &quot;repeat=&quot;        + _repeat                                                 + &quot;, &quot; +
                     &quot;fitComponent=&quot;  + _fitMode                                                + &quot;, &quot; +
-<span class="fc" id="L704">                    &quot;width=&quot;         + _size.width().map(Objects::toString).orElse(&quot;?&quot;)  + &quot;, &quot; +</span>
-<span class="fc" id="L705">                    &quot;height=&quot;        + _size.height().map(Objects::toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L713">                    &quot;width=&quot;         + _size.width().map(Objects::toString).orElse(&quot;?&quot;)  + &quot;, &quot; +</span>
+<span class="fc" id="L714">                    &quot;height=&quot;        + _size.height().map(Objects::toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
                     &quot;opacity=&quot;       + _opacity                                                + &quot;, &quot; +
                     &quot;padding=&quot;       + _padding                                                + &quot;, &quot; +
                     &quot;offset=&quot;        + _offset                                                 + &quot;, &quot; +

@@ -1364,7 +1364,7 @@ public final class SwingTree
 <span class="fc bfc" id="L1364" title="All 2 branches covered.">            if( value == null ) {</span>
 <span class="fc" id="L1365">                synchronized( this ) {</span>
 <span class="fc" id="L1366">                    value = this.value;</span>
-<span class="fc bfc" id="L1367" title="All 2 branches covered.">                    if ( value == null )</span>
+<span class="pc bpc" id="L1367" title="1 of 2 branches missed.">                    if ( value == null )</span>
 <span class="fc" id="L1368">                        this.value = value = supplier.get();</span>
 <span class="fc" id="L1369">                }</span>
             }
