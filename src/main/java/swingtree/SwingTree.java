@@ -148,7 +148,7 @@ public final class SwingTree
     }
 
     /**
-     *  The icon cash is a hash map that uses an {@link IconDeclaration} as a key
+     *  The icon cache is a hash map that uses an {@link IconDeclaration} as a key
      *  and an {@link ImageIcon} as a value. This is used to cache icons that are loaded
      *  from the file system using convenience methods like
      *  {@link swingtree.UI#findIcon(String)} and {@link swingtree.UI#findIcon(IconDeclaration)} or
@@ -162,21 +162,29 @@ public final class SwingTree
     public Map<IconDeclaration, ImageIcon> getIconCache() { return _iconCache; }
 
     /**
-     * Returns the user scale factor is a scaling factor is used by SwingTree's
-     * style engine to scale the UI during painting.
-     * Note that this is different from the system/Graphics2D scale factor, which is
-     * the scale factor that the JRE uses to scale everything through the
-     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * There are two types of strategies for achieving high DPI scaling in Swing.
+     * The first one is available since Java 9, and it uses the system property {@code sun.java2d.uiScale}
+     * to scale the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D} graphics context.
+     * The second one is look and feel / client code dependent scaling, which is what SwingTree uses
+     * in, for example, the style engine or when seting the size of component through the SwingTree API...
      * <p>
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
-     * <p>
+     * The float based scaling factor returned by this method can be used as a multiplier in order
+     * to scale something from "developer pixels" to "component pixels" / "look and feel pixels".
+     * Conversely, by dividing a number using this factor, you convert something from "component pixels"
+     * to platform-agnostic "developer pixel".<br>
+     * The scaling factor is computed by SwingTree automatically based on the system font.
+     * Anything you do through the SwingTree API, will be scaled for you,<br>
+     * but if you write code against raw Swing, you may need to use this scale factor
+     * to ensure consistent scaling support across screens with varying DPI.
+     * Most commonly, you will need to do manual scaling when defining component dimensions
+     * or to scale custom {@link Graphics2D} based painting operations.
+     * <br
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
-     * or directly through the system property "swingtree.uiScale".
+     * or directly through the system property "swingtree.uiScale".<br>
+     * You may also set it using {@link SwingTree#setUiScaleFactor(float)}.
      *
-     * @return The user scale factor.
+     * @return The user scale factor to convert between "developer pixel size" and "component pixel size".
      */
     public float getUiScaleFactor() {
         return _uiScale.get().getUserScaleFactor();
@@ -188,10 +196,6 @@ public final class SwingTree
      * Note that this is different from the system/Graphics2D scale factor, which is
      * the scale factor that the JRE uses to scale everything through the
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
-     * <p>
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
      * <p>
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
@@ -217,16 +221,12 @@ public final class SwingTree
      * code, then it will be garbage collected alongside all of its change
      * listeners automatically for you!<br>
      * <p>
-     * The user scale factor is a scaling factor that is used by SwingTree's
-     * style engine to scale the UI during painting.<br>
+     * The user scale factor is a scaling factor that converts "developer pixel sizes" to
+     * "component pixel sizes" and it is used by SwingTree's API to support dynamic DPI scaling.<br>
      * <p>
      * Note that this is different from the system/Graphics2D scale factor, which is
      * the scale factor that the JRE uses to scale everything through the
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
-     * <p>
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
      * <p>
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
