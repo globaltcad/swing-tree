@@ -73,8 +73,8 @@ public final class SvgIcon extends ImageIcon
      * @param path The path to the SVG document.
      */
     public static SvgIcon at( String path ) {
-        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
-        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -82,16 +82,16 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon at( String path, Size size ) {
-        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(SvgIcon.class.getResource(path), size);
-        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = _loadSvgDocument(SvgIcon.class.getResource(path), size);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param svgUrl The URL to the SVG document.
      */
     public static SvgIcon at( URL svgUrl ) {
-        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(svgUrl, Size.unknown());
-        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = _loadSvgDocument(svgUrl, Size.unknown());
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -99,16 +99,16 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon at( URL svgUrl, Size size ) {
-        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(svgUrl, size);
-        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = _loadSvgDocument(svgUrl, size);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param stream The input stream supplying the text data of the SVG document.
      */
     public static SvgIcon of( InputStream stream ) {
-        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(stream, Size.unknown());
-        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = _loadSvgDocument(stream, Size.unknown());
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -116,15 +116,16 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon of( InputStream stream, Size size ) {
-        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(stream, size);
-        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = _loadSvgDocument(stream, size);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
-        return new SvgIcon(svgDocument, Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = new ConstructionArgs(svgDocument, Size.unknown(), Unit.PX, Unit.PX);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -132,24 +133,25 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon of( SVGDocument svgDocument, Size size ) {
-        return new SvgIcon(svgDocument, size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        ConstructionArgs args = new ConstructionArgs(svgDocument, size, Unit.PX, Unit.PX);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
-    private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument( URL svgUrl, Size size ) {
+    private static ConstructionArgs _loadSvgDocument( URL svgUrl, Size size ) {
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
         }, size);
     }
 
-    private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument( InputStream stream, Size size ) {
+    private static ConstructionArgs _loadSvgDocument( InputStream stream, Size size ) {
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(stream, null, LoaderContext.builder().preProcessor(processor).build());
         }, size);
     }
 
-    private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
+    private static ConstructionArgs _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
         SVGDocument tempSVGDocument = null;
         AtomicReference<String> widthUnit = new AtomicReference<>("");
         AtomicReference<String> heightUnit = new AtomicReference<>("");
@@ -161,7 +163,23 @@ public final class SvgIcon extends ImageIcon
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
-        return Pair.of(tempSVGDocument, size);
+        return new ConstructionArgs(
+                    tempSVGDocument,
+                    size,
+                    _unitOf(widthUnit.get()),
+                    _unitOf(heightUnit.get())
+                );
+    }
+
+    private static Unit _unitOf(String unitString) {
+        if ( unitString.isEmpty() )
+            return Unit.UNKNOWN;
+        if ( unitString.equals("px") )
+            return Unit.PX;
+        if ( unitString.equals("%") )
+            return Unit.PERCENTAGE;
+
+        return Unit.UNKNOWN;
     }
 
     private static String _parseUnitFrom( String numberWithUnit ) {
@@ -172,6 +190,14 @@ public final class SvgIcon extends ImageIcon
         // This regex matches the leading number (including decimals) and removes it
         String unit = numberWithUnit.replaceAll("^[-+]?\\d*\\.?\\d+", "");
         return unit.trim(); // There may be a space between the number and the unit!
+    }
+
+    private SvgIcon(
+        ConstructionArgs args,
+        UI.FitComponent  fitComponent,
+        UI.Placement     preferredPlacement
+    ) {
+        this(args.svgDocument, args.size, fitComponent, preferredPlacement);
     }
 
     private SvgIcon(
@@ -932,4 +958,20 @@ public final class SvgIcon extends ImageIcon
             return Optional.of(aspectRatio);
     }
 
+    private enum Unit {
+        PX, PERCENTAGE, UNKNOWN
+    }
+
+    private static class ConstructionArgs { // This should be a record
+        final @Nullable SVGDocument svgDocument;
+        final Size                  size;
+        final Unit                  widthUnit;
+        final Unit                  heightUnit;
+        private ConstructionArgs(@Nullable SVGDocument svgDocument, Size size, Unit widthUnit, Unit heightUnit) {
+            this.svgDocument = svgDocument;
+            this.size = size;
+            this.widthUnit = widthUnit;
+            this.heightUnit = heightUnit;
+        }
+    }
 }
