@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
@@ -150,14 +151,27 @@ public final class SvgIcon extends ImageIcon
 
     private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
         SVGDocument tempSVGDocument = null;
+        AtomicReference<String> widthUnit = new AtomicReference<>("");
+        AtomicReference<String> heightUnit = new AtomicReference<>("");
         try {
             tempSVGDocument = loader.apply(dom->{
-                // TODO: parse units
+                widthUnit.set(_parseUnitFrom(dom.attribute("width", "")));
+                heightUnit.set(_parseUnitFrom(dom.attribute("height", "")));
             });
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
         return Pair.of(tempSVGDocument, size);
+    }
+
+    private static String _parseUnitFrom( String numberWithUnit ) {
+        numberWithUnit =  numberWithUnit.trim();// sanitize
+        if ( numberWithUnit.isEmpty() ) {
+            return "";
+        }
+        // This regex matches the leading number (including decimals) and removes it
+        String unit = numberWithUnit.replaceAll("^[-+]?\\d*\\.?\\d+", "");
+        return unit.trim(); // There may be a space between the number and the unit!
     }
 
     private SvgIcon(
