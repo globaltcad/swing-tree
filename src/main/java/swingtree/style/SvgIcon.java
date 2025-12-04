@@ -8,12 +8,12 @@ import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Pair;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.layout.Size;
 
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -72,7 +72,8 @@ public final class SvgIcon extends ImageIcon
      * @param path The path to the SVG document.
      */
     public static SvgIcon at( String path ) {
-        return new SvgIcon(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
+        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -80,14 +81,16 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon at( String path, Size size ) {
-        return new SvgIcon(_loadSvgDocument(SvgIcon.class.getResource(path)), size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(SvgIcon.class.getResource(path), size);
+        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param svgUrl The URL to the SVG document.
      */
     public static SvgIcon at( URL svgUrl ) {
-        return new SvgIcon(_loadSvgDocument(svgUrl), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(svgUrl, Size.unknown());
+        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -95,14 +98,16 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon at( URL svgUrl, Size size ) {
-        return new SvgIcon(_loadSvgDocument(svgUrl), size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(svgUrl, size);
+        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
      * @param stream The input stream supplying the text data of the SVG document.
      */
     public static SvgIcon of( InputStream stream ) {
-        return new SvgIcon(_loadSvgDocument(stream), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(stream, Size.unknown());
+        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -110,7 +115,8 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon of( InputStream stream, Size size ) {
-        return new SvgIcon(_loadSvgDocument(stream), size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        Pair<@Nullable SVGDocument, Size> docAndSize = _loadSvgDocument(stream, size);
+        return new SvgIcon(docAndSize.first(), docAndSize.second(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
     /**
@@ -128,21 +134,21 @@ public final class SvgIcon extends ImageIcon
         return new SvgIcon(svgDocument, size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
-    private static @Nullable SVGDocument _loadSvgDocument( URL svgUrl ) {
+    private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument( URL svgUrl, Size size ) {
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
-        });
+        }, size);
     }
 
-    private static @Nullable SVGDocument _loadSvgDocument( InputStream stream ) {
+    private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument( InputStream stream, Size size ) {
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(stream, null, LoaderContext.builder().preProcessor(processor).build());
-        });
+        }, size);
     }
 
-    private static @Nullable SVGDocument _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader) {
+    private static Pair<@Nullable SVGDocument, Size> _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
         SVGDocument tempSVGDocument = null;
         try {
             tempSVGDocument = loader.apply(dom->{
@@ -151,7 +157,7 @@ public final class SvgIcon extends ImageIcon
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
-        return tempSVGDocument;
+        return Pair.of(tempSVGDocument, size);
     }
 
     private SvgIcon(
