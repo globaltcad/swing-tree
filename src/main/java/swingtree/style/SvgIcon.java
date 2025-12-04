@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.DomProcessor;
 import com.github.weisj.jsvg.parser.LoaderContext;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import com.github.weisj.jsvg.view.FloatSize;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your GUI.
@@ -126,6 +128,32 @@ public final class SvgIcon extends ImageIcon
         return new SvgIcon(svgDocument, size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
+    private static @Nullable SVGDocument _loadSvgDocument( URL svgUrl ) {
+        return _loadSvgDocument( processor -> {
+            SVGLoader loader = new SVGLoader();
+            return loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
+        });
+    }
+
+    private static @Nullable SVGDocument _loadSvgDocument( InputStream stream ) {
+        return _loadSvgDocument( processor -> {
+            SVGLoader loader = new SVGLoader();
+            return loader.load(stream, null, LoaderContext.builder().preProcessor(processor).build());
+        });
+    }
+
+    private static @Nullable SVGDocument _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader) {
+        SVGDocument tempSVGDocument = null;
+        try {
+            tempSVGDocument = loader.apply(dom->{
+                // TODO: parse units
+            });
+        } catch (Exception e) {
+            log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
+        }
+        return tempSVGDocument;
+    }
+
     private SvgIcon(
         @Nullable SVGDocument svgDocument, // nullable
         Size                  size,
@@ -137,28 +165,6 @@ public final class SvgIcon extends ImageIcon
         _size               = Objects.requireNonNull(size);
         _fitComponent       = Objects.requireNonNull(fitComponent);
         _preferredPlacement = Objects.requireNonNull(preferredPlacement);
-    }
-
-    private static @Nullable SVGDocument _loadSvgDocument( URL svgUrl ) {
-        SVGDocument tempSVGDocument = null;
-        try {
-            SVGLoader loader = new SVGLoader();
-            tempSVGDocument = loader.load(svgUrl);
-        } catch (Exception e) {
-            log.error(SwingTree.get().logMarker(), "Failed to load SVG document from URL: " + svgUrl, e);
-        }
-        return tempSVGDocument;
-    }
-
-    private static @Nullable SVGDocument _loadSvgDocument( InputStream stream ) {
-        SVGDocument tempSVGDocument = null;
-        try {
-            SVGLoader loader = new SVGLoader();
-            tempSVGDocument = loader.load(stream, null, LoaderContext.createDefault());
-        } catch (Exception e) {
-            log.error(SwingTree.get().logMarker(), "Failed to load SVG document from stream: " + stream, e);
-        }
-        return tempSVGDocument;
     }
 
     /**
