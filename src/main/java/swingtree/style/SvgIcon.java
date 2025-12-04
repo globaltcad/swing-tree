@@ -126,7 +126,7 @@ public final class SvgIcon extends ImageIcon
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
-        ConstructionArgs args = new ConstructionArgs(svgDocument, Size.unknown(), Unit.PX, Unit.PX);
+        ConstructionArgs args = new ConstructionArgs(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -135,7 +135,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon of( SVGDocument svgDocument, Size size ) {
-        ConstructionArgs args = new ConstructionArgs(svgDocument, size, Unit.PX, Unit.PX);
+        ConstructionArgs args = new ConstructionArgs(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
