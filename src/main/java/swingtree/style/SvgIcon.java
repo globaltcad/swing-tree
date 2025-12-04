@@ -8,7 +8,6 @@ import com.github.weisj.jsvg.view.FloatSize;
 import com.github.weisj.jsvg.view.ViewBox;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
-import sprouts.Pair;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.layout.Size;
@@ -155,22 +154,35 @@ public final class SvgIcon extends ImageIcon
 
     private static ConstructionArgs _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
         SVGDocument tempSVGDocument = null;
-        AtomicReference<String> widthUnit = new AtomicReference<>("");
-        AtomicReference<String> heightUnit = new AtomicReference<>("");
+        Unit widthUnit  = Unit.UNKNOWN;
+        Unit heightUnit = Unit.UNKNOWN;
         try {
+            AtomicReference<String> widthUnitString = new AtomicReference<>("");
+            AtomicReference<String> heightUnitString = new AtomicReference<>("");
             tempSVGDocument = loader.apply(dom->{
-                widthUnit.set(_parseUnitFrom(dom.attribute("width", "")));
-                heightUnit.set(_parseUnitFrom(dom.attribute("height", "")));
+                widthUnitString.set(_parseUnitFrom(dom.attribute("width", "")));
+                heightUnitString.set(_parseUnitFrom(dom.attribute("height", "")));
             });
+            widthUnit = _unitOf(Objects.requireNonNull(widthUnitString.get()));
+            heightUnit = _unitOf(Objects.requireNonNull(heightUnitString.get()));
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
-        return new ConstructionArgs(
-                    tempSVGDocument,
-                    size,
-                    _unitOf(widthUnit.get()),
-                    _unitOf(heightUnit.get())
-                );
+        if ( tempSVGDocument != null ) {
+            if ( widthUnit != Unit.UNKNOWN && size.hasPositiveWidth() ) {
+                if ( widthUnit == Unit.PERCENTAGE )
+                    size = size.withWidth(-1); // A percentage is NOT a concrete size! (computed dynamically)
+                else
+                    size = size.withWidth(tempSVGDocument.size().width);
+            }
+            if ( heightUnit != Unit.UNKNOWN && size.hasPositiveHeight() ) {
+                if ( heightUnit == Unit.PERCENTAGE )
+                    size = size.withHeight(-1); // A percentage is NOT a concrete size! (computed dynamically)
+                else
+                    size = size.withHeight(tempSVGDocument.size().height);
+            }
+        }
+        return new ConstructionArgs(tempSVGDocument, size, widthUnit, heightUnit);
     }
 
     private static Unit _unitOf(String unitString) {
@@ -592,8 +604,18 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        int scaledWidth  = getIconWidth();
-        int scaledHeight = getIconHeight();
+        final int scaledWidth;
+        final int scaledHeight;
+        if ( _widthUnit == Unit.PERCENTAGE ) {
+            scaledWidth = (int) (( c.getWidth() * _svgDocument.size().width ) / 100f);
+        } else {
+            scaledWidth  = getIconWidth();
+        }
+        if ( _heightUnit == Unit.PERCENTAGE ) {
+            scaledHeight = (int) (( c.getHeight() * _svgDocument.size().height ) / 100f);
+        } else {
+            scaledHeight  = getIconHeight();
+        }
 
         UI.Placement preferredPlacement = _preferredPlacement;
 
