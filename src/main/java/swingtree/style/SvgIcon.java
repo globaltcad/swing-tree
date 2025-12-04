@@ -63,6 +63,68 @@ public final class SvgIcon extends ImageIcon
 
     private @Nullable BufferedImage _cache = null;
 
+    /**
+     *  Tries to create an {@link SvgIcon} from a resource path
+     *  defined by the supplied string.
+     *
+     * @param path The path to the SVG document.
+     */
+    public static SvgIcon at( String path ) {
+        return new SvgIcon(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param path The path to the SVG document.
+     * @param size The size of the icon in the form of a {@link Size}.
+     */
+    public static SvgIcon at( String path, Size size ) {
+        return new SvgIcon(_loadSvgDocument(SvgIcon.class.getResource(path)), size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgUrl The URL to the SVG document.
+     */
+    public static SvgIcon at( URL svgUrl ) {
+        return new SvgIcon(_loadSvgDocument(svgUrl), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgUrl The URL to the SVG document.
+     * @param size The size of the icon in the form of a {@link Size}.
+     */
+    public static SvgIcon at( URL svgUrl, Size size ) {
+        return new SvgIcon(_loadSvgDocument(svgUrl), size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param stream The input stream supplying the text data of the SVG document.
+     */
+    public static SvgIcon of( InputStream stream ) {
+        return new SvgIcon(_loadSvgDocument(stream), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param stream The input stream supplying the text data of the SVG document.
+     * @param size The size of the icon in the form of a {@link Size}.
+     */
+    public static SvgIcon of( InputStream stream, Size size ) {
+        return new SvgIcon(_loadSvgDocument(stream), size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     */
+    public static SvgIcon of( SVGDocument svgDocument ) {
+        return new SvgIcon(svgDocument, Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     * @param size The size of the icon in the form of a {@link Size}.
+     */
+    public static SvgIcon of( SVGDocument svgDocument, Size size ) {
+        return new SvgIcon(svgDocument, size, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
 
     private SvgIcon(
         @Nullable SVGDocument svgDocument, // nullable
@@ -76,67 +138,6 @@ public final class SvgIcon extends ImageIcon
         _fitComponent       = Objects.requireNonNull(fitComponent);
         _preferredPlacement = Objects.requireNonNull(preferredPlacement);
     }
-
-    /**
-     * @param path The path to the SVG document.
-     */
-    public SvgIcon( String path ) {
-        this(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param svgUrl The URL to the SVG document.
-     */
-    public SvgIcon( URL svgUrl ) {
-        this(_loadSvgDocument(svgUrl), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param stream The input stream supplying the text data of the SVG document.
-     */
-    public SvgIcon( InputStream stream ) {
-        this(_loadSvgDocument(stream), Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
-     */
-    public SvgIcon( SVGDocument svgDocument ) {
-        this(svgDocument, Size.unknown(), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param path The path to the SVG document.
-     * @param size The size of the icon in the form of a {@link Dimension}.
-     */
-    public SvgIcon( String path, Dimension size ) {
-        this(_loadSvgDocument(SvgIcon.class.getResource(path)), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param svgUrl The URL to the SVG document.
-     * @param size The size of the icon in the form of a {@link Dimension}.
-     */
-    public SvgIcon( URL svgUrl, Dimension size ) {
-        this(_loadSvgDocument(svgUrl), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param stream The input stream supplying the text data of the SVG document.
-     * @param size The size of the icon in the form of a {@link Dimension}.
-     */
-    public SvgIcon( InputStream stream, Dimension size ) {
-        this(_loadSvgDocument(stream), Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
-    /**
-     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
-     * @param size The size of the icon in the form of a {@link Dimension}.
-     */
-    public SvgIcon( SVGDocument svgDocument, Dimension size ) {
-        this(svgDocument, Size.of(size), DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
-    }
-
 
     private static @Nullable SVGDocument _loadSvgDocument( URL svgUrl ) {
         SVGDocument tempSVGDocument = null;

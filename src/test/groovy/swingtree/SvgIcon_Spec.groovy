@@ -29,7 +29,7 @@ class SvgIcon_Spec extends Specification
             or the specified size of the icon.
         """
         given : 'We create a basic `SvgIcon` of a funnel.'
-            var icon = new SvgIcon("/img/funnel.svg")
+            var icon = SvgIcon.at("/img/funnel.svg")
         expect : 'The icon does not have a size.'
             icon.getSvgDocument() != null
             icon.getIconHeight() == -1
@@ -54,7 +54,7 @@ class SvgIcon_Spec extends Specification
         """
             SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a basic `SvgIcon` of a funnel.'
-            var icon = new SvgIcon("/img/funnel.svg")
+            var icon = SvgIcon.at("/img/funnel.svg")
         when : 'We use the various wither methods to create differently sized icons.'
             var icon2 = icon.withIconWidth(12)
             var icon1 = icon.withIconHeight(13)
@@ -102,7 +102,7 @@ class SvgIcon_Spec extends Specification
             and preferably placed.
         """
         given : 'We create a set of various `SvgIcon`s.'
-            var icon  = new SvgIcon("/img/funnel.svg")
+            var icon  = SvgIcon.at("/img/funnel.svg")
             var icon1 = icon.withIconHeight(13)
             var icon2 = icon.withIconWidth(12).withFitComponent(UI.FitComponent.NO)
             var icon3 = icon.withIconSize(27, 16)
