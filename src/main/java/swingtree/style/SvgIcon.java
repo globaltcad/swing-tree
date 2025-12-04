@@ -61,6 +61,8 @@ public final class SvgIcon extends ImageIcon
 
     private final @Nullable SVGDocument _svgDocument;
     private final Size                  _size;
+    private final Unit                  _widthUnit;
+    private final Unit                  _heightUnit;
     private final UI.FitComponent       _fitComponent;
     private final UI.Placement          _preferredPlacement;
 
@@ -197,18 +199,22 @@ public final class SvgIcon extends ImageIcon
         UI.FitComponent  fitComponent,
         UI.Placement     preferredPlacement
     ) {
-        this(args.svgDocument, args.size, fitComponent, preferredPlacement);
+        this(args.svgDocument, args.size, args.widthUnit, args.heightUnit, fitComponent, preferredPlacement);
     }
 
     private SvgIcon(
         @Nullable SVGDocument svgDocument, // nullable
         Size                  size,
+        Unit                  widthUnit,
+        Unit                  heightUnit,
         UI.FitComponent       fitComponent,
         UI.Placement          preferredPlacement
     ) {
         super();
         _svgDocument        = svgDocument;
         _size               = Objects.requireNonNull(size);
+        _widthUnit          = Objects.requireNonNull(widthUnit);
+        _heightUnit         = Objects.requireNonNull(heightUnit);
         _fitComponent       = Objects.requireNonNull(fitComponent);
         _preferredPlacement = Objects.requireNonNull(preferredPlacement);
     }
@@ -246,7 +252,7 @@ public final class SvgIcon extends ImageIcon
         int width = _size.width().map(Math::round).orElse(NO_SIZE);
         if ( newWidth == width )
             return this;
-        return new SvgIcon(_svgDocument, _size.withWidth(newWidth), _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, _size.withWidth(newWidth), _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -320,7 +326,7 @@ public final class SvgIcon extends ImageIcon
         int currentHeight = _size.height().map(Math::round).orElse(NO_SIZE);
         if ( height == currentHeight )
             return this;
-        return new SvgIcon(_svgDocument, _size.withHeight(height), _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, _size.withHeight(height), _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -345,7 +351,7 @@ public final class SvgIcon extends ImageIcon
         int height = _size.height().map(Math::round).orElse(NO_SIZE);
         if ( newWidth == width && newHeight == height )
             return this;
-        return new SvgIcon(_svgDocument, Size.of(newWidth, newHeight), _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, Size.of(newWidth, newHeight), _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -386,7 +392,7 @@ public final class SvgIcon extends ImageIcon
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
         Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));
-        return new SvgIcon(_svgDocument, adjustedSize, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, adjustedSize, _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -410,7 +416,7 @@ public final class SvgIcon extends ImageIcon
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
         Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));
-        return new SvgIcon(_svgDocument, adjustedSize, _fitComponent, _preferredPlacement);
+        return new SvgIcon(_svgDocument, adjustedSize, _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -504,7 +510,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
-        return new SvgIcon(_svgDocument, _size, fit, _preferredPlacement);
+        return new SvgIcon(_svgDocument, _size, _widthUnit, _heightUnit, fit, _preferredPlacement);
     }
 
     /**
@@ -530,7 +536,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(placement);
         if ( placement == _preferredPlacement )
             return this;
-        return new SvgIcon(_svgDocument, _size, _fitComponent, placement);
+        return new SvgIcon(_svgDocument, _size, _widthUnit, _heightUnit, _fitComponent, placement);
     }
 
     /**
