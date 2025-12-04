@@ -6690,7 +6690,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         if ( path.endsWith(".svg") ) {
             SvgIcon svgIcon = null;
             try {
-                svgIcon = new SvgIcon(url);
+                svgIcon = SvgIcon.at(url);
             } catch (Exception e) {
                 log.error(SwingTree.get().logMarker(), "Failed to load SVG document from URL: {}", url, e);
                 return null;
