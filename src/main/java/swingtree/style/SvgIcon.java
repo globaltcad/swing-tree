@@ -17,8 +17,10 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -104,6 +106,16 @@ public final class SvgIcon extends ImageIcon
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
+    public static SvgIcon of( String svgString ) {
+        return of( svgString, Size.unknown() );
+    }
+
+    public static SvgIcon of( String svgString, Size size ) {
+        InputStream inputStream = new ByteArrayInputStream(svgString.getBytes(StandardCharsets.UTF_8));
+        ConstructionArgs args = _loadSvgDocument(inputStream, size);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
     /**
      * @param stream The input stream supplying the text data of the SVG document.
      */
@@ -169,13 +181,13 @@ public final class SvgIcon extends ImageIcon
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
         if ( tempSVGDocument != null ) {
-            if ( widthUnit != Unit.UNKNOWN && size.hasPositiveWidth() ) {
+            if ( widthUnit != Unit.UNKNOWN && !size.hasPositiveWidth() ) {
                 if ( widthUnit == Unit.PERCENTAGE )
                     size = size.withWidth(-1); // A percentage is NOT a concrete size! (computed dynamically)
                 else
                     size = size.withWidth(tempSVGDocument.size().width);
             }
-            if ( heightUnit != Unit.UNKNOWN && size.hasPositiveHeight() ) {
+            if ( heightUnit != Unit.UNKNOWN && !size.hasPositiveHeight() ) {
                 if ( heightUnit == Unit.PERCENTAGE )
                     size = size.withHeight(-1); // A percentage is NOT a concrete size! (computed dynamically)
                 else
@@ -604,18 +616,8 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        final int scaledWidth;
-        final int scaledHeight;
-        if ( _widthUnit == Unit.PERCENTAGE ) {
-            scaledWidth = (int) (( c.getWidth() * _svgDocument.size().width ) / 100f);
-        } else {
-            scaledWidth  = getIconWidth();
-        }
-        if ( _heightUnit == Unit.PERCENTAGE ) {
-            scaledHeight = (int) (( c.getHeight() * _svgDocument.size().height ) / 100f);
-        } else {
-            scaledHeight  = getIconHeight();
-        }
+        final int scaledWidth = getIconWidth();
+        final int scaledHeight = getIconHeight();
 
         UI.Placement preferredPlacement = _preferredPlacement;
 
@@ -652,6 +654,13 @@ public final class SvgIcon extends ImageIcon
 
         width  = scaledWidth  >= 0 ? scaledWidth  : width  - insets.right  - insets.left;
         height = scaledHeight >= 0 ? scaledHeight : height - insets.bottom - insets.top ;
+
+        if ( _widthUnit == Unit.PERCENTAGE ) {
+            width = (int) (( width * _svgDocument.size().width ) / 100f);
+        }
+        if ( _heightUnit == Unit.PERCENTAGE ) {
+            height = (int) (( height * _svgDocument.size().height ) / 100f);
+        }
 
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
@@ -965,6 +974,10 @@ public final class SvgIcon extends ImageIcon
     private Optional<Double> _aspectRatio() {
         if ( _svgDocument == null )
             return Optional.empty();
+        if ( _widthUnit == Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE )
+            return Optional.empty(); // The ration cannot be known ahead of time!
+        if ( _widthUnit != Unit.PERCENTAGE && _heightUnit == Unit.PERCENTAGE )
+            return Optional.empty(); // The ration cannot be known ahead of time!
 
         double aspectRatio1 = 0;
         double aspectRatio2 = 0;
