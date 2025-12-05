@@ -52,8 +52,12 @@ final class DynamicLaF
         return _overrideWasNeeded;
     }
 
-    boolean customLookAndFeelIsInstalled() {
+    private boolean customLookAndFeelIsInstalled() {
         return _styleLaF != null;
+    }
+
+    boolean customLookAndFeelIsInstalled(JComponent owner) {
+        return _styleLaF != null || owner instanceof JBox || owner instanceof JIcon;
     }
 
     DynamicLaF establishLookAndFeelFor(StyleConf styleConf, JComponent owner ) {
