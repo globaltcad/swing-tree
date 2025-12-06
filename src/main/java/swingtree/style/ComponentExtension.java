@@ -642,7 +642,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     void paintBackgroundIfNeeded( Graphics g, Consumer<Graphics> lookAndFeelPaint )
     {
-        if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
+        if ( _styleInstaller.customLookAndFeelIsInstalled(_owner) ) {
             if ( lookAndFeelPaint != null )
                 lookAndFeelPaint.accept(g);
             return; // We render ĥere through the custom installed UI!

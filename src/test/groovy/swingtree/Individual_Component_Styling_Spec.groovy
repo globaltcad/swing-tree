@@ -375,6 +375,65 @@ class Individual_Component_Styling_Spec extends Specification
             uiScale << [1, 2, 3]
     }
 
+    def 'An icon in a box with nested shadows.'( int uiScale )
+    {
+        reportInfo """
+            Raw Swing does not support custom box shadows and it also does not
+            support importing and showing SVG icons. SwingTree supports this out of the box.
+            Here we both demonstrate and stress test this behavior by rendering a shadow nested in another
+            shadow with an icon displayed in the middle...
+            ${Utility.linkSnapshot('components/icon-in-a-box-with-nested-shadows.png')}
+
+            This test was actually born after we found a finicky little shadow clipping
+            bug specific to `JIcon` and `JBox`, which are custom components with unque behavior.
+            So this is an important regression test as well!
+        """
+        given : """
+            We first set a UI scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes,
+            in a real application scaling is done automatically.
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create the UI.'
+            var ui =
+                    UI.panel("fill").withBackground(Color.CYAN)
+                    .add("center, push, grow",
+                        UI.box("fill")
+                        .withStyle( conf -> conf
+                            .shadowColor(Color.BLACK)
+                            .shadowBlurRadius(6)
+                            .shadowSpreadRadius(-1)
+                            .borderRadius(8)
+                            .margin(13)
+                        )
+                        .add("center, push, grow",
+                            UI.icon("img/two-16th-notes.svg").withSizeExactly(58,58)
+                            .withStyle( conf -> conf
+                                .shadowColor(Color.BLUE)
+                                .shadowBlurRadius(5)
+                                .shadowSpreadRadius(-1)
+                                .borderRadius(8)
+                                .margin(13)
+                                .padding(4)
+                            )
+                        )
+                    )
+                    .get(JPanel)
+
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "components/icon-in-a-box-with-nested-shadows.png", 98) > 98
+
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """
+            uiScale << [ 1, 2, 3 ]
+    }
+
     def  'Rendering a panel, styled to have round edges, will not be visible when it is flagged as non-opaque.'( int uiScale )
     {
         reportInfo """
