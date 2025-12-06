@@ -562,8 +562,8 @@ class Style_Sheet_Spec extends Specification
                     );
                     add(group("ChessBoard"), it ->
                         it.painter(UI.Layer.BACKGROUND, g2d -> {
-                            var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
-                            var h = it.component().getHeight() / 8;
+                            var w = it.componentWidth() / 8;// We render a checkerboard pattern!
+                            var h = it.componentHeight() / 8;
                             for (var i = 0; i < 8; i++) {
                                 for (var j = 0; j < 8; j++) {
                                     if ((i + j) % 2 == 0) {

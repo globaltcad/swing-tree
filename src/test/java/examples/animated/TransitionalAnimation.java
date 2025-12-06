@@ -57,8 +57,8 @@ public final class TransitionalAnimation extends Panel
                             .type(GradientType.RADIAL)
                             .boundary(ComponentBoundary.BORDER_TO_INTERIOR)
                             .offset(
-                                it.component().getWidth()*state.progress(),
-                                it.component().getHeight()*state.progress()
+                                it.componentWidth()*state.progress(),
+                                it.componentHeight()*state.progress()
                             )
                             .colors(
                                 color(0.75, 1, 0.5, state.progress()),
