@@ -6688,15 +6688,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 }
         }
         if ( path.endsWith(".svg") ) {
-            SVGDocument tempSVGDocument;
+            SvgIcon svgIcon = null;
             try {
-                SVGLoader loader = new SVGLoader();
-                tempSVGDocument = Objects.requireNonNull(loader.load(url));
+                svgIcon = SvgIcon.at(url);
             } catch (Exception e) {
-                log.error(SwingTree.get().logMarker(), "Failed to load SVG document from URL: " + url, e);
+                log.error(SwingTree.get().logMarker(), "Failed to load SVG document from URL: {}", url, e);
                 return null;
             }
-            return new SvgIcon(tempSVGDocument).withIconSize(declaration.size());
+            if ( svgIcon.getSvgDocument() == null ) {
+                return null;
+            }
+            return svgIcon.withIconSize(declaration.size());
         } else {
             /*
                 Not that we explicitly use the "createImage" method of the toolkit here.
