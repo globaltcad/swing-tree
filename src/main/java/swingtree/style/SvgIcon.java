@@ -740,20 +740,22 @@ public final class SvgIcon extends ImageIcon
     private void _paintIcon(
         final @Nullable Component c,
         final java.awt.Graphics g,
-        int x,
-        int y,
-        int width,
-        int height,
-        UI.Placement preferredPlacement
+        final int areaX,
+        final int areaY,
+        final int areaWidth,
+        final int areaHeight,
+        final UI.Placement preferredPlacement
     ) {
         if ( _svgDocument == null )
             return;
 
-        int scaledWidth  = getIconWidth();
-        int scaledHeight = getIconHeight();
+        final int scaledWidth  = getIconWidth();
+        final int scaledHeight = getIconHeight();
 
-        width  = ( width  < 0 ? scaledWidth  : width  );
-        height = ( height < 0 ? scaledHeight : height );
+        int x = areaX;
+        int y = areaY;
+        int width  = ( areaWidth  < 0 ? scaledWidth  : areaWidth  );
+        int height = ( areaHeight < 0 ? scaledHeight : areaHeight );
 
         Graphics2D g2d = (Graphics2D) g.create();
 
@@ -778,6 +780,11 @@ public final class SvgIcon extends ImageIcon
 
         if ( _fitComponent == UI.FitComponent.HEIGHT )
             scaleY = 1f;
+
+        if ( _fitComponent == UI.FitComponent.NO ) {
+            scaleX = 1f;
+            scaleY = 1f;
+        }
 
         ViewBox viewBox = new ViewBox(x, y, width, height);
         float boxX      = viewBox.x  / scaleX;
@@ -810,9 +817,9 @@ public final class SvgIcon extends ImageIcon
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
         if ( _fitComponent == UI.FitComponent.NO ) {
-            width   = scaledWidth  >= 0 ? scaledWidth  : (int) svgSize.width;
-            height  = scaledHeight >= 0 ? scaledHeight : (int) svgSize.height;
-            viewBox = new ViewBox( x, y, width, height );
+            final int newWidth   = scaledWidth  >= 0 ? scaledWidth  : (int) svgSize.width;
+            final int newHeight  = scaledHeight >= 0 ? scaledHeight : (int) svgSize.height;
+            viewBox = new ViewBox( x, y, newWidth, newHeight );
         }
 
         // Let's check if the view box exists:
@@ -842,7 +849,7 @@ public final class SvgIcon extends ImageIcon
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
          */
-        if ( preferredPlacement != UI.Placement.UNDEFINED && preferredPlacement != UI.Placement.CENTER ) {
+        if ( preferredPlacement != UI.Placement.UNDEFINED ) {
             // First we correct if the component area is smaller than the view box:
             width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
             width += (int) Math.max(0, x - viewBox.x );
@@ -875,6 +882,9 @@ public final class SvgIcon extends ImageIcon
                     break;
                 case RIGHT:
                     viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
+                    break;
+                case CENTER:
+                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
                     break;
                 default:
                     log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);

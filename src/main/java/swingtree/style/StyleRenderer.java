@@ -1222,7 +1222,7 @@ final class StyleRenderer
 
             if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(fit);
-                svgIcon.withPreferredPlacement(UI.Placement.CENTER)
+                svgIcon.withPreferredPlacement(UI.Placement.UNDEFINED)
                         .paintIcon(null, g2d, x, y, imgWidth, imgHeight);
             }
             else
