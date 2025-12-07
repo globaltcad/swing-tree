@@ -42,7 +42,7 @@ final class NoiseGradientPaint implements Paint
         }
 
         private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
-            if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
+            if (/*this.bounds.equals(bounds) && */this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
                 return null;
@@ -315,52 +315,50 @@ final class NoiseGradientPaint implements Paint
                 // Create data array with place for red, green, blue and alpha values
                 final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
 
-                IntStream.range(0, TILE_WIDTH * TILE_HEIGHT)
-                        .parallel()
-                        .forEach(tileIndex -> {
-                            double currentRed   = 0;
-                            double currentGreen = 0;
-                            double currentBlue  = 0;
-                            double currentAlpha = 0;
-                            float onGradientRange;
+                for ( int tileIndex = 0; tileIndex < TILE_WIDTH * TILE_HEIGHT; tileIndex++ ) {
+                    double currentRed   = 0;
+                    double currentGreen = 0;
+                    double currentBlue  = 0;
+                    double currentAlpha = 0;
+                    float onGradientRange;
 
-                            int tileY = tileIndex / TILE_WIDTH;
-                            int tileX = tileIndex % TILE_WIDTH;
+                    int tileY = tileIndex / TILE_WIDTH;
+                    int tileX = tileIndex % TILE_WIDTH;
 
-                            double localX = ( X + tileX - center.getX() ) / scaleX;
-                            double localY = ( Y + tileY - center.getY() ) / scaleY;
-                            if ( rotation != 0f && rotation % 360f != 0f ) {
-                                final double angle = Math.toRadians(rotation);
-                                final double sin   = Math.sin(angle);
-                                final double cos   = Math.cos(angle);
-                                final double newX = localX * cos - localY * sin;
-                                final double newY = localX * sin + localY * cos;
-                                localX = newX;
-                                localY = newY;
-                            }
-                            float x = (float) localX;
-                            float y = (float) localY;
+                    double localX = ( X + tileX - center.getX() ) / scaleX;
+                    double localY = ( Y + tileY - center.getY() ) / scaleY;
+                    if ( rotation != 0f && rotation % 360f != 0f ) {
+                        final double angle = Math.toRadians(rotation);
+                        final double sin   = Math.sin(angle);
+                        final double cos   = Math.cos(angle);
+                        final double newX = localX * cos - localY * sin;
+                        final double newY = localX * sin + localY * cos;
+                        localX = newX;
+                        localY = newY;
+                    }
+                    float x = (float) localX;
+                    float y = (float) localY;
 
-                            onGradientRange = noiseFunction.getFractionAt( x, y );
+                    onGradientRange = noiseFunction.getFractionAt( x, y );
 
-                            // Check for each angle in fractionAngles array
-                            for (int i = 0; i < MAX; i++) {
-                                if ((onGradientRange >= localFractions[i])) {
-                                    currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * redStepLookup[i];
-                                    currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * greenStepLookup[i];
-                                    currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * blueStepLookup[i];
-                                    currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * alphaStepLookup[i];
-                                }
-                            }
+                    // Check for each angle in fractionAngles array
+                    for (int i = 0; i < MAX; i++) {
+                        if ((onGradientRange >= localFractions[i])) {
+                            currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * redStepLookup[i];
+                            currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * greenStepLookup[i];
+                            currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * blueStepLookup[i];
+                            currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * alphaStepLookup[i];
+                        }
+                    }
 
-                            // Fill data array with calculated color values
-                            final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
+                    // Fill data array with calculated color values
+                    final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
 
-                            data[BASE + 0] = (int) Math.round(currentRed   * 255);
-                            data[BASE + 1] = (int) Math.round(currentGreen * 255);
-                            data[BASE + 2] = (int) Math.round(currentBlue  * 255);
-                            data[BASE + 3] = (int) Math.round(currentAlpha * 255);
-                        });
+                    data[BASE + 0] = (int) Math.round(currentRed   * 255);
+                    data[BASE + 1] = (int) Math.round(currentGreen * 255);
+                    data[BASE + 2] = (int) Math.round(currentBlue  * 255);
+                    data[BASE + 3] = (int) Math.round(currentAlpha * 255);
+                }
 
                 // Fill the raster with the data
                 raster.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);
