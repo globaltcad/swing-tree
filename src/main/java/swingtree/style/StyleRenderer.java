@@ -1109,9 +1109,9 @@ final class StyleRenderer
         style.image().ifPresent( imageIcon -> {
             final UI.FitComponent fit          = style.fitMode();
             final UI.Placement placement       = style.placement();
-            final Outline      padding         = style.padding();
-            final int          componentWidth  = componentSize.width().orElse(0f).intValue();
-            final int          componentHeight = componentSize.height().orElse(0f).intValue();
+            final Outline      insets          = style.padding();
+            final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());
+            final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());
             final int          iconBaseWidth   = imageIcon.getIconWidth();
             final int          iconBaseHeight  = imageIcon.getIconHeight();
 
@@ -1159,6 +1159,9 @@ final class StyleRenderer
             }
             int x = style.horizontalOffset();
             int y = style.verticalOffset();
+            // We apply the insets:
+            x += insets.left().orElse(0f).intValue();
+            y += insets.top().orElse(0f).intValue();
 
             switch ( placement ) {
                 case TOP:
@@ -1194,11 +1197,6 @@ final class StyleRenderer
                 default:
                     throw new IllegalArgumentException("Unknown placement: " + placement);
             }
-            // We apply the padding:
-            x += padding.left().orElse(0f).intValue();
-            y += padding.top().orElse(0f).intValue();
-            imgWidth  -= padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue();
-            imgHeight -= padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue();
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = (SvgIcon) imageIcon;
                 if ( imgWidth > -1 && iconBaseWidth < 0 )
