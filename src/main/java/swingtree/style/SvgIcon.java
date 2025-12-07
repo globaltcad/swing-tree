@@ -658,18 +658,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( scaledWidth < 0 )
+            if ( scaledWidth < 0 || preferredPlacement != UI.Placement.UNDEFINED )
                 x = insets.left;
 
-            if ( scaledHeight < 0 )
+            if ( scaledHeight < 0 || preferredPlacement != UI.Placement.UNDEFINED )
                 y = insets.top;
         }
 
         int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );
         int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );
 
-        width  = scaledWidth  >= 0 ? scaledWidth  : width  - insets.right  - insets.left;
-        height = scaledHeight >= 0 ? scaledHeight : height - insets.bottom - insets.top ;
+        width  = scaledWidth  >= 0 && preferredPlacement == UI.Placement.UNDEFINED ? scaledWidth  : width  - insets.right  - insets.left;
+        height = scaledHeight >= 0 && preferredPlacement == UI.Placement.UNDEFINED ? scaledHeight : height - insets.bottom - insets.top ;
 
         if ( _widthUnit == Unit.PERCENTAGE ) {
             width = (int) (( width * _svgDocument.size().width ) / 100f);
@@ -691,7 +691,7 @@ public final class SvgIcon extends ImageIcon
             height = ( larger - smaller );
         }
 
-        if ( scaledWidth > 0 && scaledHeight > 0 ) {
+        if ( scaledWidth > 0 && scaledHeight > 0 && preferredPlacement == UI.Placement.UNDEFINED ) {
             if ( _cache != null && _cache.getWidth() == width && _cache.getHeight() == height )
                 g.drawImage(_cache, x, y, width, height, null);
             else {
