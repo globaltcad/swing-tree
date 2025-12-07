@@ -106,10 +106,26 @@ public final class SvgIcon extends ImageIcon
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
+    /**
+     *  Allows you to directly create an {@link SvgIcon} from
+     *  a string containing an SVG text.
+     * @param svgString A string containing SVG text.
+     * @return A new {@link SvgIcon} created from a {@link String}
+     *         containing an SVG document.
+     */
     public static SvgIcon of( String svgString ) {
         return of( svgString, Size.unknown() );
     }
 
+    /**
+     *  Allows you to directly create an {@link SvgIcon} from
+     *  a string containing an SVG text, with a custom width
+     *  and height defined by the supplied {@link Size}.
+     * @param svgString A string containing SVG text.
+     * @param size A {@link Size} object containing the desired SVG width and height.
+     * @return A new {@link SvgIcon} created from a {@link String}
+     *         containing an SVG document and a custom width and height...
+     */
     public static SvgIcon of( String svgString, Size size ) {
         InputStream inputStream = new ByteArrayInputStream(svgString.getBytes(StandardCharsets.UTF_8));
         ConstructionArgs args = _loadSvgDocument(inputStream, size);
