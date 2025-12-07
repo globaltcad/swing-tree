@@ -62,12 +62,13 @@ public class SvgViewer extends Panel
                     panel("fill")
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center",
-                        UI.box().withMinSize(270, 200)
+                        UI.box().withMinSize(290, 220)
                         .withRepaintOn(svgText, placement, fitComponent)
                         .withStyle( conf -> conf
                             .image( img -> img
                                 .image(svgIconCreator.get())
                             )
+                            .border(12, Color.LIGHTSTEELBLUE)
                             .shadowColor(Color.BLACK)
                             .shadowBlurRadius(3)
                             .shadowSpreadRadius(-1)
@@ -82,7 +83,7 @@ public class SvgViewer extends Panel
                     panel("fill")
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center",
-                        UI.icon("").withMinSize(270, 200)
+                        UI.icon("").withMinSize(290, 220)
                         .peek( l -> {
                             Viewable.cast(svgText).onChange(From.ALL, it -> {
                                 l.setIcon(svgIconCreator.get());
@@ -96,6 +97,7 @@ public class SvgViewer extends Panel
                             l.setIcon(svgIconCreator.get());
                         })
                         .withStyle( conf -> conf
+                            .border(12, Color.LIGHTSTEELBLUE)
                             .shadowColor(Color.BLACK)
                             .shadowBlurRadius(3)
                             .shadowSpreadRadius(-1)
