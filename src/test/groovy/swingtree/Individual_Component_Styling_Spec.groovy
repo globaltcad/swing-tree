@@ -1372,9 +1372,8 @@ class Individual_Component_Styling_Spec extends Specification
             new JCheckBoxMenuItem() | UI.HorizontalAlignment.TRAILING
     }
 
-    def 'Paint images as component backgrounds using the style API.'()
+    def 'Paint images as component backgrounds using the style API.'(float uiScale)
     {
-
         reportInfo """
                 Inside your `Styler` lambdas you may access another sub style
                 for configuring the grounding of a component, which
@@ -1388,10 +1387,13 @@ class Individual_Component_Styling_Spec extends Specification
                 all at once and compare them with each other.
             """
 
-        given : 'We pass the following style rules to a number of labels:'
+        given :
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We pass the following style rules to a number of labels:'
             var img = Utility.loadImage("img/swing.png")
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1405,6 +1407,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui2 =
                          UI.label("Top Right").withStyle( it -> it
+                             .fontSize(12)
                              .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.GREEN)
                              .size(120, 120)
@@ -1418,6 +1421,7 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui3 =
                         UI.label("Bottom Left").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1431,6 +1435,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui4 =
                         UI.label("Bottom Right").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1444,6 +1449,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui5 =
                         UI.label("Center").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1457,6 +1463,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui6 =
                         UI.label("Top").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1470,6 +1477,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui7 =
                         UI.label("Bottom").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1483,6 +1491,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui8 =
                         UI.label("Left").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1496,6 +1505,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui9 =
                         UI.label("Right").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1509,6 +1519,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui10 =
                         UI.label("Stretch").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1520,6 +1531,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui11 =
                         UI.label("Only Color").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1529,6 +1541,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui12 =
                         UI.label("Only Image").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1559,11 +1572,11 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(images, "components/image-panels-collage.png", 99) > 99
 
         where : 'We test this using the following UI scaling values:'
-            scale << [1f, 1.25f, 1.75f, 2f]
+            uiScale << [1f, 1.25f, 1.75f, 2f]
     }
 
 
-    def 'Paint SVG based images as a component background through the style API.'()
+    def 'Paint SVG based images as a component background through the style API.'(float uiScale)
     {
         reportInfo """
                 Inside your `Styler` lambdas you may access another sub style
@@ -1581,12 +1594,14 @@ class Individual_Component_Styling_Spec extends Specification
 
                 The text of each label describes the placement policy of the image.
             """
-
-        given : 'We pass the following style rules to a number of label declarations:'
+        given  :
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We pass the following style rules to a number of label declarations:'
             var img = UI.findIcon("img/two-16th-notes.svg").get()
             var spacing = 0.03f
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1600,6 +1615,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
            var ui2 =
                         UI.label("Top Right").withStyle( it -> it
+                            .fontSize(12)
                             .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
                             .border(2, Color.GREEN)
                             .size(120, 120)
@@ -1613,179 +1629,192 @@ class Individual_Component_Styling_Spec extends Specification
                         )
            var ui3 =
                        UI.label("Bottom Left").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.BOTTOM_LEFT)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.BOTTOM_LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui4 =
-                       UI.label("Bottom Right").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.BOTTOM_RIGHT)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Bottom Right").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.BOTTOM_RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui5 =
-                       UI.label("Center").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.CENTER)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Center").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.CENTER)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui6 =
-                       UI.label("Top").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.TOP)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Top").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.TOP)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui7 =
-                       UI.label("Bottom").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.BOTTOM)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Bottom").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.BOTTOM)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui8 =
-                       UI.label("Left").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.LEFT)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Left").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui9 =
-                       UI.label("Right").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                               .placement(UI.Placement.RIGHT)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Right").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                                .placement(UI.Placement.RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui10 =
-                       UI.label("Stretch").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img).autoFit(true)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                           )
-                       )
+                        UI.label("Stretch").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img).autoFit(true)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
            var ui11 =
-                       UI.label("Only Color").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .primer(new Color(200,240,230, 200))
-                           )
-                       )
+                        UI.label("Only Color").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .primer(new Color(200,240,230, 200))
+                            )
+                        )
            var ui12 =
-                       UI.label("Only Image").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .size(60, 60)
-                           )
-                       )
+                        UI.label("Only Image").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                            )
+                        )
            var ui13 =
-                       UI.label("Center X Stretch").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .height(60)
-                               .placement(UI.Placement.CENTER)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                               .fitMode(UI.FitComponent.WIDTH)
-                           )
-                       )
+                        UI.label("Center X Stretch").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .height(60)
+                                .placement(UI.Placement.CENTER)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                                .fitMode(UI.FitComponent.WIDTH)
+                            )
+                        )
            var ui14 =
-                       UI.label("Center Y Stretch").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .width(60)
-                               .placement(UI.Placement.CENTER)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                               .fitMode(UI.FitComponent.HEIGHT)
-                           )
-                       )
+                        UI.label("Center Y Stretch").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .width(60)
+                                .placement(UI.Placement.CENTER)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                                .fitMode(UI.FitComponent.HEIGHT)
+                            )
+                        )
            var ui15 =
-                       UI.label("Center XY Stretch").withStyle( it -> it
-                           .fontAlignment(UI.HorizontalAlignment.CENTER)
-                           .fontSpacing(spacing)
-                           .border(2, Color.GREEN)
-                           .size(120, 120)
-                           .image(ground -> ground
-                               .image(img)
-                               .placement(UI.Placement.CENTER)
-                               .opacity(0.5f)
-                               .primer(new Color(100,200,230, 100))
-                               .fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)
-                           )
-                       )
+                        UI.label("Center XY Stretch").withStyle( it -> it
+                            .fontSize(12)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .placement(UI.Placement.CENTER)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                                .fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)
+                            )
+                        )
 
 
         when : 'We render the UIs into BufferedImage instances.'
@@ -1810,7 +1839,7 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99) > 99
 
         where : 'We test this UI using the following scaling values:'
-            scale << [1f, 1.25f, 1.75f, 2f]
+            uiScale << [1f] // TODO: test more scales
     }
 
 
@@ -2283,7 +2312,7 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(ui.get(JTextField), "components/heavily-customized-text-field.png", 99.5) > 99.5
 
         where :
-            uiScale << [3]
+            uiScale << [1, 2, 3]
     }
 
     def 'Create a button with a SVG icon based toggle mode.'(
