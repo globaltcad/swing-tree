@@ -1839,7 +1839,7 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99) > 99
 
         where : 'We test this UI using the following scaling values:'
-            uiScale << [1f] // TODO: test more scales
+            uiScale << [1f, 2f, 3f]
     }
 
 

@@ -1200,9 +1200,9 @@ final class StyleRenderer
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = (SvgIcon) imageIcon;
                 if ( imgWidth > -1 && iconBaseWidth < 0 )
-                    svgIcon = svgIcon.withIconWidth(imgWidth);
+                    svgIcon = svgIcon.withIconWidth(UI.unscale(imgWidth));
                 if ( imgHeight > -1 && iconBaseHeight < 0 )
-                    svgIcon = svgIcon.withIconHeight(imgHeight);
+                    svgIcon = svgIcon.withIconHeight(UI.unscale(imgHeight));
                 imageIcon = svgIcon;
             }
 
