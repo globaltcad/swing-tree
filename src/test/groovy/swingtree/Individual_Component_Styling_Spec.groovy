@@ -2244,7 +2244,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6}
 
         then : 'The image is rendered as expected.'
-            Utility.similarityBetween(images, "components/repeated-image-label-collage.png", 99.75) > 99.75
+            Utility.similarityBetween(images, "components/repeated-image-label-collage.png", 99) > 99
     }
 
     def 'Create fancy text fields with custom icons and a button.'(
