@@ -2276,7 +2276,7 @@ class Individual_Component_Styling_Spec extends Specification
             var ui =
                     UI.textField("I am fancy! :)").withLayout("fill, ins 0").withPrefSize(190, 25)
                     .withStyle( it -> it
-                        .fontSize(16)
+                        .font("Ubuntu", 16)
                         .paddingLeft(26)
                         .marginRight(25)
                         .paddingRight(-20)
