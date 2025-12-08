@@ -257,10 +257,10 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _calculateFullPaddingInsets( StyleConf styleConf)
     {
-        _fullPaddingInsets.top    = (int)( styleConf.padding().top().orElse(0f)    + styleConf.margin().top().orElse(0f) );
-        _fullPaddingInsets.left   = (int)( styleConf.padding().left().orElse(0f)   + styleConf.margin().left().orElse(0f) );
-        _fullPaddingInsets.right  = (int)( styleConf.padding().right().orElse(0f)  + styleConf.margin().right().orElse(0f) );
-        _fullPaddingInsets.bottom = (int)( styleConf.padding().bottom().orElse(0f) + styleConf.margin().bottom().orElse(0f) );
+        _fullPaddingInsets.top    = (int)( styleConf.padding().top().orElse(0f)    + styleConf.border().widths().top().orElse(0f)    + styleConf.margin().top().orElse(0f) );
+        _fullPaddingInsets.left   = (int)( styleConf.padding().left().orElse(0f)   + styleConf.border().widths().left().orElse(0f)   + styleConf.margin().left().orElse(0f) );
+        _fullPaddingInsets.right  = (int)( styleConf.padding().right().orElse(0f)  + styleConf.border().widths().right().orElse(0f)  + styleConf.margin().right().orElse(0f) );
+        _fullPaddingInsets.bottom = (int)( styleConf.padding().bottom().orElse(0f) + styleConf.border().widths().bottom().orElse(0f) + styleConf.margin().bottom().orElse(0f) );
     }
 
 }
