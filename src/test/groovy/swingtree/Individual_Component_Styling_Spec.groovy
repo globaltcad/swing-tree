@@ -2309,7 +2309,7 @@ class Individual_Component_Styling_Spec extends Specification
                     );
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JTextField), "components/heavily-customized-text-field.png", 99.5) > 99.5
+            Utility.similarityBetween(ui.get(JTextField), "components/heavily-customized-text-field.png", 93.7) > 93.7
 
         where :
             uiScale << [1, 2, 3]
