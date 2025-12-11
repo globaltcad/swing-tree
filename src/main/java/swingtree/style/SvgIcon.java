@@ -938,14 +938,6 @@ public final class SvgIcon extends ImageIcon
 
             float shiftHalfX = ((width/scaleX - viewBox.width) / 2f);
             float shiftHalfY = ((height/scaleY - viewBox.height) / 2f);
-            if ( !isForStyleAPI ) {
-                if ( isEffectivelyFitWidth || _fitComponent == UI.FitComponent.WIDTH || _fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-                    //shiftHalfX = 0;
-                }
-                if ( isEffectivelyFitHeight || _fitComponent == UI.FitComponent.HEIGHT || _fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-                    //shiftHalfY = 0;
-                }
-            }
             switch ( preferredPlacement ) {
                 case TOP_LEFT:
                     viewBox = new ViewBox( x / scaleX, y / scaleY, viewBox.width, viewBox.height );
