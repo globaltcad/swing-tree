@@ -806,34 +806,27 @@ public final class SvgIcon extends ImageIcon
         boolean isEffectivelyFitHeight = false;
         boolean isEffectivelyFitWidth = false;
         if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {
-            if ( isForStyleAPI ) {
-                if (iconWidth < iconHeight)
-                    scaleX = 1f;
-                if (iconHeight < iconWidth)
-                    scaleY = 1f;
+            if ( _fitComponent == UI.FitComponent.MIN_DIM ) {
+                 if (areaWidth < areaHeight) {
+                    scaleX = (float) width / iconWidth;
+                    scaleY = scaleX;
+                     isEffectivelyFitWidth = true;
+                 }
+                if (areaHeight < areaWidth) {
+                    scaleY = (float) height / iconHeight;
+                    scaleX = scaleY;
+                    isEffectivelyFitHeight = true;
+                }
             } else {
-                if ( _fitComponent == UI.FitComponent.MIN_DIM ) {
-                     if (areaWidth < areaHeight) {
-                        scaleX = (float) width / iconWidth;
-                        scaleY = scaleX;
-                         isEffectivelyFitWidth = true;
-                     }
-                    if (areaHeight < areaWidth) {
-                        scaleY = (float) height / iconHeight;
-                        scaleX = scaleY;
-                        isEffectivelyFitHeight = true;
-                    }
-                } else {
-                    if (areaWidth > areaHeight) {
-                        scaleX = (float) width / iconWidth;
-                        scaleY = scaleX;
-                        isEffectivelyFitWidth = true;
-                    }
-                    if (areaHeight > areaWidth) {
-                        scaleY = (float) height / iconHeight;
-                        scaleX = scaleY;
-                        isEffectivelyFitHeight = true;
-                    }
+                if (areaWidth > areaHeight) {
+                    scaleX = (float) width / iconWidth;
+                    scaleY = scaleX;
+                    isEffectivelyFitWidth = true;
+                }
+                if (areaHeight > areaWidth) {
+                    scaleY = (float) height / iconHeight;
+                    scaleX = scaleY;
+                    isEffectivelyFitHeight = true;
                 }
             }
         }
