@@ -27,7 +27,7 @@ final class StyleEngine
     }
 
     static boolean IS_ANTIALIASING_ENABLED(){
-        return UI.scale() < 1.5;
+        return UI.scale() < 2.25;
     }
 
     private final BoxModelConf         _boxModelConf;
