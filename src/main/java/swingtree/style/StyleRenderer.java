@@ -1118,7 +1118,7 @@ final class StyleRenderer
             int imgWidth  = style.width().orElse(iconBaseWidth);
             int imgHeight = style.height().orElse(iconBaseHeight);
 
-            if ( fit != UI.FitComponent.NO ) {
+            if ( fit != UI.FitComponent.NO && fit != UI.FitComponent.UNDEFINED ) {
                 if ( imageIcon instanceof SvgIcon) {
                     // The SvgIcon does the fitting...
                     imgWidth  = style.width().orElse(componentWidth);

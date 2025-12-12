@@ -584,6 +584,12 @@ public final class UI extends UIFactoryMethods
      */
     public enum FitComponent {
         /**
+         *  How a particular image is supposed to fit a component is unknown
+         *  and <b>may be overridden by another policy or default behavior</b>.
+         *  Typically, this is equivalent to {@link #NO}.
+         */
+        UNDEFINED,
+        /**
          *  Fit the image or icon to the width of a component by scaling the icon/image along the x-axis.
          *  <b>This implies that you only want to scale the width of an image/icon, but not its height,
          *  so this constant may change the inherent aspect ratio of a targeted image/icon!</b>

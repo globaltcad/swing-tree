@@ -837,7 +837,7 @@ public final class SvgIcon extends ImageIcon
             scaleY = (float) height / iconHeight;
         }
 
-        if ( _fitComponent == UI.FitComponent.NO ) {
+        if ( _fitComponent == UI.FitComponent.NO || _fitComponent == UI.FitComponent.UNDEFINED ) {
             scaleX = 1f;
             scaleY = 1f;
         }
@@ -848,7 +848,7 @@ public final class SvgIcon extends ImageIcon
         }
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
 
-        if ( _fitComponent == UI.FitComponent.NO ) {
+        if ( _fitComponent == UI.FitComponent.NO || _fitComponent == UI.FitComponent.UNDEFINED ) {
             final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
             final int newHeight  = iconHeight >= 0 ? iconHeight : (int) svgSize.height;
             viewBox = new ViewBox( x, y, newWidth, newHeight );

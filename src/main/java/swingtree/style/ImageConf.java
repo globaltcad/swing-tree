@@ -164,7 +164,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
                                                 null,
                                                 UI.Placement.UNDEFINED,
                                                 false,
-                                                UI.FitComponent.NO,
+                                                UI.FitComponent.UNDEFINED,
                                                 Size.unknown(),
                                                 1.0f,
                                                 Outline.none(),
@@ -425,7 +425,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified {@code autoFit} flag value.
      */
     public ImageConf autoFit( boolean autoFit ) {
-        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;
+        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.UNDEFINED;
         return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
