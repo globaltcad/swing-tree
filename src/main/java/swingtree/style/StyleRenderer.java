@@ -1219,11 +1219,14 @@ final class StyleRenderer
             g2d.setClip(newClip);
 
             if ( !repeat && imageIcon instanceof SvgIcon ) {
+                SvgIcon svgIcon = ((SvgIcon) imageIcon);
                 int areaX = insets.left().orElse(0f).intValue();
                 int areaY = insets.top().orElse(0f).intValue();
-                ((SvgIcon) imageIcon)
-                        .withFitComponent(fit)
-                        .withPreferredPlacement(placement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : placement)
+                UI.Placement localPlacement = placement == UI.Placement.UNDEFINED ? svgIcon.getPreferredPlacement() : placement;
+                localPlacement = localPlacement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : localPlacement;
+                UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;
+                svgIcon.withFitComponent(localFit)
+                        .withPreferredPlacement(localPlacement)
                         .paintIcon(null, g2d, areaX, areaY, componentWidth, componentHeight);
             }
             else
