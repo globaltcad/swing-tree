@@ -562,6 +562,62 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
+     *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
+     *  should be scaled to fit the
+     *  dimensions of the component that it is being rendered into, like for example
+     *  through the {@link SvgIcon#paintIcon(java.awt.Component, Graphics, int, int)} method.<br>
+     *  You may want to pass constants of this enum to {@link ImageConf#fitMode(FitComponent)} as
+     *  part of using the style API:<br>
+     *  <pre>{@code
+     *  UI.button("Click Me!")
+     *  .withStyle( conf -> conf
+     *      .image( img -> img
+     *          .image(SvgIcon.at("my/path/to.svg"))
+     *          .fitMode(UI.FitComponent.MIN_DIM)
+     *      )
+     *      .border(12, UI.Color.LIGHTSTEELBLUE)
+     *      .borderRadius(8)
+     *  )
+     *  }</pre>
+     * @see ImageConf#fitMode(FitComponent)
+     * @see SvgIcon#withFitComponent(FitComponent)
+     */
+    public enum FitComponent {
+        /**
+         *  Fit the image or icon to the width of a component by scaling the icon/image along the x-axis.
+         *  <b>This implies that you only want to scale the width of an image/icon, but not its height,
+         *  so this constant may change the inherent aspect ratio of a targeted image/icon!</b>
+         */
+        WIDTH,
+        /**
+         *  Fit the image or icon to the height of a component by scaling the icon/image along the y-axis.
+         *  <b>This implies that you only want to scale the height of an image/icon, but not its width,
+         *  so this constant may change the inherent aspect ratio of a targeted image/icon!</b>
+         */
+        HEIGHT,
+        /**
+         *  Fit the image or icon to both fit the width and height of the component.
+         *  <b>Note that this may change the inherent aspect ratio of the image in
+         *  favor of the components aspect ratio...</b>
+         */
+        WIDTH_AND_HEIGHT,
+        /**
+         *  Fit the image to the largest dimension of the component.
+         */
+        MAX_DIM,
+        /**
+         *  Fit the image to the smallest dimension of the component,
+         *  while preserving the aspect ratio of the image.
+         */
+        MIN_DIM,
+        /**
+         *  Do not fit the image to the component,
+         *  while preserving the aspect ratio of the image.
+         */
+        NO
+    }
+
+    /**
      *  Defines the areas of a component, which is used
      *  to by the {@link ImageConf} to determine if and how an image should be clipped.
      *  Pass instances of this to {@link ImageConf#clipTo(swingtree.UI.ComponentArea)} to configure the clipping behaviour
@@ -1304,39 +1360,6 @@ public final class UI extends UIFactoryMethods
             So when we reach this point, we know that all pending events
             have been processed.
         */});
-    }
-
-    /**
-     *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
-     *  should be scaled to fit the
-     *  dimensions of the component that it is being rendered into, like for example
-     *  through the {@link SvgIcon#paintIcon(java.awt.Component, Graphics, int, int)} method.
-     */
-    public enum FitComponent {
-        /**
-         *  Fit the image or icon to the width of the component.
-         */
-        WIDTH,
-        /**
-         *  Fit the image or icon to the height of the component.
-         */
-        HEIGHT,
-        /**
-         *  Fit the image or icon to the width and height of the component.
-         */
-        WIDTH_AND_HEIGHT,
-        /**
-         *  Fit the image to the largest dimension of the component.
-         */
-        MAX_DIM,
-        /**
-         *  Fit the image to the smallest dimension of the component.
-         */
-        MIN_DIM,
-        /**
-         *  Do not fit the image to the component.
-         */
-        NO
     }
 
     /*
