@@ -847,35 +847,6 @@ public final class SvgIcon extends ImageIcon
             sizeIsUnknown = true;
         }
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
-        if (false) {
-            float boxX = viewBox.x / scaleX;
-            float boxY = viewBox.y / scaleY;
-            float boxWidth = viewBox.width / scaleX;
-            float boxHeight = viewBox.height / scaleY;
-            if (_fitComponent == UI.FitComponent.MAX_DIM) {
-                // We now want to make sure that the
-                if (boxWidth < boxHeight) {
-                    // We find the scale factor of the heights between the two rectangles:
-                    float scaleHeight = (viewBox.height / svgSize.height);
-                    // We now want to scale the view box so that both have the same heights:
-                    float newWidth = svgSize.width * scaleHeight;
-                    float newHeight = svgSize.height * scaleHeight;
-                    float newX = viewBox.x + (viewBox.width - newWidth) / 2f;
-                    float newY = viewBox.y;
-                    viewBox = new ViewBox(newX, newY, newWidth, newHeight);
-                } else {
-                    // We find the scale factor of the widths between the two rectangles:
-                    float scaleWidth = (viewBox.width / svgSize.width);
-                    // We now want to scale the view box so that both have the same widths:
-                    float newWidth = svgSize.width * scaleWidth;
-                    float newHeight = svgSize.height * scaleWidth;
-                    float newX = viewBox.x;
-                    float newY = viewBox.y + (viewBox.height - newHeight) / 2f;
-                    viewBox = new ViewBox(newX, newY, newWidth, newHeight);
-                }
-            } else
-                viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
-        }
 
         if ( _fitComponent == UI.FitComponent.NO ) {
             final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
@@ -922,40 +893,44 @@ public final class SvgIcon extends ImageIcon
             // First we correct if the component area is smaller than the view box:
             width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
             width += (int) Math.max(0, x - viewBox.x );
-            x = (int) Math.min(x, viewBox.x);
             height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
             height += (int) Math.max(0, y - viewBox.y );
+            x = (int) Math.min(x, viewBox.x);
             y = (int) Math.min(y, viewBox.y);
 
-            float shiftHalfX = ((width/scaleX - viewBox.width) / 2f);
-            float shiftHalfY = ((height/scaleY - viewBox.height) / 2f);
+            final float scaledAreaX = x / scaleX;
+            final float scaledAreaY = y / scaleY;
+            final float scaledWidth = width / scaleX;
+            final float scaledHeight = height / scaleY;
+            final float shiftHalfX = ((scaledWidth - viewBox.width) / 2f);
+            final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);
             switch ( preferredPlacement ) {
                 case TOP_LEFT:
-                    viewBox = new ViewBox( x / scaleX, y / scaleY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );
                     break;
                 case TOP_RIGHT:
-                    viewBox = new ViewBox( x / scaleX + width - viewBox.width, y, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, y, viewBox.width, viewBox.height );
                     break;
                 case BOTTOM_LEFT:
-                    viewBox = new ViewBox( x / scaleX, y / scaleY + height - viewBox.height * scaleY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
                     break;
                 case BOTTOM_RIGHT:
-                    viewBox = new ViewBox( x / scaleX + width / scaleX - viewBox.width, y + height - viewBox.height * scaleY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
                     break;
                 case TOP:
-                    viewBox = new ViewBox( x / scaleX + shiftHalfX, y / scaleY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY, viewBox.width, viewBox.height );
                     break;
                 case BOTTOM:
-                    viewBox = new ViewBox( x / scaleX + shiftHalfX, y / scaleY + height - viewBox.height * scaleY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );
                     break;
                 case LEFT:
-                    viewBox = new ViewBox( x / scaleX, y / scaleY + shiftHalfY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
                     break;
                 case RIGHT:
-                    viewBox = new ViewBox( x / scaleX + width / scaleX - viewBox.width, y / scaleY + shiftHalfY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
                     break;
                 case CENTER:
-                    viewBox = new ViewBox( x / scaleX + shiftHalfX, y / scaleY + shiftHalfY, viewBox.width, viewBox.height );
+                    viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
                     break;
                 default:
                     log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
