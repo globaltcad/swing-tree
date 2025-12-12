@@ -696,12 +696,12 @@ public final class SvgIcon extends ImageIcon
                 g.drawImage(_cache, x, y, width, height, null);
             else {
                 _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                paintIcon(c, _cache.getGraphics(), 0, 0, width, height, false);
+                paintIcon(c, _cache.getGraphics(), 0, 0, width, height );
                 g.drawImage(_cache, x, y, width, height, null);
             }
         }
         else
-            _paintIcon( c, g, x, y, width, height, preferredPlacement, false );
+            _paintIcon( c, g, x, y, width, height, preferredPlacement );
     }
 
     private Insets _determineInsetsForBorder( Border b, Component c )
@@ -728,14 +728,13 @@ public final class SvgIcon extends ImageIcon
 
     void paintIcon(
             final @Nullable Component c,
-            final java.awt.Graphics g,
+            final Graphics g,
             int x,
             int y,
             int width,
-            int height,
-            boolean isForStyleAPI
+            int height
     ) {
-        _paintIcon( c, g, x, y, width, height, _preferredPlacement, isForStyleAPI );
+        _paintIcon( c, g, x, y, width, height, _preferredPlacement);
     }
 
     private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
@@ -772,20 +771,19 @@ public final class SvgIcon extends ImageIcon
 
     private void _paintIcon(
         final @Nullable Component c,
-        final java.awt.Graphics g,
+        final Graphics g,
         final int areaX,
         final int areaY,
         final int areaWidth,
         final int areaHeight,
-        final UI.Placement preferredPlacement,
-        final boolean isForStyleAPI
+        final UI.Placement preferredPlacement
     ) {
         if ( _svgDocument == null )
             return;
 
         final Size iconSize = _computeBaseSizeFrom(areaWidth, areaHeight);
-        final int iconWidth = isForStyleAPI ? getIconWidth() : iconSize.width().map(Math::round).orElse(0);
-        final int iconHeight = isForStyleAPI ? getIconHeight() : iconSize.width().map(Math::round).orElse(0);
+        final int iconWidth = iconSize.width().map(Math::round).orElse(0);
+        final int iconHeight = iconSize.width().map(Math::round).orElse(0);
 
         int x = areaX;
         int y = areaY;
@@ -849,7 +847,7 @@ public final class SvgIcon extends ImageIcon
             sizeIsUnknown = true;
         }
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
-        if ( isForStyleAPI ) {
+        if (false) {
             float boxX = viewBox.x / scaleX;
             float boxY = viewBox.y / scaleY;
             float boxWidth = viewBox.width / scaleX;
