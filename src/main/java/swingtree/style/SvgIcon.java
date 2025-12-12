@@ -783,7 +783,7 @@ public final class SvgIcon extends ImageIcon
 
         final Size iconSize = _computeBaseSizeFrom(areaWidth, areaHeight);
         final int iconWidth = iconSize.width().map(Math::round).orElse(0);
-        final int iconHeight = iconSize.width().map(Math::round).orElse(0);
+        final int iconHeight = iconSize.height().map(Math::round).orElse(0);
 
         int x = areaX;
         int y = areaY;
