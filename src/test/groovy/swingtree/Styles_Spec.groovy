@@ -193,7 +193,7 @@ class Styles_Spec extends Specification
                                         "], " +
                                         "BaseConf[" +
                                             "icon=?, " +
-                                            "fitComponent=NO, " +
+                                            "fitComponent=UNDEFINED, " +
                                             "backgroundColor=rgba(0,128,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
                                             "foregroundColor=?, " +
@@ -550,7 +550,7 @@ class Styles_Spec extends Specification
                     "], " +
                     "BaseConf[" +
                         "icon=?, " +
-                        "fitComponent=NO, " +
+                        "fitComponent=UNDEFINED, " +
                         "backgroundColor=rgba(0,0,0,255), " +
                         "foundationColor=?, " +
                         "foregroundColor=rgba(255,255,255,255), " +
@@ -672,7 +672,7 @@ class Styles_Spec extends Specification
                             uiScale % 1 == 0 ?
                                 "NONE" :
                                 "icon=?, " +
-                                "fitComponent=NO, " +
+                                "fitComponent=UNDEFINED, " +
                                 "backgroundColor=rgba(238,238,238,255), " +
                                 "foundationColor=?, " +
                                 "foregroundColor=?, " +
@@ -738,7 +738,7 @@ class Styles_Spec extends Specification
                     "BorderConf[NONE], " +
                     "BaseConf[" +
                         "icon=?, " +
-                        "fitComponent=NO, " +
+                        "fitComponent=UNDEFINED, " +
                         "backgroundColor=DEFAULT, " +
                         "foundationColor=?, " +
                         "foregroundColor=DEFAULT, " +

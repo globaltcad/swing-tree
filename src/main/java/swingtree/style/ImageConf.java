@@ -164,7 +164,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
                                                 null,
                                                 UI.Placement.UNDEFINED,
                                                 false,
-                                                UI.FitComponent.NO,
+                                                UI.FitComponent.UNDEFINED,
                                                 Size.unknown(),
                                                 1.0f,
                                                 Outline.none(),
@@ -389,8 +389,10 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *
      * @param placement The placement of the image onto the component.
      * @return A new {@link ImageConf} instance with the specified placement.
+     * @throws NullPointerException If the supplied enum constant is {@code null}.
      */
     public ImageConf placement( UI.Placement placement ) {
+        Objects.requireNonNull(placement);
         return ImageConf.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -423,7 +425,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified {@code autoFit} flag value.
      */
     public ImageConf autoFit( boolean autoFit ) {
-        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;
+        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.UNDEFINED;
         return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -437,12 +439,18 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *      </li>
      *      <li>{@link UI.FitComponent#WIDTH} -
      *          The image will be scaled to fit the inner component width.
+     *          <b>Note that this will only scale the width of the image, but not its height,
+     *          and so the inherent aspect ratio of the image may not be preserved!</b>
      *      </li>
      *      <li>{@link UI.FitComponent#HEIGHT} -
      *          The image will be scaled to fit the inner component height.
+     *          <b>Note that this will only scale the height of the image, but not its width,
+     *          and so the inherent aspect ratio of the image may not be preserved!</b>
      *      </li>
      *      <li>{@link UI.FitComponent#WIDTH_AND_HEIGHT} -
      *          The image will be scaled to fit both the component width and height.
+     *          <b>Note that this may override the inherent aspect ratio of the image in favor
+     *          of the aspect ratio of the component dimensions!</b>
      *      </li>
      *      <li>{@link UI.FitComponent#MAX_DIM} -
      *          The image will be scaled to fit the smaller
@@ -452,11 +460,21 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *          The image will be scaled to fit the larger
      *          of the two dimension of the inner component area.
      *      </li>
+     *      <li>{@link UI.FitComponent#UNDEFINED} -
+     *          How the image will be scaled to fit the component is unclear.
+     *          Another property may override this, but typically the behavior
+     *          is similar to {@link UI.FitComponent#NO}.<br>
+     *          So for example, if you pass an {@link SvgIcon} to {@link #image(ImageIcon)}
+     *          which whose {@link SvgIcon#getFitComponent()} <b>is not {@code UNDEFINED}</b>,
+     *          then this will override the "fit component" policy of this config object.
+     *      </li>
      *  </ul>
      * @param fit The fit mode of the image.
      * @return A new {@link ImageConf} instance with the specified {@code fit} mode.
+     * @throws NullPointerException If the supplied enum constant is {@code null}.
      */
     public ImageConf fitMode( UI.FitComponent fit ) {
+        Objects.requireNonNull(fit);
         return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 

@@ -22,7 +22,7 @@ final class BaseConf
 {
     private static final BaseConf _NONE = new BaseConf(
                                                     null,
-                                                    UI.FitComponent.NO,
+                                                    UI.FitComponent.UNDEFINED,
                                                     null,
                                                     null,
                                                     null,

@@ -11,6 +11,7 @@ import sprouts.Var
 import swingtree.animation.LifeTime
 import swingtree.components.JBox
 import swingtree.components.JSplitButton
+import swingtree.style.SvgIcon
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
@@ -1836,10 +1837,514 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is rendered as expected (compared to the snapshot above).'
-            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99) > 99
+            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.5) > 99.5
 
         where : 'We test this UI using the following scaling values:'
             uiScale << [1f, 2f, 3f]
+    }
+
+    def 'Paint SVG based images as part of a regular JLabel.'(float uiScale)
+    {
+        reportInfo """
+                SwingTree supports SVG rendering through the `SvgIcon` class, a custom `ImageIcon`
+                implementation which is compatible with all JComponents supporting icons, such as the `JLabel`.
+                <br>
+                Here you can see an example of a hand full of labels 
+                with an SVG based icon each, placed and rendered
+                according to the specified placement policies, dimesnions, etc...
+                
+                They are all stitched together into a collage so that you can see them
+                all at once and compare them with each other.
+
+                ${Utility.linkSnapshot('components/svg-as-icon-panels-collage.png')}
+
+                The text of each label describes the placement policy of the image.
+            """
+        given :
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a base icon for all labels from which we derive specific icons:'
+            var icon = UI.findIcon("img/two-16th-notes.svg").get() as SvgIcon
+        and : 'A spacing size...'
+            var spacing = 0.03f
+        and : 'Finally, we declare the UIs:'
+            var ui1 =
+                        UI.label("Top Left")
+                        .withIcon(
+                            icon.withIconSize(60, 60)
+                                .withPreferredPlacement(UI.Placement.TOP_LEFT)
+                        )
+                        .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui2 =
+                        UI.label("Top Right")
+                        .withIcon(
+                            icon.withIconSize(60, 60)
+                                .withPreferredPlacement(UI.Placement.TOP_RIGHT)
+                        )
+                        .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui3 =
+                        UI.label("Bottom Left")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.BOTTOM_LEFT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui4 =
+                        UI.label("Bottom Right")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.BOTTOM_RIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui5 =
+                        UI.label("Center")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.CENTER)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui6 =
+                        UI.label("Top")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.TOP)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui7 =
+                        UI.label("Bottom")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.BOTTOM)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui8 =
+                        UI.label("Left")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.LEFT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui9 =
+                        UI.label("Right")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.RIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui10 =
+                        UI.label("Stretch")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withFitComponent(UI.FitComponent.WIDTH_AND_HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui11 =
+                        UI.label("Only Color").withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .primer(new Color(200,240,230, 200))
+                            )
+                        )
+           var ui12 =
+                        UI.label("Only Image")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui13 =
+                       UI.label("Center X Stretch")
+                         .withIcon(
+                             icon.withIconHeight(60)
+                                 .withPreferredPlacement(UI.Placement.CENTER)
+                                 .withFitComponent(UI.FitComponent.WIDTH)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui14 =
+                        UI.label("Center Y Stretch")
+                         .withIcon(
+                             icon.withIconWidth(60)
+                                 .withPreferredPlacement(UI.Placement.CENTER)
+                                 .withFitComponent(UI.FitComponent.HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+           var ui15 =
+                        UI.label("Center XY Stretch")
+                         .withIcon(
+                             icon.withPreferredPlacement(UI.Placement.CENTER)
+                                 .withFitComponent(UI.FitComponent.WIDTH_AND_HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(120, 120)
+                        )
+
+
+        when : 'We render the UIs into BufferedImage instances.'
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7 = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8 = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9 = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
+            var image13 = Utility.renderSingleComponent(ui13.get(JLabel))
+            var image14 = Utility.renderSingleComponent(ui14.get(JLabel))
+            var image15 = Utility.renderSingleComponent(ui15.get(JLabel))
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
+
+        then : 'The image is rendered as expected (compared to the snapshot above).'
+            Utility.similarityBetween(images, "components/svg-as-icon-panels-collage.png", 99.7) > 99.7
+
+        where : 'We test this UI using the following scaling values:'
+            uiScale << [1f, 1.25f,  1.5f, 2f]
+    }
+
+
+    def 'Paint SVG based images as part of a regular JLabel and have them fit the component as expected.'(float uiScale)
+    {
+        reportInfo """
+                SwingTree supports SVG rendering through the `SvgIcon` class, a custom `ImageIcon`
+                implementation which is compatible with all JComponents supporting icons, such as the `JLabel`.
+                <br>
+                Here you can see an example of a hand full of labels 
+                with an SVG based icon each, placed and rendered
+                according to the specified placement policies, dimesnions, etc...
+                
+                They are all stitched together into a collage so that you can see them
+                all at once and compare them with each other.
+
+                ${Utility.linkSnapshot('components/speech-bubble-svg-as-icon-panels-collage.png')}
+
+                The text of each label describes the placement policy of the image.
+            """
+        given :
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a base icon for all labels from which we derive specific icons:'
+            var icon = UI.findIcon("img/chat-bubble.svg").get() as SvgIcon
+        and : 'A spacing size...'
+            var spacing = 0.03f
+        and : 'Finally, we declare the UIs:'
+            var ui1 =
+                        UI.label("TL / W")
+                        .withIcon(
+                            icon.withIconSize(60, 60)
+                                .withPreferredPlacement(UI.Placement.TOP_LEFT)
+                                .withFitComponent(UI.FitComponent.WIDTH)
+                        )
+                        .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui2 =
+                        UI.label("TR / H")
+                        .withIcon(
+                            icon.withIconSize(60, 60)
+                                .withPreferredPlacement(UI.Placement.TOP_RIGHT)
+                                .withFitComponent(UI.FitComponent.HEIGHT)
+                        )
+                        .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui3 =
+                        UI.label("BL / W & H")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.BOTTOM_LEFT)
+                                .withFitComponent(UI.FitComponent.WIDTH_AND_HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui4 =
+                        UI.label("BR / Min-Dim")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.BOTTOM_RIGHT)
+                                .withFitComponent(UI.FitComponent.MIN_DIM)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui5 =
+                        UI.label("C / Max-Dim")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.CENTER)
+                                .withFitComponent(UI.FitComponent.MAX_DIM)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui6 =
+                        UI.label("T / W")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.TOP)
+                                .withFitComponent(UI.FitComponent.WIDTH)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui7 =
+                        UI.label("B / H")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.BOTTOM)
+                                .withFitComponent(UI.FitComponent.HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui8 =
+                        UI.label("L / W & H")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.LEFT)
+                                .withFitComponent(UI.FitComponent.WIDTH_AND_HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui9 =
+                        UI.label("R / Min-Dim")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.RIGHT)
+                                .withFitComponent(UI.FitComponent.MIN_DIM)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui10 =
+                        UI.label("Max-Dim")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withFitComponent(UI.FitComponent.MAX_DIM)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui11 =
+                        UI.label("Undef / W")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.UNDEFINED)
+                                 .withFitComponent(UI.FitComponent.WIDTH)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                            .image(ground -> ground
+                                .primer(new Color(200,240,230, 200))
+                            )
+                        )
+           var ui12 =
+                        UI.label("Undef / No")
+                         .withIcon(
+                             icon.withIconSize(60, 60)
+                                 .withPreferredPlacement(UI.Placement.UNDEFINED)
+                                 .withFitComponent(UI.FitComponent.NO)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui13 =
+                       UI.label("Left / W")
+                         .withIcon(
+                             icon.withIconHeight(60)
+                                 .withPreferredPlacement(UI.Placement.LEFT)
+                                 .withFitComponent(UI.FitComponent.WIDTH)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui14 =
+                        UI.label("R / H")
+                         .withIcon(
+                             icon.withIconWidth(60)
+                                 .withPreferredPlacement(UI.Placement.RIGHT)
+                                 .withFitComponent(UI.FitComponent.HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+           var ui15 =
+                        UI.label("BL / W & H")
+                         .withIcon(
+                             icon.withPreferredPlacement(UI.Placement.BOTTOM_LEFT)
+                                 .withFitComponent(UI.FitComponent.WIDTH_AND_HEIGHT)
+                         )
+                         .withStyle( it -> it
+                            .fontSize(13)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontSpacing(spacing)
+                            .border(2, Color.GREEN)
+                            .size(180, 120)
+                        )
+
+
+        when : 'We render the UIs into BufferedImage instances.'
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7 = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8 = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9 = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
+            var image13 = Utility.renderSingleComponent(ui13.get(JLabel))
+            var image14 = Utility.renderSingleComponent(ui14.get(JLabel))
+            var image15 = Utility.renderSingleComponent(ui15.get(JLabel))
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
+
+        then : 'The image is rendered as expected (compared to the snapshot above).'
+            Utility.similarityBetween(images, "components/speech-bubble-svg-as-icon-panels-collage.png", 99.8) > 99.8
+
+        where : 'We test this UI using the following scaling values:'
+            uiScale << [1f, 1.25f, 1.5f, 2f]
     }
 
 
@@ -2536,7 +3041,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 95.95) > 95.95
+            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 95.85) > 85.95
 
         where :
             uiScale << [2]

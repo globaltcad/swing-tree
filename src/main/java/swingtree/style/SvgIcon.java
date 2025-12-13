@@ -463,8 +463,7 @@ public final class SvgIcon extends ImageIcon
      *  The underlying SVG document contains a size object, which
      *  is the width and height of the root SVG element inside the document.
      *
-     * @return The size of the SVG document in the form of a {@link Size},
-     *         a subclass of {@link java.awt.geom.Dimension2D}.
+     * @return The size of the SVG document in the form of a {@link Size}.
      */
     public Size getSvgSize() {
         if ( _svgDocument == null )
@@ -486,7 +485,7 @@ public final class SvgIcon extends ImageIcon
      *  Allows you to access the {@link UI.FitComponent} policy, which
      *  determines if and how the icon should be fitted
      *  onto a component when rendered through the
-     *  {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.<br>
+     *  {@link #paintIcon(Component, Graphics, int, int)} method.<br>
      *  The following fit modes are available:
      *  <ul>
      *      <li>{@link UI.FitComponent#NO} -
@@ -507,12 +506,17 @@ public final class SvgIcon extends ImageIcon
      *      <li>{@link UI.FitComponent#MIN_DIM} -
      *      The image will be scaled to fit the smaller of the two dimensions of the inner component area.
      *      </li>
+     *      <li>{@link UI.FitComponent#UNDEFINED} -
+     *      How the image will be scaled to fit the component is unclear.
+     *      Another property may override this, but typically the behavior
+     *      is similar to {@link UI.FitComponent#NO}.
+     *      </li>
      *  </ul>
      *  See {@link #withFitComponent(UI.FitComponent)} if you want to create a new {@link SvgIcon}
      *  with an updated fit policy.
      *
      * @return The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
-     *         any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     *         any given component (see {@link #paintIcon(Component, Graphics, int, int)} ).
      */
     public UI.FitComponent getFitComponent() { return _fitComponent; }
 
@@ -543,7 +547,7 @@ public final class SvgIcon extends ImageIcon
      *      </li>
      *  </ul>
      * @param fit The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
-     *            any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     *            any given component (see {@link #paintIcon(Component, Graphics, int, int)} ).
      * @return A new {@link SvgIcon} with the given {@link UI.FitComponent} policy.
      */
     public SvgIcon withFitComponent( UI.FitComponent fit ) {
@@ -556,20 +560,20 @@ public final class SvgIcon extends ImageIcon
     /**
      *  The preferred placement policy determines where the icon
      *  should be placed within a component when rendered through the
-     *  {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.
+     *  {@link #paintIcon(Component, Graphics, int, int)} method.
      *
      * @return The {@link UI.Placement} that determines where the icon should be placed within a component
-     *         (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     *         (see {@link #paintIcon(Component, Graphics, int, int)}).
      */
     public UI.Placement getPreferredPlacement() { return _preferredPlacement; }
 
     /**
      *  Allows you to get an updated {@link SvgIcon} with the given {@link UI.Placement} policy
      *  which determines where the icon should be placed within a component
-     *  when rendered through the {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.
+     *  when rendered through the {@link #paintIcon(Component, Graphics, int, int)} method.
      *
      * @param placement The {@link UI.Placement} that determines where the icon should be placed within a component
-     *                  (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     *                  (see {@link #paintIcon(Component, Graphics, int, int)}).
      * @return A new {@link SvgIcon} with the given {@link UI.Placement} policy.
      */
     public SvgIcon withPreferredPlacement( UI.Placement placement ) {
@@ -640,6 +644,7 @@ public final class SvgIcon extends ImageIcon
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
             preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
 
+        boolean placementAndScalingIsBothUndefined = preferredPlacement == UI.Placement.UNDEFINED && _fitComponent == UI.FitComponent.UNDEFINED;
         Insets insets = ZERO_INSETS;
 
         if ( c != null ) {
@@ -658,18 +663,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( scaledWidth < 0 || preferredPlacement != UI.Placement.UNDEFINED )
+            if ( scaledWidth < 0 || !placementAndScalingIsBothUndefined )
                 x = insets.left;
 
-            if ( scaledHeight < 0 || preferredPlacement != UI.Placement.UNDEFINED )
+            if ( scaledHeight < 0 || !placementAndScalingIsBothUndefined )
                 y = insets.top;
         }
 
         int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );
         int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );
 
-        width  = scaledWidth  >= 0 && preferredPlacement == UI.Placement.UNDEFINED ? scaledWidth  : width  - insets.right  - insets.left;
-        height = scaledHeight >= 0 && preferredPlacement == UI.Placement.UNDEFINED ? scaledHeight : height - insets.bottom - insets.top ;
+        width  = scaledWidth  >= 0 && placementAndScalingIsBothUndefined ? scaledWidth  : width  - insets.right  - insets.left;
+        height = scaledHeight >= 0 && placementAndScalingIsBothUndefined ? scaledHeight : height - insets.bottom - insets.top ;
 
         if ( _widthUnit == Unit.PERCENTAGE ) {
             width = (int) (( width * _svgDocument.size().width ) / 100f);
@@ -696,7 +701,7 @@ public final class SvgIcon extends ImageIcon
                 g.drawImage(_cache, x, y, width, height, null);
             else {
                 _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                paintIcon(c, _cache.getGraphics(), 0, 0, width, height);
+                paintIcon(c, _cache.getGraphics(), 0, 0, width, height );
                 g.drawImage(_cache, x, y, width, height, null);
             }
         }
@@ -728,18 +733,50 @@ public final class SvgIcon extends ImageIcon
 
     void paintIcon(
             final @Nullable Component c,
-            final java.awt.Graphics g,
+            final Graphics g,
             int x,
             int y,
             int width,
             int height
     ) {
-        _paintIcon( c, g, x, y, width, height, _preferredPlacement );
+        _paintIcon( c, g, x, y, width, height, _preferredPlacement);
+    }
+
+    private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
+        if ( _svgDocument == null )
+            return Size.unknown();
+        final int iconWidth  = getIconWidth();
+        final int iconHeight = getIconHeight();
+        final FloatSize svgSize = _svgDocument.size();
+
+        float finalWidth  = ( iconWidth  > 0 || areaWidth  < 0 ? iconWidth  : -1 );
+        float finalHeight = ( iconHeight > 0 || areaHeight < 0 ? iconHeight : -1 );
+        if ( finalWidth <= 0 || finalHeight <= 0 ) {
+            finalWidth = iconWidth < 0 ? svgSize.width : iconWidth;
+            finalHeight = iconHeight < 0 ? svgSize.height : iconHeight;
+            float scale = 1f;
+            if ( areaWidth < areaHeight ) { // <- Tall area
+                if ( finalWidth > finalHeight ) {
+                    scale = areaWidth / finalWidth;
+                } else {
+                    scale = areaHeight / finalHeight;
+                }
+            } else { // < - Wide area
+                if ( finalWidth < finalHeight ) {
+                    scale = areaWidth / finalWidth;
+                } else {
+                    scale = areaHeight / finalHeight;
+                }
+            }
+            finalWidth = finalWidth * scale;
+            finalHeight = finalHeight * scale;
+        }
+        return Size.of(finalWidth, finalHeight);
     }
 
     private void _paintIcon(
         final @Nullable Component c,
-        final java.awt.Graphics g,
+        final Graphics g,
         final int areaX,
         final int areaY,
         final int areaWidth,
@@ -749,76 +786,76 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        final int scaledWidth  = getIconWidth();
-        final int scaledHeight = getIconHeight();
+        final Size iconSize = _computeBaseSizeFrom(areaWidth, areaHeight);
+        final int iconWidth = iconSize.width().map(Math::round).orElse(0);
+        final int iconHeight = iconSize.height().map(Math::round).orElse(0);
 
         int x = areaX;
         int y = areaY;
-        int width  = ( areaWidth  < 0 ? scaledWidth  : areaWidth  );
-        int height = ( areaHeight < 0 ? scaledHeight : areaHeight );
+        int width  = ( areaWidth  < 0 ? iconWidth  : areaWidth  );
+        int height = ( areaHeight < 0 ? iconHeight : areaHeight );
 
         Graphics2D g2d = (Graphics2D) g.create();
 
         FloatSize svgSize = _svgDocument.size();
         float svgRefWidth  = ( svgSize.width  > svgSize.height ? 1f : svgSize.width  / svgSize.height );
         float svgRefHeight = ( svgSize.height > svgSize.width  ? 1f : svgSize.height / svgSize.width  );
-        float imgRefWidth  = (     width      >=   height      ? 1f : (float) width  /   height       );
-        float imgRefHeight = (     height     >=   width       ? 1f : (float) height /   width        );
+        float imgRefWidth  = (   iconWidth    >=   iconHeight  ? 1f : (float) iconWidth /  iconHeight );
+        float imgRefHeight = (   iconHeight   >=   iconWidth   ? 1f : (float) iconHeight / iconWidth  );
 
         float scaleX = imgRefWidth  / svgRefWidth;
         float scaleY = imgRefHeight / svgRefHeight;
 
+        boolean isEffectivelyFitHeight = false;
+        boolean isEffectivelyFitWidth = false;
         if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {
-            if ( width < height )
-                scaleX = 1f;
-            if ( height < width )
-                scaleY = 1f;
-        }
-
-        if ( _fitComponent == UI.FitComponent.WIDTH )
-            scaleX = 1f;
-
-        if ( _fitComponent == UI.FitComponent.HEIGHT )
-            scaleY = 1f;
-
-        if ( _fitComponent == UI.FitComponent.NO ) {
-            scaleX = 1f;
-            scaleY = 1f;
-        }
-
-        ViewBox viewBox = new ViewBox(x, y, width, height);
-        float boxX      = viewBox.x  / scaleX;
-        float boxY      = viewBox.y  / scaleY;
-        float boxWidth  = viewBox.width  / scaleX;
-        float boxHeight = viewBox.height / scaleY;
-        if ( _fitComponent == UI.FitComponent.MAX_DIM ) {
-            // We now want to make sure that the
-            if ( boxWidth < boxHeight ) {
-                // We find the scale factor of the heights between the two rectangles:
-                float scaleHeight = ( viewBox.height / svgSize.height );
-                // We now want to scale the view box so that both have the same heights:
-                float newWidth  = svgSize.width  * scaleHeight;
-                float newHeight = svgSize.height * scaleHeight;
-                float newX = viewBox.x + (viewBox.width - newWidth) / 2f;
-                float newY = viewBox.y;
-                viewBox = new ViewBox(newX, newY, newWidth, newHeight);
+            if ( _fitComponent == UI.FitComponent.MIN_DIM ) {
+                 if (areaWidth < areaHeight) {
+                    scaleX = (float) width / iconWidth;
+                    scaleY = scaleX;
+                     isEffectivelyFitWidth = true;
+                 }
+                if (areaHeight < areaWidth) {
+                    scaleY = (float) height / iconHeight;
+                    scaleX = scaleY;
+                    isEffectivelyFitHeight = true;
+                }
             } else {
-                // We find the scale factor of the widths between the two rectangles:
-                float scaleWidth = ( viewBox.width / svgSize.width );
-                // We now want to scale the view box so that both have the same widths:
-                float newWidth  = svgSize.width  * scaleWidth;
-                float newHeight = svgSize.height * scaleWidth;
-                float newX = viewBox.x;
-                float newY = viewBox.y + (viewBox.height - newHeight) / 2f;
-                viewBox = new ViewBox(newX, newY, newWidth, newHeight);
+                if (areaWidth > areaHeight) {
+                    scaleX = (float) width / iconWidth;
+                    scaleY = scaleX;
+                    isEffectivelyFitWidth = true;
+                }
+                if (areaHeight > areaWidth) {
+                    scaleY = (float) height / iconHeight;
+                    scaleX = scaleY;
+                    isEffectivelyFitHeight = true;
+                }
             }
         }
-        else
-            viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
-        if ( _fitComponent == UI.FitComponent.NO ) {
-            final int newWidth   = scaledWidth  >= 0 ? scaledWidth  : (int) svgSize.width;
-            final int newHeight  = scaledHeight >= 0 ? scaledHeight : (int) svgSize.height;
+        if ( _fitComponent == UI.FitComponent.WIDTH || _fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+            scaleX = (float) width / iconWidth;
+        }
+
+        if ( _fitComponent == UI.FitComponent.HEIGHT || _fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+            scaleY = (float) height / iconHeight;
+        }
+
+        if ( _fitComponent == UI.FitComponent.NO || _fitComponent == UI.FitComponent.UNDEFINED ) {
+            scaleX = 1f;
+            scaleY = 1f;
+        }
+
+        boolean sizeIsUnknown = false;
+        if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED ) {
+            sizeIsUnknown = true;
+        }
+        ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
+
+        if ( _fitComponent == UI.FitComponent.NO || _fitComponent == UI.FitComponent.UNDEFINED ) {
+            final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
+            final int newHeight  = iconHeight >= 0 ? iconHeight : (int) svgSize.height;
             viewBox = new ViewBox( x, y, newWidth, newHeight );
         }
 
@@ -830,65 +867,78 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
-        // Let's make sure the view box has the correct dimension ratio:
-        float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;
-        float boxRatio     =      viewBox.width        /      viewBox.height;
-        if ( boxRatio > viewBoxRatio ) {
-            // The view box is too wide, we need to make it narrower:
-            float newWidth = viewBox.height * viewBoxRatio;
-            viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );
-        }
-        if ( boxRatio < viewBoxRatio ) {
-            // The view box is too tall, we need to make it shorter:
-            float newHeight = viewBox.width / viewBoxRatio;
-            viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );
+        if (
+            _fitComponent != UI.FitComponent.WIDTH &&
+            _fitComponent != UI.FitComponent.HEIGHT &&
+            _fitComponent != UI.FitComponent.WIDTH_AND_HEIGHT  &&
+            !isEffectivelyFitHeight &&
+            !isEffectivelyFitWidth
+        ) {
+            // Let's make sure the view box has the correct dimension ratio:
+            float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;
+            float boxRatio     =      viewBox.width        /      viewBox.height;
+            if ( boxRatio > viewBoxRatio ) {
+                // The view box is too wide, we need to make it narrower:
+                float newWidth = viewBox.height * viewBoxRatio;
+                viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );
+            }
+            if ( boxRatio < viewBoxRatio ) {
+                // The view box is too tall, we need to make it shorter:
+                float newHeight = viewBox.width / viewBoxRatio;
+                viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );
+            }
         }
 
         /*
             Before we do the actual rendering we first check if there
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
-         */
-        if ( preferredPlacement != UI.Placement.UNDEFINED ) {
-            // First we correct if the component area is smaller than the view box:
-            width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
-            width += (int) Math.max(0, x - viewBox.x );
-            x = (int) Math.min(x, viewBox.x);
-            height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
-            height += (int) Math.max(0, y - viewBox.y );
-            y = (int) Math.min(y, viewBox.y);
+        */
+        // First we correct if the component area is smaller than the view box:
+        width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
+        width += (int) Math.max(0, x - viewBox.x );
+        height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
+        height += (int) Math.max(0, y - viewBox.y );
+        x = (int) Math.min(x, viewBox.x);
+        y = (int) Math.min(y, viewBox.y);
 
-            switch ( preferredPlacement ) {
-                case TOP_LEFT:
-                    viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );
-                    break;
-                case TOP_RIGHT:
-                    viewBox = new ViewBox( x + width - viewBox.width, y, viewBox.width, viewBox.height );
-                    break;
-                case BOTTOM_LEFT:
-                    viewBox = new ViewBox( x, y + height - viewBox.height, viewBox.width, viewBox.height );
-                    break;
-                case BOTTOM_RIGHT:
-                    viewBox = new ViewBox( x + width - viewBox.width, y + height - viewBox.height, viewBox.width, viewBox.height );
-                    break;
-                case TOP:
-                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y, viewBox.width, viewBox.height );
-                    break;
-                case BOTTOM:
-                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y + height - viewBox.height, viewBox.width, viewBox.height );
-                    break;
-                case LEFT:
-                    viewBox = new ViewBox( x, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
-                    break;
-                case RIGHT:
-                    viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
-                    break;
-                case CENTER:
-                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
-                    break;
-                default:
-                    log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
-            }
+        final float scaledAreaX = x / scaleX;
+        final float scaledAreaY = y / scaleY;
+        final float scaledWidth = width / scaleX;
+        final float scaledHeight = height / scaleY;
+        final float shiftHalfX = ((scaledWidth - viewBox.width) / 2f);
+        final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);
+        switch ( preferredPlacement ) {
+            case TOP_LEFT:
+                viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );
+                break;
+            case TOP_RIGHT:
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, y, viewBox.width, viewBox.height );
+                break;
+            case BOTTOM_LEFT:
+                viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                break;
+            case BOTTOM_RIGHT:
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                break;
+            case TOP:
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY, viewBox.width, viewBox.height );
+                break;
+            case BOTTOM:
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );
+                break;
+            case LEFT:
+                viewBox = new ViewBox( scaledAreaX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                break;
+            case RIGHT:
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                break;
+            case CENTER:
+            case UNDEFINED:
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                break;
+            default:
+                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
         }
 
         // Now onto the actual rendering:
@@ -910,7 +960,7 @@ public final class SvgIcon extends ImageIcon
         try {
             // We also have to scale x and y, this is because the SVGDocument does not
             // account for the scale of the transform with respect to the view box!
-            _svgDocument.render((JComponent) c, g2d, viewBox);
+            _svgDocument.render(c, g2d, viewBox);
         } catch (Exception e) {
             log.warn(SwingTree.get().logMarker(), "Failed to render SVG document.", e);
         }
