@@ -31,7 +31,7 @@ public class BorderHoverExample extends JPanel {
     private static void printAndDispatchIndicationAnimation( ComponentMouseEventDelegate<?> delegate, String info ) {
         System.out.println(info);
         delegate.animateFor(0.25, java.util.concurrent.TimeUnit.SECONDS, status -> {
-            double r = 35 * status.fadeIn() * delegate.getScale();
+            double r = 35 * status.fadeIn();
             double x = delegate.mouseX() - r / 2.0;
             double y = delegate.mouseY() - r / 2.0;
             delegate.paint(ComponentArea.BORDER, status, g -> {

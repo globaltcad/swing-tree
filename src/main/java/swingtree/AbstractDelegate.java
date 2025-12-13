@@ -1177,7 +1177,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}
+     *  Use this to query the UI's component tree and find any {@link JComponent}
      *  of a particular type and id (the name of the component).
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1192,7 +1192,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}
+     *  Use this to query the UI's component tree and find any {@link JComponent}
      *  of a particular type and id (the name of the component).
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1207,7 +1207,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}
+     *  Use this to query the UI's component tree and find any {@link JComponent}
      *  based on a specific type and a predicate which is used to test
      *  if a particular component in the tree is the one you are looking for.
      *
@@ -1226,7 +1226,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  based on a specific type and a predicate which is used to test
      *  if a particular component in the tree is the one you are looking for.
      *
@@ -1242,7 +1242,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  of a particular type and also that belong to a particular style group.
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1257,7 +1257,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  that belong to a particular style group.
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
@@ -1271,7 +1271,7 @@ public class AbstractDelegate<C extends JComponent>
 
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  of a particular type and also that belong to a particular style group.
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1286,7 +1286,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  that belong to a particular style group.
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
@@ -1344,7 +1344,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.ComponentArea.BORDER, state, g -> {
@@ -1416,7 +1416,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.ComponentArea.BODY, UI.Layer.CONTENT, state, g -> {
@@ -1473,7 +1473,7 @@ public class AbstractDelegate<C extends JComponent>
      *      .onDragStart( it -> {
      *          it.parentDelegate( parent -> parent
      *              .animateFor(1, TimeUnit.SECONDS, status -> {
-     *                  double r = 320 * status.fadeOut() * it.getScale();
+     *                  double r = 320 * status.fadeOut();
      *                  double x = it.getEvent().getDragOrigin().getX() - r / 2;
      *                  double y = it.getEvent().getDragOrigin().getY() - r / 2;
      *                  parent.paint(status, g -> {
@@ -1717,54 +1717,5 @@ public class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(animation);
         this.animateFor(duration, unit).go(animation);
     }
-
-    /**
-     *  The number returned by this method is used to scale the UI
-     *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale custom {@link Graphics2D} painting operations.
-     *
-     * @return The current UI scale factor, which is used to scale the UI
-     *         for high resolution displays (high dots-per-inch, or DPI).
-     */
-    public float getScale() { return UI.scale(); }
-
-    /**
-     *  The number returned by this method is used to scale the UI
-     *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale custom {@link Graphics2D} painting operations.
-     *
-     * @return The current UI scale factor, which is used to scale the UI
-     *         for high resolution displays (high dots-per-inch, or DPI).
-     */
-    public float scale() { return UI.scale(); }
-
-    /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale an {@code int} value by the current UI scale factor to ensure
-     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  @param value The {@code int} value to scale.
-     *  @return The scaled {@code int} value.
-     */
-    public int scale( int value ) { return UI.scale(value); }
-
-    /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale a {@code float} value by the current UI scale factor to ensure
-     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  @param value The {@code float} value to scale.
-     *  @return The scaled {@code float} value.
-     */
-    public float scale( float value ) { return UI.scale(value); }
-
-    /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale a {@code double} value by the current UI scale factor to ensure
-     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  @param value The {@code double} value to scale.
-     *  @return The scaled {@code double} value.
-     */
-    public double scale( double value ) { return UI.scale(value); }
 
 }

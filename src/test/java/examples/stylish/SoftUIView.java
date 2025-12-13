@@ -29,7 +29,7 @@ public class SoftUIView extends Panel
                     )
                     .onMouseMove( it -> {
                         it.animateFor(1, TimeUnit.SECONDS, status -> {
-                            double r = 30 * status.fadeIn() * it.getScale();
+                            double r = 30 * status.fadeIn();
                             double x = it.mouseX() - r / 2.0;
                             double y = it.mouseY() - r / 2.0;
                             it.paint(status, g -> {
@@ -135,7 +135,7 @@ public class SoftUIView extends Panel
                 it.paint(status, g -> {
                     g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) status.fadeOut()));
                     for ( int i = 0; i < 5; i++ ) {
-                        double r = 300 * status.fadeIn() * ( 1 - i * 0.2 ) * it.getScale();
+                        double r = 300 * status.fadeIn() * ( 1 - i * 0.2 );
                         double x = it.mouseX() - r / 2;
                         double y = it.mouseY() - r / 2;
                         g.drawOval((int) x, (int) y, (int) r, (int) r);
