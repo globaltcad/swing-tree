@@ -2341,10 +2341,10 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is rendered as expected (compared to the snapshot above).'
-            Utility.similarityBetween(images, "components/speech-bubble-svg-as-icon-panels-collage.png", 99) > 99
+            Utility.similarityBetween(images, "components/speech-bubble-svg-as-icon-panels-collage.png", 99.8) > 99.8
 
         where : 'We test this UI using the following scaling values:'
-            uiScale << [1f, 1.25f,  1.5f, 2f]
+            uiScale << [1f, 1.25f, 1.5f, 2f]
     }
 
 
