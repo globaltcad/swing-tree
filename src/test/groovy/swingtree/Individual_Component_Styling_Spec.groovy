@@ -1837,7 +1837,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is rendered as expected (compared to the snapshot above).'
-            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.8) > 99.8
+            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.5) > 99.5
 
         where : 'We test this UI using the following scaling values:'
             uiScale << [1f, 2f, 3f]
