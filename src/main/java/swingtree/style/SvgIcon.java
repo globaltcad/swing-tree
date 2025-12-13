@@ -644,6 +644,7 @@ public final class SvgIcon extends ImageIcon
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
             preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
 
+        boolean placementAndScalingIsBothUndefined = preferredPlacement == UI.Placement.UNDEFINED && _fitComponent == UI.FitComponent.UNDEFINED;
         Insets insets = ZERO_INSETS;
 
         if ( c != null ) {
@@ -662,18 +663,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( scaledWidth < 0 || preferredPlacement != UI.Placement.UNDEFINED )
+            if ( scaledWidth < 0 || !placementAndScalingIsBothUndefined )
                 x = insets.left;
 
-            if ( scaledHeight < 0 || preferredPlacement != UI.Placement.UNDEFINED )
+            if ( scaledHeight < 0 || !placementAndScalingIsBothUndefined )
                 y = insets.top;
         }
 
         int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );
         int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );
 
-        width  = scaledWidth  >= 0 && preferredPlacement == UI.Placement.UNDEFINED ? scaledWidth  : width  - insets.right  - insets.left;
-        height = scaledHeight >= 0 && preferredPlacement == UI.Placement.UNDEFINED ? scaledHeight : height - insets.bottom - insets.top ;
+        width  = scaledWidth  >= 0 && placementAndScalingIsBothUndefined ? scaledWidth  : width  - insets.right  - insets.left;
+        height = scaledHeight >= 0 && placementAndScalingIsBothUndefined ? scaledHeight : height - insets.bottom - insets.top ;
 
         if ( _widthUnit == Unit.PERCENTAGE ) {
             width = (int) (( width * _svgDocument.size().width ) / 100f);
@@ -892,53 +893,52 @@ public final class SvgIcon extends ImageIcon
             Before we do the actual rendering we first check if there
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
-         */
-        if ( preferredPlacement != UI.Placement.UNDEFINED ) {
-            // First we correct if the component area is smaller than the view box:
-            width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
-            width += (int) Math.max(0, x - viewBox.x );
-            height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
-            height += (int) Math.max(0, y - viewBox.y );
-            x = (int) Math.min(x, viewBox.x);
-            y = (int) Math.min(y, viewBox.y);
+        */
+        // First we correct if the component area is smaller than the view box:
+        width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
+        width += (int) Math.max(0, x - viewBox.x );
+        height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
+        height += (int) Math.max(0, y - viewBox.y );
+        x = (int) Math.min(x, viewBox.x);
+        y = (int) Math.min(y, viewBox.y);
 
-            final float scaledAreaX = x / scaleX;
-            final float scaledAreaY = y / scaleY;
-            final float scaledWidth = width / scaleX;
-            final float scaledHeight = height / scaleY;
-            final float shiftHalfX = ((scaledWidth - viewBox.width) / 2f);
-            final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);
-            switch ( preferredPlacement ) {
-                case TOP_LEFT:
-                    viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );
-                    break;
-                case TOP_RIGHT:
-                    viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, y, viewBox.width, viewBox.height );
-                    break;
-                case BOTTOM_LEFT:
-                    viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
-                    break;
-                case BOTTOM_RIGHT:
-                    viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
-                    break;
-                case TOP:
-                    viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY, viewBox.width, viewBox.height );
-                    break;
-                case BOTTOM:
-                    viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );
-                    break;
-                case LEFT:
-                    viewBox = new ViewBox( scaledAreaX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
-                    break;
-                case RIGHT:
-                    viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
-                    break;
-                case CENTER:
-                    viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
-                    break;
-                default:
-                    log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
-            }
+        final float scaledAreaX = x / scaleX;
+        final float scaledAreaY = y / scaleY;
+        final float scaledWidth = width / scaleX;
+        final float scaledHeight = height / scaleY;
+        final float shiftHalfX = ((scaledWidth - viewBox.width) / 2f);
+        final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);
+        switch ( preferredPlacement ) {
+            case TOP_LEFT:
+                viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );
+                break;
+            case TOP_RIGHT:
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, y, viewBox.width, viewBox.height );
+                break;
+            case BOTTOM_LEFT:
+                viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                break;
+            case BOTTOM_RIGHT:
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                break;
+            case TOP:
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY, viewBox.width, viewBox.height );
+                break;
+            case BOTTOM:
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );
+                break;
+            case LEFT:
+                viewBox = new ViewBox( scaledAreaX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                break;
+            case RIGHT:
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                break;
+            case CENTER:
+            case UNDEFINED:
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                break;
+            default:
+                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
         }
 
         // Now onto the actual rendering:
