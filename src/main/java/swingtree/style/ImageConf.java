@@ -460,6 +460,14 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *          The image will be scaled to fit the larger
      *          of the two dimension of the inner component area.
      *      </li>
+     *      <li>{@link UI.FitComponent#UNDEFINED} -
+     *          How the image will be scaled to fit the component is unclear.
+     *          Another property may override this, but typically the behavior
+     *          is similar to {@link UI.FitComponent#NO}.<br>
+     *          So for example, if you pass an {@link SvgIcon} to {@link #image(ImageIcon)}
+     *          which whose {@link SvgIcon#getFitComponent()} <b>is not {@code UNDEFINED}</b>,
+     *          then this will override the "fit component" policy of this config object.
+     *      </li>
      *  </ul>
      * @param fit The fit mode of the image.
      * @return A new {@link ImageConf} instance with the specified {@code fit} mode.

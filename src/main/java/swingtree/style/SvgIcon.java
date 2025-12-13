@@ -506,6 +506,11 @@ public final class SvgIcon extends ImageIcon
      *      <li>{@link UI.FitComponent#MIN_DIM} -
      *      The image will be scaled to fit the smaller of the two dimensions of the inner component area.
      *      </li>
+     *      <li>{@link UI.FitComponent#UNDEFINED} -
+     *      How the image will be scaled to fit the component is unclear.
+     *      Another property may override this, but typically the behavior
+     *      is similar to {@link UI.FitComponent#NO}.
+     *      </li>
      *  </ul>
      *  See {@link #withFitComponent(UI.FitComponent)} if you want to create a new {@link SvgIcon}
      *  with an updated fit policy.
