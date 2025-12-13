@@ -1315,7 +1315,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(status, g -> {
@@ -1387,7 +1387,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.Layer.CONTENT, status, g -> {
