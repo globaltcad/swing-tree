@@ -1096,10 +1096,10 @@ final class StyleRenderer
     }
 
     private static void _renderImage(
-        LayerRenderConf conf,
-        ImageConf style,
-        Size        componentSize,
-        Graphics2D  g2d
+        final LayerRenderConf conf,
+        final ImageConf style,
+        final Size        componentSize,
+        final Graphics2D  g2d
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
@@ -1199,10 +1199,10 @@ final class StyleRenderer
             }
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = (SvgIcon) imageIcon;
-                if ( imgWidth > -1 && iconBaseWidth < 0 )
-                    svgIcon = svgIcon.withIconWidth(UI.unscale(imgWidth));
-                if ( imgHeight > -1 && iconBaseHeight < 0 )
-                    svgIcon = svgIcon.withIconHeight(UI.unscale(imgHeight));
+                if ( style.width().isPresent() )
+                    svgIcon = svgIcon.withIconWidth(UI.unscale(style.width().get()));
+                if ( style.height().isPresent() )
+                    svgIcon = svgIcon.withIconHeight(UI.unscale(style.height().get()));
                 imageIcon = svgIcon;
             }
 

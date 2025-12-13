@@ -582,7 +582,7 @@ public final class UI extends UIFactoryMethods
      * @see ImageConf#fitMode(FitComponent)
      * @see SvgIcon#withFitComponent(FitComponent)
      */
-    public enum FitComponent {
+    public enum FitComponent implements UIEnum<FitComponent> {
         /**
          *  How a particular image is supposed to fit a component is unknown
          *  and <b>may be overridden by another policy or default behavior</b>.
