@@ -1371,7 +1371,8 @@ final class StyleRenderer
             }
             g2d.setClip(localClip);
             float uiScale = UI.scale();
-            g2d.scale(uiScale, uiScale);
+            if ( uiScale != 1f )
+                g2d.scale(uiScale, uiScale);
 
             try {
                 backgroundPainter.paint(g2d);
