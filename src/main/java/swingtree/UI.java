@@ -582,6 +582,7 @@ public final class UI extends UIFactoryMethods
      * @see ImageConf#fitMode(FitComponent)
      * @see SvgIcon#withFitComponent(FitComponent)
      */
+    @Immutable
     public enum FitComponent implements UIEnum<FitComponent> {
         /**
          *  How a particular image is supposed to fit a component is unknown
