@@ -4705,7 +4705,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      .withDropSite( conf -> conf
      *          .onDragOver( it -> {
      *              it.animateFor(1, TimeUnit.SECONDS, status -> {
-     *                  double r = 30 * status.fadeIn() * it.getScale();
+     *                  double r = 30 * status.fadeIn();
      *                  double x = it.getEvent().getLocation().x - r / 2.0;
      *                  double y = it.getEvent().getLocation().y - r / 2.0;
      *                  it.paint(status, g -> {
@@ -4716,7 +4716,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *          })
      *          .onDrop(it -> {
      *              it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *                  double r = 480 * status.fadeIn() * it.getScale();
+     *                  double r = 480 * status.fadeIn();
      *                  double x = it.getEvent().getLocation().x - r / 2.0;
      *                  double y = it.getEvent().getLocation().y - r / 2.0;
      *                  it.paint(status, g -> {

@@ -124,37 +124,45 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently access the x-coordinate of the component relative to its parent.
+     *  Allows you to access the x-coordinate of the delegated component relative to its parent,
+     *  and <b>scaled to "developer pixel space" instead of "component pixel space".</b>
+     *  This means that even if your component and its placement was upscaled
+     *  for a particular high DPI environment for example, then you will still
+     *  receive a consistent coordinate.
      *
-     * @return The x-coordinate of the component relative to its parent.
+     * @return The x-coordinate of the component relative to its parent
+     *         and in "developer pixel space" (without DPI aware scaling applied).
      */
-    public final int getX() { return _component().getX(); }
+    public final int getX() { return UI.unscale(_component().getX()); }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently access the y-coordinate of the component relative to its parent.
+     *  Allows you to access the y-coordinate of the delegated component relative to its parent,
+     *  and <b>scaled to "developer pixel space" instead of "component pixel space".</b>
+     *  This means that even if your component and its placement was upscaled
+     *  for a particular high DPI environment for example, then you will still
+     *  receive a consistent coordinate.
      *
-     * @return The y-coordinate of the component relative to its parent.
+     * @return The y-coordinate of the component relative to its parent
+     *         and in "developer pixel space" (without DPI aware scaling applied).
      */
-    public final int getY() { return _component().getY(); }
+    public final int getY() { return UI.unscale(_component().getY()); }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently access the location of the component relative to its parent
-     *  in the form of an immutable {@link Position} value object.
-     *  The value returned by this method is equal to the coordinate
-     *  values returned by {@link #getX()} and {@link #getY()}.
+     *  This method allows you to access the location of the delegated component r
+     *  elative to its parent in "developer pixel space" instead of "component pixel space".
+     *  It returns an immutable {@link Position} object holding both x and y components
+     *  which are equal to the values available through {@link #getX()} and {@link #getY()}.
      *
-     * @return The location of the component relative to its parent.
+     * @return The location of the component relative to its parent
+     *         in "developer pixel space" (without DPI scaling applied).
      */
     public final Position getLocation() {
-        return Position.of(_component().getLocation());
+        return Position.of(getX(), getY());
     }
 
     /**
-     *  This is class a delegate API, which means that it represents
-     *  the API of a wrapped component. This method allows you to access
+     *  This is a component delegate API, which means that it represents
+     *  the API of a wrapped component. So this method allows you to access
      *  the parent of the underlying component.
      *  In essence, this is a delegate to {@link Component#getParent()}. <br>
      *
@@ -465,8 +473,9 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the bounds of the component.
+     *  Allows you to specify new bounds for the delegated component in "developer pixel space"
+     *  and then have them scaled and set as "component pixel size", which may be scaled for hgigh
+     *  DPI environments by the {@link UI#scale()} factor.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  <p>
      *  See {@link Component#setBounds(int, int, int, int)} for more information.
@@ -481,7 +490,7 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( int x, int y, int width, int height ) {
-        _component().setBounds(x, y, width, height);
+        _component().setBounds(UI.scale(x), UI.scale(y), UI.scale(width), UI.scale(height));
         return this;
     }
 
@@ -489,6 +498,9 @@ public class AbstractDelegate<C extends JComponent>
      *  Delegates to the {@link JComponent#setBounds(int, int, int, int)} method
      *  of the underlying component. The bounds consist of a location and a size
      *  which are relative to the component's parent.
+     *  <b>Important:</b> The supplied bounds are interpreted as "being in developer pixel space"
+     *  without any scaling factor applied to it. And so this method will scale the bounds
+     *  to DPI aware "component pixel space" by multiplying by {@link UI#scale()}.
      *
      * @param bounds The new bounds of the component.
      *                This is relative to the component's parent.
@@ -496,10 +508,10 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setBounds( Bounds bounds ) {
         return setBounds(
-                (int) bounds.location().x(),
-                (int) bounds.location().y(),
-                bounds.size().width().map(Number::intValue).orElse(0),
-                bounds.size().height().map(Number::intValue).orElse(0)
+                (int) UI.scale(bounds.location().x()),
+                (int) UI.scale(bounds.location().y()),
+                bounds.size().width().map(UI::scale).map(Number::intValue).orElse(0),
+                bounds.size().height().map(UI::scale).map(Number::intValue).orElse(0)
             );
     }
 
@@ -510,13 +522,16 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setBounds(Rectangle)} for more information.
      *  </p>
+     *  <b>Important:</b> The supplied {@link Rectangle} is interpreted as "being in developer pixel space"
+     *  without any scaling factor applied to it. And so this method will scale the bounds
+     *  to DPI aware "component pixel space" by multiplying by {@link UI#scale()}.
      *
      *  @param bounds The new bounds of the component.
      *                  This is relative to the component's parent.
      * @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( Rectangle bounds ) {
-        _component().setBounds(bounds);
+        _component().setBounds(UI.scale(bounds));
         return this;
     }
 
@@ -527,17 +542,20 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#getBounds()} for more information.
      *  </p>
+     *  <b>Important:</b> The returned {@link Rectangle} is scaled to "developer pixel space"
+     *  and not necessarily in "component pixel space".
      *
-     *  @return The bounds of the component.
+     *  @return The bounds of the component in scaling agnostic "developer pixel space".
      *          This is relative to the component's parent.
      */
     public final Bounds getBounds() {
-        return Bounds.of(_component().getBounds());
+        Rectangle rec = _component().getBounds();
+        return Bounds.of(UI.unscale(rec.x), UI.unscale(rec.y), UI.unscale(rec.width), UI.unscale(rec.height));
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  access a specific {@link UI.ComponentArea} of the component.
+     *  You can use this method to access a specific {@link UI.ComponentArea} of the component,
+     *  which is useful if you do custom painting.
      *  This method returns an {@link Optional} value, which means that the
      *  component area may not be present.
      *  The {@link swingtree.UI.ComponentArea#BORDER} for example, may not be present
@@ -554,8 +572,8 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the preferred size of the component.
+     *  Allows you to set the preferred size of the component in DPI agnostic "developer pixels",
+     *  which are automatically converted to DPI aware "component pixels" using {@link UI#scale()}.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The preferred size is used by the layout manager to determine the size of the component.
      *  <p>
@@ -563,89 +581,107 @@ public class AbstractDelegate<C extends JComponent>
      *  </p>
      *  @param size The preferred size of the component.
      *  @return The delegate itself.
+     *  @deprecated Use {@link #setPrefSize(Size)} instead of this method.
      */
+    @Deprecated
     public final AbstractDelegate<C> setPrefSize( Dimension size ) {
-        _component().setPreferredSize(size);
+        _scaleAndSetPrefSize(size);
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the preferred size of the component.
+     *  Allows you to set the preferred size of the component in DPI agnostic "developer pixels",
+     *  which are automatically converted to DPI aware "component pixels" using {@link UI#scale()}.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The preferred size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setPreferredSize(Dimension)} for more information.
      *  </p>
-     *  @param size The preferred size of the component.
+     *  Also note that the supplied size is treated as being measured in "developer pixel size", 
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied size automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *  
+     *  @param size The preferred size of the component in developer pixel size.
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setPrefSize( Size size ) {
-        return setPrefSize(size.toDimension());
-    }
-
-    /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the preferred size of the component.
-     *  This method returns the delegate itself, so you can chain calls to this method.
-     *  The preferred size is used by the layout manager to determine the size of the component.
-     *  <p>
-     *  See {@link Component#setPreferredSize(Dimension)} for more information.
-     *  </p>
-     *  @param width The preferred width of the component.
-     *  @param height The preferred height of the component.
-     *  @return The delegate itself.
-     */
-    public final AbstractDelegate<C> setPrefSize( int width, int height ) {
-        _component().setPreferredSize(new Dimension(width, height));
+        _scaleAndSetPrefSize(size.toDimension());
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the preferred width of the component.
+     *  Allows you to set the preferred width and height of the component in DPI agnostic "developer pixels",
+     *  which are automatically converted to DPI aware "component pixels" using {@link UI#scale()}.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The preferred size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setPreferredSize(Dimension)} for more information.
      *  </p>
-     *  @param width The preferred width of the component.
+     *  Also note that the supplied size is treated as being measured in "developer pixel size", 
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied width and height automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *  
+     *  @param width The preferred width of the component in developer pixels (not scaled for high DPI).
+     *  @param height The preferred height of the component in developer pixels (not scaled for high DPI).
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate<C> setPrefSize( int width, int height ) {
+        _scaleAndSetPrefSize(new Dimension(width, height));
+        return this;
+    }
+
+    private void _scaleAndSetPrefSize( Dimension size ) {
+        _component().setPreferredSize(UI.scale(size));
+    }
+
+    /**
+     *  Allows you to set the preferred width of the component in DPI agnostic "developer pixels",
+     *  which are automatically converted to DPI aware "component pixels" using {@link UI#scale()}.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  <p>
+     *  See {@link Component#setPreferredSize(Dimension)} for more information.
+     *  </p>
+     *  @param width The preferred width of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setPrefWidth( int width ) {
         Dimension size = _component().getPreferredSize();
-        _component().setPreferredSize(new Dimension(width, size.height));
+        _component().setPreferredSize(new Dimension(UI.scale(width), size.height));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the preferred height of the component.
+     *  Allows you to set the preferred height of the component in DPI agnostic "developer pixels",
+     *  which are automatically converted to DPI aware "component pixels" using {@link UI#scale()}.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The preferred size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setPreferredSize(Dimension)} for more information.
      *  </p>
-     *  @param height The preferred height of the component.
+     *  @param height The preferred height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setPrefHeight( int height ) {
         Dimension size = _component().getPreferredSize();
-        _component().setPreferredSize(new Dimension(size.width, height));
+        _component().setPreferredSize(new Dimension(size.width, UI.scale(height)));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the preferred size of the component.
+     *  Exposes the preferred size of the component in DPI agnostic "developer pixels" which are
+     *  computed by dividing the already scaled preferred component width and height 
+     *  in "component pixels" by the {@link UI#scale()} factor.<br>
      *  The preferred size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#getPreferredSize()} for more information.
      *  </p>
-     *  @return The preferred size of the component.
+     *  @return The preferred size of the component scaled to "developer pixel size".
      */
     public final Size getPrefSize() {
-        return Size.of(_component().getPreferredSize());
+        return Size.of(UI.unscale(_component().getPreferredSize()));
     }
 
     /**
@@ -656,48 +692,60 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setMinimumSize(Dimension)} for more information.
      *  </p>
-     *  @param size The minimum size of the component.
+     *  @param size The minimum size of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
+     *  @deprecated Use {@link #setMinSize(Size)} instead!
      */
+    @Deprecated
     public final AbstractDelegate<C> setMinSize( Dimension size ) {
-        _component().setMinimumSize(size);
+        _component().setMinimumSize(size == null ? null : UI.scale(size));
         return this;
     }
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the minimum size of the component.
+     *  conveniently set the minimum size of the component <b>in developer pixel size</b>.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The minimum size is used by the layout manager to determine the size of the component.
      *  <p>
-     *  See {@link Component#setMinimumSize(Dimension)} for more information.
+     *  See {@link Component#setMinimumSize(Dimension)} for more information 
+     *  about the meaning of this property.
      *  </p>
-     *  @param size The minimum size of the component.
+     *  Also note that the supplied size is treated as being measured in "developer pixel size", 
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied size automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *  
+     *  @param size The minimum size of the component in developer pixel size,
+     *              or {@link Size#unknown()} to set the minimum size to being "undefined"/"null".
      *  @return The delegate itself.
+     *  @throws NullPointerException if the supplied size is null.
      */
     public final AbstractDelegate<C> setMinSize( Size size ) {
         Objects.requireNonNull(size, "Use Size.unknown() instead of null to represent the absence of a size.");
         if ( size.equals(Size.unknown()) )
             _component().setMinimumSize(null);
         else
-            _component().setMinimumSize(size.toDimension());
+            _component().setMinimumSize(UI.scale(size.toDimension()));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the minimum size of the component.
+     *  This method allows you to set the minimum size of the delegated component
+     *  in "developer pixels" instead of "component pixels".
+     *  The dimension you supply to this method will be scale to "component pixels" for you, so you
+     *  don't have to rely on component pixel space in your code (which varies depending on the {@link UI#scale()}).
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The minimum size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setMinimumSize(Dimension)} for more information.
      *  </p>
-     *  @param width The minimum width of the component.
-     *  @param height The minimum height of the component.
+     *  @param width The minimum width of the component in developer pixels (not scaled for high DPI).
+     *  @param height The minimum height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinSize( int width, int height ) {
-        _component().setMinimumSize(new Dimension(width, height));
+        _component().setMinimumSize(new Dimension(UI.scale(width), UI.scale(height)));
         return this;
     }
 
@@ -709,12 +757,12 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setMinimumSize(Dimension)} for more information.
      *  </p>
-     *  @param width The minimum width of the component.
+     *  @param width The minimum width of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinWidth( int width ) {
         Dimension size = _component().getMinimumSize();
-        _component().setMinimumSize(new Dimension(width, size.height));
+        _component().setMinimumSize(new Dimension(UI.scale(width), size.height));
         return this;
     }
 
@@ -726,18 +774,19 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setMinimumSize(Dimension)} for more information.
      *  </p>
-     *  @param height The minimum height of the component.
+     *  @param height The minimum height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinHeight( int height ) {
         Dimension size = _component().getMinimumSize();
-        _component().setMinimumSize(new Dimension(size.width, height));
+        _component().setMinimumSize(new Dimension(size.width, UI.scale(height)));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the minimum size of the component.
+     *  Exposes the minimum size of the component in DPI agnostic "developer pixels" which are
+     *  computed by dividing the already scaled minimum component width and height 
+     *  in "component pixels" by the {@link UI#scale()} factor.<br>
      *  The minimum size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#getMinimumSize()} for more information.
@@ -745,7 +794,7 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The minimum size of the component.
      */
     public final Size getMinSize() {
-        return Size.of(_component().getMinimumSize());
+        return Size.of(UI.unscale(_component().getMinimumSize()));
     }
 
     /**
@@ -759,8 +808,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @param size The maximum size of the component.
      *  @return The delegate itself.
      */
+    @Deprecated
     public final AbstractDelegate<C> setMaxSize( Dimension size ) {
-        _component().setMaximumSize(size);
+        _component().setMaximumSize(size == null ? null : UI.scale(size));
         return this;
     }
 
@@ -772,203 +822,232 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setMaximumSize(Dimension)} for more information.
      *  </p>
-     *  @param size The maximum size of the component.
+     *  Also note that the supplied size is treated as being measured in "developer pixel size", 
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied size automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *  
+     *  @param size The maximum size of the component in developer pixel size,
+     *              or {@link Size#unknown()} to set the maximum size to being "undefined"/"null".
      *  @return The delegate itself.
+     *  @throws NullPointerException if the supplied size is {@code null}.
      */
     public final AbstractDelegate<C> setMaxSize( Size size ) {
         Objects.requireNonNull(size, "Use Size.unknown() instead of null to represent the absence of a size.");
         if ( size.equals(Size.unknown()) )
             _component().setMaximumSize(null);
         else
-            _component().setMaximumSize(size.toDimension());
+            _component().setMaximumSize(UI.scale(size.toDimension()));
         return this;
     }
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the maximum size of the component.
+     *  conveniently set the maximum size of the component in "developer pixel".
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The maximum size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setMaximumSize(Dimension)} for more information.
      *  </p>
-     *  @param width The maximum width of the component.
-     *  @param height The maximum height of the component.
+     *  Also note that the supplied size is treated as being measured in "developer pixel size", 
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied size automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *  
+     *  @param width The maximum width of the component in developer pixels (not scaled for high DPI).
+     *  @param height The maximum height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxSize( int width, int height ) {
-        _component().setMaximumSize(new Dimension(width, height));
+        _component().setMaximumSize(UI.scale(new Dimension(width, height)));
         return this;
     }
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the maximum width of the component.
+     *  conveniently set the maximum width of the component in "developer pixel".
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The maximum size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setMaximumSize(Dimension)} for more information.
      *  </p>
-     *  @param width The maximum width of the component.
+     *  Also note that the supplied width is treated as being measured in "developer pixel size", 
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied width automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *  
+     *  @param width The maximum width of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxWidth( int width ) {
         Dimension size = _component().getMaximumSize();
-        _component().setMaximumSize(new Dimension(width, size.height));
+        _component().setMaximumSize(new Dimension(UI.scale(width), size.height));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the maximum height of the component.
+     *  Takes a new maximum height for the component in "developer pixel" and applies it as "component pixels".
+     *  This means that the supplied height will be scaled to dynamic "component pixels"
+     *  through multiplication with the {@link UI#scale()} factor.<br>
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The maximum size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setMaximumSize(Dimension)} for more information.
      *  </p>
-     *  @param height The maximum height of the component.
+     *  Also note that the supplied height is treated as being measured in "developer pixel size",
+     *  which are defined as pixels <b>without</b> the UI scaling factor applied to them.<br>
+     *  This method will scale the supplied height automatically for you, and therefore you as a developer
+     *  may define dimensions in your GUI code consistently, without sacrificing dynamic DPI scaling.
+     *
+     *  @param height The maximum height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxHeight( int height ) {
         Dimension size = _component().getMaximumSize();
-        _component().setMaximumSize(new Dimension(size.width, height));
+        _component().setMaximumSize(new Dimension(size.width, UI.scale(height)));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the maximum size of the component.
-     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  Exposes the maximum size of the component in DPI agnostic "developer pixels" which are
+     *  computed by dividing the already scaled maximum width and height of the component
+     *  in "component pixels" by the {@link UI#scale()} factor.<br>
+     *  The maximum size of a component is used by the layout manager to determine 
+     *  the size of the component.
      *  <p>
      *  See {@link Component#getMaximumSize()} for more information.
      *  </p>
-     *  @return The maximum size of the component.
+     *  @return The maximum size of the component in "developer pixels".
      */
     public final Size getMaxSize() {
-        return Size.of(_component().getMaximumSize());
+        return Size.of(UI.unscale(_component().getMaximumSize()));
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the size of the component.
+     *  You can use this method to set the size of the component in "developer pixel",
+     *  meaning that the supplied dimensions will be scaled to dynamic "component pixels"
+     *  using the {@link UI#scale()} factor.<br>
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setSize(Dimension)} for more information.
      *  </p>
-     *  @param size The size of the component.
+     *  @param size The size of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
+     *  @deprecated Use {@link #setSize(Size)} instead of this method!
      */
+    @Deprecated
     public final AbstractDelegate<C> setSize( Dimension size ) {
-        _component().setSize(size);
+        _component().setSize(size == null ? null : UI.scale(size));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the size of the component.
+     *  Takes a new {@link Size} for the component in "developer pixel" and applies it as "component pixels".
+     *  This means that the supplied dimensions will be scaled to dynamic "component pixels"
+     *  through multiplication with the {@link UI#scale()} factor.<br>
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setSize(Dimension)} for more information.
      *  </p>
-     *  @param size The size of the component.
+     *  @param size The size of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setSize( Size size ) {
         Objects.requireNonNull(size);
-        _component().setSize(size.toDimension());
+        _component().setSize(UI.scale(size.toDimension()));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the size of the component.
+     *  Takes two new width and height for the component in "developer pixel" and applies it as "component pixels".
+     *  This means that the supplied dimensions will be scaled to dynamic "component pixels"
+     *  through multiplication with the {@link UI#scale()} factor.<br>
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setSize(Dimension)} for more information.
      *  </p>
-     *  @param width The width of the component.
-     *  @param height The height of the component.
+     *  @param width The width of the component in developer pixels (not scaled for high DPI).
+     *  @param height The height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setSize( int width, int height ) {
-        _component().setSize(new Dimension(width, height));
+        _component().setSize(UI.scale(new Dimension(width, height)));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the width of the component.
+     *  Takes a new width for the underlying component in "developer pixel" and applies it as "component pixels".
+     *  This means that the supplied width will be scaled to dynamic "component pixels"
+     *  through multiplication with the {@link UI#scale()} factor.<br>
      *  This method returns the delegate itself, so you can chain calls to this method.
-     *  The size is used by the layout manager to determine the size of the component.
+     *  The regular size of a component is typically managed and set by the layout manager of a component.
+     *  So you may not want to set this in most cases...
      *  <p>
      *  See {@link Component#setSize(Dimension)} for more information.
      *  </p>
-     *  @param width The width of the component.
+     *  @param width The width of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setWidth( int width ) {
         Dimension size = _component().getSize();
-        _component().setSize(new Dimension(width, size.height));
+        _component().setSize(new Dimension(UI.scale(width), size.height));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently set the height of the component.
+     *  You can use this method to set the height of the delegated component in "developer pixel".
+     *  The value you pass to this method will be scaled by {@link UI#scale(int)} and then set.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  The size is used by the layout manager to determine the size of the component.
      *  <p>
      *  See {@link Component#setSize(Dimension)} for more information.
      *  </p>
-     *  @param height The height of the component.
+     *  @param height The height of the component in developer pixels (not scaled for high DPI).
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setHeight( int height ) {
         Dimension size = _component().getSize();
-        _component().setSize(new Dimension(size.width, height));
+        _component().setSize(new Dimension(size.width, UI.scale(height)));
         return this;
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the size of the component.
-     *  The size is used by the layout manager to determine the size of the component.
+     *  Exposes the size of the delegated component in "developer pixel".
+     *  Theis property is typically managed and set by the layout manager.
      *  <p>
      *  See {@link Component#getSize()} for more information.
      *  </p>
      *  @return The size of the component.
      */
     public final Size getSize() {
-        return Size.of(_component().getSize());
+        return Size.of(UI.unscale(_component().getSize()));
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the width of the component.
-     *  The size is used by the layout manager to determine the size of the component.
+     *  Exposes the width of the underlying component in "developer pixel".
+     *  Theis property is typically managed and set by the layout manager.
      *  <p>
      *  See {@link Component#getSize()} for more information.
      *  </p>
-     *  @return The width of the component.
+     *  @return The width of the component in developer pixels (not scaled for high DPI).
      */
     public final int getWidth() {
-        return _component().getSize().width;
+        return UI.unscale(_component().getSize().width);
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the height of the component.
-     *  The size is used by the layout manager to determine the size of the component.
+     *  Exposes the height of the component in "developer pixel" pixel.
+     *  Theis property is typically managed and set by the layout manager.
      *  <p>
      *  See {@link Component#getSize()} for more information.
      *  </p>
-     *  @return The height of the component.
+     *  @return The height of the component in developer pixels (not scaled for high DPI).
      */
     public final int getHeight() {
-        return _component().getSize().height;
+        return UI.unscale(_component().getSize().height);
     }
 
     /**
@@ -977,6 +1056,7 @@ public class AbstractDelegate<C extends JComponent>
      *
      * @param cursor The {@link UI.Cursor} which should be set.
      * @return The delegate itself.
+     * @throws NullPointerException if the supplied enum instance is {@code null}!
      */
     public final AbstractDelegate<C> setCursor( UI.Cursor cursor ) {
         Objects.requireNonNull(cursor);
@@ -1022,15 +1102,18 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the tooltip of the component.
+     *  Exposes the tooltip {@link String} of the component or
+     *  an empty {@link String} if the component does not have a tooltip.
+     *  Note that this method will never return {@code null}.
      *  <p>
      *  See {@link JComponent#getToolTipText()} for more information.
      *  </p>
-     * @return The tooltip text.
+     * @return The tooltip text or an empty {@link String} if this component
+     *         does not have a tooltip, <b>but {@code null} is never returned</b>!
      */
     public final String getTooltip() {
-        return _component().getToolTipText();
+        String nullableToolTip = _component().getToolTipText();
+        return nullableToolTip == null ? "" : nullableToolTip;
     }
 
     /**
@@ -1089,21 +1172,6 @@ public class AbstractDelegate<C extends JComponent>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently make the component opaque or transparent.
-     *  This method returns the delegate itself, so you can chain calls to this method.
-     *  <p>
-     *  See {@link JComponent#setOpaque(boolean)} for more information.
-     *  </p>
-     * @param opaque True if the component should be opaque, false otherwise.
-     * @return The delegate itself.
-     */
-    public final AbstractDelegate<C> setOpaque( boolean opaque ) {
-        _component().setOpaque(opaque);
-        return this;
-    }
-
-    /**
-     *  As a delegate to the underlying component, you can use this method to
      *  conveniently check if the component is opaque.
      *  <p>
      *  See {@link JComponent#isOpaque()} for more information.
@@ -1115,7 +1183,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}
+     *  Use this to query the UI's component tree and find any {@link JComponent}
      *  of a particular type and id (the name of the component).
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1130,7 +1198,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}
+     *  Use this to query the UI's component tree and find any {@link JComponent}
      *  of a particular type and id (the name of the component).
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1145,7 +1213,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}
+     *  Use this to query the UI's component tree and find any {@link JComponent}
      *  based on a specific type and a predicate which is used to test
      *  if a particular component in the tree is the one you are looking for.
      *
@@ -1164,7 +1232,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  based on a specific type and a predicate which is used to test
      *  if a particular component in the tree is the one you are looking for.
      *
@@ -1180,7 +1248,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  of a particular type and also that belong to a particular style group.
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1195,7 +1263,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  that belong to a particular style group.
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
@@ -1209,7 +1277,7 @@ public class AbstractDelegate<C extends JComponent>
 
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  of a particular type and also that belong to a particular style group.
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
@@ -1224,7 +1292,7 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  Use this to query the UI's component tree and find all {@link JComponent}s
      *  that belong to a particular style group.
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
@@ -1247,7 +1315,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(status, g -> {
@@ -1282,7 +1350,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.ComponentArea.BORDER, state, g -> {
@@ -1319,7 +1387,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.Layer.CONTENT, status, g -> {
@@ -1354,7 +1422,7 @@ public class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, status -> {
-     *          double r = 300 * status.progress() * it.scale();
+     *          double r = 300 * status.progress();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(UI.ComponentArea.BODY, UI.Layer.CONTENT, state, g -> {
@@ -1411,7 +1479,7 @@ public class AbstractDelegate<C extends JComponent>
      *      .onDragStart( it -> {
      *          it.parentDelegate( parent -> parent
      *              .animateFor(1, TimeUnit.SECONDS, status -> {
-     *                  double r = 320 * status.fadeOut() * it.getScale();
+     *                  double r = 320 * status.fadeOut();
      *                  double x = it.getEvent().getDragOrigin().getX() - r / 2;
      *                  double y = it.getEvent().getDragOrigin().getY() - r / 2;
      *                  parent.paint(status, g -> {
@@ -1655,54 +1723,5 @@ public class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(animation);
         this.animateFor(duration, unit).go(animation);
     }
-
-    /**
-     *  The number returned by this method is used to scale the UI
-     *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale custom {@link Graphics2D} painting operations.
-     *
-     * @return The current UI scale factor, which is used to scale the UI
-     *         for high resolution displays (high dots-per-inch, or DPI).
-     */
-    public float getScale() { return UI.scale(); }
-
-    /**
-     *  The number returned by this method is used to scale the UI
-     *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale custom {@link Graphics2D} painting operations.
-     *
-     * @return The current UI scale factor, which is used to scale the UI
-     *         for high resolution displays (high dots-per-inch, or DPI).
-     */
-    public float scale() { return UI.scale(); }
-
-    /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale an {@code int} value by the current UI scale factor to ensure
-     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  @param value The {@code int} value to scale.
-     *  @return The scaled {@code int} value.
-     */
-    public int scale( int value ) { return UI.scale(value); }
-
-    /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale a {@code float} value by the current UI scale factor to ensure
-     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  @param value The {@code float} value to scale.
-     *  @return The scaled {@code float} value.
-     */
-    public float scale( float value ) { return UI.scale(value); }
-
-    /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationStatus, Painter)})
-     *  to scale a {@code double} value by the current UI scale factor to ensure
-     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
-     *  @param value The {@code double} value to scale.
-     *  @return The scaled {@code double} value.
-     */
-    public double scale( double value ) { return UI.scale(value); }
 
 }

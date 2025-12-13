@@ -1,6 +1,7 @@
 package swingtree;
 
 import swingtree.layout.Position;
+import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -120,33 +121,66 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
     }
 
     /**
-     * Returns the x coordinate of the mouse event of this delegate.
+     * Returns the x coordinate of the mouse event of this delegate <b>without DPI scaling</b>.
+     * So the value is in "developer pixel" coordinate space <b>relative to the underlying component</b>.
+     * So a mouse position of (0,0) would be in the top left corner of the component. <br>
+     * <p>
+     * <b>For Context:</b><br>
+     * SwingTree supports high DPI scaling, but to achieve this it needs to scale the size
+     * of components for you depending on the current {@link UI#scale()} factor. <br>
+     * This means that whatever dimensions you specify in methods like
+     * {@link UIForAnySwing#withSizeExactly(Size)} are not necessarily
+     * going to be the equal to the actual size of the underlying component.<br>
+     * Therefore the component relative mouse position must be "unscaled" to be consistent
+     * from a developers point of view...
+     * </p>
      *
-     * @return integer value for the x coordinate
+     * @return An integer value representing the x coordinate without DPI scaling (aka "developer pixel").
      */
     public final int mouseX() {
-        return getEvent().getX();
+        return UI.unscale(getEvent().getX());
     }
 
     /**
-     * Returns the y coordinate of the mouse event of this delegate.
-     *
-     * @return integer value for the y coordinate
+     * Returns the y coordinate of the mouse event of this delegate <b>without DPI scaling</b>.
+     * So the value is in "developer pixel" coordinate space <b>relative to the underlying component</b>.
+     * So a mouse position of (0,0) would be in the top left corner of the component. <br>
+     * <p>
+     * <b>For Context:</b><br>
+     * SwingTree supports high DPI scaling, but to achieve this it needs to scale the size
+     * of components for you depending on the current {@link UI#scale()} factor. <br>
+     * This means that whatever dimensions you specify in methods like
+     * {@link UIForAnySwing#withSizeExactly(Size)} are not necessarily
+     * going to be the equal to the actual size of the underlying component.<br>
+     * Therefore the component relative mouse position must be "unscaled" to be consistent
+     * from a developers point of view...
+     * </p>
+     * @return An integer value representing the y coordinate without DPI scaling (aka "developer pixel").
      */
     public final int mouseY() {
-        return getEvent().getY();
+        return UI.unscale(getEvent().getY());
     }
 
     /**
-     * Returns the position of the mouse event of this delegate
-     * in the form of an immutable {@link Position} value object.
-     * So you may safely share this object without
-     * having to worry about side effects.
+     * Returns the {@link Position} of the mouse event of this delegate <b>without DPI scaling</b>.
+     * So the x and y coordinates of the position is scaled to the "developer pixel" coordinate space
+     * <b>relative to the underlying component</b>. So a position of (0,0) is in the top left
+     * corner of the component. <br>
+     * <p>
+     * <b>For Context:</b><br>
+     * SwingTree supports high DPI scaling, but to achieve this it needs to scale the size
+     * of components for you depending on the current {@link UI#scale()} factor. <br>
+     * This means that whatever dimensions you specify in methods like
+     * {@link UIForAnySwing#withSizeExactly(Size)} are not necessarily
+     * going to be the equal to the actual size of the underlying component.<br>
+     * Therefore the component relative mouse position must be "unscaled" to be consistent
+     * from a developers point of view...
+     * </p>
      *
-     * @return the position of the mouse event
+     * @return The component relative position of the mouse event in the developer pixel coordinate space (without DPI scaling applied).
      */
     public final Position mousePosition() {
-        return Position.of(getEvent().getPoint());
+        return Position.of(mouseX(), mouseY());
     }
 
     /**

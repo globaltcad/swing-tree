@@ -137,8 +137,8 @@ class Individual_Component_Styling_Spec extends Specification
                             .type(UI.GradientType.RADIAL)
                             .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                             .offset(
-                                it.component().getWidth()*state.progress(),
-                                it.component().getHeight()*state.progress()
+                                it.componentWidth()*state.progress(),
+                                it.componentHeight()*state.progress()
                             )
                             .colors(
                                 UI.color(0.35, 0.71, 1, state.progress()),
@@ -1191,19 +1191,19 @@ class Individual_Component_Styling_Spec extends Specification
                         .margin(10)
                         .painter(UI.Layer.BACKGROUND, g -> {
                             g.setColor(Color.RED);
-                            g.fill(UI.scale(new RoundRectangle2D.Double(10,15,20,20,5,5)));
+                            g.fill(new RoundRectangle2D.Double(10,15,20,20,5,5));
                         })
                         .painter(UI.Layer.CONTENT, g -> {
                             g.setColor(Color.ORANGE);
-                            g.fill(UI.scale(new RoundRectangle2D.Double(25,15,20,20,5,5)));
+                            g.fill(new RoundRectangle2D.Double(25,15,20,20,5,5));
                         })
                         .painter(UI.Layer.BORDER, g -> {
                             g.setColor(Color.BLUE);
-                            g.fill(UI.scale(new RoundRectangle2D.Double(40,15,20,20,5,5)));
+                            g.fill(new RoundRectangle2D.Double(40,15,20,20,5,5));
                         })
                         .painter(UI.Layer.FOREGROUND, g -> {
                             g.setColor(Color.MAGENTA);
-                            g.fill(UI.scale(new RoundRectangle2D.Double(55,15,20,20,5,5)));
+                            g.fill(new RoundRectangle2D.Double(55,15,20,20,5,5));
                         })
                     )
 
@@ -2802,11 +2802,11 @@ class Individual_Component_Styling_Spec extends Specification
                                 boolean isPressed = it.component().getModel().isPressed();
                                 if ( isPressed ) {
                                     g2d.setColor(new Color(0,100,200));
-                                    g2d.fillRoundRect(0, 0, it.component().getWidth(), it.component().getHeight(), 5, 5);
+                                    g2d.fillRoundRect(0, 0, it.componentWidth(), it.componentHeight(), 5, 5);
                                 }
                                 else if ( isHovered ) {
                                     g2d.setColor(new Color(120,220,100));
-                                    g2d.fillRoundRect(0, 0, it.component().getWidth(), it.component().getHeight(), 5, 5);
+                                    g2d.fillRoundRect(0, 0, it.componentWidth(), it.componentHeight(), 5, 5);
                                 }
                             })
                         )

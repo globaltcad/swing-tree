@@ -925,11 +925,18 @@ public final class UI extends UIFactoryMethods
      *  to scale the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D} graphics context.
      *  The second one is look and feel / client code dependent scaling, which is what this library uses.
      *  <p>
-     *  The factor returned by this method is determined by SwingTree
-     *  automatically to ensure that the UI is DPI aware.
-     *  All the SwingTree styles are scaled using this factor.
-     *  Use this factor to scale your {@link Graphics2D} based painting operations.
-     *  For configuring the scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
+     *  The float based scaling factor returned by this method can be used as a multiplier in order
+     *  to scale something from "developer pixels" to "component pixels" / "look and feel pixels".
+     *  Conversely, by dividing a number using this factor, you convert something from "component pixels"
+     *  to platform-agnostic "developer pixel".<br>
+     *  The scaling factor is computed by SwingTree automatically based on the system font.
+     *  Anything you do through the SwingTree API, will be scaled for you,<br>
+     *  but if you write code against raw Swing, you may need to use this scale factor
+     *  to ensure consistent scaling support across screens with varying DPI.
+     *  Most commonly, you will need to do manual scaling when defining component dimensions
+     *  or to scale custom {@link Graphics2D} based painting operations.
+     *  <br
+     *  For configuring a manual scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
      *  or {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
      *
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
@@ -949,10 +956,11 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     * Multiplies the given double value by the user scale factor.
+     * Converts a double in "developer pixel size" to "Look and Feel / component pixel size",
+     * by multiplying the given double value with the user scale factor.
      * See {@link swingtree.SwingTree} for more information about how the user scale factor is determined.
      *
-     * @param value The double value to scale.
+     * @param value The double value to scale from developer pixel size to component pixel size.
      * @return The scaled double value.
      */
     public static double scale( double value ) {
@@ -961,7 +969,8 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     * Multiplies the given int value by the user scale factor and rounds the result.
+     * Converts an int representing "developer pixel size" to "Look and Feel / component pixel size",
+     * by multiplying the given int value with the user "scale factor" and then rounding the result.
      * See {@link swingtree.SwingTree} for more information about how the user scale factor is determined.
      * @param value The int value to scale.
      * @return The scaled int value.
@@ -994,6 +1003,11 @@ public final class UI extends UIFactoryMethods
     public static float unscale( float value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
         return ( scaleFactor == 1f ? value : (value / scaleFactor) );
+    }
+
+    public static Dimension unscale( Dimension size ) {
+        float scaleFactor = SwingTree.get().getUiScaleFactor();
+        return ( scaleFactor == 1f ? size : new Dimension(unscale(size.width), unscale(size.height)) );
     }
 
     /**

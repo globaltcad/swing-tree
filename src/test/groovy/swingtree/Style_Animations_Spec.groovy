@@ -279,10 +279,10 @@ class Style_Animations_Spec extends Specification
                                         // We draw a custom gradient:
                                         var gradient = new GradientPaint(
                                             0, 0, isMouseRollover ? Color.RED : Color.BLUE,
-                                                style.component().getWidth(), style.component().getHeight(), isMouseRollover ? Color.BLUE : Color.RED
+                                                style.componentWidth(), style.componentHeight(), isMouseRollover ? Color.BLUE : Color.RED
                                         )
                                         g2d.setPaint(gradient)
-                                        g2d.fillRect(0, 0, it.component.getWidth(), it.component.getHeight())
+                                        g2d.fillRect(0, 0, style.componentWidth(), style.componentHeight())
                                     })
                                 )
                             )

@@ -26,7 +26,7 @@ public final class FancyTextField extends TextField
             .image(Layer.BORDER, image -> image
                 .image("/img/seed.png")
                 .placement(Placement.LEFT)
-                .height(it.component().getHeight())
+                .height(it.componentHeight())
                 .width(30)
                 .padding(5)
             )
@@ -41,7 +41,7 @@ public final class FancyTextField extends TextField
                     boolean isPressed = it.component().getModel().isPressed();
                     if ( isPressed ) {
                         g2d.setColor(Color.GREEN);
-                        g2d.fillRoundRect(0, 0, it.component().getWidth(), it.component().getHeight(), 5, 5);
+                        g2d.fillRoundRect(0, 0, it.componentWidth(), it.componentHeight(), 5, 5);
                     }
                     else if ( isHovered ) {
                         // When the button is hovered, we draw a radial gradient in the center
@@ -49,13 +49,13 @@ public final class FancyTextField extends TextField
                         // We also scale the g2d so that the gradient is stretched vertically.
                         g2d.scale(1, 1.5);
                         g2d.setPaint(new java.awt.RadialGradientPaint(
-                            it.component().getWidth() / 2f,
-                            it.component().getHeight() / 2f / 1.5f,
-                            it.component().getWidth() / 4f,
+                            it.componentWidth() / 2f,
+                            it.componentHeight() / 2f / 1.5f,
+                            it.componentWidth() / 4f,
                             new float[] { 0f, 1f },
                             new java.awt.Color[] { new java.awt.Color(0xffff00), new java.awt.Color(0xffff00, true) }
                         ));
-                        g2d.fillRect(0, 0, it.component().getWidth(), it.component().getHeight());
+                        g2d.fillRect(0, 0, it.componentWidth(), it.componentHeight());
                     }
                 })
             )

@@ -41,7 +41,7 @@ public final class DragAndDrop extends Panel
                     .onDragStart( it -> {
                         it.parentDelegate( parent -> {
                             parent.animateFor(1, TimeUnit.SECONDS, status -> {
-                                double r = 320 * status.fadeOut() * it.getScale();
+                                double r = 320 * status.fadeOut();
                                 double x = it.getEvent().getDragOrigin().getX() - r / 2;
                                 double y = it.getEvent().getDragOrigin().getY() - r / 2;
                                 parent.paint(status, g -> {
@@ -76,7 +76,7 @@ public final class DragAndDrop extends Panel
             .withDropSite( conf -> conf
                 .onDrop( it -> {
                     it.animateFor(1, TimeUnit.SECONDS, status -> {
-                        double r = 320 * status.fadeIn() * it.getScale();
+                        double r = 320 * status.fadeIn();
                         double x = it.getEvent().getLocation().getX() - r / 2;
                         double y = it.getEvent().getLocation().getY() - r / 2;
                         it.paint(status, g -> {
