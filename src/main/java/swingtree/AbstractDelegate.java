@@ -500,7 +500,7 @@ public class AbstractDelegate<C extends JComponent>
      *  which are relative to the component's parent.
      *  <b>Important:</b> The supplied bounds are interpreted as "being in developer pixel space"
      *  without any scaling factor applied to it. And so this method will scale the bounds
-     *  to DPI aware "component pixel space" by dividing by {@link UI#scale()}.
+     *  to DPI aware "component pixel space" by multiplying by {@link UI#scale()}.
      *
      * @param bounds The new bounds of the component.
      *                This is relative to the component's parent.
@@ -508,10 +508,10 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setBounds( Bounds bounds ) {
         return setBounds(
-                UI.scale((int) bounds.location().x()),
-                UI.scale((int) bounds.location().y()),
-                UI.scale(bounds.size().width().map(Number::intValue).orElse(0)),
-                UI.scale(bounds.size().height().map(Number::intValue).orElse(0))
+                (int) UI.scale(bounds.location().x()),
+                (int) UI.scale(bounds.location().y()),
+                bounds.size().width().map(UI::scale).map(Number::intValue).orElse(0),
+                bounds.size().height().map(UI::scale).map(Number::intValue).orElse(0)
             );
     }
 
@@ -522,13 +522,16 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setBounds(Rectangle)} for more information.
      *  </p>
+     *  <b>Important:</b> The supplied {@link Rectangle} is interpreted as "being in developer pixel space"
+     *  without any scaling factor applied to it. And so this method will scale the bounds
+     *  to DPI aware "component pixel space" by multiplying by {@link UI#scale()}.
      *
      *  @param bounds The new bounds of the component.
      *                  This is relative to the component's parent.
      * @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( Rectangle bounds ) {
-        _component().setBounds(bounds);
+        _component().setBounds(UI.scale(bounds));
         return this;
     }
 
@@ -539,17 +542,20 @@ public class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#getBounds()} for more information.
      *  </p>
+     *  <b>Important:</b> The returned {@link Rectangle} is scaled to "developer pixel space"
+     *  and not necessarily in "component pixel space".
      *
-     *  @return The bounds of the component.
+     *  @return The bounds of the component in scaling agnostic "developer pixel space".
      *          This is relative to the component's parent.
      */
     public final Bounds getBounds() {
-        return Bounds.of(_component().getBounds());
+        Rectangle rec = _component().getBounds();
+        return Bounds.of(UI.unscale(rec.x), UI.unscale(rec.y), UI.unscale(rec.width), UI.unscale(rec.height));
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  access a specific {@link UI.ComponentArea} of the component.
+     *  You can use this method to access a specific {@link UI.ComponentArea} of the component,
+     *  which is useful if you do custom painting.
      *  This method returns an {@link Optional} value, which means that the
      *  component area may not be present.
      *  The {@link swingtree.UI.ComponentArea#BORDER} for example, may not be present
