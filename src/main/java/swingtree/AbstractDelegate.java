@@ -1166,21 +1166,6 @@ public class AbstractDelegate<C extends JComponent>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
-     *  conveniently make the component opaque or transparent.
-     *  This method returns the delegate itself, so you can chain calls to this method.
-     *  <p>
-     *  See {@link JComponent#setOpaque(boolean)} for more information.
-     *  </p>
-     * @param opaque True if the component should be opaque, false otherwise.
-     * @return The delegate itself.
-     */
-    public final AbstractDelegate<C> setOpaque( boolean opaque ) {
-        _component().setOpaque(opaque);
-        return this;
-    }
-
-    /**
-     *  As a delegate to the underlying component, you can use this method to
      *  conveniently check if the component is opaque.
      *  <p>
      *  See {@link JComponent#isOpaque()} for more information.
