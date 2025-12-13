@@ -1114,86 +1114,6 @@ final class StyleRenderer
             final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());
             final int          iconBaseWidth   = imageIcon.getIconWidth();
             final int          iconBaseHeight  = imageIcon.getIconHeight();
-
-            int imgWidth  = style.width().orElse(iconBaseWidth);
-            int imgHeight = style.height().orElse(iconBaseHeight);
-
-            if ( fit != UI.FitComponent.NO && fit != UI.FitComponent.UNDEFINED ) {
-                if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-                    imgWidth  = style.width().orElse(componentWidth);
-                    imgHeight = style.height().orElse(componentHeight);
-                }
-                if (
-                    fit == UI.FitComponent.WIDTH ||
-                    (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
-                    (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
-                ) {
-                    imgWidth = style.width().orElse(componentWidth);
-                    double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;
-                    // We preserve the aspect ratio:
-                    imgHeight = (int) (imgWidth * aspectRatio);
-                } if (
-                    fit == UI.FitComponent.HEIGHT ||
-                    (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
-                    (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
-                ) {
-                    imgHeight = style.height().orElse(componentHeight);
-                    double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;
-                    // We preserve the aspect ratio:
-                    imgWidth = (int) (imgHeight * aspectRatio);
-                }
-                imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
-                imgHeight = imgHeight >= 0 ? imgHeight : componentHeight;
-            }
-            int x = style.horizontalOffset();
-            int y = style.verticalOffset();
-            // We apply the insets:
-            x += insets.left().orElse(0f).intValue();
-            y += insets.top().orElse(0f).intValue();
-
-            switch ( placement ) {
-                case TOP:
-                    x += (componentWidth - imgWidth) / 2;
-                    break;
-                case LEFT:
-                    y += (componentHeight - imgHeight) / 2;
-                    break;
-                case BOTTOM:
-                    x += (componentWidth - imgWidth) / 2;
-                    y += componentHeight - imgHeight;
-                    break;
-                case RIGHT:
-                    x += componentWidth - imgWidth;
-                    y += (componentHeight - imgHeight) / 2;
-                    break;
-                case TOP_LEFT: break;
-                case TOP_RIGHT:
-                    x += componentWidth - imgWidth;
-                    break;
-                case BOTTOM_LEFT:
-                    y += componentHeight - imgHeight;
-                    break;
-                case BOTTOM_RIGHT:
-                    x += componentWidth - imgWidth;
-                    y += componentHeight - imgHeight;
-                    break;
-                case CENTER:
-                case UNDEFINED:
-                    x += (componentWidth - imgWidth) / 2;
-                    y += (componentHeight - imgHeight) / 2;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown placement: " + placement);
-            }
-            if ( imageIcon instanceof SvgIcon ) {
-                SvgIcon svgIcon = (SvgIcon) imageIcon;
-                if ( style.width().isPresent() )
-                    svgIcon = svgIcon.withIconWidth(UI.unscale(style.width().get()));
-                if ( style.height().isPresent() )
-                    svgIcon = svgIcon.withIconHeight(UI.unscale(style.height().get()));
-                imageIcon = svgIcon;
-            }
-
             final boolean repeat  = style.repeat();
             final float   opacity = style.opacity();
 
@@ -1206,6 +1126,14 @@ final class StyleRenderer
 
             g2d.setClip(newClip);
 
+            if ( imageIcon instanceof SvgIcon ) {
+                SvgIcon svgIcon = (SvgIcon) imageIcon;
+                if ( style.width().isPresent() )
+                    svgIcon = svgIcon.withIconWidth(UI.unscale(style.width().get()));
+                if ( style.height().isPresent() )
+                    svgIcon = svgIcon.withIconHeight(UI.unscale(style.height().get()));
+                imageIcon = svgIcon;
+            }
             if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon);
                 int areaX = insets.left().orElse(0f).intValue();
@@ -1216,9 +1144,77 @@ final class StyleRenderer
                 svgIcon.withFitComponent(localFit)
                         .withPreferredPlacement(localPlacement)
                         .paintIcon(null, g2d, areaX, areaY, componentWidth, componentHeight);
-            }
-            else
-            {
+            } else {
+                int imgWidth  = style.width().orElse(iconBaseWidth);
+                int imgHeight = style.height().orElse(iconBaseHeight);
+
+                if ( fit != UI.FitComponent.NO && fit != UI.FitComponent.UNDEFINED ) {
+                    if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+                        imgWidth  = style.width().orElse(componentWidth);
+                        imgHeight = style.height().orElse(componentHeight);
+                    }
+                    if (
+                            fit == UI.FitComponent.WIDTH ||
+                                    (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
+                                    (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
+                    ) {
+                        imgWidth = style.width().orElse(componentWidth);
+                        double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;
+                        // We preserve the aspect ratio:
+                        imgHeight = (int) (imgWidth * aspectRatio);
+                    } if (
+                            fit == UI.FitComponent.HEIGHT ||
+                                    (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
+                                    (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
+                    ) {
+                        imgHeight = style.height().orElse(componentHeight);
+                        double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;
+                        // We preserve the aspect ratio:
+                        imgWidth = (int) (imgHeight * aspectRatio);
+                    }
+                    imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
+                    imgHeight = imgHeight >= 0 ? imgHeight : componentHeight;
+                }
+                int x = style.horizontalOffset();
+                int y = style.verticalOffset();
+                // We apply the insets:
+                x += insets.left().orElse(0f).intValue();
+                y += insets.top().orElse(0f).intValue();
+
+                switch ( placement ) {
+                    case TOP:
+                        x += (componentWidth - imgWidth) / 2;
+                        break;
+                    case LEFT:
+                        y += (componentHeight - imgHeight) / 2;
+                        break;
+                    case BOTTOM:
+                        x += (componentWidth - imgWidth) / 2;
+                        y += componentHeight - imgHeight;
+                        break;
+                    case RIGHT:
+                        x += componentWidth - imgWidth;
+                        y += (componentHeight - imgHeight) / 2;
+                        break;
+                    case TOP_LEFT: break;
+                    case TOP_RIGHT:
+                        x += componentWidth - imgWidth;
+                        break;
+                    case BOTTOM_LEFT:
+                        y += componentHeight - imgHeight;
+                        break;
+                    case BOTTOM_RIGHT:
+                        x += componentWidth - imgWidth;
+                        y += componentHeight - imgHeight;
+                        break;
+                    case CENTER:
+                    case UNDEFINED:
+                        x += (componentWidth - imgWidth) / 2;
+                        y += (componentHeight - imgHeight) / 2;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown placement: " + placement);
+                }
                 Image image;
                 if ( imageIcon instanceof SvgIcon) {
                     SvgIcon svgIcon = (SvgIcon) imageIcon;
