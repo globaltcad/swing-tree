@@ -1096,15 +1096,18 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  As a delegate to the underlying component, you can use this method to
-     *  conveniently get the tooltip of the component.
+     *  Exposes the tooltip {@link String} of the component or
+     *  an empty {@link String} if the component does not have a tooltip.
+     *  Note that this method will never return {@code null}.
      *  <p>
      *  See {@link JComponent#getToolTipText()} for more information.
      *  </p>
-     * @return The tooltip text.
+     * @return The tooltip text or an empty {@link String} if this component
+     *         does not have a tooltip, <b>but {@code null} is never returned</b>!
      */
     public final String getTooltip() {
-        return _component().getToolTipText();
+        String nullableToolTip = _component().getToolTipText();
+        return nullableToolTip == null ? "" : nullableToolTip;
     }
 
     /**
