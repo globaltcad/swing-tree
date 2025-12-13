@@ -1119,43 +1119,31 @@ final class StyleRenderer
             int imgHeight = style.height().orElse(iconBaseHeight);
 
             if ( fit != UI.FitComponent.NO && fit != UI.FitComponent.UNDEFINED ) {
-                if ( imageIcon instanceof SvgIcon) {
-                    // The SvgIcon does the fitting...
+                if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {
                     imgWidth  = style.width().orElse(componentWidth);
                     imgHeight = style.height().orElse(componentHeight);
-                } else {
-                    if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-                        imgWidth  = style.width().orElse(componentWidth);
-                        imgHeight = style.height().orElse(componentHeight);
-                    }
-                    if (
-                        fit == UI.FitComponent.WIDTH ||
-                        (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
-                        (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
-                    ) {
-                        imgWidth = style.width().orElse(componentWidth);
-                        double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;
-                        // We preserve the aspect ratio:
-                        imgHeight = (int) (imgWidth * aspectRatio);
-                    } if (
-                        fit == UI.FitComponent.HEIGHT ||
-                        (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
-                        (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
-                    ) {
-                        imgHeight = style.height().orElse(componentHeight);
-                        double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;
-                        // We preserve the aspect ratio:
-                        imgWidth = (int) (imgHeight * aspectRatio);
-                    }
+                }
+                if (
+                    fit == UI.FitComponent.WIDTH ||
+                    (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
+                    (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
+                ) {
+                    imgWidth = style.width().orElse(componentWidth);
+                    double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;
+                    // We preserve the aspect ratio:
+                    imgHeight = (int) (imgWidth * aspectRatio);
+                } if (
+                    fit == UI.FitComponent.HEIGHT ||
+                    (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
+                    (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
+                ) {
+                    imgHeight = style.height().orElse(componentHeight);
+                    double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;
+                    // We preserve the aspect ratio:
+                    imgWidth = (int) (imgHeight * aspectRatio);
                 }
                 imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
                 imgHeight = imgHeight >= 0 ? imgHeight : componentHeight;
-            }
-            if ( imageIcon instanceof SvgIcon ) {
-                SvgIcon   svgIcon = (SvgIcon) imageIcon;
-                Size size = svgIcon.getSvgSize();
-                imgWidth  = imgWidth  >= 0 ? imgWidth  : size.width().map(Number::intValue).orElse(0);
-                imgHeight = imgHeight >= 0 ? imgHeight : size.height().map(Number::intValue).orElse(0);
             }
             int x = style.horizontalOffset();
             int y = style.verticalOffset();
