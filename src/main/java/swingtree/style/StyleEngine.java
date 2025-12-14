@@ -73,10 +73,6 @@ final class StyleEngine
         return new StyleEngine(boxModelConf, componentConf, _layerCaches);
     }
 
-    StyleEngine withoutAnimationPainters() {
-        return new StyleEngine(_boxModelConf, _componentConf, _layerCaches);
-    }
-
     void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y )
     {
         // We remember if antialiasing was enabled before we render:

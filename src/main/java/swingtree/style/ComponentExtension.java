@@ -442,7 +442,6 @@ public final class ComponentExtension<C extends JComponent>
      *  as well as {@link Styler} based animations.
      */
     public void clearAnimations() {
-        _styleEngine = _styleEngine.withoutAnimationPainters();
         _styleSource = _styleSource.withoutAnimationStylers();
     }
 
