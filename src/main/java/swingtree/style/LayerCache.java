@@ -10,7 +10,6 @@ import swingtree.layout.Size;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -50,56 +49,53 @@ final class LayerCache
         return Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * DYNAMIC_CACHE_AGGRESSIVENESS());
     }
 
-    private static final Map<LayerRenderConf, CachedImage> _CACHE = new WeakHashMap<>();
+    private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
 
 
-    private final UI.Layer        _layer;
-    private @Nullable CachedImage _localCache;
-    private LayerRenderConf       _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-    private int                   _cacheHitsUntilAllocation;
-    private boolean               _isInitialized;
+    private final UI.Layer          _layer;
+    private @Nullable CachedImage   _localCache;
+    private Pooled<LayerRenderConf> _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private int                     _cacheHitsUntilAllocation;
+    private boolean                 _isInitialized;
 
 
     public LayerCache( UI.Layer layer ) {
         _layer                    = Objects.requireNonNull(layer);
-        _layerRenderData          = LayerRenderConf.none();
+        _layerRenderData          = new Pooled<>(LayerRenderConf.none());
         _cacheHitsUntilAllocation = -1;
         _isInitialized            = false;
     }
 
     LayerRenderConf getCurrentRenderInputData() {
-        return _layerRenderData;
+        return _layerRenderData.get();
     }
 
     public boolean hasBufferedImage() {
         return _localCache != null;
     }
 
-    private void _allocateOrGetCachedBuffer( LayerRenderConf layerRenderConf )
+    private void _allocateOrGetCachedBuffer( Pooled<LayerRenderConf> layerRenderConf )
     {
-        Map<LayerRenderConf, CachedImage> CACHE = _CACHE;
-
+        Map<Pooled<LayerRenderConf>, CachedImage> CACHE = _CACHE;
+        /*
+            We store a pooled ref as the key because this
+            key object is also the key in the global (weak) hash map based cache
+            whose reachability determines if the cached image is garbage collected or not!
+            So in order to avoid the cache being freed too early, we need to keep a strong
+            reference to the key object for all LayerCache instances that make use of the
+            corresponding cached image (the value of a particular key in the global cache).
+            And so a pooled object has a higher likely hood of being strongly referenced somewhere.
+        */
+        layerRenderConf = layerRenderConf.intern();
         CachedImage bufferedImage = CACHE.get(layerRenderConf);
 
         if ( bufferedImage == null ) {
-            Size size = layerRenderConf.boxModel().size();
-            bufferedImage = new CachedImage(size, layerRenderConf, _cacheHitsUntilAllocation);
+            Size size = layerRenderConf.get().boxModel().size();
+            bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
             CACHE.put(layerRenderConf, bufferedImage);
 
-            _layerRenderData = layerRenderConf;
         }
-        else {
-            // We keep a strong reference to the state so that the cached image is not garbage collected
-            _layerRenderData = bufferedImage.getKeyOrElse(layerRenderConf);
-            /*
-                The reason why we take the key stored in the cached image as a strong reference is because this
-                key object is also the key in the global (weak) hash map based cache
-                whose reachability determines if the cached image is garbage collected or not!
-                So in order to avoid the cache being freed too early, we need to keep a strong
-                reference to the key object for all LayerCache instances that make use of the
-                corresponding cached image (the value of a particular key in the global cache).
-            */
-        }
+        _layerRenderData = layerRenderConf;
 
         _localCache = bufferedImage;
     }
@@ -113,7 +109,7 @@ final class LayerCache
     public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            _layerRenderData = LayerRenderConf.none();
+            _layerRenderData = new Pooled<>(LayerRenderConf.none());
             return;
         }
 
@@ -132,7 +128,7 @@ final class LayerCache
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             _freeLocalCache();
-            _layerRenderData = newState;
+            _layerRenderData = new Pooled<>(newState).intern();
             return;
         }
 
@@ -152,23 +148,23 @@ final class LayerCache
         }
 
         if ( cacheIsFull ) {
-            _layerRenderData = newState;
+            _layerRenderData = new Pooled<>(newState).intern();
             return;
         }
 
         if ( newBufferNeeded )
-            _allocateOrGetCachedBuffer(newState);
+            _allocateOrGetCachedBuffer(new Pooled<>(newState));
     }
 
     public final void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
-        Size size = _layerRenderData.boxModel().size();
+        Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.width().orElse(0f) == 0f || size.height().orElse(0f) == 0f )
             return;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
-            renderer.accept(_layerRenderData, g);
+            renderer.accept(_layerRenderData.get(), g);
             return;
         }
 
@@ -183,7 +179,7 @@ final class LayerCache
                     It will need a few more hits to be ready...
                     So we just do normal rendering instead:
                 */
-                renderer.accept(_layerRenderData, g);
+                renderer.accept(_layerRenderData.get(), g);
                 return;
             }
             try {
@@ -193,7 +189,7 @@ final class LayerCache
                 log.debug(SwingTree.get().logMarker(), "Error while transferring configurations to the cached image graphics context.");
             }
             finally {
-                renderer.accept(_layerRenderData, g2);
+                renderer.accept(_layerRenderData.get(), g2);
                 g2.dispose();
             }
         }
@@ -298,14 +294,12 @@ final class LayerCache
     private static final class CachedImage
     {
         private final Supplier<BufferedImage>  _imageAllocator;
-        private WeakReference<LayerRenderConf> _key;
         private @Nullable BufferedImage        _image;
         private boolean                        _isRendered;
         private int                            _numberOfHitsUntilAllocation;
 
 
-        CachedImage( Size size, LayerRenderConf cacheKey, int numberOfHitsUntilAllocation ) {
-            _key                         = new WeakReference<>(cacheKey);
+        CachedImage( Size size, int numberOfHitsUntilAllocation ) {
             _isRendered                  = false;
             _imageAllocator              = () -> new BufferedImage(size.width().map(Number::intValue).orElse(1), size.height().map(Number::intValue).orElse(1), BufferedImage.TYPE_INT_ARGB);
             _image                       = null;
@@ -344,15 +338,6 @@ final class LayerCache
                 _image = _imageAllocator.get();
             _isRendered = true;
             return _image.createGraphics();
-        }
-
-        public LayerRenderConf getKeyOrElse( LayerRenderConf newFallbackKey ) {
-            LayerRenderConf key = _key.get();
-            if ( key == null ) {
-                _key = new WeakReference<>(newFallbackKey);
-                key = newFallbackKey;
-            }
-            return key;
         }
 
         public boolean isRendered() {

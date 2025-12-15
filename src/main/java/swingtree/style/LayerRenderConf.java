@@ -31,10 +31,6 @@ final class LayerRenderConf
     private final BaseColorConf  _baseColor;
     private final StyleConfLayer _layer;
 
-    private boolean _wasAlreadyHashed = false;
-    private int     _hashCode         = 0; // cached hash code
-
-
     private LayerRenderConf(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
@@ -89,12 +85,7 @@ final class LayerRenderConf
 
     @Override
     public int hashCode() {
-        if ( _wasAlreadyHashed )
-            return _hashCode;
-
-        _hashCode = Objects.hash(_boxModelConf, _baseColor, _layer);
-        _wasAlreadyHashed = true;
-        return _hashCode;
+        return Objects.hash(_boxModelConf, _baseColor, _layer);
     }
 
     @Override
