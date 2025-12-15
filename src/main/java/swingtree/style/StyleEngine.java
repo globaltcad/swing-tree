@@ -54,7 +54,7 @@ final class StyleEngine
     BoxModelConf getBoxModelConf() { return _boxModelConf.get(); }
 
     Optional<Shape> componentAreaIfCalculated( UI.ComponentArea area ) {
-        ComponentAreas _areas = ComponentAreas.of(_boxModelConf.get());
+        ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
         if ( _areas.areaExists(area) )
             return Optional.ofNullable(_areas.get(area));
         if ( area == UI.ComponentArea.BODY ) {
@@ -85,7 +85,7 @@ final class StyleEngine
             if ( !filter.equals(FilterConf.none()) ) {
                 // Location relative to the parent:
                 try {
-                    StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf.get());
+                    StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
                 } catch ( Exception ex ) {
                     log.error(SwingTree.get().logMarker(), "Exception while trying to apply and render parent filter!", ex);
                 }

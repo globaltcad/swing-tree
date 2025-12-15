@@ -23,39 +23,26 @@ import java.util.WeakHashMap;
  */
 final class ComponentAreas
 {
-    private static final Map<BoxModelConf, ComponentAreas> _CACHE = new WeakHashMap<>();
+    private static final Map<Pooled<BoxModelConf>, ComponentAreas> _CACHE = new WeakHashMap<>();
 
     private final LazyRef<Area>   _borderArea      = new LazyRef<>(ComponentAreas::_produceBorderArea);
     private final LazyRef<Area>   _interiorArea    = new LazyRef<>(ComponentAreas::_produceInteriorArea);
     private final LazyRef<Area>   _exteriorArea    = new LazyRef<>(ComponentAreas::_produceExteriorArea);
     private final LazyRef<Area>   _bodyArea        = new LazyRef<>(ComponentAreas::_produceBodyArea);
     private final LazyRef<Area[]> _borderEdgeAreas = new LazyRef<>((currentState, currentAreas) -> calculateEdgeBorderAreas(currentState));
+    private final BoxModelConf _sourceState;
 
-    private final WeakReference<BoxModelConf> _key;
-
-
-    static ComponentAreas of( BoxModelConf state ) {
-        return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state));
-    }
-
-    static BoxModelConf intern(BoxModelConf state ) {
-        ComponentAreas areas = _CACHE.get(state);
-        if ( areas != null ) {
-            BoxModelConf key = areas._key.get();
-            if ( key != null )
-                return key;
-        }
-        _CACHE.put(state, new ComponentAreas(state));
-        return state;
+    static ComponentAreas of( Pooled<BoxModelConf> state ) {
+        return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state.get()));
     }
 
 
     private ComponentAreas(BoxModelConf conf) {
-        _key = new WeakReference<>(conf);
+        _sourceState = conf;
     }
 
     public Shape get( UI.ComponentArea areaType ) {
-        BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
+        BoxModelConf boxModel = _sourceState;
         switch ( areaType ) {
             case BODY:
                 return _bodyArea.getFor(boxModel, this); // all - exterior == interior + border
@@ -76,8 +63,7 @@ final class ComponentAreas
     }
 
     public Area[] getEdgeAreas() {
-        BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
-        return _borderEdgeAreas.getFor(boxModel, this);
+        return _borderEdgeAreas.getFor(_sourceState, this);
     }
 
     public boolean areaExists(UI.ComponentArea area) {

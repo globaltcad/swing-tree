@@ -1416,9 +1416,9 @@ final class StyleRenderer
         Graphics2D    g2d,
         int offsetX,
         int offsetY,
-        BoxModelConf boxModelConf
+        Pooled<BoxModelConf> boxModelConf
     ) {
-        final Size       size   = boxModelConf.size();
+        final Size       size   = boxModelConf.get().size();
         final float      width  = size.width().orElse(0f);
         final float      height = size.height().orElse(0f);
         final Offset     center = filterConf.offset();
@@ -1461,7 +1461,7 @@ final class StyleRenderer
 
         Shape oldClip = g2d.getClip();
         try {
-            ComponentAreas areas = boxModelConf.areas();
+            ComponentAreas areas = ComponentAreas.of(boxModelConf);
             Shape newClip = areas.get(filterConf.area());
             g2d.setClip(newClip);
             g2d.drawImage(filtered, -offsetX, -offsetY, null);

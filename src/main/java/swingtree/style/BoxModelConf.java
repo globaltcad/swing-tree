@@ -113,10 +113,6 @@ final class BoxModelConf
         _size            = Objects.requireNonNull(size);
     }
 
-    ComponentAreas areas() {
-        return ComponentAreas.of(this);
-    }
-
     public Optional<Arc> topLeftArc() { return _topLeftArc.equals(Arc.none()) ? Optional.empty() : Optional.of(_topLeftArc); }
 
     public Optional<Arc> topRightArc() { return _topRightArc.equals(Arc.none()) ? Optional.empty() : Optional.of(_topRightArc); }
