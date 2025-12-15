@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  *  A wrapper designed for larger immutable value objects (typically config objects
  *  used as cache keys), which can be put to and retrieved from an internal
- *  object poll through its {@link #intern()} method. This is conceptionally
+ *  object poll through its {@link #intern()} method. This is conceptually
  *  identical to {@link String#intern()}...<br>
  *  In practice this is a wrapper over a value object, which extends the value semantics
  *  of the thing it wraps through composition but note that at the same time it has
