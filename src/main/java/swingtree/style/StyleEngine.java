@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,25 +20,25 @@ final class StyleEngine
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
     static StyleEngine create() {
-        return new StyleEngine(BoxModelConf.none(), ComponentConf.none(), null);
+        return new StyleEngine(new Pooled<>(BoxModelConf.none()), new Pooled<>(ComponentConf.none()), null);
     }
 
     static boolean IS_ANTIALIASING_ENABLED(){
         return UI.scale() < 2.25;
     }
 
-    private final BoxModelConf         _boxModelConf;
-    private final ComponentConf        _componentConf;
-    private final LayerCache[]         _layerCaches;
+    private final Pooled<BoxModelConf>  _boxModelConf;
+    private final Pooled<ComponentConf> _componentConf;
+    private final LayerCache[]          _layerCaches;
 
 
     private StyleEngine(
-        BoxModelConf           boxModelConf,
-        ComponentConf          componentConf,
+        Pooled<BoxModelConf>  boxModelConf,
+        Pooled<ComponentConf> componentConf,
         @Nullable LayerCache[] layerCaches // Null when the style engine is freshly created
     ) {
-        _boxModelConf      = Objects.requireNonNull(boxModelConf);
-        _componentConf     = Objects.requireNonNull(componentConf);
+        _boxModelConf  = Objects.requireNonNull(boxModelConf).intern();
+        _componentConf = Objects.requireNonNull(componentConf).intern();
         if ( layerCaches == null ) {
             layerCaches = new LayerCache[UI.Layer.values().length];
             for ( int i = 0; i < layerCaches.length; i++ )
@@ -50,27 +47,27 @@ final class StyleEngine
         _layerCaches = Objects.requireNonNull(layerCaches);
     }
 
-    ComponentConf getComponentConf() { return _componentConf; }
+    ComponentConf getComponentConf() { return _componentConf.get(); }
 
     LayerCache[] getLayerCaches() { return _layerCaches; }
 
-    BoxModelConf getBoxModelConf() { return _boxModelConf; }
+    BoxModelConf getBoxModelConf() { return _boxModelConf.get(); }
 
     Optional<Shape> componentAreaIfCalculated( UI.ComponentArea area ) {
-        ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
+        ComponentAreas _areas = ComponentAreas.of(_boxModelConf.get());
         if ( _areas.areaExists(area) )
             return Optional.ofNullable(_areas.get(area));
         if ( area == UI.ComponentArea.BODY ) {
-            if ( _componentConf.style().margin().isPositive() )
+            if ( _componentConf.get().style().margin().isPositive() )
                 return Optional.ofNullable(_areas.get(area));
-            if ( _componentConf.style().border().hasAnyNonZeroArcs() )
+            if ( _componentConf.get().style().border().hasAnyNonZeroArcs() )
                 return Optional.ofNullable(_areas.get(area));
         }
         return Optional.empty();
     }
 
     StyleEngine with( BoxModelConf boxModelConf, ComponentConf componentConf ) {
-        return new StyleEngine(boxModelConf, componentConf, _layerCaches);
+        return new StyleEngine(new Pooled<>(boxModelConf), new Pooled<>(componentConf), _layerCaches);
     }
 
     void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y )
@@ -84,11 +81,11 @@ final class StyleEngine
 
         // A component may have a filter on the parent:
         if ( parentRendering != null ) {
-            FilterConf filter = _componentConf.style().layers().filter();
+            FilterConf filter = _componentConf.get().style().layers().filter();
             if ( !filter.equals(FilterConf.none()) ) {
                 // Location relative to the parent:
                 try {
-                    StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
+                    StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf.get());
                 } catch ( Exception ex ) {
                     log.error(SwingTree.get().logMarker(), "Exception while trying to apply and render parent filter!", ex);
                 }
