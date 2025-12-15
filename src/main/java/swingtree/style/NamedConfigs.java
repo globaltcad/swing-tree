@@ -165,12 +165,16 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         else
             styleType += "=";
         if ( this.size() == 1 )
-            return String.valueOf(this.get(defaultName));
+            return stringOf(this.get(defaultName));
         else
             return this.namedStyles()
                     .stream()
-                    .map(e -> e.name() + "=" + e.style())
+                    .map(e -> e.name() + "=" + stringOf(e.style()))
                     .collect(Collectors.joining(", ", styleType+"[", "]"));
+    }
+
+    private String stringOf(@Nullable S style) {
+        return String.valueOf(style instanceof Pooled ? ((Pooled<?>)style).get() : style);
     }
 
     @Override
@@ -178,7 +182,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName()).append("[");
         for ( int i = 0; i < _styles.length; i++ ) {
-            sb.append(_styles[i].name()).append("=").append(_styles[i].style());
+            sb.append(_styles[i].name()).append("=").append(stringOf(_styles[i].style()));
             if ( i < _styles.length - 1 )
                 sb.append(", ");
         }

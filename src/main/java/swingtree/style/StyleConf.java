@@ -264,7 +264,7 @@ public final class StyleConf
     }
 
     List<NoiseConf> noises( UI.Layer layer ) {
-        return _layers.get(layer).noises().sortedByNames();
+        return _layers.get(layer).noises().sortedByNames().stream().map(Pooled::get).collect(Collectors.toList());
     }
 
     boolean hasVisibleNoisesOnLayer( UI.Layer layer ) {
@@ -300,7 +300,7 @@ public final class StyleConf
                 .map(StyleConfLayer::noises)
                 .flatMap( n -> n
                     .stylesStream()
-                    .map( noise -> noise.isOpaque() ? noise.area() : null )
+                    .map( noise -> noise.get().isOpaque() ? noise.get().area() : null )
                     .filter(Objects::nonNull)
                 )
                 .distinct()
@@ -378,7 +378,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
 
-    StyleConf _withNoises( UI.Layer layer, NamedConfigs<NoiseConf> noises ) {
+    StyleConf _withNoises( UI.Layer layer, NamedConfigs<Pooled<NoiseConf>> noises ) {
         Objects.requireNonNull(noises);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withNoises(noises)), _properties);
     }
@@ -441,14 +441,14 @@ public final class StyleConf
     StyleConf noise( UI.Layer layer, String noiseName, Configurator<NoiseConf> styler ) {
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
-        NoiseConf noise = _layers.get(layer).noises().find(noiseName).orElse(NoiseConf.none());
+        NoiseConf noise = _layers.get(layer).noises().find(noiseName).map(Pooled::get).orElse(NoiseConf.none());
         try {
             noise = styler.configure(noise);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to configure noise '{}' for layer '{}'", noiseName, layer, e);
         }
         // We clone the noise map:
-        NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, noise);
+        NamedConfigs<Pooled<NoiseConf>> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, new Pooled<>(noise));
         return _withNoises(layer, newNoises);
     }
 

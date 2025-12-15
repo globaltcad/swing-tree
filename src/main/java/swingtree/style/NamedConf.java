@@ -46,7 +46,7 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
                     "name="  + _name  +", "+
-                    "style=" + _style +
+                    "style=" + (_style instanceof Pooled ? ((Pooled<?>)_style).get() : _style) +
                 "]";
     }
 
@@ -57,6 +57,18 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
             if (simplifiedStyle == _style)
                 return this;
             return new NamedConf<>(_name, simplifiedStyle);
+        }
+        if ( _style instanceof Pooled ) {
+            Pooled<Object> pooled = (Pooled<Object>) _style;
+            pooled = pooled.map( it -> {
+                if ( it instanceof Simplifiable ) {
+                    return ((Simplifiable<S>)it).simplified();
+                }
+                return it;
+            });
+            pooled = pooled.intern();
+            if ( pooled != _style )
+                return new NamedConf<>(_name, (S)pooled);
         }
         return this;
     }

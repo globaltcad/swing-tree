@@ -102,7 +102,7 @@ final class LayerRenderConf
     @Override
     public String toString() {
         return getClass().getSimpleName()+"[" +
-                    "boxModel=" + _boxModelConf + ", " +
+                    "boxModel=" + _boxModelConf.get() + ", " +
                     "baseColor=" + _baseColor + ", " +
                     "layer=" + _layer +
                 ']';

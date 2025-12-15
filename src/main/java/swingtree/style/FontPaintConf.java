@@ -10,6 +10,7 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  *  An internal class that holds immutable configuration data
@@ -31,13 +32,13 @@ final class FontPaintConf
     public static FontPaintConf none() { return _NONE; }
 
     public static FontPaintConf of(
-            @Nullable Color        color,
-            @Nullable Paint        paint,
-            @Nullable NoiseConf    noise,
-            @Nullable GradientConf gradient
+            @Nullable Color             color,
+            @Nullable Paint             paint,
+            @Nullable Pooled<NoiseConf> noise,
+            @Nullable GradientConf      gradient
     ) {
         color    = StyleUtil.isUndefinedColor(color)    ? null : color;
-        noise    = NoiseConf.none().equals(noise)       ? null : noise;
+        noise    = Optional.ofNullable((noise != null && NoiseConf.none().equals(noise.get())) ? null : noise).map(Pooled::intern).orElse(null);
         gradient = GradientConf.none().equals(gradient) ? null : gradient;
         if ( color == null && paint == null && noise == null && gradient == null )
             return _NONE;
@@ -47,14 +48,14 @@ final class FontPaintConf
 
     private final @Nullable Color _color;
     private final @Nullable Paint _paint;
-    private final @Nullable NoiseConf _noise;
+    private final @Nullable Pooled<NoiseConf> _noise;
     private final @Nullable GradientConf _gradient;
 
 
     FontPaintConf(
         @Nullable Color color,
         @Nullable Paint paint,
-        @Nullable NoiseConf noise,
+        @Nullable Pooled<NoiseConf> noise,
         @Nullable GradientConf gradient
     ) {
         if ( color != null ) {
@@ -93,9 +94,9 @@ final class FontPaintConf
 
     FontPaintConf noise( Configurator<NoiseConf> noiseConfigurator ) {
         Objects.requireNonNull(noiseConfigurator);
-        NoiseConf noise = _noise == null ? NoiseConf.none() : _noise;
+        Pooled<NoiseConf> noise = _noise == null ? new Pooled<>(NoiseConf.none()) : _noise;
         try {
-            noise = noiseConfigurator.configure(noise);
+            noise = new Pooled<>(noiseConfigurator.configure(noise.get()));
             return of(null, null, noise, null);
         } catch ( Exception e ) {
             log.error(SwingTree.get().logMarker(), "Failed to apply noise configuration.", e);
