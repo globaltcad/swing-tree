@@ -709,26 +709,12 @@ public final class SvgIcon extends ImageIcon
             _paintIcon( c, g, x, y, width, height, preferredPlacement );
     }
 
+    @SuppressWarnings("DoNotCall")
     private Insets _determineInsetsForBorder( Border b, Component c )
     {
-        if ( b == null )
-            return ZERO_INSETS;
-
-        if ( b instanceof StyleAndAnimationBorder )
-            return ((StyleAndAnimationBorder<?>)b).getFullPaddingInsets();
-
-        // Compound border
-        if ( b instanceof javax.swing.border.CompoundBorder ) {
-            javax.swing.border.CompoundBorder cb = (javax.swing.border.CompoundBorder) b;
-            return cb.getOutsideBorder().getBorderInsets(c);
-        }
-
-        try {
-            return b.getBorderInsets(c);
-        } catch (Exception e) {
-            // Ignore
-        }
-        return ZERO_INSETS;
+        return LibraryInternalCrossPackageStyleUtil._onlyBorderInsetsOf(b, c)
+                                                    .logProblemsAsError()
+                                                    .orElse(ZERO_INSETS);
     }
 
     void paintIcon(
