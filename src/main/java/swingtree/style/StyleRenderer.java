@@ -1109,7 +1109,8 @@ final class StyleRenderer
         style.image().ifPresent( imageIcon -> {
             final UI.FitComponent fit          = style.fitMode();
             final UI.Placement placement       = style.placement();
-            final Outline      insets          = style.padding().plus(conf.boxModel().margin()).plus(conf.boxModel().widths());
+            final Outline      padding         = style.padding();
+            final Outline      insets          = conf.boxModel().margin().plus(conf.boxModel().widths());
             final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());
             final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());
             final int          iconBaseWidth   = imageIcon.getIconWidth();
@@ -1215,6 +1216,11 @@ final class StyleRenderer
                     default:
                         throw new IllegalArgumentException("Unknown placement: " + placement);
                 }
+                x += padding.left().orElse(0f).intValue();
+                y += padding.top().orElse(0f).intValue();
+                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());
+                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());
+
                 Image image;
                 if ( imageIcon instanceof SvgIcon) {
                     SvgIcon svgIcon = (SvgIcon) imageIcon;
