@@ -54,7 +54,7 @@ import java.util.function.Function;
 public final class SvgIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);
-    private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.MIN_DIM;
+    private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.UNDEFINED;
     private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
     private static final int             NO_SIZE               = -1;
     private static final Insets          ZERO_INSETS           = new Insets(0,0,0,0);
@@ -640,11 +640,17 @@ public final class SvgIcon extends ImageIcon
         final int scaledHeight = getIconHeight();
 
         UI.Placement preferredPlacement = _preferredPlacement;
+        UI.FitComponent fitComponent = _fitComponent;
 
+        // If this SVG has no special layout requirements, we render it exactly like expected in Swing:
+        boolean weNeedToRenderLikeTheInvokerWantsTo = preferredPlacement == UI.Placement.UNDEFINED &&
+                                                      fitComponent == UI.FitComponent.UNDEFINED;
+
+        if ( fitComponent == UI.FitComponent.UNDEFINED )
+            fitComponent = UI.FitComponent.MIN_DIM; // best default!
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
             preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
 
-        boolean placementAndScalingIsBothUndefined = preferredPlacement == UI.Placement.UNDEFINED && _fitComponent == UI.FitComponent.UNDEFINED;
         Insets insets = ZERO_INSETS;
 
         if ( c != null ) {
@@ -663,18 +669,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( scaledWidth < 0 || !placementAndScalingIsBothUndefined )
+            if ( scaledWidth < 0 || !weNeedToRenderLikeTheInvokerWantsTo )
                 x = insets.left;
 
-            if ( scaledHeight < 0 || !placementAndScalingIsBothUndefined )
+            if ( scaledHeight < 0 || !weNeedToRenderLikeTheInvokerWantsTo )
                 y = insets.top;
         }
 
         int width  = Math.max( scaledWidth,  c == null ? NO_SIZE : c.getWidth()  );
         int height = Math.max( scaledHeight, c == null ? NO_SIZE : c.getHeight() );
 
-        width  = scaledWidth  >= 0 && placementAndScalingIsBothUndefined ? scaledWidth  : width  - insets.right  - insets.left;
-        height = scaledHeight >= 0 && placementAndScalingIsBothUndefined ? scaledHeight : height - insets.bottom - insets.top ;
+        width  = scaledWidth  >= 0 && weNeedToRenderLikeTheInvokerWantsTo ? scaledWidth  : width  - insets.right  - insets.left;
+        height = scaledHeight >= 0 && weNeedToRenderLikeTheInvokerWantsTo ? scaledHeight : height - insets.bottom - insets.top ;
 
         if ( _widthUnit == Unit.PERCENTAGE ) {
             width = (int) (( width * _svgDocument.size().width ) / 100f);
@@ -706,7 +712,7 @@ public final class SvgIcon extends ImageIcon
             }
         }
         else
-            _paintIcon( c, g, x, y, width, height, preferredPlacement );
+            _paintIcon( c, g, x, y, width, height, preferredPlacement, fitComponent );
     }
 
     @SuppressWarnings("DoNotCall")
@@ -725,7 +731,10 @@ public final class SvgIcon extends ImageIcon
             int width,
             int height
     ) {
-        _paintIcon( c, g, x, y, width, height, _preferredPlacement);
+        UI.FitComponent fitComponent = _fitComponent;
+        if ( fitComponent == UI.FitComponent.UNDEFINED )
+            fitComponent = UI.FitComponent.MIN_DIM; // best default!
+        _paintIcon( c, g, x, y, width, height, _preferredPlacement, fitComponent);
     }
 
     private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
@@ -767,7 +776,8 @@ public final class SvgIcon extends ImageIcon
         final int areaY,
         final int areaWidth,
         final int areaHeight,
-        final UI.Placement preferredPlacement
+        final UI.Placement preferredPlacement,
+        final UI.FitComponent fitComponent
     ) {
         if ( _svgDocument == null )
             return;
@@ -794,8 +804,8 @@ public final class SvgIcon extends ImageIcon
 
         boolean isEffectivelyFitHeight = false;
         boolean isEffectivelyFitWidth = false;
-        if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {
-            if ( _fitComponent == UI.FitComponent.MIN_DIM ) {
+        if ( fitComponent == UI.FitComponent.MIN_DIM || fitComponent == UI.FitComponent.MAX_DIM ) {
+            if ( fitComponent == UI.FitComponent.MIN_DIM ) {
                  if (areaWidth < areaHeight) {
                     scaleX = (float) width / iconWidth;
                     scaleY = scaleX;
@@ -820,15 +830,15 @@ public final class SvgIcon extends ImageIcon
             }
         }
 
-        if ( _fitComponent == UI.FitComponent.WIDTH || _fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+        if ( fitComponent == UI.FitComponent.WIDTH || fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
             scaleX = (float) width / iconWidth;
         }
 
-        if ( _fitComponent == UI.FitComponent.HEIGHT || _fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+        if ( fitComponent == UI.FitComponent.HEIGHT || fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
             scaleY = (float) height / iconHeight;
         }
 
-        if ( _fitComponent == UI.FitComponent.NO || _fitComponent == UI.FitComponent.UNDEFINED ) {
+        if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
             scaleX = 1f;
             scaleY = 1f;
         }
@@ -839,7 +849,7 @@ public final class SvgIcon extends ImageIcon
         }
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
 
-        if ( _fitComponent == UI.FitComponent.NO || _fitComponent == UI.FitComponent.UNDEFINED ) {
+        if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
             final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
             final int newHeight  = iconHeight >= 0 ? iconHeight : (int) svgSize.height;
             viewBox = new ViewBox( x, y, newWidth, newHeight );
@@ -854,9 +864,9 @@ public final class SvgIcon extends ImageIcon
             return;
 
         if (
-            _fitComponent != UI.FitComponent.WIDTH &&
-            _fitComponent != UI.FitComponent.HEIGHT &&
-            _fitComponent != UI.FitComponent.WIDTH_AND_HEIGHT  &&
+            fitComponent != UI.FitComponent.WIDTH &&
+            fitComponent != UI.FitComponent.HEIGHT &&
+            fitComponent != UI.FitComponent.WIDTH_AND_HEIGHT  &&
             !isEffectivelyFitHeight &&
             !isEffectivelyFitWidth
         ) {
