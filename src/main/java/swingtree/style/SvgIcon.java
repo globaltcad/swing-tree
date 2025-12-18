@@ -731,7 +731,7 @@ public final class SvgIcon extends ImageIcon
         final Offset offset
     ) {
         UI.FitComponent fitComponent = _fitComponent;
-        if ( fitComponent == UI.FitComponent.UNDEFINED )
+        if ( fitComponent == UI.FitComponent.UNDEFINED && !_size.width().isPresent() && !_size.height().isPresent() )
             fitComponent = UI.FitComponent.MIN_DIM; // best default!
         _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent);
     }
