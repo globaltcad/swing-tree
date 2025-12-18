@@ -913,7 +913,7 @@ public final class SvgIcon extends ImageIcon
                 viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );
                 break;
             case TOP_RIGHT:
-                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, y, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY, viewBox.width, viewBox.height );
                 break;
             case BOTTOM_LEFT:
                 viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
