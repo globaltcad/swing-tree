@@ -10,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
+import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
 import javax.swing.*;
@@ -707,12 +708,12 @@ public final class SvgIcon extends ImageIcon
                 g.drawImage(_cache, x, y, width, height, null);
             else {
                 _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                paintIcon(c, _cache.getGraphics(), 0, 0, width, height );
+                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.of(0, 0) );
                 g.drawImage(_cache, x, y, width, height, null);
             }
         }
         else
-            _paintIcon( c, g, x, y, width, height, preferredPlacement, fitComponent );
+            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent );
     }
 
     @SuppressWarnings("DoNotCall")
@@ -724,17 +725,15 @@ public final class SvgIcon extends ImageIcon
     }
 
     void paintIcon(
-            final @Nullable Component c,
-            final Graphics g,
-            int x,
-            int y,
-            int width,
-            int height
+        final @Nullable Component c,
+        final Graphics g,
+        final Bounds bounds,
+        final Offset offset
     ) {
         UI.FitComponent fitComponent = _fitComponent;
         if ( fitComponent == UI.FitComponent.UNDEFINED )
             fitComponent = UI.FitComponent.MIN_DIM; // best default!
-        _paintIcon( c, g, x, y, width, height, _preferredPlacement, fitComponent);
+        _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent);
     }
 
     private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
@@ -772,13 +771,16 @@ public final class SvgIcon extends ImageIcon
     private void _paintIcon(
         final @Nullable Component c,
         final Graphics g,
-        final int areaX,
-        final int areaY,
-        final int areaWidth,
-        final int areaHeight,
+        final Bounds bounds,
+        final Offset offset,
         final UI.Placement preferredPlacement,
         final UI.FitComponent fitComponent
     ) {
+        final int areaX = Math.round(bounds.location().x() + offset.x());
+        final int areaY = Math.round(bounds.location().y() + offset.y());
+        final int areaWidth  = bounds.size().width().map(Math::round).orElse(0);
+        final int areaHeight = bounds.size().height().map(Math::round).orElse(0);
+                
         if ( _svgDocument == null )
             return;
 

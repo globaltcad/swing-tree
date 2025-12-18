@@ -269,6 +269,8 @@ public final class ImageConf implements Simplifiable<ImageConf>
     
     int verticalOffset() { return (int) _offset.y(); }
 
+    Offset offset() { return _offset; }
+
     UI.ComponentArea clipArea() { return _clipArea; }
 
     /**

@@ -1144,7 +1144,7 @@ final class StyleRenderer
                 UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;
                 svgIcon.withFitComponent(localFit)
                         .withPreferredPlacement(localPlacement)
-                        .paintIcon(null, g2d, areaX, areaY, componentWidth, componentHeight);
+                        .paintIcon(null, g2d, Bounds.of(areaX, areaY, componentWidth, componentHeight), style.offset());
             } else {
                 int imgWidth  = style.width().orElse(iconBaseWidth);
                 int imgHeight = style.height().orElse(iconBaseHeight);
