@@ -1,16 +1,16 @@
 package examples.simple;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import examples.FancyTextField;
 import sprouts.Event;
 import sprouts.Var;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.animation.LifeTime;
 import swingtree.api.IconDeclaration;
 import swingtree.style.SvgIcon;
 
 import javax.swing.*;
-import java.awt.Color;
+import java.awt.*;
 import java.time.DayOfWeek;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -111,6 +111,26 @@ public class NamedFieldsView extends JPanel {
                 UI.box("fill")
                 .add("alignx right, shrinkx", UI.label("Menu Item:").peek(design::fitLeft))
                 .add("growx, pushx",
+                    UI.checkBoxMenuItem("<- The plus is displayed here!").isSelectedIf(true)
+                    .withIcon(IconDeclaration.of("img/plus.svg").withSize(-1, 14))
+                )
+            )
+            .add(
+                UI.box("fill, debug")
+                .add("alignx right, shrinkx", UI.label("Menu Item:").peek(design::fitLeft))
+                .add("growx, pushx",
+                    UI.checkBoxMenuItem("<- The plus is displayed here!").isSelectedIf(true)
+                    .withStyle(delegate -> delegate
+                        .image(UI.Layer.FOREGROUND, config -> config
+                            .image(IconDeclaration.of("img/plus.svg").withSize(-1, 14)).horizontalOffset( - delegate.component().getWidth() / 2 )
+                        )
+                    )
+                )
+            )
+            .add(
+                UI.box("fill")
+                .add("alignx right, shrinkx", UI.label("Menu Item:").peek(design::fitLeft))
+                .add("growx, pushx",
                     UI.menuItem("<- The T is displayed here!", svgT.find(ImageIcon.class).get())
                 )
             )
@@ -118,7 +138,7 @@ public class NamedFieldsView extends JPanel {
                 UI.box("fill")
                 .add("alignx right, shrinkx", UI.label("Menu Item:").peek(design::fitLeft))
                 .add("growx, pushx",
-                    UI.menuItem("<- The T is displayed here!", pngT.withSize(16,16).find().get())
+                    UI.menuItem("<- The png is displayed here!", pngT.withSize(16,16).find().get())
                 )
             )
             .add(
@@ -223,14 +243,15 @@ public class NamedFieldsView extends JPanel {
     public static void main(String... args) {
         // First we set nimbus as the look and feel.
         // This is not necessary, but it looks better.
+        SwingTree.initialiseUsing(it->it.isUiScaleFactorEnabled(false));
         try {
-            //for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-            //    if ( "Nimbus".equals(info.getName()) ) {
-            //        javax.swing.UIManager.setLookAndFeel(info.getClassName());
-            //        break;
-            //    }
-            //}
-            FlatLightLaf.setup();
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ( "Nimbus".equals(info.getName()) ) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+            //FlatLightLaf.setup();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -2779,7 +2779,7 @@ class Individual_Component_Styling_Spec extends Specification
             var seed = Utility.loadImage("img/seed.png")
             var trees = Utility.loadImage("img/trees.png")
             var ui =
-                    UI.textField("I am fancy! :)").withLayout("fill, ins 0").withPrefSize(190, 25)
+                    UI.textField("text").withLayout("fill, ins 0").withPrefSize(190, 25)
                     .withStyle( it -> it
                         .font("Ubuntu", 16)
                         .paddingLeft(26)
@@ -2814,7 +2814,7 @@ class Individual_Component_Styling_Spec extends Specification
                     );
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JTextField), "components/heavily-customized-text-field.png", 93.7) > 93.7
+            Utility.similarityBetween(ui.get(JTextField), "components/heavily-customized-text-field.png", 95) > 95
 
         where :
             uiScale << [1, 2, 3]

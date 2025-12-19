@@ -1,11 +1,16 @@
 package swingtree.style;
 
 import com.google.errorprone.annotations.DoNotCall;
+import org.jspecify.annotations.Nullable;
+import sprouts.Result;
+import swingtree.UI;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import java.awt.*;
 import java.util.Objects;
 
 
@@ -15,6 +20,37 @@ import java.util.Objects;
  */
 @Deprecated
 public final class LibraryInternalCrossPackageStyleUtil {
+    private static final Insets ZERO_INSETS = new Insets(0,0,0,0);
+
+    @DoNotCall @Deprecated
+    public static Result<Insets> _onlyBorderInsetsOf(@Nullable Border b, java.awt.Component c) {
+        return Result.ofTry(Insets.class, ()->{
+            if ( b == null )
+                return ZERO_INSETS;
+
+            if ( b instanceof StyleAndAnimationBorder )
+                return ((StyleAndAnimationBorder<?>)b).getFullPaddingInsets();
+
+            // Compound border
+            if ( b instanceof javax.swing.border.CompoundBorder ) {
+                javax.swing.border.CompoundBorder cb = (javax.swing.border.CompoundBorder) b;
+                return cb.getOutsideBorder().getBorderInsets(c);
+            }
+            Insets insets = b.getBorderInsets(c);
+            if ( _needsNimbusBorderInsetsCorrection(c) ) {
+                int min = Math.min(insets.top, Math.min(insets.left, Math.min(insets.bottom, insets.right)));
+                insets = new Insets(min, min, min, min);
+            }
+            return insets;
+        });
+    }
+
+    private static boolean _needsNimbusBorderInsetsCorrection(Component c) {
+        if ( UI.currentLookAndFeel() == UI.LookAndFeel.NIMBUS ) {
+            return c instanceof JButton || c instanceof JToggleButton;
+        }
+        return false;
+    }
 
     @DoNotCall @Deprecated
     public static void applyFontConfAlignmentsToComponent(FontConf fontConf, JComponent owner) {

@@ -117,12 +117,12 @@ class SvgIcon_Spec extends Specification
             icon5 = icon5.toString()
 
         expect : 'They all have the expected String representations:'
-            icon.matches( /SvgIcon\[width=\?, height=\?, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon1.matches( /SvgIcon\[width=\?, height=13, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon.matches( /SvgIcon\[width=\?, height=\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon1.matches( /SvgIcon\[width=\?, height=13, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
             icon2.matches( /SvgIcon\[width=12, height=\?, fitComponent=NO, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon3.matches( /SvgIcon\[width=27, height=16, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon4.matches( /SvgIcon\[width=31, height=31, fitComponent=MIN_DIM, preferredPlacement=BOTTOM_RIGHT, doc=.*\]/ )
-            icon5.matches( /SvgIcon\[width=24, height=24, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon3.matches( /SvgIcon\[width=27, height=16, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon4.matches( /SvgIcon\[width=31, height=31, fitComponent=UNDEFINED, preferredPlacement=BOTTOM_RIGHT, doc=.*\]/ )
+            icon5.matches( /SvgIcon\[width=24, height=24, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
 
     }
 
