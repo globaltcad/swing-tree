@@ -38,10 +38,12 @@ final class FontPaintConf
             @Nullable GradientConf      gradient
     ) {
         color    = StyleUtil.isUndefinedColor(color)    ? null : color;
-        noise    = Optional.ofNullable((noise != null && NoiseConf.none().equals(noise.get())) ? null : noise).map(Pooled::intern).orElse(null);
+        noise    = noise == null || NoiseConf.none().equals(noise.get()) ? null : noise;
         gradient = GradientConf.none().equals(gradient) ? null : gradient;
         if ( color == null && paint == null && noise == null && gradient == null )
             return _NONE;
+        if ( noise != null )
+            noise = noise.intern();
 
         return new FontPaintConf(color, paint, noise, gradient);
     }
