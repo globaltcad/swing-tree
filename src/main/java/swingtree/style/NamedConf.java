@@ -61,7 +61,7 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
         if ( _style instanceof Pooled ) {
             Pooled<Object> pooled = (Pooled<Object>) _style;
             pooled = pooled.map( it -> {
-                if ( it instanceof Simplifiable ) {
+                if ( it instanceof Simplifiable<?> ) {
                     return ((Simplifiable<S>)it).simplified();
                 }
                 return it;

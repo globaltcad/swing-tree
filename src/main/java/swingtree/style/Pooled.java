@@ -74,12 +74,9 @@ final class Pooled<V> {
 
     @Override
     public int hashCode() {
-        Integer hash = _hashCache.get();
-        if ( hash != null )
-            return hash;
-        hash = Objects.hashCode(value);
-        _hashCache.set(hash);
-        return hash;
+        return Objects.requireNonNull(
+            _hashCache.updateAndGet(h -> h != null ? h : Objects.hashCode(value))
+        );
     }
 
     @Override
