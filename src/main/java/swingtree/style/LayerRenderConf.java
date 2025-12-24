@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  *  An immutable snapshot of essential component state needed for rendering
  *  the style of a particular component layer using the {@link StyleRenderer} and its
- *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, Graphics2D)} ethod. <br>
+ *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, Graphics2D)} method. <br>
  *  This (and all of its parts) is immutable to use it as a basis for caching.
  *  When the config changes compared to the previous one, the image buffer based
  *  render cache is being invalidated and the component is rendered again
@@ -27,20 +27,16 @@ final class LayerRenderConf
 
     public static LayerRenderConf none() { return _NONE; }
 
-    private final BoxModelConf   _boxModelConf;
-    private final BaseColorConf  _baseColor;
+    private final Pooled<BoxModelConf> _boxModelConf;
+    private final BaseColorConf _baseColor;
     private final StyleConfLayer _layer;
-
-    private boolean _wasAlreadyHashed = false;
-    private int     _hashCode         = 0; // cached hash code
-
 
     private LayerRenderConf(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
         StyleConfLayer layers
     ) {
-        _boxModelConf = ComponentAreas.intern(Objects.requireNonNull(boxModelConf));
+        _boxModelConf = new Pooled<>(Objects.requireNonNull(boxModelConf)).intern();
         _baseColor    = Objects.requireNonNull(base);
         _layer        = Objects.requireNonNull(layers);
     }
@@ -78,23 +74,18 @@ final class LayerRenderConf
                 );
     }
 
-    BoxModelConf boxModel() { return _boxModelConf; }
+    BoxModelConf boxModel() { return _boxModelConf.get(); }
 
     BaseColorConf baseColors() { return _baseColor; }
 
     StyleConfLayer layer() { return _layer; }
 
-    ComponentAreas areas() { return _boxModelConf.areas(); }
+    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
 
 
     @Override
     public int hashCode() {
-        if ( _wasAlreadyHashed )
-            return _hashCode;
-
-        _hashCode = Objects.hash(_boxModelConf, _baseColor, _layer);
-        _wasAlreadyHashed = true;
-        return _hashCode;
+        return Objects.hash(_boxModelConf, _baseColor, _layer);
     }
 
     @Override
@@ -111,7 +102,7 @@ final class LayerRenderConf
     @Override
     public String toString() {
         return getClass().getSimpleName()+"[" +
-                    "boxModel=" + _boxModelConf + ", " +
+                    "boxModel=" + _boxModelConf.get() + ", " +
                     "baseColor=" + _baseColor + ", " +
                     "layer=" + _layer +
                 ']';

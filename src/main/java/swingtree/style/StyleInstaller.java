@@ -212,7 +212,7 @@ final class StyleInstaller<C extends JComponent>
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.images().any(named -> named.style().image().isPresent() || named.style().primer().isPresent() ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.texts().any(named -> !TextConf.none().equals(named.style()) ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.painters().any(named -> !Painter.none().equals(named.style().painter()) ) )
-               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.noises().any(named -> named.style().colors().length > 0 ) )
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.noises().any(named -> named.style().get().colors().length > 0 ) )
             );
 
         final boolean weNeedToInstallTheCustomUI = isStyled && (
@@ -223,7 +223,7 @@ final class StyleInstaller<C extends JComponent>
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.images().any(named -> named.style().image().isPresent() || named.style().primer().isPresent() ) )
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.painters().any(named -> !Painter.none().equals(named.style().painter()) ) )
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.texts().any(named -> !TextConf.none().equals(named.style()) ) )
-               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.noises().any(named -> named.style().colors().length > 0 ) )
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.noises().any(named -> named.style().get().colors().length > 0 ) )
             );
 
         if ( weNeedToInstallTheCustomBorder ) {

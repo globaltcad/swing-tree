@@ -27,7 +27,7 @@ import java.util.function.Function;
 final class StyleRenderer
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
-    private static final Map<NoiseConf, Map<Point2D,NoiseGradientPaint>> _NOISE_PAINT_CACHE = new WeakHashMap<>();
+    private static final Map<Pooled<NoiseConf>, Map<Point2D,NoiseGradientPaint>> _NOISE_PAINT_CACHE = new WeakHashMap<>();
 
     private StyleRenderer() {} // Un-instantiable!
 
@@ -72,8 +72,8 @@ final class StyleRenderer
             }
 
         // 3. Noise, which is a simple way to add a bit of texture to a component:
-        for ( NoiseConf noise : conf.layer().noises().sortedByNames() )
-            if ( noise.colors().length > 0 ) {
+        for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() )
+            if ( noise.get().colors().length > 0 ) {
                 _renderNoise( noise, conf, g2d );
             }
 
@@ -720,26 +720,26 @@ final class StyleRenderer
     }
 
     private static void _renderNoise(
-        final NoiseConf       noise,
+        final Pooled<NoiseConf> noise,
         final LayerRenderConf conf,
         final Graphics2D g2d
     ) {
         Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
-        Shape areaToFill = conf.areas().get(noise.area());
+        Shape areaToFill = conf.areas().get(noise.get().area());
         g2d.setPaint(noisePaint);
         g2d.fill(areaToFill);
     }
 
     static Paint _createNoisePaint(
         final BoxModelConf   boxModel,
-        final NoiseConf      noise
+        final Pooled<NoiseConf> noise
     ) {
-        if ( noise.colors().length == 1 ) {
-            return noise.colors()[0];
+        if ( noise.get().colors().length == 1 ) {
+            return noise.get().colors()[0];
         } else {
             Size dimensions = boxModel.size();
             Outline insets = Outline.none();
-            switch ( noise.boundary() ) {
+            switch ( noise.get().boundary() ) {
                 case OUTER_TO_EXTERIOR:
                     insets = Outline.none(); break;
                 case EXTERIOR_TO_BORDER:
@@ -755,8 +755,8 @@ final class StyleRenderer
             }
 
             Point2D.Float corner1 = new Point2D.Float(
-                                        insets.left().orElse(0f) + noise.offset().x(),
-                                        insets.top().orElse(0f) + noise.offset().y()
+                                        insets.left().orElse(0f) + noise.get().offset().x(),
+                                        insets.top().orElse(0f) + noise.get().offset().y()
                                     );
 
             return _createNoisePaint(corner1, noise);
@@ -765,7 +765,7 @@ final class StyleRenderer
 
     private static Paint _createNoisePaint(
         final Point2D.Float  center,
-        final NoiseConf      noise
+        final Pooled<NoiseConf> noise
     ) {
         Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.get(noise);
         if ( cachedPaints == null ) {
@@ -777,10 +777,10 @@ final class StyleRenderer
             return paint;
         }
 
-        final Color[] colors    = noise.colors();
-        final float[] fractions = _fractionsFrom(colors, noise.fractions());
-        float rotation = noise.rotation();
-        Scale scale = noise.scale();
+        final Color[] colors    = noise.get().colors();
+        final float[] fractions = _fractionsFrom(colors, noise.get().fractions());
+        float rotation = noise.get().rotation();
+        Scale scale = noise.get().scale();
         float scaleX = scale.x();
         float scaleY = scale.y();
 
@@ -791,7 +791,7 @@ final class StyleRenderer
                         rotation,
                         fractions,
                         colors,
-                        noise.function()
+                        noise.get().function()
                     );
         cachedPaints.put(center, paint);
         return paint;
@@ -1416,9 +1416,9 @@ final class StyleRenderer
         Graphics2D    g2d,
         int offsetX,
         int offsetY,
-        BoxModelConf boxModelConf
+        Pooled<BoxModelConf> boxModelConf
     ) {
-        final Size       size   = boxModelConf.size();
+        final Size       size   = boxModelConf.get().size();
         final float      width  = size.width().orElse(0f);
         final float      height = size.height().orElse(0f);
         final Offset     center = filterConf.offset();
@@ -1461,7 +1461,7 @@ final class StyleRenderer
 
         Shape oldClip = g2d.getClip();
         try {
-            ComponentAreas areas = boxModelConf.areas();
+            ComponentAreas areas = ComponentAreas.of(boxModelConf);
             Shape newClip = areas.get(filterConf.area());
             g2d.setClip(newClip);
             g2d.drawImage(filtered, -offsetX, -offsetY, null);
