@@ -83,6 +83,7 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Creates an {@link SvgIcon} from a resource path and a custom size.
      * @param path The path to the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
      */
@@ -92,6 +93,11 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Creates an {@link SvgIcon} from the supplied URL pointing to an SVG document.
+     *  If parsing the SVG document fails, an empty icon will be created, which does not render anything.
+     *  The resulting icon will have an unknown size, placement and fit policy,
+     *  meaning that it will be rendered according to the size of the component
+     *  it is rendered into (see {@link #paintIcon(Component, Graphics, int, int)}).
      * @param svgUrl The URL to the SVG document.
      */
     public static SvgIcon at( URL svgUrl ) {
@@ -135,6 +141,16 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Reads the SVG document from the supplied input stream and creates
+     *  an {@link SvgIcon} from it. If parsing the SVG document fails,
+     *  an empty icon will be created, which does not render anything.
+     *  The resulting icon will have an unknown size, placement and fit policy,
+     *  meaning that it will be rendered according to the size of the component
+     *  it is rendered into (see {@link #paintIcon(Component, Graphics, int, int)}).
+     *  If you want to customize the size, layout and placement of the icon, consider creating
+     *  derived versions using the {@link #withIconWidth(int)}, {@link #withIconHeight(int)},
+     *  {@link #withIconSize(int, int)}, {@link #withFitComponent(UI.FitComponent)} and
+     *  {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param stream The input stream supplying the text data of the SVG document.
      */
     public static SvgIcon of( InputStream stream ) {
@@ -143,6 +159,16 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Reads the SVG document from the supplied input stream and creates
+     *  an {@link SvgIcon} from it with a custom width and height defined
+     *  by the supplied {@link Size}.<br>
+     *  If parsing the SVG document fails, an empty icon will be created, which does not render anything.
+     *  The resulting icon will have the given size, but the default placement
+     *  and fit policy, meaning that it will be rendered according to the size of the component
+     *  it is rendered into (see {@link #paintIcon(Component, Graphics, int, int)}).<br>
+     *  If you want to customize the layout and placement of the icon, consider creating
+     *  derived versions using the {@link #withFitComponent(UI.FitComponent)} and
+     *  {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param stream The input stream supplying the text data of the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
      */
@@ -152,6 +178,13 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Allows you to create an {@link SvgIcon} from an already loaded {@link SVGDocument}.
+     *  The icon will be created with an unknown size, meaning that it will be rendered
+     *  according to the size of the component it is rendered into (see {@link #paintIcon(Component, Graphics, int, int)}).
+     *  If you want to customize the size, layout and placement of the icon, consider creating
+     *  derived versions using the {@link #withIconWidth(int)}, {@link #withIconHeight(int)},
+     *  {@link #withIconSize(int, int)}, {@link #withFitComponent(UI.FitComponent)} and
+     *  {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
@@ -160,6 +193,11 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     * Allows you to create an {@link SvgIcon} from an already loaded {@link SVGDocument}
+     * with a custom width and height defined by the supplied {@link Size}.<br>
+     * If you want to customize the layout and placement of the icon, consider creating
+     * derived versions using the {@link #withFitComponent(UI.FitComponent)} and
+     * {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      * @param size The size of the icon in the form of a {@link Size}.
      */
