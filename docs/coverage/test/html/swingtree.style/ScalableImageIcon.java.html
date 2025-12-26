@@ -91,9 +91,9 @@ public final class ScalableImageIcon extends ImageIcon
 <span class="fc" id="L91">            Image originalImage = original.getImage();</span>
 <span class="fc bfc" id="L92" title="All 4 branches covered.">            if ( width == original.getIconWidth() &amp;&amp; height == original.getIconHeight() )</span>
 <span class="fc" id="L93">                return original;</span>
-<span class="pc bpc" id="L94" title="2 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
+<span class="pc bpc" id="L94" title="1 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
                 // We create the smallest possible image to avoid exceptions.
-<span class="nc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
+<span class="fc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
             }
 <span class="fc" id="L98">            return new ImageIcon(originalImage.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH));</span>
 <span class="nc" id="L99">        } catch ( Exception e ) {</span>
@@ -230,7 +230,7 @@ public final class ScalableImageIcon extends ImageIcon
 
     @Override
     public int hashCode() {
-<span class="nc" id="L233">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
+<span class="fc" id="L233">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
     }
 
 }

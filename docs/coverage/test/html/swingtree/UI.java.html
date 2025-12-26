@@ -562,6 +562,69 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
+     *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
+     *  should be scaled to fit the
+     *  dimensions of the component that it is being rendered into, like for example
+     *  through the {@link SvgIcon#paintIcon(java.awt.Component, Graphics, int, int)} method.&lt;br&gt;
+     *  You may want to pass constants of this enum to {@link ImageConf#fitMode(FitComponent)} as
+     *  part of using the style API:&lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *  UI.button(&quot;Click Me!&quot;)
+     *  .withStyle( conf -&gt; conf
+     *      .image( img -&gt; img
+     *          .image(SvgIcon.at(&quot;my/path/to.svg&quot;))
+     *          .fitMode(UI.FitComponent.MIN_DIM)
+     *      )
+     *      .border(12, UI.Color.LIGHTSTEELBLUE)
+     *      .borderRadius(8)
+     *  )
+     *  }&lt;/pre&gt;
+     * @see ImageConf#fitMode(FitComponent)
+     * @see SvgIcon#withFitComponent(FitComponent)
+     */
+<span class="fc" id="L585">    @Immutable</span>
+    public enum FitComponent implements UIEnum&lt;FitComponent&gt; {
+        /**
+         *  How a particular image is supposed to fit a component is unknown
+         *  and &lt;b&gt;may be overridden by another policy or default behavior&lt;/b&gt;.
+         *  Typically, this is equivalent to {@link #NO}.
+         */
+<span class="fc" id="L592">        UNDEFINED,</span>
+        /**
+         *  Fit the image or icon to the width of a component by scaling the icon/image along the x-axis.
+         *  &lt;b&gt;This implies that you only want to scale the width of an image/icon, but not its height,
+         *  so this constant may change the inherent aspect ratio of a targeted image/icon!&lt;/b&gt;
+         */
+<span class="fc" id="L598">        WIDTH,</span>
+        /**
+         *  Fit the image or icon to the height of a component by scaling the icon/image along the y-axis.
+         *  &lt;b&gt;This implies that you only want to scale the height of an image/icon, but not its width,
+         *  so this constant may change the inherent aspect ratio of a targeted image/icon!&lt;/b&gt;
+         */
+<span class="fc" id="L604">        HEIGHT,</span>
+        /**
+         *  Fit the image or icon to both fit the width and height of the component.
+         *  &lt;b&gt;Note that this may change the inherent aspect ratio of the image in
+         *  favor of the components aspect ratio...&lt;/b&gt;
+         */
+<span class="fc" id="L610">        WIDTH_AND_HEIGHT,</span>
+        /**
+         *  Fit the image to the largest dimension of the component.
+         */
+<span class="fc" id="L614">        MAX_DIM,</span>
+        /**
+         *  Fit the image to the smallest dimension of the component,
+         *  while preserving the aspect ratio of the image.
+         */
+<span class="fc" id="L619">        MIN_DIM,</span>
+        /**
+         *  Do not fit the image to the component,
+         *  while preserving the aspect ratio of the image.
+         */
+<span class="fc" id="L624">        NO</span>
+    }
+
+    /**
      *  Defines the areas of a component, which is used
      *  to by the {@link ImageConf} to determine if and how an image should be clipped.
      *  Pass instances of this to {@link ImageConf#clipTo(swingtree.UI.ComponentArea)} to configure the clipping behaviour
@@ -589,10 +652,10 @@ public final class UI extends UIFactoryMethods
      *      &lt;/li&gt;
      *  &lt;/ul&gt;
      */
-<span class="fc" id="L592">    @Immutable</span>
+<span class="fc" id="L655">    @Immutable</span>
     public enum ComponentArea implements UIEnum&lt;ComponentArea&gt;
     {
-<span class="fc" id="L595">        ALL, EXTERIOR, BORDER, INTERIOR, BODY</span>
+<span class="fc" id="L658">        ALL, EXTERIOR, BORDER, INTERIOR, BODY</span>
     }
 
     /**
@@ -617,30 +680,30 @@ public final class UI extends UIFactoryMethods
      *     &lt;/li&gt;
      * &lt;/ul&gt;
      */
-<span class="fc" id="L620">    @Immutable</span>
+<span class="fc" id="L683">    @Immutable</span>
     public enum ComponentBoundary implements UIEnum&lt;ComponentBoundary&gt; {
         /**
          * The outermost boundary of the component, including any margin that might be applied.
          */
-<span class="fc" id="L625">        OUTER_TO_EXTERIOR, // The outermost boundary of the component.</span>
+<span class="fc" id="L688">        OUTER_TO_EXTERIOR, // The outermost boundary of the component.</span>
         /**
          * The boundary located after the margin but before the border. This wraps the {@link ComponentArea#BODY}.
          */
-<span class="fc" id="L629">        EXTERIOR_TO_BORDER, // After the margin, before the border.</span>
+<span class="fc" id="L692">        EXTERIOR_TO_BORDER, // After the margin, before the border.</span>
         /**
          * The boundary located after the border but before the padding. It represents the edge of the component's interior.
          */
-<span class="fc" id="L633">        BORDER_TO_INTERIOR, // After the border, before the padding.</span>
+<span class="fc" id="L696">        BORDER_TO_INTERIOR, // After the border, before the padding.</span>
         /**
          * The boundary located after the padding.
          * It represents the innermost boundary of the component, where the actual content of the component begins,
          * like for example the contents of a {@link JPanel} or {@link JScrollPane}.
          */
-<span class="fc" id="L639">        INTERIOR_TO_CONTENT, // After the padding, before the content.</span>
+<span class="fc" id="L702">        INTERIOR_TO_CONTENT, // After the padding, before the content.</span>
         /**
          * The center point of the component.
          */
-<span class="fc" id="L643">        CENTER_TO_CONTENT, // The center of the component.</span>
+<span class="fc" id="L706">        CENTER_TO_CONTENT, // The center of the component.</span>
     }
 
     /**
@@ -649,10 +712,10 @@ public final class UI extends UIFactoryMethods
      *  &lt;br&gt;
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(swingtree.UI.ComponentOrientation)}.
      */
-<span class="fc" id="L652">    @Immutable</span>
+<span class="fc" id="L715">    @Immutable</span>
     public enum ComponentOrientation implements UIEnum&lt;ComponentOrientation&gt;
     {
-<span class="fc" id="L655">        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT</span>
+<span class="fc" id="L718">        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT</span>
     }
 
     /**
@@ -673,18 +736,18 @@ public final class UI extends UIFactoryMethods
      *  See {@link UIForAnyWindow#withOnCloseOperation(swingtree.UI.OnWindowClose)} for more
      *  information about the usage of this enum.
      */
-<span class="nc" id="L676">    @Immutable</span>
+<span class="nc" id="L739">    @Immutable</span>
     public enum OnWindowClose implements UIEnum&lt;OnWindowClose&gt;
     {
-<span class="nc" id="L679">        DISPOSE, HIDE, DO_NOTHING;</span>
+<span class="nc" id="L742">        DISPOSE, HIDE, DO_NOTHING;</span>
 
         public int forSwing() {
-<span class="nc bnc" id="L682" title="All 4 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L683">                case DISPOSE:     return WindowConstants.DISPOSE_ON_CLOSE;</span>
-<span class="nc" id="L684">                case HIDE:        return WindowConstants.HIDE_ON_CLOSE;</span>
-<span class="nc" id="L685">                case DO_NOTHING:  return WindowConstants.DO_NOTHING_ON_CLOSE;</span>
+<span class="nc bnc" id="L745" title="All 4 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L746">                case DISPOSE:     return WindowConstants.DISPOSE_ON_CLOSE;</span>
+<span class="nc" id="L747">                case HIDE:        return WindowConstants.HIDE_ON_CLOSE;</span>
+<span class="nc" id="L748">                case DO_NOTHING:  return WindowConstants.DO_NOTHING_ON_CLOSE;</span>
             }
-<span class="nc" id="L687">            throw new RuntimeException();</span>
+<span class="nc" id="L750">            throw new RuntimeException();</span>
         }
     }
 
@@ -697,38 +760,38 @@ public final class UI extends UIFactoryMethods
      *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
      *  and {@link ComponentStyleDelegate#layout(Layout)}).
      */
-<span class="nc" id="L700">    @Immutable</span>
+<span class="nc" id="L763">    @Immutable</span>
     public enum Axis implements UIEnum&lt;Axis&gt;
     {
         /**
          * Specifies that something is laid out left to right.
          */
-<span class="nc" id="L706">        X,</span>
+<span class="nc" id="L769">        X,</span>
         /**
          * Specifies that something is laid out top to bottom.
          */
-<span class="nc" id="L710">        Y,</span>
+<span class="nc" id="L773">        Y,</span>
         /**
          * Specifies that something is laid out in the direction of
          * a line of text as determined by the target container's
          * {@code ComponentOrientation} property.
          */
-<span class="nc" id="L716">        LINE,</span>
+<span class="nc" id="L779">        LINE,</span>
         /**
          * Specifies that something is laid out in the direction that
          * lines flow across a page as determined by the target container's
          * {@code ComponentOrientation} property.
          */
-<span class="nc" id="L722">        PAGE;</span>
+<span class="nc" id="L785">        PAGE;</span>
 
         public int forBoxLayout() {
-<span class="nc bnc" id="L725" title="All 5 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L726">                case X:    return BoxLayout.X_AXIS;</span>
-<span class="nc" id="L727">                case Y:    return BoxLayout.Y_AXIS;</span>
-<span class="nc" id="L728">                case LINE: return BoxLayout.LINE_AXIS;</span>
-<span class="nc" id="L729">                case PAGE: return BoxLayout.PAGE_AXIS;</span>
+<span class="nc bnc" id="L788" title="All 5 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L789">                case X:    return BoxLayout.X_AXIS;</span>
+<span class="nc" id="L790">                case Y:    return BoxLayout.Y_AXIS;</span>
+<span class="nc" id="L791">                case LINE: return BoxLayout.LINE_AXIS;</span>
+<span class="nc" id="L792">                case PAGE: return BoxLayout.PAGE_AXIS;</span>
             }
-<span class="nc" id="L731">            throw new RuntimeException();</span>
+<span class="nc" id="L794">            throw new RuntimeException();</span>
         }
     }
 
@@ -737,19 +800,19 @@ public final class UI extends UIFactoryMethods
      *  &lt;br&gt;
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)}.
      */
-<span class="fc" id="L740">    @Immutable</span>
+<span class="fc" id="L803">    @Immutable</span>
     public enum FontStyle implements UIEnum&lt;FontStyle&gt;
     {
-<span class="fc" id="L743">        PLAIN, BOLD, ITALIC, BOLD_ITALIC;</span>
+<span class="fc" id="L806">        PLAIN, BOLD, ITALIC, BOLD_ITALIC;</span>
 
         int toAWTFontStyle() {
-<span class="pc bpc" id="L746" title="1 of 5 branches missed.">            switch ( this ) {</span>
-<span class="fc" id="L747">                case PLAIN:        return java.awt.Font.PLAIN;</span>
-<span class="fc" id="L748">                case BOLD:         return java.awt.Font.BOLD;</span>
-<span class="fc" id="L749">                case ITALIC:       return java.awt.Font.ITALIC;</span>
-<span class="fc" id="L750">                case BOLD_ITALIC:  return java.awt.Font.BOLD + java.awt.Font.ITALIC;</span>
+<span class="pc bpc" id="L809" title="1 of 5 branches missed.">            switch ( this ) {</span>
+<span class="fc" id="L810">                case PLAIN:        return java.awt.Font.PLAIN;</span>
+<span class="fc" id="L811">                case BOLD:         return java.awt.Font.BOLD;</span>
+<span class="fc" id="L812">                case ITALIC:       return java.awt.Font.ITALIC;</span>
+<span class="fc" id="L813">                case BOLD_ITALIC:  return java.awt.Font.BOLD + java.awt.Font.ITALIC;</span>
             }
-<span class="nc" id="L752">            throw new RuntimeException();</span>
+<span class="nc" id="L815">            throw new RuntimeException();</span>
         }
     }
 
@@ -759,30 +822,30 @@ public final class UI extends UIFactoryMethods
      * These constants are a direct mapping to the constants defined in the {@link TransferHandler} class
      * as well as the {@link java.awt.dnd.DnDConstants} class.
      */
-<span class="nc" id="L762">    @Immutable</span>
+<span class="nc" id="L825">    @Immutable</span>
     public enum DragAction implements UIEnum&lt;DragAction&gt;
     {
         /**
          * An &lt;code&gt;int&lt;/code&gt; representing no transfer action.
          */
-<span class="nc" id="L768">        NONE,</span>
+<span class="nc" id="L831">        NONE,</span>
         /**
          * An &lt;code&gt;int&lt;/code&gt; representing a &amp;quot;copy&amp;quot; transfer action.
          * This value is used when data is copied to a clipboard
          * or copied elsewhere in a drag and drop operation.
          */
-<span class="nc" id="L774">        COPY,</span>
+<span class="nc" id="L837">        COPY,</span>
         /**
          * An &lt;code&gt;int&lt;/code&gt; representing a &amp;quot;move&amp;quot; transfer action.
          * This value is used when data is moved to a clipboard (i.e. a cut)
          * or moved elsewhere in a drag and drop operation.
          */
-<span class="nc" id="L780">        MOVE,</span>
+<span class="nc" id="L843">        MOVE,</span>
         /**
          * An &lt;code&gt;int&lt;/code&gt; representing a source action capability of either
          * &amp;quot;copy&amp;quot; or &amp;quot;move&amp;quot;.
          */
-<span class="nc" id="L785">        COPY_OR_MOVE,</span>
+<span class="nc" id="L848">        COPY_OR_MOVE,</span>
         /**
          * An &lt;code&gt;int&lt;/code&gt; representing a &amp;quot;link&amp;quot; transfer action.
          * This value is used to specify that data should be linked in a drag
@@ -790,17 +853,17 @@ public final class UI extends UIFactoryMethods
          *
          * @see java.awt.dnd.DnDConstants#ACTION_LINK
          */
-<span class="nc" id="L793">        LINK;</span>
+<span class="nc" id="L856">        LINK;</span>
 
         public int toIntCode() {
-<span class="nc bnc" id="L796" title="All 6 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L797">                case NONE:        return TransferHandler.NONE;</span>
-<span class="nc" id="L798">                case COPY:        return TransferHandler.COPY;</span>
-<span class="nc" id="L799">                case MOVE:        return TransferHandler.MOVE;</span>
-<span class="nc" id="L800">                case COPY_OR_MOVE:return TransferHandler.COPY_OR_MOVE;</span>
-<span class="nc" id="L801">                case LINK:        return TransferHandler.LINK;</span>
+<span class="nc bnc" id="L859" title="All 6 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L860">                case NONE:        return TransferHandler.NONE;</span>
+<span class="nc" id="L861">                case COPY:        return TransferHandler.COPY;</span>
+<span class="nc" id="L862">                case MOVE:        return TransferHandler.MOVE;</span>
+<span class="nc" id="L863">                case COPY_OR_MOVE:return TransferHandler.COPY_OR_MOVE;</span>
+<span class="nc" id="L864">                case LINK:        return TransferHandler.LINK;</span>
             }
-<span class="nc" id="L803">            throw new RuntimeException();</span>
+<span class="nc" id="L866">            throw new RuntimeException();</span>
         }
 
         /**
@@ -809,7 +872,7 @@ public final class UI extends UIFactoryMethods
          *  @return {@code true} if this enum action is the same as the given {@code action}, {@code false} otherwise.
          */
         public boolean is( int action ) {
-<span class="nc bnc" id="L812" title="All 2 branches missed.">            return (action &amp; toIntCode()) != 0;</span>
+<span class="nc bnc" id="L875" title="All 2 branches missed.">            return (action &amp; toIntCode()) != 0;</span>
         }
     }
 
@@ -817,12 +880,12 @@ public final class UI extends UIFactoryMethods
      *  Set of enum instances defining common types of Swing look and feels.
      *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
      */
-<span class="fc" id="L820">    @Immutable</span>
+<span class="fc" id="L883">    @Immutable</span>
     public enum LookAndFeel implements UIEnum&lt;LookAndFeel&gt; {
-<span class="fc" id="L822">        OTHER,</span>
-<span class="fc" id="L823">        METAL,</span>
-<span class="fc" id="L824">        FLAT_LAF,</span>
-<span class="fc" id="L825">        NIMBUS;</span>
+<span class="fc" id="L885">        OTHER,</span>
+<span class="fc" id="L886">        METAL,</span>
+<span class="fc" id="L887">        FLAT_LAF,</span>
+<span class="fc" id="L888">        NIMBUS;</span>
     }
 
     /**
@@ -842,16 +905,16 @@ public final class UI extends UIFactoryMethods
      */
     public static LookAndFeel currentLookAndFeel() {
         try {
-<span class="fc" id="L845">            String laf = UIManager.getLookAndFeel().getClass().getName();</span>
-<span class="pc bpc" id="L846" title="1 of 2 branches missed.">            if ( laf.contains(&quot;FlatLaf&quot;) ) return LookAndFeel.FLAT_LAF;</span>
-<span class="fc bfc" id="L847" title="All 2 branches covered.">            if ( laf.contains(&quot;Nimbus&quot;)  ) return LookAndFeel.NIMBUS;</span>
-<span class="fc bfc" id="L848" title="All 2 branches covered.">            if ( laf.contains(&quot;Metal&quot;)   ) return LookAndFeel.METAL;</span>
+<span class="fc" id="L908">            String laf = UIManager.getLookAndFeel().getClass().getName();</span>
+<span class="pc bpc" id="L909" title="1 of 2 branches missed.">            if ( laf.contains(&quot;FlatLaf&quot;) ) return LookAndFeel.FLAT_LAF;</span>
+<span class="fc bfc" id="L910" title="All 2 branches covered.">            if ( laf.contains(&quot;Nimbus&quot;)  ) return LookAndFeel.NIMBUS;</span>
+<span class="fc bfc" id="L911" title="All 2 branches covered.">            if ( laf.contains(&quot;Metal&quot;)   ) return LookAndFeel.METAL;</span>
         }
-<span class="nc" id="L850">        catch (Exception e) {</span>
-<span class="nc" id="L851">            log.warn(SwingTree.get().logMarker(), &quot;Failed to determine current look and feel.&quot;, e);</span>
-<span class="fc" id="L852">        }</span>
+<span class="nc" id="L913">        catch (Exception e) {</span>
+<span class="nc" id="L914">            log.warn(SwingTree.get().logMarker(), &quot;Failed to determine current look and feel.&quot;, e);</span>
+<span class="fc" id="L915">        }</span>
 
-<span class="fc" id="L854">        return LookAndFeel.OTHER;</span>
+<span class="fc" id="L917">        return LookAndFeel.OTHER;</span>
     }
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -862,16 +925,23 @@ public final class UI extends UIFactoryMethods
      *  to scale the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D} graphics context.
      *  The second one is look and feel / client code dependent scaling, which is what this library uses.
      *  &lt;p&gt;
-     *  The factor returned by this method is determined by SwingTree
-     *  automatically to ensure that the UI is DPI aware.
-     *  All the SwingTree styles are scaled using this factor.
-     *  Use this factor to scale your {@link Graphics2D} based painting operations.
-     *  For configuring the scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
+     *  The float based scaling factor returned by this method can be used as a multiplier in order
+     *  to scale something from &quot;developer pixels&quot; to &quot;component pixels&quot; / &quot;look and feel pixels&quot;.
+     *  Conversely, by dividing a number using this factor, you convert something from &quot;component pixels&quot;
+     *  to platform-agnostic &quot;developer pixel&quot;.&lt;br&gt;
+     *  The scaling factor is computed by SwingTree automatically based on the system font.
+     *  Anything you do through the SwingTree API, will be scaled for you,&lt;br&gt;
+     *  but if you write code against raw Swing, you may need to use this scale factor
+     *  to ensure consistent scaling support across screens with varying DPI.
+     *  Most commonly, you will need to do manual scaling when defining component dimensions
+     *  or to scale custom {@link Graphics2D} based painting operations.
+     *  &lt;br&gt;
+     *  For configuring a manual scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
      *  or {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
      *
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
      */
-<span class="fc" id="L874">    public static float scale() { return SwingTree.get().getUiScaleFactor(); }</span>
+<span class="fc" id="L944">    public static float scale() { return SwingTree.get().getUiScaleFactor(); }</span>
 
     /**
      * Multiplies the given float value by the user scale factor.
@@ -881,31 +951,33 @@ public final class UI extends UIFactoryMethods
      * @return The scaled float value.
      */
     public static float scale( float value ) {
-<span class="fc" id="L884">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="fc bfc" id="L885" title="All 2 branches covered.">        return ( scaleFactor == 1 ? value : (value * scaleFactor) );</span>
+<span class="fc" id="L954">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="fc bfc" id="L955" title="All 2 branches covered.">        return ( scaleFactor == 1 ? value : (value * scaleFactor) );</span>
     }
 
     /**
-     * Multiplies the given double value by the user scale factor.
+     * Converts a double in &quot;developer pixel size&quot; to &quot;Look and Feel / component pixel size&quot;,
+     * by multiplying the given double value with the user scale factor.
      * See {@link swingtree.SwingTree} for more information about how the user scale factor is determined.
      *
-     * @param value The double value to scale.
+     * @param value The double value to scale from developer pixel size to component pixel size.
      * @return The scaled double value.
      */
     public static double scale( double value ) {
-<span class="fc" id="L896">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="pc bpc" id="L897" title="1 of 2 branches missed.">        return ( scaleFactor == 1 ? value : (value * scaleFactor) );</span>
+<span class="nc" id="L967">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L968" title="All 2 branches missed.">        return ( scaleFactor == 1 ? value : (value * scaleFactor) );</span>
     }
 
     /**
-     * Multiplies the given int value by the user scale factor and rounds the result.
+     * Converts an int representing &quot;developer pixel size&quot; to &quot;Look and Feel / component pixel size&quot;,
+     * by multiplying the given int value with the user &quot;scale factor&quot; and then rounding the result.
      * See {@link swingtree.SwingTree} for more information about how the user scale factor is determined.
      * @param value The int value to scale.
      * @return The scaled int value.
      */
     public static int scale( int value ) {
-<span class="fc" id="L907">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="fc bfc" id="L908" title="All 2 branches covered.">        return ( scaleFactor == 1 ? value : Math.round( value * scaleFactor ) );</span>
+<span class="fc" id="L979">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="fc bfc" id="L980" title="All 2 branches covered.">        return ( scaleFactor == 1 ? value : Math.round( value * scaleFactor ) );</span>
     }
 
     /**
@@ -917,8 +989,8 @@ public final class UI extends UIFactoryMethods
      * @return The scaled and rounded down value.
      */
     public int scaleRoundedDown( int value ) {
-<span class="nc" id="L920">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L921" title="All 2 branches missed.">        return ( scaleFactor == 1 ? value : (int) (value * scaleFactor) );</span>
+<span class="nc" id="L992">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L993" title="All 2 branches missed.">        return ( scaleFactor == 1 ? value : (int) (value * scaleFactor) );</span>
     }
 
     /**
@@ -929,8 +1001,13 @@ public final class UI extends UIFactoryMethods
      * @return The unscaled float value.
      */
     public static float unscale( float value ) {
-<span class="fc" id="L932">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="fc bfc" id="L933" title="All 2 branches covered.">        return ( scaleFactor == 1f ? value : (value / scaleFactor) );</span>
+<span class="fc" id="L1004">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="fc bfc" id="L1005" title="All 2 branches covered.">        return ( scaleFactor == 1f ? value : (value / scaleFactor) );</span>
+    }
+
+    public static Dimension unscale( Dimension size ) {
+<span class="nc" id="L1009">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L1010" title="All 2 branches missed.">        return ( scaleFactor == 1f ? size : new Dimension(unscale(size.width), unscale(size.height)) );</span>
     }
 
     /**
@@ -940,8 +1017,8 @@ public final class UI extends UIFactoryMethods
      * @return The unscaled int value.
      */
     public static int unscale( int value ) {
-<span class="nc" id="L943">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L944" title="All 2 branches missed.">        return ( scaleFactor == 1f ? value : Math.round( value / scaleFactor ) );</span>
+<span class="fc" id="L1020">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="fc bfc" id="L1021" title="All 2 branches covered.">        return ( scaleFactor == 1f ? value : Math.round( value / scaleFactor ) );</span>
     }
 
     /**
@@ -952,10 +1029,10 @@ public final class UI extends UIFactoryMethods
      * @param g The graphics context to scale.
      */
     public static void scale( Graphics2D g ) {
-<span class="nc" id="L955">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L956" title="All 2 branches missed.">        if ( scaleFactor != 1f )</span>
-<span class="nc" id="L957">            g.scale( scaleFactor, scaleFactor );</span>
-<span class="nc" id="L958">    }</span>
+<span class="nc" id="L1032">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L1033" title="All 2 branches missed.">        if ( scaleFactor != 1f )</span>
+<span class="nc" id="L1034">            g.scale( scaleFactor, scaleFactor );</span>
+<span class="nc" id="L1035">    }</span>
 
     /**
      * Scales the given dimension with the user scale factor.
@@ -969,13 +1046,13 @@ public final class UI extends UIFactoryMethods
      * @return The scaled dimension.
      */
     public static Dimension scale( Dimension dimension ) {
-<span class="fc" id="L972">        Objects.requireNonNull(dimension);</span>
-<span class="fc" id="L973">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="fc bfc" id="L974" title="All 2 branches covered.">        return ( scaleFactor == 1f)</span>
-<span class="fc" id="L975">                ? dimension</span>
-<span class="pc bpc" id="L976" title="1 of 2 branches missed.">                : (dimension instanceof UIResource</span>
-<span class="nc" id="L977">                    ? new DimensionUIResource( UI.scale( dimension.width ), UI.scale( dimension.height ) )</span>
-<span class="fc" id="L978">                    : new Dimension          ( UI.scale( dimension.width ), UI.scale( dimension.height ) ));</span>
+<span class="fc" id="L1049">        Objects.requireNonNull(dimension);</span>
+<span class="fc" id="L1050">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="fc bfc" id="L1051" title="All 2 branches covered.">        return ( scaleFactor == 1f)</span>
+<span class="fc" id="L1052">                ? dimension</span>
+<span class="pc bpc" id="L1053" title="1 of 2 branches missed.">                : (dimension instanceof UIResource</span>
+<span class="nc" id="L1054">                    ? new DimensionUIResource( UI.scale( dimension.width ), UI.scale( dimension.height ) )</span>
+<span class="fc" id="L1055">                    : new Dimension          ( UI.scale( dimension.width ), UI.scale( dimension.height ) ));</span>
     }
 
     /**
@@ -988,13 +1065,13 @@ public final class UI extends UIFactoryMethods
      * @return The scaled rectangle.
      */
     public static Rectangle scale( Rectangle rectangle ) {
-<span class="nc" id="L991">        Objects.requireNonNull(rectangle);</span>
-<span class="nc" id="L992">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L993" title="All 2 branches missed.">        return ( scaleFactor == 1f )</span>
-<span class="nc" id="L994">                ? rectangle</span>
-<span class="nc" id="L995">                : new Rectangle(</span>
-<span class="nc" id="L996">                        UI.scale( rectangle.x ),     UI.scale( rectangle.y ),</span>
-<span class="nc" id="L997">                        UI.scale( rectangle.width ), UI.scale( rectangle.height )</span>
+<span class="nc" id="L1068">        Objects.requireNonNull(rectangle);</span>
+<span class="nc" id="L1069">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L1070" title="All 2 branches missed.">        return ( scaleFactor == 1f )</span>
+<span class="nc" id="L1071">                ? rectangle</span>
+<span class="nc" id="L1072">                : new Rectangle(</span>
+<span class="nc" id="L1073">                        UI.scale( rectangle.x ),     UI.scale( rectangle.y ),</span>
+<span class="nc" id="L1074">                        UI.scale( rectangle.width ), UI.scale( rectangle.height )</span>
                     );
     }
 
@@ -1009,21 +1086,21 @@ public final class UI extends UIFactoryMethods
      * @return The scaled rectangle.
      */
     public static RoundRectangle2D scale( RoundRectangle2D rectangle ) {
-<span class="fc" id="L1012">        Objects.requireNonNull(rectangle);</span>
-<span class="fc" id="L1013">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="fc bfc" id="L1014" title="All 2 branches covered.">        if ( scaleFactor == 1f )</span>
-<span class="fc" id="L1015">            return rectangle;</span>
-<span class="pc bpc" id="L1016" title="1 of 2 branches missed.">        if ( rectangle instanceof RoundRectangle2D.Float )</span>
-<span class="nc" id="L1017">            return new RoundRectangle2D.Float(</span>
-<span class="nc" id="L1018">                    (float) UI.scale( rectangle.getX() ),        (float) UI.scale( rectangle.getY() ),</span>
-<span class="nc" id="L1019">                    (float) UI.scale( rectangle.getWidth() ),    (float) UI.scale( rectangle.getHeight() ),</span>
-<span class="nc" id="L1020">                    (float) UI.scale( rectangle.getArcWidth() ), (float) UI.scale( rectangle.getArcHeight() )</span>
+<span class="nc" id="L1089">        Objects.requireNonNull(rectangle);</span>
+<span class="nc" id="L1090">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L1091" title="All 2 branches missed.">        if ( scaleFactor == 1f )</span>
+<span class="nc" id="L1092">            return rectangle;</span>
+<span class="nc bnc" id="L1093" title="All 2 branches missed.">        if ( rectangle instanceof RoundRectangle2D.Float )</span>
+<span class="nc" id="L1094">            return new RoundRectangle2D.Float(</span>
+<span class="nc" id="L1095">                    (float) UI.scale( rectangle.getX() ),        (float) UI.scale( rectangle.getY() ),</span>
+<span class="nc" id="L1096">                    (float) UI.scale( rectangle.getWidth() ),    (float) UI.scale( rectangle.getHeight() ),</span>
+<span class="nc" id="L1097">                    (float) UI.scale( rectangle.getArcWidth() ), (float) UI.scale( rectangle.getArcHeight() )</span>
                 );
         else
-<span class="fc" id="L1023">            return new RoundRectangle2D.Double(</span>
-<span class="fc" id="L1024">                    UI.scale( rectangle.getX() ),        UI.scale( rectangle.getY() ),</span>
-<span class="fc" id="L1025">                    UI.scale( rectangle.getWidth() ),    UI.scale( rectangle.getHeight() ),</span>
-<span class="fc" id="L1026">                    UI.scale( rectangle.getArcWidth() ), UI.scale( rectangle.getArcHeight() )</span>
+<span class="nc" id="L1100">            return new RoundRectangle2D.Double(</span>
+<span class="nc" id="L1101">                    UI.scale( rectangle.getX() ),        UI.scale( rectangle.getY() ),</span>
+<span class="nc" id="L1102">                    UI.scale( rectangle.getWidth() ),    UI.scale( rectangle.getHeight() ),</span>
+<span class="nc" id="L1103">                    UI.scale( rectangle.getArcWidth() ), UI.scale( rectangle.getArcHeight() )</span>
                 );
     }
 
@@ -1034,19 +1111,19 @@ public final class UI extends UIFactoryMethods
      * @return The scaled ellipse.
      */
     public static Ellipse2D scale( Ellipse2D ellipse ) {
-<span class="nc" id="L1037">        Objects.requireNonNull(ellipse);</span>
-<span class="nc" id="L1038">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L1039" title="All 2 branches missed.">        if ( scaleFactor == 1f)</span>
-<span class="nc" id="L1040">            return ellipse;</span>
-<span class="nc bnc" id="L1041" title="All 2 branches missed.">        if ( ellipse instanceof Ellipse2D.Float )</span>
-<span class="nc" id="L1042">            return new Ellipse2D.Float(</span>
-<span class="nc" id="L1043">                    (float) UI.scale( ellipse.getX() ), (float) UI.scale( ellipse.getY() ),</span>
-<span class="nc" id="L1044">                    (float) UI.scale( ellipse.getWidth() ), (float) UI.scale( ellipse.getHeight() )</span>
+<span class="nc" id="L1114">        Objects.requireNonNull(ellipse);</span>
+<span class="nc" id="L1115">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L1116" title="All 2 branches missed.">        if ( scaleFactor == 1f)</span>
+<span class="nc" id="L1117">            return ellipse;</span>
+<span class="nc bnc" id="L1118" title="All 2 branches missed.">        if ( ellipse instanceof Ellipse2D.Float )</span>
+<span class="nc" id="L1119">            return new Ellipse2D.Float(</span>
+<span class="nc" id="L1120">                    (float) UI.scale( ellipse.getX() ), (float) UI.scale( ellipse.getY() ),</span>
+<span class="nc" id="L1121">                    (float) UI.scale( ellipse.getWidth() ), (float) UI.scale( ellipse.getHeight() )</span>
                 );
         else
-<span class="nc" id="L1047">            return new Ellipse2D.Double(</span>
-<span class="nc" id="L1048">                    UI.scale( ellipse.getX() ), UI.scale( ellipse.getY() ),</span>
-<span class="nc" id="L1049">                    UI.scale( ellipse.getWidth() ), UI.scale( ellipse.getHeight() )</span>
+<span class="nc" id="L1124">            return new Ellipse2D.Double(</span>
+<span class="nc" id="L1125">                    UI.scale( ellipse.getX() ), UI.scale( ellipse.getY() ),</span>
+<span class="nc" id="L1126">                    UI.scale( ellipse.getWidth() ), UI.scale( ellipse.getHeight() )</span>
                 );
     }
 
@@ -1061,13 +1138,13 @@ public final class UI extends UIFactoryMethods
      * @return The scaled insets.
      */
     public static Insets scale( Insets insets ) {
-<span class="nc" id="L1064">        Objects.requireNonNull(insets);</span>
-<span class="nc" id="L1065">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
-<span class="nc bnc" id="L1066" title="All 2 branches missed.">        return ( scaleFactor == 1f )</span>
-<span class="nc" id="L1067">                ? insets</span>
-<span class="nc bnc" id="L1068" title="All 2 branches missed.">                : (insets instanceof UIResource</span>
-<span class="nc" id="L1069">                    ? new InsetsUIResource( UI.scale( insets.top ), UI.scale( insets.left ), UI.scale( insets.bottom ), UI.scale( insets.right ) )</span>
-<span class="nc" id="L1070">                    : new Insets          ( UI.scale( insets.top ), UI.scale( insets.left ), UI.scale( insets.bottom ), UI.scale( insets.right ) ));</span>
+<span class="nc" id="L1141">        Objects.requireNonNull(insets);</span>
+<span class="nc" id="L1142">        float scaleFactor = SwingTree.get().getUiScaleFactor();</span>
+<span class="nc bnc" id="L1143" title="All 2 branches missed.">        return ( scaleFactor == 1f )</span>
+<span class="nc" id="L1144">                ? insets</span>
+<span class="nc bnc" id="L1145" title="All 2 branches missed.">                : (insets instanceof UIResource</span>
+<span class="nc" id="L1146">                    ? new InsetsUIResource( UI.scale( insets.top ), UI.scale( insets.left ), UI.scale( insets.bottom ), UI.scale( insets.right ) )</span>
+<span class="nc" id="L1147">                    : new Insets          ( UI.scale( insets.top ), UI.scale( insets.left ), UI.scale( insets.bottom ), UI.scale( insets.right ) ));</span>
     }
 
     private UI(){ super(); } // This is a static API
@@ -1090,12 +1167,12 @@ public final class UI extends UIFactoryMethods
      * @see #runNow
      */
     public static void run( Runnable runnable ) {
-<span class="fc" id="L1093">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="fc bfc" id="L1094" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L1095">            SwingUtilities.invokeLater(runnable);</span>
+<span class="fc" id="L1170">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="fc bfc" id="L1171" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L1172">            SwingUtilities.invokeLater(runnable);</span>
         else
-<span class="fc" id="L1097">            runnable.run();</span>
-<span class="fc" id="L1098">    }</span>
+<span class="fc" id="L1174">            runnable.run();</span>
+<span class="fc" id="L1175">    }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
@@ -1121,9 +1198,9 @@ public final class UI extends UIFactoryMethods
      * @see #runNow
      */
     public static void runLater( Runnable runnable ) {
-<span class="fc" id="L1124">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="fc" id="L1125">        SwingUtilities.invokeLater(runnable);</span>
-<span class="fc" id="L1126">    }</span>
+<span class="fc" id="L1201">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="fc" id="L1202">        SwingUtilities.invokeLater(runnable);</span>
+<span class="fc" id="L1203">    }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
@@ -1150,12 +1227,12 @@ public final class UI extends UIFactoryMethods
      * @see #runNow
      */
     public static void runLater( int delay, Runnable runnable ) {
-<span class="nc" id="L1153">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="nc" id="L1154">        Timer timer = new Timer( delay, e -&gt; { runnable.run(); } );</span>
-<span class="nc" id="L1155">        timer.setRepeats(false); // Execute only once</span>
-<span class="nc" id="L1156">        timer.setInitialDelay(delay);</span>
-<span class="nc" id="L1157">        timer.start();</span>
-<span class="nc" id="L1158">    }</span>
+<span class="nc" id="L1230">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="nc" id="L1231">        Timer timer = new Timer( delay, e -&gt; { runnable.run(); } );</span>
+<span class="nc" id="L1232">        timer.setRepeats(false); // Execute only once</span>
+<span class="nc" id="L1233">        timer.setInitialDelay(delay);</span>
+<span class="nc" id="L1234">        timer.start();</span>
+<span class="nc" id="L1235">    }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
@@ -1184,13 +1261,13 @@ public final class UI extends UIFactoryMethods
      * @see #runNow
      */
     public static void runLater( double delay, TimeUnit unit,  Runnable runnable ) {
-<span class="nc" id="L1187">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="nc" id="L1188">        NullUtil.nullArgCheck(unit, &quot;unit&quot;, TimeUnit.class);</span>
-<span class="nc" id="L1189">        long millis = (long) (delay * unit.toMillis(1));</span>
-<span class="nc" id="L1190">        long remainderMillis = (long) (delay * unit.toMillis(1) - millis);</span>
-<span class="nc" id="L1191">        long convertedDelay = TimeUnit.MILLISECONDS.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
-<span class="nc" id="L1192">        runLater( (int) convertedDelay, runnable );</span>
-<span class="nc" id="L1193">    }</span>
+<span class="nc" id="L1264">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="nc" id="L1265">        NullUtil.nullArgCheck(unit, &quot;unit&quot;, TimeUnit.class);</span>
+<span class="nc" id="L1266">        long millis = (long) (delay * unit.toMillis(1));</span>
+<span class="nc" id="L1267">        long remainderMillis = (long) (delay * unit.toMillis(1) - millis);</span>
+<span class="nc" id="L1268">        long convertedDelay = TimeUnit.MILLISECONDS.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L1269">        runLater( (int) convertedDelay, runnable );</span>
+<span class="nc" id="L1270">    }</span>
 
     /**
      * Returns true if the current thread is an AWT event dispatching thread.
@@ -1202,7 +1279,7 @@ public final class UI extends UIFactoryMethods
      *
      * @return true if the current thread is an AWT event dispatching thread
      */
-<span class="fc" id="L1205">    public static boolean thisIsUIThread() { return SwingUtilities.isEventDispatchThread(); }</span>
+<span class="fc" id="L1282">    public static boolean thisIsUIThread() { return SwingUtilities.isEventDispatchThread(); }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
@@ -1240,16 +1317,16 @@ public final class UI extends UIFactoryMethods
      * @see #run
      */
     public static void runNow( Runnable runnable ) {
-<span class="fc" id="L1243">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="fc" id="L1320">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
         try {
-<span class="fc bfc" id="L1245" title="All 2 branches covered.">            if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L1246">                SwingUtilities.invokeAndWait(runnable);</span>
+<span class="fc bfc" id="L1322" title="All 2 branches covered.">            if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L1323">                SwingUtilities.invokeAndWait(runnable);</span>
             else
-<span class="fc" id="L1248">                runnable.run();</span>
-<span class="nc" id="L1249">        } catch ( Exception e ) {</span>
-<span class="nc" id="L1250">            throw new RuntimeException(e);</span>
-<span class="fc" id="L1251">        }</span>
-<span class="fc" id="L1252">    }</span>
+<span class="fc" id="L1325">                runnable.run();</span>
+<span class="nc" id="L1326">        } catch ( Exception e ) {</span>
+<span class="nc" id="L1327">            throw new RuntimeException(e);</span>
+<span class="fc" id="L1328">        }</span>
+<span class="fc" id="L1329">    }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
@@ -1284,10 +1361,10 @@ public final class UI extends UIFactoryMethods
      * @return The result provided by the supplier.
      */
     public static &lt;T&gt; T runAndGet( Supplier&lt;T&gt; supplier ) {
-<span class="fc" id="L1287">        NullUtil.nullArgCheck(supplier, &quot;callable&quot;, Supplier.class);</span>
-<span class="fc" id="L1288">        T[] ref = (T[]) new Object[1];</span>
-<span class="fc" id="L1289">        runNow( () -&gt; ref[0] = supplier.get() );</span>
-<span class="fc" id="L1290">        return ref[0];</span>
+<span class="fc" id="L1364">        NullUtil.nullArgCheck(supplier, &quot;callable&quot;, Supplier.class);</span>
+<span class="fc" id="L1365">        T[] ref = (T[]) new Object[1];</span>
+<span class="fc" id="L1366">        runNow( () -&gt; ref[0] = supplier.get() );</span>
+<span class="fc" id="L1367">        return ref[0];</span>
     }
 
     /**
@@ -1298,46 +1375,13 @@ public final class UI extends UIFactoryMethods
      *  and not from the UI thread.
      */
     public static void sync() {
-<span class="fc" id="L1301">        runNow( () -&gt; {/*</span>
+<span class="fc" id="L1378">        runNow( () -&gt; {/*</span>
             This is a no-op, but it forces the event dispatching thread to
             process all pending events before returning.
             So when we reach this point, we know that all pending events
             have been processed.
-<span class="fc" id="L1306">        */});</span>
-<span class="fc" id="L1307">    }</span>
-
-    /**
-     *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
-     *  should be scaled to fit the
-     *  dimensions of the component that it is being rendered into, like for example
-     *  through the {@link SvgIcon#paintIcon(java.awt.Component, Graphics, int, int)} method.
-     */
-<span class="fc" id="L1315">    public enum FitComponent {</span>
-        /**
-         *  Fit the image or icon to the width of the component.
-         */
-<span class="fc" id="L1319">        WIDTH,</span>
-        /**
-         *  Fit the image or icon to the height of the component.
-         */
-<span class="fc" id="L1323">        HEIGHT,</span>
-        /**
-         *  Fit the image or icon to the width and height of the component.
-         */
-<span class="fc" id="L1327">        WIDTH_AND_HEIGHT,</span>
-        /**
-         *  Fit the image to the largest dimension of the component.
-         */
-<span class="fc" id="L1331">        MAX_DIM,</span>
-        /**
-         *  Fit the image to the smallest dimension of the component.
-         */
-<span class="fc" id="L1335">        MIN_DIM,</span>
-        /**
-         *  Do not fit the image to the component.
-         */
-<span class="fc" id="L1339">        NO</span>
-    }
+<span class="fc" id="L1383">        */});</span>
+<span class="fc" id="L1384">    }</span>
 
     /*
         The following methods and subsequent class definitions have 2 purposes:
@@ -1351,82 +1395,82 @@ public final class UI extends UIFactoryMethods
     */
 
     /** {inheritDoc} */
-<span class="nc" id="L1354">    public static class Component extends JComponent implements StylableComponent {</span>
-<span class="nc" id="L1355">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1356">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1357">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1398">    public static class Component extends JComponent implements StylableComponent {</span>
+<span class="nc" id="L1399">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1400">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1401">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1360">    public static class Panel extends JPanel implements StylableComponent {</span>
-<span class="fc" id="L1361">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1362">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1363">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1404">    public static class Panel extends JPanel implements StylableComponent {</span>
+<span class="fc" id="L1405">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1406">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1407">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1366">    public static class Label extends JLabel implements StylableComponent {</span>
-<span class="fc" id="L1367">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1368">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1369">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1410">    public static class Label extends JLabel implements StylableComponent {</span>
+<span class="fc" id="L1411">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1412">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1413">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1372">    public static class TextField extends JTextField implements StylableComponent {</span>
-<span class="fc" id="L1373">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1374">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1375">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1416">    public static class TextField extends JTextField implements StylableComponent {</span>
+<span class="fc" id="L1417">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1418">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1419">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1378">    public static class TextArea extends JTextArea implements StylableComponent {</span>
-<span class="fc" id="L1379">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1380">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1381">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1422">    public static class TextArea extends JTextArea implements StylableComponent {</span>
+<span class="fc" id="L1423">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1424">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1425">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1384">    public static class CheckBox extends JCheckBox implements StylableComponent {</span>
-<span class="fc" id="L1385">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1386">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1387">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1428">    public static class CheckBox extends JCheckBox implements StylableComponent {</span>
+<span class="fc" id="L1429">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1430">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1431">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1390">    public static class Button extends JButton implements StylableComponent {</span>
-<span class="fc" id="L1391">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1392">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1393">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1434">    public static class Button extends JButton implements StylableComponent {</span>
+<span class="fc" id="L1435">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1436">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1437">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1396">    public static class ToggleButton extends JToggleButton implements StylableComponent {</span>
-<span class="fc" id="L1397">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1398">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1399">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1440">    public static class ToggleButton extends JToggleButton implements StylableComponent {</span>
+<span class="fc" id="L1441">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1442">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1443">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1402">    public static class RadioButton extends JRadioButton implements StylableComponent {</span>
-<span class="fc" id="L1403">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1404">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1405">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1446">    public static class RadioButton extends JRadioButton implements StylableComponent {</span>
+<span class="fc" id="L1447">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1448">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1449">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1408">    public static class ComboBox&lt;E&gt; extends JComboBox&lt;E&gt; implements StylableComponent {</span>
-<span class="fc" id="L1409">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1410">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1411">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1452">    public static class ComboBox&lt;E&gt; extends JComboBox&lt;E&gt; implements StylableComponent {</span>
+<span class="fc" id="L1453">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1454">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1455">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1414">    public static class ListView&lt;E&gt; extends JList&lt;E&gt; implements StylableComponent {</span>
-<span class="nc" id="L1415">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1416">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1417">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1458">    public static class ListView&lt;E&gt; extends JList&lt;E&gt; implements StylableComponent {</span>
+<span class="nc" id="L1459">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1460">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1461">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1420">    public static class Table extends JTable implements StylableComponent {</span>
-<span class="fc" id="L1421">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1422">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1423">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1464">    public static class Table extends JTable implements StylableComponent {</span>
+<span class="fc" id="L1465">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1466">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1467">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
     public static class TableHeader extends JTableHeader implements StylableComponent {
         private @Nullable Function&lt;Integer, String&gt; _toolTipTextSupplier;
-<span class="nc" id="L1428">        public TableHeader() { super(); }</span>
-<span class="nc" id="L1429">        public TableHeader(TableColumnModel model) { super(model); }</span>
+<span class="nc" id="L1472">        public TableHeader() { super(); }</span>
+<span class="nc" id="L1473">        public TableHeader(TableColumnModel model) { super(model); }</span>
         /**
          *  Use this for defining the header cell tool tips.
          *  This models the tool tip of all header cells using a function which receives the column index
@@ -1435,166 +1479,166 @@ public final class UI extends UIFactoryMethods
          *                            tool tip text for that column.
          */
         public void setToolTipsSupplier( Function&lt;Integer, String&gt; toolTipTextSupplier ) {
-<span class="nc" id="L1438">            Objects.requireNonNull(toolTipTextSupplier);</span>
-<span class="nc" id="L1439">            _toolTipTextSupplier = toolTipTextSupplier;</span>
-<span class="nc" id="L1440">        }</span>
+<span class="nc" id="L1482">            Objects.requireNonNull(toolTipTextSupplier);</span>
+<span class="nc" id="L1483">            _toolTipTextSupplier = toolTipTextSupplier;</span>
+<span class="nc" id="L1484">        }</span>
         /**
          *  Use this for defining a fixed set of tool tip texts for the columns.
          * @param toolTips The tool tip texts for the columns.
          */
         public void setToolTips( String... toolTips ) {
-<span class="nc" id="L1446">            Objects.requireNonNull(toolTips);</span>
-<span class="nc" id="L1447">            setToolTipsSupplier( i -&gt; toolTips[i] );</span>
-<span class="nc" id="L1448">        }</span>
-<span class="nc" id="L1449">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1450">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintComponent); }</span>
-<span class="nc" id="L1451">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1490">            Objects.requireNonNull(toolTips);</span>
+<span class="nc" id="L1491">            setToolTipsSupplier( i -&gt; toolTips[i] );</span>
+<span class="nc" id="L1492">        }</span>
+<span class="nc" id="L1493">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1494">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintComponent); }</span>
+<span class="nc" id="L1495">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
         @Override public String getToolTipText(MouseEvent e) {
-<span class="nc" id="L1453">            int col = columnAtPoint(e.getPoint());</span>
-<span class="nc" id="L1454">            int modelCol = Optional.ofNullable(getTable())</span>
-<span class="nc" id="L1455">                                    .map( t -&gt; t.convertColumnIndexToModel(col) )</span>
-<span class="nc" id="L1456">                                    .orElse(col);</span>
-<span class="nc" id="L1457">            String retStr = &quot;&quot;;</span>
+<span class="nc" id="L1497">            int col = columnAtPoint(e.getPoint());</span>
+<span class="nc" id="L1498">            int modelCol = Optional.ofNullable(getTable())</span>
+<span class="nc" id="L1499">                                    .map( t -&gt; t.convertColumnIndexToModel(col) )</span>
+<span class="nc" id="L1500">                                    .orElse(col);</span>
+<span class="nc" id="L1501">            String retStr = &quot;&quot;;</span>
             try {
-<span class="nc bnc" id="L1459" title="All 2 branches missed.">                if ( _toolTipTextSupplier != null )</span>
-<span class="nc" id="L1460">                    retStr = _toolTipTextSupplier.apply(modelCol);</span>
+<span class="nc bnc" id="L1503" title="All 2 branches missed.">                if ( _toolTipTextSupplier != null )</span>
+<span class="nc" id="L1504">                    retStr = _toolTipTextSupplier.apply(modelCol);</span>
             }
-<span class="nc" id="L1462">            catch ( NullPointerException | ArrayIndexOutOfBoundsException ex ) {</span>
-<span class="nc" id="L1463">                retStr = &quot;&quot;;</span>
-<span class="nc" id="L1464">            }</span>
-<span class="nc bnc" id="L1465" title="All 2 branches missed.">            return  ( retStr.isEmpty() ? super.getToolTipText(e) : retStr );</span>
+<span class="nc" id="L1506">            catch ( NullPointerException | ArrayIndexOutOfBoundsException ex ) {</span>
+<span class="nc" id="L1507">                retStr = &quot;&quot;;</span>
+<span class="nc" id="L1508">            }</span>
+<span class="nc bnc" id="L1509" title="All 2 branches missed.">            return  ( retStr.isEmpty() ? super.getToolTipText(e) : retStr );</span>
         }
     }
     /** {inheritDoc} */
-<span class="fc" id="L1469">    public static class Slider extends JSlider implements StylableComponent {</span>
-<span class="fc" id="L1470">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1471">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1472">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1513">    public static class Slider extends JSlider implements StylableComponent {</span>
+<span class="fc" id="L1514">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1515">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1516">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1475">    public static class Separator extends JSeparator implements StylableComponent {</span>
-<span class="fc" id="L1476">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1477">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1478">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1519">    public static class Separator extends JSeparator implements StylableComponent {</span>
+<span class="fc" id="L1520">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1521">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1522">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L1481">    public static class PopupMenu extends JPopupMenu implements StylableComponent {</span>
-<span class="nc" id="L1482">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1483">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1484">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1525">    public static class PopupMenu extends JPopupMenu implements StylableComponent {</span>
+<span class="nc" id="L1526">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1527">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1528">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1487">    public static class MenuItem extends JMenuItem implements StylableComponent {</span>
-<span class="nc" id="L1488">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1489">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1490">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1531">    public static class MenuItem extends JMenuItem implements StylableComponent {</span>
+<span class="nc" id="L1532">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1533">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1534">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1493">    public static class RadioButtonMenuItem extends JRadioButtonMenuItem implements StylableComponent {</span>
-<span class="nc" id="L1494">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1495">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1496">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1537">    public static class RadioButtonMenuItem extends JRadioButtonMenuItem implements StylableComponent {</span>
+<span class="nc" id="L1538">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1539">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1540">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1499">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {</span>
-<span class="nc" id="L1500">         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1501">         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="fc" id="L1502">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1543">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {</span>
+<span class="nc" id="L1544">         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1545">         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1546">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
      }
     /** {inheritDoc} */
-<span class="fc" id="L1505">    public static class Menu extends JMenu implements StylableComponent {</span>
-<span class="nc" id="L1506">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1507">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1508">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1549">    public static class Menu extends JMenu implements StylableComponent {</span>
+<span class="nc" id="L1550">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1551">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1552">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L1511">    public static class MenuBar extends JMenuBar implements StylableComponent {</span>
-<span class="nc" id="L1512">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1513">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1514">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1555">    public static class MenuBar extends JMenuBar implements StylableComponent {</span>
+<span class="nc" id="L1556">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1557">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1558">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane implements StylableComponent {
-<span class="fc" id="L1518">        public ScrollPane() { this(null); }</span>
+<span class="fc" id="L1562">        public ScrollPane() { this(null); }</span>
         public ScrollPane(java.awt.@Nullable Component view) {
-<span class="fc" id="L1520">            super(view);</span>
-<span class="fc" id="L1521">            addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));</span>
-<span class="fc" id="L1522">        }</span>
-<span class="fc" id="L1523">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1524">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1525">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1564">            super(view);</span>
+<span class="fc" id="L1565">            addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));</span>
+<span class="fc" id="L1566">        }</span>
+<span class="fc" id="L1567">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1568">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1569">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1528">    public static class TabbedPane extends JTabbedPane implements StylableComponent {</span>
-<span class="nc" id="L1529">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1530">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1531">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1572">    public static class TabbedPane extends JTabbedPane implements StylableComponent {</span>
+<span class="nc" id="L1573">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1574">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1575">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L1534">    public static class ToolBar extends JToolBar implements StylableComponent {</span>
-<span class="nc" id="L1535">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1536">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1537">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1578">    public static class ToolBar extends JToolBar implements StylableComponent {</span>
+<span class="nc" id="L1579">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1580">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1581">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L1540">    public static class ToolTip extends JToolTip implements StylableComponent {</span>
-<span class="nc" id="L1541">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1542">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1543">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1584">    public static class ToolTip extends JToolTip implements StylableComponent {</span>
+<span class="nc" id="L1585">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1586">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1587">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L1546">    public static class Tree extends JTree implements StylableComponent {</span>
-<span class="nc" id="L1547">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1548">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1549">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="nc" id="L1590">    public static class Tree extends JTree implements StylableComponent {</span>
+<span class="nc" id="L1591">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1592">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1593">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1552">    public static class TextPane extends JTextPane implements StylableComponent {</span>
-<span class="nc" id="L1553">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1554">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1555">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1596">    public static class TextPane extends JTextPane implements StylableComponent {</span>
+<span class="nc" id="L1597">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1598">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1599">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1558">    public static class Spinner extends JSpinner implements StylableComponent {</span>
-<span class="fc" id="L1559">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1560">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1561">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1602">    public static class Spinner extends JSpinner implements StylableComponent {</span>
+<span class="fc" id="L1603">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1604">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1605">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
     public static class SplitPane extends JSplitPane implements StylableComponent {
-<span class="fc" id="L1565">        SplitPane( Align align ) { super(align.forSplitPane()); }</span>
-<span class="nc" id="L1566">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1567">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1568">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1609">        SplitPane( Align align ) { super(align.forSplitPane()); }</span>
+<span class="nc" id="L1610">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1611">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1612">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1571">    public static class PasswordField extends JPasswordField implements StylableComponent {</span>
-<span class="fc" id="L1572">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1573">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1574">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1615">    public static class PasswordField extends JPasswordField implements StylableComponent {</span>
+<span class="fc" id="L1616">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1617">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1618">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1577">    public static class ProgressBar extends JProgressBar implements StylableComponent {</span>
-<span class="fc" id="L1578">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="fc" id="L1579">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1580">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1621">    public static class ProgressBar extends JProgressBar implements StylableComponent {</span>
+<span class="fc" id="L1622">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1623">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1624">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1583">    public static class EditorPane extends JEditorPane implements StylableComponent {</span>
-<span class="nc" id="L1584">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1585">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1586">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1627">    public static class EditorPane extends JEditorPane implements StylableComponent {</span>
+<span class="nc" id="L1628">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1629">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1630">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {@inheritDoc} */
-<span class="fc" id="L1589">    public static class FormattedTextField extends JFormattedTextField implements StylableComponent {</span>
-<span class="nc" id="L1590">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1591">        @Override public void paintChildren(Graphics g){ paintForeground(g, super::paintChildren); }</span>
-<span class="nc" id="L1592">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
+<span class="fc" id="L1633">    public static class FormattedTextField extends JFormattedTextField implements StylableComponent {</span>
+<span class="nc" id="L1634">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="nc" id="L1635">        @Override public void paintChildren(Graphics g){ paintForeground(g, super::paintChildren); }</span>
+<span class="nc" id="L1636">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L1595">    public static class Box extends JBox {/* Already implemented */}</span>
+<span class="fc" id="L1639">    public static class Box extends JBox {/* Already implemented */}</span>
     /** {@inheritDoc} */
-<span class="fc" id="L1597">    public static class SplitButton extends JSplitButton {/* Already implemented */}</span>
+<span class="fc" id="L1641">    public static class SplitButton extends JSplitButton {/* Already implemented */}</span>
 
     /**
      * This {@code Color} class is a refined and more complete/modernized
@@ -1668,7 +1712,7 @@ public final class UI extends UIFactoryMethods
     @Immutable
     public static final class Color extends java.awt.Color
     {
-<span class="fc" id="L1671">        private static final Logger log = LoggerFactory.getLogger(Color.class);</span>
+<span class="fc" id="L1715">        private static final Logger log = LoggerFactory.getLogger(Color.class);</span>
 
         /**
          *  This constant is a {@link Color} object with all of its rgba values set to 0.
@@ -1679,897 +1723,897 @@ public final class UI extends UIFactoryMethods
          *  {@link java.awt.Component#setForeground(java.awt.Color)} methods as null.
          *  Passing null to these methods means that the look and feel determines the coloring.
          */
-<span class="fc" id="L1682">        public static final Color UNDEFINED = new Color(0f, 0f, 0f, 0f);</span>
+<span class="fc" id="L1726">        public static final Color UNDEFINED = new Color(0f, 0f, 0f, 0f);</span>
         /**
          * A fully transparent color with an ARGB value of #00000000.
          */
-<span class="fc" id="L1686">        public static final Color TRANSPARENT = new Color(0f, 0f, 0f, 0f);</span>
+<span class="fc" id="L1730">        public static final Color TRANSPARENT = new Color(0f, 0f, 0f, 0f);</span>
 
         /**
          * The color alice blue with an RGB value of #F0F8FF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F0F8FF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1692">        public static final Color ALICEBLUE = new Color(0.9411765f, 0.972549f, 1.0f);</span>
+<span class="fc" id="L1736">        public static final Color ALICEBLUE = new Color(0.9411765f, 0.972549f, 1.0f);</span>
 
         /**
          * The color antique white with an RGB value of #FAEBD7
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FAEBD7;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1698">        public static final Color ANTIQUEWHITE = new Color(0.98039216f, 0.92156863f, 0.84313726f);</span>
+<span class="fc" id="L1742">        public static final Color ANTIQUEWHITE = new Color(0.98039216f, 0.92156863f, 0.84313726f);</span>
 
         /**
          * The color aqua with an RGB value of #00FFFF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00FFFF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1704">        public static final Color AQUA = new Color(0.0f, 1.0f, 1.0f);</span>
+<span class="fc" id="L1748">        public static final Color AQUA = new Color(0.0f, 1.0f, 1.0f);</span>
 
         /**
          * The color aquamarine with an RGB value of #7FFFD4
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#7FFFD4;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1710">        public static final Color AQUAMARINE = new Color(0.49803922f, 1.0f, 0.83137256f);</span>
+<span class="fc" id="L1754">        public static final Color AQUAMARINE = new Color(0.49803922f, 1.0f, 0.83137256f);</span>
 
         /**
          * The color azure with an RGB value of #F0FFFF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F0FFFF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1716">        public static final Color AZURE = new Color(0.9411765f, 1.0f, 1.0f);</span>
+<span class="fc" id="L1760">        public static final Color AZURE = new Color(0.9411765f, 1.0f, 1.0f);</span>
 
         /**
          * The color beige with an RGB value of #F5F5DC
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F5F5DC;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1722">        public static final Color BEIGE = new Color(0.9607843f, 0.9607843f, 0.8627451f);</span>
+<span class="fc" id="L1766">        public static final Color BEIGE = new Color(0.9607843f, 0.9607843f, 0.8627451f);</span>
 
         /**
          * The color bisque with an RGB value of #FFE4C4
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFE4C4;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1728">        public static final Color BISQUE = new Color(1.0f, 0.89411765f, 0.76862746f);</span>
+<span class="fc" id="L1772">        public static final Color BISQUE = new Color(1.0f, 0.89411765f, 0.76862746f);</span>
 
         /**
          * The color black with an RGB value of #000000
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#000000;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1734">        public static final Color BLACK = new Color(0.0f, 0.0f, 0.0f);</span>
+<span class="fc" id="L1778">        public static final Color BLACK = new Color(0.0f, 0.0f, 0.0f);</span>
 
         /**
          * The color blanched almond with an RGB value of #FFEBCD
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFEBCD;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1740">        public static final Color BLANCHEDALMOND = new Color(1.0f, 0.92156863f, 0.8039216f);</span>
+<span class="fc" id="L1784">        public static final Color BLANCHEDALMOND = new Color(1.0f, 0.92156863f, 0.8039216f);</span>
 
         /**
          * The color blue with an RGB value of #0000FF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#0000FF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1746">        public static final Color BLUE = new Color(0.0f, 0.0f, 1.0f);</span>
+<span class="fc" id="L1790">        public static final Color BLUE = new Color(0.0f, 0.0f, 1.0f);</span>
 
         /**
          * The color blue violet with an RGB value of #8A2BE2
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#8A2BE2;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1752">        public static final Color BLUEVIOLET = new Color(0.5411765f, 0.16862746f, 0.8862745f);</span>
+<span class="fc" id="L1796">        public static final Color BLUEVIOLET = new Color(0.5411765f, 0.16862746f, 0.8862745f);</span>
 
         /**
          * The color brown with an RGB value of #A52A2A
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#A52A2A;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1758">        public static final Color BROWN = new Color(0.64705884f, 0.16470589f, 0.16470589f);</span>
+<span class="fc" id="L1802">        public static final Color BROWN = new Color(0.64705884f, 0.16470589f, 0.16470589f);</span>
 
         /**
          * The color burly wood with an RGB value of #DEB887
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DEB887;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1764">        public static final Color BURLYWOOD = new Color(0.87058824f, 0.72156864f, 0.5294118f);</span>
+<span class="fc" id="L1808">        public static final Color BURLYWOOD = new Color(0.87058824f, 0.72156864f, 0.5294118f);</span>
 
         /**
          * The color cadet blue with an RGB value of #5F9EA0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#5F9EA0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1770">        public static final Color CADETBLUE = new Color(0.37254903f, 0.61960787f, 0.627451f);</span>
+<span class="fc" id="L1814">        public static final Color CADETBLUE = new Color(0.37254903f, 0.61960787f, 0.627451f);</span>
 
         /**
          * The color chartreuse with an RGB value of #7FFF00
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#7FFF00;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1776">        public static final Color CHARTREUSE = new Color(0.49803922f, 1.0f, 0.0f);</span>
+<span class="fc" id="L1820">        public static final Color CHARTREUSE = new Color(0.49803922f, 1.0f, 0.0f);</span>
 
         /**
          * The color chocolate with an RGB value of #D2691E
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#D2691E;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1782">        public static final Color CHOCOLATE = new Color(0.8235294f, 0.4117647f, 0.11764706f);</span>
+<span class="fc" id="L1826">        public static final Color CHOCOLATE = new Color(0.8235294f, 0.4117647f, 0.11764706f);</span>
 
         /**
          * The color coral with an RGB value of #FF7F50
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF7F50;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1788">        public static final Color CORAL = new Color(1.0f, 0.49803922f, 0.3137255f);</span>
+<span class="fc" id="L1832">        public static final Color CORAL = new Color(1.0f, 0.49803922f, 0.3137255f);</span>
 
         /**
          * The color cornflower blue with an RGB value of #6495ED
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#6495ED;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1794">        public static final Color CORNFLOWERBLUE = new Color(0.39215687f, 0.58431375f, 0.92941177f);</span>
+<span class="fc" id="L1838">        public static final Color CORNFLOWERBLUE = new Color(0.39215687f, 0.58431375f, 0.92941177f);</span>
 
         /**
          * The color cornsilk with an RGB value of #FFF8DC
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFF8DC;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1800">        public static final Color CORNSILK = new Color(1.0f, 0.972549f, 0.8627451f);</span>
+<span class="fc" id="L1844">        public static final Color CORNSILK = new Color(1.0f, 0.972549f, 0.8627451f);</span>
 
         /**
          * The color crimson with an RGB value of #DC143C
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DC143C;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1806">        public static final Color CRIMSON = new Color(0.8627451f, 0.078431375f, 0.23529412f);</span>
+<span class="fc" id="L1850">        public static final Color CRIMSON = new Color(0.8627451f, 0.078431375f, 0.23529412f);</span>
 
         /**
          * The color cyan with an RGB value of #00FFFF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00FFFF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1812">        public static final Color CYAN = new Color(0.0f, 1.0f, 1.0f);</span>
+<span class="fc" id="L1856">        public static final Color CYAN = new Color(0.0f, 1.0f, 1.0f);</span>
 
         /**
          * The color dark blue with an RGB value of #00008B
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00008B;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1818">        public static final Color DARKBLUE = new Color(0.0f, 0.0f, 0.54509807f);</span>
+<span class="fc" id="L1862">        public static final Color DARKBLUE = new Color(0.0f, 0.0f, 0.54509807f);</span>
 
         /**
          * The color dark cyan with an RGB value of #008B8B
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#008B8B;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1824">        public static final Color DARKCYAN = new Color(0.0f, 0.54509807f, 0.54509807f);</span>
+<span class="fc" id="L1868">        public static final Color DARKCYAN = new Color(0.0f, 0.54509807f, 0.54509807f);</span>
 
         /**
          * The color dark goldenrod with an RGB value of #B8860B
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#B8860B;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1830">        public static final Color DARKGOLDENROD = new Color(0.72156864f, 0.5254902f, 0.043137256f);</span>
+<span class="fc" id="L1874">        public static final Color DARKGOLDENROD = new Color(0.72156864f, 0.5254902f, 0.043137256f);</span>
 
         /**
          * The color dark gray with an RGB value of #A9A9A9
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#A9A9A9;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1836">        public static final Color DARKGRAY = new Color(0.6627451f, 0.6627451f, 0.6627451f);</span>
+<span class="fc" id="L1880">        public static final Color DARKGRAY = new Color(0.6627451f, 0.6627451f, 0.6627451f);</span>
 
         /**
          * The color dark green with an RGB value of #006400
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#006400;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1842">        public static final Color DARKGREEN = new Color(0.0f, 0.39215687f, 0.0f);</span>
+<span class="fc" id="L1886">        public static final Color DARKGREEN = new Color(0.0f, 0.39215687f, 0.0f);</span>
 
         /**
          * The color dark grey with an RGB value of #A9A9A9
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#A9A9A9;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1848">        public static final Color DARKGREY             = DARKGRAY;</span>
+<span class="fc" id="L1892">        public static final Color DARKGREY             = DARKGRAY;</span>
 
         /**
          * The color dark khaki with an RGB value of #BDB76B
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#BDB76B;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1854">        public static final Color DARKKHAKI = new Color(0.7411765f, 0.7176471f, 0.41960785f);</span>
+<span class="fc" id="L1898">        public static final Color DARKKHAKI = new Color(0.7411765f, 0.7176471f, 0.41960785f);</span>
 
         /**
          * The color dark magenta with an RGB value of #8B008B
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#8B008B;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1860">        public static final Color DARKMAGENTA = new Color(0.54509807f, 0.0f, 0.54509807f);</span>
+<span class="fc" id="L1904">        public static final Color DARKMAGENTA = new Color(0.54509807f, 0.0f, 0.54509807f);</span>
 
         /**
          * The color dark olive green with an RGB value of #556B2F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#556B2F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1866">        public static final Color DARKOLIVEGREEN = new Color(0.33333334f, 0.41960785f, 0.18431373f);</span>
+<span class="fc" id="L1910">        public static final Color DARKOLIVEGREEN = new Color(0.33333334f, 0.41960785f, 0.18431373f);</span>
 
         /**
          * The color dark orange with an RGB value of #FF8C00
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF8C00;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1872">        public static final Color DARKORANGE = new Color(1.0f, 0.54901963f, 0.0f);</span>
+<span class="fc" id="L1916">        public static final Color DARKORANGE = new Color(1.0f, 0.54901963f, 0.0f);</span>
 
         /**
          * The color dark orchid with an RGB value of #9932CC
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#9932CC;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1878">        public static final Color DARKORCHID = new Color(0.6f, 0.19607843f, 0.8f);</span>
+<span class="fc" id="L1922">        public static final Color DARKORCHID = new Color(0.6f, 0.19607843f, 0.8f);</span>
 
         /**
          * The color dark red with an RGB value of #8B0000
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#8B0000;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1884">        public static final Color DARKRED = new Color(0.54509807f, 0.0f, 0.0f);</span>
+<span class="fc" id="L1928">        public static final Color DARKRED = new Color(0.54509807f, 0.0f, 0.0f);</span>
 
         /**
          * The color dark salmon with an RGB value of #E9967A
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#E9967A;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1890">        public static final Color DARKSALMON = new Color(0.9137255f, 0.5882353f, 0.47843137f);</span>
+<span class="fc" id="L1934">        public static final Color DARKSALMON = new Color(0.9137255f, 0.5882353f, 0.47843137f);</span>
 
         /**
          * The color dark sea green with an RGB value of #8FBC8F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#8FBC8F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1896">        public static final Color DARKSEAGREEN = new Color(0.56078434f, 0.7372549f, 0.56078434f);</span>
+<span class="fc" id="L1940">        public static final Color DARKSEAGREEN = new Color(0.56078434f, 0.7372549f, 0.56078434f);</span>
 
         /**
          * The color dark slate blue with an RGB value of #483D8B
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#483D8B;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1902">        public static final Color DARKSLATEBLUE = new Color(0.28235295f, 0.23921569f, 0.54509807f);</span>
+<span class="fc" id="L1946">        public static final Color DARKSLATEBLUE = new Color(0.28235295f, 0.23921569f, 0.54509807f);</span>
 
         /**
          * The color dark slate gray with an RGB value of #2F4F4F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#2F4F4F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1908">        public static final Color DARKSLATEGRAY = new Color(0.18431373f, 0.30980393f, 0.30980393f);</span>
+<span class="fc" id="L1952">        public static final Color DARKSLATEGRAY = new Color(0.18431373f, 0.30980393f, 0.30980393f);</span>
 
         /**
          * The color dark slate grey with an RGB value of #2F4F4F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#2F4F4F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1914">        public static final Color DARKSLATEGREY        = DARKSLATEGRAY;</span>
+<span class="fc" id="L1958">        public static final Color DARKSLATEGREY        = DARKSLATEGRAY;</span>
 
         /**
          * The color dark turquoise with an RGB value of #00CED1
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00CED1;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1920">        public static final Color DARKTURQUOISE = new Color(0.0f, 0.80784315f, 0.81960785f);</span>
+<span class="fc" id="L1964">        public static final Color DARKTURQUOISE = new Color(0.0f, 0.80784315f, 0.81960785f);</span>
 
         /**
          * The color dark violet with an RGB value of #9400D3
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#9400D3;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1926">        public static final Color DARKVIOLET = new Color(0.5803922f, 0.0f, 0.827451f);</span>
+<span class="fc" id="L1970">        public static final Color DARKVIOLET = new Color(0.5803922f, 0.0f, 0.827451f);</span>
 
         /**
          * The color deep pink with an RGB value of #FF1493
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF1493;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1932">        public static final Color DEEPPINK = new Color(1.0f, 0.078431375f, 0.5764706f);</span>
+<span class="fc" id="L1976">        public static final Color DEEPPINK = new Color(1.0f, 0.078431375f, 0.5764706f);</span>
 
         /**
          * The color deep sky blue with an RGB value of #00BFFF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00BFFF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1938">        public static final Color DEEPSKYBLUE = new Color(0.0f, 0.7490196f, 1.0f);</span>
+<span class="fc" id="L1982">        public static final Color DEEPSKYBLUE = new Color(0.0f, 0.7490196f, 1.0f);</span>
 
         /**
          * The color dim gray with an RGB value of #696969
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#696969;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1944">        public static final Color DIMGRAY = new Color(0.4117647f, 0.4117647f, 0.4117647f);</span>
+<span class="fc" id="L1988">        public static final Color DIMGRAY = new Color(0.4117647f, 0.4117647f, 0.4117647f);</span>
 
         /**
          * The color dim grey with an RGB value of #696969
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#696969;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1950">        public static final Color DIMGREY              = DIMGRAY;</span>
+<span class="fc" id="L1994">        public static final Color DIMGREY              = DIMGRAY;</span>
 
         /**
          * The color dodger blue with an RGB value of #1E90FF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#1E90FF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1956">        public static final Color DODGERBLUE = new Color(0.11764706f, 0.5647059f, 1.0f);</span>
+<span class="fc" id="L2000">        public static final Color DODGERBLUE = new Color(0.11764706f, 0.5647059f, 1.0f);</span>
 
         /**
          * The color firebrick with an RGB value of #B22222
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#B22222;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1962">        public static final Color FIREBRICK = new Color(0.69803923f, 0.13333334f, 0.13333334f);</span>
+<span class="fc" id="L2006">        public static final Color FIREBRICK = new Color(0.69803923f, 0.13333334f, 0.13333334f);</span>
 
         /**
          * The color floral white with an RGB value of #FFFAF0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFAF0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1968">        public static final Color FLORALWHITE = new Color(1.0f, 0.98039216f, 0.9411765f);</span>
+<span class="fc" id="L2012">        public static final Color FLORALWHITE = new Color(1.0f, 0.98039216f, 0.9411765f);</span>
 
         /**
          * The color forest green with an RGB value of #228B22
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#228B22;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1974">        public static final Color FORESTGREEN = new Color(0.13333334f, 0.54509807f, 0.13333334f);</span>
+<span class="fc" id="L2018">        public static final Color FORESTGREEN = new Color(0.13333334f, 0.54509807f, 0.13333334f);</span>
 
         /**
          * The color fuchsia with an RGB value of #FF00FF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF00FF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1980">        public static final Color FUCHSIA = new Color(1.0f, 0.0f, 1.0f);</span>
+<span class="fc" id="L2024">        public static final Color FUCHSIA = new Color(1.0f, 0.0f, 1.0f);</span>
 
         /**
          * The color gainsboro with an RGB value of #DCDCDC
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DCDCDC;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1986">        public static final Color GAINSBORO = new Color(0.8627451f, 0.8627451f, 0.8627451f);</span>
+<span class="fc" id="L2030">        public static final Color GAINSBORO = new Color(0.8627451f, 0.8627451f, 0.8627451f);</span>
 
         /**
          * The color ghost white with an RGB value of #F8F8FF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F8F8FF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1992">        public static final Color GHOSTWHITE = new Color(0.972549f, 0.972549f, 1.0f);</span>
+<span class="fc" id="L2036">        public static final Color GHOSTWHITE = new Color(0.972549f, 0.972549f, 1.0f);</span>
 
         /**
          * The color gold with an RGB value of #FFD700
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFD700;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L1998">        public static final Color GOLD = new Color(1.0f, 0.84313726f, 0.0f);</span>
+<span class="fc" id="L2042">        public static final Color GOLD = new Color(1.0f, 0.84313726f, 0.0f);</span>
 
         /**
          * The color goldenrod with an RGB value of #DAA520
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DAA520;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2004">        public static final Color GOLDENROD = new Color(0.85490197f, 0.64705884f, 0.1254902f);</span>
+<span class="fc" id="L2048">        public static final Color GOLDENROD = new Color(0.85490197f, 0.64705884f, 0.1254902f);</span>
 
         /**
          * The color gray with an RGB value of #808080
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#808080;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2010">        public static final Color GRAY = new Color(0.5019608f, 0.5019608f, 0.5019608f);</span>
+<span class="fc" id="L2054">        public static final Color GRAY = new Color(0.5019608f, 0.5019608f, 0.5019608f);</span>
 
         /**
          * The color green with an RGB value of #008000
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#008000;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2016">        public static final Color GREEN = new Color(0.0f, 0.5019608f, 0.0f);</span>
+<span class="fc" id="L2060">        public static final Color GREEN = new Color(0.0f, 0.5019608f, 0.0f);</span>
 
         /**
          * The color green yellow with an RGB value of #ADFF2F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#ADFF2F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2022">        public static final Color GREENYELLOW = new Color(0.6784314f, 1.0f, 0.18431373f);</span>
+<span class="fc" id="L2066">        public static final Color GREENYELLOW = new Color(0.6784314f, 1.0f, 0.18431373f);</span>
 
         /**
          * The color grey with an RGB value of #808080
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#808080;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2028">        public static final Color GREY                 = GRAY;</span>
+<span class="fc" id="L2072">        public static final Color GREY                 = GRAY;</span>
 
         /**
          * The color honeydew with an RGB value of #F0FFF0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F0FFF0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2034">        public static final Color HONEYDEW = new Color(0.9411765f, 1.0f, 0.9411765f);</span>
+<span class="fc" id="L2078">        public static final Color HONEYDEW = new Color(0.9411765f, 1.0f, 0.9411765f);</span>
 
         /**
          * The color hot pink with an RGB value of #FF69B4
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF69B4;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2040">        public static final Color HOTPINK = new Color(1.0f, 0.4117647f, 0.7058824f);</span>
+<span class="fc" id="L2084">        public static final Color HOTPINK = new Color(1.0f, 0.4117647f, 0.7058824f);</span>
 
         /**
          * The color indian red with an RGB value of #CD5C5C
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#CD5C5C;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2046">        public static final Color INDIANRED = new Color(0.8039216f, 0.36078432f, 0.36078432f);</span>
+<span class="fc" id="L2090">        public static final Color INDIANRED = new Color(0.8039216f, 0.36078432f, 0.36078432f);</span>
 
         /**
          * The color indigo with an RGB value of #4B0082
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#4B0082;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2052">        public static final Color INDIGO = new Color(0.29411766f, 0.0f, 0.50980395f);</span>
+<span class="fc" id="L2096">        public static final Color INDIGO = new Color(0.29411766f, 0.0f, 0.50980395f);</span>
 
         /**
          * The color ivory with an RGB value of #FFFFF0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFFF0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2058">        public static final Color IVORY = new Color(1.0f, 1.0f, 0.9411765f);</span>
+<span class="fc" id="L2102">        public static final Color IVORY = new Color(1.0f, 1.0f, 0.9411765f);</span>
 
         /**
          * The color khaki with an RGB value of #F0E68C
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F0E68C;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2064">        public static final Color KHAKI = new Color(0.9411765f, 0.9019608f, 0.54901963f);</span>
+<span class="fc" id="L2108">        public static final Color KHAKI = new Color(0.9411765f, 0.9019608f, 0.54901963f);</span>
 
         /**
          * The color lavender with an RGB value of #E6E6FA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#E6E6FA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2070">        public static final Color LAVENDER = new Color(0.9019608f, 0.9019608f, 0.98039216f);</span>
+<span class="fc" id="L2114">        public static final Color LAVENDER = new Color(0.9019608f, 0.9019608f, 0.98039216f);</span>
 
         /**
          * The color lavender blush with an RGB value of #FFF0F5
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFF0F5;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2076">        public static final Color LAVENDERBLUSH = new Color(1.0f, 0.9411765f, 0.9607843f);</span>
+<span class="fc" id="L2120">        public static final Color LAVENDERBLUSH = new Color(1.0f, 0.9411765f, 0.9607843f);</span>
 
         /**
          * The color lawn green with an RGB value of #7CFC00
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#7CFC00;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2082">        public static final Color LAWNGREEN = new Color(0.4862745f, 0.9882353f, 0.0f);</span>
+<span class="fc" id="L2126">        public static final Color LAWNGREEN = new Color(0.4862745f, 0.9882353f, 0.0f);</span>
 
         /**
          * The color lemon chiffon with an RGB value of #FFFACD
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFACD;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2088">        public static final Color LEMONCHIFFON = new Color(1.0f, 0.98039216f, 0.8039216f);</span>
+<span class="fc" id="L2132">        public static final Color LEMONCHIFFON = new Color(1.0f, 0.98039216f, 0.8039216f);</span>
 
         /**
          * The color light blue with an RGB value of #ADD8E6
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#ADD8E6;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2094">        public static final Color LIGHTBLUE = new Color(0.6784314f, 0.84705883f, 0.9019608f);</span>
+<span class="fc" id="L2138">        public static final Color LIGHTBLUE = new Color(0.6784314f, 0.84705883f, 0.9019608f);</span>
 
         /**
          * The color light coral with an RGB value of #F08080
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F08080;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2100">        public static final Color LIGHTCORAL = new Color(0.9411765f, 0.5019608f, 0.5019608f);</span>
+<span class="fc" id="L2144">        public static final Color LIGHTCORAL = new Color(0.9411765f, 0.5019608f, 0.5019608f);</span>
 
         /**
          * The color light cyan with an RGB value of #E0FFFF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#E0FFFF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2106">        public static final Color LIGHTCYAN = new Color(0.8784314f, 1.0f, 1.0f);</span>
+<span class="fc" id="L2150">        public static final Color LIGHTCYAN = new Color(0.8784314f, 1.0f, 1.0f);</span>
 
         /**
          * The color light goldenrod yellow with an RGB value of #FAFAD2
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FAFAD2;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2112">        public static final Color LIGHTGOLDENRODYELLOW = new Color(0.98039216f, 0.98039216f, 0.8235294f);</span>
+<span class="fc" id="L2156">        public static final Color LIGHTGOLDENRODYELLOW = new Color(0.98039216f, 0.98039216f, 0.8235294f);</span>
 
         /**
          * The color light gray with an RGB value of #D3D3D3
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#D3D3D3;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2118">        public static final Color LIGHTGRAY = new Color(0.827451f, 0.827451f, 0.827451f);</span>
+<span class="fc" id="L2162">        public static final Color LIGHTGRAY = new Color(0.827451f, 0.827451f, 0.827451f);</span>
 
         /**
          * The color light green with an RGB value of #90EE90
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#90EE90;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2124">        public static final Color LIGHTGREEN = new Color(0.5647059f, 0.93333334f, 0.5647059f);</span>
+<span class="fc" id="L2168">        public static final Color LIGHTGREEN = new Color(0.5647059f, 0.93333334f, 0.5647059f);</span>
 
         /**
          * The color light grey with an RGB value of #D3D3D3
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#D3D3D3;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2130">        public static final Color LIGHTGREY            = LIGHTGRAY;</span>
+<span class="fc" id="L2174">        public static final Color LIGHTGREY            = LIGHTGRAY;</span>
 
         /**
          * The color light pink with an RGB value of #FFB6C1
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFB6C1;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2136">        public static final Color LIGHTPINK = new Color(1.0f, 0.7137255f, 0.75686276f);</span>
+<span class="fc" id="L2180">        public static final Color LIGHTPINK = new Color(1.0f, 0.7137255f, 0.75686276f);</span>
 
         /**
          * The color light salmon with an RGB value of #FFA07A
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFA07A;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2142">        public static final Color LIGHTSALMON = new Color(1.0f, 0.627451f, 0.47843137f);</span>
+<span class="fc" id="L2186">        public static final Color LIGHTSALMON = new Color(1.0f, 0.627451f, 0.47843137f);</span>
 
         /**
          * The color light sea green with an RGB value of #20B2AA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#20B2AA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2148">        public static final Color LIGHTSEAGREEN = new Color(0.1254902f, 0.69803923f, 0.6666667f);</span>
+<span class="fc" id="L2192">        public static final Color LIGHTSEAGREEN = new Color(0.1254902f, 0.69803923f, 0.6666667f);</span>
 
         /**
          * The color light sky blue with an RGB value of #87CEFA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#87CEFA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2154">        public static final Color LIGHTSKYBLUE = new Color(0.5294118f, 0.80784315f, 0.98039216f);</span>
+<span class="fc" id="L2198">        public static final Color LIGHTSKYBLUE = new Color(0.5294118f, 0.80784315f, 0.98039216f);</span>
 
         /**
          * The color light slate gray with an RGB value of #778899
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#778899;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2160">        public static final Color LIGHTSLATEGRAY = new Color(0.46666667f, 0.53333336f, 0.6f);</span>
+<span class="fc" id="L2204">        public static final Color LIGHTSLATEGRAY = new Color(0.46666667f, 0.53333336f, 0.6f);</span>
 
         /**
          * The color light slate grey with an RGB value of #778899
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#778899;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2166">        public static final Color LIGHTSLATEGREY       = LIGHTSLATEGRAY;</span>
+<span class="fc" id="L2210">        public static final Color LIGHTSLATEGREY       = LIGHTSLATEGRAY;</span>
 
         /**
          * The color light steel blue with an RGB value of #B0C4DE
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#B0C4DE;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2172">        public static final Color LIGHTSTEELBLUE = new Color(0.6901961f, 0.76862746f, 0.87058824f);</span>
+<span class="fc" id="L2216">        public static final Color LIGHTSTEELBLUE = new Color(0.6901961f, 0.76862746f, 0.87058824f);</span>
 
         /**
          * The color light yellow with an RGB value of #FFFFE0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFFE0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2178">        public static final Color LIGHTYELLOW = new Color(1.0f, 1.0f, 0.8784314f);</span>
+<span class="fc" id="L2222">        public static final Color LIGHTYELLOW = new Color(1.0f, 1.0f, 0.8784314f);</span>
 
         /**
          * The color lime with an RGB value of #00FF00
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00FF00;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2184">        public static final Color LIME = new Color(0.0f, 1.0f, 0.0f);</span>
+<span class="fc" id="L2228">        public static final Color LIME = new Color(0.0f, 1.0f, 0.0f);</span>
 
         /**
          * The color lime green with an RGB value of #32CD32
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#32CD32;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2190">        public static final Color LIMEGREEN = new Color(0.19607843f, 0.8039216f, 0.19607843f);</span>
+<span class="fc" id="L2234">        public static final Color LIMEGREEN = new Color(0.19607843f, 0.8039216f, 0.19607843f);</span>
 
         /**
          * The color linen with an RGB value of #FAF0E6
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FAF0E6;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2196">        public static final Color LINEN = new Color(0.98039216f, 0.9411765f, 0.9019608f);</span>
+<span class="fc" id="L2240">        public static final Color LINEN = new Color(0.98039216f, 0.9411765f, 0.9019608f);</span>
 
         /**
          * The color magenta with an RGB value of #FF00FF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF00FF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2202">        public static final Color MAGENTA = new Color(1.0f, 0.0f, 1.0f);</span>
+<span class="fc" id="L2246">        public static final Color MAGENTA = new Color(1.0f, 0.0f, 1.0f);</span>
 
         /**
          * The color maroon with an RGB value of #800000
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#800000;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2208">        public static final Color MAROON = new Color(0.5019608f, 0.0f, 0.0f);</span>
+<span class="fc" id="L2252">        public static final Color MAROON = new Color(0.5019608f, 0.0f, 0.0f);</span>
 
         /**
          * The color medium aquamarine with an RGB value of #66CDAA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#66CDAA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2214">        public static final Color MEDIUMAQUAMARINE = new Color(0.4f, 0.8039216f, 0.6666667f);</span>
+<span class="fc" id="L2258">        public static final Color MEDIUMAQUAMARINE = new Color(0.4f, 0.8039216f, 0.6666667f);</span>
 
         /**
          * The color medium blue with an RGB value of #0000CD
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#0000CD;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2220">        public static final Color MEDIUMBLUE = new Color(0.0f, 0.0f, 0.8039216f);</span>
+<span class="fc" id="L2264">        public static final Color MEDIUMBLUE = new Color(0.0f, 0.0f, 0.8039216f);</span>
 
         /**
          * The color medium orchid with an RGB value of #BA55D3
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#BA55D3;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2226">        public static final Color MEDIUMORCHID = new Color(0.7294118f, 0.33333334f, 0.827451f);</span>
+<span class="fc" id="L2270">        public static final Color MEDIUMORCHID = new Color(0.7294118f, 0.33333334f, 0.827451f);</span>
 
         /**
          * The color medium purple with an RGB value of #9370DB
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#9370DB;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2232">        public static final Color MEDIUMPURPLE = new Color(0.5764706f, 0.4392157f, 0.85882354f);</span>
+<span class="fc" id="L2276">        public static final Color MEDIUMPURPLE = new Color(0.5764706f, 0.4392157f, 0.85882354f);</span>
 
         /**
          * The color medium sea green with an RGB value of #3CB371
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#3CB371;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2238">        public static final Color MEDIUMSEAGREEN = new Color(0.23529412f, 0.7019608f, 0.44313726f);</span>
+<span class="fc" id="L2282">        public static final Color MEDIUMSEAGREEN = new Color(0.23529412f, 0.7019608f, 0.44313726f);</span>
 
         /**
          * The color medium slate blue with an RGB value of #7B68EE
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#7B68EE;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2244">        public static final Color MEDIUMSLATEBLUE = new Color(0.48235294f, 0.40784314f, 0.93333334f);</span>
+<span class="fc" id="L2288">        public static final Color MEDIUMSLATEBLUE = new Color(0.48235294f, 0.40784314f, 0.93333334f);</span>
 
         /**
          * The color medium spring green with an RGB value of #00FA9A
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00FA9A;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2250">        public static final Color MEDIUMSPRINGGREEN = new Color(0.0f, 0.98039216f, 0.6039216f);</span>
+<span class="fc" id="L2294">        public static final Color MEDIUMSPRINGGREEN = new Color(0.0f, 0.98039216f, 0.6039216f);</span>
 
         /**
          * The color medium turquoise with an RGB value of #48D1CC
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#48D1CC;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2256">        public static final Color MEDIUMTURQUOISE = new Color(0.28235295f, 0.81960785f, 0.8f);</span>
+<span class="fc" id="L2300">        public static final Color MEDIUMTURQUOISE = new Color(0.28235295f, 0.81960785f, 0.8f);</span>
 
         /**
          * The color medium violet red with an RGB value of #C71585
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#C71585;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2262">        public static final Color MEDIUMVIOLETRED = new Color(0.78039217f, 0.08235294f, 0.52156866f);</span>
+<span class="fc" id="L2306">        public static final Color MEDIUMVIOLETRED = new Color(0.78039217f, 0.08235294f, 0.52156866f);</span>
 
         /**
          * The color midnight blue with an RGB value of #191970
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#191970;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2268">        public static final Color MIDNIGHTBLUE = new Color(0.09803922f, 0.09803922f, 0.4392157f);</span>
+<span class="fc" id="L2312">        public static final Color MIDNIGHTBLUE = new Color(0.09803922f, 0.09803922f, 0.4392157f);</span>
 
         /**
          * The color mint cream with an RGB value of #F5FFFA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F5FFFA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2274">        public static final Color MINTCREAM = new Color(0.9607843f, 1.0f, 0.98039216f);</span>
+<span class="fc" id="L2318">        public static final Color MINTCREAM = new Color(0.9607843f, 1.0f, 0.98039216f);</span>
 
         /**
          * The color misty rose with an RGB value of #FFE4E1
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFE4E1;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2280">        public static final Color MISTYROSE = new Color(1.0f, 0.89411765f, 0.88235295f);</span>
+<span class="fc" id="L2324">        public static final Color MISTYROSE = new Color(1.0f, 0.89411765f, 0.88235295f);</span>
 
         /**
          * The color moccasin with an RGB value of #FFE4B5
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFE4B5;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2286">        public static final Color MOCCASIN = new Color(1.0f, 0.89411765f, 0.70980394f);</span>
+<span class="fc" id="L2330">        public static final Color MOCCASIN = new Color(1.0f, 0.89411765f, 0.70980394f);</span>
 
         /**
          * The color navajo white with an RGB value of #FFDEAD
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFDEAD;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2292">        public static final Color NAVAJOWHITE = new Color(1.0f, 0.87058824f, 0.6784314f);</span>
+<span class="fc" id="L2336">        public static final Color NAVAJOWHITE = new Color(1.0f, 0.87058824f, 0.6784314f);</span>
 
         /**
          * The color navy with an RGB value of #000080
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#000080;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2298">        public static final Color NAVY = new Color(0.0f, 0.0f, 0.5019608f);</span>
+<span class="fc" id="L2342">        public static final Color NAVY = new Color(0.0f, 0.0f, 0.5019608f);</span>
 
         /**
          * The color &quot;oak&quot;.
          */
-<span class="fc" id="L2303">        public static final Color OAK = new Color(216/255f, 181/255f, 137/255f);</span>
+<span class="fc" id="L2347">        public static final Color OAK = new Color(216/255f, 181/255f, 137/255f);</span>
 
         /**
          * The color old lace with an RGB value of #FDF5E6
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FDF5E6;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2309">        public static final Color OLDLACE = new Color(0.99215686f, 0.9607843f, 0.9019608f);</span>
+<span class="fc" id="L2353">        public static final Color OLDLACE = new Color(0.99215686f, 0.9607843f, 0.9019608f);</span>
 
         /**
          * The color olive with an RGB value of #808000
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#808000;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2315">        public static final Color OLIVE = new Color(0.5019608f, 0.5019608f, 0.0f);</span>
+<span class="fc" id="L2359">        public static final Color OLIVE = new Color(0.5019608f, 0.5019608f, 0.0f);</span>
 
         /**
          * The color olive drab with an RGB value of #6B8E23
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#6B8E23;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2321">        public static final Color OLIVEDRAB = new Color(0.41960785f, 0.5568628f, 0.13725491f);</span>
+<span class="fc" id="L2365">        public static final Color OLIVEDRAB = new Color(0.41960785f, 0.5568628f, 0.13725491f);</span>
 
         /**
          * The color orange with an RGB value of #FFA500
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFA500;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2327">        public static final Color ORANGE = new Color(1.0f, 0.64705884f, 0.0f);</span>
+<span class="fc" id="L2371">        public static final Color ORANGE = new Color(1.0f, 0.64705884f, 0.0f);</span>
 
         /**
          * The color orange red with an RGB value of #FF4500
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF4500;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2333">        public static final Color ORANGERED = new Color(1.0f, 0.27058825f, 0.0f);</span>
+<span class="fc" id="L2377">        public static final Color ORANGERED = new Color(1.0f, 0.27058825f, 0.0f);</span>
 
         /**
          * The color orchid with an RGB value of #DA70D6
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DA70D6;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2339">        public static final Color ORCHID = new Color(0.85490197f, 0.4392157f, 0.8392157f);</span>
+<span class="fc" id="L2383">        public static final Color ORCHID = new Color(0.85490197f, 0.4392157f, 0.8392157f);</span>
 
         /**
          * The color pale goldenrod with an RGB value of #EEE8AA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#EEE8AA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2345">        public static final Color PALEGOLDENROD = new Color(0.93333334f, 0.9098039f, 0.6666667f);</span>
+<span class="fc" id="L2389">        public static final Color PALEGOLDENROD = new Color(0.93333334f, 0.9098039f, 0.6666667f);</span>
 
         /**
          * The color pale green with an RGB value of #98FB98
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#98FB98;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2351">        public static final Color PALEGREEN = new Color(0.59607846f, 0.9843137f, 0.59607846f);</span>
+<span class="fc" id="L2395">        public static final Color PALEGREEN = new Color(0.59607846f, 0.9843137f, 0.59607846f);</span>
 
         /**
          * The color pale turquoise with an RGB value of #AFEEEE
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#AFEEEE;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2357">        public static final Color PALETURQUOISE = new Color(0.6862745f, 0.93333334f, 0.93333334f);</span>
+<span class="fc" id="L2401">        public static final Color PALETURQUOISE = new Color(0.6862745f, 0.93333334f, 0.93333334f);</span>
 
         /**
          * The color pale violet red with an RGB value of #DB7093
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DB7093;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2363">        public static final Color PALEVIOLETRED = new Color(0.85882354f, 0.4392157f, 0.5764706f);</span>
+<span class="fc" id="L2407">        public static final Color PALEVIOLETRED = new Color(0.85882354f, 0.4392157f, 0.5764706f);</span>
 
         /**
          * The color papaya whip with an RGB value of #FFEFD5
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFEFD5;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2369">        public static final Color PAPAYAWHIP = new Color(1.0f, 0.9372549f, 0.8352941f);</span>
+<span class="fc" id="L2413">        public static final Color PAPAYAWHIP = new Color(1.0f, 0.9372549f, 0.8352941f);</span>
 
         /**
          * The color peach puff with an RGB value of #FFDAB9
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFDAB9;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2375">        public static final Color PEACHPUFF = new Color(1.0f, 0.85490197f, 0.7254902f);</span>
+<span class="fc" id="L2419">        public static final Color PEACHPUFF = new Color(1.0f, 0.85490197f, 0.7254902f);</span>
 
         /**
          * The color peru with an RGB value of #CD853F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#CD853F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2381">        public static final Color PERU = new Color(0.8039216f, 0.52156866f, 0.24705882f);</span>
+<span class="fc" id="L2425">        public static final Color PERU = new Color(0.8039216f, 0.52156866f, 0.24705882f);</span>
 
         /**
          * The color pink with an RGB value of #FFC0CB
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFC0CB;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2387">        public static final Color PINK = new Color(1.0f, 0.7529412f, 0.79607844f);</span>
+<span class="fc" id="L2431">        public static final Color PINK = new Color(1.0f, 0.7529412f, 0.79607844f);</span>
 
         /**
          * The color plum with an RGB value of #DDA0DD
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#DDA0DD;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2393">        public static final Color PLUM = new Color(0.8666667f, 0.627451f, 0.8666667f);</span>
+<span class="fc" id="L2437">        public static final Color PLUM = new Color(0.8666667f, 0.627451f, 0.8666667f);</span>
 
         /**
          * The color powder blue with an RGB value of #B0E0E6
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#B0E0E6;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2399">        public static final Color POWDERBLUE = new Color(0.6901961f, 0.8784314f, 0.9019608f);</span>
+<span class="fc" id="L2443">        public static final Color POWDERBLUE = new Color(0.6901961f, 0.8784314f, 0.9019608f);</span>
 
         /**
          * The color purple with an RGB value of #800080
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#800080;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2405">        public static final Color PURPLE = new Color(0.5019608f, 0.0f, 0.5019608f);</span>
+<span class="fc" id="L2449">        public static final Color PURPLE = new Color(0.5019608f, 0.0f, 0.5019608f);</span>
 
         /**
          * The color red with an RGB value of #FF0000
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF0000;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2411">        public static final Color RED = new Color(1.0f, 0.0f, 0.0f);</span>
+<span class="fc" id="L2455">        public static final Color RED = new Color(1.0f, 0.0f, 0.0f);</span>
 
         /**
          * The color rosy brown with an RGB value of #BC8F8F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#BC8F8F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2417">        public static final Color ROSYBROWN = new Color(0.7372549f, 0.56078434f, 0.56078434f);</span>
+<span class="fc" id="L2461">        public static final Color ROSYBROWN = new Color(0.7372549f, 0.56078434f, 0.56078434f);</span>
 
         /**
          * The color royal blue with an RGB value of #4169E1
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#4169E1;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2423">        public static final Color ROYALBLUE = new Color(0.25490198f, 0.4117647f, 0.88235295f);</span>
+<span class="fc" id="L2467">        public static final Color ROYALBLUE = new Color(0.25490198f, 0.4117647f, 0.88235295f);</span>
 
         /**
          * The color saddle brown with an RGB value of #8B4513
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#8B4513;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2429">        public static final Color SADDLEBROWN = new Color(0.54509807f, 0.27058825f, 0.07450981f);</span>
+<span class="fc" id="L2473">        public static final Color SADDLEBROWN = new Color(0.54509807f, 0.27058825f, 0.07450981f);</span>
 
         /**
          * The color salmon with an RGB value of #FA8072
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FA8072;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2435">        public static final Color SALMON = new Color(0.98039216f, 0.5019608f, 0.44705883f);</span>
+<span class="fc" id="L2479">        public static final Color SALMON = new Color(0.98039216f, 0.5019608f, 0.44705883f);</span>
 
         /**
          * The color sandy brown with an RGB value of #F4A460
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F4A460;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2441">        public static final Color SANDYBROWN = new Color(0.95686275f, 0.6431373f, 0.3764706f);</span>
+<span class="fc" id="L2485">        public static final Color SANDYBROWN = new Color(0.95686275f, 0.6431373f, 0.3764706f);</span>
 
         /**
          * The color sea green with an RGB value of #2E8B57
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#2E8B57;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2447">        public static final Color SEAGREEN = new Color(0.18039216f, 0.54509807f, 0.34117648f);</span>
+<span class="fc" id="L2491">        public static final Color SEAGREEN = new Color(0.18039216f, 0.54509807f, 0.34117648f);</span>
 
         /**
          * The color sea shell with an RGB value of #FFF5EE
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFF5EE;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2453">        public static final Color SEASHELL = new Color(1.0f, 0.9607843f, 0.93333334f);</span>
+<span class="fc" id="L2497">        public static final Color SEASHELL = new Color(1.0f, 0.9607843f, 0.93333334f);</span>
 
         /**
          * The color sienna with an RGB value of #A0522D
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#A0522D;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2459">        public static final Color SIENNA = new Color(0.627451f, 0.32156864f, 0.1764706f);</span>
+<span class="fc" id="L2503">        public static final Color SIENNA = new Color(0.627451f, 0.32156864f, 0.1764706f);</span>
 
         /**
          * The color silver with an RGB value of #C0C0C0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#C0C0C0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2465">        public static final Color SILVER = new Color(0.7529412f, 0.7529412f, 0.7529412f);</span>
+<span class="fc" id="L2509">        public static final Color SILVER = new Color(0.7529412f, 0.7529412f, 0.7529412f);</span>
         /**
          * The color sky blue with an RGB value of #87CEEB
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#87CEEB;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2470">        public static final Color SKYBLUE = new Color(0.5294118f, 0.80784315f, 0.92156863f);</span>
+<span class="fc" id="L2514">        public static final Color SKYBLUE = new Color(0.5294118f, 0.80784315f, 0.92156863f);</span>
 
         /**
          * The color slate blue with an RGB value of #6A5ACD
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#6A5ACD;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2476">        public static final Color SLATEBLUE = new Color(0.41568628f, 0.3529412f, 0.8039216f);</span>
+<span class="fc" id="L2520">        public static final Color SLATEBLUE = new Color(0.41568628f, 0.3529412f, 0.8039216f);</span>
 
         /**
          * The color slate gray with an RGB value of #708090
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#708090;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2482">        public static final Color SLATEGRAY = new Color(0.4392157f, 0.5019608f, 0.5647059f);</span>
+<span class="fc" id="L2526">        public static final Color SLATEGRAY = new Color(0.4392157f, 0.5019608f, 0.5647059f);</span>
 
         /**
          * The color slate grey with an RGB value of #708090
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#708090;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2488">        public static final Color SLATEGREY            = SLATEGRAY;</span>
+<span class="fc" id="L2532">        public static final Color SLATEGREY            = SLATEGRAY;</span>
 
         /**
          * The color snow with an RGB value of #FFFAFA
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFAFA;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2494">        public static final Color SNOW = new Color(1.0f, 0.98039216f, 0.98039216f);</span>
+<span class="fc" id="L2538">        public static final Color SNOW = new Color(1.0f, 0.98039216f, 0.98039216f);</span>
 
         /**
          * The color spring green with an RGB value of #00FF7F
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#00FF7F;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2500">        public static final Color SPRINGGREEN = new Color(0.0f, 1.0f, 0.49803922f);</span>
+<span class="fc" id="L2544">        public static final Color SPRINGGREEN = new Color(0.0f, 1.0f, 0.49803922f);</span>
 
         /**
          * The color steel blue with an RGB value of #4682B4
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#4682B4;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2506">        public static final Color STEELBLUE = new Color(0.27450982f, 0.50980395f, 0.7058824f);</span>
+<span class="fc" id="L2550">        public static final Color STEELBLUE = new Color(0.27450982f, 0.50980395f, 0.7058824f);</span>
 
         /**
          * The color tan with an RGB value of #D2B48C
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#D2B48C;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2512">        public static final Color TAN = new Color(0.8235294f, 0.7058824f, 0.54901963f);</span>
+<span class="fc" id="L2556">        public static final Color TAN = new Color(0.8235294f, 0.7058824f, 0.54901963f);</span>
 
         /**
          * The color teal with an RGB value of #008080
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#008080;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2518">        public static final Color TEAL = new Color(0.0f, 0.5019608f, 0.5019608f);</span>
+<span class="fc" id="L2562">        public static final Color TEAL = new Color(0.0f, 0.5019608f, 0.5019608f);</span>
 
         /**
          * The color thistle with an RGB value of #D8BFD8
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#D8BFD8;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2524">        public static final Color THISTLE = new Color(0.84705883f, 0.7490196f, 0.84705883f);</span>
+<span class="fc" id="L2568">        public static final Color THISTLE = new Color(0.84705883f, 0.7490196f, 0.84705883f);</span>
 
         /**
          * The color tomato with an RGB value of #FF6347
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FF6347;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2530">        public static final Color TOMATO = new Color(1.0f, 0.3882353f, 0.2784314f);</span>
+<span class="fc" id="L2574">        public static final Color TOMATO = new Color(1.0f, 0.3882353f, 0.2784314f);</span>
 
         /**
          * The color turquoise with an RGB value of #40E0D0
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#40E0D0;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2536">        public static final Color TURQUOISE = new Color(0.2509804f, 0.8784314f, 0.8156863f);</span>
+<span class="fc" id="L2580">        public static final Color TURQUOISE = new Color(0.2509804f, 0.8784314f, 0.8156863f);</span>
 
         /**
          * The color violet with an RGB value of #EE82EE
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#EE82EE;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2542">        public static final Color VIOLET = new Color(0.93333334f, 0.50980395f, 0.93333334f);</span>
+<span class="fc" id="L2586">        public static final Color VIOLET = new Color(0.93333334f, 0.50980395f, 0.93333334f);</span>
 
         /**
          * The color wheat with an RGB value of #F5DEB3
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F5DEB3;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2548">        public static final Color WHEAT = new Color(0.9607843f, 0.87058824f, 0.7019608f);</span>
+<span class="fc" id="L2592">        public static final Color WHEAT = new Color(0.9607843f, 0.87058824f, 0.7019608f);</span>
 
         /**
          * The color white with an RGB value of #FFFFFF
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFFFF;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2554">        public static final Color WHITE = new Color(1.0f, 1.0f, 1.0f);</span>
+<span class="fc" id="L2598">        public static final Color WHITE = new Color(1.0f, 1.0f, 1.0f);</span>
 
         /**
          * The color white smoke with an RGB value of #F5F5F5
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#F5F5F5;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2560">        public static final Color WHITESMOKE = new Color(0.9607843f, 0.9607843f, 0.9607843f);</span>
+<span class="fc" id="L2604">        public static final Color WHITESMOKE = new Color(0.9607843f, 0.9607843f, 0.9607843f);</span>
 
         /**
          * The color yellow with an RGB value of #FFFF00
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#FFFF00;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2566">        public static final Color YELLOW = new Color(1.0f, 1.0f, 0.0f);</span>
+<span class="fc" id="L2610">        public static final Color YELLOW = new Color(1.0f, 1.0f, 0.0f);</span>
 
         /**
          * The color yellow green with an RGB value of #9ACD32
          * &lt;div style=&quot;border:1px solid black;width:40px;height:20px;background-color:#9ACD32;float:right;margin: 0 10px 0 0&quot;&gt;&lt;/div&gt;
          */
-<span class="fc" id="L2572">        public static final Color YELLOWGREEN = new Color(0.6039216f, 0.8039216f, 0.19607843f);</span>
+<span class="fc" id="L2616">        public static final Color YELLOWGREEN = new Color(0.6039216f, 0.8039216f, 0.19607843f);</span>
 
         /**
          * Brightness change factor for darker() and brighter() methods.
@@ -2587,7 +2631,7 @@ public final class UI extends UIFactoryMethods
          * @return The color object.
          */
         public static Color of( java.awt.Color color ) {
-<span class="fc" id="L2590">            return new Color(color);</span>
+<span class="fc" id="L2634">            return new Color(color);</span>
         }
 
         /**
@@ -2600,8 +2644,8 @@ public final class UI extends UIFactoryMethods
          * @throws IllegalArgumentException if any value is out of range
          */
         public static Color ofRgb( int red, int green, int blue ) {
-<span class="fc" id="L2603">            _checkRGB(red, green, blue);</span>
-<span class="fc" id="L2604">            return new Color(red, green, blue);</span>
+<span class="fc" id="L2647">            _checkRGB(red, green, blue);</span>
+<span class="fc" id="L2648">            return new Color(red, green, blue);</span>
         }
 
         /**
@@ -2623,7 +2667,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          */
         public static Color ofRgba( int r, int g, int b, int a ) {
-<span class="fc" id="L2626">            return new Color(r, g, b, a);</span>
+<span class="fc" id="L2670">            return new Color(r, g, b, a);</span>
         }
 
         /**
@@ -2643,7 +2687,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          */
         public static Color ofRgb( int rgb ) {
-<span class="nc" id="L2646">            return new Color(rgb);</span>
+<span class="nc" id="L2690">            return new Color(rgb);</span>
         }
 
         /**
@@ -2665,7 +2709,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color} from the specified RGBA value or RGB value depending on whether the {@code hasalpha} flag is set
          */
         public static Color ofRgb( int rgba, boolean hasalpha ) {
-<span class="nc" id="L2668">            return new Color(rgba, hasalpha);</span>
+<span class="nc" id="L2712">            return new Color(rgba, hasalpha);</span>
         }
 
         /**
@@ -2682,7 +2726,7 @@ public final class UI extends UIFactoryMethods
          * @see #blue()
          */
         public static Color of( double red, double green, double blue ) {
-<span class="nc" id="L2685">            return Color.of((float) red, (float) green, (float) blue);</span>
+<span class="nc" id="L2729">            return Color.of((float) red, (float) green, (float) blue);</span>
         }
 
         /**
@@ -2699,7 +2743,7 @@ public final class UI extends UIFactoryMethods
          * @see #blue()
          */
         public static Color of( float red, float green, float blue ) {
-<span class="fc" id="L2702">            return new Color(red, green, blue);</span>
+<span class="fc" id="L2746">            return new Color(red, green, blue);</span>
         }
 
         /**
@@ -2718,7 +2762,7 @@ public final class UI extends UIFactoryMethods
          * @see #opacity()
          */
         public static Color of( double red, double green, double blue, double opacity ) {
-<span class="fc" id="L2721">            return Color.of((float) red, (float) green, (float) blue, (float) opacity);</span>
+<span class="fc" id="L2765">            return Color.of((float) red, (float) green, (float) blue, (float) opacity);</span>
         }
 
         /**
@@ -2737,7 +2781,7 @@ public final class UI extends UIFactoryMethods
          * @see #opacity()
          */
         public static Color of( float red, float green, float blue, float opacity ) {
-<span class="fc" id="L2740">            return new Color(red, green, blue, opacity);</span>
+<span class="fc" id="L2784">            return new Color(red, green, blue, opacity);</span>
         }
 
         /**
@@ -2760,7 +2804,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color} corresponding to the specified components and alpha.
          */
         public static Color of( ColorSpace cspace, float[] components, float alpha ) {
-<span class="nc" id="L2763">            return new Color(cspace, components, alpha);</span>
+<span class="nc" id="L2807">            return new Color(cspace, components, alpha);</span>
         }
 
         /**
@@ -2775,8 +2819,8 @@ public final class UI extends UIFactoryMethods
          * @throws IllegalArgumentException if any value is out of range
          */
         public static Color ofRgb( int red, int green, int blue, double opacity ) {
-<span class="nc" id="L2778">            _checkRGB(red, green, blue);</span>
-<span class="nc" id="L2779">            return Color.of(</span>
+<span class="nc" id="L2822">            _checkRGB(red, green, blue);</span>
+<span class="nc" id="L2823">            return Color.of(</span>
                     red / 255.0,
                     green / 255.0,
                     blue / 255.0,
@@ -2789,7 +2833,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          */
         public static Color ofGrayRgb( int gray ) {
-<span class="nc" id="L2792">            return ofRgb(gray, gray, gray);</span>
+<span class="nc" id="L2836">            return ofRgb(gray, gray, gray);</span>
         }
 
         /**
@@ -2799,7 +2843,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          */
         public static Color ofGrayRgb( int gray, double opacity ) {
-<span class="nc" id="L2802">            return ofRgb(gray, gray, gray, opacity);</span>
+<span class="nc" id="L2846">            return ofRgb(gray, gray, gray, opacity);</span>
         }
 
         /**
@@ -2811,7 +2855,7 @@ public final class UI extends UIFactoryMethods
          * @throws IllegalArgumentException if any value is out of range
          */
         public static Color ofGray( double gray, double opacity ) {
-<span class="nc" id="L2814">            return Color.of(gray, gray, gray, opacity);</span>
+<span class="nc" id="L2858">            return Color.of(gray, gray, gray, opacity);</span>
         }
 
         /**
@@ -2822,7 +2866,7 @@ public final class UI extends UIFactoryMethods
          * @throws IllegalArgumentException if any value is out of range
          */
         public static Color ofGray( double gray ) {
-<span class="nc" id="L2825">            return ofGray(gray, 1.0);</span>
+<span class="nc" id="L2869">            return ofGray(gray, 1.0);</span>
         }
 
         /**
@@ -2838,72 +2882,72 @@ public final class UI extends UIFactoryMethods
          *         {@code opacity} are out of range
          */
         public static Color ofHsb(double hue, double saturation, double brightness, double opacity) {
-<span class="fc" id="L2841">            _checkSB(saturation, brightness);</span>
-<span class="fc" id="L2842">            double[] rgb = ColorUtility.HSBtoRGB(hue, saturation, brightness);</span>
-<span class="fc" id="L2843">            return Color.of(rgb[0], rgb[1], rgb[2], opacity);</span>
+<span class="fc" id="L2885">            _checkSB(saturation, brightness);</span>
+<span class="fc" id="L2886">            double[] rgb = ColorUtility.HSBtoRGB(hue, saturation, brightness);</span>
+<span class="fc" id="L2887">            return Color.of(rgb[0], rgb[1], rgb[2], opacity);</span>
         }
 
         public static Color of( String colorString ) {
             try {
-<span class="fc" id="L2848">                return ColorUtility.parseColor(colorString);</span>
-<span class="nc" id="L2849">            } catch ( Exception e ) {</span>
-<span class="nc" id="L2850">                log.error(SwingTree.get().logMarker(), &quot;Could not parse color '&quot; + colorString + &quot;'.&quot;, e);</span>
-<span class="nc" id="L2851">                return Color.UNDEFINED;</span>
+<span class="fc" id="L2892">                return ColorUtility.parseColor(colorString);</span>
+<span class="nc" id="L2893">            } catch ( Exception e ) {</span>
+<span class="nc" id="L2894">                log.error(SwingTree.get().logMarker(), &quot;Could not parse color '&quot; + colorString + &quot;'.&quot;, e);</span>
+<span class="nc" id="L2895">                return Color.UNDEFINED;</span>
             }
         }
 
         private static void _checkRGB( int red, int green, int blue ) {
-<span class="pc bpc" id="L2856" title="2 of 4 branches missed.">            if (red &lt; 0 || red &gt; 255) {</span>
-<span class="nc" id="L2857">                throw new IllegalArgumentException(&quot;Color.rgb's red parameter (&quot; + red + &quot;) expects color values 0-255&quot;);</span>
+<span class="pc bpc" id="L2900" title="2 of 4 branches missed.">            if (red &lt; 0 || red &gt; 255) {</span>
+<span class="nc" id="L2901">                throw new IllegalArgumentException(&quot;Color.rgb's red parameter (&quot; + red + &quot;) expects color values 0-255&quot;);</span>
             }
-<span class="pc bpc" id="L2859" title="2 of 4 branches missed.">            if (green &lt; 0 || green &gt; 255) {</span>
-<span class="nc" id="L2860">                throw new IllegalArgumentException(&quot;Color.rgb's green parameter (&quot; + green + &quot;) expects color values 0-255&quot;);</span>
+<span class="pc bpc" id="L2903" title="2 of 4 branches missed.">            if (green &lt; 0 || green &gt; 255) {</span>
+<span class="nc" id="L2904">                throw new IllegalArgumentException(&quot;Color.rgb's green parameter (&quot; + green + &quot;) expects color values 0-255&quot;);</span>
             }
-<span class="pc bpc" id="L2862" title="2 of 4 branches missed.">            if (blue &lt; 0 || blue &gt; 255) {</span>
-<span class="nc" id="L2863">                throw new IllegalArgumentException(&quot;Color.rgb's blue parameter (&quot; + blue + &quot;) expects color values 0-255&quot;);</span>
+<span class="pc bpc" id="L2906" title="2 of 4 branches missed.">            if (blue &lt; 0 || blue &gt; 255) {</span>
+<span class="nc" id="L2907">                throw new IllegalArgumentException(&quot;Color.rgb's blue parameter (&quot; + blue + &quot;) expects color values 0-255&quot;);</span>
             }
-<span class="fc" id="L2865">        }</span>
+<span class="fc" id="L2909">        }</span>
 
         private static void _checkSB( double saturation, double brightness ) {
-<span class="pc bpc" id="L2868" title="2 of 4 branches missed.">            if (saturation &lt; 0.0 || saturation &gt; 1.0) {</span>
-<span class="nc" id="L2869">                throw new IllegalArgumentException(&quot;Color.hsb's saturation parameter (&quot; + saturation + &quot;) expects values 0.0-1.0&quot;);</span>
+<span class="pc bpc" id="L2912" title="2 of 4 branches missed.">            if (saturation &lt; 0.0 || saturation &gt; 1.0) {</span>
+<span class="nc" id="L2913">                throw new IllegalArgumentException(&quot;Color.hsb's saturation parameter (&quot; + saturation + &quot;) expects values 0.0-1.0&quot;);</span>
             }
-<span class="pc bpc" id="L2871" title="2 of 4 branches missed.">            if (brightness &lt; 0.0 || brightness &gt; 1.0) {</span>
-<span class="nc" id="L2872">                throw new IllegalArgumentException(&quot;Color.hsb's brightness parameter (&quot; + brightness + &quot;) expects values 0.0-1.0&quot;);</span>
+<span class="pc bpc" id="L2915" title="2 of 4 branches missed.">            if (brightness &lt; 0.0 || brightness &gt; 1.0) {</span>
+<span class="nc" id="L2916">                throw new IllegalArgumentException(&quot;Color.hsb's brightness parameter (&quot; + brightness + &quot;) expects values 0.0-1.0&quot;);</span>
             }
-<span class="fc" id="L2874">        }</span>
+<span class="fc" id="L2918">        }</span>
 
         private Color(java.awt.Color color) {
-<span class="fc" id="L2877">            super(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());</span>
-<span class="fc" id="L2878">        }</span>
+<span class="fc" id="L2921">            super(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());</span>
+<span class="fc" id="L2922">        }</span>
 
         private Color(int r, int g, int b) {
-<span class="fc" id="L2881">            super(r, g, b);</span>
-<span class="fc" id="L2882">        }</span>
+<span class="fc" id="L2925">            super(r, g, b);</span>
+<span class="fc" id="L2926">        }</span>
 
         private Color(int r, int g, int b, int a) {
-<span class="fc" id="L2885">            super(r, g, b, a);</span>
-<span class="fc" id="L2886">        }</span>
+<span class="fc" id="L2929">            super(r, g, b, a);</span>
+<span class="fc" id="L2930">        }</span>
 
         private Color(int rgb) {
-<span class="nc" id="L2889">            super(rgb);</span>
-<span class="nc" id="L2890">        }</span>
+<span class="nc" id="L2933">            super(rgb);</span>
+<span class="nc" id="L2934">        }</span>
 
         private Color(int rgba, boolean hasalpha) {
-<span class="nc" id="L2893">            super(rgba, hasalpha);</span>
-<span class="nc" id="L2894">        }</span>
+<span class="nc" id="L2937">            super(rgba, hasalpha);</span>
+<span class="nc" id="L2938">        }</span>
 
         private Color(float r, float g, float b) {
-<span class="fc" id="L2897">            super(r, g, b);</span>
-<span class="fc" id="L2898">        }</span>
+<span class="fc" id="L2941">            super(r, g, b);</span>
+<span class="fc" id="L2942">        }</span>
 
         private Color(float r, float g, float b, float a) {
-<span class="fc" id="L2901">            super(r, g, b, a);</span>
-<span class="fc" id="L2902">        }</span>
+<span class="fc" id="L2945">            super(r, g, b, a);</span>
+<span class="fc" id="L2946">        }</span>
 
         private Color(ColorSpace cspace, float[] components, float alpha) {
-<span class="nc" id="L2905">            super(cspace, components, alpha);</span>
-<span class="nc" id="L2906">        }</span>
+<span class="nc" id="L2949">            super(cspace, components, alpha);</span>
+<span class="nc" id="L2950">        }</span>
 
         /**
          * The red component of the {@code Color}, in the range {@code 0.0-1.0}.
@@ -2914,7 +2958,7 @@ public final class UI extends UIFactoryMethods
          * @see #getRed()
          */
         public double red() {
-<span class="fc" id="L2917">            return getRed() / 255.0;</span>
+<span class="fc" id="L2961">            return getRed() / 255.0;</span>
         }
 
         /**
@@ -2926,7 +2970,7 @@ public final class UI extends UIFactoryMethods
          * @see #getGreen()
          */
         public double green() {
-<span class="fc" id="L2929">            return getGreen() / 255.0;</span>
+<span class="fc" id="L2973">            return getGreen() / 255.0;</span>
         }
 
         /**
@@ -2938,7 +2982,7 @@ public final class UI extends UIFactoryMethods
          * @see #getBlue()
          */
         public double blue() {
-<span class="fc" id="L2941">            return getBlue() / 255.0;</span>
+<span class="fc" id="L2985">            return getBlue() / 255.0;</span>
         }
 
         /**
@@ -2950,7 +2994,7 @@ public final class UI extends UIFactoryMethods
          * @see #getAlpha()
          */
         public double opacity() {
-<span class="fc" id="L2953">            return getAlpha() / 255.0;</span>
+<span class="fc" id="L2997">            return getAlpha() / 255.0;</span>
         }
 
         /**
@@ -2958,7 +3002,7 @@ public final class UI extends UIFactoryMethods
          * @return Hue value in the range in the range {@code 0.0-360.0}.
          */
         public double hue() {
-<span class="nc" id="L2961">            return ColorUtility.RGBtoHSB(red(), green(), blue())[0];</span>
+<span class="nc" id="L3005">            return ColorUtility.RGBtoHSB(red(), green(), blue())[0];</span>
         }
 
         /**
@@ -2966,7 +3010,7 @@ public final class UI extends UIFactoryMethods
          * @return Saturation value in the range in the range {@code 0.0-1.0}.
          */
         public double saturation() {
-<span class="nc" id="L2969">            return ColorUtility.RGBtoHSB(red(), green(), blue())[1];</span>
+<span class="nc" id="L3013">            return ColorUtility.RGBtoHSB(red(), green(), blue())[1];</span>
         }
 
         /**
@@ -2974,7 +3018,7 @@ public final class UI extends UIFactoryMethods
          * @return Brightness value in the range in the range {@code 0.0-1.0}.
          */
         public double brightness() {
-<span class="nc" id="L2977">            return ColorUtility.RGBtoHSB(red(), green(), blue())[2];</span>
+<span class="nc" id="L3021">            return ColorUtility.RGBtoHSB(red(), green(), blue())[2];</span>
         }
 
         /**
@@ -2999,8 +3043,8 @@ public final class UI extends UIFactoryMethods
             double brightnessFactor,
             double opacityFactor
         ) {
-<span class="fc" id="L3002">            return ColorUtility.deriveColor(</span>
-<span class="fc" id="L3003">                    hueShift, saturationFactor, brightnessFactor, opacityFactor, red(), green(), blue(), opacity()</span>
+<span class="fc" id="L3046">            return ColorUtility.deriveColor(</span>
+<span class="fc" id="L3047">                    hueShift, saturationFactor, brightnessFactor, opacityFactor, red(), green(), blue(), opacity()</span>
                 );
         }
 
@@ -3010,7 +3054,7 @@ public final class UI extends UIFactoryMethods
          */
         @Override
         public Color brighter() {
-<span class="fc" id="L3013">            return _deriveColor(0, 1.0, 1.0 / DARKER_BRIGHTER_FACTOR, 1.0);</span>
+<span class="fc" id="L3057">            return _deriveColor(0, 1.0, 1.0 / DARKER_BRIGHTER_FACTOR, 1.0);</span>
         }
 
         /**
@@ -3019,11 +3063,11 @@ public final class UI extends UIFactoryMethods
          * @return A color that is a brighter version of this color or the same color if the factor is 0.0.
          */
         public Color brighterBy(double percentage) {
-<span class="fc bfc" id="L3022" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
-<span class="fc" id="L3023">                return this;</span>
+<span class="fc bfc" id="L3066" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
+<span class="fc" id="L3067">                return this;</span>
 
-<span class="fc" id="L3025">            double factor = 1 - percentage;</span>
-<span class="fc" id="L3026">            return _deriveColor(0, 1.0, 1.0 / factor, 1.0);</span>
+<span class="fc" id="L3069">            double factor = 1 - percentage;</span>
+<span class="fc" id="L3070">            return _deriveColor(0, 1.0, 1.0 / factor, 1.0);</span>
         }
 
         /**
@@ -3032,7 +3076,7 @@ public final class UI extends UIFactoryMethods
          */
         @Override
         public Color darker() {
-<span class="fc" id="L3035">            return _deriveColor(0, 1.0, DARKER_BRIGHTER_FACTOR, 1.0);</span>
+<span class="fc" id="L3079">            return _deriveColor(0, 1.0, DARKER_BRIGHTER_FACTOR, 1.0);</span>
         }
 
         /**
@@ -3042,11 +3086,11 @@ public final class UI extends UIFactoryMethods
          * @return A color that is a darker version of this color or the same color if the factor is 0.0.
          */
         public Color darkerBy(double percentage) {
-<span class="fc bfc" id="L3045" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
-<span class="fc" id="L3046">                return this;</span>
+<span class="fc bfc" id="L3089" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
+<span class="fc" id="L3090">                return this;</span>
 
-<span class="fc" id="L3048">            double factor = 1 - percentage;</span>
-<span class="fc" id="L3049">            return _deriveColor(0, 1.0, factor, 1.0);</span>
+<span class="fc" id="L3092">            double factor = 1 - percentage;</span>
+<span class="fc" id="L3093">            return _deriveColor(0, 1.0, factor, 1.0);</span>
         }
 
         /**
@@ -3056,7 +3100,7 @@ public final class UI extends UIFactoryMethods
          * @return A color that is a more saturated version of this color.
          */
         public Color saturate() {
-<span class="nc" id="L3059">            return _deriveColor(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);</span>
+<span class="nc" id="L3103">            return _deriveColor(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);</span>
         }
 
         /**
@@ -3068,11 +3112,11 @@ public final class UI extends UIFactoryMethods
          * @return A color that is saturated by the specified percentage factor or the same color if the factor is 0.0.
          */
         public Color saturateBy(double percentage) {
-<span class="fc bfc" id="L3071" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
-<span class="fc" id="L3072">                return this;</span>
+<span class="fc bfc" id="L3115" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
+<span class="fc" id="L3116">                return this;</span>
 
-<span class="fc" id="L3074">            double factor = 1 - percentage;</span>
-<span class="fc" id="L3075">            return _deriveColor(0, 1.0 / factor, 1.0, 1.0);</span>
+<span class="fc" id="L3118">            double factor = 1 - percentage;</span>
+<span class="fc" id="L3119">            return _deriveColor(0, 1.0 / factor, 1.0, 1.0);</span>
         }
 
         /**
@@ -3082,7 +3126,7 @@ public final class UI extends UIFactoryMethods
          * @return A color that is a less saturated version of this color.
          */
         public Color desaturate() {
-<span class="nc" id="L3085">            return _deriveColor(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);</span>
+<span class="nc" id="L3129">            return _deriveColor(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);</span>
         }
 
         /**
@@ -3094,11 +3138,11 @@ public final class UI extends UIFactoryMethods
          * @return A color that is desaturated by the specified percentage factor or the same color if the factor is 0.0.
          */
         public Color desaturateBy(double percentage) {
-<span class="fc bfc" id="L3097" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
-<span class="fc" id="L3098">                return this;</span>
+<span class="fc bfc" id="L3141" title="All 2 branches covered.">            if ( percentage == 0.0 )</span>
+<span class="fc" id="L3142">                return this;</span>
 
-<span class="fc" id="L3100">            double factor = 1 - percentage;</span>
-<span class="fc" id="L3101">            return _deriveColor(0, factor, 1.0, 1.0);</span>
+<span class="fc" id="L3144">            double factor = 1 - percentage;</span>
+<span class="fc" id="L3145">            return _deriveColor(0, factor, 1.0, 1.0);</span>
         }
 
         /**
@@ -3107,8 +3151,8 @@ public final class UI extends UIFactoryMethods
          * @return A color that is grayscale equivalent of this color
          */
         public Color grayscale() {
-<span class="nc" id="L3110">            double gray = 0.2126 * red() + 0.7152 * green() + 0.0722 * blue();</span>
-<span class="nc" id="L3111">            return Color.of(gray, gray, gray, opacity());</span>
+<span class="nc" id="L3154">            double gray = 0.2126 * red() + 0.7152 * green() + 0.0722 * blue();</span>
+<span class="nc" id="L3155">            return Color.of(gray, gray, gray, opacity());</span>
         }
 
         /**
@@ -3117,7 +3161,7 @@ public final class UI extends UIFactoryMethods
          * @return A color that is inversion of this color.
          */
         public Color invert() {
-<span class="nc" id="L3120">            return Color.of(1.0 - red(), 1.0 - green(), 1.0 - blue(), opacity());</span>
+<span class="nc" id="L3164">            return Color.of(1.0 - red(), 1.0 - green(), 1.0 - blue(), opacity());</span>
         }
 
         /**
@@ -3132,7 +3176,7 @@ public final class UI extends UIFactoryMethods
          * @see #red()
          */
         public Color withRed(double red) {
-<span class="nc" id="L3135">            return Color.of(red, green(), blue(), opacity());</span>
+<span class="nc" id="L3179">            return Color.of(red, green(), blue(), opacity());</span>
         }
 
         /**
@@ -3147,7 +3191,7 @@ public final class UI extends UIFactoryMethods
          * @see #green()
          */
         public Color withGreen(double green) {
-<span class="nc" id="L3150">            return Color.of(red(), green, blue(), opacity());</span>
+<span class="nc" id="L3194">            return Color.of(red(), green, blue(), opacity());</span>
         }
 
         /**
@@ -3162,7 +3206,7 @@ public final class UI extends UIFactoryMethods
          * @see #blue()
          */
         public Color withBlue(double blue) {
-<span class="nc" id="L3165">            return Color.of(red(), green(), blue, opacity());</span>
+<span class="nc" id="L3209">            return Color.of(red(), green(), blue, opacity());</span>
         }
 
         /**
@@ -3177,7 +3221,7 @@ public final class UI extends UIFactoryMethods
          * @see #opacity()
          */
         public Color withOpacity(double opacity) {
-<span class="fc" id="L3180">            return Color.of(red(), green(), blue(), opacity);</span>
+<span class="fc" id="L3224">            return Color.of(red(), green(), blue(), opacity);</span>
         }
 
         /**
@@ -3190,7 +3234,7 @@ public final class UI extends UIFactoryMethods
          * @return A new {@code Color} object with the alpha component changed
          */
         public Color withAlpha(int alpha ) {
-<span class="fc" id="L3193">            return new Color(getRed(), getGreen(), getBlue(), alpha);</span>
+<span class="fc" id="L3237">            return new Color(getRed(), getGreen(), getBlue(), alpha);</span>
         }
 
         /**
@@ -3205,7 +3249,7 @@ public final class UI extends UIFactoryMethods
          * @see #hue()
          */
         public Color withHue(double hue) {
-<span class="nc" id="L3208">            return Color.ofHsb(hue, saturation(), brightness(), opacity());</span>
+<span class="nc" id="L3252">            return Color.ofHsb(hue, saturation(), brightness(), opacity());</span>
         }
 
         /**
@@ -3220,7 +3264,7 @@ public final class UI extends UIFactoryMethods
          * @see #saturation()
          */
         public Color withSaturation(double saturation) {
-<span class="nc" id="L3223">            return Color.ofHsb(hue(), saturation, brightness(), opacity());</span>
+<span class="nc" id="L3267">            return Color.ofHsb(hue(), saturation, brightness(), opacity());</span>
         }
 
         /**
@@ -3235,7 +3279,7 @@ public final class UI extends UIFactoryMethods
          * @see #brightness()
          */
         public Color withBrightness( double brightness ) {
-<span class="nc" id="L3238">            return Color.ofHsb(hue(), saturation(), brightness, opacity());</span>
+<span class="nc" id="L3282">            return Color.ofHsb(hue(), saturation(), brightness, opacity());</span>
         }
     }
 
@@ -3268,7 +3312,7 @@ public final class UI extends UIFactoryMethods
          *  the {@link java.awt.Component#setFont(java.awt.Font)} method as null.
          *  Passing null to this method means that the look and feel determines the font.
          */
-<span class="fc" id="L3271">        public static final java.awt.Font UNDEFINED = new java.awt.Font(&quot;&quot;, -1, 0);</span>
+<span class="fc" id="L3315">        public static final java.awt.Font UNDEFINED = new java.awt.Font(&quot;&quot;, -1, 0);</span>
 
         private final FontConf conf;
 
@@ -3282,7 +3326,7 @@ public final class UI extends UIFactoryMethods
          * @return A new {@code Font} object with the specified font name, style and size.
          */
         public static Font of( String name, FontStyle style, int size ) {
-<span class="fc" id="L3285">            return new Font(name, style.toAWTFontStyle(), size);</span>
+<span class="fc" id="L3329">            return new Font(name, style.toAWTFontStyle(), size);</span>
         }
 
         /**
@@ -3294,7 +3338,7 @@ public final class UI extends UIFactoryMethods
          * @return A new {@code Font} object with the specified font name, style and size.
          */
         public static Font of( String name, int size ) {
-<span class="fc" id="L3297">            return new Font(name, FontStyle.PLAIN.toAWTFontStyle(), size);</span>
+<span class="fc" id="L3341">            return new Font(name, FontStyle.PLAIN.toAWTFontStyle(), size);</span>
         }
 
         /**
@@ -3306,7 +3350,7 @@ public final class UI extends UIFactoryMethods
          * @return A new {@code Font} object with the specified attributes.
          */
         public static Font of( Map&lt;? extends AttributedCharacterIterator.Attribute, ?&gt; attributes ) {
-<span class="nc" id="L3309">            return new Font(attributes);</span>
+<span class="nc" id="L3353">            return new Font(attributes);</span>
         }
 
         /**
@@ -3315,30 +3359,30 @@ public final class UI extends UIFactoryMethods
          * @return The SwingTree native font object.
          */
         public static Font of( java.awt.Font font ) {
-<span class="fc" id="L3318">            return new Font(font);</span>
+<span class="fc" id="L3362">            return new Font(font);</span>
         }
 
         private Font(String name, int style, int size) {
-<span class="fc" id="L3322">            this(new java.awt.Font(name, style, size));</span>
-<span class="fc" id="L3323">        }</span>
+<span class="fc" id="L3366">            this(new java.awt.Font(name, style, size));</span>
+<span class="fc" id="L3367">        }</span>
 
         private Font(Map&lt;? extends AttributedCharacterIterator.Attribute, ?&gt; attributes) {
-<span class="nc" id="L3326">            this(new java.awt.Font(attributes));</span>
-<span class="nc" id="L3327">        }</span>
+<span class="nc" id="L3370">            this(new java.awt.Font(attributes));</span>
+<span class="nc" id="L3371">        }</span>
 
         private Font(java.awt.Font font) {
-<span class="fc" id="L3330">            this(conf-&gt;conf.withPropertiesFromFont(font));</span>
-<span class="fc" id="L3331">        }</span>
+<span class="fc" id="L3374">            this(conf-&gt;conf.withPropertiesFromFont(font));</span>
+<span class="fc" id="L3375">        }</span>
 
         private Font(Configurator&lt;FontConf&gt; configurator) {
-<span class="fc" id="L3334">            this(Result.ofTry(FontConf.class, ()-&gt;configurator.configure(FontConf.none()))</span>
-<span class="fc" id="L3335">                                    .logProblemsAsError()</span>
-<span class="fc" id="L3336">                                    .orElse(FontConf.none()));</span>
-<span class="fc" id="L3337">        }</span>
+<span class="fc" id="L3378">            this(Result.ofTry(FontConf.class, ()-&gt;configurator.configure(FontConf.none()))</span>
+<span class="fc" id="L3379">                                    .logProblemsAsError()</span>
+<span class="fc" id="L3380">                                    .orElse(FontConf.none()));</span>
+<span class="fc" id="L3381">        }</span>
 
-<span class="fc" id="L3339">        private Font(FontConf conf) {</span>
-<span class="fc" id="L3340">            this.conf = conf;</span>
-<span class="fc" id="L3341">        }</span>
+<span class="fc" id="L3383">        private Font(FontConf conf) {</span>
+<span class="fc" id="L3384">            this.conf = conf;</span>
+<span class="fc" id="L3385">        }</span>
 
         /**
          *  Converts this font to a {@link java.awt.Font} object
@@ -3350,7 +3394,7 @@ public final class UI extends UIFactoryMethods
          *  @return The {@link java.awt.Font} object representing this font.
          */
         public java.awt.Font toAwtFont() {
-<span class="fc" id="L3353">            return SwingTree.get().scale(this.conf.toAwtFont());</span>
+<span class="fc" id="L3397">            return SwingTree.get().scale(this.conf.toAwtFont());</span>
         }
 
         /**
@@ -3362,7 +3406,7 @@ public final class UI extends UIFactoryMethods
          *  @return The configuration of this font.
          */
         public FontConf conf() {
-<span class="fc" id="L3365">            return this.conf;</span>
+<span class="fc" id="L3409">            return this.conf;</span>
         }
 
         /**
@@ -3375,10 +3419,10 @@ public final class UI extends UIFactoryMethods
          * @throws NullPointerException If the configurator is null.
          */
         public Font with( Configurator&lt;FontConf&gt; configurator ) {
-<span class="fc" id="L3378">            Objects.requireNonNull(configurator, &quot;The font configurator cannot be null.&quot;);</span>
-<span class="fc" id="L3379">            return new Font(Result.ofTry(FontConf.class, ()-&gt; configurator.configure(this.conf))</span>
-<span class="fc" id="L3380">                    .logProblemsAsError()</span>
-<span class="fc" id="L3381">                    .orElse(this.conf));</span>
+<span class="fc" id="L3422">            Objects.requireNonNull(configurator, &quot;The font configurator cannot be null.&quot;);</span>
+<span class="fc" id="L3423">            return new Font(Result.ofTry(FontConf.class, ()-&gt; configurator.configure(this.conf))</span>
+<span class="fc" id="L3424">                    .logProblemsAsError()</span>
+<span class="fc" id="L3425">                    .orElse(this.conf));</span>
         }
 
         /**
@@ -3388,8 +3432,8 @@ public final class UI extends UIFactoryMethods
          *  @throws NullPointerException If the font name is null.
          */
         public Font withName( String name ) {
-<span class="fc" id="L3391">            Objects.requireNonNull(name, &quot;The font name cannot be null.&quot;);</span>
-<span class="fc" id="L3392">            return with(conf-&gt;conf.family(name));</span>
+<span class="fc" id="L3435">            Objects.requireNonNull(name, &quot;The font name cannot be null.&quot;);</span>
+<span class="fc" id="L3436">            return with(conf-&gt;conf.family(name));</span>
         }
 
         /**
@@ -3399,7 +3443,7 @@ public final class UI extends UIFactoryMethods
          *  @return A new {@code Font} object with the font style changed.
          */
         public Font withStyle( FontStyle style ) {
-<span class="fc" id="L3402">            return with(conf-&gt;conf.style(style));</span>
+<span class="fc" id="L3446">            return with(conf-&gt;conf.style(style));</span>
         }
 
         /**
@@ -3408,23 +3452,23 @@ public final class UI extends UIFactoryMethods
          *  @return A new {@code Font} object with the font size changed.
          */
         public Font withSize( int size ) {
-<span class="fc" id="L3411">            return with(conf-&gt;conf.size(size));</span>
+<span class="fc" id="L3455">            return with(conf-&gt;conf.size(size));</span>
         }
 
         @Override
         public int hashCode() {
-<span class="fc" id="L3416">            return this.conf.hashCode();</span>
+<span class="fc" id="L3460">            return this.conf.hashCode();</span>
         }
 
         @Override
         public boolean equals(Object obj) {
-<span class="pc bpc" id="L3421" title="1 of 4 branches missed.">            return obj instanceof Font &amp;&amp; this.conf.equals(((Font)obj).conf);</span>
+<span class="pc bpc" id="L3465" title="1 of 4 branches missed.">            return obj instanceof Font &amp;&amp; this.conf.equals(((Font)obj).conf);</span>
         }
 
         @Override
         public String toString() {
-<span class="fc" id="L3426">            String confString = this.conf.toString();</span>
-<span class="fc" id="L3427">            return &quot;UI.Font[&quot; + confString.substring(9, confString.length() - 1) + &quot;]&quot;;</span>
+<span class="fc" id="L3470">            String confString = this.conf.toString();</span>
+<span class="fc" id="L3471">            return &quot;UI.Font[&quot; + confString.substring(9, confString.length() - 1) + &quot;]&quot;;</span>
         }
 
     }

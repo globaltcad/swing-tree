@@ -82,13 +82,13 @@ final class ComponentConf
 <span class="fc" id="L82">        ComponentConf other = (ComponentConf) o;</span>
 <span class="fc bfc" id="L83" title="All 2 branches covered.">        return Objects.equals(_styleConf, other._styleConf)</span>
 <span class="fc bfc" id="L84" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_currentBounds, other._currentBounds)</span>
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">            &amp;&amp; Objects.equals(_marginCorrection, other._marginCorrection);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_marginCorrection, other._marginCorrection);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( _wasAlreadyHashed )</span>
-<span class="nc" id="L91">            return _hashCode;</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if ( _wasAlreadyHashed )</span>
+<span class="fc" id="L91">            return _hashCode;</span>
 
 <span class="fc" id="L93">        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);</span>
 <span class="fc" id="L94">        _wasAlreadyHashed = true;</span>

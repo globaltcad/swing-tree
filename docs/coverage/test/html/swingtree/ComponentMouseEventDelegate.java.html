@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentMouseEventDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">ComponentMouseEventDelegate.java</span></div><h1>ComponentMouseEventDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
 
 import swingtree.layout.Position;
+import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -43,8 +44,8 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
         C component,
         MouseEvent event
     ) {
-<span class="fc" id="L46">        super(component, event);</span>
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L47">        super(component, event);</span>
+<span class="fc" id="L48">    }</span>
 
     /**
      * Returns true if the mouse event of this delegate is the left mouse button.
@@ -52,7 +53,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the left mouse button was active
      */
     public final boolean isLeftMouseButton() {
-<span class="nc" id="L55">        return SwingUtilities.isLeftMouseButton(getEvent());</span>
+<span class="nc" id="L56">        return SwingUtilities.isLeftMouseButton(getEvent());</span>
     }
 
     /**
@@ -61,7 +62,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the right mouse button was active
      */
     public final boolean isRightMouseButton() {
-<span class="nc" id="L64">        return SwingUtilities.isRightMouseButton(getEvent());</span>
+<span class="nc" id="L65">        return SwingUtilities.isRightMouseButton(getEvent());</span>
     }
 
     /**
@@ -70,7 +71,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the middle mouse button was active
      */
     public final boolean isMiddleMouseButton() {
-<span class="nc" id="L73">        return SwingUtilities.isMiddleMouseButton(getEvent());</span>
+<span class="nc" id="L74">        return SwingUtilities.isMiddleMouseButton(getEvent());</span>
     }
 
     /**
@@ -79,7 +80,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the alt modifier is down
      */
     public final boolean isAltDown() {
-<span class="nc" id="L82">        return getEvent().isAltDown();</span>
+<span class="nc" id="L83">        return getEvent().isAltDown();</span>
     }
 
     /**
@@ -88,7 +89,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the control modifier is down
      */
     public final boolean isCtrlDown() {
-<span class="nc" id="L91">        return getEvent().isControlDown();</span>
+<span class="nc" id="L92">        return getEvent().isControlDown();</span>
     }
 
     /**
@@ -97,7 +98,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the shift modifier is down
      */
     public final boolean isShiftDown() {
-<span class="nc" id="L100">        return getEvent().isShiftDown();</span>
+<span class="nc" id="L101">        return getEvent().isShiftDown();</span>
     }
 
     /**
@@ -106,7 +107,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return true if the meta modifier is down
      */
     public final boolean isMetaDown() {
-<span class="nc" id="L109">        return getEvent().isMetaDown();</span>
+<span class="nc" id="L110">        return getEvent().isMetaDown();</span>
     }
 
     /**
@@ -116,37 +117,70 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return An integer indicating the number of mouse clicks associated with the mouse event.
      */
     public final int clickCount() {
-<span class="fc" id="L119">        return getEvent().getClickCount();</span>
+<span class="fc" id="L120">        return getEvent().getClickCount();</span>
     }
 
     /**
-     * Returns the x coordinate of the mouse event of this delegate.
+     * Returns the x coordinate of the mouse event of this delegate &lt;b&gt;without DPI scaling&lt;/b&gt;.
+     * So the value is in &quot;developer pixel&quot; coordinate space &lt;b&gt;relative to the underlying component&lt;/b&gt;.
+     * So a mouse position of (0,0) would be in the top left corner of the component. &lt;br&gt;
+     * &lt;p&gt;
+     * &lt;b&gt;For Context:&lt;/b&gt;&lt;br&gt;
+     * SwingTree supports high DPI scaling, but to achieve this it needs to scale the size
+     * of components for you depending on the current {@link UI#scale()} factor. &lt;br&gt;
+     * This means that whatever dimensions you specify in methods like
+     * {@link UIForAnySwing#withSizeExactly(Size)} are not necessarily
+     * going to be the equal to the actual size of the underlying component.&lt;br&gt;
+     * Therefore the component relative mouse position must be &quot;unscaled&quot; to be consistent
+     * from a developers point of view...
+     * &lt;/p&gt;
      *
-     * @return integer value for the x coordinate
+     * @return An integer value representing the x coordinate without DPI scaling (aka &quot;developer pixel&quot;).
      */
     public final int mouseX() {
-<span class="fc" id="L128">        return getEvent().getX();</span>
+<span class="nc" id="L141">        return UI.unscale(getEvent().getX());</span>
     }
 
     /**
-     * Returns the y coordinate of the mouse event of this delegate.
-     *
-     * @return integer value for the y coordinate
+     * Returns the y coordinate of the mouse event of this delegate &lt;b&gt;without DPI scaling&lt;/b&gt;.
+     * So the value is in &quot;developer pixel&quot; coordinate space &lt;b&gt;relative to the underlying component&lt;/b&gt;.
+     * So a mouse position of (0,0) would be in the top left corner of the component. &lt;br&gt;
+     * &lt;p&gt;
+     * &lt;b&gt;For Context:&lt;/b&gt;&lt;br&gt;
+     * SwingTree supports high DPI scaling, but to achieve this it needs to scale the size
+     * of components for you depending on the current {@link UI#scale()} factor. &lt;br&gt;
+     * This means that whatever dimensions you specify in methods like
+     * {@link UIForAnySwing#withSizeExactly(Size)} are not necessarily
+     * going to be the equal to the actual size of the underlying component.&lt;br&gt;
+     * Therefore the component relative mouse position must be &quot;unscaled&quot; to be consistent
+     * from a developers point of view...
+     * &lt;/p&gt;
+     * @return An integer value representing the y coordinate without DPI scaling (aka &quot;developer pixel&quot;).
      */
     public final int mouseY() {
-<span class="fc" id="L137">        return getEvent().getY();</span>
+<span class="nc" id="L161">        return UI.unscale(getEvent().getY());</span>
     }
 
     /**
-     * Returns the position of the mouse event of this delegate
-     * in the form of an immutable {@link Position} value object.
-     * So you may safely share this object without
-     * having to worry about side effects.
+     * Returns the {@link Position} of the mouse event of this delegate &lt;b&gt;without DPI scaling&lt;/b&gt;.
+     * So the x and y coordinates of the position is scaled to the &quot;developer pixel&quot; coordinate space
+     * &lt;b&gt;relative to the underlying component&lt;/b&gt;. So a position of (0,0) is in the top left
+     * corner of the component. &lt;br&gt;
+     * &lt;p&gt;
+     * &lt;b&gt;For Context:&lt;/b&gt;&lt;br&gt;
+     * SwingTree supports high DPI scaling, but to achieve this it needs to scale the size
+     * of components for you depending on the current {@link UI#scale()} factor. &lt;br&gt;
+     * This means that whatever dimensions you specify in methods like
+     * {@link UIForAnySwing#withSizeExactly(Size)} are not necessarily
+     * going to be the equal to the actual size of the underlying component.&lt;br&gt;
+     * Therefore the component relative mouse position must be &quot;unscaled&quot; to be consistent
+     * from a developers point of view...
+     * &lt;/p&gt;
      *
-     * @return the position of the mouse event
+     * @return The component relative position of the mouse event in the developer pixel coordinate space (without DPI scaling applied).
      */
     public final Position mousePosition() {
-<span class="nc" id="L149">        return Position.of(getEvent().getPoint());</span>
+<span class="nc" id="L183">        return Position.of(mouseX(), mouseY());</span>
     }
 
     /**
@@ -160,7 +194,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return x  an integer indicating absolute horizontal position.
      */
     public final int mouseXOnScreen() {
-<span class="nc" id="L163">        return getEvent().getXOnScreen();</span>
+<span class="nc" id="L197">        return getEvent().getXOnScreen();</span>
     }
 
     /**
@@ -174,7 +208,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return y  an integer indicating absolute vertical position.
      */
     public final int mouseYOnScreen() {
-<span class="nc" id="L177">        return getEvent().getYOnScreen();</span>
+<span class="nc" id="L211">        return getEvent().getYOnScreen();</span>
     }
 
     /**
@@ -186,7 +220,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return the absolute position of the mouse event
      */
     public final Position mousePositionOnScreen() {
-<span class="nc" id="L189">        return Position.of(getEvent().getLocationOnScreen());</span>
+<span class="nc" id="L223">        return Position.of(getEvent().getLocationOnScreen());</span>
     }
 
 }

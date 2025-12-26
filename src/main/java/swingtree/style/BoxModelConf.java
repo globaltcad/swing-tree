@@ -10,8 +10,13 @@ import java.util.Optional;
 /**
  *  An immutable config container defining the shape of a component as part of
  *  a {@link StyleConf} configuration object.
- *  The state of this object is updated through with-methods that return
- *  a new instance of this class with the updated state.
+ *  The so-called "box model" refers to the same concept in web development/CSS,
+ *  in which the size and shape of a component is defined by its content size,
+ *  padding, border, margin, and border-radius (arc).
+ *  The state of this object is updated through wither-methods that return
+ *  a new instance of this class with the updated state.<br>
+ *  Instances of this serve as globally pooled cache keys for {@link ComponentAreas}
+ *  instances, which hold pre-computed geometric areas for rendering components.
  */
 @Immutable
 final class BoxModelConf

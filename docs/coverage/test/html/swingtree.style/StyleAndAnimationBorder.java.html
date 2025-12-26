@@ -257,10 +257,10 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
 
     private void _calculateFullPaddingInsets( StyleConf styleConf)
     {
-<span class="fc" id="L260">        _fullPaddingInsets.top    = (int)( styleConf.padding().top().orElse(0f)    + styleConf.margin().top().orElse(0f) );</span>
-<span class="fc" id="L261">        _fullPaddingInsets.left   = (int)( styleConf.padding().left().orElse(0f)   + styleConf.margin().left().orElse(0f) );</span>
-<span class="fc" id="L262">        _fullPaddingInsets.right  = (int)( styleConf.padding().right().orElse(0f)  + styleConf.margin().right().orElse(0f) );</span>
-<span class="fc" id="L263">        _fullPaddingInsets.bottom = (int)( styleConf.padding().bottom().orElse(0f) + styleConf.margin().bottom().orElse(0f) );</span>
+<span class="fc" id="L260">        _fullPaddingInsets.top    = (int)( styleConf.padding().top().orElse(0f)    + styleConf.border().widths().top().orElse(0f)    + styleConf.margin().top().orElse(0f) );</span>
+<span class="fc" id="L261">        _fullPaddingInsets.left   = (int)( styleConf.padding().left().orElse(0f)   + styleConf.border().widths().left().orElse(0f)   + styleConf.margin().left().orElse(0f) );</span>
+<span class="fc" id="L262">        _fullPaddingInsets.right  = (int)( styleConf.padding().right().orElse(0f)  + styleConf.border().widths().right().orElse(0f)  + styleConf.margin().right().orElse(0f) );</span>
+<span class="fc" id="L263">        _fullPaddingInsets.bottom = (int)( styleConf.padding().bottom().orElse(0f) + styleConf.border().widths().bottom().orElse(0f) + styleConf.margin().bottom().orElse(0f) );</span>
 <span class="fc" id="L264">    }</span>
 
 }

@@ -4,7 +4,7 @@
   "narrative":"Swing-Tree supports SVG icons through the `SvgIcon` class,\n    which is a subclass of `javax.swing.ImageIcon`.\n    This allows for smooth integration of SVG icons into regular\n    Swing components, like buttons, labels, etc.\n\n    In this specification we will see how to use the `SvgIcon` class.",
   "subjects":["swingtree.style.SvgIcon"],
   "statistics":{
-    "runs":"9",
+    "runs":"37",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The nature of SVG icons is that they are scalable,\n            which means that they do not have a fixed size.\n            The size is dependent on the component that uses the icon\n            or the specified size of the icon.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+        {"kind":"given","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = SvgIcon.at(\"/img/funnel.svg\")"]},
 
         {"kind":"expect","text":"The icon does not have a size.","code":["icon.getSvgDocument() != null","icon.getIconHeight() == -1","icon.getIconWidth()  == -1"]}
       ],
@@ -38,7 +38,7 @@
       "blocks":[
         {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
-        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = SvgIcon.at(\"/img/funnel.svg\")"]},
 
         {"kind":"when","text":"We use the various wither methods to create differently sized icons.","code":["var icon2 = icon.withIconWidth(12)","var icon1 = icon.withIconHeight(13)","var icon3 = icon.withIconSize(27, 16)","var icon5 = icon.withIconSizeFromWidth(31)","var icon4 = icon.withIconSizeFromHeight(24)"]},
 
@@ -61,7 +61,7 @@
       "blocks":[
         {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
-        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = SvgIcon.at(\"/img/funnel.svg\")"]},
 
         {"kind":"when","text":"We use the various wither methods to create differently sized icons.","code":["var icon2 = icon.withIconWidth(12)","var icon1 = icon.withIconHeight(13)","var icon3 = icon.withIconSize(27, 16)","var icon5 = icon.withIconSizeFromWidth(31)","var icon4 = icon.withIconSizeFromHeight(24)"]},
 
@@ -84,7 +84,7 @@
       "blocks":[
         {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
-        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = new SvgIcon(\"/img/funnel.svg\")"]},
+        {"kind":"and","text":"We create a basic `SvgIcon` of a funnel.","code":["var icon = SvgIcon.at(\"/img/funnel.svg\")"]},
 
         {"kind":"when","text":"We use the various wither methods to create differently sized icons.","code":["var icon2 = icon.withIconWidth(12)","var icon1 = icon.withIconHeight(13)","var icon3 = icon.withIconSize(27, 16)","var icon5 = icon.withIconSizeFromWidth(31)","var icon4 = icon.withIconSizeFromHeight(24)"]},
 
@@ -105,11 +105,11 @@
       "tags":{},"see":[],"extraInfo":["\n            The `SvgIcon` consists of various properties,\n            which are shown in the `String` representation of the icon.\n            This includes the size of the icon and how it is scaled\n            and preferably placed.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a set of various `SvgIcon`s.","code":["var icon  = new SvgIcon(\"/img/funnel.svg\")","var icon1 = icon.withIconHeight(13)","var icon2 = icon.withIconWidth(12).withFitComponent(UI.FitComponent.NO)","var icon3 = icon.withIconSize(27, 16)","var icon4 = icon.withIconSizeFromWidth(31).withPreferredPlacement(UI.Placement.BOTTOM_RIGHT)","var icon5 = icon.withIconSizeFromHeight(24)"]},
+        {"kind":"given","text":"We create a set of various `SvgIcon`s.","code":["var icon  = SvgIcon.at(\"/img/funnel.svg\")","var icon1 = icon.withIconHeight(13)","var icon2 = icon.withIconWidth(12).withFitComponent(UI.FitComponent.NO)","var icon3 = icon.withIconSize(27, 16)","var icon4 = icon.withIconSizeFromWidth(31).withPreferredPlacement(UI.Placement.BOTTOM_RIGHT)","var icon5 = icon.withIconSizeFromHeight(24)"]},
 
         {"kind":"and","text":"We turn each icon into its String representation:","code":["icon  = icon .toString()","icon1 = icon1.toString()","icon2 = icon2.toString()","icon3 = icon3.toString()","icon4 = icon4.toString()","icon5 = icon5.toString()"]},
 
-        {"kind":"expect","text":"They all have the expected String representations:","code":["icon.matches( /SvgIcon\\[width=\\?, height=\\?, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon1.matches( /SvgIcon\\[width=\\?, height=13, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon2.matches( /SvgIcon\\[width=12, height=\\?, fitComponent=NO, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon3.matches( /SvgIcon\\[width=27, height=16, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon4.matches( /SvgIcon\\[width=31, height=31, fitComponent=MIN_DIM, preferredPlacement=BOTTOM_RIGHT, doc=.*\\]/ )","icon5.matches( /SvgIcon\\[width=24, height=24, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\\]/ )"]}
+        {"kind":"expect","text":"They all have the expected String representations:","code":["icon.matches( /SvgIcon\\[width=\\?, height=\\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon1.matches( /SvgIcon\\[width=\\?, height=13, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon2.matches( /SvgIcon\\[width=12, height=\\?, fitComponent=NO, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon3.matches( /SvgIcon\\[width=27, height=16, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\\]/ )","icon4.matches( /SvgIcon\\[width=31, height=31, fitComponent=UNDEFINED, preferredPlacement=BOTTOM_RIGHT, doc=.*\\]/ )","icon5.matches( /SvgIcon\\[width=24, height=24, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\\]/ )"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -180,6 +180,594 @@
         {"kind":"and","text":"The icons should have the correct size.","code":["icon1.get().getIconWidth() == 17","icon1.get().getIconHeight() == 17","icon2.get().getIconWidth() == 17","icon2.get().getIconHeight() == 17"]},
 
         {"kind":"and","text":"Their base size is what we specified.","code":["icon1.get().getBaseWidth() == -1","icon1.get().getBaseHeight() == 17","icon2.get().getBaseWidth() == 17","icon2.get().getBaseHeight() == -1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [14]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [15]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [16]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [17]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [18]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [19]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [20]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [21]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [22]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [23]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [24]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [25]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [26]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `SvgIcon` has the correct dimensions when parsed from a string. [27]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We start with an initial UI scale.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+
+        {"kind":"and","text":"","code":["var svgIcon = SvgIcon.of(svg)"]},
+
+        {"kind":"expect","text":"","code":["svgIcon.getIconWidth() == expectedWidth"]},
+
+        {"kind":"and","text":"","code":["svgIcon.getIconHeight() == expectedHeight"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1","1","1","1","1","1","1","1","1","1","1","1","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],"expectedWidth":["-1","-1","100","75","-1","8","22","-1","-1","100","75","-1","8","22","-1","-1","200","150","-1","16","44","-1","-1","200","150","-1","16","44"],"expectedHeight":["100","90","-1","100","12","16","22","100","90","-1","100","12","16","22","200","180","-1","200","24","32","44","200","180","-1","200","24","32","44"],"svg":["\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75\\\" height=\\\"100\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8\\\" height=\\\"16\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22\\\" height=\\\"22\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"90px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100px\\\" height=\\\"100%\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"75px\\\" height=\\\"100px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"100%\\\" height=\\\"12px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"8px\\\" height=\\\"16px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:","\"<svg width=\\\"22px\\\" height=\\\"22px\\\" viewBox=\\\"0 0 100 100\\\" xmlns=\\\"http:"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

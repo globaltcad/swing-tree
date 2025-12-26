@@ -148,7 +148,7 @@ public final class SwingTree
 <span class="fc" id="L148">    }</span>
 
     /**
-     *  The icon cash is a hash map that uses an {@link IconDeclaration} as a key
+     *  The icon cache is a hash map that uses an {@link IconDeclaration} as a key
      *  and an {@link ImageIcon} as a value. This is used to cache icons that are loaded
      *  from the file system using convenience methods like
      *  {@link swingtree.UI#findIcon(String)} and {@link swingtree.UI#findIcon(IconDeclaration)} or
@@ -162,24 +162,32 @@ public final class SwingTree
 <span class="fc" id="L162">    public Map&lt;IconDeclaration, ImageIcon&gt; getIconCache() { return _iconCache; }</span>
 
     /**
-     * Returns the user scale factor is a scaling factor is used by SwingTree's
-     * style engine to scale the UI during painting.
-     * Note that this is different from the system/Graphics2D scale factor, which is
-     * the scale factor that the JRE uses to scale everything through the
-     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * There are two types of strategies for achieving high DPI scaling in Swing.
+     * The first one is available since Java 9, and it uses the system property {@code sun.java2d.uiScale}
+     * to scale the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D} graphics context.
+     * The second one is look and feel / client code dependent scaling, which is what SwingTree uses
+     * in, for example, the style engine or when seting the size of component through the SwingTree API...
      * &lt;p&gt;
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
-     * &lt;p&gt;
+     * The float based scaling factor returned by this method can be used as a multiplier in order
+     * to scale something from &quot;developer pixels&quot; to &quot;component pixels&quot; / &quot;look and feel pixels&quot;.
+     * Conversely, by dividing a number using this factor, you convert something from &quot;component pixels&quot;
+     * to platform-agnostic &quot;developer pixel&quot;.&lt;br&gt;
+     * The scaling factor is computed by SwingTree automatically based on the system font.
+     * Anything you do through the SwingTree API, will be scaled for you,&lt;br&gt;
+     * but if you write code against raw Swing, you may need to use this scale factor
+     * to ensure consistent scaling support across screens with varying DPI.
+     * Most commonly, you will need to do manual scaling when defining component dimensions
+     * or to scale custom {@link Graphics2D} based painting operations.
+     * &lt;br&gt;
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
-     * or directly through the system property &quot;swingtree.uiScale&quot;.
+     * or directly through the system property &quot;swingtree.uiScale&quot;.&lt;br&gt;
+     * You may also set it using {@link SwingTree#setUiScaleFactor(float)}.
      *
-     * @return The user scale factor.
+     * @return The user scale factor to convert between &quot;developer pixel size&quot; and &quot;component pixel size&quot;.
      */
     public float getUiScaleFactor() {
-<span class="fc" id="L182">        return _uiScale.get().getUserScaleFactor();</span>
+<span class="fc" id="L190">        return _uiScale.get().getUserScaleFactor();</span>
     }
 
     /**
@@ -189,10 +197,6 @@ public final class SwingTree
      * the scale factor that the JRE uses to scale everything through the
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * &lt;p&gt;
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
-     * &lt;p&gt;
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
      * or directly through the system property &quot;swingtree.uiScale&quot;.
@@ -200,14 +204,14 @@ public final class SwingTree
      * @param scaleFactor The user scale factor.
      */
     public void setUiScaleFactor( float scaleFactor ) {
-<span class="fc" id="L203">        log.debug(SwingTree.get().logMarker(), &quot;Changing UI scale factor from {} to {} now.&quot;, _uiScale.get().getUserScaleFactor(), scaleFactor);</span>
-<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L205">            _uiScale.get().setUserScaleFactor(scaleFactor);</span>
+<span class="fc" id="L207">        log.debug(SwingTree.get().logMarker(), &quot;Changing UI scale factor from {} to {} now.&quot;, _uiScale.get().getUserScaleFactor(), scaleFactor);</span>
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L209">            _uiScale.get().setUserScaleFactor(scaleFactor);</span>
         else
-<span class="fc" id="L207">            UI.runNow(()-&gt;{</span>
-<span class="fc" id="L208">                _uiScale.get().setUserScaleFactor(scaleFactor);</span>
-<span class="fc" id="L209">            });</span>
-<span class="fc" id="L210">    }</span>
+<span class="fc" id="L211">            UI.runNow(()-&gt;{</span>
+<span class="fc" id="L212">                _uiScale.get().setUserScaleFactor(scaleFactor);</span>
+<span class="fc" id="L213">            });</span>
+<span class="fc" id="L214">    }</span>
 
     /**
      * Creates and returns a reactive {@link Viewable} of the library context's user scale factor
@@ -217,16 +221,12 @@ public final class SwingTree
      * code, then it will be garbage collected alongside all of its change
      * listeners automatically for you!&lt;br&gt;
      * &lt;p&gt;
-     * The user scale factor is a scaling factor that is used by SwingTree's
-     * style engine to scale the UI during painting.&lt;br&gt;
+     * The user scale factor is a scaling factor that converts &quot;developer pixel sizes&quot; to
+     * &quot;component pixel sizes&quot; and it is used by SwingTree's API to support dynamic DPI scaling.&lt;br&gt;
      * &lt;p&gt;
      * Note that this is different from the system/Graphics2D scale factor, which is
      * the scale factor that the JRE uses to scale everything through the
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
-     * &lt;p&gt;
-     * Use this scaling factor for painting operations that are not performed
-     * by SwingTree's style engine, e.g. custom painting
-     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
      * &lt;p&gt;
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
@@ -514,8 +514,8 @@ public final class SwingTree
 <span class="fc" id="L514">                    Font highDPIFont = _calculateDPIAwarePlatformFont(config.logMarker());</span>
 <span class="fc" id="L515">                    boolean updated = _initialize( highDPIFont );</span>
 <span class="pc bpc" id="L516" title="1 of 2 branches missed.">                    if ( this.scaleFactor.isNot(defaultScale) ) {</span>
-<span class="fc" id="L517">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
-<span class="fc" id="L518">                        log.debug(config.logMarker(), &quot;Setting default font ('{}') to in UIManager to {}&quot;, _DEFAULT_FONT, highDPIFont);</span>
+<span class="nc" id="L517">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
+<span class="nc" id="L518">                        log.debug(config.logMarker(), &quot;Setting default font ('{}') to in UIManager to {}&quot;, _DEFAULT_FONT, highDPIFont);</span>
                     }
 <span class="pc bpc" id="L520" title="1 of 2 branches missed.">                    if ( updated )</span>
 <span class="fc" id="L521">                        _setScalePropertyListeners();</span>
@@ -727,8 +727,8 @@ public final class SwingTree
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
 <span class="fc" id="L729">            Font font = UIManager.getFont( _DEFAULT_FONT );</span>
-<span class="pc bpc" id="L730" title="1 of 2 branches missed.">            if ( font == null )</span>
-<span class="nc" id="L731">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
+<span class="fc bfc" id="L730" title="All 2 branches covered.">            if ( font == null )</span>
+<span class="fc" id="L731">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
 
 <span class="fc" id="L733">            return font;</span>
         }
@@ -1364,7 +1364,7 @@ public final class SwingTree
 <span class="fc bfc" id="L1364" title="All 2 branches covered.">            if( value == null ) {</span>
 <span class="fc" id="L1365">                synchronized( this ) {</span>
 <span class="fc" id="L1366">                    value = this.value;</span>
-<span class="pc bpc" id="L1367" title="1 of 2 branches missed.">                    if ( value == null )</span>
+<span class="fc bfc" id="L1367" title="All 2 branches covered.">                    if ( value == null )</span>
 <span class="fc" id="L1368">                        this.value = value = supplier.get();</span>
 <span class="fc" id="L1369">                }</span>
             }

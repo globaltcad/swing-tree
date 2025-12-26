@@ -11,12 +11,12 @@ import java.util.Objects;
 @Immutable
 final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
 {
-<span class="fc" id="L14">    static final NamedConfigs&lt;ShadowConf&gt;   _NO_SHADOWS   = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ShadowConf.none()));</span>
-<span class="fc" id="L15">    static final NamedConfigs&lt;PainterConf&gt;  _NO_PAINTERS  = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, PainterConf.none()));</span>
-<span class="fc" id="L16">    static final NamedConfigs&lt;GradientConf&gt; _NO_GRADIENTS = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, GradientConf.none()));</span>
-<span class="fc" id="L17">    static final NamedConfigs&lt;NoiseConf&gt;    _NO_NOISES    = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, NoiseConf.none()));</span>
-<span class="fc" id="L18">    static final NamedConfigs&lt;ImageConf&gt;    _NO_IMAGES    = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ImageConf.none()));</span>
-<span class="fc" id="L19">    static final NamedConfigs&lt;TextConf&gt;     _NO_TEXTS     = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, TextConf.none()));</span>
+<span class="fc" id="L14">    static final NamedConfigs&lt;ShadowConf&gt;        _NO_SHADOWS   = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ShadowConf.none()));</span>
+<span class="fc" id="L15">    static final NamedConfigs&lt;PainterConf&gt;       _NO_PAINTERS  = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, PainterConf.none()));</span>
+<span class="fc" id="L16">    static final NamedConfigs&lt;GradientConf&gt;      _NO_GRADIENTS = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, GradientConf.none()));</span>
+<span class="fc" id="L17">    static final NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; _NO_NOISES    = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, new Pooled&lt;&gt;(NoiseConf.none())));</span>
+<span class="fc" id="L18">    static final NamedConfigs&lt;ImageConf&gt;         _NO_IMAGES    = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ImageConf.none()));</span>
+<span class="fc" id="L19">    static final NamedConfigs&lt;TextConf&gt;          _NO_TEXTS     = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, TextConf.none()));</span>
 
 <span class="fc" id="L21">    private static final StyleConfLayer _EMPTY = new StyleConfLayer(</span>
                                                     _NO_SHADOWS,
@@ -31,21 +31,21 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
 <span class="fc" id="L31">        return _EMPTY;</span>
     }
 
-    private final NamedConfigs&lt;ShadowConf&gt;   _shadows;
-    private final NamedConfigs&lt;PainterConf&gt;  _painters;
-    private final NamedConfigs&lt;GradientConf&gt; _gradients;
-    private final NamedConfigs&lt;NoiseConf&gt;    _noises;
-    private final NamedConfigs&lt;ImageConf&gt;    _images;
-    private final NamedConfigs&lt;TextConf&gt;     _texts;
+    private final NamedConfigs&lt;ShadowConf&gt;        _shadows;
+    private final NamedConfigs&lt;PainterConf&gt;       _painters;
+    private final NamedConfigs&lt;GradientConf&gt;      _gradients;
+    private final NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; _noises;
+    private final NamedConfigs&lt;ImageConf&gt;         _images;
+    private final NamedConfigs&lt;TextConf&gt;          _texts;
 
 
     static StyleConfLayer of(
-        NamedConfigs&lt;ShadowConf&gt;   shadows,
-        NamedConfigs&lt;PainterConf&gt;  painters,
-        NamedConfigs&lt;GradientConf&gt; gradients,
-        NamedConfigs&lt;NoiseConf&gt;    noises,
-        NamedConfigs&lt;ImageConf&gt;    images,
-        NamedConfigs&lt;TextConf&gt;     texts
+        NamedConfigs&lt;ShadowConf&gt;        shadows,
+        NamedConfigs&lt;PainterConf&gt;       painters,
+        NamedConfigs&lt;GradientConf&gt;      gradients,
+        NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; noises,
+        NamedConfigs&lt;ImageConf&gt;         images,
+        NamedConfigs&lt;TextConf&gt;          texts
     ) {
 <span class="fc" id="L50">        StyleConfLayer empty = StyleConfLayer.empty();</span>
 <span class="fc" id="L51">        if (</span>
@@ -62,12 +62,12 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
     }
 
     StyleConfLayer(
-        NamedConfigs&lt;ShadowConf&gt;   shadows,
-        NamedConfigs&lt;PainterConf&gt;  painters,
-        NamedConfigs&lt;GradientConf&gt; gradients,
-        NamedConfigs&lt;NoiseConf&gt;    noises,
-        NamedConfigs&lt;ImageConf&gt;    images,
-        NamedConfigs&lt;TextConf&gt;     texts
+        NamedConfigs&lt;ShadowConf&gt;              shadows,
+        NamedConfigs&lt;PainterConf&gt;             painters,
+        NamedConfigs&lt;GradientConf&gt;            gradients,
+        NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; noises,
+        NamedConfigs&lt;ImageConf&gt;               images,
+        NamedConfigs&lt;TextConf&gt;                texts
 <span class="fc" id="L71">    ) {</span>
 <span class="fc" id="L72">        _shadows   = shadows;</span>
 <span class="fc" id="L73">        _painters  = painters;</span>
@@ -87,7 +87,7 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
     NamedConfigs&lt;GradientConf&gt; gradients() {
 <span class="fc" id="L88">        return _gradients;</span>
     }
-    NamedConfigs&lt;NoiseConf&gt; noises() {
+    NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; noises() {
 <span class="fc" id="L91">        return _noises;</span>
     }
     NamedConfigs&lt;ImageConf&gt; images() {
@@ -106,7 +106,7 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
     StyleConfLayer withGradients(NamedConfigs&lt;GradientConf&gt; gradients ) {
 <span class="fc" id="L107">        return of(_shadows, _painters, gradients, _noises, _images, _texts);</span>
     }
-    StyleConfLayer withNoises(NamedConfigs&lt;NoiseConf&gt; noises ) {
+    StyleConfLayer withNoises(NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; noises ) {
 <span class="fc" id="L110">        return of(_shadows, _painters, _gradients, noises, _images, _texts);</span>
     }
     StyleConfLayer withImages(NamedConfigs&lt;ImageConf&gt; images ) {
@@ -121,7 +121,7 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
 <span class="fc" id="L121">                    _shadows.mapStyles( s -&gt; s._scale(scale) ),</span>
                     _painters, // This is the users problem...
 <span class="fc" id="L123">                    _gradients.mapStyles( s -&gt; s._scale(scale) ),</span>
-<span class="fc" id="L124">                    _noises.mapStyles( s -&gt; s._scale(scale) ),</span>
+<span class="fc" id="L124">                    _noises.mapStyles( s -&gt; s.map(n-&gt;n._scale(scale)) ),</span>
 <span class="fc" id="L125">                    _images.mapStyles( s -&gt; s._scale(scale) ),</span>
 <span class="fc" id="L126">                    _texts.mapStyles( s -&gt; s._scale(scale) )</span>
                 );
@@ -204,12 +204,12 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
 <span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( this.equals(_EMPTY) )</span>
 <span class="fc" id="L205">            return this;</span>
 
-<span class="fc" id="L207">        NamedConfigs&lt;ShadowConf&gt;   simplifiedShadows   = _shadows.simplified();</span>
-<span class="fc" id="L208">        NamedConfigs&lt;PainterConf&gt;  simplifiedPainters  = _painters.simplified();</span>
-<span class="fc" id="L209">        NamedConfigs&lt;GradientConf&gt; simplifiedGradients = _gradients.simplified();</span>
-<span class="fc" id="L210">        NamedConfigs&lt;NoiseConf&gt;    simplifiedNoises    = _noises.simplified();</span>
-<span class="fc" id="L211">        NamedConfigs&lt;ImageConf&gt;    simplifiedImages    = _images.simplified();</span>
-<span class="fc" id="L212">        NamedConfigs&lt;TextConf&gt;     simplifiedTexts     = _texts.simplified();</span>
+<span class="fc" id="L207">        NamedConfigs&lt;ShadowConf&gt;        simplifiedShadows   = _shadows.simplified();</span>
+<span class="fc" id="L208">        NamedConfigs&lt;PainterConf&gt;       simplifiedPainters  = _painters.simplified();</span>
+<span class="fc" id="L209">        NamedConfigs&lt;GradientConf&gt;      simplifiedGradients = _gradients.simplified();</span>
+<span class="fc" id="L210">        NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; simplifiedNoises    = _noises.simplified();</span>
+<span class="fc" id="L211">        NamedConfigs&lt;ImageConf&gt;         simplifiedImages    = _images.simplified();</span>
+<span class="fc" id="L212">        NamedConfigs&lt;TextConf&gt;          simplifiedTexts     = _texts.simplified();</span>
 
 <span class="fc" id="L214">        if (</span>
 <span class="fc bfc" id="L215" title="All 2 branches covered.">            simplifiedShadows   .equals( _shadows   ) &amp;&amp;</span>

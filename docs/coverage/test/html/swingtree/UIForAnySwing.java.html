@@ -4705,7 +4705,7 @@ import java.util.function.Supplier;
      *      .withDropSite( conf -&gt; conf
      *          .onDragOver( it -&gt; {
      *              it.animateFor(1, TimeUnit.SECONDS, status -&gt; {
-     *                  double r = 30 * status.fadeIn() * it.getScale();
+     *                  double r = 30 * status.fadeIn();
      *                  double x = it.getEvent().getLocation().x - r / 2.0;
      *                  double y = it.getEvent().getLocation().y - r / 2.0;
      *                  it.paint(status, g -&gt; {
@@ -4716,7 +4716,7 @@ import java.util.function.Supplier;
      *          })
      *          .onDrop(it -&gt; {
      *              it.animateFor(2, TimeUnit.SECONDS, status -&gt; {
-     *                  double r = 480 * status.fadeIn() * it.getScale();
+     *                  double r = 480 * status.fadeIn();
      *                  double x = it.getEvent().getLocation().x - r / 2.0;
      *                  double y = it.getEvent().getLocation().y - r / 2.0;
      *                  it.paint(status, g -&gt; {
@@ -5925,7 +5925,7 @@ import java.util.function.Supplier;
         }
 
         private M tryAvoidNull(@Nullable M item) {
-<span class="pc bpc" id="L5928" title="1 of 4 branches missed.">            if ( item != null || allowsNull ) {</span>
+<span class="pc bpc" id="L5928" title="3 of 4 branches missed.">            if ( item != null || allowsNull ) {</span>
 <span class="fc" id="L5929">                return NullUtil.fakeNonNull(item);</span>
 <span class="nc bnc" id="L5930" title="All 2 branches missed.">            } else if ( type == String.class ) {</span>
 <span class="nc" id="L5931">                return type.cast(&quot;&quot;);</span>

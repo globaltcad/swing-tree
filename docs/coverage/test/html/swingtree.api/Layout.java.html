@@ -306,7 +306,7 @@ public interface Layout
     {
 <span class="fc" id="L307">        None(){}</span>
 
-<span class="nc" id="L309">        @Override public int hashCode() { return 0; }</span>
+<span class="fc" id="L309">        @Override public int hashCode() { return 0; }</span>
 
         @Override
         public boolean equals(Object o) {
@@ -355,7 +355,7 @@ public interface Layout
 
 <span class="nc" id="L356">        public ForMigLayout withComponentConstraint( String componentConstr ) { return new ForMigLayout( _constr, _colConstr, _rowConstr ); }</span>
 
-<span class="nc" id="L358">        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }</span>
+<span class="fc" id="L358">        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }</span>
 
         @Override
         public boolean equals( Object o ) {
@@ -448,7 +448,7 @@ public interface Layout
 <span class="fc" id="L448">            _verticalGapSize   = vgap;</span>
 <span class="fc" id="L449">        }</span>
 
-<span class="nc" id="L451">        @Override public int hashCode() { return Objects.hash( _align, _horizontalGapSize, _verticalGapSize); }</span>
+<span class="fc" id="L451">        @Override public int hashCode() { return Objects.hash( _align, _horizontalGapSize, _verticalGapSize); }</span>
 
         @Override
         public boolean equals( @Nullable Object o ) {
@@ -513,7 +513,7 @@ public interface Layout
 <span class="fc" id="L513">            _vgap = vgap;</span>
 <span class="fc" id="L514">        }</span>
 
-<span class="nc" id="L516">        @Override public int hashCode() { return Objects.hash(_hgap, _vgap); }</span>
+<span class="fc" id="L516">        @Override public int hashCode() { return Objects.hash(_hgap, _vgap); }</span>
 
         @Override
         public boolean equals( @Nullable Object o ) {

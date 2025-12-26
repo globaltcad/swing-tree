@@ -264,7 +264,7 @@ public final class StyleConf
     }
 
     List&lt;NoiseConf&gt; noises( UI.Layer layer ) {
-<span class="fc" id="L267">        return _layers.get(layer).noises().sortedByNames();</span>
+<span class="fc" id="L267">        return _layers.get(layer).noises().sortedByNames().stream().map(Pooled::get).collect(Collectors.toList());</span>
     }
 
     boolean hasVisibleNoisesOnLayer( UI.Layer layer ) {
@@ -300,7 +300,7 @@ public final class StyleConf
 <span class="fc" id="L300">                .map(StyleConfLayer::noises)</span>
 <span class="fc" id="L301">                .flatMap( n -&gt; n</span>
 <span class="fc" id="L302">                    .stylesStream()</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">                    .map( noise -&gt; noise.isOpaque() ? noise.area() : null )</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">                    .map( noise -&gt; noise.get().isOpaque() ? noise.get().area() : null )</span>
 <span class="fc" id="L304">                    .filter(Objects::nonNull)</span>
                 )
 <span class="fc" id="L306">                .distinct()</span>
@@ -378,7 +378,7 @@ public final class StyleConf
 <span class="fc" id="L378">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);</span>
     }
 
-    StyleConf _withNoises( UI.Layer layer, NamedConfigs&lt;NoiseConf&gt; noises ) {
+    StyleConf _withNoises( UI.Layer layer, NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; noises ) {
 <span class="fc" id="L382">        Objects.requireNonNull(noises);</span>
 <span class="fc" id="L383">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withNoises(noises)), _properties);</span>
     }
@@ -441,14 +441,14 @@ public final class StyleConf
     StyleConf noise( UI.Layer layer, String noiseName, Configurator&lt;NoiseConf&gt; styler ) {
 <span class="fc" id="L442">        Objects.requireNonNull(noiseName);</span>
 <span class="fc" id="L443">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L444">        NoiseConf noise = _layers.get(layer).noises().find(noiseName).orElse(NoiseConf.none());</span>
+<span class="fc" id="L444">        NoiseConf noise = _layers.get(layer).noises().find(noiseName).map(Pooled::get).orElse(NoiseConf.none());</span>
         try {
 <span class="fc" id="L446">            noise = styler.configure(noise);</span>
 <span class="nc" id="L447">        } catch (Exception e) {</span>
 <span class="nc" id="L448">            log.error(SwingTree.get().logMarker(), &quot;Failed to configure noise '{}' for layer '{}'&quot;, noiseName, layer, e);</span>
 <span class="fc" id="L449">        }</span>
         // We clone the noise map:
-<span class="fc" id="L451">        NamedConfigs&lt;NoiseConf&gt; newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, noise);</span>
+<span class="fc" id="L451">        NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, new Pooled&lt;&gt;(noise));</span>
 <span class="fc" id="L452">        return _withNoises(layer, newNoises);</span>
     }
 

@@ -89,8 +89,8 @@ import java.util.Optional;
 <span class="fc" id="L89">        _dynamicLaF.installCustomUIFor(owner);</span>
 <span class="fc" id="L90">    }</span>
 
-    boolean customLookAndFeelIsInstalled() {
-<span class="fc" id="L93">        return _dynamicLaF.customLookAndFeelIsInstalled();</span>
+    boolean customLookAndFeelIsInstalled(C owner) {
+<span class="fc" id="L93">        return _dynamicLaF.customLookAndFeelIsInstalled(owner);</span>
     }
 
     Outline _formerBorderMarginCorrection( C owner ) {
@@ -212,7 +212,7 @@ import java.util.Optional;
 <span class="pc bpc" id="L212" title="4 of 10 branches missed.">               || newStyle.layers().any( (layer, it) -&gt; layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) &amp;&amp; it.images().any(named -&gt; named.style().image().isPresent() || named.style().primer().isPresent() ) )</span>
 <span class="fc bfc" id="L213" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) &amp;&amp; it.texts().any(named -&gt; !TextConf.none().equals(named.style()) ) )</span>
 <span class="fc bfc" id="L214" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) &amp;&amp; it.painters().any(named -&gt; !Painter.none().equals(named.style().painter()) ) )</span>
-<span class="fc bfc" id="L215" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) &amp;&amp; it.noises().any(named -&gt; named.style().colors().length &gt; 0 ) )</span>
+<span class="fc bfc" id="L215" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) &amp;&amp; it.noises().any(named -&gt; named.style().get().colors().length &gt; 0 ) )</span>
             );
 
 <span class="pc bpc" id="L218" title="1 of 8 branches missed.">        final boolean weNeedToInstallTheCustomUI = isStyled &amp;&amp; (</span>
@@ -223,7 +223,7 @@ import java.util.Optional;
 <span class="fc bfc" id="L223" title="All 10 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer == UI.Layer.BACKGROUND &amp;&amp; it.images().any(named -&gt; named.style().image().isPresent() || named.style().primer().isPresent() ) )</span>
 <span class="fc bfc" id="L224" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer == UI.Layer.BACKGROUND &amp;&amp; it.painters().any(named -&gt; !Painter.none().equals(named.style().painter()) ) )</span>
 <span class="pc bpc" id="L225" title="3 of 8 branches missed.">               || newStyle.layers().any( (layer, it) -&gt; layer == UI.Layer.BACKGROUND &amp;&amp; it.texts().any(named -&gt; !TextConf.none().equals(named.style()) ) )</span>
-<span class="fc bfc" id="L226" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer == UI.Layer.BACKGROUND &amp;&amp; it.noises().any(named -&gt; named.style().colors().length &gt; 0 ) )</span>
+<span class="fc bfc" id="L226" title="All 8 branches covered.">               || newStyle.layers().any( (layer, it) -&gt; layer == UI.Layer.BACKGROUND &amp;&amp; it.noises().any(named -&gt; named.style().get().colors().length &gt; 0 ) )</span>
             );
 
 <span class="fc bfc" id="L229" title="All 2 branches covered.">        if ( weNeedToInstallTheCustomBorder ) {</span>
@@ -363,7 +363,7 @@ import java.util.Optional;
 
 <span class="fc" id="L364">        final Color   backgroundColor = owner.getBackground();</span>
 <span class="fc bfc" id="L365" title="All 4 branches covered.">        final boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;</span>
-<span class="fc" id="L366">        final boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();</span>
+<span class="fc" id="L366">        final boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled(owner);</span>
 <span class="fc bfc" id="L367" title="All 14 branches covered.">        final boolean requiresBackgroundPainting =</span>
                                              hasBackgroundGradients ||
                                              hasBackgroundNoise     ||

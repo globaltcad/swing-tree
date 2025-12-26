@@ -372,7 +372,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
     @Override
     public boolean equals( @Nullable Object o ) {
 <span class="fc bfc" id="L374" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="fc bfc" id="L375" title="All 2 branches covered.">        if ( !(o instanceof NoiseConf) ) return false;</span>
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">        if ( !(o instanceof NoiseConf) ) return false;</span>
 <span class="fc" id="L376">        NoiseConf that = (NoiseConf) o;</span>
 <span class="fc bfc" id="L377" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
 <span class="fc bfc" id="L378" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>

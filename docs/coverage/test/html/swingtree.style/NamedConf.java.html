@@ -46,7 +46,7 @@ final class NamedConf&lt;S&gt; implements Simplifiable&lt;NamedConf&lt;S&gt;&gt;
     public String toString() {
 <span class="nc" id="L47">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
                     &quot;name=&quot;  + _name  +&quot;, &quot;+
-                    &quot;style=&quot; + _style +
+<span class="nc bnc" id="L49" title="All 2 branches missed.">                    &quot;style=&quot; + (_style instanceof Pooled ? ((Pooled&lt;?&gt;)_style).get() : _style) +</span>
                 &quot;]&quot;;
     }
 
@@ -58,7 +58,19 @@ final class NamedConf&lt;S&gt; implements Simplifiable&lt;NamedConf&lt;S&gt;&gt;
 <span class="fc" id="L58">                return this;</span>
 <span class="fc" id="L59">            return new NamedConf&lt;&gt;(_name, simplifiedStyle);</span>
         }
-<span class="fc" id="L61">        return this;</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if ( _style instanceof Pooled ) {</span>
+<span class="fc" id="L62">            Pooled&lt;Object&gt; pooled = (Pooled&lt;Object&gt;) _style;</span>
+<span class="fc" id="L63">            pooled = pooled.map( it -&gt; {</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                if ( it instanceof Simplifiable&lt;?&gt; ) {</span>
+<span class="fc" id="L65">                    return ((Simplifiable&lt;S&gt;)it).simplified();</span>
+                }
+<span class="nc" id="L67">                return it;</span>
+            });
+<span class="fc" id="L69">            pooled = pooled.intern();</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if ( pooled != _style )</span>
+<span class="fc" id="L71">                return new NamedConf&lt;&gt;(_name, (S)pooled);</span>
+        }
+<span class="fc" id="L73">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

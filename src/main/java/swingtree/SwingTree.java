@@ -178,7 +178,7 @@ public final class SwingTree
      * to ensure consistent scaling support across screens with varying DPI.
      * Most commonly, you will need to do manual scaling when defining component dimensions
      * or to scale custom {@link Graphics2D} based painting operations.
-     * <br
+     * <br>
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".<br>

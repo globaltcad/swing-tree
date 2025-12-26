@@ -165,44 +165,48 @@ final class NamedConfigs&lt;S&gt; implements Simplifiable&lt;NamedConfigs&lt;S&g
         else
 <span class="fc" id="L166">            styleType += &quot;=&quot;;</span>
 <span class="fc bfc" id="L167" title="All 2 branches covered.">        if ( this.size() == 1 )</span>
-<span class="fc" id="L168">            return String.valueOf(this.get(defaultName));</span>
+<span class="fc" id="L168">            return stringOf(this.get(defaultName));</span>
         else
 <span class="fc" id="L170">            return this.namedStyles()</span>
 <span class="fc" id="L171">                    .stream()</span>
-<span class="fc" id="L172">                    .map(e -&gt; e.name() + &quot;=&quot; + e.style())</span>
+<span class="fc" id="L172">                    .map(e -&gt; e.name() + &quot;=&quot; + stringOf(e.style()))</span>
 <span class="fc" id="L173">                    .collect(Collectors.joining(&quot;, &quot;, styleType+&quot;[&quot;, &quot;]&quot;));</span>
+    }
+
+    private String stringOf(@Nullable S style) {
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        return String.valueOf(style instanceof Pooled ? ((Pooled&lt;?&gt;)style).get() : style);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L178">        StringBuilder sb = new StringBuilder();</span>
-<span class="nc" id="L179">        sb.append(getClass().getSimpleName()).append(&quot;[&quot;);</span>
-<span class="nc bnc" id="L180" title="All 2 branches missed.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
-<span class="nc" id="L181">            sb.append(_styles[i].name()).append(&quot;=&quot;).append(_styles[i].style());</span>
-<span class="nc bnc" id="L182" title="All 2 branches missed.">            if ( i &lt; _styles.length - 1 )</span>
-<span class="nc" id="L183">                sb.append(&quot;, &quot;);</span>
+<span class="nc" id="L182">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L183">        sb.append(getClass().getSimpleName()).append(&quot;[&quot;);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="nc" id="L185">            sb.append(_styles[i].name()).append(&quot;=&quot;).append(stringOf(_styles[i].style()));</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">            if ( i &lt; _styles.length - 1 )</span>
+<span class="nc" id="L187">                sb.append(&quot;, &quot;);</span>
         }
-<span class="nc" id="L185">        sb.append(&quot;]&quot;);</span>
-<span class="nc" id="L186">        return sb.toString();</span>
+<span class="nc" id="L189">        sb.append(&quot;]&quot;);</span>
+<span class="nc" id="L190">        return sb.toString();</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L191">        return Arrays.hashCode(_styles);</span>
+<span class="fc" id="L195">        return Arrays.hashCode(_styles);</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L197" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L199">        NamedConfigs&lt;?&gt; rhs = (NamedConfigs&lt;?&gt;) obj;</span>
-<span class="fc" id="L200">        return Arrays.equals(_styles, rhs._styles);</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L203">        NamedConfigs&lt;?&gt; rhs = (NamedConfigs&lt;?&gt;) obj;</span>
+<span class="fc" id="L204">        return Arrays.equals(_styles, rhs._styles);</span>
     }
 
     @Override
     public NamedConfigs&lt;S&gt; simplified() {
-<span class="fc" id="L205">        return mapNamedStyles(NamedConf::simplified);</span>
+<span class="fc" id="L209">        return mapNamedStyles(NamedConf::simplified);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

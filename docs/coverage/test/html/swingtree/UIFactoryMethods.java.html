@@ -6688,15 +6688,17 @@ import java.util.function.Supplier;
 <span class="fc" id="L6688">                }</span>
         }
 <span class="fc bfc" id="L6690" title="All 2 branches covered.">        if ( path.endsWith(&quot;.svg&quot;) ) {</span>
-            SVGDocument tempSVGDocument;
+<span class="fc" id="L6691">            SvgIcon svgIcon = null;</span>
             try {
-<span class="fc" id="L6693">                SVGLoader loader = new SVGLoader();</span>
-<span class="fc" id="L6694">                tempSVGDocument = Objects.requireNonNull(loader.load(url));</span>
-<span class="fc" id="L6695">            } catch (Exception e) {</span>
-<span class="fc" id="L6696">                log.error(SwingTree.get().logMarker(), &quot;Failed to load SVG document from URL: &quot; + url, e);</span>
-<span class="fc" id="L6697">                return null;</span>
-<span class="fc" id="L6698">            }</span>
-<span class="fc" id="L6699">            return new SvgIcon(tempSVGDocument).withIconSize(declaration.size());</span>
+<span class="fc" id="L6693">                svgIcon = SvgIcon.at(url);</span>
+<span class="nc" id="L6694">            } catch (Exception e) {</span>
+<span class="nc" id="L6695">                log.error(SwingTree.get().logMarker(), &quot;Failed to load SVG document from URL: {}&quot;, url, e);</span>
+<span class="nc" id="L6696">                return null;</span>
+<span class="fc" id="L6697">            }</span>
+<span class="fc bfc" id="L6698" title="All 2 branches covered.">            if ( svgIcon.getSvgDocument() == null ) {</span>
+<span class="fc" id="L6699">                return null;</span>
+            }
+<span class="fc" id="L6701">            return svgIcon.withIconSize(declaration.size());</span>
         } else {
             /*
                 Not that we explicitly use the &quot;createImage&quot; method of the toolkit here.
@@ -6705,8 +6707,8 @@ import java.util.function.Supplier;
                 (The internal caching of the toolkit is somewhat limited and we have no control over it,
                 which is why we use our own cache.)
             */
-<span class="fc" id="L6708">            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());</span>
-<span class="fc" id="L6709">            return ScalableImageIcon.of(declaration.size(), icon);</span>
+<span class="fc" id="L6710">            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());</span>
+<span class="fc" id="L6711">            return ScalableImageIcon.of(declaration.size(), icon);</span>
         }
     }
 
