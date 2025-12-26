@@ -5,6 +5,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.HasId
 import sprouts.Tuple
 import sprouts.Var
 import sprouts.Vars
@@ -29,7 +30,7 @@ import javax.swing.JPanel
 @Subject([JScrollPanels])
 class Scroll_Panels_Spec extends Specification
 {
-
+    static record StringAsId(String id) implements HasId<String> {}
     public class SimpleEntry implements swingtree.api.mvvm.EntryViewModel {
         private final Var<Boolean> selected = Var.of(false);
         private final Var<Integer> position = Var.of(0);
@@ -303,9 +304,9 @@ class Scroll_Panels_Spec extends Specification
             tabs that have changed.
         """
         given: 'A string tuple property, a view supplier and a panel UI node.'
-            var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
+            var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5").mapTo(StringAsId, it -> new StringAsId(it))
             var models = Var.of(tuple)
-            BoundViewSupplier<String> supplier = (Var<String> title) -> UI.button(title.view("", {it}))
+            BoundViewSupplier<StringAsId> supplier = (Var<StringAsId> title) -> UI.button(title.view("", {it.id()}))
             var panels =
                         UI.scrollPanels()
                         .addAll(models, supplier)
@@ -336,24 +337,24 @@ class Scroll_Panels_Spec extends Specification
         when : 'We unpack the panel contents:'
             var viewedTexts = panel.getComponents().collect({it.getComponent(0).text})
         then : 'The view texts a equal to the string representations of the tuple elements.'
-            viewedTexts == models.get().mapTo(String, it -> Objects.toString(it)).toList()
+            viewedTexts == models.get().mapTo(String, it -> Objects.toString(it.id())).toList()
 
         where : 'We test the following operations:'
             diff                 | operation
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
-            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
-            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
-            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
-            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [0, _, 2, 3, 4]      | { it.setAt(1, new StringAsId("Comp X")) }
+            [0, 1, 2, 3, 4, _]   | { it.add(new StringAsId("Comp X")) }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll(new StringAsId("Comp X"), new StringAsId("Comp Y")) }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, new StringAsId("Comp X")) }
             [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
             [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
             [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
             [-1, -1, -1, -1, -1] | { it.clear() }
-            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
-            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
-            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
-            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5").mapTo(StringAsId, s -> new StringAsId(s)) }
+            [_, _, _, _, _]      | { it.clear().addAll(new StringAsId("Comp 1"), new StringAsId("Comp 2"), new StringAsId("Comp 3"), new StringAsId("Comp 4"), new StringAsId("Comp 5")) }
+            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e").mapTo(StringAsId, s -> new StringAsId(s)) }
+            [_, _, _, _, _]      | { it.clear().addAll(new StringAsId("Comp a"), new StringAsId("Comp b"), new StringAsId("Comp c"), new StringAsId("Comp d"), new StringAsId("Comp e")) }
     }
 
     def 'A scroll panels widget maintains the correct state after a series of operations applied to a bound property list.'()
