@@ -270,6 +270,9 @@ public final class SvgIcon extends ImageIcon
         }
         // This regex matches the leading number (including decimals) and removes it
         String unit = numberWithUnit.replaceAll("^[-+]?\\d*\\.?\\d+", "");
+        if ( unit.isEmpty() ) {
+            return "px"; // Default to pixels if no unit is specified
+        }
         return unit.trim(); // There may be a space between the number and the unit!
     }
 
