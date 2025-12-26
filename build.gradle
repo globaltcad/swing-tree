@@ -80,7 +80,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // Required for test execution
-    testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.4-groovy-4.0'
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.3-groovy-4.0'
     testImplementation 'com.athaydes:spock-reports:2.5.1-groovy-4.0'
     testImplementation 'org.slf4j:slf4j-api:2.0.12'
     testImplementation 'org.slf4j:slf4j-simple:2.0.12'
