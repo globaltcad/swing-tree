@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ListBasedComboModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">ListBasedComboModel.java</span></div><h1>ListBasedComboModel.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Var;
+
+import java.util.List;
+import java.util.Objects;
+
+final class ListBasedComboModel&lt;E extends @Nullable Object&gt; extends AbstractComboModel&lt;E&gt;
+{
+	private final List&lt;E&gt; _items;
+
+	ListBasedComboModel( List&lt;E&gt; items ) {
+<span class="fc" id="L14">		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));</span>
+<span class="fc" id="L15">		_items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L16">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
+<span class="fc" id="L17">	}</span>
+
+	ListBasedComboModel( Var&lt;E&gt; var, List&lt;E&gt; items ) {
+<span class="fc" id="L20">		super(var);</span>
+<span class="fc" id="L21">		_items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L22">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
+<span class="fc" id="L23">	}</span>
+
+<span class="fc" id="L25">	@Override public int getSize() { return _items.size(); }</span>
+<span class="fc" id="L26">	@Override public E getElementAt( int index ) { return _items.get(index); }</span>
+
+	@Override
+	public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
+<span class="fc" id="L30">		return new ListBasedComboModel&lt;&gt;(newVar, _items);</span>
+	}
+
+	@Override protected void setAt(int index, @Nullable E element) {
+		/*
+			So the UI component tells us a combo option should be changed...
+			But does the user of this library want that?
+			Well there is a way to find out:
+			Is the list we are using here intended to be modified?
+			If so, then we should modify it, otherwise we should not.
+			The problem is, we don't know if the list is unmodifiable or not.
+			We could check if it is an instance of java.util.Collections.UnmodifiableList,
+			but that is a internal class, so we can't rely on it.
+			So we'll just try to modify it, and if it fails, we'll just ignore it.
+		 */
+		try {
+<span class="nc" id="L46">			_items.set(index, element);</span>
+<span class="fc" id="L47">		} catch (UnsupportedOperationException ignored) {</span>
+			// ignore, the user of this library doesn't want us to modify the list
+<span class="nc" id="L49">		}</span>
+<span class="fc" id="L50">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

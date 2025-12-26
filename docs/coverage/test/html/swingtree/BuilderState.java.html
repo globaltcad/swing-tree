@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BuilderState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">BuilderState.java</span></div><h1>BuilderState.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.style.ComponentExtension;
+import swingtree.threading.EventProcessor;
+
+import javax.swing.JComponent;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+/**
+ *  A library internal object for modeling the state of a builder node,
+ *  in particular the component wrapped by the builder node.
+ *  This is a short-lived object only intended to be used
+ *  during the building of a component, but never after.
+ *
+ * @param &lt;C&gt; The type of the component wrapped by the builder node.
+ */
+final class BuilderState&lt;C extends java.awt.Component&gt;
+{
+<span class="fc" id="L24">    private static final Logger log = LoggerFactory.getLogger(BuilderState.class);</span>
+
+    static final String WHY_A_BUILDER_IS_DISPOSED =
+                    &quot;\nA builder is automatically disposed when it is being superseded by a\n&quot; +
+                    &quot;new builder instance through a subsequent call to the next builder method\n&quot; +
+                    &quot;in the chain of builder method calls.\n&quot; +
+                    &quot;The SwingTree API only allows for writing declarative code,\n&quot; +
+                    &quot;and the use of procedural GUI code is largely forbidden &quot; +
+                    &quot;to ensure readability and prevent side effects.\n&quot; +
+                    &quot;In practise, this means that you may not store and reuse references to spent builders.\n&quot; +
+                    &quot;This is a similar design choice as in Java's Stream API,\n&quot; +
+                    &quot;where an exception is thrown when trying to reuse a stream after it has already been consumed.\n&quot;;
+
+<span class="fc" id="L37">    enum Mode</span>
+    {
+        /**
+         * The component mutations are composed into a factory pipeline and executed when the component is fetched.
+         */
+<span class="fc" id="L42">        FUNCTIONAL_FACTORY_BUILDER,</span>
+        /**
+         *  Builder states get disposed of after being used for building.
+         */
+<span class="fc" id="L46">        DECLARATIVE_ONLY,</span>
+        /**
+         *  Builder states do not get disposed of after being used for building.
+         */
+<span class="fc" id="L50">        PROCEDURAL_OR_DECLARATIVE</span>
+    }
+
+    /**
+     *  A builder can either be used in declarative or procedural mode.
+     *  In declarative mode, builder nodes get disposed of after being used for building.
+     *  In procedural mode, builder nodes do not get disposed of after being used for building,
+     *  meaning that a builder node can be reused for component mutations.
+     */
+    private final Mode _mode;
+    /**
+     * The event processor determines the thread execution mode of the component and view model events.
+     * And also which type of thread can access the component.
+     */
+    private final EventProcessor _eventProcessor;
+    /**
+     *  The type class of the component managed by this builder.
+     */
+    private final Class&lt;C&gt; _componentType;
+
+    /**
+     *  A supplier for the component managed by this builder.
+     *  The supplier is null when the builder is disposed.
+     */
+    private @Nullable Supplier&lt;C&gt; _componentFetcher; // Is null when the builder is disposed.
+
+
+    &lt;T extends C&gt; BuilderState( Class&lt;T&gt; type, Supplier&lt;C&gt; componentSource )
+    {
+<span class="fc" id="L79">        this(</span>
+<span class="fc" id="L80">            SwingTree.get().getEventProcessor(),</span>
+            Mode.FUNCTIONAL_FACTORY_BUILDER,
+            (Class&lt;C&gt;) type,
+<span class="fc" id="L83">            ()-&gt;initializeComponent(componentSource.get()).get()</span>
+        );
+<span class="fc" id="L85">    }</span>
+
+    BuilderState( C component )
+    {
+<span class="fc" id="L89">        this(</span>
+<span class="fc" id="L90">            SwingTree.get().getEventProcessor(),</span>
+            Mode.DECLARATIVE_ONLY,
+<span class="fc" id="L92">            (Class&lt;C&gt;) component.getClass(),</span>
+<span class="fc" id="L93">            initializeComponent(component)</span>
+        );
+<span class="fc" id="L95">    }</span>
+
+    BuilderState(
+        EventProcessor        eventProcessor,
+        Mode                  mode,
+        Class&lt;C&gt;              type,
+        @Nullable Supplier&lt;C&gt; componentFetcher
+<span class="fc" id="L102">    ) {</span>
+<span class="fc" id="L103">        Objects.requireNonNull(eventProcessor,   &quot;eventProcessor&quot;);</span>
+<span class="fc" id="L104">        Objects.requireNonNull(mode,             &quot;mode&quot;);</span>
+<span class="fc" id="L105">        Objects.requireNonNull(type,             &quot;type&quot;);</span>
+<span class="fc" id="L106">        Objects.requireNonNull(componentFetcher, &quot;componentFetcher&quot;);</span>
+
+<span class="fc" id="L108">        _eventProcessor   = eventProcessor;</span>
+<span class="fc" id="L109">        _mode             = mode;</span>
+<span class="fc" id="L110">        _componentType    = type;</span>
+<span class="fc" id="L111">        _componentFetcher = componentFetcher;</span>
+<span class="fc" id="L112">    }</span>
+
+    private static &lt;C extends java.awt.Component&gt; Supplier&lt;C&gt; initializeComponent( C component )
+    {
+<span class="fc" id="L116">        Objects.requireNonNull(component, &quot;component&quot;);</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if ( component instanceof JComponent)</span>
+<span class="fc" id="L118">            ComponentExtension.initializeFor( (JComponent) component );</span>
+
+<span class="fc" id="L120">        return () -&gt; component;</span>
+    }
+
+    /**
+     *  @return The component managed by this builder.
+     *  @throws IllegalStateException If this builder state is disposed (it's reference to the component is null).
+     */
+    C component()
+    {
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if ( this.isDisposed() )</span>
+<span class="nc" id="L130">            throw new IllegalStateException(</span>
+                    &quot;Trying to access the component of a spent and disposed builder!&quot; +
+                    WHY_A_BUILDER_IS_DISPOSED +
+                    &quot;If you need to access the component of a builder node, &quot; +
+                    &quot;you may only do so through the builder instance returned by the most recent builder method call.&quot;
+                );
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if ( _componentFetcher == null )</span>
+<span class="nc" id="L137">            throw new IllegalStateException(&quot;This builder state is disposed and cannot be used for building.&quot;);</span>
+
+<span class="fc" id="L139">        return _componentType.cast(_componentFetcher.get());</span>
+    }
+
+    /**
+     * The thread mode determines how events are dispatched to the component.
+     * And also which type of thread can access the component. &lt;br&gt;
+     * &lt;b&gt;This will never return null.&lt;/b&gt;
+     */
+    EventProcessor eventProcessor() {
+<span class="fc" id="L148">        return _eventProcessor;</span>
+    }
+
+    /**
+     *  The type class of the component managed by this builder. &lt;br&gt;
+     *  &lt;b&gt;This will never return null.&lt;/b&gt;
+     */
+    Class&lt;C&gt; componentType() {
+<span class="fc" id="L156">        return _componentType;</span>
+    }
+
+    /**
+     *  Cut off the strong reference to the component supplier managed by this builder
+     *  and disposes this builder node as a whole, meaning it is no longer usable for building. &lt;br&gt;
+     *  &lt;b&gt;Only call this method from the UI thread (AWT's EDT thread) as builder states are not thread safe.&lt;/b&gt;
+     */
+    void dispose() {
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L166">            Thread currentThread = Thread.currentThread();</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">            if ( !currentThread.getName().startsWith(&quot;Test worker&quot;) )</span>
+<span class="nc" id="L168">                log.warn(</span>
+<span class="nc" id="L169">                    &quot;The builder state for component type '&quot; + _componentType.getSimpleName() + &quot;' &quot; +</span>
+<span class="nc" id="L170">                    &quot;is being disposed from thread '&quot; + currentThread.getName() + &quot;', which is problematic! \n&quot; +</span>
+                    &quot;Builder states should only be disposed by the UI thread (AWT's EDT thread) because &quot; +
+                    &quot;they lack thread safety. Furthermore, it is important to note that GUI components &quot; +
+                    &quot;should only be assembled in the frontend layer of the application, and not in the backend layer &quot; +
+                    &quot;and one of its threads.&quot;,
+                    new Throwable()
+                );
+        }
+<span class="fc" id="L178">        _componentFetcher = null;</span>
+<span class="fc" id="L179">    }</span>
+
+    /**
+     *  A builder may be disposed of, which means that it is no longer usable for building
+     *  as it no longer has a reference to the component or built steps. &lt;br&gt;
+     *  @return True if this builder node has already been disposed of.
+     */
+    boolean isDisposed() {
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        return _componentFetcher == null;</span>
+    }
+
+    /**
+     *  A mutator is a functional consumer containing an action
+     *  that mutates the component passed to it. &lt;br&gt;
+     *  A mutator is either executed immediately or composed into a factory pipeline
+     *  and executed when the component is built and fetched at the end of the builder chain. &lt;br&gt;
+     *
+     * @param componentMutator A consumer which mutates the component managed by this builder.
+     * @return In procedural mode, this very builder node is returned.
+     *         In declarative mode, a new builder node is returned which is a copy of this builder node,
+     *         and this builder node is disposed of.
+     *         Either way, the component managed by this builder is mutated by the provided consumer.
+     */
+    BuilderState&lt;C&gt; withMutator( Consumer&lt;C&gt; componentMutator )
+    {
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( this.isDisposed() )</span>
+<span class="fc" id="L205">            throw new IllegalStateException(</span>
+                    &quot;Trying to build using a builder which has already been spent and disposed!&quot; +
+                    WHY_A_BUILDER_IS_DISPOSED +
+                    &quot;Make sure to only use the builder instance returned by the most recent builder method call.&quot;
+                );
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        if ( _mode != Mode.FUNCTIONAL_FACTORY_BUILDER)</span>
+            try {
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">                if ( _componentFetcher != null )</span>
+<span class="fc" id="L214">                    componentMutator.accept(_componentFetcher.get());</span>
+<span class="nc" id="L215">            } catch ( Exception e ) {</span>
+<span class="nc" id="L216">                e.printStackTrace();</span>
+<span class="nc" id="L217">                log.error(SwingTree.get().logMarker(), &quot;Exception while building component of type '{}'.&quot;, _componentType.getSimpleName(), e);</span>
+                /*
+                    If individual steps in the builder chain throw exceptions,
+                    we do not want the entire GUI declaration to fail
+                    so that only the GUI of the failing component is not built.
+                */
+<span class="fc" id="L223">            }</span>
+
+<span class="pc bpc" id="L225" title="1 of 4 branches missed.">        switch ( _mode) </span>
+        {
+            case FUNCTIONAL_FACTORY_BUILDER:
+            {
+<span class="fc" id="L229">                Supplier&lt;C&gt; componentFactory = _componentFetcher;</span>
+<span class="fc" id="L230">                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.</span>
+<span class="fc" id="L231">                return new BuilderState&lt;&gt;(</span>
+                        _eventProcessor,
+                        _mode,
+                        _componentType,
+                        () -&gt; {
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">                            if ( componentFactory == null )</span>
+<span class="nc" id="L237">                                throw new IllegalStateException(&quot;This builder state is disposed and cannot be used for building.&quot;);</span>
+<span class="fc" id="L238">                            C newComponent = componentFactory.get();</span>
+<span class="fc" id="L239">                            componentMutator.accept(newComponent);</span>
+<span class="fc" id="L240">                            return newComponent;</span>
+                        }
+                );
+            }
+            case DECLARATIVE_ONLY:
+            {
+<span class="fc" id="L246">                @Nullable Supplier&lt;C&gt; componentFactory = _componentFetcher;</span>
+<span class="fc" id="L247">                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.</span>
+<span class="fc" id="L248">                return new BuilderState&lt;&gt;(</span>
+                        _eventProcessor,
+                        _mode,
+                        _componentType,
+                        componentFactory
+                    );
+            }
+            case PROCEDURAL_OR_DECLARATIVE:
+            {
+<span class="fc" id="L257">                return this;</span>
+            }
+            default:
+<span class="nc" id="L260">                throw new IllegalStateException(&quot;Unknown mode: &quot; + _mode);</span>
+        }
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L266">        return this.getClass().getSimpleName() + &quot;[&quot; + _componentType.getSimpleName() + &quot;]&quot;;</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L272" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
+
+<span class="fc" id="L274">        BuilderState&lt;?&gt; that = (BuilderState&lt;?&gt;) o;</span>
+
+<span class="pc bpc" id="L276" title="2 of 4 branches missed.">        return _componentType.equals(that._componentType) &amp;&amp; _mode == that._mode;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L281">        return _componentType.hashCode();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResponsiveGridFlowLayout.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.layout</a> &gt; <span class="el_source">ResponsiveGridFlowLayout.java</span></div><h1>ResponsiveGridFlowLayout.java</h1><pre class="source lang-java linenums">
+package swingtree.layout;
+
+import net.miginfocom.layout.LC;
+import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
+import swingtree.UI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * A flow layout arranges components in a directional flow, much
+ * like lines of text in a paragraph.
+ */
+public final class ResponsiveGridFlowLayout implements LayoutManager2 {
+
+    private static final int NUMBER_OF_COLUMNS = 12;
+<span class="fc" id="L25">    private static final Logger log = LoggerFactory.getLogger(ResponsiveGridFlowLayout.class);</span>
+
+    private UI.HorizontalAlignment _alignmentCode;
+    private int                    _horizontalGapSize;
+    private int                    _verticalGapSize;
+    private boolean                _alignOnBaseline;
+
+    /**
+     * Constructs a new {@code FlowLayout} with a centered alignment and a
+     * default 5-unit horizontal and vertical gap.
+     */
+    public ResponsiveGridFlowLayout() {
+<span class="fc" id="L37">        this(UI.HorizontalAlignment.CENTER, 5, 5);</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Constructs a new {@code FlowLayout} with the specified
+     * alignment and a default 5-unit horizontal and vertical gap.
+     * The value of the alignment argument must be one of
+     * {@code FlowLayout.LEFT}, {@code FlowLayout.RIGHT},
+     * {@code FlowLayout.CENTER}, {@code FlowLayout.LEADING},
+     * or {@code FlowLayout.TRAILING}.
+     *
+     * @param align the alignment value
+     */
+    public ResponsiveGridFlowLayout(UI.HorizontalAlignment align) {
+<span class="nc" id="L51">        this(align, 5, 5);</span>
+<span class="nc" id="L52">    }</span>
+
+    /**
+     * Creates a new flow layout manager with the indicated alignment
+     * and the indicated horizontal and vertical gaps.
+     * &lt;p&gt;
+     * The value of the alignment argument must be one of
+     * {@link UI.HorizontalAlignment#LEFT}, {@link UI.HorizontalAlignment#RIGHT},
+     * {@link UI.HorizontalAlignment#CENTER}, {@link UI.HorizontalAlignment#LEADING},
+     * or {@link UI.HorizontalAlignment#TRAILING}.
+     *
+     * @param align the alignment value
+     * @param horizontalGapSize  the horizontal gap between components
+     *              and between the components and the
+     *              borders of the {@code Container}
+     * @param verticalGapSize  the vertical gap between components
+     *              and between the components and the
+     *              borders of the {@code Container}
+     */
+    public ResponsiveGridFlowLayout(
+        UI.HorizontalAlignment align,
+        int horizontalGapSize,
+        int verticalGapSize
+<span class="fc" id="L75">    ) {</span>
+<span class="fc" id="L76">        _alignmentCode     = align;</span>
+<span class="fc" id="L77">        _horizontalGapSize = horizontalGapSize;</span>
+<span class="fc" id="L78">        _verticalGapSize   = verticalGapSize;</span>
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Gets the alignment for this layout.
+     * Possible values are {@link UI.HorizontalAlignment#LEFT},
+     * {@link UI.HorizontalAlignment#RIGHT}, {@link UI.HorizontalAlignment#CENTER},
+     * {@link UI.HorizontalAlignment#LEADING},
+     * or {@link UI.HorizontalAlignment#TRAILING}.
+     *
+     * @return the alignment value for this layout
+     * @see #setAlignment
+     */
+    public UI.HorizontalAlignment getAlignment() {
+<span class="fc" id="L92">        return _alignmentCode;</span>
+    }
+
+    /**
+     * Sets the alignment for this layout.
+     * Possible values are
+     * &lt;ul&gt;
+     * &lt;li&gt;{@link UI.HorizontalAlignment#LEFT}
+     * &lt;li&gt;{@link UI.HorizontalAlignment#RIGHT}
+     * &lt;li&gt;{@link UI.HorizontalAlignment#CENTER}
+     * &lt;li&gt;{@link UI.HorizontalAlignment#LEADING}
+     * &lt;li&gt;{@link UI.HorizontalAlignment#TRAILING}
+     * &lt;/ul&gt;
+     *
+     * @param align one of the alignment values shown above
+     * @see #getAlignment()
+     */
+    public void setAlignment(UI.HorizontalAlignment align) {
+<span class="nc" id="L110">        _alignmentCode = align;</span>
+<span class="nc" id="L111">    }</span>
+
+    /**
+     * Gets the horizontal gap between components
+     * and between the components and the borders
+     * of the {@code Container}
+     *
+     * @return the horizontal gap between components
+     * and between the components and the borders
+     * of the {@code Container}
+     * @see ResponsiveGridFlowLayout#setHorizontalGapSize(int)
+     */
+    public int horizontalGapSize() {
+<span class="fc" id="L124">        return UI.scale(_horizontalGapSize);</span>
+    }
+
+    /**
+     * Sets the horizontal gap between components and
+     * between the components and the borders of the
+     * {@code Container}.
+     *
+     * @param size the horizontal gap between components
+     *             and between the components and the borders
+     *             of the {@code Container}
+     * @see ResponsiveGridFlowLayout#horizontalGapSize()
+     */
+    public void setHorizontalGapSize(int size) {
+<span class="nc" id="L138">        _horizontalGapSize = size;</span>
+<span class="nc" id="L139">    }</span>
+
+    /**
+     * Gets the vertical gap between components and
+     * between the components and the borders of the
+     * {@code Container}.
+     *
+     * @return the vertical gap between components
+     * and between the components and the borders
+     * of the {@code Container}
+     * @see ResponsiveGridFlowLayout#setVerticalGapSize(int)
+     */
+    public int verticalGapSize() {
+<span class="fc" id="L152">        return UI.scale(_verticalGapSize);</span>
+    }
+
+    /**
+     * Sets the vertical gap between components and between
+     * the components and the borders of the {@code Container}.
+     *
+     * @param size the vertical gap between components
+     *             and between the components and the borders
+     *             of the {@code Container}
+     * @see ResponsiveGridFlowLayout#verticalGapSize()
+     */
+    public void setVerticalGapSize(int size) {
+<span class="nc" id="L165">        _verticalGapSize = size;</span>
+<span class="nc" id="L166">    }</span>
+
+    /**
+     * Sets whether or not components should be vertically aligned along their
+     * baseline.  Components that do not have a baseline will be centered.
+     * The default is false.
+     *
+     * @param alignOnBaseline whether or not components should be
+     *                        vertically aligned on their baseline
+     */
+    public void setAlignOnBaseline(boolean alignOnBaseline) {
+<span class="nc" id="L177">        this._alignOnBaseline = alignOnBaseline;</span>
+<span class="nc" id="L178">    }</span>
+
+    /**
+     * Returns true if components are to be vertically aligned along
+     * their baseline.  The default is false.
+     *
+     * @return true if components are to be vertically aligned along
+     * their baseline
+     */
+    public boolean getAlignOnBaseline() {
+<span class="fc" id="L188">        return _alignOnBaseline;</span>
+    }
+
+    /**
+     * Adds the specified component to the layout.
+     * Not used by this class.
+     *
+     * @param name the name of the component
+     * @param comp the component to be added
+     */
+    @Override
+    public void addLayoutComponent( String name, Component comp ) {
+<span class="nc" id="L200">    }</span>
+
+    /**
+     * Removes the specified component from the layout.
+     * Not used by this class.
+     *
+     * @param comp the component to remove
+     * @see java.awt.Container#removeAll
+     */
+    @Override
+    public void removeLayoutComponent( Component comp ) {
+<span class="nc" id="L211">    }</span>
+
+    /**
+     * Returns the preferred dimensions for this layout given the
+     * &lt;i&gt;visible&lt;/i&gt; components in the specified target container.
+     *
+     * @param target the container that needs to be laid out
+     * @return the preferred dimensions to lay out the
+     * subcomponents of the specified container
+     * @see java.awt.Container
+     * @see #minimumLayoutSize
+     * @see java.awt.Container#getPreferredSize
+     */
+    @Override
+    public Dimension preferredLayoutSize( Container target ) {
+<span class="fc" id="L226">        synchronized (target.getTreeLock()) {</span>
+<span class="fc" id="L227">            Dimension dim = new Dimension(0, 0);</span>
+<span class="fc" id="L228">            int nmembers = target.getComponentCount();</span>
+<span class="fc" id="L229">            boolean firstVisibleComponent = true;</span>
+<span class="fc" id="L230">            boolean useBaseline = getAlignOnBaseline();</span>
+<span class="fc" id="L231">            int maxAscent = 0;</span>
+<span class="fc" id="L232">            int maxDescent = 0;</span>
+<span class="fc" id="L233">            int hgap = UI.scale(_horizontalGapSize);</span>
+<span class="fc" id="L234">            int vgap = UI.scale(_verticalGapSize);</span>
+
+<span class="fc" id="L236">            Bounds bounds = Bounds.of(Position.of(0,0), recursionSafePreferredSizeOf(target));</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">            for (int i = 0; i &lt; nmembers; i++) {</span>
+<span class="fc" id="L238">                Component m = target.getComponent(i);</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">                if (m.isVisible()) {</span>
+<span class="fc" id="L240">                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(m.getSize()).plus(hgap, vgap));</span>
+<span class="fc" id="L241">                    bounds = bounds.merge(childBounds);</span>
+<span class="fc" id="L242">                    Dimension d = m.getSize();</span>
+<span class="fc" id="L243">                    dim.height = Math.max(dim.height, d.height);</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">                    if (firstVisibleComponent) {</span>
+<span class="fc" id="L245">                        firstVisibleComponent = false;</span>
+                    } else {
+<span class="fc" id="L247">                        dim.width += hgap;</span>
+                    }
+<span class="fc" id="L249">                    dim.width += d.width;</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">                    if (useBaseline) {</span>
+<span class="nc" id="L251">                        int baseline = m.getBaseline(d.width, d.height);</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                        if (baseline &gt;= 0) {</span>
+<span class="nc" id="L253">                            maxAscent = Math.max(maxAscent, baseline);</span>
+<span class="nc" id="L254">                            maxDescent = Math.max(maxDescent, d.height - baseline);</span>
+                        }
+                    }
+                }
+            }
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">            if (useBaseline) {</span>
+<span class="nc" id="L260">                dim.height = Math.max(maxAscent + maxDescent, dim.height);</span>
+            }
+<span class="fc" id="L262">            Insets insets = target.getInsets();</span>
+<span class="fc" id="L263">            dim.width  = Math.max( dim.width  + hgap * 2, bounds.size().width().orElse(0f).intValue() );</span>
+<span class="fc" id="L264">            dim.height = Math.max( dim.height + vgap * 2, bounds.size().height().orElse(0f).intValue() );</span>
+<span class="fc" id="L265">            dim.width  += insets.left + insets.right;</span>
+<span class="fc" id="L266">            dim.height += insets.top  + insets.bottom;</span>
+<span class="fc" id="L267">            return dim;</span>
+        }
+    }
+
+    private static Size recursionSafePreferredSizeOf( Container target ) {
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if ( target.isPreferredSizeSet() )</span>
+<span class="fc" id="L273">            return Size.of(target.getPreferredSize());</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">        else if ( target.isMaximumSizeSet() )</span>
+<span class="nc" id="L275">            return Size.of(target.getMaximumSize()); // Good enough fall back 1.</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">        else if  ( target.isMinimumSizeSet() )</span>
+<span class="nc" id="L277">            return Size.of(target.getMinimumSize()); // Good enough fall back 2.</span>
+        else
+<span class="fc" id="L279">            return Size.of(target.getSize()); // Good enough fallback 3.</span>
+    }
+
+    /**
+     * Returns the minimum dimensions needed to layout the &lt;i&gt;visible&lt;/i&gt;
+     * components contained in the specified target container.
+     *
+     * @param target the container that needs to be laid out
+     * @return the minimum dimensions to lay out the
+     * subcomponents of the specified container
+     * @see #preferredLayoutSize
+     * @see java.awt.Container
+     * @see java.awt.Container#doLayout
+     */
+    @Override
+    public Dimension minimumLayoutSize( Container target ) {
+<span class="nc" id="L295">        synchronized (target.getTreeLock()) {</span>
+<span class="nc" id="L296">            boolean useBaseline = getAlignOnBaseline();</span>
+<span class="nc" id="L297">            Dimension dim = new Dimension(0, 0);</span>
+<span class="nc" id="L298">            int nmembers = target.getComponentCount();</span>
+<span class="nc" id="L299">            int maxAscent = 0;</span>
+<span class="nc" id="L300">            int maxDescent = 0;</span>
+<span class="nc" id="L301">            boolean firstVisibleComponent = true;</span>
+<span class="nc" id="L302">            int hgap = UI.scale(_horizontalGapSize);</span>
+<span class="nc" id="L303">            int vgap = UI.scale(_verticalGapSize);</span>
+
+<span class="nc bnc" id="L305" title="All 2 branches missed.">            for (int i = 0; i &lt; nmembers; i++) {</span>
+<span class="nc" id="L306">                Component m = target.getComponent(i);</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                if (m.isVisible()) {</span>
+<span class="nc" id="L308">                    Dimension d = m.getMinimumSize();</span>
+<span class="nc" id="L309">                    dim.height = Math.max(dim.height, d.height);</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">                    if (firstVisibleComponent) {</span>
+<span class="nc" id="L311">                        firstVisibleComponent = false;</span>
+                    } else {
+<span class="nc" id="L313">                        dim.width += hgap;</span>
+                    }
+<span class="nc" id="L315">                    dim.width += d.width;</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">                    if (useBaseline) {</span>
+<span class="nc" id="L317">                        int baseline = m.getBaseline(d.width, d.height);</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">                        if (baseline &gt;= 0) {</span>
+<span class="nc" id="L319">                            maxAscent = Math.max(maxAscent, baseline);</span>
+<span class="nc" id="L320">                            maxDescent = Math.max(maxDescent,</span>
+                                    dim.height - baseline);
+                        }
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            if (useBaseline) {</span>
+<span class="nc" id="L328">                dim.height = Math.max(maxAscent + maxDescent, dim.height);</span>
+            }
+
+<span class="nc" id="L331">            Insets insets = target.getInsets();</span>
+<span class="nc" id="L332">            dim.width += insets.left + insets.right + hgap * 2;</span>
+<span class="nc" id="L333">            dim.height += insets.top + insets.bottom + vgap * 2;</span>
+<span class="nc" id="L334">            return dim;</span>
+        }
+    }
+
+    /**
+     * Centers the elements in the specified row, if there is any slack.
+     *
+     * @param target      the component which needs to be moved
+     * @param cells       an array of cells, one for each component of the target
+     * @param x           the x coordinate
+     * @param y           the y coordinate
+     * @param width       the width dimensions
+     * @param height      the height dimensions
+     * @param rowStart    the beginning of the row
+     * @param rowEnd      the ending of the row
+     * @param useBaseline Whether or not to align on baseline.
+     * @param ascent      Ascent for the components. This is only valid if
+     *                    useBaseline is true.
+     * @param descent     Ascent for the components. This is only valid if
+     *                    useBaseline is true.
+     * @return actual row height
+     */
+    private int moveComponents(
+            Container target, Cell[] cells,
+            int x, int y, int width, int height,
+            int rowStart, int rowEnd, boolean ltr,
+            boolean useBaseline,
+            int@Nullable [] ascent,
+            int@Nullable [] descent
+    ) {
+<span class="fc" id="L364">        int hgap = UI.scale(_horizontalGapSize);</span>
+<span class="pc bpc" id="L365" title="3 of 6 branches missed.">        switch (_alignmentCode) {</span>
+            case LEFT:
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">                x += ltr ? 0 : width;</span>
+<span class="fc" id="L368">                break;</span>
+            case CENTER:
+<span class="fc" id="L370">                x += width / 2;</span>
+<span class="fc" id="L371">                break;</span>
+            case RIGHT:
+<span class="pc bpc" id="L373" title="1 of 2 branches missed.">                x += ltr ? width : 0;</span>
+<span class="fc" id="L374">                break;</span>
+            case LEADING:
+<span class="nc" id="L376">                break;</span>
+            case TRAILING:
+<span class="nc" id="L378">                x += width;</span>
+<span class="nc" id="L379">                break;</span>
+            case UNDEFINED:
+                break; // Should happen?
+        }
+<span class="fc" id="L383">        int maxAscent = 0;</span>
+<span class="fc" id="L384">        int nonbaselineHeight = 0;</span>
+<span class="fc" id="L385">        int baselineOffset = 0;</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">        if (useBaseline) {</span>
+<span class="nc" id="L387">            Objects.requireNonNull(ascent);</span>
+<span class="nc" id="L388">            Objects.requireNonNull(descent);</span>
+<span class="nc" id="L389">            int maxDescent = 0;</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            for (int i = rowStart; i &lt; rowEnd; i++) {</span>
+<span class="nc" id="L391">                Component m = target.getComponent(i);</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                if (m.isVisible()) {</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                    if (ascent[i] &gt;= 0) {</span>
+<span class="nc" id="L394">                        maxAscent = Math.max(maxAscent, ascent[i]);</span>
+<span class="nc" id="L395">                        maxDescent = Math.max(maxDescent, descent[i]);</span>
+                    } else {
+<span class="nc" id="L397">                        nonbaselineHeight = Math.max(m.getHeight(),</span>
+                                nonbaselineHeight);
+                    }
+                }
+            }
+<span class="nc" id="L402">            height = Math.max(maxAscent + maxDescent, nonbaselineHeight);</span>
+<span class="nc" id="L403">            baselineOffset = (height - maxAscent - maxDescent) / 2;</span>
+        }
+<span class="fc bfc" id="L405" title="All 2 branches covered.">        for (int i = rowStart; i &lt; rowEnd; i++) {</span>
+<span class="fc" id="L406">            Component m = target.getComponent(i);</span>
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">            if (m.isVisible()) {</span>
+<span class="fc" id="L408">                Optional&lt;FlowCellConf&gt; optionalFlowCellConf = cells[i].flowCell();</span>
+<span class="fc" id="L409">                boolean fillHeight = optionalFlowCellConf.map(FlowCellConf::fill).orElse(false);</span>
+<span class="fc" id="L410">                UI.VerticalAlignment verticalAlignment = optionalFlowCellConf.map(FlowCellConf::verticalAlignment).orElse(UI.VerticalAlignment.CENTER);</span>
+                int cy;
+<span class="pc bpc" id="L412" title="5 of 6 branches missed.">                if (ascent != null &amp;&amp; useBaseline &amp;&amp; ascent[i] &gt;= 0) {</span>
+<span class="nc" id="L413">                    cy = y + baselineOffset + maxAscent - ascent[i];</span>
+                } else {
+<span class="fc bfc" id="L415" title="All 2 branches covered.">                    if (fillHeight) {</span>
+<span class="fc" id="L416">                        cy = y;</span>
+                    } else {
+<span class="fc bfc" id="L418" title="All 2 branches covered.">                        if ( verticalAlignment == UI.VerticalAlignment.TOP )</span>
+<span class="fc" id="L419">                            cy = y;</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">                        else if ( verticalAlignment == UI.VerticalAlignment.BOTTOM )</span>
+<span class="fc" id="L421">                            cy = y + height - m.getHeight();</span>
+                        else // centered:
+<span class="fc" id="L423">                            cy = y + (height - m.getHeight()) / 2;</span>
+                    }
+                }
+<span class="pc bpc" id="L426" title="1 of 2 branches missed.">                if (ltr) {</span>
+<span class="fc" id="L427">                    m.setLocation(x, cy);</span>
+                } else {
+<span class="nc" id="L429">                    m.setLocation(target.getWidth() - x - m.getWidth(), cy);</span>
+                }
+<span class="fc" id="L431">                x += m.getWidth() + hgap;</span>
+
+<span class="fc bfc" id="L433" title="All 2 branches covered.">                if ( fillHeight ) {</span>
+<span class="fc" id="L434">                    m.setSize(m.getWidth(), height);</span>
+                }
+            }
+        }
+<span class="fc" id="L438">        return height;</span>
+    }
+
+    /**
+     * Lays out the container. This method lets each
+     * &lt;i&gt;visible&lt;/i&gt; component take
+     * its preferred size by reshaping the components in the
+     * target container in order to satisfy the alignment of
+     * this layout manager.
+     *
+     * @param target the specified component being laid out
+     * @see Container
+     * @see java.awt.Container#doLayout
+     */
+    @Override
+    public void layoutContainer(Container target) {
+<span class="fc" id="L454">        synchronized (target.getTreeLock()) {</span>
+<span class="fc" id="L455">            final int hgap = UI.scale(_horizontalGapSize);</span>
+<span class="fc" id="L456">            final int vgap = UI.scale(_verticalGapSize);</span>
+<span class="fc" id="L457">            final Insets insets = target.getInsets();</span>
+<span class="fc" id="L458">            final int maxwidth = target.getWidth() - (insets.left + insets.right + hgap * 2);</span>
+<span class="fc" id="L459">            final int generalMaxWidth = target.getPreferredSize().width - (insets.left + insets.right + hgap * 2);</span>
+<span class="fc" id="L460">            final int nmembers = target.getComponentCount();</span>
+<span class="fc" id="L461">            int x = 0, y = insets.top + vgap;</span>
+<span class="fc" id="L462">            int rowh = 0, start = 0;</span>
+
+<span class="fc" id="L464">            Cell[] cells = _createCells(target, nmembers, maxwidth, generalMaxWidth);</span>
+
+<span class="fc" id="L466">            boolean ltr = target.getComponentOrientation().isLeftToRight();</span>
+<span class="fc" id="L467">            boolean useBaseline = getAlignOnBaseline();</span>
+<span class="fc" id="L468">            int[] ascent = null;</span>
+<span class="fc" id="L469">            int[] descent = null;</span>
+
+<span class="pc bpc" id="L471" title="1 of 2 branches missed.">            if (useBaseline) {</span>
+<span class="nc" id="L472">                ascent = new int[nmembers];</span>
+<span class="nc" id="L473">                descent = new int[nmembers];</span>
+            }
+
+<span class="fc bfc" id="L476" title="All 2 branches covered.">            for (int i = 0; i &lt; nmembers; i++) {</span>
+<span class="fc" id="L477">                Component m = cells[i].component();</span>
+<span class="pc bpc" id="L478" title="1 of 2 branches missed.">                if (m.isVisible()) {</span>
+<span class="fc" id="L479">                    Dimension d = m.getPreferredSize();</span>
+                    try {
+<span class="fc" id="L481">                        d = _dimensionsFromCellConf(cells[i], maxwidth).orElse(d);</span>
+<span class="nc" id="L482">                    } catch (Exception e) {</span>
+<span class="nc" id="L483">                        log.error(SwingTree.get().logMarker(), &quot;Error applying cell configuration&quot;, e);</span>
+<span class="fc" id="L484">                    }</span>
+<span class="fc" id="L485">                    m.setSize(d.width, d.height);</span>
+
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">                    if (useBaseline ) {</span>
+<span class="nc" id="L488">                        Objects.requireNonNull(ascent);</span>
+<span class="nc" id="L489">                        Objects.requireNonNull(descent);</span>
+<span class="nc" id="L490">                        int baseline = m.getBaseline(d.width, d.height);</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">                        if (baseline &gt;= 0) {</span>
+<span class="nc" id="L492">                            ascent[i] = baseline;</span>
+<span class="nc" id="L493">                            descent[i] = d.height - baseline;</span>
+                        } else {
+<span class="nc" id="L495">                            ascent[i] = -1;</span>
+                        }
+                    }
+<span class="fc bfc" id="L498" title="All 4 branches covered.">                    if ((x == 0) || ((x + d.width) &lt;= maxwidth)) {</span>
+<span class="fc bfc" id="L499" title="All 2 branches covered.">                        if (x &gt; 0) {</span>
+<span class="fc" id="L500">                            x += hgap;</span>
+                        }
+<span class="fc" id="L502">                        x += d.width;</span>
+<span class="fc" id="L503">                        rowh = Math.max(rowh, d.height);</span>
+                    } else {
+<span class="fc" id="L505">                        rowh = moveComponents(</span>
+                                target, cells,
+                                insets.left + hgap, y,
+                                maxwidth - x, rowh, start, i, ltr,
+                                useBaseline, ascent, descent
+                        );
+<span class="fc" id="L511">                        x = d.width;</span>
+<span class="fc" id="L512">                        y += vgap + rowh;</span>
+<span class="fc" id="L513">                        rowh = d.height;</span>
+<span class="fc" id="L514">                        start = i;</span>
+                    }
+                }
+            }
+<span class="fc" id="L518">            moveComponents(</span>
+                    target, cells,
+                    insets.left + hgap, y, maxwidth - x, rowh,
+                    start, nmembers, ltr, useBaseline, ascent, descent
+            );
+<span class="fc" id="L523">        }</span>
+<span class="fc" id="L524">    }</span>
+
+    private Cell[] _createCells(
+            Container target,
+            int nmembers,
+            int maxwidth,
+            int generalMaxWidth
+    ) {
+<span class="fc" id="L532">        Cell[] cells = new Cell[nmembers];</span>
+<span class="fc" id="L533">        AtomicInteger componentsInRow = new AtomicInteger(0);</span>
+<span class="fc" id="L534">        double currentRowSize = 0;</span>
+<span class="fc bfc" id="L535" title="All 2 branches covered.">        for (int i = 0; i &lt; nmembers; i++) {</span>
+<span class="fc" id="L536">            Component m = target.getComponent(i);</span>
+<span class="fc" id="L537">            Optional&lt;Cell&gt; optionalCell = Optional.empty();</span>
+<span class="fc" id="L538">            double rowSizeIncrease = 0;</span>
+<span class="pc bpc" id="L539" title="1 of 2 branches missed.">            if (m instanceof JComponent) {</span>
+<span class="fc" id="L540">                JComponent jc = (JComponent) m;</span>
+<span class="fc" id="L541">                AddConstraint addConstraint = (AddConstraint) jc.getClientProperty(AddConstraint.class);</span>
+<span class="fc bfc" id="L542" title="All 2 branches covered.">                if (addConstraint instanceof FlowCell) {</span>
+<span class="fc" id="L543">                    FlowCell cell = (FlowCell) addConstraint;</span>
+<span class="fc" id="L544">                    optionalCell = cellFromCellConf(target, cell, jc, componentsInRow, maxwidth, generalMaxWidth);</span>
+<span class="fc" id="L545">                    rowSizeIncrease += optionalCell.flatMap(Cell::autoSpan)</span>
+<span class="fc" id="L546">                                                    .map(FlowCellSpanPolicy::cellsToFill)</span>
+<span class="fc" id="L547">                                                    .orElse(0);</span>
+                }
+            }
+<span class="fc bfc" id="L550" title="All 2 branches covered.">            if ( !optionalCell.isPresent() ) {</span>
+<span class="fc" id="L551">                double prefComponentWidth = m.getPreferredSize().getWidth();</span>
+<span class="pc bpc" id="L552" title="3 of 4 branches missed.">                if ( maxwidth &gt; 0 &amp;&amp; prefComponentWidth &gt; 0 ) {</span>
+<span class="nc" id="L553">                    rowSizeIncrease += NUMBER_OF_COLUMNS * prefComponentWidth / maxwidth;</span>
+                }
+            }
+
+<span class="fc" id="L557">            cells[i] = optionalCell.orElse(new Cell(m, componentsInRow, null, null));</span>
+
+<span class="fc" id="L559">            double newRowSize = currentRowSize + rowSizeIncrease;</span>
+<span class="fc bfc" id="L560" title="All 2 branches covered.">            if ( newRowSize &lt; NUMBER_OF_COLUMNS ) {</span>
+                // Still room in the row for new components...
+<span class="fc" id="L562">                componentsInRow.set(componentsInRow.get() + 1);</span>
+<span class="fc" id="L563">                currentRowSize += rowSizeIncrease;</span>
+<span class="fc bfc" id="L564" title="All 2 branches covered.">            } else if ( Math.round(newRowSize) == NUMBER_OF_COLUMNS ) {</span>
+                // We have a new row with no leftovers.
+<span class="fc" id="L566">                componentsInRow.set(componentsInRow.get() + 1);</span>
+<span class="fc" id="L567">                componentsInRow = new AtomicInteger(0);</span>
+<span class="fc" id="L568">                currentRowSize = 0;</span>
+<span class="pc bpc" id="L569" title="1 of 2 branches missed.">            } else if ( newRowSize &gt; NUMBER_OF_COLUMNS ) {</span>
+                // The row does not fit the new component. We need to start a new row.
+<span class="fc" id="L571">                componentsInRow = new AtomicInteger(1);</span>
+<span class="fc" id="L572">                cells[i].setNumberOfComponents(componentsInRow);</span>
+<span class="fc" id="L573">                currentRowSize = rowSizeIncrease; // We have a new row with the current component.</span>
+            }
+        }
+<span class="fc" id="L576">        return cells;</span>
+    }
+
+    /**
+     * Returns a string representation of this {@code FlowLayout}
+     * object and its values.
+     *
+     * @return a string representation of this layout
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L587">        String str = &quot;&quot;;</span>
+<span class="nc" id="L588">        int hgap = UI.scale(_horizontalGapSize);</span>
+<span class="nc" id="L589">        int vgap = UI.scale(_verticalGapSize);</span>
+<span class="nc bnc" id="L590" title="All 7 branches missed.">        switch (_alignmentCode) {</span>
+            case LEFT:
+<span class="nc" id="L592">                str = &quot;,align=left&quot;;</span>
+<span class="nc" id="L593">                break;</span>
+            case CENTER:
+<span class="nc" id="L595">                str = &quot;,align=center&quot;;</span>
+<span class="nc" id="L596">                break;</span>
+            case RIGHT:
+<span class="nc" id="L598">                str = &quot;,align=right&quot;;</span>
+<span class="nc" id="L599">                break;</span>
+            case LEADING:
+<span class="nc" id="L601">                str = &quot;,align=leading&quot;;</span>
+<span class="nc" id="L602">                break;</span>
+            case TRAILING:
+<span class="nc" id="L604">                str = &quot;,align=trailing&quot;;</span>
+<span class="nc" id="L605">                break;</span>
+            case UNDEFINED:
+<span class="nc" id="L607">                str = &quot;,align=?&quot;;</span>
+                break;
+        }
+<span class="nc" id="L610">        return getClass().getName() + &quot;[horizontalGap=&quot; + hgap + &quot;,verticalGap=&quot; + vgap + str + &quot;]&quot;;</span>
+    }
+
+    @Override
+    public void addLayoutComponent(Component comp, Object constraints) {
+<span class="fc bfc" id="L615" title="All 2 branches covered.">        if (constraints instanceof AddConstraint) {</span>
+<span class="pc bpc" id="L616" title="1 of 2 branches missed.">            if (comp instanceof JComponent) {</span>
+<span class="fc" id="L617">                JComponent jc = (JComponent) comp;</span>
+<span class="fc" id="L618">                jc.putClientProperty(AddConstraint.class, constraints);</span>
+            }
+        }
+<span class="fc" id="L621">    }</span>
+
+    @Override
+    public Dimension maximumLayoutSize(Container target) {
+<span class="nc" id="L625">        return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);</span>
+    }
+
+    @Override
+    public float getLayoutAlignmentX(Container target) {
+<span class="nc" id="L630">        return 0;</span>
+    }
+
+    @Override
+    public float getLayoutAlignmentY(Container target) {
+<span class="nc" id="L635">        return 0;</span>
+    }
+
+    @Override
+    public void invalidateLayout(Container target) {
+
+<span class="nc" id="L641">    }</span>
+
+    public Optional&lt;Cell&gt; cellFromCellConf(
+            Component parent,
+            FlowCell flowCell,
+            Component child,
+            AtomicInteger componentCounter,
+            int maxWidth,
+            int generalMaxWidth
+    ) {
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">        if ( maxWidth &lt;= 0 ) {</span>
+<span class="nc" id="L652">            return Optional.empty();</span>
+        }
+        // How much preferred width the parent actually fills:
+<span class="fc" id="L655">        ParentSizeClass currentParentSizeCategory = ParentSizeClass.of(maxWidth, generalMaxWidth);</span>
+
+<span class="fc" id="L657">        boolean shouldFillHeight = false;</span>
+<span class="pc bpc" id="L658" title="1 of 2 branches missed.">        LayoutManager childLayout = ( child instanceof JComponent ) ? ((JComponent) child).getLayout() : null;</span>
+<span class="pc bpc" id="L659" title="1 of 2 branches missed.">        if ( childLayout instanceof MigLayout ) {</span>
+<span class="fc" id="L660">            Object layoutConstraints = ((MigLayout) childLayout).getLayoutConstraints();</span>
+            // If the child has the &quot;fill&quot; or &quot;filly&quot; constraint, we should fill the height.
+<span class="pc bpc" id="L662" title="1 of 2 branches missed.">            if ( layoutConstraints instanceof String ) {</span>
+<span class="fc" id="L663">                String constraints = (String) layoutConstraints;</span>
+<span class="pc bpc" id="L664" title="2 of 4 branches missed.">                shouldFillHeight = constraints.contains(&quot;fill&quot;) || constraints.contains(&quot;filly&quot;);</span>
+<span class="pc bnc" id="L665" title="All 2 branches missed.">            } else if ( layoutConstraints instanceof LC ) {</span>
+<span class="nc" id="L666">                LC lc = (LC) layoutConstraints;</span>
+<span class="nc" id="L667">                shouldFillHeight = lc.isFillY();</span>
+            }
+        }
+<span class="fc" id="L670">        Size parentSize = Size.of(parent.getWidth(), parent.getHeight());</span>
+<span class="fc" id="L671">        FlowCellConf cellConf = flowCell.fetchConfig(NUMBER_OF_COLUMNS, parentSize, currentParentSizeCategory, shouldFillHeight);</span>
+<span class="fc" id="L672">        Optional&lt;FlowCellSpanPolicy&gt; autoSpan = _findNextBestAutoSpan(cellConf, currentParentSizeCategory);</span>
+<span class="fc" id="L673">        return autoSpan.map(autoCellSpanPolicy -&gt; new Cell(child, componentCounter, autoCellSpanPolicy, cellConf));</span>
+    }
+
+    private Optional&lt;Dimension&gt; _dimensionsFromCellConf( Cell cell, int maxWidth ) {
+
+<span class="fc bfc" id="L678" title="All 2 branches covered.">        if ( maxWidth &lt;= 0 ) {</span>
+<span class="fc" id="L679">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L682">        Optional&lt;FlowCellSpanPolicy&gt; autoSpan = cell.autoSpan();</span>
+<span class="pc bpc" id="L683" title="1 of 2 branches missed.">        if (!autoSpan.isPresent()) {</span>
+<span class="nc" id="L684">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L687">        int cellsToFill = autoSpan.get().cellsToFill();</span>
+<span class="fc" id="L688">        int unusableSpace = ((cell.numberOfComponentsInRow()-1) * UI.scale(_horizontalGapSize));</span>
+<span class="fc" id="L689">        int width = ((maxWidth - unusableSpace) * cellsToFill) / NUMBER_OF_COLUMNS;</span>
+<span class="fc" id="L690">        Dimension newSize = new Dimension(width, cell.component().getPreferredSize().height);</span>
+<span class="fc" id="L691">        return Optional.of(newSize);</span>
+    }
+
+    private static int rankOf(ParentSizeClass sizeClass){
+<span class="pc bpc" id="L695" title="4 of 8 branches missed.">        switch (sizeClass) {</span>
+            case VOID:
+<span class="nc" id="L697">                return 0;</span>
+            case VERY_SMALL:
+<span class="fc" id="L699">                return 1;</span>
+            case SMALL:
+<span class="fc" id="L701">                return 2;</span>
+            case MEDIUM:
+<span class="fc" id="L703">                return 3;</span>
+            case LARGE:
+<span class="nc" id="L705">                return 4;</span>
+            case VERY_LARGE:
+<span class="fc" id="L707">                return 5;</span>
+            case OVERSIZE:
+<span class="nc" id="L709">                return 6;</span>
+            default:
+<span class="nc" id="L711">                return -1;</span>
+        }
+    }
+
+    private static Optional&lt;FlowCellSpanPolicy&gt; _findNextBestAutoSpan( FlowCellConf cell, ParentSizeClass targetSize ) {
+<span class="fc" id="L716">        Optional&lt;FlowCellSpanPolicy&gt; autoSpan = _find(rankOf(targetSize), cell);</span>
+<span class="fc bfc" id="L717" title="All 2 branches covered.">        if ( autoSpan.isPresent() )</span>
+<span class="fc" id="L718">            return autoSpan;</span>
+
+        // We did not find the exact match. Let's try to find the closest match.
+
+<span class="fc" id="L722">        int numberOfSizeClasses = ParentSizeClass.values().length;</span>
+<span class="fc" id="L723">        int targetOrdinal = rankOf(targetSize);</span>
+        /*
+            We want to find the enum value which is closed to the target ordinal.
+         */
+<span class="fc bfc" id="L727" title="All 2 branches covered.">        int sign = ( rankOf(targetSize) &gt; numberOfSizeClasses / 2 ? 1 : -1 );</span>
+<span class="pc bpc" id="L728" title="1 of 2 branches missed.">        for ( int offset = 1; offset &lt; numberOfSizeClasses; offset++ ) {</span>
+<span class="fc" id="L729">            sign = -sign;</span>
+<span class="fc" id="L730">            autoSpan = _find(targetOrdinal + offset * sign, cell);</span>
+<span class="pc bpc" id="L731" title="1 of 2 branches missed.">            if ( autoSpan.isPresent() )</span>
+<span class="fc" id="L732">                return autoSpan;</span>
+
+<span class="nc" id="L734">            sign = -sign;</span>
+<span class="nc" id="L735">            autoSpan = _find(targetOrdinal + offset * sign, cell);</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">            if ( autoSpan.isPresent() )</span>
+<span class="nc" id="L737">                return autoSpan;</span>
+        }
+<span class="nc" id="L739">        return Optional.empty();</span>
+    }
+
+    private static Optional&lt;FlowCellSpanPolicy&gt; _find( int ordinal, FlowCellConf cell ) {
+<span class="pc bpc" id="L743" title="2 of 4 branches missed.">        if ( ordinal &lt; 0 || ordinal &gt;= ParentSizeClass.values().length ) {</span>
+<span class="nc" id="L744">            return Optional.empty();</span>
+        }
+<span class="fc" id="L746">        ParentSizeClass targetSize = ParentSizeClass.values()[ordinal];</span>
+<span class="fc bfc" id="L747" title="All 2 branches covered.">        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {</span>
+<span class="fc bfc" id="L748" title="All 2 branches covered.">            if ( autoSpan.parentSize() == targetSize ) {</span>
+<span class="fc" id="L749">                return Optional.of(autoSpan);</span>
+            }
+        }
+<span class="fc" id="L752">        return Optional.empty();</span>
+    }
+
+    private static final class Cell {
+
+        private final Component component;
+        private final @Nullable FlowCellSpanPolicy autoSpan;
+        private final @Nullable FlowCellConf cellConf;
+
+        private AtomicInteger numberOfComponents;
+
+
+        Cell(
+                Component component,
+                AtomicInteger componentCounter,
+                @Nullable FlowCellSpanPolicy autoSpan,
+                @Nullable FlowCellConf cellConf
+<span class="fc" id="L769">        ) {</span>
+<span class="fc" id="L770">            this.component          = component;</span>
+<span class="fc" id="L771">            this.numberOfComponents = componentCounter;</span>
+<span class="fc" id="L772">            this.autoSpan           = autoSpan;</span>
+<span class="fc" id="L773">            this.cellConf           = cellConf;</span>
+<span class="fc" id="L774">        }</span>
+
+        public Component component() {
+<span class="fc" id="L777">            return component;</span>
+        }
+
+        public Optional&lt;FlowCellSpanPolicy&gt; autoSpan() {
+<span class="fc" id="L781">            return Optional.ofNullable(autoSpan);</span>
+        }
+
+        public Optional&lt;FlowCellConf&gt; flowCell() {
+<span class="fc" id="L785">            return Optional.ofNullable(cellConf);</span>
+        }
+
+        public int numberOfComponentsInRow() {
+<span class="fc" id="L789">            return numberOfComponents.get();</span>
+        }
+
+        public void setNumberOfComponents(AtomicInteger numberOfComponents) {
+<span class="fc" id="L793">            this.numberOfComponents = numberOfComponents;</span>
+<span class="fc" id="L794">        }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

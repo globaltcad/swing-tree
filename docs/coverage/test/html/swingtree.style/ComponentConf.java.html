@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ComponentConf.java</span></div><h1>ComponentConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
+import swingtree.layout.Bounds;
+import swingtree.layout.Size;
+
+import java.util.Objects;
+
+/**
+ *  An immutable snapshot of all the essential component state needed for rendering
+ *  and configuring the component state.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class ComponentConf
+{
+    public static ComponentConf none() {
+<span class="fc" id="L19">        return new ComponentConf(</span>
+<span class="fc" id="L20">                    StyleConf.none(),</span>
+<span class="fc" id="L21">                    Bounds.none(),</span>
+<span class="fc" id="L22">                    Outline.none()</span>
+                );
+    }
+
+    private final StyleConf _styleConf;
+    private final Bounds    _currentBounds;
+    private final Outline   _marginCorrection;
+
+<span class="fc" id="L30">    private boolean _wasAlreadyHashed = false;</span>
+<span class="fc" id="L31">    private int     _hashCode         = 0; // cached hash code</span>
+
+
+    ComponentConf(
+            StyleConf styleConf,
+            Bounds currentBounds,
+            Outline marginCorrection
+<span class="fc" id="L38">    ) {</span>
+<span class="fc" id="L39">        _styleConf        = Objects.requireNonNull(styleConf);</span>
+<span class="fc" id="L40">        _currentBounds    = Objects.requireNonNull(currentBounds);</span>
+<span class="fc" id="L41">        _marginCorrection = Objects.requireNonNull(marginCorrection);</span>
+<span class="fc" id="L42">    }</span>
+
+<span class="fc" id="L44">    StyleConf style() { return _styleConf; }</span>
+
+<span class="fc" id="L46">    Bounds currentBounds() { return _currentBounds; }</span>
+
+<span class="fc" id="L48">    Outline areaMarginCorrection() { return _marginCorrection; }</span>
+
+    ComponentConf withSize( int width, int height ) {
+<span class="fc" id="L51">        return new ComponentConf(</span>
+                   _styleConf,
+<span class="fc" id="L53">                   Bounds.of(_currentBounds.location(), Size.of(width, height)),</span>
+                _marginCorrection
+               );
+    }
+
+    /**
+     *  Returns a new {@link ComponentConf} instance which only contains style information relevant
+     *  to the provided {@link UI.Layer}. Style information on other layers is discarded.
+     * @param layer The layer to retain.
+     * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
+     */
+    LayerRenderConf toRenderConfFor(UI.Layer layer ) {
+<span class="fc" id="L65">        return LayerRenderConf.of(layer,this);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L70">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+                    &quot;style=&quot;                + _styleConf + &quot;, &quot;+
+                    &quot;bounds=&quot;               + _currentBounds + &quot;, &quot;+
+                    &quot;areaMarginCorrection=&quot; + _marginCorrection + &quot;, &quot;+
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L82">        ComponentConf other = (ComponentConf) o;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        return Objects.equals(_styleConf, other._styleConf)</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_currentBounds, other._currentBounds)</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_marginCorrection, other._marginCorrection);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if ( _wasAlreadyHashed )</span>
+<span class="fc" id="L91">            return _hashCode;</span>
+
+<span class="fc" id="L93">        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);</span>
+<span class="fc" id="L94">        _wasAlreadyHashed = true;</span>
+<span class="fc" id="L95">        return _hashCode;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

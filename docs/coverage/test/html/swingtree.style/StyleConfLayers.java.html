@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleConfLayers.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleConfLayers.java</span></div><h1>StyleConfLayers.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.api.Configurator;
+
+import java.util.Objects;
+import java.util.function.BiPredicate;
+
+@Immutable
+final class StyleConfLayers
+{
+<span class="fc" id="L16">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleConfLayers.class);</span>
+
+<span class="fc" id="L18">    private static final StyleConfLayers _EMPTY = new StyleConfLayers(</span>
+<span class="fc" id="L19">                                                    FilterConf.none(),</span>
+<span class="fc" id="L20">                                                    StyleConfLayer.empty(),</span>
+<span class="fc" id="L21">                                                    StyleConfLayer.empty(),</span>
+<span class="fc" id="L22">                                                    StyleConfLayer.empty(),</span>
+<span class="fc" id="L23">                                                    StyleConfLayer.empty(),</span>
+                                                    null
+                                                );
+
+    static StyleConfLayers empty() {
+<span class="fc" id="L28">        return _EMPTY;</span>
+    }
+
+    private final FilterConf               _filter;
+    private final StyleConfLayer           _background;
+    private final StyleConfLayer           _content;
+    private final StyleConfLayer           _border;
+    private final StyleConfLayer           _foreground;
+
+    private final @Nullable StyleConfLayer _any;
+
+
+    static StyleConfLayers of(
+        FilterConf               filter,
+        StyleConfLayer           background,
+        StyleConfLayer           content,
+        StyleConfLayer           border,
+        StyleConfLayer           foreground,
+        @Nullable StyleConfLayer any
+    ) {
+<span class="fc" id="L48">        StyleConfLayer empty = StyleConfLayer.empty();</span>
+<span class="fc" id="L49">        if (</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            filter     .equals( FilterConf.none() ) &amp;&amp;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            background .equals( empty ) &amp;&amp;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            content    .equals( empty ) &amp;&amp;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            border     .equals( empty ) &amp;&amp;</span>
+<span class="pc bpc" id="L54" title="1 of 4 branches missed.">            foreground .equals( empty ) &amp;&amp;</span>
+            any == null
+        )
+<span class="fc" id="L57">            return _EMPTY;</span>
+
+<span class="fc" id="L59">        return new StyleConfLayers( filter, background, content, border, foreground, any );</span>
+    }
+
+    StyleConfLayers(
+        FilterConf               filter,
+        StyleConfLayer           background,
+        StyleConfLayer           content,
+        StyleConfLayer           border,
+        StyleConfLayer           foreground,
+        @Nullable StyleConfLayer any
+<span class="fc" id="L69">    ) {</span>
+<span class="fc" id="L70">        _filter     = Objects.requireNonNull(filter);</span>
+<span class="fc" id="L71">        _background = Objects.requireNonNull(background);</span>
+<span class="fc" id="L72">        _content    = Objects.requireNonNull(content);</span>
+<span class="fc" id="L73">        _border     = Objects.requireNonNull(border);</span>
+<span class="fc" id="L74">        _foreground = Objects.requireNonNull(foreground);</span>
+<span class="fc" id="L75">        _any        = any;</span>
+<span class="fc" id="L76">    }</span>
+
+<span class="fc" id="L78">    FilterConf filter() { return _filter; }</span>
+
+    StyleConfLayer get( UI.Layer layer ) {
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if ( _any != null )</span>
+<span class="nc" id="L82">            return _any;</span>
+
+<span class="pc bpc" id="L84" title="1 of 5 branches missed.">        switch (layer) {</span>
+<span class="fc" id="L85">            case BACKGROUND: return _background;</span>
+<span class="fc" id="L86">            case CONTENT:    return _content;</span>
+<span class="fc" id="L87">            case BORDER:     return _border;</span>
+<span class="fc" id="L88">            case FOREGROUND: return _foreground;</span>
+            default:
+<span class="nc" id="L90">                throw new IllegalArgumentException(&quot;Unknown layer: &quot; + layer);</span>
+        }
+    }
+
+    StyleConfLayers filter( Configurator&lt;FilterConf&gt; f ) {
+<span class="fc" id="L95">        FilterConf filter = _filter;</span>
+        try {
+<span class="fc" id="L97">            filter = f.configure(_filter);</span>
+<span class="nc" id="L98">        } catch (Exception e) {</span>
+<span class="nc" id="L99">            log.error(SwingTree.get().logMarker(), &quot;Error configuring filter settings for component background.&quot;, e);</span>
+<span class="fc" id="L100">        }</span>
+<span class="fc" id="L101">        return of(filter, _background, _content, _border, _foreground, _any);</span>
+    }
+
+    StyleConfLayers with(UI.Layer layer, StyleConfLayer style) {
+<span class="pc bpc" id="L105" title="1 of 5 branches missed.">        switch (layer) {</span>
+<span class="fc" id="L106">            case BACKGROUND: return of(_filter, style,       _content, _border,  _foreground, _any);</span>
+<span class="fc" id="L107">            case CONTENT:    return of(_filter, _background,  style,    _border, _foreground, _any);</span>
+<span class="fc" id="L108">            case BORDER:     return of(_filter, _background, _content,  style,   _foreground, _any);</span>
+<span class="fc" id="L109">            case FOREGROUND: return of(_filter, _background, _content, _border,   style,      _any);</span>
+            default:
+<span class="nc" id="L111">                throw new IllegalArgumentException(&quot;Unknown layer: &quot; + layer);</span>
+        }
+    }
+
+    /**
+     *  Tests if the predicate returns true for any of the {@link UI.Layer}s and their
+     *  corresponding {@link StyleConfLayer}s in this {@link StyleConfLayers} object.
+     *
+     * @param predicate A predicate that takes a layer and a style configuration and returns true or false.
+     * @return True if the predicate returns true for any of the layers.
+     */
+    boolean any( BiPredicate&lt;UI.Layer, StyleConfLayer&gt; predicate ) {
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if ( _any != null )</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            return  predicate.test(UI.Layer.BACKGROUND,    _any)</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                    || predicate.test(UI.Layer.CONTENT,    _any)</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                    || predicate.test(UI.Layer.BORDER,     _any)</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                    || predicate.test(UI.Layer.FOREGROUND, _any);</span>
+
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        return predicate.test(UI.Layer.BACKGROUND, _background)</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            || predicate.test(UI.Layer.CONTENT,    _content)</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            || predicate.test(UI.Layer.BORDER,     _border)</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            || predicate.test(UI.Layer.FOREGROUND, _foreground);</span>
+    }
+
+    StyleConfLayers map( Configurator&lt;StyleConfLayer&gt; f ) {
+        try {
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">            return of(_filter, f.configure(_background), f.configure(_content), f.configure(_border), f.configure(_foreground), _any == null ? null : f.configure(_any));</span>
+<span class="nc" id="L138">        } catch (Exception e) {</span>
+<span class="nc" id="L139">            log.error(SwingTree.get().logMarker(), &quot;Error configuring style settings for component background.&quot;, e);</span>
+<span class="nc" id="L140">            return this;</span>
+        }
+    }
+
+    StyleConfLayers _scale( double factor ) {
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if ( factor == 1 ) {</span>
+<span class="nc" id="L146">            return this;</span>
+        }
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if ( this.equals(_EMPTY) ) {</span>
+<span class="fc" id="L149">            return this;</span>
+        }
+<span class="fc" id="L151">        return of(</span>
+<span class="fc" id="L152">            _filter    ._scale(factor),</span>
+<span class="fc" id="L153">            _background._scale(factor),</span>
+<span class="fc" id="L154">            _content   ._scale(factor),</span>
+<span class="fc" id="L155">            _border    ._scale(factor),</span>
+<span class="fc" id="L156">            _foreground._scale(factor),</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">            _any == null ? null : _any._scale(factor)</span>
+        );
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    StyleConfLayers simplified() {
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if ( this == _EMPTY )</span>
+<span class="fc" id="L164">            return this;</span>
+
+<span class="fc" id="L166">        FilterConf     filter     = _filter.simplified();</span>
+<span class="fc" id="L167">        StyleConfLayer background = _background.simplified();</span>
+<span class="fc" id="L168">        StyleConfLayer content    = _content.simplified();</span>
+<span class="fc" id="L169">        StyleConfLayer border     = _border.simplified();</span>
+<span class="fc" id="L170">        StyleConfLayer foreground = _foreground.simplified();</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        StyleConfLayer any        = ( _any == null ? null : _any.simplified() );</span>
+
+<span class="pc bpc" id="L173" title="4 of 12 branches missed.">        if (</span>
+             filter     == _filter     &amp;&amp;
+             background == _background &amp;&amp;
+             content    == _content    &amp;&amp;
+             border     == _border     &amp;&amp;
+             foreground == _foreground &amp;&amp;
+             any        == _any
+        )
+<span class="fc" id="L181">            return this;</span>
+
+<span class="fc" id="L183">        return of(filter, background, content, border, foreground, any);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if ( _any != null )</span>
+<span class="nc" id="L189">            return String.format(</span>
+<span class="nc" id="L190">                this.getClass().getSimpleName() + &quot;[any=%s]&quot;,</span>
+                _any
+            );
+<span class="fc" id="L193">        return String.format(</span>
+<span class="fc" id="L194">            this.getClass().getSimpleName() + &quot;[filter=%s, background=%s, content=%s, border=%s, foreground=%s]&quot;,</span>
+            _filter, _background, _content, _border, _foreground
+        );
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L201">        return Objects.hash(_filter, _background, _content, _border, _foreground, _any);</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if ( !(obj instanceof StyleConfLayers) ) return false;</span>
+
+<span class="fc" id="L209">        StyleConfLayers other = (StyleConfLayers) obj;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        return Objects.equals(_filter,     other._filter)</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_background, other._background)</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_content,    other._content)</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_border,     other._border)</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">            &amp;&amp; Objects.equals(_foreground, other._foreground)</span>
+<span class="pc bnc" id="L215" title="All 2 branches missed.">            &amp;&amp; Objects.equals(_any,        other._any);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
