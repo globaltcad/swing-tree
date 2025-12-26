@@ -935,7 +935,7 @@ public final class UI extends UIFactoryMethods
      *  to ensure consistent scaling support across screens with varying DPI.
      *  Most commonly, you will need to do manual scaling when defining component dimensions
      *  or to scale custom {@link Graphics2D} based painting operations.
-     *  <br
+     *  <br>
      *  For configuring a manual scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
      *  or {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
      *
