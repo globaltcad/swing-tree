@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -27,15 +26,13 @@ final class NoiseGradientPaint implements Paint
      */
     private static class CachedContext
     {
-        private final Rectangle bounds;
         private final Point2D center;
         private final AffineTransform transform;
 
         private final NoiseGradientPaintContext cachedContext;
 
 
-        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, NoiseGradientPaintContext context) {
-            this.bounds = bounds;
+        private CachedContext(Point2D center, AffineTransform transform, NoiseGradientPaintContext context) {
             this.center = center;
             this.transform = transform;
             cachedContext = context;
@@ -224,7 +221,7 @@ final class NoiseGradientPaint implements Paint
         }
 
         NoiseGradientPaintContext context = new NoiseGradientPaintContext(center, TRANSFORM);
-        cached = new CachedContext(DEVICE_BOUNDS, center, TRANSFORM, context);
+        cached = new CachedContext(center, TRANSFORM, context);
 
         return context;
     }

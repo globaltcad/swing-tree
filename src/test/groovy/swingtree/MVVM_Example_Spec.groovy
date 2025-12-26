@@ -2,6 +2,7 @@ package swingtree
 
 
 import examples.mvvm.LoginViewModel
+import groovy.transform.Immutable
 import groovy.transform.ImmutableOptions
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
@@ -36,6 +37,23 @@ import java.util.List
 ''')
 class MVVM_Example_Spec extends Specification
 {
+    @ImmutableOptions(knownImmutableClasses=[Object])
+    static record SelfAsId(Object id) implements HasId<Object> {}
+    static record StringWithId(String string, UUID id) implements HasId<UUID> {
+        public StringWithId withString(String string) { return new StringWithId(string, id) }
+        public StringWithId withId(UUID id) { return new StringWithId(string, id) }
+    }
+    static record StringAsId(String id) implements HasId<String> {}
+    @ImmutableOptions(knownImmutableClasses=[Number])
+    static record NumberWithId(Number number, UUID id) implements HasId<UUID> {
+        public NumberWithId withNumber(Number number) { return new NumberWithId(number, id) }
+        public NumberWithId withId(UUID id) { return new NumberWithId(number, id) }
+    }
+    @ImmutableOptions(knownImmutableClasses=[Enum])
+    static record EnumWithId(Enum enumeration, UUID id) implements HasId<UUID> {
+        public EnumWithId withEnum(Enum enumeration) { return new EnumWithId(enumeration, id) }
+        public EnumWithId withId(UUID id) { return new EnumWithId(enumeration, id) }
+    }
     static record Address(String street, int postalCode) {
         public Address withStreet(String street) { return new Address(street, postalCode) }
         public Address withPostalCode(int postalCode) { return new Address(street, postalCode) }
@@ -862,7 +880,7 @@ class MVVM_Example_Spec extends Specification
     }
 
     def 'A panel bound tuple property will be zoomed into correctly.'(
-        Tuple<Object> tuple
+        Tuple<? extends HasId<?>> tuple
     ) {
         reportInfo """
             You can bind any kind of tuple property and a view supplier 
@@ -873,7 +891,7 @@ class MVVM_Example_Spec extends Specification
         given: 'A tuple property, a view supplier and a panel UI node.'
             var trace = []
             var models = Var.of(tuple)
-            BoundViewSupplier<Object> supplier = { Var<Object> property ->
+            BoundViewSupplier<HasId<?>> supplier = { Var<HasId<?>> property ->
                 trace.add(property)
                 return UI.label("I am the sub view bound to: "+property.type().getSimpleName())
             }
@@ -891,21 +909,21 @@ class MVVM_Example_Spec extends Specification
 
         where : 'We test the following operations:'
             tuple << [
-                Tuple.of("A", "B", "C"),
-                Tuple.of("watch", "dominion", "or" ,"earthlings"),
-                Tuple.of(2, 3, 5, 7, 11),
-                Tuple.of(0.47d, 3.5d, -2.22d, 84.3d),
-                Tuple.of(DayOfWeek.MONDAY, DayOfWeek.SATURDAY, DayOfWeek.THURSDAY, DayOfWeek.WEDNESDAY),
-                Tuple.ofNullable(String, "A", null, "B", "C", null),
-                Tuple.ofNullable(String, "watch", "dominion", "or" ,"earthlings"),
-                Tuple.ofNullable(Integer, null, 2, 3, 5, null, 7, 11),
-                Tuple.ofNullable(Double, 0.47d, null, 3.5d, null, -2.22d, 84.3d),
-                Tuple.ofNullable(DayOfWeek, DayOfWeek.MONDAY, null, DayOfWeek.SATURDAY, null),
+                Tuple.of("A", "B", "C").mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.of("watch", "dominion", "or" ,"earthlings").mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.of(2, 3, 5, 7, 11).mapTo(NumberWithId, i->new NumberWithId(i, UUID.randomUUID())),
+                Tuple.of(0.47d, 3.5d, -2.22d, 84.3d).mapTo(NumberWithId, d->new NumberWithId(d, UUID.randomUUID())),
+                Tuple.of(DayOfWeek.MONDAY, DayOfWeek.SATURDAY, DayOfWeek.THURSDAY, DayOfWeek.WEDNESDAY).mapTo(EnumWithId, d->new EnumWithId(d, UUID.randomUUID())),
+                Tuple.ofNullable(String, "A", null, "B", "C", null).mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.ofNullable(String, "watch", "dominion", "or" ,"earthlings").mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.ofNullable(Integer, null, 2, 3, 5, null, 7, 11).mapTo(NumberWithId, i->new NumberWithId(i, UUID.randomUUID())),
+                Tuple.ofNullable(Double, 0.47d, null, 3.5d, null, -2.22d, 84.3d).mapTo(NumberWithId, d->new NumberWithId(d, UUID.randomUUID())),
+                Tuple.ofNullable(DayOfWeek, DayOfWeek.MONDAY, null, DayOfWeek.SATURDAY, null).mapTo(EnumWithId, d->new EnumWithId(d, UUID.randomUUID()))
             ]
     }
 
     def 'A menu bound tuple property will be zoomed into correctly.'(
-        Tuple<Object> tuple
+        Tuple<? extends HasId<?>> tuple
     ) {
         reportInfo """
             You can bind any kind of tuple property and a view supplier 
@@ -916,7 +934,7 @@ class MVVM_Example_Spec extends Specification
         given: 'A tuple property, a view supplier and a panel UI node.'
             var trace = []
             var models = Var.of(tuple)
-            BoundViewSupplier<Object> supplier = { Var<Object> property ->
+            BoundViewSupplier<HasId<?>> supplier = { Var<HasId<?>> property ->
                 trace.add(property)
                 return UI.label("I am the sub menu bound to: "+property.type().getSimpleName())
             }
@@ -934,16 +952,16 @@ class MVVM_Example_Spec extends Specification
 
         where : 'We test the following operations:'
             tuple << [
-                Tuple.of("A", "B", "C"),
-                Tuple.of("watch", "dominion", "or" ,"earthlings"),
-                Tuple.of(2, 3, 5, 7, 11),
-                Tuple.of(0.47d, 3.5d, -2.22d, 84.3d),
-                Tuple.of(DayOfWeek.MONDAY, DayOfWeek.SATURDAY, DayOfWeek.THURSDAY, DayOfWeek.WEDNESDAY),
-                Tuple.ofNullable(String, "A", null, "B", "C", null),
-                Tuple.ofNullable(String, "watch", "dominion", "or" ,"earthlings"),
-                Tuple.ofNullable(Integer, null, 2, 3, 5, null, 7, 11),
-                Tuple.ofNullable(Double, 0.47d, null, 3.5d, null, -2.22d, 84.3d),
-                Tuple.ofNullable(DayOfWeek, DayOfWeek.MONDAY, null, DayOfWeek.SATURDAY, null),
+                Tuple.of("A", "B", "C").mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.of("watch", "dominion", "or" ,"earthlings").mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.of(2, 3, 5, 7, 11).mapTo(NumberWithId, i->new NumberWithId(i, UUID.randomUUID())),
+                Tuple.of(0.47d, 3.5d, -2.22d, 84.3d).mapTo(NumberWithId, d->new NumberWithId(d, UUID.randomUUID())),
+                Tuple.of(DayOfWeek.MONDAY, DayOfWeek.SATURDAY, DayOfWeek.THURSDAY, DayOfWeek.WEDNESDAY).mapTo(EnumWithId, d->new EnumWithId(d, UUID.randomUUID())),
+                Tuple.ofNullable(String, "A", null, "B", "C", null).mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.ofNullable(String, "watch", "dominion", "or" ,"earthlings").mapTo(StringWithId, s->new StringWithId(s, UUID.randomUUID())),
+                Tuple.ofNullable(Integer, null, 2, 3, 5, null, 7, 11).mapTo(NumberWithId, i->new NumberWithId(i, UUID.randomUUID())),
+                Tuple.ofNullable(Double, 0.47d, null, 3.5d, null, -2.22d, 84.3d).mapTo(NumberWithId, d->new NumberWithId(d, UUID.randomUUID())),
+                Tuple.ofNullable(DayOfWeek, DayOfWeek.MONDAY, null, DayOfWeek.SATURDAY, null).mapTo(EnumWithId, d->new EnumWithId(d, UUID.randomUUID()))
             ]
     }
 
@@ -1073,8 +1091,8 @@ class MVVM_Example_Spec extends Specification
         """
         given: 'A string tuple property, a view supplier and a panel UI node.'
             var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
-            var models = Var.of(tuple)
-            BoundViewSupplier<String> supplier = (Var<String> title) -> UI.button(title)
+            var models = Var.of(tuple.mapTo(StringAsId, s->new StringAsId(s)))
+            BoundViewSupplier<StringAsId> supplier = (Var<StringAsId> title) -> UI.button(title.viewAsString(it->it.string()))
             def panel =
                         UI.panel()
                         .addAll(models, supplier)
@@ -1103,22 +1121,22 @@ class MVVM_Example_Spec extends Specification
             diff                 | operation
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
-            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
-            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
-            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
-            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
-            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
-            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
-            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
-            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [0, _, 2, 3, 4]      | { it.setAt(1, new StringAsId("Comp X")) }
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, new StringAsId("Comp 3"), new StringAsId("Comp 2")) } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, new StringAsId("Comp 4"), new StringAsId("Comp 3"), new StringAsId("Comp 2"), new StringAsId("Comp 1")) } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, new StringAsId("Comp 4"), new StringAsId("Comp 3"), new StringAsId("Comp 2"), new StringAsId("Comp 5")) } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, new StringAsId("Comp 5"), new StringAsId("Comp 4")) } // Swap
+            [0, 1, 2, 3, 4, _]   | { it.add(new StringAsId("Comp X")) }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll(new StringAsId("Comp X"), new StringAsId("Comp Y")) }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, new StringAsId("Comp X")) }
             [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
             [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
             [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
             [-1, -1, -1, -1, -1] | { it.clear() }
-            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
-            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
-            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
-            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { Tuple.of(new StringAsId("Comp 1"), new StringAsId("Comp 2"), new StringAsId("Comp 3"), new StringAsId("Comp 4"), new StringAsId("Comp 5")) }
+            [_, _, _, _, _]      | { it.clear().addAll(new StringAsId("Comp 1"), new StringAsId("Comp 2"), new StringAsId("Comp 3"), new StringAsId("Comp 4"), new StringAsId("Comp 5")) }
+            [_, _, _, _, _]      | { Tuple.of(new StringAsId("Comp a"), new StringAsId("Comp b"), new StringAsId("Comp c"), new StringAsId("Comp d"), new StringAsId("Comp e")) }
+            [_, _, _, _, _]      | { it.clear().addAll(new StringAsId("Comp a"), new StringAsId("Comp b"), new StringAsId("Comp c"), new StringAsId("Comp d"), new StringAsId("Comp e")) }
     }
 
     def 'A tuple property can be bound to a `JMenu` bi-directionally and compute efficiently.'(
@@ -1131,8 +1149,8 @@ class MVVM_Example_Spec extends Specification
         """
         given: 'A string tuple property, a view supplier and a menu UI node.'
             var tuple = Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5")
-            var models = Var.of(tuple)
-            BoundViewSupplier<String> supplier = (Var<String> title) -> UI.button(title)
+            var models = Var.of(tuple.mapTo(StringAsId, s->new StringAsId(s)))
+            BoundViewSupplier<StringAsId> supplier = (Var<StringAsId> title) -> UI.button(title.viewAsString(it -> it.string()))
             def menu =
                         UI.menu()
                         .addAll(models, supplier)
@@ -1161,22 +1179,22 @@ class MVVM_Example_Spec extends Specification
             diff                 | operation
             [0,-1, 2, 3, 4]      | { it.removeAt(1) }
             [0,-1,-1, 3, 4]      | { it.removeAt(1, 2) }
-            [0, _, 2, 3, 4]      | { it.setAt(1, "Comp X") }
-            [0, 2, 1, 3, 4]      | { it.setAllAt(1, "Comp 3", "Comp 2") } // Swap
-            [3, 2, 1, 0, 4]      | { it.setAllAt(0, "Comp 4", "Comp 3", "Comp 2", "Comp 1") } // Swap
-            [0, 3, 2, 1, 4]      | { it.setAllAt(1, "Comp 4", "Comp 3", "Comp 2", "Comp 5") } // Swap
-            [0, 1, 2, 4, 3]      | { it.setAllAt(3, "Comp 5", "Comp 4") } // Swap
-            [0, 1, 2, 3, 4, _]   | { it.add("Comp X") }
-            [0, 1, 2, 3, 4, _, _]| { it.addAll("Comp X", "Comp Y") }
-            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, "Comp X") }
+            [0, _, 2, 3, 4]      | { it.setAt(1, new StringAsId("Comp X")) }
+            [0, 2, 1, 3, 4]      | { it.setAllAt(1, new StringAsId("Comp 3"), new StringAsId("Comp 2")) } // Swap
+            [3, 2, 1, 0, 4]      | { it.setAllAt(0, new StringAsId("Comp 4"), new StringAsId("Comp 3"), new StringAsId("Comp 2"), new StringAsId("Comp 1")) } // Swap
+            [0, 3, 2, 1, 4]      | { it.setAllAt(1, new StringAsId("Comp 4"), new StringAsId("Comp 3"), new StringAsId("Comp 2"), new StringAsId("Comp 5")) } // Swap
+            [0, 1, 2, 4, 3]      | { it.setAllAt(3, new StringAsId("Comp 5"), new StringAsId("Comp 4")) } // Swap
+            [0, 1, 2, 3, 4, _]   | { it.add(new StringAsId("Comp X")) }
+            [0, 1, 2, 3, 4, _, _]| { it.addAll(new StringAsId("Comp X"), new StringAsId("Comp Y")) }
+            [_, 0, 1, 2, 3, 4]   | { it.addAt(0, new StringAsId("Comp X")) }
             [-1, 1, 2, 3, -1]    | { it.slice(1, 4) }
             [0, 1, -1, -1, -1]   | { it.sliceFirst(2) }
             [-1, -1, 2, 3, 4]    | { it.sliceLast(3) }
             [-1, -1, -1, -1, -1] | { it.clear() }
-            [_, _, _, _, _]      | { Tuple.of("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
-            [_, _, _, _, _]      | { it.clear().addAll("Comp 1", "Comp 2", "Comp 3", "Comp 4", "Comp 5") }
-            [_, _, _, _, _]      | { Tuple.of("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
-            [_, _, _, _, _]      | { it.clear().addAll("Comp a", "Comp b", "Comp c", "Comp d", "Comp e") }
+            [_, _, _, _, _]      | { Tuple.of(new StringAsId("Comp 1"), new StringAsId("Comp 2"), new StringAsId("Comp 3"), new StringAsId("Comp 4"), new StringAsId("Comp 5")) }
+            [_, _, _, _, _]      | { it.clear().addAll(new StringAsId("Comp 1"), new StringAsId("Comp 2"), new StringAsId("Comp 3"), new StringAsId("Comp 4"), new StringAsId("Comp 5")) }
+            [_, _, _, _, _]      | { Tuple.of(new StringAsId("Comp a"), new StringAsId("Comp b"), new StringAsId("Comp c"), new StringAsId("Comp d"), new StringAsId("Comp e")) }
+            [_, _, _, _, _]      | { it.clear().addAll(new StringAsId("Comp a"), new StringAsId("Comp b"), new StringAsId("Comp c"), new StringAsId("Comp d"), new StringAsId("Comp e")) }
     }
 
     def 'Views bound to a tuple property will be reused efficiently.'(
@@ -1236,8 +1254,8 @@ class MVVM_Example_Spec extends Specification
             existed in the previous tuple.
         """
         given: 'A string tuple property, a view supplier and a panel UI node.'
-            var models = Var.of(initialModels)
-            BoundViewSupplier<Object> supplier = (Var<Object> aThing) -> UI.button(aThing.itemAsString())
+            var models = Var.of(initialModels.mapTo(SelfAsId, o->new SelfAsId(o)))
+            BoundViewSupplier<SelfAsId> supplier = (Var<SelfAsId> aThing) -> UI.button(aThing.viewAsString(it->Objects.toString(it.id())))
             def panel =
                         UI.panel()
                         .addAll(models, supplier)
@@ -1251,17 +1269,17 @@ class MVVM_Example_Spec extends Specification
         and : 'We evaluate the situation after the change:'
             var newComponents = panel.components as List<JComponent>
             var whichViewReused = initialComponents.collect({newComponents.contains(it)})
-            var whichModelsReused = initialModels.collect({models.get().contains(it)})
+            var whichModelsReused = initialModels.collect({models.get().contains(new SelfAsId(it))})
         then: 'The tabbed pane is updated.'
             whichModelsReused == whichViewReused
         and : 'The new components are buttons with the expected text.'
-            newComponents.collect({it.text}) == models.get().mapTo(String, it -> Objects.toString(it)).toList()
+            newComponents.collect({it.text}) == models.get().mapTo(String, it -> Objects.toString(it.id())).toList()
 
         where : 'We test the following operations:'
             initialModels                | operation
-            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z") }
-            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3) }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42) }
+            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z").mapTo(SelfAsId, o->new SelfAsId(o)) }
+            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3).mapTo(SelfAsId, o->new SelfAsId(o)) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o->new SelfAsId(o)) }
             Tuple.of("a", "b")           | { it.reversed() }
             Tuple.of(1, 2, 3)            | { it.reversed() }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
@@ -1271,8 +1289,8 @@ class MVVM_Example_Spec extends Specification
             Tuple.of("a", "b")           | { it.removeLast(1) }
             Tuple.of(1, 2, 3)            | { it.removeLast(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, new SelfAsId(42)) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }
     }
 
     def 'JMenus bound to a tuple property bi-directionally, will be reused efficiently.'(
@@ -1285,8 +1303,8 @@ class MVVM_Example_Spec extends Specification
             existed in the previous tuple.
         """
         given: 'A string tuple property, a view supplier and a `JMenu` UI node.'
-            var models = Var.of(initialModels)
-            BoundViewSupplier<Object> supplier = (Var<Object> aThing) -> UI.button(aThing.itemAsString())
+            var models = Var.of(initialModels.mapTo(SelfAsId, o->new SelfAsId(o)))
+            BoundViewSupplier<SelfAsId> supplier = (Var<SelfAsId> aThing) -> UI.button(aThing.viewAsString(it->Objects.toString(it.id())))
             def menu =
                         UI.menu()
                         .addAll(models, supplier)
@@ -1300,17 +1318,17 @@ class MVVM_Example_Spec extends Specification
         and : 'We evaluate the situation after the change:'
             var newComponents = menu.menuComponents as List<JComponent>
             var whichViewReused = initialComponents.collect({newComponents.contains(it)})
-            var whichModelsReused = initialModels.collect({models.get().contains(it)})
+            var whichModelsReused = initialModels.collect({models.get().contains(new SelfAsId(it))})
         then: 'The tabbed pane is updated.'
             whichModelsReused == whichViewReused
         and : 'The new components are buttons with the expected text.'
-            newComponents.collect({it.text}) == models.get().mapTo(String, it -> Objects.toString(it)).toList()
+            newComponents.collect({it.text}) == models.get().mapTo(String, it -> Objects.toString(it.id())).toList()
 
         where : 'We test the following operations:'
             initialModels                | operation
-            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z") }
-            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3) }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42) }
+            Tuple.of("a", "b")           | { Tuple.of("X", "a", "z").mapTo(SelfAsId, o->new SelfAsId(o)) }
+            Tuple.of(1, 2, 3)            | { Tuple.of(-1, 2, -3).mapTo(SelfAsId, o->new SelfAsId(o)) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o->new SelfAsId(o)) }
             Tuple.of("a", "b")           | { it.reversed() }
             Tuple.of(1, 2, 3)            | { it.reversed() }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.reversed() }
@@ -1320,8 +1338,8 @@ class MVVM_Example_Spec extends Specification
             Tuple.of("a", "b")           | { it.removeLast(1) }
             Tuple.of(1, 2, 3)            | { it.removeLast(1) }
             Tuple.of(1, 2, 3, 4, 5, 6)   | { it.removeLast(1) }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, 42) }
-            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, 42, 73) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAt(1, new SelfAsId(42)) }
+            Tuple.of(1, 2, 3, 4, 5, 6)   | { it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }
     }
 
     def 'Binding a tuple property through `addAll` assumes full ownership over all sub-components.'() {

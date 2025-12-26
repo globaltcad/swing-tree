@@ -227,6 +227,15 @@ class SvgIcon_Spec extends Specification
 
         where :
             uiScale | expectedWidth | expectedHeight || svg
+
+            1       |   -1          |   100          || "<svg width=\"100%\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            1       |   -1          |    90          || "<svg width=\"100%\" height=\"90\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            1       |   100         |   -1           || "<svg width=\"100\" height=\"100%\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            1       |   75          |   100          || "<svg width=\"75\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            1       |   -1          |    12          || "<svg width=\"100%\" height=\"12\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            1       |    8          |    16          || "<svg width=\"8\" height=\"16\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            1       |    22         |    22          || "<svg width=\"22\" height=\"22\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+
             1       |   -1          |   100          || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
             1       |   -1          |    90          || "<svg width=\"100%\" height=\"90px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
             1       |   100         |   -1           || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
@@ -234,6 +243,15 @@ class SvgIcon_Spec extends Specification
             1       |   -1          |    12          || "<svg width=\"100%\" height=\"12px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
             1       |    8          |    16          || "<svg width=\"8px\" height=\"16px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
             1       |    22         |    22          || "<svg width=\"22px\" height=\"22px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+
+            2       |   -1          |   200          || "<svg width=\"100%\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            2       |   -1          |   180          || "<svg width=\"100%\" height=\"90\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            2       |   200         |   -1           || "<svg width=\"100\" height=\"100%\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            2       |   150         |   200          || "<svg width=\"75\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            2       |   -1          |    24          || "<svg width=\"100%\" height=\"12\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            2       |    16         |    32          || "<svg width=\"8\" height=\"16\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+            2       |    44         |    44          || "<svg width=\"22\" height=\"22\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
+
             2       |   -1          |   200          || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
             2       |   -1          |   180          || "<svg width=\"100%\" height=\"90px\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
             2       |   200         |   -1           || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "  <circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n" + "</svg>"
