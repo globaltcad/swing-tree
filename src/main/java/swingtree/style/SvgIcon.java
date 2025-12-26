@@ -13,8 +13,7 @@ import swingtree.UI;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -237,15 +236,17 @@ public final class SvgIcon extends ImageIcon
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
         if ( tempSVGDocument != null ) {
-            if ( widthUnit == Unit.PERCENTAGE && !size.hasPositiveWidth() ) {
-                size = size.withWidth(-1); // A percentage is NOT a concrete size! (computed dynamically)
-            } else {
-                size = size.withWidth(tempSVGDocument.size().width);
+            if ( widthUnit != Unit.UNKNOWN && !size.hasPositiveWidth() ) {
+                if ( widthUnit == Unit.PERCENTAGE )
+                    size = size.withWidth(-1); // A percentage is NOT a concrete size! (computed dynamically)
+                else
+                    size = size.withWidth(tempSVGDocument.size().width);
             }
-            if ( widthUnit == Unit.PERCENTAGE && !size.hasPositiveHeight() ) {
-                size = size.withHeight(-1); // A percentage is NOT a concrete size! (computed dynamically)
-            } else {
-                size = size.withHeight(tempSVGDocument.size().height);
+            if ( heightUnit != Unit.UNKNOWN && !size.hasPositiveHeight() ) {
+                if ( heightUnit == Unit.PERCENTAGE )
+                    size = size.withHeight(-1); // A percentage is NOT a concrete size! (computed dynamically)
+                else
+                    size = size.withHeight(tempSVGDocument.size().height);
             }
         }
         return new ConstructionArgs(tempSVGDocument, size, widthUnit, heightUnit);
