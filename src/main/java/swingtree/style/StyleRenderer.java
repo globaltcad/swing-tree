@@ -1137,8 +1137,8 @@ final class StyleRenderer
             }
             if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon);
-                int areaX = insets.left().orElse(0f).intValue();
-                int areaY = insets.top().orElse(0f).intValue();
+                int areaX = (insets.left().orElse(0f).intValue() + padding.left().orElse(0f).intValue());
+                int areaY = (insets.top().orElse(0f).intValue() + padding.top().orElse(0f).intValue());
                 UI.Placement localPlacement = placement == UI.Placement.UNDEFINED ? svgIcon.getPreferredPlacement() : placement;
                 localPlacement = localPlacement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : localPlacement;
                 UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;
@@ -1179,9 +1179,10 @@ final class StyleRenderer
                 int x = style.horizontalOffset();
                 int y = style.verticalOffset();
                 // We apply the insets:
-                x += insets.left().orElse(0f).intValue();
-                y += insets.top().orElse(0f).intValue();
-
+                x += (insets.left().orElse(0f).intValue() + padding.left().orElse(0f).intValue());
+                y += (insets.top().orElse(0f).intValue() + padding.top().orElse(0f).intValue());
+                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());
+                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());
                 switch ( placement ) {
                     case TOP:
                         x += (componentWidth - imgWidth) / 2;
@@ -1216,10 +1217,6 @@ final class StyleRenderer
                     default:
                         throw new IllegalArgumentException("Unknown placement: " + placement);
                 }
-                x += padding.left().orElse(0f).intValue();
-                y += padding.top().orElse(0f).intValue();
-                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());
-                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());
 
                 Image image;
                 if ( imageIcon instanceof SvgIcon) {
