@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.From;
 import sprouts.Val;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
@@ -121,7 +122,7 @@ public class JIcon extends JLabel implements StylableComponent
     @SuppressWarnings("NullAway")
     private static @Nullable ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
         if ( !UI.thisIsUIThread() ) {
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                 "Loading an icon off the UI thread. " +
                 "This may lead to unexpected behavior and should be avoided.",
                 new Throwable() // Log the stack trace for debugging purposes.

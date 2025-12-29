@@ -650,7 +650,7 @@ public class JScrollPanels extends UI.ScrollPane
             _lastState = lastState;
             if ( _lastState.getParent() != null ) {
                 Container parent = _lastState.getParent();
-                log.error(
+                log.error(SwingTree.get().logMarker(),
                             "View supplier in {} class supplied a view which is already tied to another parent {}.",
                             JScrollPanels.class.getSimpleName(), parent, new Throwable()
                         );

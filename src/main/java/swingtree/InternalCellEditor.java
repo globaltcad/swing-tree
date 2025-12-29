@@ -457,11 +457,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             try {
                 return _tryConvert(value, targetType);
             } catch (Exception e) {
-                log.debug(
-                        "Failed to convert internal cell editor value " +
-                        "from '"+value+"' to target type '"+targetType.getName()+"' " +
-                        "for host component type '"+hostType.getName()+"'",
-                        e
+                log.debug(SwingTree.get().logMarker(),
+                        "Failed to convert internal cell editor value from '{}' " +
+                        "to target type '{}' for host component type '{}'",
+                        value, targetType.getName(), hostType.getName(), e
                     );
             }
 
@@ -477,11 +476,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                     restoredValue = _tryConvert(restoredValue, targetType).orElseNullable(value);
             } catch (Exception e) {
                 problems.add(Problem.of(e));
-                log.debug(
+                log.debug(SwingTree.get().logMarker(),
                         "Failed to convert internal cell editor value received before editing " +
-                        "from '"+this.originalValue+"' to target type '"+targetType.getName()+"' " +
-                        "for host component type '"+hostType.getName()+"'",
-                        e
+                        "from '{}' to target type '{}' for host component type '{}'",
+                        this.originalValue, targetType.getName(), hostType.getName(), e
                     );
             }
             return Result.of(

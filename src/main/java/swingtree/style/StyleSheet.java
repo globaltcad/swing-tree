@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
 import sprouts.Observable;
+import swingtree.SwingTree;
 import swingtree.SwingTreeConfigurator;
 import swingtree.api.Styler;
 
@@ -145,10 +146,10 @@ public abstract class StyleSheet
         try {
             configure(); // The subclass will add traits to this style sheet using the add(..) method.
         } catch ( Exception e ) {
-            log.warn(
-                "An exception occurred while configuring style sheet " + getClass().getSimpleName() + "!",
-                e
-            );
+            log.warn(SwingTree.get().logMarker(),
+                    "An exception occurred while configuring style sheet {}!",
+                    getClass().getSimpleName(), e
+                );
             /*
                 Exceptions inside a style sheet should not be fatal.
                 We just log the stack trace for debugging purposes

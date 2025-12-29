@@ -258,14 +258,12 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
                     if ( state.selectedTabIndex != null && state.selectedTabIndex != index )
-                        log.warn(
-                            "Trying to bind a new property '"+index+"' " +
-                            "to the index of tabbed pane '"+thisComponent+"' " +
-                            "even though the previously specified property '"+state.selectedTabIndex+"' is " +
-                            "already bound to it. " +
-                            "The previous property will be replaced now!",
-                            new Throwable()
-                        );
+                        log.warn(SwingTree.get().logMarker(),
+                                "Trying to bind a new property '{}' to the index of tabbed pane '{}' even " +
+                                "though the previously specified property '{}' is already bound to it. " +
+                                "The previous property will be replaced now!",
+                                index, thisComponent, state.selectedTabIndex, new Throwable()
+                            );
 
                     state.selectedTabIndex = index;
                })
@@ -491,7 +489,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         Objects.requireNonNull(tabSupplier, "tabSupplier");
         return _with(thisComponent -> {
             if ( thisComponent.getTabCount() > 0 ) {
-                log.warn(
+                log.warn(SwingTree.get().logMarker(),
                     "Trying to bind a list of tabs to a tabbed pane that already has tabs. \n" +
                     "Manually defined tabs existing along with bound tabs is not supported. \n" +
                     "The manually defined tabs will be removed now!",
@@ -561,7 +559,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         }
 
         if (pane.getTabCount() != delegate.currentValues().size()) {
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                 "Broken binding to view model list detected! \n" +
                 "TabbedPane tab count '{}' does not match tab models list of size '{}'. \n" +
                 "A possible cause for this is that tabs were {} this '{}' \n" +
@@ -609,7 +607,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         Objects.requireNonNull(tabSupplier, "tabSupplier");
         return _with(thisComponent -> {
             if ( thisComponent.getTabCount() > 0 ) {
-                log.warn(
+                log.warn(SwingTree.get().logMarker(),
                     "Trying to bind a tuple of tabs to a tabbed pane that already has tabs. \n" +
                     "Manually defined tabs existing along with bound tabs is not supported. \n" +
                     "The manually defined tabs will be removed now!",
@@ -684,7 +682,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         }
 
         if (pane.getTabCount() != tupleOfModels.size()) {
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                 "Broken binding to view model tuple detected! \n" +
                 "TabbedPane tab count '{}' does not match tab models tuple of size '{}'. \n" +
                 "A possible cause for this is that tabs were {} this '{}' \n" +

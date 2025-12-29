@@ -125,10 +125,10 @@ final class StyleRenderer
                     g2d.fill(leftBorderArea);
                 }
             } catch ( Exception e ) {
-                log.warn(
-                    "An exception occurred while drawing the border of border style '" + conf.boxModel() + "' ",
-                    e
-                );
+                log.warn(SwingTree.get().logMarker(),
+                        "An exception occurred while drawing the border of border style '{}' ",
+                        conf.boxModel(), e
+                    );
                 /*
                     If exceptions happen in user provided painters, we don't want to
                     mess up the rendering of the rest of the component, so we catch them here!
@@ -679,7 +679,7 @@ final class StyleRenderer
             corner2 = new Point2D.Float(realX, realY);
         }
         else {
-            log.warn(SwingTree.get().logMarker(), "Unknown gradient type: " + type, new Throwable());
+            log.warn(SwingTree.get().logMarker(), "Unknown gradient type: {}", type, new Throwable());
             return null;
         }
 
@@ -1007,7 +1007,7 @@ final class StyleRenderer
             case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;
             case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;
             default:
-                log.warn(SwingTree.get().logMarker(), "Unknown cycle method: " + cycle, new Throwable());
+                log.warn(SwingTree.get().logMarker(), "Unknown cycle method: {}", cycle, new Throwable());
                 return MultipleGradientPaint.CycleMethod.NO_CYCLE;
         }
     }
@@ -1380,10 +1380,9 @@ final class StyleRenderer
             try {
                 backgroundPainter.paint(g2d);
             } catch (Exception e) {
-                log.warn(
-                    "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                    "on layer '" + layer + "' for style '" + conf + "' ",
-                    e
+                log.warn(SwingTree.get().logMarker(),
+                        "An exception occurred while executing painter '{}' on layer '{}' for style '{}' ",
+                        backgroundPainter, layer, conf, e
                 );
                 /*
                     If exceptions happen in user provided painters, we don't want to

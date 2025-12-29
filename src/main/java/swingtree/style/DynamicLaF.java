@@ -445,31 +445,28 @@ final class DynamicLaF
             Object source   = event.getSource();
             if ( !(source instanceof JComponent) ) {
                 String sourceTypeAsString = Optional.ofNullable(source).map(Object::getClass).map(Class::getSimpleName).orElse("null");
-                log.error(
-                        "Invalid UI update event source detected! " +
-                        "Source object is expected to be a 'JComponent'.\n" +
-                        "Received unknown object of type '" + sourceTypeAsString + "' instead.",
-                        new Throwable()
+                log.error(SwingTree.get().logMarker(),
+                        "Invalid UI update event source detected! Source object is expected to be a 'JComponent'.\n" +
+                        "Received unknown object of type '{}' instead.",
+                        sourceTypeAsString, new Throwable()
                     );
                 return;
             }
             if ( !(oldValue instanceof ComponentUI) ) {
                 String oldValueTypeAsString = Optional.ofNullable(oldValue).map(Object::getClass).map(Class::getSimpleName).orElse("null");
-                log.error(
-                        "Detected invalid 'oldValue'  object in UI update event! " +
-                        "Old value is expected to be a 'ComponentUI'.\n" +
-                        "Received unknown object of type '" + oldValueTypeAsString + "' instead.",
-                        new Throwable()
+                log.error(SwingTree.get().logMarker(),
+                        "Detected invalid 'oldValue' object in UI update event! " +
+                        "Old value is expected to be a 'ComponentUI'.\nReceived unknown object of type '{}' instead.",
+                        oldValueTypeAsString, new Throwable()
                     );
                 return;
             }
             if ( !(newValue instanceof ComponentUI) ) {
                 String newValueTypeAsString = Optional.ofNullable(newValue).map(Object::getClass).map(Class::getSimpleName).orElse("null");
-                log.error(
-                        "Detected invalid 'newValue'  object in UI update event! " +
-                        "New value is expected to be a 'ComponentUI'.\n" +
-                        "Received unknown object of type '" + newValueTypeAsString + "' instead.",
-                        new Throwable()
+                log.error(SwingTree.get().logMarker(),
+                        "Detected invalid 'newValue' object in UI update event! New value is expected to be a 'ComponentUI'.\n" +
+                        "Received unknown object of type '{}' instead.",
+                        newValueTypeAsString, new Throwable()
                     );
                 return;
             }

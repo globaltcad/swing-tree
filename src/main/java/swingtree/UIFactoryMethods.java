@@ -5670,7 +5670,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
         Objects.requireNonNull(frame);
         if ( !(frame.getGlassPane() instanceof JGlassPane) )
-            log.debug(
+            log.debug(SwingTree.get().logMarker(),
                     "Encountered a JFrame instance which does not have a JGlassPane as its glass pane. " +
                     "SwingTree based drag and drop functionality will not work as expected for this frame.",
                     new Throwable()
@@ -5713,7 +5713,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
         if ( !(dialog.getGlassPane() instanceof JGlassPane) )
-            log.debug(
+            log.debug(SwingTree.get().logMarker(),
                     "Encountered a JDialog instance which does not have a JGlassPane as its glass pane. " +
                     "SwingTree based drag and drop functionality will not work as expected for this dialog.",
                     new Throwable()
@@ -6530,9 +6530,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         final double actualWidth  = _getBaseWidth(icon);
         final double actualHeight = _getBaseHeight(icon);
         if ( actualWidth <= 0 || actualHeight <= 0 ){
-            log.debug(
-                    "Encountered an invalid icon width '" + actualWidth + "' or height '" + actualHeight + "'.",
-                    new Throwable()
+            log.debug(SwingTree.get().logMarker(),
+                    "Encountered an invalid icon width '{}' or height '{}'.",
+                    actualWidth, actualHeight, new Throwable()
                 );
             return icon;
         }
@@ -6551,10 +6551,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         int height = size.height().map(Float::intValue).orElse(0);
 
         if ( width < 1 || height < 1 ) {
-            log.warn(
-                    "Encountered an invalid icon size '" + size + "' " +
-                    "while scaling an icon for the '"+JIcon.class.getSimpleName()+"' component.",
-                    new Throwable()
+            log.warn(SwingTree.get().logMarker(),
+                    "Encountered an invalid icon size '{}' while " +
+                    "scaling an icon for the '{}' component.",
+                    size, JIcon.class.getSimpleName(), new Throwable()
                 );
             return icon;
         }

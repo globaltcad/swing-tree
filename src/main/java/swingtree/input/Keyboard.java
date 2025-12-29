@@ -2,6 +2,7 @@ package swingtree.input;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 import java.awt.*;
@@ -29,7 +30,7 @@ public final class Keyboard
      */
     public static Keyboard get() {
         if ( !UI.thisIsUIThread() )
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                 "Keyboard.get() should only be called from the UI thread (Swing Event Dispatch Thread).\n" +
                 "Encountered thread '{}' instead!", Thread.currentThread().getName(),
                 new Throwable() // Stack trace for debugging purposes
