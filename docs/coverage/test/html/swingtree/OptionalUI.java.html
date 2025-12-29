@@ -196,7 +196,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
                 } else
 <span class="nc bnc" id="L197" title="All 2 branches missed.">                    return predicate.test(_component) ? this : empty();</span>
 <span class="nc" id="L198">            } catch (Exception e) {</span>
-<span class="nc" id="L199">                log.error(</span>
+<span class="nc" id="L199">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error filtering UI component of OptionalUI instance. &quot; +
                     &quot;Returning current OptionalUI instance instead.&quot;,
                     e
@@ -236,7 +236,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
                     }
                 }
 <span class="nc" id="L238">            } catch (Exception ex) {</span>
-<span class="nc" id="L239">                log.error(</span>
+<span class="nc" id="L239">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error mapping OptionalUI to Optional instance! &quot; +
                     &quot;Returning current OptionalUI instance instead.&quot;,
                     ex
@@ -272,7 +272,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
                     }
                 }
 <span class="nc" id="L274">            } catch (Exception ex) {</span>
-<span class="nc" id="L275">                log.error(</span>
+<span class="nc" id="L275">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating an updated OptionalUI instance! &quot; +
                     &quot;Returning current OptionalUI instance instead.&quot;,
                     ex
@@ -323,7 +323,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
                     }
                 }
 <span class="nc" id="L325">            } catch (Exception ex) {</span>
-<span class="nc" id="L326">                log.error(</span>
+<span class="nc" id="L326">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating an updated OptionalUI instance! &quot; +
                     &quot;Returning current OptionalUI instance instead.&quot;,
                     ex
@@ -376,7 +376,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
 <span class="nc" id="L376">                OptionalUI&lt;C&gt; r = (OptionalUI&lt;C&gt;) supplier.get();</span>
 <span class="nc" id="L377">                return Objects.requireNonNull(r);</span>
 <span class="nc" id="L378">            } catch (Exception e) {</span>
-<span class="nc" id="L379">                log.error(</span>
+<span class="nc" id="L379">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating fetching alternative OptionalUI instance! &quot; +
                     &quot;Returning current OptionalUI instead.&quot;,
                     e
@@ -409,7 +409,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
 <span class="fc" id="L409">                C c = supplier.get();</span>
 <span class="fc" id="L410">                return OptionalUI.ofNullable(c);</span>
 <span class="nc" id="L411">            } catch (Exception e) {</span>
-<span class="nc" id="L412">                log.error(</span>
+<span class="nc" id="L412">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating fetching alternative UI component! &quot; +
                     &quot;Returning current OptionalUI instead.&quot;,
                     e
@@ -450,7 +450,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
 <span class="nc" id="L450">                C c = supplier.get();</span>
 <span class="nc" id="L451">                return OptionalUI.ofNullable(c);</span>
 <span class="nc" id="L452">            } catch (Exception e) {</span>
-<span class="nc" id="L453">                log.error(</span>
+<span class="nc" id="L453">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating fetching alternative UI component! &quot; +
                     &quot;Returning current OptionalUI instead.&quot;,
                     e
@@ -484,7 +484,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
 <span class="fc" id="L484">                UIForAnything&lt;?, A, B&gt; ui = supplier.get();</span>
 <span class="fc" id="L485">                return OptionalUI.ofNullable(ui.get(ui.getType()));</span>
 <span class="nc" id="L486">            } catch (Exception e) {</span>
-<span class="nc" id="L487">                log.error(</span>
+<span class="nc" id="L487">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating fetching alternative UI component! &quot; +
                     &quot;Returning current OptionalUI instead.&quot;,
                     e
@@ -526,7 +526,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
 <span class="fc" id="L526">                UIForAnything&lt;?, A, B&gt; ui = supplier.get();</span>
 <span class="fc" id="L527">                return OptionalUI.ofNullable(ui.get(ui.getType()));</span>
 <span class="nc" id="L528">            } catch (Exception e) {</span>
-<span class="nc" id="L529">                log.error(</span>
+<span class="nc" id="L529">                log.error(SwingTree.get().logMarker(),</span>
                     &quot;Error creating fetching alternative UI component! &quot; +
                     &quot;Returning current OptionalUI instead.&quot;,
                     e

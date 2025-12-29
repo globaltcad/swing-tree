@@ -326,13 +326,16 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
                 case NONE:
 <span class="nc" id="L327">                    break;</span>
                 default:
-<span class="nc" id="L329">                    log.error(SwingTree.get().logMarker(), &quot;Unknown change type: {}&quot;, change, new Throwable());</span>
+<span class="nc" id="L329">                    log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Unknown change type: {}&quot;,
+                        change, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                    );
                     // We do a simple rebuild:
-<span class="nc" id="L331">                    c.removeAllEntries();</span>
-<span class="nc" id="L332">                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
+<span class="nc" id="L334">                    c.removeAllEntries();</span>
+<span class="nc" id="L335">                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
             }
         }
-<span class="fc" id="L335">    }</span>
+<span class="fc" id="L338">    }</span>
 
     private &lt;M&gt; void _update(
             P c,
@@ -344,40 +347,43 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
             Function&lt;Integer, ViewHandle&lt;M&gt;&gt; lensSupplier,
             ModelToViewConverter&lt;ViewHandle&lt;M&gt;&gt; viewSupplier
     ) {
-<span class="pc bpc" id="L347" title="1 of 2 branches missed.">        if ( index &lt; 0 ) {</span>
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">        if ( index &lt; 0 ) {</span>
             // We do a simple re-build
-<span class="nc" id="L349">            c.removeAllEntries();</span>
-<span class="nc" id="L350">            _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
+<span class="nc" id="L352">            c.removeAllEntries();</span>
+<span class="nc" id="L353">            _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
         } else {
-<span class="pc bpc" id="L352" title="2 of 7 branches missed.">            switch (change) {</span>
+<span class="pc bpc" id="L355" title="2 of 7 branches missed.">            switch (change) {</span>
                 case SET:
-<span class="fc" id="L354">                    _setAllEntriesAt(attr, c, index, count, lensSupplier, viewSupplier);</span>
-<span class="fc" id="L355">                    break;</span>
-                case ADD:
-<span class="fc" id="L357">                    _addAllEntriesAt(attr, c, index, newModels.sliceAt(index, count), lensSupplier, viewSupplier);</span>
+<span class="fc" id="L357">                    _setAllEntriesAt(attr, c, index, count, lensSupplier, viewSupplier);</span>
 <span class="fc" id="L358">                    break;</span>
-                case REMOVE:
-<span class="fc" id="L360">                    c.removeEntriesAt(index, count);</span>
+                case ADD:
+<span class="fc" id="L360">                    _addAllEntriesAt(attr, c, index, newModels.sliceAt(index, count), lensSupplier, viewSupplier);</span>
 <span class="fc" id="L361">                    break;</span>
+                case REMOVE:
+<span class="fc" id="L363">                    c.removeEntriesAt(index, count);</span>
+<span class="fc" id="L364">                    break;</span>
                 case RETAIN: // Only keep the elements in the range.
                     // Remove trailing components:
-<span class="fc" id="L364">                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));</span>
+<span class="fc" id="L367">                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));</span>
                     // Remove leading components:
-<span class="fc" id="L366">                    c.removeEntriesAt(0, index);</span>
-<span class="fc" id="L367">                    break;</span>
-                case CLEAR:
-<span class="fc" id="L369">                    c.removeAllEntries();</span>
+<span class="fc" id="L369">                    c.removeEntriesAt(0, index);</span>
 <span class="fc" id="L370">                    break;</span>
+                case CLEAR:
+<span class="fc" id="L372">                    c.removeAllEntries();</span>
+<span class="fc" id="L373">                    break;</span>
                 case NONE:
-<span class="nc" id="L372">                    break;</span>
+<span class="nc" id="L375">                    break;</span>
                 default:
-<span class="nc" id="L374">                    log.error(SwingTree.get().logMarker(), &quot;Unknown change type: {}&quot;, change, new Throwable());</span>
+<span class="nc" id="L377">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Unknown change type: {}&quot;,
+                            change, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                        );
                     // We do a simple rebuild:
-<span class="nc" id="L376">                    c.removeAllEntries();</span>
-<span class="nc" id="L377">                    _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
+<span class="nc" id="L382">                    c.removeAllEntries();</span>
+<span class="nc" id="L383">                    _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
             }
         }
-<span class="fc" id="L380">    }</span>
+<span class="fc" id="L386">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

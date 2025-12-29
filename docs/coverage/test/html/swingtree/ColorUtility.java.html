@@ -149,343 +149,356 @@ import java.util.Map;
 <span class="fc" id="L149">            int start = colorString.indexOf('(');</span>
 <span class="fc" id="L150">            int end = colorString.indexOf(')');</span>
 <span class="pc bpc" id="L151" title="3 of 6 branches missed.">            if (start &lt; 0 || end &lt; 0 || end &lt; start) {</span>
-<span class="nc" id="L152">                log.error(SwingTree.get().logMarker(), &quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
-<span class="nc" id="L153">                return UI.Color.UNDEFINED;</span>
+<span class="nc" id="L152">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Invalid rgb() or rgba() color: {}&quot;,
+                        colorString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                    );
+<span class="nc" id="L156">                return UI.Color.UNDEFINED;</span>
             }
 
-<span class="fc" id="L156">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;, -1);</span>
-<span class="pc bpc" id="L157" title="2 of 4 branches missed.">            if (parts.length &lt; 3 || parts.length &gt; 4) {</span>
-<span class="nc" id="L158">                log.error(SwingTree.get().logMarker(), &quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
-<span class="nc" id="L159">                return UI.Color.UNDEFINED;</span>
+<span class="fc" id="L159">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;, -1);</span>
+<span class="pc bpc" id="L160" title="2 of 4 branches missed.">            if (parts.length &lt; 3 || parts.length &gt; 4) {</span>
+<span class="nc" id="L161">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Invalid rgb() or rgba() color: {}&quot;, colorString,
+                        new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                    );
+<span class="nc" id="L165">                return UI.Color.UNDEFINED;</span>
             }
 
-<span class="fc bfc" id="L162" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++)</span>
-<span class="fc" id="L163">                parts[i] = parts[i].trim();</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++)</span>
+<span class="fc" id="L169">                parts[i] = parts[i].trim();</span>
 
-<span class="fc" id="L165">            int[] values = new int[parts.length];</span>
+<span class="fc" id="L171">            int[] values = new int[parts.length];</span>
 
-<span class="fc bfc" id="L167" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++) {</span>
-<span class="fc" id="L168">                String part = parts[i];</span>
-<span class="fc bfc" id="L169" title="All 2 branches covered.">                if (part.endsWith(&quot;%&quot;)) {</span>
-<span class="fc" id="L170">                    part = part.substring(0, part.length() - 1);</span>
-<span class="fc" id="L171">                    values[i] = Integer.parseInt(part);</span>
-<span class="pc bpc" id="L172" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 100) {</span>
-<span class="nc" id="L173">                        log.error(SwingTree.get().logMarker(), &quot;Invalid rgb() or rgba() color: &quot; + colorString, new Throwable());</span>
-<span class="nc" id="L174">                        return UI.Color.UNDEFINED;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++) {</span>
+<span class="fc" id="L174">                String part = parts[i];</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">                if (part.endsWith(&quot;%&quot;)) {</span>
+<span class="fc" id="L176">                    part = part.substring(0, part.length() - 1);</span>
+<span class="fc" id="L177">                    values[i] = Integer.parseInt(part);</span>
+<span class="pc bpc" id="L178" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 100) {</span>
+<span class="nc" id="L179">                        log.error(SwingTree.get().logMarker(),</span>
+                                &quot;Invalid rgb() or rgba() color: {}&quot;,
+                                colorString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                            );
+<span class="nc" id="L183">                        return UI.Color.UNDEFINED;</span>
                     }
-<span class="fc" id="L176">                    values[i] = (int) Math.ceil(values[i] * 2.55);</span>
-<span class="fc bfc" id="L177" title="All 2 branches covered.">                } else if (part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;))</span>
-<span class="fc" id="L178">                    values[i] = (int) (Float.parseFloat(part) * 255);</span>
+<span class="fc" id="L185">                    values[i] = (int) Math.ceil(values[i] * 2.55);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                } else if (part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;))</span>
+<span class="fc" id="L187">                    values[i] = (int) (Float.parseFloat(part) * 255);</span>
                 else
-<span class="fc" id="L180">                    values[i] = Integer.parseInt(part);</span>
+<span class="fc" id="L189">                    values[i] = Integer.parseInt(part);</span>
             }
-<span class="fc" id="L182">            int r = values[0];</span>
-<span class="fc" id="L183">            int g = values[1];</span>
-<span class="fc" id="L184">            int b = values[2];</span>
-<span class="fc bfc" id="L185" title="All 2 branches covered.">            int a = values.length == 4 ? values[3] : 255;</span>
-<span class="fc" id="L186">            return UI.Color.ofRgba(r, g, b, a);</span>
+<span class="fc" id="L191">            int r = values[0];</span>
+<span class="fc" id="L192">            int g = values[1];</span>
+<span class="fc" id="L193">            int b = values[2];</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">            int a = values.length == 4 ? values[3] : 255;</span>
+<span class="fc" id="L195">            return UI.Color.ofRgba(r, g, b, a);</span>
         }
 
-<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (colorString.startsWith(&quot;hsb&quot;)) {</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if (colorString.startsWith(&quot;hsb&quot;)) {</span>
             // We have an hsb() or hsba() color
-<span class="fc" id="L191">            int start = colorString.indexOf('(');</span>
-<span class="fc" id="L192">            int end = colorString.indexOf(')');</span>
-<span class="pc bpc" id="L193" title="3 of 6 branches missed.">            if (start &lt; 0 || end &lt; 0 || end &lt; start) {</span>
-<span class="nc" id="L194">                log.error(SwingTree.get().logMarker(), &quot;Invalid hsb() or hsba() color: &quot; + colorString, new Throwable());</span>
-<span class="nc" id="L195">                return UI.Color.UNDEFINED;</span>
+<span class="fc" id="L200">            int start = colorString.indexOf('(');</span>
+<span class="fc" id="L201">            int end = colorString.indexOf(')');</span>
+<span class="pc bpc" id="L202" title="3 of 6 branches missed.">            if (start &lt; 0 || end &lt; 0 || end &lt; start) {</span>
+<span class="nc" id="L203">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Invalid hsb() or hsba() color: {}&quot;,
+                        colorString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                    );
+<span class="nc" id="L207">                return UI.Color.UNDEFINED;</span>
             }
 
-<span class="fc" id="L198">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;, -1);</span>
-<span class="pc bpc" id="L199" title="2 of 4 branches missed.">            if (parts.length &lt; 3 || parts.length &gt; 4) {</span>
-<span class="nc" id="L200">                log.error(SwingTree.get().logMarker(), &quot;Invalid hsb() or hsba() color: &quot; + colorString, new Throwable());</span>
-<span class="nc" id="L201">                return UI.Color.UNDEFINED;</span>
+<span class="fc" id="L210">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;, -1);</span>
+<span class="pc bpc" id="L211" title="2 of 4 branches missed.">            if (parts.length &lt; 3 || parts.length &gt; 4) {</span>
+<span class="nc" id="L212">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Invalid hsb() or hsba() color: {}&quot;,
+                        colorString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                    );
+<span class="nc" id="L216">                return UI.Color.UNDEFINED;</span>
             }
 
-<span class="fc bfc" id="L204" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++)</span>
-<span class="fc" id="L205">                parts[i] = parts[i].trim();</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++)</span>
+<span class="fc" id="L220">                parts[i] = parts[i].trim();</span>
 
-<span class="fc" id="L207">            float[] values = new float[parts.length];</span>
+<span class="fc" id="L222">            float[] values = new float[parts.length];</span>
 
-<span class="fc bfc" id="L209" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++) {</span>
-<span class="fc" id="L210">                String part = parts[i];</span>
-<span class="fc bfc" id="L211" title="All 2 branches covered.">                if (part.endsWith(&quot;%&quot;)) {</span>
-<span class="fc" id="L212">                    part = part.substring(0, part.length() - 1);</span>
-<span class="fc" id="L213">                    values[i] = Float.parseFloat(part);</span>
-<span class="pc bpc" id="L214" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 100) {</span>
-<span class="nc" id="L215">                        log.error(</span>
-                                &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', &quot; +
-                                        &quot;value '&quot; + part + &quot;' out of range.&quot;,
-                                new Throwable()
-                        );
-<span class="nc" id="L220">                        return UI.Color.UNDEFINED;</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">            for (int i = 0; i &lt; parts.length; i++) {</span>
+<span class="fc" id="L225">                String part = parts[i];</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">                if (part.endsWith(&quot;%&quot;)) {</span>
+<span class="fc" id="L227">                    part = part.substring(0, part.length() - 1);</span>
+<span class="fc" id="L228">                    values[i] = Float.parseFloat(part);</span>
+<span class="pc bpc" id="L229" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 100) {</span>
+<span class="nc" id="L230">                        log.error(SwingTree.get().logMarker(),</span>
+                                &quot;Invalid hsb() or hsba() string '{}', value '{}' out of range.&quot;,
+                                colorString, part, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                            );
+<span class="nc" id="L234">                        return UI.Color.UNDEFINED;</span>
                     }
-<span class="fc" id="L222">                    values[i] = values[i] / 100.0f;</span>
-<span class="fc bfc" id="L223" title="All 2 branches covered.">                } else if (part.endsWith(&quot;°&quot;)) {</span>
-<span class="pc bpc" id="L224" title="1 of 2 branches missed.">                    if (i &gt; 0) {</span>
-<span class="nc" id="L225">                        log.error(</span>
-                                &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', &quot; +
-                                        &quot;unexpected degree symbol in '&quot; + part + &quot;' (only allowed for hue)&quot;,
-                                new Throwable()
-                        );
-<span class="nc" id="L230">                        return UI.Color.UNDEFINED;</span>
+<span class="fc" id="L236">                    values[i] = values[i] / 100.0f;</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">                } else if (part.endsWith(&quot;°&quot;)) {</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">                    if (i &gt; 0) {</span>
+<span class="nc" id="L239">                        log.error(SwingTree.get().logMarker(),</span>
+                                &quot;Invalid hsb() or hsba() string '{}', &quot; +
+                                &quot;unexpected degree symbol in '{}' (only allowed for hue)&quot;,
+                                colorString, part, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                            );
+<span class="nc" id="L244">                        return UI.Color.UNDEFINED;</span>
                     }
 
-<span class="fc" id="L233">                    part = part.substring(0, part.length() - 1);</span>
-<span class="fc" id="L234">                    values[i] = Float.parseFloat(part);</span>
-<span class="pc bpc" id="L235" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 360) {</span>
-<span class="nc" id="L236">                        log.error(</span>
-                                &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', &quot; +
-                                        &quot;hue value '&quot; + part + &quot;' out of range.&quot;,
-                                new Throwable()
-                        );
-<span class="nc" id="L241">                        return UI.Color.UNDEFINED;</span>
+<span class="fc" id="L247">                    part = part.substring(0, part.length() - 1);</span>
+<span class="fc" id="L248">                    values[i] = Float.parseFloat(part);</span>
+<span class="pc bpc" id="L249" title="2 of 4 branches missed.">                    if (values[i] &lt; 0 || values[i] &gt; 360) {</span>
+<span class="nc" id="L250">                        log.error(SwingTree.get().logMarker(),</span>
+                                &quot;Invalid hsb() or hsba() string '{}', hue value '{}' out of range.&quot;,
+                                colorString, part, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                            );
+<span class="nc" id="L254">                        return UI.Color.UNDEFINED;</span>
                     }
-<span class="fc" id="L243">                    values[i] = values[i] / 360.0f;</span>
-<span class="fc bfc" id="L244" title="All 2 branches covered.">                } else if (part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;))</span>
-<span class="fc" id="L245">                    values[i] = Float.parseFloat(part);</span>
+<span class="fc" id="L256">                    values[i] = values[i] / 360.0f;</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">                } else if (part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;))</span>
+<span class="fc" id="L258">                    values[i] = Float.parseFloat(part);</span>
                 else
-<span class="fc" id="L247">                    values[i] = Integer.parseInt(part);</span>
+<span class="fc" id="L260">                    values[i] = Integer.parseInt(part);</span>
             }
 
-<span class="fc" id="L250">            float h = values[0];</span>
-<span class="fc" id="L251">            float s = values[1];</span>
-<span class="fc" id="L252">            float b = values[2];</span>
-<span class="fc bfc" id="L253" title="All 2 branches covered.">            float a = values.length == 4 ? values[3] : 1.0f;</span>
-<span class="fc" id="L254">            java.awt.Color c = java.awt.Color.getHSBColor(h, s, b);</span>
-<span class="fc" id="L255">            return UI.Color.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int) (a * 255));</span>
+<span class="fc" id="L263">            float h = values[0];</span>
+<span class="fc" id="L264">            float s = values[1];</span>
+<span class="fc" id="L265">            float b = values[2];</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">            float a = values.length == 4 ? values[3] : 1.0f;</span>
+<span class="fc" id="L267">            java.awt.Color c = java.awt.Color.getHSBColor(h, s, b);</span>
+<span class="fc" id="L268">            return UI.Color.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int) (a * 255));</span>
         }
 
         {
-<span class="fc" id="L259">            String maybeWord = colorString.toLowerCase(Locale.ENGLISH);</span>
-<span class="fc" id="L260">            boolean transparent = false;</span>
+<span class="fc" id="L272">            String maybeWord = colorString.toLowerCase(Locale.ENGLISH);</span>
+<span class="fc" id="L273">            boolean transparent = false;</span>
 
-<span class="fc bfc" id="L262" title="All 2 branches covered.">            if (maybeWord.startsWith(&quot;transparent&quot;)) {</span>
-<span class="fc" id="L263">                transparent = true;</span>
-<span class="fc" id="L264">                maybeWord = maybeWord.substring(11).trim();</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">            if (maybeWord.startsWith(&quot;transparent&quot;)) {</span>
+<span class="fc" id="L276">                transparent = true;</span>
+<span class="fc" id="L277">                maybeWord = maybeWord.substring(11).trim();</span>
             }
 
             // Let's try a few common color names
-<span class="fc" id="L268">            UI.Color color = _tryFromName(maybeWord);</span>
-<span class="pc bpc" id="L269" title="1 of 4 branches missed.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;darker&quot;)) {</span>
-<span class="nc" id="L270">                color = _tryFromName(maybeWord.substring(6).trim());</span>
-<span class="nc bnc" id="L271" title="All 2 branches missed.">                if (color != null)</span>
-<span class="nc" id="L272">                    color = color.darker();</span>
+<span class="fc" id="L281">            UI.Color color = _tryFromName(maybeWord);</span>
+<span class="pc bpc" id="L282" title="1 of 4 branches missed.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;darker&quot;)) {</span>
+<span class="nc" id="L283">                color = _tryFromName(maybeWord.substring(6).trim());</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                if (color != null)</span>
+<span class="nc" id="L285">                    color = color.darker();</span>
             }
-<span class="fc bfc" id="L274" title="All 4 branches covered.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;dark&quot;)) {</span>
-<span class="fc" id="L275">                color = _tryFromName(maybeWord.substring(4).trim());</span>
-<span class="pc bpc" id="L276" title="1 of 2 branches missed.">                if (color != null)</span>
-<span class="fc" id="L277">                    color = color.darker();</span>
+<span class="fc bfc" id="L287" title="All 4 branches covered.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;dark&quot;)) {</span>
+<span class="fc" id="L288">                color = _tryFromName(maybeWord.substring(4).trim());</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">                if (color != null)</span>
+<span class="fc" id="L290">                    color = color.darker();</span>
             }
-<span class="pc bpc" id="L279" title="1 of 4 branches missed.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;lighter&quot;)) {</span>
-<span class="nc" id="L280">                color = _tryFromName(maybeWord.substring(7).trim());</span>
-<span class="nc bnc" id="L281" title="All 2 branches missed.">                if (color != null)</span>
-<span class="nc" id="L282">                    color = color.brighter();</span>
+<span class="pc bpc" id="L292" title="1 of 4 branches missed.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;lighter&quot;)) {</span>
+<span class="nc" id="L293">                color = _tryFromName(maybeWord.substring(7).trim());</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                if (color != null)</span>
+<span class="nc" id="L295">                    color = color.brighter();</span>
             }
-<span class="fc bfc" id="L284" title="All 4 branches covered.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;light&quot;)) {</span>
-<span class="fc" id="L285">                color = _tryFromName(maybeWord.substring(5).trim());</span>
-<span class="pc bpc" id="L286" title="1 of 2 branches missed.">                if (color != null)</span>
-<span class="fc" id="L287">                    color = color.brighter();</span>
+<span class="fc bfc" id="L297" title="All 4 branches covered.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;light&quot;)) {</span>
+<span class="fc" id="L298">                color = _tryFromName(maybeWord.substring(5).trim());</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">                if (color != null)</span>
+<span class="fc" id="L300">                    color = color.brighter();</span>
             }
-<span class="pc bpc" id="L289" title="1 of 4 branches missed.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;brighter&quot;)) {</span>
-<span class="nc" id="L290">                color = _tryFromName(maybeWord.substring(8).trim());</span>
-<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (color != null)</span>
-<span class="nc" id="L292">                    color = color.brighter();</span>
+<span class="pc bpc" id="L302" title="1 of 4 branches missed.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;brighter&quot;)) {</span>
+<span class="nc" id="L303">                color = _tryFromName(maybeWord.substring(8).trim());</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">                if (color != null)</span>
+<span class="nc" id="L305">                    color = color.brighter();</span>
             }
-<span class="fc bfc" id="L294" title="All 4 branches covered.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;bright&quot;)) {</span>
-<span class="fc" id="L295">                color = _tryFromName(maybeWord.substring(6).trim());</span>
-<span class="pc bpc" id="L296" title="1 of 2 branches missed.">                if (color != null)</span>
-<span class="fc" id="L297">                    color = color.brighter();</span>
+<span class="fc bfc" id="L307" title="All 4 branches covered.">            if (color == null &amp;&amp; maybeWord.startsWith(&quot;bright&quot;)) {</span>
+<span class="fc" id="L308">                color = _tryFromName(maybeWord.substring(6).trim());</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">                if (color != null)</span>
+<span class="fc" id="L310">                    color = color.brighter();</span>
             }
 
-<span class="fc bfc" id="L300" title="All 2 branches covered.">            if (color != null) {</span>
-<span class="fc bfc" id="L301" title="All 2 branches covered.">                if (transparent)</span>
-<span class="fc" id="L302">                    return UI.Color.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255 / 2);</span>
+<span class="fc bfc" id="L313" title="All 2 branches covered.">            if (color != null) {</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">                if (transparent)</span>
+<span class="fc" id="L315">                    return UI.Color.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255 / 2);</span>
                 else
-<span class="fc" id="L304">                    return color;</span>
-<span class="fc bfc" id="L305" title="All 2 branches covered.">            } else if (transparent)</span>
-<span class="fc" id="L306">                return UI.Color.TRANSPARENT;</span>
+<span class="fc" id="L317">                    return color;</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">            } else if (transparent)</span>
+<span class="fc" id="L319">                return UI.Color.TRANSPARENT;</span>
         }
 
         // Let's try to find it as a system property
-<span class="fc" id="L310">        UI.Color foundInSystemProperties = null;</span>
+<span class="fc" id="L323">        UI.Color foundInSystemProperties = null;</span>
         try {
-<span class="fc" id="L312">            java.awt.Color found = java.awt.Color.getColor(colorString);</span>
-<span class="pc bpc" id="L313" title="3 of 4 branches missed.">            if (found != null &amp;&amp; !(found instanceof UI.Color))</span>
-<span class="nc" id="L314">                foundInSystemProperties = UI.Color.of(found);</span>
-<span class="nc" id="L315">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L325">            java.awt.Color found = java.awt.Color.getColor(colorString);</span>
+<span class="pc bpc" id="L326" title="3 of 4 branches missed.">            if (found != null &amp;&amp; !(found instanceof UI.Color))</span>
+<span class="nc" id="L327">                foundInSystemProperties = UI.Color.of(found);</span>
+<span class="nc" id="L328">        } catch (IllegalArgumentException e) {</span>
             // Ignore
-<span class="fc" id="L317">        }</span>
-<span class="pc bpc" id="L318" title="1 of 2 branches missed.">        if (foundInSystemProperties != null)</span>
-<span class="nc" id="L319">            return foundInSystemProperties;</span>
+<span class="fc" id="L330">        }</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">        if (foundInSystemProperties != null)</span>
+<span class="nc" id="L332">            return foundInSystemProperties;</span>
 
-<span class="fc" id="L321">        return UI.Color.UNDEFINED;</span>
+<span class="fc" id="L334">        return UI.Color.UNDEFINED;</span>
     }
 
     private static UI.@Nullable Color _tryFromName(String maybeColorName) {
         try {
-<span class="fc" id="L326">            String lowerCaseName = maybeColorName.toLowerCase(Locale.ENGLISH);</span>
-<span class="fc" id="L327">            return ColorUtility.get(lowerCaseName);</span>
-<span class="nc" id="L328">        } catch (IllegalArgumentException e) {</span>
-<span class="nc" id="L329">            return null;</span>
+<span class="fc" id="L339">            String lowerCaseName = maybeColorName.toLowerCase(Locale.ENGLISH);</span>
+<span class="fc" id="L340">            return ColorUtility.get(lowerCaseName);</span>
+<span class="nc" id="L341">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L342">            return null;</span>
         }
     }
 
 
     static UI.@Nullable Color get(String name) {
-<span class="fc" id="L335">        return NAMED_COLOURS.get(name);</span>
+<span class="fc" id="L348">        return NAMED_COLOURS.get(name);</span>
     }
 
-<span class="fc" id="L338">    private static final Map&lt;String, UI.Color&gt; NAMED_COLOURS = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L351">    private static final Map&lt;String, UI.Color&gt; NAMED_COLOURS = new HashMap&lt;&gt;();</span>
     static {
-<span class="fc" id="L340">        NAMED_COLOURS.put(&quot;aliceblue&quot;, UI.Color.ALICEBLUE);</span>
-<span class="fc" id="L341">        NAMED_COLOURS.put(&quot;antiquewhite&quot;, UI.Color.ANTIQUEWHITE);</span>
-<span class="fc" id="L342">        NAMED_COLOURS.put(&quot;aqua&quot;, UI.Color.AQUA);</span>
-<span class="fc" id="L343">        NAMED_COLOURS.put(&quot;aquamarine&quot;, UI.Color.AQUAMARINE);</span>
-<span class="fc" id="L344">        NAMED_COLOURS.put(&quot;azure&quot;, UI.Color.AZURE);</span>
-<span class="fc" id="L345">        NAMED_COLOURS.put(&quot;beige&quot;, UI.Color.BEIGE);</span>
-<span class="fc" id="L346">        NAMED_COLOURS.put(&quot;bisque&quot;, UI.Color.BISQUE);</span>
-<span class="fc" id="L347">        NAMED_COLOURS.put(&quot;black&quot;, UI.Color.BLACK);</span>
-<span class="fc" id="L348">        NAMED_COLOURS.put(&quot;blanchedalmond&quot;, UI.Color.BLANCHEDALMOND);</span>
-<span class="fc" id="L349">        NAMED_COLOURS.put(&quot;blue&quot;, UI.Color.BLUE);</span>
-<span class="fc" id="L350">        NAMED_COLOURS.put(&quot;blueviolet&quot;, UI.Color.BLUEVIOLET);</span>
-<span class="fc" id="L351">        NAMED_COLOURS.put(&quot;brown&quot;, UI.Color.BROWN);</span>
-<span class="fc" id="L352">        NAMED_COLOURS.put(&quot;burlywood&quot;, UI.Color.BURLYWOOD);</span>
-<span class="fc" id="L353">        NAMED_COLOURS.put(&quot;cadetblue&quot;, UI.Color.CADETBLUE);</span>
-<span class="fc" id="L354">        NAMED_COLOURS.put(&quot;chartreuse&quot;, UI.Color.CHARTREUSE);</span>
-<span class="fc" id="L355">        NAMED_COLOURS.put(&quot;chocolate&quot;, UI.Color.CHOCOLATE);</span>
-<span class="fc" id="L356">        NAMED_COLOURS.put(&quot;coral&quot;, UI.Color.CORAL);</span>
-<span class="fc" id="L357">        NAMED_COLOURS.put(&quot;cornflowerblue&quot;, UI.Color.CORNFLOWERBLUE);</span>
-<span class="fc" id="L358">        NAMED_COLOURS.put(&quot;cornsilk&quot;, UI.Color.CORNSILK);</span>
-<span class="fc" id="L359">        NAMED_COLOURS.put(&quot;crimson&quot;, UI.Color.CRIMSON);</span>
-<span class="fc" id="L360">        NAMED_COLOURS.put(&quot;cyan&quot;, UI.Color.CYAN);</span>
-<span class="fc" id="L361">        NAMED_COLOURS.put(&quot;darkblue&quot;, UI.Color.DARKBLUE);</span>
-<span class="fc" id="L362">        NAMED_COLOURS.put(&quot;darkcyan&quot;, UI.Color.DARKCYAN);</span>
-<span class="fc" id="L363">        NAMED_COLOURS.put(&quot;darkgoldenrod&quot;, UI.Color.DARKGOLDENROD);</span>
-<span class="fc" id="L364">        NAMED_COLOURS.put(&quot;darkgray&quot;, UI.Color.DARKGRAY);</span>
-<span class="fc" id="L365">        NAMED_COLOURS.put(&quot;darkgreen&quot;, UI.Color.DARKGREEN);</span>
-<span class="fc" id="L366">        NAMED_COLOURS.put(&quot;darkgrey&quot;, UI.Color.DARKGREY);</span>
-<span class="fc" id="L367">        NAMED_COLOURS.put(&quot;darkkhaki&quot;, UI.Color.DARKKHAKI);</span>
-<span class="fc" id="L368">        NAMED_COLOURS.put(&quot;darkmagenta&quot;, UI.Color.DARKMAGENTA);</span>
-<span class="fc" id="L369">        NAMED_COLOURS.put(&quot;darkolivegreen&quot;, UI.Color.DARKOLIVEGREEN);</span>
-<span class="fc" id="L370">        NAMED_COLOURS.put(&quot;darkorange&quot;, UI.Color.DARKORANGE);</span>
-<span class="fc" id="L371">        NAMED_COLOURS.put(&quot;darkorchid&quot;, UI.Color.DARKORCHID);</span>
-<span class="fc" id="L372">        NAMED_COLOURS.put(&quot;darkred&quot;, UI.Color.DARKRED);</span>
-<span class="fc" id="L373">        NAMED_COLOURS.put(&quot;darksalmon&quot;, UI.Color.DARKSALMON);</span>
-<span class="fc" id="L374">        NAMED_COLOURS.put(&quot;darkseagreen&quot;, UI.Color.DARKSEAGREEN);</span>
-<span class="fc" id="L375">        NAMED_COLOURS.put(&quot;darkslateblue&quot;, UI.Color.DARKSLATEBLUE);</span>
-<span class="fc" id="L376">        NAMED_COLOURS.put(&quot;darkslategray&quot;, UI.Color.DARKSLATEGRAY);</span>
-<span class="fc" id="L377">        NAMED_COLOURS.put(&quot;darkslategrey&quot;, UI.Color.DARKSLATEGREY);</span>
-<span class="fc" id="L378">        NAMED_COLOURS.put(&quot;darkturquoise&quot;, UI.Color.DARKTURQUOISE);</span>
-<span class="fc" id="L379">        NAMED_COLOURS.put(&quot;darkviolet&quot;, UI.Color.DARKVIOLET);</span>
-<span class="fc" id="L380">        NAMED_COLOURS.put(&quot;deeppink&quot;, UI.Color.DEEPPINK);</span>
-<span class="fc" id="L381">        NAMED_COLOURS.put(&quot;deepskyblue&quot;, UI.Color.DEEPSKYBLUE);</span>
-<span class="fc" id="L382">        NAMED_COLOURS.put(&quot;dimgray&quot;, UI.Color.DIMGRAY);</span>
-<span class="fc" id="L383">        NAMED_COLOURS.put(&quot;dimgrey&quot;, UI.Color.DIMGREY);</span>
-<span class="fc" id="L384">        NAMED_COLOURS.put(&quot;dodgerblue&quot;, UI.Color.DODGERBLUE);</span>
-<span class="fc" id="L385">        NAMED_COLOURS.put(&quot;firebrick&quot;, UI.Color.FIREBRICK);</span>
-<span class="fc" id="L386">        NAMED_COLOURS.put(&quot;floralwhite&quot;, UI.Color.FLORALWHITE);</span>
-<span class="fc" id="L387">        NAMED_COLOURS.put(&quot;forestgreen&quot;, UI.Color.FORESTGREEN);</span>
-<span class="fc" id="L388">        NAMED_COLOURS.put(&quot;fuchsia&quot;, UI.Color.FUCHSIA);</span>
-<span class="fc" id="L389">        NAMED_COLOURS.put(&quot;gainsboro&quot;, UI.Color.GAINSBORO);</span>
-<span class="fc" id="L390">        NAMED_COLOURS.put(&quot;ghostwhite&quot;, UI.Color.GHOSTWHITE);</span>
-<span class="fc" id="L391">        NAMED_COLOURS.put(&quot;gold&quot;, UI.Color.GOLD);</span>
-<span class="fc" id="L392">        NAMED_COLOURS.put(&quot;goldenrod&quot;, UI.Color.GOLDENROD);</span>
-<span class="fc" id="L393">        NAMED_COLOURS.put(&quot;gray&quot;, UI.Color.GRAY);</span>
-<span class="fc" id="L394">        NAMED_COLOURS.put(&quot;green&quot;, UI.Color.GREEN);</span>
-<span class="fc" id="L395">        NAMED_COLOURS.put(&quot;greenyellow&quot;, UI.Color.GREENYELLOW);</span>
-<span class="fc" id="L396">        NAMED_COLOURS.put(&quot;grey&quot;, UI.Color.GREY);</span>
-<span class="fc" id="L397">        NAMED_COLOURS.put(&quot;honeydew&quot;, UI.Color.HONEYDEW);</span>
-<span class="fc" id="L398">        NAMED_COLOURS.put(&quot;hotpink&quot;, UI.Color.HOTPINK);</span>
-<span class="fc" id="L399">        NAMED_COLOURS.put(&quot;indianred&quot;, UI.Color.INDIANRED);</span>
-<span class="fc" id="L400">        NAMED_COLOURS.put(&quot;indigo&quot;, UI.Color.INDIGO);</span>
-<span class="fc" id="L401">        NAMED_COLOURS.put(&quot;ivory&quot;, UI.Color.IVORY);</span>
-<span class="fc" id="L402">        NAMED_COLOURS.put(&quot;khaki&quot;, UI.Color.KHAKI);</span>
-<span class="fc" id="L403">        NAMED_COLOURS.put(&quot;lavender&quot;, UI.Color.LAVENDER);</span>
-<span class="fc" id="L404">        NAMED_COLOURS.put(&quot;lavenderblush&quot;, UI.Color.LAVENDERBLUSH);</span>
-<span class="fc" id="L405">        NAMED_COLOURS.put(&quot;lawngreen&quot;, UI.Color.LAWNGREEN);</span>
-<span class="fc" id="L406">        NAMED_COLOURS.put(&quot;lemonchiffon&quot;, UI.Color.LEMONCHIFFON);</span>
-<span class="fc" id="L407">        NAMED_COLOURS.put(&quot;lightblue&quot;, UI.Color.LIGHTBLUE);</span>
-<span class="fc" id="L408">        NAMED_COLOURS.put(&quot;lightcoral&quot;, UI.Color.LIGHTCORAL);</span>
-<span class="fc" id="L409">        NAMED_COLOURS.put(&quot;lightcyan&quot;, UI.Color.LIGHTCYAN);</span>
-<span class="fc" id="L410">        NAMED_COLOURS.put(&quot;lightgoldenrodyellow&quot;, UI.Color.LIGHTGOLDENRODYELLOW);</span>
-<span class="fc" id="L411">        NAMED_COLOURS.put(&quot;lightgray&quot;, UI.Color.LIGHTGRAY);</span>
-<span class="fc" id="L412">        NAMED_COLOURS.put(&quot;lightgreen&quot;, UI.Color.LIGHTGREEN);</span>
-<span class="fc" id="L413">        NAMED_COLOURS.put(&quot;lightgrey&quot;, UI.Color.LIGHTGREY);</span>
-<span class="fc" id="L414">        NAMED_COLOURS.put(&quot;lightpink&quot;, UI.Color.LIGHTPINK);</span>
-<span class="fc" id="L415">        NAMED_COLOURS.put(&quot;lightsalmon&quot;, UI.Color.LIGHTSALMON);</span>
-<span class="fc" id="L416">        NAMED_COLOURS.put(&quot;lightseagreen&quot;, UI.Color.LIGHTSEAGREEN);</span>
-<span class="fc" id="L417">        NAMED_COLOURS.put(&quot;lightskyblue&quot;, UI.Color.LIGHTSKYBLUE);</span>
-<span class="fc" id="L418">        NAMED_COLOURS.put(&quot;lightslategray&quot;, UI.Color.LIGHTSLATEGRAY);</span>
-<span class="fc" id="L419">        NAMED_COLOURS.put(&quot;lightslategrey&quot;, UI.Color.LIGHTSLATEGREY);</span>
-<span class="fc" id="L420">        NAMED_COLOURS.put(&quot;lightsteelblue&quot;, UI.Color.LIGHTSTEELBLUE);</span>
-<span class="fc" id="L421">        NAMED_COLOURS.put(&quot;lightyellow&quot;, UI.Color.LIGHTYELLOW);</span>
-<span class="fc" id="L422">        NAMED_COLOURS.put(&quot;lime&quot;, UI.Color.LIME);</span>
-<span class="fc" id="L423">        NAMED_COLOURS.put(&quot;limegreen&quot;, UI.Color.LIMEGREEN);</span>
-<span class="fc" id="L424">        NAMED_COLOURS.put(&quot;linen&quot;, UI.Color.LINEN);</span>
-<span class="fc" id="L425">        NAMED_COLOURS.put(&quot;magenta&quot;, UI.Color.MAGENTA);</span>
-<span class="fc" id="L426">        NAMED_COLOURS.put(&quot;maroon&quot;, UI.Color.MAROON);</span>
-<span class="fc" id="L427">        NAMED_COLOURS.put(&quot;mediumaquamarine&quot;, UI.Color.MEDIUMAQUAMARINE);</span>
-<span class="fc" id="L428">        NAMED_COLOURS.put(&quot;mediumblue&quot;, UI.Color.MEDIUMBLUE);</span>
-<span class="fc" id="L429">        NAMED_COLOURS.put(&quot;mediumorchid&quot;, UI.Color.MEDIUMORCHID);</span>
-<span class="fc" id="L430">        NAMED_COLOURS.put(&quot;mediumpurple&quot;, UI.Color.MEDIUMPURPLE);</span>
-<span class="fc" id="L431">        NAMED_COLOURS.put(&quot;mediumseagreen&quot;, UI.Color.MEDIUMSEAGREEN);</span>
-<span class="fc" id="L432">        NAMED_COLOURS.put(&quot;mediumslateblue&quot;, UI.Color.MEDIUMSLATEBLUE);</span>
-<span class="fc" id="L433">        NAMED_COLOURS.put(&quot;mediumspringgreen&quot;, UI.Color.MEDIUMSPRINGGREEN);</span>
-<span class="fc" id="L434">        NAMED_COLOURS.put(&quot;mediumturquoise&quot;, UI.Color.MEDIUMTURQUOISE);</span>
-<span class="fc" id="L435">        NAMED_COLOURS.put(&quot;mediumvioletred&quot;, UI.Color.MEDIUMVIOLETRED);</span>
-<span class="fc" id="L436">        NAMED_COLOURS.put(&quot;midnightblue&quot;, UI.Color.MIDNIGHTBLUE);</span>
-<span class="fc" id="L437">        NAMED_COLOURS.put(&quot;mintcream&quot;, UI.Color.MINTCREAM);</span>
-<span class="fc" id="L438">        NAMED_COLOURS.put(&quot;mistyrose&quot;, UI.Color.MISTYROSE);</span>
-<span class="fc" id="L439">        NAMED_COLOURS.put(&quot;moccasin&quot;, UI.Color.MOCCASIN);</span>
-<span class="fc" id="L440">        NAMED_COLOURS.put(&quot;navajowhite&quot;, UI.Color.NAVAJOWHITE);</span>
-<span class="fc" id="L441">        NAMED_COLOURS.put(&quot;navy&quot;, UI.Color.NAVY);</span>
-<span class="fc" id="L442">        NAMED_COLOURS.put(&quot;oak&quot;, UI.Color.OAK);</span>
-<span class="fc" id="L443">        NAMED_COLOURS.put(&quot;oldlace&quot;, UI.Color.OLDLACE);</span>
-<span class="fc" id="L444">        NAMED_COLOURS.put(&quot;olive&quot;, UI.Color.OLIVE);</span>
-<span class="fc" id="L445">        NAMED_COLOURS.put(&quot;olivedrab&quot;, UI.Color.OLIVEDRAB);</span>
-<span class="fc" id="L446">        NAMED_COLOURS.put(&quot;orange&quot;, UI.Color.ORANGE);</span>
-<span class="fc" id="L447">        NAMED_COLOURS.put(&quot;orangered&quot;, UI.Color.ORANGERED);</span>
-<span class="fc" id="L448">        NAMED_COLOURS.put(&quot;orchid&quot;, UI.Color.ORCHID);</span>
-<span class="fc" id="L449">        NAMED_COLOURS.put(&quot;palegoldenrod&quot;, UI.Color.PALEGOLDENROD);</span>
-<span class="fc" id="L450">        NAMED_COLOURS.put(&quot;palegreen&quot;, UI.Color.PALEGREEN);</span>
-<span class="fc" id="L451">        NAMED_COLOURS.put(&quot;paleturquoise&quot;, UI.Color.PALETURQUOISE);</span>
-<span class="fc" id="L452">        NAMED_COLOURS.put(&quot;palevioletred&quot;, UI.Color.PALEVIOLETRED);</span>
-<span class="fc" id="L453">        NAMED_COLOURS.put(&quot;papayawhip&quot;, UI.Color.PAPAYAWHIP);</span>
-<span class="fc" id="L454">        NAMED_COLOURS.put(&quot;peachpuff&quot;, UI.Color.PEACHPUFF);</span>
-<span class="fc" id="L455">        NAMED_COLOURS.put(&quot;peru&quot;, UI.Color.PERU);</span>
-<span class="fc" id="L456">        NAMED_COLOURS.put(&quot;pink&quot;, UI.Color.PINK);</span>
-<span class="fc" id="L457">        NAMED_COLOURS.put(&quot;plum&quot;, UI.Color.PLUM);</span>
-<span class="fc" id="L458">        NAMED_COLOURS.put(&quot;powderblue&quot;, UI.Color.POWDERBLUE);</span>
-<span class="fc" id="L459">        NAMED_COLOURS.put(&quot;purple&quot;, UI.Color.PURPLE);</span>
-<span class="fc" id="L460">        NAMED_COLOURS.put(&quot;red&quot;, UI.Color.RED);</span>
-<span class="fc" id="L461">        NAMED_COLOURS.put(&quot;rosybrown&quot;, UI.Color.ROSYBROWN);</span>
-<span class="fc" id="L462">        NAMED_COLOURS.put(&quot;royalblue&quot;, UI.Color.ROYALBLUE);</span>
-<span class="fc" id="L463">        NAMED_COLOURS.put(&quot;saddlebrown&quot;, UI.Color.SADDLEBROWN);</span>
-<span class="fc" id="L464">        NAMED_COLOURS.put(&quot;salmon&quot;, UI.Color.SALMON);</span>
-<span class="fc" id="L465">        NAMED_COLOURS.put(&quot;sandybrown&quot;, UI.Color.SANDYBROWN);</span>
-<span class="fc" id="L466">        NAMED_COLOURS.put(&quot;seagreen&quot;, UI.Color.SEAGREEN);</span>
-<span class="fc" id="L467">        NAMED_COLOURS.put(&quot;seashell&quot;, UI.Color.SEASHELL);</span>
-<span class="fc" id="L468">        NAMED_COLOURS.put(&quot;sienna&quot;, UI.Color.SIENNA);</span>
-<span class="fc" id="L469">        NAMED_COLOURS.put(&quot;silver&quot;, UI.Color.SILVER);</span>
-<span class="fc" id="L470">        NAMED_COLOURS.put(&quot;skyblue&quot;, UI.Color.SKYBLUE);</span>
-<span class="fc" id="L471">        NAMED_COLOURS.put(&quot;slateblue&quot;, UI.Color.SLATEBLUE);</span>
-<span class="fc" id="L472">        NAMED_COLOURS.put(&quot;slategray&quot;, UI.Color.SLATEGRAY);</span>
-<span class="fc" id="L473">        NAMED_COLOURS.put(&quot;slategrey&quot;, UI.Color.SLATEGREY);</span>
-<span class="fc" id="L474">        NAMED_COLOURS.put(&quot;snow&quot;, UI.Color.SNOW);</span>
-<span class="fc" id="L475">        NAMED_COLOURS.put(&quot;springgreen&quot;, UI.Color.SPRINGGREEN);</span>
-<span class="fc" id="L476">        NAMED_COLOURS.put(&quot;steelblue&quot;, UI.Color.STEELBLUE);</span>
-<span class="fc" id="L477">        NAMED_COLOURS.put(&quot;tan&quot;, UI.Color.TAN);</span>
-<span class="fc" id="L478">        NAMED_COLOURS.put(&quot;teal&quot;, UI.Color.TEAL);</span>
-<span class="fc" id="L479">        NAMED_COLOURS.put(&quot;thistle&quot;, UI.Color.THISTLE);</span>
-<span class="fc" id="L480">        NAMED_COLOURS.put(&quot;tomato&quot;, UI.Color.TOMATO);</span>
-<span class="fc" id="L481">        NAMED_COLOURS.put(&quot;transparent&quot;, UI.Color.TRANSPARENT);</span>
-<span class="fc" id="L482">        NAMED_COLOURS.put(&quot;turquoise&quot;, UI.Color.TURQUOISE);</span>
-<span class="fc" id="L483">        NAMED_COLOURS.put(&quot;violet&quot;, UI.Color.VIOLET);</span>
-<span class="fc" id="L484">        NAMED_COLOURS.put(&quot;wheat&quot;, UI.Color.WHEAT);</span>
-<span class="fc" id="L485">        NAMED_COLOURS.put(&quot;white&quot;, UI.Color.WHITE);</span>
-<span class="fc" id="L486">        NAMED_COLOURS.put(&quot;whitesmoke&quot;, UI.Color.WHITESMOKE);</span>
-<span class="fc" id="L487">        NAMED_COLOURS.put(&quot;yellow&quot;, UI.Color.YELLOW);</span>
-<span class="fc" id="L488">        NAMED_COLOURS.put(&quot;yellowgreen&quot;, UI.Color.YELLOWGREEN);</span>
-<span class="fc" id="L489">    }</span>
+<span class="fc" id="L353">        NAMED_COLOURS.put(&quot;aliceblue&quot;, UI.Color.ALICEBLUE);</span>
+<span class="fc" id="L354">        NAMED_COLOURS.put(&quot;antiquewhite&quot;, UI.Color.ANTIQUEWHITE);</span>
+<span class="fc" id="L355">        NAMED_COLOURS.put(&quot;aqua&quot;, UI.Color.AQUA);</span>
+<span class="fc" id="L356">        NAMED_COLOURS.put(&quot;aquamarine&quot;, UI.Color.AQUAMARINE);</span>
+<span class="fc" id="L357">        NAMED_COLOURS.put(&quot;azure&quot;, UI.Color.AZURE);</span>
+<span class="fc" id="L358">        NAMED_COLOURS.put(&quot;beige&quot;, UI.Color.BEIGE);</span>
+<span class="fc" id="L359">        NAMED_COLOURS.put(&quot;bisque&quot;, UI.Color.BISQUE);</span>
+<span class="fc" id="L360">        NAMED_COLOURS.put(&quot;black&quot;, UI.Color.BLACK);</span>
+<span class="fc" id="L361">        NAMED_COLOURS.put(&quot;blanchedalmond&quot;, UI.Color.BLANCHEDALMOND);</span>
+<span class="fc" id="L362">        NAMED_COLOURS.put(&quot;blue&quot;, UI.Color.BLUE);</span>
+<span class="fc" id="L363">        NAMED_COLOURS.put(&quot;blueviolet&quot;, UI.Color.BLUEVIOLET);</span>
+<span class="fc" id="L364">        NAMED_COLOURS.put(&quot;brown&quot;, UI.Color.BROWN);</span>
+<span class="fc" id="L365">        NAMED_COLOURS.put(&quot;burlywood&quot;, UI.Color.BURLYWOOD);</span>
+<span class="fc" id="L366">        NAMED_COLOURS.put(&quot;cadetblue&quot;, UI.Color.CADETBLUE);</span>
+<span class="fc" id="L367">        NAMED_COLOURS.put(&quot;chartreuse&quot;, UI.Color.CHARTREUSE);</span>
+<span class="fc" id="L368">        NAMED_COLOURS.put(&quot;chocolate&quot;, UI.Color.CHOCOLATE);</span>
+<span class="fc" id="L369">        NAMED_COLOURS.put(&quot;coral&quot;, UI.Color.CORAL);</span>
+<span class="fc" id="L370">        NAMED_COLOURS.put(&quot;cornflowerblue&quot;, UI.Color.CORNFLOWERBLUE);</span>
+<span class="fc" id="L371">        NAMED_COLOURS.put(&quot;cornsilk&quot;, UI.Color.CORNSILK);</span>
+<span class="fc" id="L372">        NAMED_COLOURS.put(&quot;crimson&quot;, UI.Color.CRIMSON);</span>
+<span class="fc" id="L373">        NAMED_COLOURS.put(&quot;cyan&quot;, UI.Color.CYAN);</span>
+<span class="fc" id="L374">        NAMED_COLOURS.put(&quot;darkblue&quot;, UI.Color.DARKBLUE);</span>
+<span class="fc" id="L375">        NAMED_COLOURS.put(&quot;darkcyan&quot;, UI.Color.DARKCYAN);</span>
+<span class="fc" id="L376">        NAMED_COLOURS.put(&quot;darkgoldenrod&quot;, UI.Color.DARKGOLDENROD);</span>
+<span class="fc" id="L377">        NAMED_COLOURS.put(&quot;darkgray&quot;, UI.Color.DARKGRAY);</span>
+<span class="fc" id="L378">        NAMED_COLOURS.put(&quot;darkgreen&quot;, UI.Color.DARKGREEN);</span>
+<span class="fc" id="L379">        NAMED_COLOURS.put(&quot;darkgrey&quot;, UI.Color.DARKGREY);</span>
+<span class="fc" id="L380">        NAMED_COLOURS.put(&quot;darkkhaki&quot;, UI.Color.DARKKHAKI);</span>
+<span class="fc" id="L381">        NAMED_COLOURS.put(&quot;darkmagenta&quot;, UI.Color.DARKMAGENTA);</span>
+<span class="fc" id="L382">        NAMED_COLOURS.put(&quot;darkolivegreen&quot;, UI.Color.DARKOLIVEGREEN);</span>
+<span class="fc" id="L383">        NAMED_COLOURS.put(&quot;darkorange&quot;, UI.Color.DARKORANGE);</span>
+<span class="fc" id="L384">        NAMED_COLOURS.put(&quot;darkorchid&quot;, UI.Color.DARKORCHID);</span>
+<span class="fc" id="L385">        NAMED_COLOURS.put(&quot;darkred&quot;, UI.Color.DARKRED);</span>
+<span class="fc" id="L386">        NAMED_COLOURS.put(&quot;darksalmon&quot;, UI.Color.DARKSALMON);</span>
+<span class="fc" id="L387">        NAMED_COLOURS.put(&quot;darkseagreen&quot;, UI.Color.DARKSEAGREEN);</span>
+<span class="fc" id="L388">        NAMED_COLOURS.put(&quot;darkslateblue&quot;, UI.Color.DARKSLATEBLUE);</span>
+<span class="fc" id="L389">        NAMED_COLOURS.put(&quot;darkslategray&quot;, UI.Color.DARKSLATEGRAY);</span>
+<span class="fc" id="L390">        NAMED_COLOURS.put(&quot;darkslategrey&quot;, UI.Color.DARKSLATEGREY);</span>
+<span class="fc" id="L391">        NAMED_COLOURS.put(&quot;darkturquoise&quot;, UI.Color.DARKTURQUOISE);</span>
+<span class="fc" id="L392">        NAMED_COLOURS.put(&quot;darkviolet&quot;, UI.Color.DARKVIOLET);</span>
+<span class="fc" id="L393">        NAMED_COLOURS.put(&quot;deeppink&quot;, UI.Color.DEEPPINK);</span>
+<span class="fc" id="L394">        NAMED_COLOURS.put(&quot;deepskyblue&quot;, UI.Color.DEEPSKYBLUE);</span>
+<span class="fc" id="L395">        NAMED_COLOURS.put(&quot;dimgray&quot;, UI.Color.DIMGRAY);</span>
+<span class="fc" id="L396">        NAMED_COLOURS.put(&quot;dimgrey&quot;, UI.Color.DIMGREY);</span>
+<span class="fc" id="L397">        NAMED_COLOURS.put(&quot;dodgerblue&quot;, UI.Color.DODGERBLUE);</span>
+<span class="fc" id="L398">        NAMED_COLOURS.put(&quot;firebrick&quot;, UI.Color.FIREBRICK);</span>
+<span class="fc" id="L399">        NAMED_COLOURS.put(&quot;floralwhite&quot;, UI.Color.FLORALWHITE);</span>
+<span class="fc" id="L400">        NAMED_COLOURS.put(&quot;forestgreen&quot;, UI.Color.FORESTGREEN);</span>
+<span class="fc" id="L401">        NAMED_COLOURS.put(&quot;fuchsia&quot;, UI.Color.FUCHSIA);</span>
+<span class="fc" id="L402">        NAMED_COLOURS.put(&quot;gainsboro&quot;, UI.Color.GAINSBORO);</span>
+<span class="fc" id="L403">        NAMED_COLOURS.put(&quot;ghostwhite&quot;, UI.Color.GHOSTWHITE);</span>
+<span class="fc" id="L404">        NAMED_COLOURS.put(&quot;gold&quot;, UI.Color.GOLD);</span>
+<span class="fc" id="L405">        NAMED_COLOURS.put(&quot;goldenrod&quot;, UI.Color.GOLDENROD);</span>
+<span class="fc" id="L406">        NAMED_COLOURS.put(&quot;gray&quot;, UI.Color.GRAY);</span>
+<span class="fc" id="L407">        NAMED_COLOURS.put(&quot;green&quot;, UI.Color.GREEN);</span>
+<span class="fc" id="L408">        NAMED_COLOURS.put(&quot;greenyellow&quot;, UI.Color.GREENYELLOW);</span>
+<span class="fc" id="L409">        NAMED_COLOURS.put(&quot;grey&quot;, UI.Color.GREY);</span>
+<span class="fc" id="L410">        NAMED_COLOURS.put(&quot;honeydew&quot;, UI.Color.HONEYDEW);</span>
+<span class="fc" id="L411">        NAMED_COLOURS.put(&quot;hotpink&quot;, UI.Color.HOTPINK);</span>
+<span class="fc" id="L412">        NAMED_COLOURS.put(&quot;indianred&quot;, UI.Color.INDIANRED);</span>
+<span class="fc" id="L413">        NAMED_COLOURS.put(&quot;indigo&quot;, UI.Color.INDIGO);</span>
+<span class="fc" id="L414">        NAMED_COLOURS.put(&quot;ivory&quot;, UI.Color.IVORY);</span>
+<span class="fc" id="L415">        NAMED_COLOURS.put(&quot;khaki&quot;, UI.Color.KHAKI);</span>
+<span class="fc" id="L416">        NAMED_COLOURS.put(&quot;lavender&quot;, UI.Color.LAVENDER);</span>
+<span class="fc" id="L417">        NAMED_COLOURS.put(&quot;lavenderblush&quot;, UI.Color.LAVENDERBLUSH);</span>
+<span class="fc" id="L418">        NAMED_COLOURS.put(&quot;lawngreen&quot;, UI.Color.LAWNGREEN);</span>
+<span class="fc" id="L419">        NAMED_COLOURS.put(&quot;lemonchiffon&quot;, UI.Color.LEMONCHIFFON);</span>
+<span class="fc" id="L420">        NAMED_COLOURS.put(&quot;lightblue&quot;, UI.Color.LIGHTBLUE);</span>
+<span class="fc" id="L421">        NAMED_COLOURS.put(&quot;lightcoral&quot;, UI.Color.LIGHTCORAL);</span>
+<span class="fc" id="L422">        NAMED_COLOURS.put(&quot;lightcyan&quot;, UI.Color.LIGHTCYAN);</span>
+<span class="fc" id="L423">        NAMED_COLOURS.put(&quot;lightgoldenrodyellow&quot;, UI.Color.LIGHTGOLDENRODYELLOW);</span>
+<span class="fc" id="L424">        NAMED_COLOURS.put(&quot;lightgray&quot;, UI.Color.LIGHTGRAY);</span>
+<span class="fc" id="L425">        NAMED_COLOURS.put(&quot;lightgreen&quot;, UI.Color.LIGHTGREEN);</span>
+<span class="fc" id="L426">        NAMED_COLOURS.put(&quot;lightgrey&quot;, UI.Color.LIGHTGREY);</span>
+<span class="fc" id="L427">        NAMED_COLOURS.put(&quot;lightpink&quot;, UI.Color.LIGHTPINK);</span>
+<span class="fc" id="L428">        NAMED_COLOURS.put(&quot;lightsalmon&quot;, UI.Color.LIGHTSALMON);</span>
+<span class="fc" id="L429">        NAMED_COLOURS.put(&quot;lightseagreen&quot;, UI.Color.LIGHTSEAGREEN);</span>
+<span class="fc" id="L430">        NAMED_COLOURS.put(&quot;lightskyblue&quot;, UI.Color.LIGHTSKYBLUE);</span>
+<span class="fc" id="L431">        NAMED_COLOURS.put(&quot;lightslategray&quot;, UI.Color.LIGHTSLATEGRAY);</span>
+<span class="fc" id="L432">        NAMED_COLOURS.put(&quot;lightslategrey&quot;, UI.Color.LIGHTSLATEGREY);</span>
+<span class="fc" id="L433">        NAMED_COLOURS.put(&quot;lightsteelblue&quot;, UI.Color.LIGHTSTEELBLUE);</span>
+<span class="fc" id="L434">        NAMED_COLOURS.put(&quot;lightyellow&quot;, UI.Color.LIGHTYELLOW);</span>
+<span class="fc" id="L435">        NAMED_COLOURS.put(&quot;lime&quot;, UI.Color.LIME);</span>
+<span class="fc" id="L436">        NAMED_COLOURS.put(&quot;limegreen&quot;, UI.Color.LIMEGREEN);</span>
+<span class="fc" id="L437">        NAMED_COLOURS.put(&quot;linen&quot;, UI.Color.LINEN);</span>
+<span class="fc" id="L438">        NAMED_COLOURS.put(&quot;magenta&quot;, UI.Color.MAGENTA);</span>
+<span class="fc" id="L439">        NAMED_COLOURS.put(&quot;maroon&quot;, UI.Color.MAROON);</span>
+<span class="fc" id="L440">        NAMED_COLOURS.put(&quot;mediumaquamarine&quot;, UI.Color.MEDIUMAQUAMARINE);</span>
+<span class="fc" id="L441">        NAMED_COLOURS.put(&quot;mediumblue&quot;, UI.Color.MEDIUMBLUE);</span>
+<span class="fc" id="L442">        NAMED_COLOURS.put(&quot;mediumorchid&quot;, UI.Color.MEDIUMORCHID);</span>
+<span class="fc" id="L443">        NAMED_COLOURS.put(&quot;mediumpurple&quot;, UI.Color.MEDIUMPURPLE);</span>
+<span class="fc" id="L444">        NAMED_COLOURS.put(&quot;mediumseagreen&quot;, UI.Color.MEDIUMSEAGREEN);</span>
+<span class="fc" id="L445">        NAMED_COLOURS.put(&quot;mediumslateblue&quot;, UI.Color.MEDIUMSLATEBLUE);</span>
+<span class="fc" id="L446">        NAMED_COLOURS.put(&quot;mediumspringgreen&quot;, UI.Color.MEDIUMSPRINGGREEN);</span>
+<span class="fc" id="L447">        NAMED_COLOURS.put(&quot;mediumturquoise&quot;, UI.Color.MEDIUMTURQUOISE);</span>
+<span class="fc" id="L448">        NAMED_COLOURS.put(&quot;mediumvioletred&quot;, UI.Color.MEDIUMVIOLETRED);</span>
+<span class="fc" id="L449">        NAMED_COLOURS.put(&quot;midnightblue&quot;, UI.Color.MIDNIGHTBLUE);</span>
+<span class="fc" id="L450">        NAMED_COLOURS.put(&quot;mintcream&quot;, UI.Color.MINTCREAM);</span>
+<span class="fc" id="L451">        NAMED_COLOURS.put(&quot;mistyrose&quot;, UI.Color.MISTYROSE);</span>
+<span class="fc" id="L452">        NAMED_COLOURS.put(&quot;moccasin&quot;, UI.Color.MOCCASIN);</span>
+<span class="fc" id="L453">        NAMED_COLOURS.put(&quot;navajowhite&quot;, UI.Color.NAVAJOWHITE);</span>
+<span class="fc" id="L454">        NAMED_COLOURS.put(&quot;navy&quot;, UI.Color.NAVY);</span>
+<span class="fc" id="L455">        NAMED_COLOURS.put(&quot;oak&quot;, UI.Color.OAK);</span>
+<span class="fc" id="L456">        NAMED_COLOURS.put(&quot;oldlace&quot;, UI.Color.OLDLACE);</span>
+<span class="fc" id="L457">        NAMED_COLOURS.put(&quot;olive&quot;, UI.Color.OLIVE);</span>
+<span class="fc" id="L458">        NAMED_COLOURS.put(&quot;olivedrab&quot;, UI.Color.OLIVEDRAB);</span>
+<span class="fc" id="L459">        NAMED_COLOURS.put(&quot;orange&quot;, UI.Color.ORANGE);</span>
+<span class="fc" id="L460">        NAMED_COLOURS.put(&quot;orangered&quot;, UI.Color.ORANGERED);</span>
+<span class="fc" id="L461">        NAMED_COLOURS.put(&quot;orchid&quot;, UI.Color.ORCHID);</span>
+<span class="fc" id="L462">        NAMED_COLOURS.put(&quot;palegoldenrod&quot;, UI.Color.PALEGOLDENROD);</span>
+<span class="fc" id="L463">        NAMED_COLOURS.put(&quot;palegreen&quot;, UI.Color.PALEGREEN);</span>
+<span class="fc" id="L464">        NAMED_COLOURS.put(&quot;paleturquoise&quot;, UI.Color.PALETURQUOISE);</span>
+<span class="fc" id="L465">        NAMED_COLOURS.put(&quot;palevioletred&quot;, UI.Color.PALEVIOLETRED);</span>
+<span class="fc" id="L466">        NAMED_COLOURS.put(&quot;papayawhip&quot;, UI.Color.PAPAYAWHIP);</span>
+<span class="fc" id="L467">        NAMED_COLOURS.put(&quot;peachpuff&quot;, UI.Color.PEACHPUFF);</span>
+<span class="fc" id="L468">        NAMED_COLOURS.put(&quot;peru&quot;, UI.Color.PERU);</span>
+<span class="fc" id="L469">        NAMED_COLOURS.put(&quot;pink&quot;, UI.Color.PINK);</span>
+<span class="fc" id="L470">        NAMED_COLOURS.put(&quot;plum&quot;, UI.Color.PLUM);</span>
+<span class="fc" id="L471">        NAMED_COLOURS.put(&quot;powderblue&quot;, UI.Color.POWDERBLUE);</span>
+<span class="fc" id="L472">        NAMED_COLOURS.put(&quot;purple&quot;, UI.Color.PURPLE);</span>
+<span class="fc" id="L473">        NAMED_COLOURS.put(&quot;red&quot;, UI.Color.RED);</span>
+<span class="fc" id="L474">        NAMED_COLOURS.put(&quot;rosybrown&quot;, UI.Color.ROSYBROWN);</span>
+<span class="fc" id="L475">        NAMED_COLOURS.put(&quot;royalblue&quot;, UI.Color.ROYALBLUE);</span>
+<span class="fc" id="L476">        NAMED_COLOURS.put(&quot;saddlebrown&quot;, UI.Color.SADDLEBROWN);</span>
+<span class="fc" id="L477">        NAMED_COLOURS.put(&quot;salmon&quot;, UI.Color.SALMON);</span>
+<span class="fc" id="L478">        NAMED_COLOURS.put(&quot;sandybrown&quot;, UI.Color.SANDYBROWN);</span>
+<span class="fc" id="L479">        NAMED_COLOURS.put(&quot;seagreen&quot;, UI.Color.SEAGREEN);</span>
+<span class="fc" id="L480">        NAMED_COLOURS.put(&quot;seashell&quot;, UI.Color.SEASHELL);</span>
+<span class="fc" id="L481">        NAMED_COLOURS.put(&quot;sienna&quot;, UI.Color.SIENNA);</span>
+<span class="fc" id="L482">        NAMED_COLOURS.put(&quot;silver&quot;, UI.Color.SILVER);</span>
+<span class="fc" id="L483">        NAMED_COLOURS.put(&quot;skyblue&quot;, UI.Color.SKYBLUE);</span>
+<span class="fc" id="L484">        NAMED_COLOURS.put(&quot;slateblue&quot;, UI.Color.SLATEBLUE);</span>
+<span class="fc" id="L485">        NAMED_COLOURS.put(&quot;slategray&quot;, UI.Color.SLATEGRAY);</span>
+<span class="fc" id="L486">        NAMED_COLOURS.put(&quot;slategrey&quot;, UI.Color.SLATEGREY);</span>
+<span class="fc" id="L487">        NAMED_COLOURS.put(&quot;snow&quot;, UI.Color.SNOW);</span>
+<span class="fc" id="L488">        NAMED_COLOURS.put(&quot;springgreen&quot;, UI.Color.SPRINGGREEN);</span>
+<span class="fc" id="L489">        NAMED_COLOURS.put(&quot;steelblue&quot;, UI.Color.STEELBLUE);</span>
+<span class="fc" id="L490">        NAMED_COLOURS.put(&quot;tan&quot;, UI.Color.TAN);</span>
+<span class="fc" id="L491">        NAMED_COLOURS.put(&quot;teal&quot;, UI.Color.TEAL);</span>
+<span class="fc" id="L492">        NAMED_COLOURS.put(&quot;thistle&quot;, UI.Color.THISTLE);</span>
+<span class="fc" id="L493">        NAMED_COLOURS.put(&quot;tomato&quot;, UI.Color.TOMATO);</span>
+<span class="fc" id="L494">        NAMED_COLOURS.put(&quot;transparent&quot;, UI.Color.TRANSPARENT);</span>
+<span class="fc" id="L495">        NAMED_COLOURS.put(&quot;turquoise&quot;, UI.Color.TURQUOISE);</span>
+<span class="fc" id="L496">        NAMED_COLOURS.put(&quot;violet&quot;, UI.Color.VIOLET);</span>
+<span class="fc" id="L497">        NAMED_COLOURS.put(&quot;wheat&quot;, UI.Color.WHEAT);</span>
+<span class="fc" id="L498">        NAMED_COLOURS.put(&quot;white&quot;, UI.Color.WHITE);</span>
+<span class="fc" id="L499">        NAMED_COLOURS.put(&quot;whitesmoke&quot;, UI.Color.WHITESMOKE);</span>
+<span class="fc" id="L500">        NAMED_COLOURS.put(&quot;yellow&quot;, UI.Color.YELLOW);</span>
+<span class="fc" id="L501">        NAMED_COLOURS.put(&quot;yellowgreen&quot;, UI.Color.YELLOWGREEN);</span>
+<span class="fc" id="L502">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

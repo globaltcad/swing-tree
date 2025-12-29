@@ -98,7 +98,7 @@ final class BuiltCells&lt;C extends JComponent, E&gt; {
     void checkTypeValidity( @Nullable Object encounteredValue ) {
 <span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( encounteredValue != null ) {</span>
 <span class="pc bpc" id="L100" title="1 of 2 branches missed.">            if ( !_elementType.isAssignableFrom(encounteredValue.getClass()) )</span>
-<span class="nc" id="L101">                log.debug(</span>
+<span class="nc" id="L101">                log.debug(SwingTree.get().logMarker(),</span>
                     &quot;Encountered an unusual cell entry in component '{}'. &quot; +
                     &quot;Expected type '{}', but got '{}'.&quot;,
 <span class="nc" id="L104">                    _componentType.getSimpleName(),</span>

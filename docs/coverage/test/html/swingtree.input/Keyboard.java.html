@@ -2,6 +2,7 @@
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 
 import java.awt.*;
@@ -19,8 +20,8 @@ import java.util.Objects;
  */
 public final class Keyboard
 {
-<span class="nc" id="L22">    private final static Keyboard INSTANCE = new Keyboard();</span>
-<span class="nc" id="L23">    private static final Logger log = LoggerFactory.getLogger(Keyboard.class);</span>
+<span class="nc" id="L23">    private final static Keyboard INSTANCE = new Keyboard();</span>
+<span class="nc" id="L24">    private static final Logger log = LoggerFactory.getLogger(Keyboard.class);</span>
 
     /**
      *  Exposes the singleton instance of the {@link Keyboard} class.
@@ -28,20 +29,20 @@ public final class Keyboard
      * @return The singleton instance of the {@link Keyboard} class.
      */
     public static Keyboard get() {
-<span class="nc bnc" id="L31" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L32">            log.warn(</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L33">            log.warn(SwingTree.get().logMarker(),</span>
                 &quot;Keyboard.get() should only be called from the UI thread (Swing Event Dispatch Thread).\n&quot; +
-<span class="nc" id="L34">                &quot;Encountered thread '{}' instead!&quot;, Thread.currentThread().getName(),</span>
-                new Throwable() // Stack trace for debugging purposes
+<span class="nc" id="L35">                &quot;Encountered thread '{}' instead!&quot;, Thread.currentThread().getName(),</span>
+                new Throwable(&quot;Stack trace for debugging purposes.&quot;)
             );
-<span class="nc" id="L37">        return INSTANCE;</span>
+<span class="nc" id="L38">        return INSTANCE;</span>
     }
 
     /**
      *  This enum represents all the keys on the keyboard which can be queried for their current state.
      *  This is a mapping of the {@link KeyEvent} constants to a more readable and type safe enum.
      */
-<span class="fc" id="L44">    public enum Key</span>
+<span class="fc" id="L45">    public enum Key</span>
     {
         /**
          * This value is used to indicate that the keyCode is unknown.
@@ -49,137 +50,137 @@ public final class Keyboard
          * is used instead.
          * See {@link KeyEvent#VK_UNDEFINED} for more information.
          */
-<span class="fc" id="L52">        NONE(KeyEvent.VK_UNDEFINED),</span>
+<span class="fc" id="L53">        NONE(KeyEvent.VK_UNDEFINED),</span>
         /** Constant for the ENTER virtual key. See {@link KeyEvent#VK_ENTER} for the underlying key-code. */
-<span class="fc" id="L54">        ENTER(KeyEvent.VK_ENTER),</span>
+<span class="fc" id="L55">        ENTER(KeyEvent.VK_ENTER),</span>
         /** Constant for the BACK_SPACE virtual key. See {@link KeyEvent#VK_BACK_SPACE} for the underlying key-code.*/
-<span class="fc" id="L56">        BACK_SPACE(KeyEvent.VK_BACK_SPACE),</span>
+<span class="fc" id="L57">        BACK_SPACE(KeyEvent.VK_BACK_SPACE),</span>
         /** Constant for the TAB virtual key. See {@link KeyEvent#VK_TAB} for the underlying key-code.*/
-<span class="fc" id="L58">        TAB(KeyEvent.VK_TAB),</span>
+<span class="fc" id="L59">        TAB(KeyEvent.VK_TAB),</span>
         /** Constant for the CANCEL virtual key. See {@link KeyEvent#VK_CANCEL} for the underlying key-code.*/
-<span class="fc" id="L60">        CANCEL(KeyEvent.VK_CANCEL),</span>
+<span class="fc" id="L61">        CANCEL(KeyEvent.VK_CANCEL),</span>
         /** Constant for the CLEAR virtual key. See {@link KeyEvent#VK_CLEAR} for the underlying key-code.*/
-<span class="fc" id="L62">        CLEAR(KeyEvent.VK_CLEAR),</span>
+<span class="fc" id="L63">        CLEAR(KeyEvent.VK_CLEAR),</span>
         /** Constant for the SHIFT virtual key. See {@link KeyEvent#VK_SHIFT} for the underlying key-code.*/
-<span class="fc" id="L64">        SHIFT(KeyEvent.VK_SHIFT),</span>
+<span class="fc" id="L65">        SHIFT(KeyEvent.VK_SHIFT),</span>
         /** Constant for the CONTROL virtual key. See {@link KeyEvent#VK_CONTROL} for the underlying key-code.*/
-<span class="fc" id="L66">        CONTROL(KeyEvent.VK_CONTROL),</span>
+<span class="fc" id="L67">        CONTROL(KeyEvent.VK_CONTROL),</span>
         /** Constant for the ALT virtual key. See {@link KeyEvent#VK_ALT} for the underlying key-code.*/
-<span class="fc" id="L68">        ALT(KeyEvent.VK_ALT),</span>
+<span class="fc" id="L69">        ALT(KeyEvent.VK_ALT),</span>
         /** Constant for the PAUSE virtual key. See {@link KeyEvent#VK_PAUSE} for the underlying key-code.*/
-<span class="fc" id="L70">        PAUSE(KeyEvent.VK_PAUSE),</span>
+<span class="fc" id="L71">        PAUSE(KeyEvent.VK_PAUSE),</span>
         /** Constant for the CAPS_LOCK virtual key. See {@link KeyEvent#VK_CAPS_LOCK} for the underlying key-code.*/
-<span class="fc" id="L72">        CAPS_LOCK(KeyEvent.VK_CAPS_LOCK),</span>
+<span class="fc" id="L73">        CAPS_LOCK(KeyEvent.VK_CAPS_LOCK),</span>
         /** Constant for the ESCAPE virtual key. See {@link KeyEvent#VK_ESCAPE} for the underlying key-code.*/
-<span class="fc" id="L74">        ESCAPE(KeyEvent.VK_ESCAPE),</span>
+<span class="fc" id="L75">        ESCAPE(KeyEvent.VK_ESCAPE),</span>
         /** Constant for the SPACE virtual key. See {@link KeyEvent#VK_SPACE} for the underlying key-code.*/
-<span class="fc" id="L76">        SPACE(KeyEvent.VK_SPACE),</span>
+<span class="fc" id="L77">        SPACE(KeyEvent.VK_SPACE),</span>
         /** Constant for the PAGE_UP virtual key. See {@link KeyEvent#VK_PAGE_UP} for the underlying key-code.*/
-<span class="fc" id="L78">        PAGE_UP(KeyEvent.VK_PAGE_UP),</span>
+<span class="fc" id="L79">        PAGE_UP(KeyEvent.VK_PAGE_UP),</span>
         /** Constant for the PAGE_DOWN virtual key. See {@link KeyEvent#VK_PAGE_DOWN} for the underlying key-code.*/
-<span class="fc" id="L80">        PAGE_DOWN(KeyEvent.VK_PAGE_DOWN),</span>
+<span class="fc" id="L81">        PAGE_DOWN(KeyEvent.VK_PAGE_DOWN),</span>
         /** Constant for the END virtual key. See {@link KeyEvent#VK_END} for the underlying key-code.*/
-<span class="fc" id="L82">        END(KeyEvent.VK_END),</span>
+<span class="fc" id="L83">        END(KeyEvent.VK_END),</span>
         /** Constant for the HOME virtual key. See {@link KeyEvent#VK_HOME} for the underlying key-code.*/
-<span class="fc" id="L84">        HOME(KeyEvent.VK_HOME),</span>
+<span class="fc" id="L85">        HOME(KeyEvent.VK_HOME),</span>
         /**
          * Constant for the non-numpad &lt;b&gt;left&lt;/b&gt; arrow key. See {@link KeyEvent#VK_LEFT} for the underlying key-code.
          * @see #LEFT
          */
-<span class="fc" id="L89">        LEFT(KeyEvent.VK_LEFT),</span>
+<span class="fc" id="L90">        LEFT(KeyEvent.VK_LEFT),</span>
         /**
          * Constant for the non-numpad &lt;b&gt;up&lt;/b&gt; arrow key.See {@link KeyEvent#VK_U} for the underlying key-code.
          * @see #UP
          */
-<span class="fc" id="L94">        UP(KeyEvent.VK_UP),</span>
+<span class="fc" id="L95">        UP(KeyEvent.VK_UP),</span>
         /**
          * Constant for the non-numpad &lt;b&gt;right&lt;/b&gt; arrow key. See {@link KeyEvent#VK_RIGHT} for the underlying key-code.
          * @see #RIGHT
          */
-<span class="fc" id="L99">        RIGHT(KeyEvent.VK_RIGHT),</span>
+<span class="fc" id="L100">        RIGHT(KeyEvent.VK_RIGHT),</span>
         /**
          * Constant for the non-numpad &lt;b&gt;down&lt;/b&gt; arrow key.See {@link KeyEvent#VK_DOWN} for the underlying key-code.
          * @see #DOWN
          */
-<span class="fc" id="L104">        DOWN(KeyEvent.VK_DOWN),</span>
+<span class="fc" id="L105">        DOWN(KeyEvent.VK_DOWN),</span>
         /**
          * Constant for the comma key, &quot;,&quot;
          */
-<span class="fc" id="L108">        COMMA(KeyEvent.VK_COMMA),</span>
+<span class="fc" id="L109">        COMMA(KeyEvent.VK_COMMA),</span>
         /**
          * Constant for the minus key, &quot;-&quot;
          */
-<span class="fc" id="L112">        MINUS(KeyEvent.VK_MINUS),</span>
+<span class="fc" id="L113">        MINUS(KeyEvent.VK_MINUS),</span>
         /**
          * Constant for the period key, &quot;.&quot;
          */
-<span class="fc" id="L116">        PERIOD(KeyEvent.VK_PERIOD),</span>
+<span class="fc" id="L117">        PERIOD(KeyEvent.VK_PERIOD),</span>
         /**
          * Constant for the forward slash key, &quot;/&quot;
          */
-<span class="fc" id="L120">        SLASH(KeyEvent.VK_SLASH),</span>
+<span class="fc" id="L121">        SLASH(KeyEvent.VK_SLASH),</span>
         /** Constant for the &quot;0&quot; key. */
-<span class="fc" id="L122">        ZERO(KeyEvent.VK_0),</span>
+<span class="fc" id="L123">        ZERO(KeyEvent.VK_0),</span>
         /** Constant for the &quot;1&quot; key. */
-<span class="fc" id="L124">        ONE(KeyEvent.VK_1),</span>
+<span class="fc" id="L125">        ONE(KeyEvent.VK_1),</span>
         /** Constant for the &quot;2&quot; key. */
-<span class="fc" id="L126">        TWO(KeyEvent.VK_2),</span>
+<span class="fc" id="L127">        TWO(KeyEvent.VK_2),</span>
         /** Constant for the &quot;3&quot; key. */
-<span class="fc" id="L128">        THREE(KeyEvent.VK_3),</span>
+<span class="fc" id="L129">        THREE(KeyEvent.VK_3),</span>
         /** Constant for the &quot;4&quot; key. */
-<span class="fc" id="L130">        FOUR(KeyEvent.VK_4),</span>
+<span class="fc" id="L131">        FOUR(KeyEvent.VK_4),</span>
         /** Constant for the &quot;5&quot; key. */
-<span class="fc" id="L132">        FIVE(KeyEvent.VK_5),</span>
+<span class="fc" id="L133">        FIVE(KeyEvent.VK_5),</span>
         /** Constant for the &quot;6&quot; key. */
-<span class="fc" id="L134">        SIX(KeyEvent.VK_6),</span>
+<span class="fc" id="L135">        SIX(KeyEvent.VK_6),</span>
         /** Constant for the &quot;7&quot; key. */
-<span class="fc" id="L136">        SEVEN(KeyEvent.VK_7),</span>
+<span class="fc" id="L137">        SEVEN(KeyEvent.VK_7),</span>
         /** Constant for the &quot;8&quot; key. */
-<span class="fc" id="L138">        EIGHT(KeyEvent.VK_8),</span>
+<span class="fc" id="L139">        EIGHT(KeyEvent.VK_8),</span>
         /** Constant for the &quot;9&quot; key. */
-<span class="fc" id="L140">        NINE(KeyEvent.VK_9),</span>
+<span class="fc" id="L141">        NINE(KeyEvent.VK_9),</span>
 
         /**
          * Constant for the semicolon key, &quot;;&quot;
          */
-<span class="fc" id="L145">        SEMICOLON(KeyEvent.VK_SEMICOLON),</span>
+<span class="fc" id="L146">        SEMICOLON(KeyEvent.VK_SEMICOLON),</span>
         /**
          * Constant for the equals key, &quot;=&quot;
          */
-<span class="fc" id="L149">        EQUALS(KeyEvent.VK_EQUALS),</span>
+<span class="fc" id="L150">        EQUALS(KeyEvent.VK_EQUALS),</span>
 
-<span class="fc" id="L151">        A(KeyEvent.VK_A), B(KeyEvent.VK_B), C(KeyEvent.VK_C), D(KeyEvent.VK_D), E(KeyEvent.VK_E), F(KeyEvent.VK_F),</span>
-<span class="fc" id="L152">        G(KeyEvent.VK_G), H(KeyEvent.VK_H), I(KeyEvent.VK_I), J(KeyEvent.VK_J), K(KeyEvent.VK_K), L(KeyEvent.VK_L),</span>
-<span class="fc" id="L153">        M(KeyEvent.VK_M), N(KeyEvent.VK_N), O(KeyEvent.VK_O), P(KeyEvent.VK_P), Q(KeyEvent.VK_Q), R(KeyEvent.VK_R),</span>
-<span class="fc" id="L154">        S(KeyEvent.VK_S), T(KeyEvent.VK_T), U(KeyEvent.VK_U), V(KeyEvent.VK_V), W(KeyEvent.VK_W), X(KeyEvent.VK_X),</span>
-<span class="fc" id="L155">        Y(KeyEvent.VK_Y), Z(KeyEvent.VK_Z),</span>
+<span class="fc" id="L152">        A(KeyEvent.VK_A), B(KeyEvent.VK_B), C(KeyEvent.VK_C), D(KeyEvent.VK_D), E(KeyEvent.VK_E), F(KeyEvent.VK_F),</span>
+<span class="fc" id="L153">        G(KeyEvent.VK_G), H(KeyEvent.VK_H), I(KeyEvent.VK_I), J(KeyEvent.VK_J), K(KeyEvent.VK_K), L(KeyEvent.VK_L),</span>
+<span class="fc" id="L154">        M(KeyEvent.VK_M), N(KeyEvent.VK_N), O(KeyEvent.VK_O), P(KeyEvent.VK_P), Q(KeyEvent.VK_Q), R(KeyEvent.VK_R),</span>
+<span class="fc" id="L155">        S(KeyEvent.VK_S), T(KeyEvent.VK_T), U(KeyEvent.VK_U), V(KeyEvent.VK_V), W(KeyEvent.VK_W), X(KeyEvent.VK_X),</span>
+<span class="fc" id="L156">        Y(KeyEvent.VK_Y), Z(KeyEvent.VK_Z),</span>
 
-<span class="fc" id="L157">        OPEN_BRACKET(KeyEvent.VK_OPEN_BRACKET),</span>
-<span class="fc" id="L158">        BACK_SLASH(KeyEvent.VK_BACK_SLASH),</span>
-<span class="fc" id="L159">        CLOSE_BRACKET(KeyEvent.VK_CLOSE_BRACKET),</span>
-<span class="fc" id="L160">        NUMPAD_0(KeyEvent.VK_NUMPAD0), NUMPAD_1(KeyEvent.VK_NUMPAD1), NUMPAD_2(KeyEvent.VK_NUMPAD2),</span>
-<span class="fc" id="L161">        NUMPAD_3(KeyEvent.VK_NUMPAD3), NUMPAD_4(KeyEvent.VK_NUMPAD4), NUMPAD_5(KeyEvent.VK_NUMPAD5),</span>
-<span class="fc" id="L162">        NUMPAD_6(KeyEvent.VK_NUMPAD6), NUMPAD_7(KeyEvent.VK_NUMPAD7), NUMPAD_8(KeyEvent.VK_NUMPAD8),</span>
-<span class="fc" id="L163">        NUMPAD_9(KeyEvent.VK_NUMPAD9),</span>
-<span class="fc" id="L164">        MULTIPLY(KeyEvent.VK_MULTIPLY), ADD(KeyEvent.VK_ADD), SEPARATOR(KeyEvent.VK_SEPARATOR),</span>
-<span class="fc" id="L165">        SUBTRACT(KeyEvent.VK_SUBTRACT), DECIMAL(KeyEvent.VK_DECIMAL), DIVIDE(KeyEvent.VK_DIVIDE),</span>
-<span class="fc" id="L166">        DELETE(KeyEvent.VK_DELETE), NUM_LOCK(KeyEvent.VK_NUM_LOCK), SCROLL_LOCK(KeyEvent.VK_SCROLL_LOCK),</span>
+<span class="fc" id="L158">        OPEN_BRACKET(KeyEvent.VK_OPEN_BRACKET),</span>
+<span class="fc" id="L159">        BACK_SLASH(KeyEvent.VK_BACK_SLASH),</span>
+<span class="fc" id="L160">        CLOSE_BRACKET(KeyEvent.VK_CLOSE_BRACKET),</span>
+<span class="fc" id="L161">        NUMPAD_0(KeyEvent.VK_NUMPAD0), NUMPAD_1(KeyEvent.VK_NUMPAD1), NUMPAD_2(KeyEvent.VK_NUMPAD2),</span>
+<span class="fc" id="L162">        NUMPAD_3(KeyEvent.VK_NUMPAD3), NUMPAD_4(KeyEvent.VK_NUMPAD4), NUMPAD_5(KeyEvent.VK_NUMPAD5),</span>
+<span class="fc" id="L163">        NUMPAD_6(KeyEvent.VK_NUMPAD6), NUMPAD_7(KeyEvent.VK_NUMPAD7), NUMPAD_8(KeyEvent.VK_NUMPAD8),</span>
+<span class="fc" id="L164">        NUMPAD_9(KeyEvent.VK_NUMPAD9),</span>
+<span class="fc" id="L165">        MULTIPLY(KeyEvent.VK_MULTIPLY), ADD(KeyEvent.VK_ADD), SEPARATOR(KeyEvent.VK_SEPARATOR),</span>
+<span class="fc" id="L166">        SUBTRACT(KeyEvent.VK_SUBTRACT), DECIMAL(KeyEvent.VK_DECIMAL), DIVIDE(KeyEvent.VK_DIVIDE),</span>
+<span class="fc" id="L167">        DELETE(KeyEvent.VK_DELETE), NUM_LOCK(KeyEvent.VK_NUM_LOCK), SCROLL_LOCK(KeyEvent.VK_SCROLL_LOCK),</span>
 
-<span class="fc" id="L168">        F1(KeyEvent.VK_F1), F2(KeyEvent.VK_F2), F3(KeyEvent.VK_F3), F4(KeyEvent.VK_F4), F5(KeyEvent.VK_F5),</span>
-<span class="fc" id="L169">        F6(KeyEvent.VK_F6), F7(KeyEvent.VK_F7), F8(KeyEvent.VK_F8), F9(KeyEvent.VK_F9), F10(KeyEvent.VK_F10),</span>
-<span class="fc" id="L170">        F11(KeyEvent.VK_F11), F12(KeyEvent.VK_F12), F13(KeyEvent.VK_F13), F14(KeyEvent.VK_F14), F15(KeyEvent.VK_F15),</span>
-<span class="fc" id="L171">        F16(KeyEvent.VK_F16), F17(KeyEvent.VK_F17), F18(KeyEvent.VK_F18), F19(KeyEvent.VK_F19), F20(KeyEvent.VK_F20),</span>
-<span class="fc" id="L172">        F21(KeyEvent.VK_F21), F22(KeyEvent.VK_F22), F23(KeyEvent.VK_F23), F24(KeyEvent.VK_F24),</span>
+<span class="fc" id="L169">        F1(KeyEvent.VK_F1), F2(KeyEvent.VK_F2), F3(KeyEvent.VK_F3), F4(KeyEvent.VK_F4), F5(KeyEvent.VK_F5),</span>
+<span class="fc" id="L170">        F6(KeyEvent.VK_F6), F7(KeyEvent.VK_F7), F8(KeyEvent.VK_F8), F9(KeyEvent.VK_F9), F10(KeyEvent.VK_F10),</span>
+<span class="fc" id="L171">        F11(KeyEvent.VK_F11), F12(KeyEvent.VK_F12), F13(KeyEvent.VK_F13), F14(KeyEvent.VK_F14), F15(KeyEvent.VK_F15),</span>
+<span class="fc" id="L172">        F16(KeyEvent.VK_F16), F17(KeyEvent.VK_F17), F18(KeyEvent.VK_F18), F19(KeyEvent.VK_F19), F20(KeyEvent.VK_F20),</span>
+<span class="fc" id="L173">        F21(KeyEvent.VK_F21), F22(KeyEvent.VK_F22), F23(KeyEvent.VK_F23), F24(KeyEvent.VK_F24),</span>
 
-<span class="fc" id="L174">        PRINTSCREEN(KeyEvent.VK_PRINTSCREEN),</span>
-<span class="fc" id="L175">        INSERT(KeyEvent.VK_INSERT),</span>
-<span class="fc" id="L176">        HELP(KeyEvent.VK_HELP), META(KeyEvent.VK_META), BACK_QUOTE(KeyEvent.VK_BACK_QUOTE),</span>
-<span class="fc" id="L177">        QUOTE(KeyEvent.VK_QUOTE);</span>
+<span class="fc" id="L175">        PRINTSCREEN(KeyEvent.VK_PRINTSCREEN),</span>
+<span class="fc" id="L176">        INSERT(KeyEvent.VK_INSERT),</span>
+<span class="fc" id="L177">        HELP(KeyEvent.VK_HELP), META(KeyEvent.VK_META), BACK_QUOTE(KeyEvent.VK_BACK_QUOTE),</span>
+<span class="fc" id="L178">        QUOTE(KeyEvent.VK_QUOTE);</span>
 
 
         public final int code;
 
-<span class="fc" id="L182">        Key( int keyCode ) { this.code = keyCode; }</span>
+<span class="fc" id="L183">        Key( int keyCode ) { this.code = keyCode; }</span>
 
         /**
          *  This method checks if this key is currently pressed on the keyboard
@@ -188,12 +189,12 @@ public final class Keyboard
          * @return The truth value determining if this key is currently pressed on the keyboard.
          */
         public boolean isPressed() {
-<span class="nc" id="L191">            return Keyboard.get().isPressed(this);</span>
+<span class="nc" id="L192">            return Keyboard.get().isPressed(this);</span>
         }
 
     }
 
-<span class="nc" id="L196">    private final List&lt;Key&gt; _pressed = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L197">    private final List&lt;Key&gt; _pressed = new ArrayList&lt;&gt;();</span>
 
     /**
      *  This method checks if the supplied {@link Key} is currently pressed on the keyboard.
@@ -204,49 +205,49 @@ public final class Keyboard
      *                              use {@link Key#NONE} instead to check if no key is currently pressed.
      */
     public boolean isPressed( Key key ) {
-<span class="nc" id="L207">        Objects.requireNonNull(key);</span>
-<span class="nc" id="L208">        synchronized ( this ) {</span>
-<span class="nc bnc" id="L209" title="All 2 branches missed.">            if ( key == Key.NONE )</span>
-<span class="nc" id="L210">                return _pressed.isEmpty();</span>
+<span class="nc" id="L208">        Objects.requireNonNull(key);</span>
+<span class="nc" id="L209">        synchronized ( this ) {</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            if ( key == Key.NONE )</span>
+<span class="nc" id="L211">                return _pressed.isEmpty();</span>
 
-<span class="nc" id="L212">            return _pressed.contains(key);</span>
+<span class="nc" id="L213">            return _pressed.contains(key);</span>
         }
     }
 
 
-<span class="nc" id="L217">    private Keyboard() {</span>
-<span class="nc" id="L218">        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {</span>
+<span class="nc" id="L218">    private Keyboard() {</span>
+<span class="nc" id="L219">        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {</span>
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {
-<span class="nc" id="L221">                synchronized (this) {</span>
-<span class="nc bnc" id="L222" title="All 3 branches missed.">                    switch ( ke.getID() ) {</span>
+<span class="nc" id="L222">                synchronized (this) {</span>
+<span class="nc bnc" id="L223" title="All 3 branches missed.">                    switch ( ke.getID() ) {</span>
                         case KeyEvent.KEY_PRESSED: {
-<span class="nc" id="L224">                                Key k = _fromKeyEvent(ke);</span>
-<span class="nc bnc" id="L225" title="All 4 branches missed.">                                if ( k != Key.NONE &amp;&amp; !_pressed.contains(k) )</span>
-<span class="nc" id="L226">                                    _pressed.add(k);</span>
+<span class="nc" id="L225">                                Key k = _fromKeyEvent(ke);</span>
+<span class="nc bnc" id="L226" title="All 4 branches missed.">                                if ( k != Key.NONE &amp;&amp; !_pressed.contains(k) )</span>
+<span class="nc" id="L227">                                    _pressed.add(k);</span>
                             }
-<span class="nc" id="L228">                            break;</span>
+<span class="nc" id="L229">                            break;</span>
 
                         case KeyEvent.KEY_RELEASED: {
-<span class="nc" id="L231">                                Key k = _fromKeyEvent(ke);</span>
-<span class="nc bnc" id="L232" title="All 2 branches missed.">                                if ( k != Key.NONE )</span>
-<span class="nc" id="L233">                                    _pressed.remove(k);</span>
+<span class="nc" id="L232">                                Key k = _fromKeyEvent(ke);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">                                if ( k != Key.NONE )</span>
+<span class="nc" id="L234">                                    _pressed.remove(k);</span>
                             }
                             break;
                     }
-<span class="nc" id="L237">                    return false;</span>
+<span class="nc" id="L238">                    return false;</span>
                 }
             }
         });
-<span class="nc" id="L241">    }</span>
+<span class="nc" id="L242">    }</span>
 
     private static Key _fromKeyEvent( KeyEvent keyEvent ) {
-<span class="nc bnc" id="L244" title="All 2 branches missed.">        for ( Key key : Key.values() ) {</span>
-<span class="nc bnc" id="L245" title="All 2 branches missed.">            if ( key.code == keyEvent.getKeyCode() ) {</span>
-<span class="nc" id="L246">                return key;</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">        for ( Key key : Key.values() ) {</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            if ( key.code == keyEvent.getKeyCode() ) {</span>
+<span class="nc" id="L247">                return key;</span>
             }
         }
-<span class="nc" id="L249">        return Key.NONE;</span>
+<span class="nc" id="L250">        return Key.NONE;</span>
     }
 
 }

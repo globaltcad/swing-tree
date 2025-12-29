@@ -93,7 +93,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 try {
 <span class="nc" id="L94">                    conf.onDragStart().accept(new ComponentDelegate(conf.component(), dragTrigger));</span>
 <span class="nc" id="L95">                } catch (Exception ex) {</span>
-<span class="nc" id="L96">                    log.error(</span>
+<span class="nc" id="L96">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Error while executing drag start event handlers.&quot;,
                             ex
                     );
@@ -110,10 +110,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     try {
 <span class="nc" id="L111">                        conf.onDragMove().accept(new ComponentDelegate(conf.component(), event));</span>
 <span class="nc" id="L112">                    } catch (Exception ex) {</span>
-<span class="nc" id="L113">                        log.error(</span>
+<span class="nc" id="L113">                        log.error(SwingTree.get().logMarker(),</span>
                                 &quot;Error while executing drag movement event handlers.&quot;,
                                 ex
-                        );
+                            );
 <span class="nc" id="L117">                    }</span>
 <span class="nc" id="L118">                });</span>
 <span class="nc" id="L119">                ActiveDrag previousActiveDrag = activeDrag;</span>
@@ -451,10 +451,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 try {
 <span class="nc" id="L452">                    conf.onDragEnter().accept(new ComponentDelegate(conf.component(), event));</span>
 <span class="nc" id="L453">                } catch (Exception ex) {</span>
-<span class="nc" id="L454">                    log.error(</span>
+<span class="nc" id="L454">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Error while executing drag enter event handlers.&quot;,
                             ex
-                    );
+                        );
 <span class="nc" id="L458">                }</span>
 <span class="nc" id="L459">            });</span>
 <span class="nc" id="L460">        }</span>
@@ -464,10 +464,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 try {
 <span class="nc" id="L465">                    conf.onDragOver().accept(new ComponentDelegate(conf.component(), event));</span>
 <span class="nc" id="L466">                } catch (Exception ex) {</span>
-<span class="nc" id="L467">                    log.error(</span>
+<span class="nc" id="L467">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Error while executing drag over event handlers.&quot;,
                             ex
-                    );
+                        );
 <span class="nc" id="L471">                }</span>
 <span class="nc" id="L472">            });</span>
 <span class="nc" id="L473">        }</span>
@@ -477,10 +477,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 try {
 <span class="nc" id="L478">                    conf.onDropActionChanged().accept(new ComponentDelegate(conf.component(), event));</span>
 <span class="nc" id="L479">                } catch (Exception ex) {</span>
-<span class="nc" id="L480">                    log.error(</span>
+<span class="nc" id="L480">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Error while executing drop action changed event handlers.&quot;,
                             ex
-                    );
+                        );
 <span class="nc" id="L484">                }</span>
 <span class="nc" id="L485">            });</span>
 <span class="nc" id="L486">        }</span>
@@ -490,10 +490,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 try {
 <span class="nc" id="L491">                    conf.onDragExit().accept(new ComponentDelegate(conf.component(), event));</span>
 <span class="nc" id="L492">                } catch (Exception ex) {</span>
-<span class="nc" id="L493">                    log.error(</span>
+<span class="nc" id="L493">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Error while executing drag exit event handlers.&quot;,
                             ex
-                    );
+                        );
 <span class="nc" id="L497">                }</span>
 <span class="nc" id="L498">            });</span>
 <span class="nc" id="L499">        }</span>
@@ -508,7 +508,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                 try {
 <span class="nc" id="L509">                    conf.onDragDropEnd().accept(new ComponentDelegate(conf.component(), event));</span>
 <span class="nc" id="L510">                } catch (Exception ex) {</span>
-<span class="nc" id="L511">                    log.error(</span>
+<span class="nc" id="L511">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Error while executing drag drop end event handlers.&quot;,
                             ex
                     );

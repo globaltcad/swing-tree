@@ -445,41 +445,38 @@ final class DynamicLaF
 <span class="fc" id="L445">            Object source   = event.getSource();</span>
 <span class="pc bpc" id="L446" title="1 of 2 branches missed.">            if ( !(source instanceof JComponent) ) {</span>
 <span class="nc" id="L447">                String sourceTypeAsString = Optional.ofNullable(source).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
-<span class="nc" id="L448">                log.error(</span>
-                        &quot;Invalid UI update event source detected! &quot; +
-                        &quot;Source object is expected to be a 'JComponent'.\n&quot; +
-                        &quot;Received unknown object of type '&quot; + sourceTypeAsString + &quot;' instead.&quot;,
-                        new Throwable()
+<span class="nc" id="L448">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Invalid UI update event source detected! Source object is expected to be a 'JComponent'.\n&quot; +
+                        &quot;Received unknown object of type '{}' instead.&quot;,
+                        sourceTypeAsString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
-<span class="nc" id="L454">                return;</span>
+<span class="nc" id="L453">                return;</span>
             }
-<span class="pc bpc" id="L456" title="1 of 2 branches missed.">            if ( !(oldValue instanceof ComponentUI) ) {</span>
-<span class="nc" id="L457">                String oldValueTypeAsString = Optional.ofNullable(oldValue).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
-<span class="nc" id="L458">                log.error(</span>
-                        &quot;Detected invalid 'oldValue'  object in UI update event! &quot; +
-                        &quot;Old value is expected to be a 'ComponentUI'.\n&quot; +
-                        &quot;Received unknown object of type '&quot; + oldValueTypeAsString + &quot;' instead.&quot;,
-                        new Throwable()
+<span class="pc bpc" id="L455" title="1 of 2 branches missed.">            if ( !(oldValue instanceof ComponentUI) ) {</span>
+<span class="nc" id="L456">                String oldValueTypeAsString = Optional.ofNullable(oldValue).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
+<span class="nc" id="L457">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Detected invalid 'oldValue' object in UI update event! &quot; +
+                        &quot;Old value is expected to be a 'ComponentUI'.\nReceived unknown object of type '{}' instead.&quot;,
+                        oldValueTypeAsString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
-<span class="nc" id="L464">                return;</span>
+<span class="nc" id="L462">                return;</span>
             }
-<span class="pc bpc" id="L466" title="1 of 2 branches missed.">            if ( !(newValue instanceof ComponentUI) ) {</span>
-<span class="nc" id="L467">                String newValueTypeAsString = Optional.ofNullable(newValue).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
-<span class="nc" id="L468">                log.error(</span>
-                        &quot;Detected invalid 'newValue'  object in UI update event! &quot; +
-                        &quot;New value is expected to be a 'ComponentUI'.\n&quot; +
-                        &quot;Received unknown object of type '&quot; + newValueTypeAsString + &quot;' instead.&quot;,
-                        new Throwable()
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">            if ( !(newValue instanceof ComponentUI) ) {</span>
+<span class="nc" id="L465">                String newValueTypeAsString = Optional.ofNullable(newValue).map(Object::getClass).map(Class::getSimpleName).orElse(&quot;null&quot;);</span>
+<span class="nc" id="L466">                log.error(SwingTree.get().logMarker(),</span>
+                        &quot;Detected invalid 'newValue' object in UI update event! New value is expected to be a 'ComponentUI'.\n&quot; +
+                        &quot;Received unknown object of type '{}' instead.&quot;,
+                        newValueTypeAsString, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
-<span class="nc" id="L474">                return;</span>
+<span class="nc" id="L471">                return;</span>
             }
-<span class="fc" id="L476">            JComponent owner = (JComponent) source;</span>
-<span class="fc" id="L477">            ComponentExtension.from(owner).updateDynamicLookAndFeel( oldLaf -&gt; {</span>
-<span class="pc bpc" id="L478" title="1 of 2 branches missed.">                if (  oldLaf.customLookAndFeelIsInstalled() )</span>
-<span class="fc" id="L479">                    oldLaf = oldLaf._installCustomLaF(owner, true);</span>
-<span class="fc" id="L480">                return oldLaf;</span>
+<span class="fc" id="L473">            JComponent owner = (JComponent) source;</span>
+<span class="fc" id="L474">            ComponentExtension.from(owner).updateDynamicLookAndFeel( oldLaf -&gt; {</span>
+<span class="pc bpc" id="L475" title="1 of 2 branches missed.">                if (  oldLaf.customLookAndFeelIsInstalled() )</span>
+<span class="fc" id="L476">                    oldLaf = oldLaf._installCustomLaF(owner, true);</span>
+<span class="fc" id="L477">                return oldLaf;</span>
             });
-<span class="fc" id="L482">        }</span>
+<span class="fc" id="L479">        }</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

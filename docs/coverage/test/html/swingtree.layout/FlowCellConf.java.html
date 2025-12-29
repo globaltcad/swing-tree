@@ -3,6 +3,7 @@
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.Configurator;
@@ -57,7 +58,7 @@ import java.util.Objects;
 @Immutable
 public final class FlowCellConf
 {
-<span class="fc" id="L60">    private static final Logger log = LoggerFactory.getLogger(FlowCellConf.class);</span>
+<span class="fc" id="L61">    private static final Logger log = LoggerFactory.getLogger(FlowCellConf.class);</span>
     private final int                    _maxCellsToFill;
     private final Size                   _parentSize;
     private final ParentSizeClass        _parentSizeCategory;
@@ -74,17 +75,17 @@ public final class FlowCellConf
             FlowCellSpanPolicy[] autoSpans,
             boolean              fill,
             UI.VerticalAlignment alignVertically
-<span class="fc" id="L77">    ) {</span>
-<span class="fc" id="L78">        _maxCellsToFill     = maxCellsToFill;</span>
-<span class="fc" id="L79">        _parentSize         = Objects.requireNonNull(parentSize);</span>
-<span class="fc" id="L80">        _parentSizeCategory = Objects.requireNonNull(parentSizeCategory);</span>
-<span class="fc" id="L81">        _autoSpans          = Objects.requireNonNull(autoSpans.clone());</span>
-<span class="fc" id="L82">        _fill               = fill;</span>
-<span class="fc" id="L83">        _verticalAlignment = alignVertically;</span>
-<span class="fc" id="L84">    }</span>
+<span class="fc" id="L78">    ) {</span>
+<span class="fc" id="L79">        _maxCellsToFill     = maxCellsToFill;</span>
+<span class="fc" id="L80">        _parentSize         = Objects.requireNonNull(parentSize);</span>
+<span class="fc" id="L81">        _parentSizeCategory = Objects.requireNonNull(parentSizeCategory);</span>
+<span class="fc" id="L82">        _autoSpans          = Objects.requireNonNull(autoSpans.clone());</span>
+<span class="fc" id="L83">        _fill               = fill;</span>
+<span class="fc" id="L84">        _verticalAlignment = alignVertically;</span>
+<span class="fc" id="L85">    }</span>
 
     FlowCellSpanPolicy[] autoSpans() {
-<span class="fc" id="L87">        return _autoSpans.clone();</span>
+<span class="fc" id="L88">        return _autoSpans.clone();</span>
     }
 
     /**
@@ -97,7 +98,7 @@ public final class FlowCellConf
      *  @return The maximum number of cells that a component can span in a grid layout.
      */
     public int maxCellsToFill() {
-<span class="nc" id="L100">        return _maxCellsToFill;</span>
+<span class="nc" id="L101">        return _maxCellsToFill;</span>
     }
 
     /**
@@ -109,7 +110,7 @@ public final class FlowCellConf
      *          associated with this cell span configuration.
      */
     public Size parentSize() {
-<span class="nc" id="L112">        return _parentSize;</span>
+<span class="nc" id="L113">        return _parentSize;</span>
     }
 
     /**
@@ -126,7 +127,7 @@ public final class FlowCellConf
      *  @return The category of the parent container's size.
      */
     public ParentSizeClass parentSizeCategory() {
-<span class="nc" id="L129">        return _parentSizeCategory;</span>
+<span class="nc" id="L130">        return _parentSizeCategory;</span>
     }
 
     /**
@@ -139,27 +140,27 @@ public final class FlowCellConf
      *  @return A new {@link FlowCellConf} instance with the given {@link ParentSizeClass} and number of cells to fill.
      */
     public FlowCellConf with( ParentSizeClass size, int cellsToFill ) {
-<span class="fc" id="L142">        Objects.requireNonNull(size);</span>
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if ( cellsToFill &lt; 0 ) {</span>
-<span class="nc" id="L144">            log.warn(</span>
-                    &quot;Encountered negative number '&quot;+cellsToFill+&quot;' for cells &quot; +
-<span class="nc" id="L146">                    &quot;to fill as part of the '&quot;+ResponsiveGridFlowLayout.class.getSimpleName()+&quot;' layout.&quot;,</span>
-                    new Throwable()
+<span class="fc" id="L143">        Objects.requireNonNull(size);</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if ( cellsToFill &lt; 0 ) {</span>
+<span class="nc" id="L145">            log.warn(SwingTree.get().logMarker(),</span>
+                    &quot;Encountered negative number '{}' for cells to fill as part of the '{}' layout.&quot;,
+<span class="nc" id="L147">                    cellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),</span>
+                    new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
-<span class="nc" id="L149">            cellsToFill = 0;</span>
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        } else if ( cellsToFill &gt; _maxCellsToFill ) {</span>
-<span class="nc" id="L151">            log.warn(</span>
-                    &quot;Encountered number '&quot;+cellsToFill+&quot;' for cells to fill that is greater &quot; +
-                    &quot;than the maximum number of cells to fill '&quot;+_maxCellsToFill+&quot;' &quot; +
-<span class="nc" id="L154">                    &quot;as part of the '&quot;+ResponsiveGridFlowLayout.class.getSimpleName()+&quot;' layout.&quot;,</span>
-                    new Throwable()
+<span class="nc" id="L150">            cellsToFill = 0;</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        } else if ( cellsToFill &gt; _maxCellsToFill ) {</span>
+<span class="nc" id="L152">            log.warn(SwingTree.get().logMarker(),</span>
+                    &quot;Encountered number '{}' for cells to fill that is greater than the maximum &quot; +
+                    &quot;number of cells to fill '{}' as part of the '{}' layout.&quot;,
+<span class="nc" id="L155">                    cellsToFill, _maxCellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),</span>
+                    new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
-<span class="nc" id="L157">            cellsToFill = _maxCellsToFill;</span>
+<span class="nc" id="L158">            cellsToFill = _maxCellsToFill;</span>
         }
-<span class="fc" id="L159">        FlowCellSpanPolicy[] autoSpans = new FlowCellSpanPolicy[_autoSpans.length+1];</span>
-<span class="fc" id="L160">        System.arraycopy(_autoSpans, 0, autoSpans, 0, _autoSpans.length);</span>
-<span class="fc" id="L161">        autoSpans[_autoSpans.length] = FlowCellSpanPolicy.of(size, cellsToFill);</span>
-<span class="fc" id="L162">        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, autoSpans, _fill, _verticalAlignment);</span>
+<span class="fc" id="L160">        FlowCellSpanPolicy[] autoSpans = new FlowCellSpanPolicy[_autoSpans.length+1];</span>
+<span class="fc" id="L161">        System.arraycopy(_autoSpans, 0, autoSpans, 0, _autoSpans.length);</span>
+<span class="fc" id="L162">        autoSpans[_autoSpans.length] = FlowCellSpanPolicy.of(size, cellsToFill);</span>
+<span class="fc" id="L163">        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, autoSpans, _fill, _verticalAlignment);</span>
     }
 
     /**
@@ -178,7 +179,7 @@ public final class FlowCellConf
      *          for the {@link ParentSizeClass#VERY_SMALL} category.
      */
     public FlowCellConf verySmall( int span ) {
-<span class="fc" id="L181">        return with(ParentSizeClass.VERY_SMALL, span);</span>
+<span class="fc" id="L182">        return with(ParentSizeClass.VERY_SMALL, span);</span>
     }
 
     /**
@@ -197,7 +198,7 @@ public final class FlowCellConf
      *          for the {@link ParentSizeClass#SMALL} category.
      */
     public FlowCellConf small( int span ) {
-<span class="fc" id="L200">        return with(ParentSizeClass.SMALL, span);</span>
+<span class="fc" id="L201">        return with(ParentSizeClass.SMALL, span);</span>
     }
 
     /**
@@ -216,7 +217,7 @@ public final class FlowCellConf
      *          for the {@link ParentSizeClass#MEDIUM} category.
      */
     public FlowCellConf medium( int span ) {
-<span class="fc" id="L219">        return with(ParentSizeClass.MEDIUM, span);</span>
+<span class="fc" id="L220">        return with(ParentSizeClass.MEDIUM, span);</span>
     }
 
     /**
@@ -235,7 +236,7 @@ public final class FlowCellConf
      *          for the {@link ParentSizeClass#LARGE} category.
      */
     public FlowCellConf large( int span ) {
-<span class="fc" id="L238">        return with(ParentSizeClass.LARGE, span);</span>
+<span class="fc" id="L239">        return with(ParentSizeClass.LARGE, span);</span>
     }
 
     /**
@@ -254,7 +255,7 @@ public final class FlowCellConf
      *          for the {@link ParentSizeClass#VERY_LARGE} category.
      */
     public FlowCellConf veryLarge( int span ) {
-<span class="fc" id="L257">        return with(ParentSizeClass.VERY_LARGE, span);</span>
+<span class="fc" id="L258">        return with(ParentSizeClass.VERY_LARGE, span);</span>
     }
 
     /**
@@ -272,11 +273,11 @@ public final class FlowCellConf
      *          for the {@link ParentSizeClass#OVERSIZE} category.
      */
     public FlowCellConf oversize( int span ) {
-<span class="fc" id="L275">        return with(ParentSizeClass.OVERSIZE, span);</span>
+<span class="fc" id="L276">        return with(ParentSizeClass.OVERSIZE, span);</span>
     }
 
     boolean fill() {
-<span class="fc" id="L279">        return _fill;</span>
+<span class="fc" id="L280">        return _fill;</span>
     }
 
     /**
@@ -292,11 +293,11 @@ public final class FlowCellConf
      * @return A new {@link FlowCellConf} instance with the given fill flag.
      */
     public FlowCellConf fill(boolean fill) {
-<span class="fc" id="L295">        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, _autoSpans, fill, _verticalAlignment);</span>
+<span class="fc" id="L296">        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, _autoSpans, fill, _verticalAlignment);</span>
     }
 
     UI.VerticalAlignment verticalAlignment() {
-<span class="fc" id="L299">        return _verticalAlignment;</span>
+<span class="fc" id="L300">        return _verticalAlignment;</span>
     }
 
     /**
@@ -312,12 +313,12 @@ public final class FlowCellConf
      * @return A new {@link FlowCellConf} instance with the given vertical alignment policy.
      */
     public FlowCellConf align(UI.VerticalAlignment alignment) {
-<span class="fc" id="L315">        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, _autoSpans, _fill, alignment);</span>
+<span class="fc" id="L316">        return new FlowCellConf(_maxCellsToFill, _parentSize, _parentSizeCategory, _autoSpans, _fill, alignment);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L320">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L321">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;maxCellsToFill=&quot;     + _maxCellsToFill + &quot;, &quot; +
                     &quot;parentSize=&quot;         + _parentSize + &quot;, &quot; +
                     &quot;parentSizeCategory=&quot; + _parentSizeCategory + &quot;, &quot; +
@@ -329,25 +330,25 @@ public final class FlowCellConf
 
     @Override
     public boolean equals(Object obj) {
-<span class="nc bnc" id="L332" title="All 2 branches missed.">        if ( obj == this ) {</span>
-<span class="nc" id="L333">            return true;</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        if ( obj == this ) {</span>
+<span class="nc" id="L334">            return true;</span>
         }
-<span class="nc bnc" id="L335" title="All 4 branches missed.">        if ( obj == null || obj.getClass() != this.getClass() ) {</span>
-<span class="nc" id="L336">            return false;</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">        if ( obj == null || obj.getClass() != this.getClass() ) {</span>
+<span class="nc" id="L337">            return false;</span>
         }
-<span class="nc" id="L338">        FlowCellConf that = (FlowCellConf)obj;</span>
-<span class="nc bnc" id="L339" title="All 2 branches missed.">        return this._maxCellsToFill == that._maxCellsToFill</span>
-<span class="nc bnc" id="L340" title="All 6 branches missed.">            &amp;&amp; this._parentSize.equals(that._parentSize)</span>
+<span class="nc" id="L339">        FlowCellConf that = (FlowCellConf)obj;</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        return this._maxCellsToFill == that._maxCellsToFill</span>
+<span class="nc bnc" id="L341" title="All 6 branches missed.">            &amp;&amp; this._parentSize.equals(that._parentSize)</span>
             &amp;&amp; this._parentSizeCategory == that._parentSizeCategory
             &amp;&amp; this._autoSpans.length == that._autoSpans.length
-<span class="nc bnc" id="L343" title="All 6 branches missed.">            &amp;&amp; Arrays.deepEquals(this._autoSpans, that._autoSpans)</span>
+<span class="nc bnc" id="L344" title="All 6 branches missed.">            &amp;&amp; Arrays.deepEquals(this._autoSpans, that._autoSpans)</span>
             &amp;&amp; this._fill == that._fill
             &amp;&amp; this._verticalAlignment == that._verticalAlignment;
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L350">        return Objects.hash(_maxCellsToFill, _parentSize, _parentSizeCategory, Arrays.hashCode(_autoSpans), _fill, _verticalAlignment);</span>
+<span class="nc" id="L351">        return Objects.hash(_maxCellsToFill, _parentSize, _parentSizeCategory, Arrays.hashCode(_autoSpans), _fill, _verticalAlignment);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

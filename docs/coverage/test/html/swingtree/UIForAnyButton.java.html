@@ -1756,12 +1756,12 @@ import java.util.function.Consumer;
 <span class="pc bpc" id="L1756" title="1 of 2 branches missed.">        if ( optIcon.isPresent() )</span>
 <span class="fc" id="L1757">            iconSetter.accept(button, optIcon.get());</span>
         else {
-<span class="nc" id="L1759">            log.warn(</span>
+<span class="nc" id="L1759">            log.warn(SwingTree.get().logMarker(),</span>
                     &quot;Failed to load from 'IconDeclaration' instance '{}', &quot; +
-                            &quot;with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.&quot;,
+                    &quot;with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.&quot;,
 <span class="nc" id="L1762">                    icon, icon.path(), icon.size(), button,</span>
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
-            );
+                );
 <span class="nc" id="L1765">            iconSetter.accept(button, null);</span>
         }
 <span class="fc" id="L1767">    }</span>

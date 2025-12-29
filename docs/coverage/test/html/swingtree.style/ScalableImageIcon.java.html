@@ -203,34 +203,37 @@ public final class ScalableImageIcon extends ImageIcon
 
     @Override
     public void setImage( Image image ) {
-<span class="nc" id="L206">        log.warn(SwingTree.get().logMarker(), &quot;Setting the image of a &quot;+this.getClass().getSimpleName()+&quot; is not supported.&quot;, new Throwable());</span>
-<span class="nc" id="L207">    }</span>
+<span class="nc" id="L206">        log.warn(SwingTree.get().logMarker(),</span>
+                &quot;Setting the image of a {} is not supported.&quot;,
+<span class="nc" id="L208">                this.getClass().getSimpleName(), new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+            );
+<span class="nc" id="L210">    }</span>
 
     @Override
     public String toString() {
-<span class="nc" id="L211">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L214">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;baseSize=&quot; + _baseSize + &quot;, &quot; +
-<span class="nc" id="L213">                    &quot;displaySize=&quot; + Size.of(getIconWidth(), getIconHeight()) + &quot;, &quot; +</span>
+<span class="nc" id="L216">                    &quot;displaySize=&quot; + Size.of(getIconWidth(), getIconHeight()) + &quot;, &quot; +</span>
                     &quot;scale=&quot; + _currentScale + &quot;, &quot; +
-<span class="nc" id="L215">                    &quot;sourceSize=&quot; + Size.of(_sourceIcon.getIconWidth(), _sourceIcon.getIconHeight()) +</span>
+<span class="nc" id="L218">                    &quot;sourceSize=&quot; + Size.of(_sourceIcon.getIconWidth(), _sourceIcon.getIconHeight()) +</span>
                 &quot;]&quot;;
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        if ( obj == this )</span>
-<span class="nc" id="L222">            return true;</span>
-<span class="fc bfc" id="L223" title="All 4 branches covered.">        if ( obj == null || obj.getClass() != this.getClass() )</span>
-<span class="fc" id="L224">            return false;</span>
-<span class="fc" id="L225">        ScalableImageIcon other = (ScalableImageIcon) obj;</span>
-<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        return _sourceIcon.equals(other._sourceIcon) &amp;&amp;</span>
-<span class="nc bnc" id="L227" title="All 2 branches missed.">               _relativeScale.equals(other._relativeScale) &amp;&amp;</span>
-<span class="pc bnc" id="L228" title="All 2 branches missed.">               _baseSize.equals(other._baseSize);</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        if ( obj == this )</span>
+<span class="nc" id="L225">            return true;</span>
+<span class="fc bfc" id="L226" title="All 4 branches covered.">        if ( obj == null || obj.getClass() != this.getClass() )</span>
+<span class="fc" id="L227">            return false;</span>
+<span class="fc" id="L228">        ScalableImageIcon other = (ScalableImageIcon) obj;</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        return _sourceIcon.equals(other._sourceIcon) &amp;&amp;</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">               _relativeScale.equals(other._relativeScale) &amp;&amp;</span>
+<span class="pc bnc" id="L231" title="All 2 branches missed.">               _baseSize.equals(other._baseSize);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L233">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
+<span class="fc" id="L236">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
     }
 
 }

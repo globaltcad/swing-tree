@@ -78,7 +78,7 @@ public final class Tab
      */
     public final Tab isSelectedIf( boolean isSelected ) {
 <span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L81">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L81">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 
 <span class="fc" id="L83">        return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
@@ -94,7 +94,7 @@ public final class Tab
     public final Tab isSelectedIf( Var&lt;Boolean&gt; isSelected ) {
 <span class="fc" id="L95">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
 <span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L97">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L97">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 
 <span class="fc" id="L99">        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
@@ -111,7 +111,7 @@ public final class Tab
     public final Tab isSelectedIf( Val&lt;Boolean&gt; isSelected ) {
 <span class="nc" id="L112">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
 <span class="nc bnc" id="L113" title="All 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L114">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L114">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 
 <span class="nc" id="L116">        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
@@ -130,7 +130,7 @@ public final class Tab
 <span class="nc" id="L130">        NullUtil.nullArgCheck(state,&quot;state&quot;,Enum.class);</span>
 <span class="nc" id="L131">        NullUtil.nullArgCheck(selectedState,&quot;selectedState&quot;,Var.class);</span>
 <span class="nc bnc" id="L132" title="All 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L133">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L133">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 
 <span class="nc bnc" id="L135" title="All 2 branches missed.">        Var&lt;Boolean&gt; isSelectedModel = Var.of(state == selectedState.get());</span>
 <span class="nc" id="L136">        Viewable.cast(selectedState).onChange(From.ALL, it -&gt; {</span>
@@ -151,7 +151,7 @@ public final class Tab
      */
     public final Tab isEnabledIf( boolean isEnabled ) {
 <span class="nc bnc" id="L153" title="All 2 branches missed.">        if ( _isEnabled != null )</span>
-<span class="nc" id="L154">            log.warn(SwingTree.get().logMarker(), &quot;Enabled flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L154">            log.warn(SwingTree.get().logMarker(), &quot;Enabled flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 
 <span class="nc" id="L156">        return new Tab(_contents, _headerComponent, _title, _isSelected, Val.of(isEnabled), _icon, _tip, _onSelected, _onMouseClick);</span>
     }
@@ -165,7 +165,7 @@ public final class Tab
     public final Tab isEnabledIf( Val&lt;Boolean&gt; isEnabled ) {
 <span class="fc" id="L166">        NullUtil.nullArgCheck(isEnabled,&quot;isEnabled&quot;,Val.class);</span>
 <span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if ( _isEnabled != null )</span>
-<span class="nc" id="L168">            log.warn(SwingTree.get().logMarker(), &quot;Enabled flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L168">            log.warn(SwingTree.get().logMarker(), &quot;Enabled flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L169">        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
@@ -183,7 +183,7 @@ public final class Tab
 <span class="nc" id="L183">        NullUtil.nullArgCheck(state,&quot;state&quot;,Enum.class);</span>
 <span class="nc" id="L184">        NullUtil.nullArgCheck(enabledState,&quot;enabledState&quot;,Val.class);</span>
 <span class="nc bnc" id="L185" title="All 2 branches missed.">        if ( _isEnabled != null )</span>
-<span class="nc" id="L186">            log.warn(SwingTree.get().logMarker(), &quot;Enabled flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L186">            log.warn(SwingTree.get().logMarker(), &quot;Enabled flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="nc bnc" id="L187" title="All 2 branches missed.">        Val&lt;Boolean&gt; isEnabled = enabledState.viewAs(Boolean.class, it -&gt; it == state );</span>
 <span class="nc" id="L188">        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
@@ -197,7 +197,7 @@ public final class Tab
     public final Tab withIcon( Icon icon ) {
 <span class="nc" id="L198">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
 <span class="nc bnc" id="L199" title="All 2 branches missed.">        if ( _icon != null )</span>
-<span class="nc" id="L200">            log.warn(SwingTree.get().logMarker(), &quot;Icon already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L200">            log.warn(SwingTree.get().logMarker(), &quot;Icon already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="nc" id="L201">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, Val.of(icon), _tip, _onSelected, _onMouseClick);</span>
     }
 
@@ -241,7 +241,7 @@ public final class Tab
     public final Tab withIcon( Val&lt;IconDeclaration&gt; iconDeclaration ) {
 <span class="fc" id="L242">        NullUtil.nullArgCheck(iconDeclaration,&quot;icon&quot;,Val.class);</span>
 <span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if ( _icon != null )</span>
-<span class="nc" id="L244">            log.warn(SwingTree.get().logMarker(), &quot;Icon already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L244">            log.warn(SwingTree.get().logMarker(), &quot;Icon already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L245">        Val&lt;Icon&gt; asIcon = iconDeclaration.viewAs( Icon.class, it -&gt; it.find().orElse(null) );</span>
 <span class="fc" id="L246">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, asIcon, _tip, _onSelected, _onMouseClick);</span>
     }
@@ -255,7 +255,7 @@ public final class Tab
     public final Tab withTip( String tip ) {
 <span class="fc" id="L256">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
 <span class="pc bpc" id="L257" title="1 of 2 branches missed.">        if ( _tip != null )</span>
-<span class="nc" id="L258">            log.warn(SwingTree.get().logMarker(), &quot;Tip already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L258">            log.warn(SwingTree.get().logMarker(), &quot;Tip already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L259">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, Val.of(tip), _onSelected, _onMouseClick);</span>
     }
 
@@ -270,14 +270,14 @@ public final class Tab
     public final Tab withTip( Val&lt;String&gt; tip ) {
 <span class="fc" id="L271">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
 <span class="pc bpc" id="L272" title="1 of 2 branches missed.">        if ( _tip != null )</span>
-<span class="nc" id="L273">            log.warn(SwingTree.get().logMarker(), &quot;Tip already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L273">            log.warn(SwingTree.get().logMarker(), &quot;Tip already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L274">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);</span>
     }
 
     public final Tab withHeader( JComponent headerComponent ) {
 <span class="fc" id="L278">        NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;,JComponent.class);</span>
 <span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if ( _headerComponent != null )</span>
-<span class="nc" id="L280">            log.warn(SwingTree.get().logMarker(), &quot;Header component already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L280">            log.warn(SwingTree.get().logMarker(), &quot;Header component already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L281">        return new Tab(_contents, headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
@@ -301,7 +301,7 @@ public final class Tab
      */
     public final Tab add( UIForAnySwing&lt;?,?&gt; contents ) {
 <span class="pc bpc" id="L303" title="1 of 2 branches missed.">        if ( _contents != null )</span>
-<span class="nc" id="L304">            log.warn(SwingTree.get().logMarker(), &quot;Content component already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L304">            log.warn(SwingTree.get().logMarker(), &quot;Content component already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L305">        return new Tab(contents.getComponent(), _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
@@ -313,7 +313,7 @@ public final class Tab
      */
     public final Tab add( JComponent contents ) {
 <span class="nc bnc" id="L315" title="All 2 branches missed.">        if ( _contents != null )</span>
-<span class="nc" id="L316">            log.warn(SwingTree.get().logMarker(), &quot;Content component already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L316">            log.warn(SwingTree.get().logMarker(), &quot;Content component already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="nc" id="L317">        return new Tab(contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 

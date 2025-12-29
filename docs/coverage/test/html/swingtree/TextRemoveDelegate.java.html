@@ -44,12 +44,11 @@ public final class TextRemoveDelegate extends AbstractTextComponentDelegate
         try {
 <span class="fc" id="L45">            return getComponent().getDocument().getText(getOffset(), getLength());</span>
 <span class="nc" id="L46">        } catch (BadLocationException e) {</span>
-<span class="nc" id="L47">            log.error(</span>
-                    &quot;Failed to read the text to be removed from the document &quot; +
-<span class="nc" id="L49">                    &quot;at offset &quot;+ getOffset() + &quot; and using length &quot; + getLength() + &quot;!&quot;,</span>
-                    e
+<span class="nc" id="L47">            log.error(SwingTree.get().logMarker(),</span>
+                    &quot;Failed to read the text to be removed from the document at offset {} and using length {}!&quot;,
+<span class="nc" id="L49">                    getOffset(), getLength(), e</span>
                 );
-<span class="nc" id="L52">            return &quot;&quot;;</span>
+<span class="nc" id="L51">            return &quot;&quot;;</span>
         }
     }
 }

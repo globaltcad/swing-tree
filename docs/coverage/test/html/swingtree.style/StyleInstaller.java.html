@@ -257,7 +257,7 @@ import java.util.Optional;
             }
 <span class="fc bfc" id="L258" title="All 2 branches covered.">            if ( !isStyled ) {</span>
 <span class="fc" id="L259">                backgroundSetter.run();</span>
-<span class="pc bpc" id="L260" title="1 of 4 branches missed.">                if ( _initialFont != null &amp;&amp; !Objects.equals(_initialFont, owner.getFont()) ) {</span>
+<span class="fc bfc" id="L260" title="All 4 branches covered.">                if ( _initialFont != null &amp;&amp; !Objects.equals(_initialFont, owner.getFont()) ) {</span>
 <span class="fc" id="L261">                    owner.setFont(_initialFont);</span>
 <span class="fc" id="L262">                    _initialFont = null;</span>
                 }
@@ -801,10 +801,10 @@ import java.util.Optional;
         try {
 <span class="fc" id="L802">            other = (JComponent) type.getDeclaredConstructor().newInstance();</span>
 <span class="nc" id="L803">        } catch (Exception e) {</span>
-<span class="nc" id="L804">            log.debug(</span>
-<span class="nc" id="L805">                    &quot;Failed to instantiate component '&quot;+type.getName()+&quot;' as part &quot; +</span>
-                    &quot;part of an attempt to get the default color of said type!&quot;,
-                    e
+<span class="nc" id="L804">            log.debug(SwingTree.get().logMarker(),</span>
+                    &quot;Failed to instantiate component '{}' as part of an &quot; +
+                    &quot;attempt to get the default color of said type!&quot;,
+<span class="nc" id="L807">                    type.getName(), e</span>
                 );
 <span class="fc" id="L809">        }</span>
 <span class="fc" id="L810">        Color defaultBackgroundColor = null;</span>

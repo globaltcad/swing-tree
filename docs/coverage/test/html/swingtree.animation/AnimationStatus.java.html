@@ -119,24 +119,33 @@ public final class AnimationStatus implements Progress
 <span class="nc" id="L119">            return this;</span>
         }
 <span class="nc bnc" id="L121" title="All 2 branches missed.">        if ( from == to ) {</span>
-<span class="nc" id="L122">            log.warn(SwingTree.get().logMarker(), &quot;Invalid slice from '&quot;+from+&quot;' to '&quot;+to+&quot;'&quot;, new Throwable());</span>
+<span class="nc" id="L122">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L123">                    &quot;Invalid slice from '{}' to '{}'&quot;, from, to,</span>
+                    new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                );
         }
-<span class="nc bnc" id="L124" title="All 8 branches missed.">        if ( from &lt; 0 || from &gt; 1 || to &lt; 0 || to &gt; 1 ) {</span>
-<span class="nc" id="L125">            log.warn(SwingTree.get().logMarker(), &quot;Invalid slice from '&quot;+from+&quot;' to '&quot;+to+&quot;'&quot;, new Throwable());</span>
-<span class="nc" id="L126">            from = Math.min(1, Math.max(0, from));</span>
-<span class="nc" id="L127">            to   = Math.min(1, Math.max(0, to));</span>
+<span class="nc bnc" id="L127" title="All 8 branches missed.">        if ( from &lt; 0 || from &gt; 1 || to &lt; 0 || to &gt; 1 ) {</span>
+<span class="nc" id="L128">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L129">                    &quot;Invalid slice from '{}' to '{}'&quot;, from, to,</span>
+                    new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                );
+<span class="nc" id="L132">            from = Math.min(1, Math.max(0, from));</span>
+<span class="nc" id="L133">            to   = Math.min(1, Math.max(0, to));</span>
         }
-<span class="nc bnc" id="L129" title="All 2 branches missed.">        if ( from &gt; to ) {</span>
-<span class="nc" id="L130">            log.warn(SwingTree.get().logMarker(), &quot;Invalid slice from '&quot;+from+&quot;' to '&quot;+to+&quot;'&quot;, new Throwable());</span>
-<span class="nc" id="L131">            double tmp = from;</span>
-<span class="nc" id="L132">            from = to;</span>
-<span class="nc" id="L133">            to = tmp;</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if ( from &gt; to ) {</span>
+<span class="nc" id="L136">            log.warn(SwingTree.get().logMarker(),</span>
+                    &quot;Invalid slice from '{}' to '{}'&quot;,
+<span class="nc" id="L138">                    from, to, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+                );
+<span class="nc" id="L140">            double tmp = from;</span>
+<span class="nc" id="L141">            from = to;</span>
+<span class="nc" id="L142">            to = tmp;</span>
         }
-<span class="nc" id="L135">        double subProgress = Math.max(from, Math.min(to, progress));</span>
-<span class="nc" id="L136">        return new Progress() {</span>
+<span class="nc" id="L144">        double subProgress = Math.max(from, Math.min(to, progress));</span>
+<span class="nc" id="L145">        return new Progress() {</span>
             @Override
             public double progress() {
-<span class="nc" id="L139">                return subProgress;</span>
+<span class="nc" id="L148">                return subProgress;</span>
             }
         };
     }
@@ -151,7 +160,7 @@ public final class AnimationStatus implements Progress
      *         and for most animations it will be 0 at the end of the animation as well.
      *         An animation may be repeated if it is explicitly scheduled to run for a longer time.
      */
-<span class="fc" id="L154">    public long repeats() { return howManyLoops; }</span>
+<span class="fc" id="L163">    public long repeats() { return howManyLoops; }</span>
 
     /**
      *  Exposes the {@link LifeSpan} of the animation, which defines
@@ -160,7 +169,7 @@ public final class AnimationStatus implements Progress
      *
      * @return The {@link LifeSpan} of the animation, i.e. the time when the animation started and how long it should run.
      */
-<span class="fc" id="L163">    public LifeSpan lifeSpan() { return lifeSpan; }</span>
+<span class="fc" id="L172">    public LifeSpan lifeSpan() { return lifeSpan; }</span>
 
     /**
      *  Exposes the timer event that triggered the animation.
@@ -169,11 +178,11 @@ public final class AnimationStatus implements Progress
      *
      * @return The timer event that triggered the animation.
      */
-<span class="fc" id="L172">    public ActionEvent event() { return event; }</span>
+<span class="fc" id="L181">    public ActionEvent event() { return event; }</span>
 
     @Override
     public String toString() {
-<span class="nc" id="L176">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L185">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
                 &quot;progress=&quot;   + progress +
                 &quot;, repeats=&quot;  + howManyLoops +
                 &quot;, lifeSpan=&quot; + lifeSpan +
@@ -183,25 +192,25 @@ public final class AnimationStatus implements Progress
 
     @Override
     public boolean equals( Object o ) {
-<span class="nc bnc" id="L186" title="All 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="nc bnc" id="L187" title="All 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L196" title="All 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
 
-<span class="nc" id="L189">        AnimationStatus that = (AnimationStatus) o;</span>
+<span class="nc" id="L198">        AnimationStatus that = (AnimationStatus) o;</span>
 
-<span class="nc bnc" id="L191" title="All 2 branches missed.">        if ( Double.compare(that.progress, progress) != 0 ) return false;</span>
-<span class="nc bnc" id="L192" title="All 2 branches missed.">        if ( howManyLoops != that.howManyLoops ) return false;</span>
-<span class="nc bnc" id="L193" title="All 2 branches missed.">        if ( !lifeSpan.equals(that.lifeSpan) ) return false;</span>
-<span class="nc" id="L194">        return event.equals(that.event);</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if ( Double.compare(that.progress, progress) != 0 ) return false;</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        if ( howManyLoops != that.howManyLoops ) return false;</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if ( !lifeSpan.equals(that.lifeSpan) ) return false;</span>
+<span class="nc" id="L203">        return event.equals(that.event);</span>
     }
 
     @Override
     public int hashCode() {
         int result;
-<span class="nc" id="L200">        result = Double.hashCode(progress);</span>
-<span class="nc" id="L201">        result = 31 * result + Long.hashCode(howManyLoops);</span>
-<span class="nc" id="L202">        result = 31 * result + lifeSpan.hashCode();</span>
-<span class="nc" id="L203">        result = 31 * result + event.hashCode();</span>
-<span class="nc" id="L204">        return result;</span>
+<span class="nc" id="L209">        result = Double.hashCode(progress);</span>
+<span class="nc" id="L210">        result = 31 * result + Long.hashCode(howManyLoops);</span>
+<span class="nc" id="L211">        result = 31 * result + lifeSpan.hashCode();</span>
+<span class="nc" id="L212">        result = 31 * result + event.hashCode();</span>
+<span class="nc" id="L213">        return result;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

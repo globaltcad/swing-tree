@@ -165,15 +165,15 @@ final class BuilderState&lt;C extends java.awt.Component&gt;
 <span class="fc bfc" id="L165" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
 <span class="fc" id="L166">            Thread currentThread = Thread.currentThread();</span>
 <span class="pc bpc" id="L167" title="1 of 2 branches missed.">            if ( !currentThread.getName().startsWith(&quot;Test worker&quot;) )</span>
-<span class="nc" id="L168">                log.warn(</span>
-<span class="nc" id="L169">                    &quot;The builder state for component type '&quot; + _componentType.getSimpleName() + &quot;' &quot; +</span>
-<span class="nc" id="L170">                    &quot;is being disposed from thread '&quot; + currentThread.getName() + &quot;', which is problematic! \n&quot; +</span>
-                    &quot;Builder states should only be disposed by the UI thread (AWT's EDT thread) because &quot; +
-                    &quot;they lack thread safety. Furthermore, it is important to note that GUI components &quot; +
-                    &quot;should only be assembled in the frontend layer of the application, and not in the backend layer &quot; +
-                    &quot;and one of its threads.&quot;,
-                    new Throwable()
-                );
+<span class="nc" id="L168">                log.warn(SwingTree.get().logMarker(),</span>
+                        &quot;The builder state for component type '{}' is being disposed from &quot; +
+                        &quot;thread '{}', which is problematic! \n&quot; +
+                        &quot;Builder states should only be disposed by the UI thread (AWT's EDT thread) &quot; +
+                        &quot;because they lack thread safety. &quot; +
+                        &quot;Furthermore, it is important to note that GUI components should only be assembled &quot; +
+                        &quot;in the frontend layer of the application, and not in the backend layer and one of its threads.&quot;,
+<span class="nc" id="L175">                        _componentType.getSimpleName(), currentThread.getName(), new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+                    );
         }
 <span class="fc" id="L178">        _componentFetcher = null;</span>
 <span class="fc" id="L179">    }</span>

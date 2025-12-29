@@ -152,8 +152,11 @@ final class StyleEngine
 <span class="fc" id="L152">                StyleRenderer.renderStyleOn(layer, conf, graphics);</span>
 <span class="fc" id="L153">            });</span>
         else
-<span class="nc" id="L155">            log.error(SwingTree.get().logMarker(), &quot;Layer cache is null for layer: &quot; + layer, new Throwable());</span>
-<span class="fc" id="L156">    }</span>
+<span class="nc" id="L155">            log.error(SwingTree.get().logMarker(),</span>
+                    &quot;Layer cache is null for layer: {}&quot;,
+                    layer, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                );
+<span class="fc" id="L159">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
