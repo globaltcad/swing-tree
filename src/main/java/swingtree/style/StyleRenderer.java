@@ -1137,8 +1137,8 @@ final class StyleRenderer
             }
             if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon);
-                int areaX = insets.left().orElse(0f).intValue();
-                int areaY = insets.top().orElse(0f).intValue();
+                int areaX = (insets.left().orElse(0f).intValue() + padding.left().orElse(0f).intValue());
+                int areaY = (insets.top().orElse(0f).intValue() + padding.top().orElse(0f).intValue());
                 UI.Placement localPlacement = placement == UI.Placement.UNDEFINED ? svgIcon.getPreferredPlacement() : placement;
                 localPlacement = localPlacement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : localPlacement;
                 UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;
