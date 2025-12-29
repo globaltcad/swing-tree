@@ -125,7 +125,7 @@ public class JIcon extends JLabel implements StylableComponent
             log.warn(SwingTree.get().logMarker(),
                 "Loading an icon off the UI thread. " +
                 "This may lead to unexpected behavior and should be avoided.",
-                new Throwable() // Log the stack trace for debugging purposes.
+                new Throwable("Stack trace for debugging purposes.")
             );
             return UI.runAndGet(()->_getFromCacheOrLoadFrom(declaration));
         }

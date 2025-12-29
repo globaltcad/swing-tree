@@ -262,7 +262,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                 "Trying to bind a new property '{}' to the index of tabbed pane '{}' even " +
                                 "though the previously specified property '{}' is already bound to it. " +
                                 "The previous property will be replaced now!",
-                                index, thisComponent, state.selectedTabIndex, new Throwable()
+                                index, thisComponent, state.selectedTabIndex,
+                                new Throwable("Stack trace for debugging purposes.")
                             );
 
                     state.selectedTabIndex = index;
@@ -493,7 +494,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     "Trying to bind a list of tabs to a tabbed pane that already has tabs. \n" +
                     "Manually defined tabs existing along with bound tabs is not supported. \n" +
                     "The manually defined tabs will be removed now!",
-                    new Throwable() // Stack trace so that a user can see where this warning was triggered.
+                    new Throwable("Stack trace for debugging purposes.")
                 );
                 _doWithoutListeners(thisComponent, thisComponent::removeAll);
             }
@@ -552,7 +553,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             case NONE:
                 break;
             default:
-                log.warn(SwingTree.get().logMarker(), "Unknown change type: {}", delegate.change(), new Throwable());
+                log.warn(SwingTree.get().logMarker(),
+                        "Unknown change type: {}",
+                        delegate.change(), new Throwable("Stack trace for debugging purposes.")
+                    );
                 // We do a simple rebuild:
                 pane.removeAll();
                 delegate.currentValues().forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
@@ -569,7 +573,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 delegate.currentValues().size(),
                 pane.getTabCount() > delegate.currentValues().size() ? "added to" : "removed from",
                 pane,
-                new Throwable()
+                new Throwable("Stack trace for debugging purposes.")
             );
         }
     }
@@ -611,7 +615,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     "Trying to bind a tuple of tabs to a tabbed pane that already has tabs. \n" +
                     "Manually defined tabs existing along with bound tabs is not supported. \n" +
                     "The manually defined tabs will be removed now!",
-                    new Throwable() // Stack trace so that a user can see where this warning was triggered.
+                    new Throwable("Stack trace for debugging purposes.")
                 );
                 _doWithoutListeners(thisComponent, thisComponent::removeAll);
             }
@@ -674,7 +678,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 case NONE:
                     break;
                 default:
-                    log.warn(SwingTree.get().logMarker(), "Unknown change type: {}", diff.change(), new Throwable());
+                    log.warn(SwingTree.get().logMarker(),
+                            "Unknown change type: {}",
+                            diff.change(), new Throwable("Stack trace for debugging purposes.")
+                        );
                     // We do a simple rebuild:
                     pane.removeAll();
                     tupleOfModels.forEach(value -> _addTabAt(pane.getTabCount(), value, tabSupplier, pane));
@@ -692,7 +699,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 tupleOfModels.size(),
                 pane.getTabCount() > tupleOfModels.size() ? "added to" : "removed from",
                 pane,
-                new Throwable()
+                new Throwable("Stack trace for debugging purposes.")
             );
         }
     }
@@ -997,7 +1004,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         try {
             Tab tab = tabSupplier.createTabFor(m);
             if ( tab == null ) {
-                log.warn(SwingTree.get().logMarker(), "Tab supplier returned null for '{}'.", m, new Throwable());
+                log.warn(SwingTree.get().logMarker(),
+                        "Tab supplier returned null for '{}'.",
+                        m, new Throwable("Stack trace for debugging purposes.")
+                    );
                 return UIForTabbedPane.TAB_NULL;
             }
             return tab;

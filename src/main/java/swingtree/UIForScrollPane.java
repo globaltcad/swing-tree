@@ -99,8 +99,9 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 log.warn(SwingTree.get().logMarker(),
                     "Trying to add a 'Scrollable' component to a declarative scroll pane UI which is already " +
                     "configured with a SwingTree based Scrollable through the 'UI.scrollPane(Configurator)' method. " +
-                    "The provided component of type '{}' is most likely not intended to be used this way.", 
-                    addedComponent.getClass().getName(), new Throwable()
+                    "The provided component of type '{}' is most likely not intended to be used this way.",
+                    addedComponent.getClass().getName(),
+                    new Throwable("Stack trace for debugging purposes.")
                 );
             } else {
                 ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);

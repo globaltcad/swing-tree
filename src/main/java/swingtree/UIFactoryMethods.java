@@ -222,11 +222,20 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         }
         if ( font == null ) {
             if ( potentialProblem1 != null )
-                log.error(SwingTree.get().logMarker(), "Could not parse font string '" + fontString + "' using 'Font.decode(String)'.", potentialProblem1);
+                log.error(SwingTree.get().logMarker(),
+                        "Could not parse font string '{}' using 'Font.decode(String)'.",
+                        fontString, potentialProblem1, new Throwable("Stack trace for debugging purposes.")
+                    );
             if ( potentialProblem2 != null )
-                log.error(SwingTree.get().logMarker(), "Could not parse font string '" + fontString + "' from 'System.getProperty(String)'.", potentialProblem2);
+                log.error(SwingTree.get().logMarker(),
+                        "Could not parse font string '{}' from 'System.getProperty(String)'.",
+                        fontString, potentialProblem2, new Throwable("Stack trace for debugging purposes.")
+                    );
 
-            log.error(SwingTree.get().logMarker(), "Could not parse font string '" + fontString + "' using 'Font.decode(String)' or 'System.getProperty(String)'.", new Throwable());
+            log.error(SwingTree.get().logMarker(),
+                    "Could not parse font string '{}' using 'Font.decode(String)' or 'System.getProperty(String)'.",
+                    fontString, new Throwable("Stack trace for debugging purposes.")
+                );
 
             try {
                 return UI.Font.of(fontString, UI.FontStyle.PLAIN, UI.scale(12));
@@ -5673,7 +5682,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             log.debug(SwingTree.get().logMarker(),
                     "Encountered a JFrame instance which does not have a JGlassPane as its glass pane. " +
                     "SwingTree based drag and drop functionality will not work as expected for this frame.",
-                    new Throwable()
+                    new Throwable("Stack trace for debugging purposes.")
                 );
         return new UIForJFrame<>(new BuilderState<>(frame));
     }
@@ -5716,7 +5725,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             log.debug(SwingTree.get().logMarker(),
                     "Encountered a JDialog instance which does not have a JGlassPane as its glass pane. " +
                     "SwingTree based drag and drop functionality will not work as expected for this dialog.",
-                    new Throwable()
+                    new Throwable("Stack trace for debugging purposes.")
                 );
         return new UIForJDialog<>(new BuilderState<>(dialog));
     }
@@ -6430,7 +6439,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             if ( c == null ) {
                 log.error(
                         "Failed to create a UI component for a new JFrame using supplier function '{}'.", uiSupplier,
-                        new Throwable()
+                        new Throwable("Stack trace for debugging purposes.")
                     );
             }
             this.component = c;
@@ -6532,7 +6541,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         if ( actualWidth <= 0 || actualHeight <= 0 ){
             log.debug(SwingTree.get().logMarker(),
                     "Encountered an invalid icon width '{}' or height '{}'.",
-                    actualWidth, actualHeight, new Throwable()
+                    actualWidth, actualHeight, new Throwable("Stack trace for debugging purposes.")
                 );
             return icon;
         }
@@ -6554,7 +6563,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             log.warn(SwingTree.get().logMarker(),
                     "Encountered an invalid icon size '{}' while " +
                     "scaling an icon for the '{}' component.",
-                    size, JIcon.class.getSimpleName(), new Throwable()
+                    size, JIcon.class.getSimpleName(), new Throwable("Stack trace for debugging purposes.")
                 );
             return icon;
         }

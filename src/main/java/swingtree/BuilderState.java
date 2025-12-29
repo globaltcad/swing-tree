@@ -172,7 +172,7 @@ final class BuilderState<C extends java.awt.Component>
                         "because they lack thread safety. " +
                         "Furthermore, it is important to note that GUI components should only be assembled " +
                         "in the frontend layer of the application, and not in the backend layer and one of its threads.",
-                        _componentType.getSimpleName(), currentThread.getName(), new Throwable()
+                        _componentType.getSimpleName(), currentThread.getName(), new Throwable("Stack trace for debugging purposes.")
                     );
         }
         _componentFetcher = null;

@@ -679,7 +679,10 @@ final class StyleRenderer
             corner2 = new Point2D.Float(realX, realY);
         }
         else {
-            log.warn(SwingTree.get().logMarker(), "Unknown gradient type: {}", type, new Throwable());
+            log.warn(SwingTree.get().logMarker(),
+                    "Unknown gradient type: {}",
+                    type, new Throwable("Stack trace for debugging purposes.")
+                );
             return null;
         }
 
@@ -1007,7 +1010,10 @@ final class StyleRenderer
             case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;
             case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;
             default:
-                log.warn(SwingTree.get().logMarker(), "Unknown cycle method: {}", cycle, new Throwable());
+                log.warn(SwingTree.get().logMarker(),
+                        "Unknown cycle method: {}",
+                        cycle, new Throwable("Stack trace for debugging purposes.")
+                    );
                 return MultipleGradientPaint.CycleMethod.NO_CYCLE;
         }
     }

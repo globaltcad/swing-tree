@@ -149,13 +149,19 @@ final class ColorUtility {
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
             if (start < 0 || end < 0 || end < start) {
-                log.error(SwingTree.get().logMarker(), "Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Invalid rgb() or rgba() color: {}",
+                        colorString, new Throwable("Stack trace for debugging purposes.")
+                    );
                 return UI.Color.UNDEFINED;
             }
 
             String[] parts = colorString.substring(start + 1, end).split(",", -1);
             if (parts.length < 3 || parts.length > 4) {
-                log.error(SwingTree.get().logMarker(), "Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Invalid rgb() or rgba() color: {}", colorString,
+                        new Throwable("Stack trace for debugging purposes.")
+                    );
                 return UI.Color.UNDEFINED;
             }
 
@@ -170,7 +176,10 @@ final class ColorUtility {
                     part = part.substring(0, part.length() - 1);
                     values[i] = Integer.parseInt(part);
                     if (values[i] < 0 || values[i] > 100) {
-                        log.error(SwingTree.get().logMarker(), "Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Invalid rgb() or rgba() color: {}",
+                                colorString, new Throwable("Stack trace for debugging purposes.")
+                            );
                         return UI.Color.UNDEFINED;
                     }
                     values[i] = (int) Math.ceil(values[i] * 2.55);
@@ -191,13 +200,19 @@ final class ColorUtility {
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
             if (start < 0 || end < 0 || end < start) {
-                log.error(SwingTree.get().logMarker(), "Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Invalid hsb() or hsba() color: {}",
+                        colorString, new Throwable("Stack trace for debugging purposes.")
+                    );
                 return UI.Color.UNDEFINED;
             }
 
             String[] parts = colorString.substring(start + 1, end).split(",", -1);
             if (parts.length < 3 || parts.length > 4) {
-                log.error(SwingTree.get().logMarker(), "Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Invalid hsb() or hsba() color: {}",
+                        colorString, new Throwable("Stack trace for debugging purposes.")
+                    );
                 return UI.Color.UNDEFINED;
             }
 
@@ -214,7 +229,7 @@ final class ColorUtility {
                     if (values[i] < 0 || values[i] > 100) {
                         log.error(SwingTree.get().logMarker(),
                                 "Invalid hsb() or hsba() string '{}', value '{}' out of range.",
-                                colorString, part, new Throwable()
+                                colorString, part, new Throwable("Stack trace for debugging purposes.")
                             );
                         return UI.Color.UNDEFINED;
                     }
@@ -224,7 +239,7 @@ final class ColorUtility {
                         log.error(SwingTree.get().logMarker(),
                                 "Invalid hsb() or hsba() string '{}', " +
                                 "unexpected degree symbol in '{}' (only allowed for hue)",
-                                colorString, part, new Throwable()
+                                colorString, part, new Throwable("Stack trace for debugging purposes.")
                             );
                         return UI.Color.UNDEFINED;
                     }
@@ -234,7 +249,7 @@ final class ColorUtility {
                     if (values[i] < 0 || values[i] > 360) {
                         log.error(SwingTree.get().logMarker(),
                                 "Invalid hsb() or hsba() string '{}', hue value '{}' out of range.",
-                                colorString, part, new Throwable()
+                                colorString, part, new Throwable("Stack trace for debugging purposes.")
                             );
                         return UI.Color.UNDEFINED;
                     }

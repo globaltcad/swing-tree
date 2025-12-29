@@ -328,7 +328,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                         "Consider taking a look at 'UI.run(()->...)', 'UI.runAndGet(()->...)', 'UI.runLater(()->...)', " +
                         "among other methods to ensure that your UI is built on the EDT.\n" +
                         "Running 'UI.runAndGet(()->...)' for you now...",
-                        currentThreadName, new Throwable()
+                        currentThreadName, new Throwable("Stack trace for debugging purposes.")
                     );
 
             return UI.runAndGet(()->_state().component());
@@ -446,7 +446,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                 "If it is, please make this intention explicit by removing " +
                 "the component from its current container first.",
                 childComponent.getClass(), _state().componentType(),
-                new Throwable()
+                new Throwable("Stack trace for debugging purposes.")
             );
 
         if ( childComponent instanceof JComponent ) {
@@ -688,7 +688,10 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         };
         C component = weakComponent.get();
         if (!(component instanceof JComponent)) {
-            log.error(SwingTree.get().logMarker(), "Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ", new Throwable());
+            log.error(SwingTree.get().logMarker(),
+                    "Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ",
+                    new Throwable("Stack trace for debugging purposes.")
+                );
             return;
         }
         Viewables<T> viewables = properties.view();

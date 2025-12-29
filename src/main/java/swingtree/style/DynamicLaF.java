@@ -448,7 +448,7 @@ final class DynamicLaF
                 log.error(SwingTree.get().logMarker(),
                         "Invalid UI update event source detected! Source object is expected to be a 'JComponent'.\n" +
                         "Received unknown object of type '{}' instead.",
-                        sourceTypeAsString, new Throwable()
+                        sourceTypeAsString, new Throwable("Stack trace for debugging purposes.")
                     );
                 return;
             }
@@ -457,7 +457,7 @@ final class DynamicLaF
                 log.error(SwingTree.get().logMarker(),
                         "Detected invalid 'oldValue' object in UI update event! " +
                         "Old value is expected to be a 'ComponentUI'.\nReceived unknown object of type '{}' instead.",
-                        oldValueTypeAsString, new Throwable()
+                        oldValueTypeAsString, new Throwable("Stack trace for debugging purposes.")
                     );
                 return;
             }
@@ -466,7 +466,7 @@ final class DynamicLaF
                 log.error(SwingTree.get().logMarker(),
                         "Detected invalid 'newValue' object in UI update event! New value is expected to be a 'ComponentUI'.\n" +
                         "Received unknown object of type '{}' instead.",
-                        newValueTypeAsString, new Throwable()
+                        newValueTypeAsString, new Throwable("Stack trace for debugging purposes.")
                     );
                 return;
             }

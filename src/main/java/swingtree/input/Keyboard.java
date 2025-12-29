@@ -33,7 +33,7 @@ public final class Keyboard
             log.warn(SwingTree.get().logMarker(),
                 "Keyboard.get() should only be called from the UI thread (Swing Event Dispatch Thread).\n" +
                 "Encountered thread '{}' instead!", Thread.currentThread().getName(),
-                new Throwable() // Stack trace for debugging purposes
+                new Throwable("Stack trace for debugging purposes.")
             );
         return INSTANCE;
     }

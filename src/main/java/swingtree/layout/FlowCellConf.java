@@ -144,14 +144,16 @@ public final class FlowCellConf
         if ( cellsToFill < 0 ) {
             log.warn(SwingTree.get().logMarker(),
                     "Encountered negative number '{}' for cells to fill as part of the '{}' layout.",
-                    cellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(), new Throwable()
+                    cellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),
+                    new Throwable("Stack trace for debugging purposes.")
                 );
             cellsToFill = 0;
         } else if ( cellsToFill > _maxCellsToFill ) {
             log.warn(SwingTree.get().logMarker(),
                     "Encountered number '{}' for cells to fill that is greater than the maximum " +
                     "number of cells to fill '{}' as part of the '{}' layout.",
-                    cellsToFill, _maxCellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(), new Throwable()
+                    cellsToFill, _maxCellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),
+                    new Throwable("Stack trace for debugging purposes.")
                 );
             cellsToFill = _maxCellsToFill;
         }

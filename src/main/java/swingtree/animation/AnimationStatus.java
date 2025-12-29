@@ -119,15 +119,24 @@ public final class AnimationStatus implements Progress
             return this;
         }
         if ( from == to ) {
-            log.warn(SwingTree.get().logMarker(), "Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
+            log.warn(SwingTree.get().logMarker(),
+                    "Invalid slice from '{}' to '{}'", from, to,
+                    new Throwable("Stack trace for debugging purposes.")
+                );
         }
         if ( from < 0 || from > 1 || to < 0 || to > 1 ) {
-            log.warn(SwingTree.get().logMarker(), "Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
+            log.warn(SwingTree.get().logMarker(),
+                    "Invalid slice from '{}' to '{}'", from, to,
+                    new Throwable("Stack trace for debugging purposes.")
+                );
             from = Math.min(1, Math.max(0, from));
             to   = Math.min(1, Math.max(0, to));
         }
         if ( from > to ) {
-            log.warn(SwingTree.get().logMarker(), "Invalid slice from '"+from+"' to '"+to+"'", new Throwable());
+            log.warn(SwingTree.get().logMarker(),
+                    "Invalid slice from '{}' to '{}'",
+                    from, to, new Throwable("Stack trace for debugging purposes.")
+                );
             double tmp = from;
             from = to;
             to = tmp;

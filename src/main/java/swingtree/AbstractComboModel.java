@@ -70,7 +70,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 					"Detected thread '{}' modifying a combobox data model instead of the expected EDT (AWT) GUI-Thread! " +
 					"Delegating modification to EDT now...",
 					Thread.currentThread().getName(),
-					new Throwable()
+					new Throwable("Stack trace for debugging purposes.")
 				);
 			@Nullable Object scopedItem = anItem;
 			UI.runNow(()->setSelectedItem(scopedItem));
@@ -85,7 +85,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 					    "Failed to set selection due to unexpected data type in combo box!\n" +
 					    "Expected type '{}' but encountered object\n" +
 					    "of type '{}' which is not assignable to the former.",
-						expectedType.getName(), anItem.getClass().getName(), new Throwable()
+						expectedType.getName(), anItem.getClass().getName(), new Throwable("Stack trace for debugging purposes.")
 					);
 				else
 					anItem = convertedItem;

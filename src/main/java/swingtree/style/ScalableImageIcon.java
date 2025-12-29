@@ -203,7 +203,10 @@ public final class ScalableImageIcon extends ImageIcon
 
     @Override
     public void setImage( Image image ) {
-        log.warn(SwingTree.get().logMarker(), "Setting the image of a "+this.getClass().getSimpleName()+" is not supported.", new Throwable());
+        log.warn(SwingTree.get().logMarker(),
+                "Setting the image of a {} is not supported.",
+                this.getClass().getSimpleName(), new Throwable("Stack trace for debugging purposes.")
+            );
     }
 
     @Override
