@@ -802,7 +802,7 @@ final class StyleInstaller<C extends JComponent>
             other = (JComponent) type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.debug(SwingTree.get().logMarker(),
-                    "Failed to instantiate component '{}' as part part of an " +
+                    "Failed to instantiate component '{}' as part of an " +
                     "attempt to get the default color of said type!",
                     type.getName(), e
                 );

@@ -224,12 +224,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             if ( potentialProblem1 != null )
                 log.error(SwingTree.get().logMarker(),
                         "Could not parse font string '{}' using 'Font.decode(String)'.",
-                        fontString, potentialProblem1, new Throwable("Stack trace for debugging purposes.")
+                        fontString, potentialProblem1
                     );
             if ( potentialProblem2 != null )
                 log.error(SwingTree.get().logMarker(),
                         "Could not parse font string '{}' from 'System.getProperty(String)'.",
-                        fontString, potentialProblem2, new Throwable("Stack trace for debugging purposes.")
+                        fontString, potentialProblem2
                     );
 
             log.error(SwingTree.get().logMarker(),
