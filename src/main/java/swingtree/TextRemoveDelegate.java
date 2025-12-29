@@ -44,10 +44,9 @@ public final class TextRemoveDelegate extends AbstractTextComponentDelegate
         try {
             return getComponent().getDocument().getText(getOffset(), getLength());
         } catch (BadLocationException e) {
-            log.error(
-                    "Failed to read the text to be removed from the document " +
-                    "at offset "+ getOffset() + " and using length " + getLength() + "!",
-                    e
+            log.error(SwingTree.get().logMarker(),
+                    "Failed to read the text to be removed from the document at offset {} and using length {}!",
+                    getOffset(), getLength(), e
                 );
             return "";
         }

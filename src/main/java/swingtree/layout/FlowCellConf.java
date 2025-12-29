@@ -3,6 +3,7 @@ package swingtree.layout;
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.Configurator;
@@ -141,18 +142,18 @@ public final class FlowCellConf
     public FlowCellConf with( ParentSizeClass size, int cellsToFill ) {
         Objects.requireNonNull(size);
         if ( cellsToFill < 0 ) {
-            log.warn(
-                    "Encountered negative number '"+cellsToFill+"' for cells " +
-                    "to fill as part of the '"+ResponsiveGridFlowLayout.class.getSimpleName()+"' layout.",
-                    new Throwable()
+            log.warn(SwingTree.get().logMarker(),
+                    "Encountered negative number '{}' for cells to fill as part of the '{}' layout.",
+                    cellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),
+                    new Throwable("Stack trace for debugging purposes.")
                 );
             cellsToFill = 0;
         } else if ( cellsToFill > _maxCellsToFill ) {
-            log.warn(
-                    "Encountered number '"+cellsToFill+"' for cells to fill that is greater " +
-                    "than the maximum number of cells to fill '"+_maxCellsToFill+"' " +
-                    "as part of the '"+ResponsiveGridFlowLayout.class.getSimpleName()+"' layout.",
-                    new Throwable()
+            log.warn(SwingTree.get().logMarker(),
+                    "Encountered number '{}' for cells to fill that is greater than the maximum " +
+                    "number of cells to fill '{}' as part of the '{}' layout.",
+                    cellsToFill, _maxCellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),
+                    new Throwable("Stack trace for debugging purposes.")
                 );
             cellsToFill = _maxCellsToFill;
         }

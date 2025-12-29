@@ -5266,7 +5266,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a property list not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a property list not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                     _bindTo( models, null, viewSupplier, thisComponent );
                     }
@@ -5306,7 +5309,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(models, "models");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a property list not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a property list not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, () -> attr, viewSupplier, thisComponent);
                     }
@@ -5346,7 +5352,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a property list not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a property list not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, attr, viewSupplier, thisComponent);
                     }
@@ -5384,7 +5393,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a tuple property not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, null, viewSupplier, thisComponent);
                     }
@@ -5425,7 +5437,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a tuple property not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, () -> attr, viewSupplier, thisComponent);
                     }
@@ -5465,7 +5480,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a tuple property not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, attr, viewSupplier, thisComponent);
                     }
@@ -5506,7 +5524,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a tuple property not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                        );
                     } else {
                         _bindTo(models, null, viewSupplier, thisComponent);
                     }
@@ -5550,7 +5571,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a tuple property not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, () -> attr, viewSupplier, thisComponent);
                     }
@@ -5593,7 +5617,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Objects.requireNonNull(viewSupplier, "viewSupplier");
         return _with( thisComponent -> {
                     if ( thisComponent instanceof JComboBox ) {
-                        log.error(SwingTree.get().logMarker(), "Binding 'JComboBox' to a tuple property not supported.", new Throwable());
+                        log.error(SwingTree.get().logMarker(),
+                                "Binding 'JComboBox' to a tuple property not supported.",
+                                new Throwable("Stack trace for debugging purposes.")
+                            );
                     } else {
                         _bindTo(models, attr, viewSupplier, thisComponent);
                     }
@@ -5716,7 +5743,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         switch ( delegate.change() ) {
             case SET:
                 if ( index < 0 ) {
-                    log.error(SwingTree.get().logMarker(), "Missing index for change type: {}", delegate.change(), new Throwable());
+                    log.error(SwingTree.get().logMarker(),
+                            "Missing index for change type: {}",
+                            delegate.change(), new Throwable("Stack trace for debugging purposes.")
+                        );
                     _clearComponentsOf(innerComponent);
                     for ( int i = 0; i < delegate.currentValues().size(); i++ )
                         _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
@@ -5743,7 +5773,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 break;
             case REMOVE:
                 if ( index < 0 ) {
-                    log.error(SwingTree.get().logMarker(), "Missing index for change type: {}", delegate.change(), new Throwable());
+                    log.error(SwingTree.get().logMarker(),
+                            "Missing index for change type: {}",
+                            delegate.change(),
+                            new Throwable("Stack trace for debugging purposes.")
+                        );
                     _clearComponentsOf(innerComponent);
                     for ( int i = 0; i < delegate.currentValues().size(); i++ )
                         _addComponentAt( i, delegate.currentValues().at(i).orElseNull(), viewSupplier, attr, innerComponent );
@@ -5758,7 +5792,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case REVERSE: _reverseComponentsOf(innerComponent); break;
             case NONE: break;
             default:
-                log.error(SwingTree.get().logMarker(), "Unknown change type: {}", delegate.change(), new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Unknown change type: {}",
+                        delegate.change(), new Throwable("Stack trace for debugging purposes.")
+                    );
                 // We do a simple rebuild:
                 Vals<M> currentValues = delegate.currentValues();
                 _clearComponentsOf(innerComponent);
@@ -5767,15 +5804,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }
         int componentCount = InternalUtil._actualComponentCountFrom(innerComponent);
         if ( componentCount != delegate.currentValues().size() )
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                     "Broken binding to view model list detected! \n" +
-                    "UI sub-component count '"+componentCount+"' " +
-                    "does not match viewable models list of size '"+delegate.currentValues().size()+"'. \n" +
-                    "A possible cause for this is that components " +
-                    "were " + ( componentCount > delegate.currentValues().size() ? "added" : "removed" ) + " " +
-                    "to this '" + innerComponent + "' \ndirectly, instead of through the property list binding. \n" +
+                    "UI sub-component count '{}' does not match viewable models list of size '{}'. \n" +
+                    "A possible cause for this is that components were {} to this '{}' \n" +
+                    "directly, instead of through the property list binding. \n" +
                     "However, this could also be a bug in the UI framework.",
-                    new Throwable()
+                    componentCount, delegate.currentValues().size(),
+                    componentCount > delegate.currentValues().size() ? "added" : "removed", innerComponent,
+                    new Throwable("Stack trace for debugging purposes.")
                 );
     }
 
@@ -6057,7 +6094,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case NONE:
                 break;
             default:
-                log.error(SwingTree.get().logMarker(), "Unknown change type: {}", change, new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Unknown change type: {}",
+                        change, new Throwable("Stack trace for debugging purposes.")
+                    );
                 // We do a simple rebuild:
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
@@ -6168,7 +6208,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case NONE:
                 break;
             default:
-                log.error(SwingTree.get().logMarker(), "Unknown change type: {}", change, new Throwable());
+                log.error(SwingTree.get().logMarker(),
+                        "Unknown change type: {}",
+                        change, new Throwable("Stack trace for debugging purposes.")
+                    );
                 // We do a simple rebuild:
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
@@ -6406,28 +6449,29 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     {
         if ( index < 0 ) {
             log.error(
-                "Cannot remove sub-component of '"+thisComponent+"' \n" +
-                "at index '"+index+"' because the index is negative.",
-                new Throwable()
-            );
+                    "Cannot remove sub-component of '{}' \n" +
+                    "at index '{}' because the index is negative.",
+                    thisComponent, index, new Throwable("Stack trace for debugging purposes.")
+                );
         } else {
             int numberOfExistingComponents = InternalUtil._actualComponentCountFrom(thisComponent);
             if (index >= numberOfExistingComponents) {
                 log.error(
-                    "Cannot remove sub-component of '" + thisComponent + "' \n" +
-                    "at index '" + index + "' because there it currently only has '" + numberOfExistingComponents + "' " +
-                    "sub-components instead of at least '" + (index + 1) + "' sub-components.",
-                    new Throwable()
-                );
+                        "Cannot remove sub-component of '{}' \n" +
+                        "at index '{}' because there it currently only has '{}' sub-components " +
+                        "instead of at least '{}' sub-components.",
+                        thisComponent, index, numberOfExistingComponents, index + 1,
+                        new Throwable("Stack trace for debugging purposes.")
+                    );
             } else {
                 // We get the component at the specified index.
                 Component component = InternalUtil._actualGetComponentAt(index, thisComponent);
                 if ( component == null ) {
                     log.error(
-                        "Cannot remove sub-component of '" + thisComponent + "' \n" +
-                        "at index '" + index + "' because there is no component at that index.",
-                        new Throwable()
-                    );
+                            "Cannot remove sub-component of '{}' \n" +
+                            "at index '{}' because there is no component at that index.",
+                            thisComponent, index, new Throwable("Stack trace for debugging purposes.")
+                        );
                 } else {
                     // We remove the component.
                     thisComponent.remove(component);
@@ -6450,7 +6494,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 "the owner of '{}' sub-components added before the 'addAll' binding call! \n" +
                 "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
                 "add sub-views through a regular 'add' or any other way. Clearing component now...",
-                    contentComponent, componentCount, new Throwable()
+                contentComponent, componentCount, new Throwable("Stack trace for debugging purposes.")
             );
             _clearComponentsOf(contentComponent);
         }
@@ -6469,7 +6513,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 "implying a number of '{}' components instead!\n" +
                 "If you use any of the bi-directionally binding 'addAll' methods, you may not \n" +
                 "add sub-views through a regular 'add' or any other way. Clearing component now...",
-                innerComponent, currentComponentCount, expectedComponentCount, new Throwable()
+                innerComponent, currentComponentCount, expectedComponentCount,
+                new Throwable("Stack trace for debugging purposes.")
             );
             isCurrentStateValid = false;
         }
@@ -6491,7 +6536,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     currentComponentCount, tupleOfModels.size(),
                     currentComponentCount > tupleOfModels.size() ? "added to" : "removed from",
                     innerComponent,
-                    new Throwable()
+                    new Throwable("Stack trace for debugging purposes.")
                 );
     }
 

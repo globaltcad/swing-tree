@@ -152,7 +152,10 @@ final class StyleEngine
                 StyleRenderer.renderStyleOn(layer, conf, graphics);
             });
         else
-            log.error(SwingTree.get().logMarker(), "Layer cache is null for layer: " + layer, new Throwable());
+            log.error(SwingTree.get().logMarker(),
+                    "Layer cache is null for layer: {}",
+                    layer, new Throwable("Stack trace for debugging purposes.")
+                );
     }
 
 }

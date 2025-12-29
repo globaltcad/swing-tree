@@ -322,15 +322,14 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
             String currentThreadName = Optional.ofNullable(Thread.currentThread().getName()).orElse("");
 
             if ( !currentThreadName.trim().equalsIgnoreCase("test worker") )
-                log.warn(
-                    "This UI is being built on thread '" + currentThreadName + "', " +
-                    "which is not the EDT (GUI thread). This may lead to unexpected behavior! " +
-                    "Please make sure to build your UI on the EDT.\n" +
-                    "Consider taking a look at 'UI.run(()->...)', 'UI.runAndGet(()->...)', 'UI.runLater(()->...)', " +
-                    "among other methods to ensure that your UI is built on the EDT.\n" +
-                    "Running 'UI.runAndGet(()->...)' for you now...",
-                    new Throwable()
-                );
+                log.warn(SwingTree.get().logMarker(),
+                        "This UI is being built on thread '{}', which is not the EDT (GUI thread). " +
+                        "This may lead to unexpected behavior! Please make sure to build your UI on the EDT.\n" +
+                        "Consider taking a look at 'UI.run(()->...)', 'UI.runAndGet(()->...)', 'UI.runLater(()->...)', " +
+                        "among other methods to ensure that your UI is built on the EDT.\n" +
+                        "Running 'UI.runAndGet(()->...)' for you now...",
+                        currentThreadName, new Throwable("Stack trace for debugging purposes.")
+                    );
 
             return UI.runAndGet(()->_state().component());
         }
@@ -439,7 +438,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         E childComponent = (E) builder.getComponent();
 
         if ( childComponent.getParent() != null )
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                 "Trying to add component '{}' to this container " +
                 "despite it already being part of another container.\n" +
                 "Adding it to this '{}' will implicitly remove it from its current container. " +
@@ -447,7 +446,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                 "If it is, please make this intention explicit by removing " +
                 "the component from its current container first.",
                 childComponent.getClass(), _state().componentType(),
-                new Throwable()
+                new Throwable("Stack trace for debugging purposes.")
             );
 
         if ( childComponent instanceof JComponent ) {
@@ -689,7 +688,10 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         };
         C component = weakComponent.get();
         if (!(component instanceof JComponent)) {
-            log.error(SwingTree.get().logMarker(), "Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ", new Throwable());
+            log.error(SwingTree.get().logMarker(),
+                    "Invalid internal state detected! The component wrapped by this builder is null or not a JComponent. ",
+                    new Throwable("Stack trace for debugging purposes.")
+                );
             return;
         }
         Viewables<T> viewables = properties.view();

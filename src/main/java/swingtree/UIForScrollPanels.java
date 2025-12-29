@@ -326,7 +326,10 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
                 case NONE:
                     break;
                 default:
-                    log.error(SwingTree.get().logMarker(), "Unknown change type: {}", change, new Throwable());
+                    log.error(SwingTree.get().logMarker(),
+                        "Unknown change type: {}",
+                        change, new Throwable("Stack trace for debugging purposes.")
+                    );
                     // We do a simple rebuild:
                     c.removeAllEntries();
                     _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);
@@ -371,7 +374,10 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
                 case NONE:
                     break;
                 default:
-                    log.error(SwingTree.get().logMarker(), "Unknown change type: {}", change, new Throwable());
+                    log.error(SwingTree.get().logMarker(),
+                            "Unknown change type: {}",
+                            change, new Throwable("Stack trace for debugging purposes.")
+                        );
                     // We do a simple rebuild:
                     c.removeAllEntries();
                     _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);

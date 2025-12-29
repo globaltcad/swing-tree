@@ -1756,12 +1756,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         if ( optIcon.isPresent() )
             iconSetter.accept(button, optIcon.get());
         else {
-            log.warn(
+            log.warn(SwingTree.get().logMarker(),
                     "Failed to load from 'IconDeclaration' instance '{}', " +
-                            "with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.",
+                    "with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.",
                     icon, icon.path(), icon.size(), button,
                     new Throwable("Stack trace for debugging purposes.")
-            );
+                );
             iconSetter.accept(button, null);
         }
     }

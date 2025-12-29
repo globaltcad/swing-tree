@@ -66,11 +66,12 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 	@SuppressWarnings("NullAway")
 	@Override public void setSelectedItem( @Nullable Object anItem ) {
 		if ( !UI.thisIsUIThread() ) {
-			log.warn(
-				"Detected thread '"+Thread.currentThread().getName()+"' modifying a combobox data model " +
-				"instead of the expected EDT (AWT) GUI-Thread! Delegating modification to EDT now...",
-				new Throwable()
-			);
+            log.warn(SwingTree.get().logMarker(),
+					"Detected thread '{}' modifying a combobox data model instead of the expected EDT (AWT) GUI-Thread! " +
+					"Delegating modification to EDT now...",
+					Thread.currentThread().getName(),
+					new Throwable("Stack trace for debugging purposes.")
+				);
 			@Nullable Object scopedItem = anItem;
 			UI.runNow(()->setSelectedItem(scopedItem));
 			return;
@@ -80,11 +81,11 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 			if ( !expectedType.isAssignableFrom(anItem.getClass()) ) {
 				Object convertedItem = _convert(anItem.toString());
 				if ( convertedItem == null )
-					log.warn(
-						"Failed to set selection due to unexpected data type in combo box!\n" +
-						"Expected type '" + expectedType.getName() + "' but encountered object\n" +
-						"of type '" + anItem.getClass().getName() + "' which is not assignable to the former.",
-						new Throwable()
+                    log.warn(SwingTree.get().logMarker(),
+					    "Failed to set selection due to unexpected data type in combo box!\n" +
+					    "Expected type '{}' but encountered object\n" +
+					    "of type '{}' which is not assignable to the former.",
+						expectedType.getName(), anItem.getClass().getName(), new Throwable("Stack trace for debugging purposes.")
 					);
 				else
 					anItem = convertedItem;
@@ -109,7 +110,10 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 				So we need to protect the GUI's control flow from any possible exceptions.
 			 */
 		} catch (Exception e) {
-			log.error(SwingTree.get().logMarker(), "Failed to fetch selected combo box item from bound property '{}', due to exception.", _selectedItem, e);
+			log.error(SwingTree.get().logMarker(),
+					"Failed to fetch selected combo box item from bound property '{}', due to exception.",
+					_selectedItem, e
+				);
 		}
 		return null;
 	}

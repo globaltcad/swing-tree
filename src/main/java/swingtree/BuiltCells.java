@@ -98,7 +98,7 @@ final class BuiltCells<C extends JComponent, E> {
     void checkTypeValidity( @Nullable Object encounteredValue ) {
         if ( encounteredValue != null ) {
             if ( !_elementType.isAssignableFrom(encounteredValue.getClass()) )
-                log.debug(
+                log.debug(SwingTree.get().logMarker(),
                     "Encountered an unusual cell entry in component '{}'. " +
                     "Expected type '{}', but got '{}'.",
                     _componentType.getSimpleName(),
