@@ -850,39 +850,27 @@ public final class SvgIcon extends ImageIcon
 
         Graphics2D g2d = (Graphics2D) g.create();
 
-        FloatSize svgSize = _svgDocument.size();
-        float svgRefWidth  = ( svgSize.width  > svgSize.height ? 1f : svgSize.width  / svgSize.height );
-        float svgRefHeight = ( svgSize.height > svgSize.width  ? 1f : svgSize.height / svgSize.width  );
-        float imgRefWidth  = (   iconWidth    >=   iconHeight  ? 1f : (float) iconWidth /  iconHeight );
-        float imgRefHeight = (   iconHeight   >=   iconWidth   ? 1f : (float) iconHeight / iconWidth  );
+        float scaleX = 1f;
+        float scaleY = 1f;
 
-        float scaleX = imgRefWidth  / svgRefWidth;
-        float scaleY = imgRefHeight / svgRefHeight;
-
-        boolean isEffectivelyFitHeight = false;
-        boolean isEffectivelyFitWidth = false;
         if ( fitComponent == UI.FitComponent.MIN_DIM || fitComponent == UI.FitComponent.MAX_DIM ) {
             if ( fitComponent == UI.FitComponent.MIN_DIM ) {
                  if (areaWidth < areaHeight) {
                     scaleX = (float) width / iconWidth;
                     scaleY = scaleX;
-                     isEffectivelyFitWidth = true;
                  }
                 if (areaHeight < areaWidth) {
                     scaleY = (float) height / iconHeight;
                     scaleX = scaleY;
-                    isEffectivelyFitHeight = true;
                 }
             } else {
                 if (areaWidth > areaHeight) {
                     scaleX = (float) width / iconWidth;
                     scaleY = scaleX;
-                    isEffectivelyFitWidth = true;
                 }
                 if (areaHeight > areaWidth) {
                     scaleY = (float) height / iconHeight;
                     scaleX = scaleY;
-                    isEffectivelyFitHeight = true;
                 }
             }
         }
@@ -895,11 +883,6 @@ public final class SvgIcon extends ImageIcon
             scaleY = (float) height / iconHeight;
         }
 
-        if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
-            scaleX = 1f;
-            scaleY = 1f;
-        }
-
         boolean sizeIsUnknown = false;
         if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED ) {
             sizeIsUnknown = true;
@@ -907,6 +890,7 @@ public final class SvgIcon extends ImageIcon
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
 
         if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
+            FloatSize svgSize = _svgDocument.size();
             final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
             final int newHeight  = iconHeight >= 0 ? iconHeight : (int) svgSize.height;
             viewBox = new ViewBox( x, y, newWidth, newHeight );
@@ -919,28 +903,6 @@ public final class SvgIcon extends ImageIcon
         // Also let's check if the view box has valid values:
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
-
-        if (
-            fitComponent != UI.FitComponent.WIDTH &&
-            fitComponent != UI.FitComponent.HEIGHT &&
-            fitComponent != UI.FitComponent.WIDTH_AND_HEIGHT  &&
-            !isEffectivelyFitHeight &&
-            !isEffectivelyFitWidth
-        ) {
-            // Let's make sure the view box has the correct dimension ratio:
-            float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;
-            float boxRatio     =      viewBox.width        /      viewBox.height;
-            if ( boxRatio > viewBoxRatio ) {
-                // The view box is too wide, we need to make it narrower:
-                float newWidth = viewBox.height * viewBoxRatio;
-                viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );
-            }
-            if ( boxRatio < viewBoxRatio ) {
-                // The view box is too tall, we need to make it shorter:
-                float newHeight = viewBox.width / viewBoxRatio;
-                viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );
-            }
-        }
 
         /*
             Before we do the actual rendering we first check if there
