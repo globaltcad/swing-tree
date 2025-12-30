@@ -40,18 +40,23 @@ final class StyleRenderer
         // First we render things unique to certain layers:
 
         // Background stuff:
-        conf.baseColors().foundationColor().ifPresent(outerColor -> {
-            if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
-                g2d.setColor(outerColor);
+        Color foundationColor = conf.baseColors().foundationColor().map(c->c.getAlpha()==0?null:c).orElse(UI.Color.UNDEFINED);
+        Color backroundColor = conf.baseColors().backgroundColor().map(c->c.getAlpha()==0?null:c).orElse(UI.Color.UNDEFINED);
+        if ( foundationColor.getAlpha() == 255 && backroundColor.getAlpha() == 255 ) {
+            g2d.setColor(foundationColor);
+            g2d.fill(conf.areas().get(UI.ComponentArea.ALL)); // Filling everything is a bit cheaper!
+            g2d.setColor(backroundColor);
+            g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
+        } else {
+            if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
+                g2d.setColor(foundationColor);
                 g2d.fill(conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
-        });
-        conf.baseColors().backgroundColor().ifPresent(color -> {
-            if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
-                g2d.setColor(color);
+            if ( backroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
+                g2d.setColor(backroundColor);
                 g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
             }
-        });
+        }
 
         // Border stuff:
         _drawBorder( conf, conf.baseColors().borderColor(), g2d);
