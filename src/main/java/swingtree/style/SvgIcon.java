@@ -205,7 +205,9 @@ public final class SvgIcon extends ImageIcon
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
-    private static ConstructionArgs _loadSvgDocument( URL svgUrl, Size size ) {
+    private static ConstructionArgs _loadSvgDocument( @Nullable URL svgUrl, Size size ) {
+        if ( svgUrl == null )
+            return new ConstructionArgs(null, size, Unit.UNKNOWN, Unit.UNKNOWN);
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
@@ -673,7 +675,7 @@ public final class SvgIcon extends ImageIcon
      * @param y the Y coordinate of the icon's top-left corner
      */
     @Override
-    public synchronized void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
+    public synchronized void paintIcon( java.awt.@Nullable Component c, java.awt.Graphics g, int x, int y )
     {
         if ( _svgDocument == null )
             return;
@@ -789,7 +791,7 @@ public final class SvgIcon extends ImageIcon
         if ( finalWidth <= 0 || finalHeight <= 0 ) {
             finalWidth = iconWidth < 0 ? svgSize.width : iconWidth;
             finalHeight = iconHeight < 0 ? svgSize.height : iconHeight;
-            float scale = 1f;
+            float scale;
             if ( areaWidth < areaHeight ) { // <- Tall area
                 if ( finalWidth > finalHeight ) {
                     scale = areaWidth / finalWidth;
@@ -977,7 +979,7 @@ public final class SvgIcon extends ImageIcon
                 viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
                 break;
             default:
-                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
+                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
         }
 
         // Now onto the actual rendering:
