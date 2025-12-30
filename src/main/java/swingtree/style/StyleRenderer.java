@@ -37,14 +37,51 @@ final class StyleRenderer
         LayerRenderConf conf,
         Graphics2D g2d
     ) {
-        // First we render things unique to certain layers:
+        // 1. Foundation + Background fill (not every layer has this):
+        _drawBackgroundFill(conf, g2d);
+        // 2. Border (not every layer has this):
+        _drawBorder( conf, conf.baseColors().borderColor(), g2d);
 
-        // Background stuff:
-        Color foundationColor = conf.baseColors().foundationColor().map(c->c.getAlpha()==0?null:c).orElse(UI.Color.UNDEFINED);
-        Color backroundColor = conf.baseColors().backgroundColor().map(c->c.getAlpha()==0?null:c).orElse(UI.Color.UNDEFINED);
+        // Now on to things every layer has:
+
+        // 3. A grounding serving as a base background, which is a filled color and/or an image:
+        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )
+            if ( !imageConf.equals(ImageConf.none()) )
+                _renderImage( conf, imageConf, conf.boxModel().size(), g2d);
+
+        // 4. Gradients, which are best used to give a component a nice surface lighting effect.
+        // They may transition vertically, horizontally or diagonally over various different colors:
+        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )
+            if ( gradient.colors().length > 0 ) {
+                _renderGradient( gradient, conf, g2d );
+            }
+
+        // 5. Noise, which is a simple way to add a bit of texture to a component:
+        for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() )
+            if ( noise.get().colors().length > 0 ) {
+                _renderNoise( noise, conf, g2d );
+            }
+
+        // 6. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
+        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
+            _renderShadows(conf, shadow, g2d);
+
+        // 7. Custom text, which can be rendered in any font and color:
+        for ( TextConf text : conf.layer().texts().sortedByNames() )
+            _renderText( text, conf, g2d );
+
+        // 8. Painters, which are provided by the user and can be anything
+        _executeUserPainters(layer, conf, g2d);
+
+        // And that's it! We have rendered a style layer!
+    }
+
+    private static void _drawBackgroundFill( LayerRenderConf conf, Graphics2D g2d ) {
+        Color foundationColor = conf.baseColors().foundationColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
+        Color backroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
         if ( foundationColor.getAlpha() == 255 && backroundColor.getAlpha() == 255 ) {
             g2d.setColor(foundationColor);
-            g2d.fill(conf.areas().get(UI.ComponentArea.ALL)); // Filling everything is a bit cheaper!
+            g2d.fill(conf.areas().get(UI.ComponentArea.ALL)); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             g2d.setColor(backroundColor);
             g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
         } else {
@@ -57,43 +94,6 @@ final class StyleRenderer
                 g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
             }
         }
-
-        // Border stuff:
-        _drawBorder( conf, conf.baseColors().borderColor(), g2d);
-
-        // Now onto things every layer has in common:
-
-        // Every layer has 4 things:
-        // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )
-            if ( !imageConf.equals(ImageConf.none()) )
-                _renderImage( conf, imageConf, conf.boxModel().size(), g2d);
-
-        // 2. Gradients, which are best used to give a component a nice surface lighting effect.
-        // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )
-            if ( gradient.colors().length > 0 ) {
-                _renderGradient( gradient, conf, g2d );
-            }
-
-        // 3. Noise, which is a simple way to add a bit of texture to a component:
-        for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() )
-            if ( noise.get().colors().length > 0 ) {
-                _renderNoise( noise, conf, g2d );
-            }
-
-        // 4. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
-            _renderShadows(conf, shadow, g2d);
-
-        // 5. Custom text, which can be rendered in any font and color:
-        for ( TextConf text : conf.layer().texts().sortedByNames() )
-            _renderText( text, conf, g2d );
-
-        // 6. Painters, which are provided by the user and can be anything
-        _executeUserPainters(layer, conf, g2d);
-
-        // And that's it! We have rendered a style layer!
     }
 
     private static void _drawBorder( LayerRenderConf conf, BorderColorsConf colors, Graphics2D g2d )
