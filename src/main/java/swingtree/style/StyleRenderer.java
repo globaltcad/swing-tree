@@ -78,19 +78,19 @@ final class StyleRenderer
 
     private static void _drawBackgroundFill( LayerRenderConf conf, Graphics2D g2d ) {
         Color foundationColor = conf.baseColors().foundationColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
-        Color backroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
-        if ( foundationColor.getAlpha() == 255 && backroundColor.getAlpha() == 255 ) {
+        Color backgroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
+        if ( foundationColor.getAlpha() == 255 && backgroundColor.getAlpha() == 255 ) {
             g2d.setColor(foundationColor);
             g2d.fill(conf.areas().get(UI.ComponentArea.ALL)); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
-            g2d.setColor(backroundColor);
+            g2d.setColor(backgroundColor);
             g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
                 g2d.fill(conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
-            if ( backroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
-                g2d.setColor(backroundColor);
+            if ( backgroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
+                g2d.setColor(backgroundColor);
                 g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
             }
         }
