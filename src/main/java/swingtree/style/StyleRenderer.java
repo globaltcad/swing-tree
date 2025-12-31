@@ -79,7 +79,7 @@ final class StyleRenderer
     private static void _drawBackgroundFill( LayerRenderConf conf, Graphics2D g2d ) {
         Color foundationColor = conf.baseColors().foundationColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
         Color backgroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
-        boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaue();
+        boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaque();
         boolean bodyIsOpaque = backgroundColor.getAlpha() == 255;
         if ( bodyIsOpaque && borderIsOpaque ) {
             g2d.setColor(foundationColor);

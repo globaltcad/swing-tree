@@ -87,7 +87,7 @@ final class BorderColorsConf
                 _left.getAlpha() > 0;
     }
 
-    boolean isFullyOpaue() {
+    boolean isFullyOpaque() {
         return
                 _top.getAlpha()    == 255 &&
                 _right.getAlpha()  == 255 &&
