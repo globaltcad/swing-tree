@@ -884,15 +884,18 @@ public final class SvgIcon extends ImageIcon
         }
 
         boolean sizeIsUnknown = false;
-        if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED ) {
+        if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED && fitComponent == UI.FitComponent.UNDEFINED ) {
             sizeIsUnknown = true;
         }
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
 
         if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
-            FloatSize svgSize = _svgDocument.size();
-            final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
-            final int newHeight  = iconHeight >= 0 ? iconHeight : (int) svgSize.height;
+            final FloatSize svgSize = _svgDocument.size();
+            float newWidth   = iconWidth  >= 0 ? iconWidth  : svgSize.width;
+            float newHeight  = iconHeight >= 0 ? iconHeight : svgSize.height;
+            final FloatSize viewBoxSize = _svgDocument.viewBox().size();
+            newWidth   = newWidth  >= 0 ? newWidth  : viewBoxSize.width;
+            newHeight  = newHeight >= 0 ? newHeight : viewBoxSize.height;
             viewBox = new ViewBox( x, y, newWidth, newHeight );
         }
 
@@ -904,12 +907,7 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
-        /*
-            Before we do the actual rendering we first check if there
-            is a preferred placement that is not the center.
-            If that is the case we move the view box accordingly.
-        */
-        // First we correct if the component area is smaller than the view box:
+        // We correct if the component area is smaller than the view box:
         width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
         width += (int) Math.max(0, x - viewBox.x );
         height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
@@ -917,6 +915,23 @@ public final class SvgIcon extends ImageIcon
         x = (int) Math.min(x, viewBox.x);
         y = (int) Math.min(y, viewBox.y);
 
+        {
+            viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
+            FloatSize svgSize = _svgDocument.viewBox().size();
+            float svgRefWidth = ((svgSize.width) / (svgSize.height));
+            float svgRefHeight = ((svgSize.height) / (svgSize.width));
+            float imgRefWidth = (viewBox.width / viewBox.height);
+            float imgRefHeight = (viewBox.height / viewBox.width);
+
+            scaleX = Math.max(1f, imgRefWidth / svgRefWidth);
+            scaleY = Math.max(1f, imgRefHeight / svgRefHeight);
+            viewBox = new ViewBox(viewBox.x / scaleX, viewBox.y / scaleY, viewBox.width / scaleX, viewBox.height / scaleY);
+        }
+        /*
+            Before we do the actual rendering we first check if there
+            is a preferred placement that is not the center.
+            If that is the case we move the view box accordingly.
+        */
         final float scaledAreaX = x / scaleX;
         final float scaledAreaY = y / scaleY;
         final float scaledWidth = width / scaleX;
