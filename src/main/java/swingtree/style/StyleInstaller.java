@@ -12,7 +12,6 @@ import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
-import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.layout.Bounds;
 
@@ -280,7 +279,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBorderRadius                = newStyle.border().hasAnyNonZeroArcs();
         final boolean hasBackground                  = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                      = newStyle.margin().isPositive();
-        final boolean hasOpaqueBorder                = newStyle.border().colors().isFullyOpaue();
+        final boolean hasOpaqueBorder                = newStyle.border().colors().isFullyOpaque();
         final boolean isNaturallyTransparent         = ( _initialIsOpaque == false ); // We categorize based on the initial state of the flag.
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret the tab buttons as background
