@@ -1189,13 +1189,8 @@ final class StyleRenderer
                     imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
                     imgHeight = imgHeight >= 0 ? imgHeight : componentHeight;
                 }
-                int x = style.horizontalOffset();
-                int y = style.verticalOffset();
-                // We apply the insets:
-                x += (insets.left().orElse(0f).intValue() + padding.left().orElse(0f).intValue());
-                y += (insets.top().orElse(0f).intValue() + padding.top().orElse(0f).intValue());
-                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());
-                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());
+                int x = style.horizontalOffset() + insets.left().orElse(0f).intValue();
+                int y = style.verticalOffset() + insets.top().orElse(0f).intValue();
                 switch ( placement ) {
                     case TOP:
                         x += (componentWidth - imgWidth) / 2;
@@ -1231,6 +1226,10 @@ final class StyleRenderer
                         throw new IllegalArgumentException("Unknown placement: " + placement);
                 }
 
+                x += padding.left().orElse(0f).intValue();
+                y += padding.top().orElse(0f).intValue();
+                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());
+                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());
                 Image image;
                 if ( imageIcon instanceof SvgIcon) {
                     SvgIcon svgIcon = (SvgIcon) imageIcon;
