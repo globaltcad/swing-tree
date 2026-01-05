@@ -726,13 +726,6 @@ public final class SvgIcon extends ImageIcon
         width  = scaledWidth  >= 0 && weNeedToRenderLikeTheInvokerWantsTo ? scaledWidth  : width  - insets.right  - insets.left;
         height = scaledHeight >= 0 && weNeedToRenderLikeTheInvokerWantsTo ? scaledHeight : height - insets.bottom - insets.top ;
 
-        if ( _widthUnit == Unit.PERCENTAGE ) {
-            width = (int) (( width * _svgDocument.size().width ) / 100f);
-        }
-        if ( _heightUnit == Unit.PERCENTAGE ) {
-            height = (int) (( height * _svgDocument.size().height ) / 100f);
-        }
-
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
             int larger  = (int) Math.ceil(  width / 2.0 );
@@ -788,25 +781,44 @@ public final class SvgIcon extends ImageIcon
 
         float finalWidth  = ( iconWidth  > 0 || areaWidth  < 0 ? iconWidth  : -1 );
         float finalHeight = ( iconHeight > 0 || areaHeight < 0 ? iconHeight : -1 );
+        boolean hasPercentageScaling = false;
         if ( finalWidth <= 0 || finalHeight <= 0 ) {
-            finalWidth = iconWidth < 0 ? svgSize.width : iconWidth;
-            finalHeight = iconHeight < 0 ? svgSize.height : iconHeight;
-            float scale;
-            if ( areaWidth < areaHeight ) { // <- Tall area
-                if ( finalWidth > finalHeight ) {
-                    scale = areaWidth / finalWidth;
+            finalWidth = iconWidth;
+            if ( iconWidth < 0 ) {
+                if ( _widthUnit == Unit.PERCENTAGE && _size.width().isPresent() ) {
+                    finalWidth = areaWidth * _size.width().get() / 100f;
+                    hasPercentageScaling = true;
                 } else {
-                    scale = areaHeight / finalHeight;
-                }
-            } else { // < - Wide area
-                if ( finalWidth < finalHeight ) {
-                    scale = areaWidth / finalWidth;
-                } else {
-                    scale = areaHeight / finalHeight;
+                    finalWidth = svgSize.width;
                 }
             }
-            finalWidth = finalWidth * scale;
-            finalHeight = finalHeight * scale;
+            finalHeight = iconHeight;
+            if ( iconHeight < 0 ) {
+                if ( _heightUnit == Unit.PERCENTAGE && _size.height().isPresent() ) {
+                    finalHeight = areaHeight * _size.height().get() / 100f;
+                    hasPercentageScaling = true;
+                } else {
+                    finalHeight = svgSize.height;
+                }
+            }
+            if ( !hasPercentageScaling ) {
+                float scale;
+                if (areaWidth < areaHeight) { // <- Tall area
+                    if (finalWidth > finalHeight) {
+                        scale = areaWidth / finalWidth;
+                    } else {
+                        scale = areaHeight / finalHeight;
+                    }
+                } else { // < - Wide area
+                    if (finalWidth < finalHeight) {
+                        scale = areaWidth / finalWidth;
+                    } else {
+                        scale = areaHeight / finalHeight;
+                    }
+                }
+                finalWidth = finalWidth * scale;
+                finalHeight = finalHeight * scale;
+            }
         }
         return Size.of(finalWidth, finalHeight);
     }
