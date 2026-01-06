@@ -3,6 +3,7 @@ package swingtree.api;
 import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Size;
+import swingtree.style.SvgIcon;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -80,13 +81,23 @@ public interface IconDeclaration
     /**
      *  The preferred size of the icon, which is not necessarily the actual size
      *  of the icon that is being loaded but rather the size that the icon should
-     *  be scaled to when it is being loaded.
+     *  be scaled to when it is being loaded.<br>
+     *  If this method returns {@link Optional#empty()}, then the loaded icon will have
+     *  the exact same size found at the image file found at {@link #path()}.
+     *  A non-empty optional with a {@link Size#unknown()}, specifically indicates to
+     *  {@link swingtree.style.SvgIcon}s that their size should be context dependent,
+     *  meaning that their {@link SvgIcon#getIconWidth()} and {@link SvgIcon#getIconHeight()}
+     *  are both returning {@code -1} to indicate flexible scaling.<br>
+     *  In case of a regular png or jpeg on the other hand, a {@link Size#unknown()} will
+     *  also cause the resulting {@link ImageIcon} to have the same dimensions found in the file.
      *
-     * @return The preferred size of the icon or {@link Size#unknown()} if the size is unspecified,
+     * @return The preferred size of the icon or {@link Optional#empty()} if the size is unspecified,
      *          which means that the icon should be loaded in its original size.
+     *          A non-empty optional with a {@link Size#unknown()}, specifically indicates to
+     *          {@link swingtree.style.SvgIcon}s that their size should be context dependent.
      */
-    default Size size() {
-        return Size.unknown();
+    default Optional<Size> size() {
+        return Optional.of(Size.unknown());
     }
 
     /**
@@ -137,7 +148,7 @@ public interface IconDeclaration
      *        but with the specified width as preferred width.
      */
     default IconDeclaration withWidth( int width ) {
-        return IconDeclaration.of(size().withWidth(width), path());
+        return IconDeclaration.of(size().map(it->it.withWidth(width)).orElse(Size.of(width, -1)), path());
     }
 
     /**
@@ -149,7 +160,7 @@ public interface IconDeclaration
      *        but with the specified height as preferred height.
      */
     default IconDeclaration withHeight( int height ) {
-        return IconDeclaration.of(size().withHeight(height), path());
+        return IconDeclaration.of(size().map(it->it.withHeight(height)).orElse(Size.of(-1, height)), path());
     }
 
     /**
