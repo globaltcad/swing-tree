@@ -357,17 +357,37 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Creates an updated {@link SvgIcon} with a new width, which is
-     *  the same as what is reported by {@link #getIconWidth()}.
-     *  The supplied width will be interpreted as having "developer pixel"
-     *  as unit, and <b>whatever unit the weight has in this instance will
-     *  be overridden in the new one</b>
+     *  Creates an updated {@link SvgIcon} with a new width measured in "developer pixel",
+     *  which effectively translates to what is being reported by {@link #getBaseWidth()},
+     *  and indirectly also {@link #getIconWidth()} (which is scaled to component pixel space).
+     *  Since the supplied width is developer pixel based, <b>the existing width-unit in
+     *  this instance will be overridden to being pixel based in the returned instance</b>
+     * <p>
+     * This method is useful when you want to adjust the width of
+     * an SVG without affecting the (pixel based) height!<br>
+     * For example, calling {@code icon.withIconWidth(100)} on an icon
+     * with dimensions 20pxx20px will result in an icon that is 100px×20px pixels in size.<br>
+     * <b>
+     *     So be aware that using this method may also change
+     *     the aspect ratio of the icon, possibly causing
+     *     it to be rendered distorted...
+     * </b>
+     * </p><br>
+     * <p>
+     *     However, in case of the height of this icon being percentage based, then the new
+     *     icon will have its height overridden to {@code -1} and the unit of the height will
+     *     also always be pixel based (see {@link #widthUnitString()} and {@link #heightUnitString()}).
+     * </p>
      *
      * @param newWidth The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width.
      *        If the width is -1, the icon will be rendered according to the width of a given component
      *        or the width of the SVG document itself.
+     * @see #withIconHeight(int) similar to this method but for setting the height instead of width...
+     * @see #withIconSize(int, int) for setting both dimensions independently.
+     * @see #getIconWidth() to get the current icon width in <b>component pixel space.</b>
+     * @see #getBaseWidth() to get the current icon width in <b>developer pixel space.</b>
      */
     public SvgIcon withIconWidth( int newWidth ) {
         int width = _size.width().map(Math::round).orElse(NO_SIZE);
@@ -443,19 +463,37 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Creates an updated {@link SvgIcon} with the supplied integer used
-     *  as the icon height, which you can also retrieve using {@link #getIconHeight()}.
-     *  The supplied height will be interpreted as having "developer pixel"
-     *  as its unit, and <b>whatever unit the height has in this instance will be overridden in the new one.</b>
-     *  If the height is -1, the icon will be rendered according to the height of a given component
-     *  or the height of the "view box" of the SVG document itself.
-     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
+     *  Creates a new {@link SvgIcon} with the specified height measured in "developer pixels".
+     *  The supplied height is developer pixel based, and <b>the existing height-unit in
+     *  this instance will be overridden to being pixel based in the returned instance</b>.
+     *  <p>
+     *  This method is useful when you want to adjust the height of an SVG without
+     *  affecting the (pixel based) width!<br>
+     *  For example, calling {@code icon.withIconHeight(50)} on an icon with
+     *  dimensions 20px×20px will result in an icon that is 20px×50px in size.<br>
+     *  <b>
+     *      Be aware that using this method may also change the aspect ratio
+     *      of the icon, potentially causing it to be rendered distorted.
+     *  </b>
+     *  </p><br>
+     *  <p>
+     *      If the width of this icon is percentage based, then the new icon will have
+     *      its width overridden to {@code -1} and the unit of the width will also always
+     *      be pixel based (see {@link #widthUnitString()} and {@link #heightUnitString()}).
+     *      This ensures that percentage-based dimensions are not mixed with explicit
+     *      pixel dimensions in a single icon instance.
+     *  </p>
      *
-     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
-     *               to the height of a given component or the height of the SVG document itself.
-     * @return A new {@link SvgIcon} with the given height in developer pixel.
-     *        If the height is -1, the icon will be rendered according to the height of a given component
-     *        or the height of the SVG document itself.
+     * @param newHeight The height of the icon in developer pixels, or -1 if the icon
+     *                  should be rendered according to the height of a given component
+     *                  or the height of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given height.
+     *         If the height is -1, the icon will be rendered according to the height
+     *         of a given component or the height of the SVG document itself.
+     * @see #withIconWidth(int) similar to this method but for setting the width instead of height...
+     * @see #withIconSize(int, int) for setting both dimensions independently.
+     * @see #getIconHeight() to get the current icon height in <b>component pixel space.</b>
+     * @see #getBaseHeight() to get the current icon height in <b>developer pixel space.</b>
      */
     public SvgIcon withIconHeight( int newHeight ) {
         int currentHeight = _size.height().map(Math::round).orElse(NO_SIZE);
@@ -472,20 +510,39 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Creates an updated {@link SvgIcon} with the given width and height, interpreted as "developer pixel".
-     *  <b>So Whatever units this icon instance has will be overridden in the new one.</b>
-     *  Dimensions smaller than 0 are considered "undefined".
-     *  When the icon is being rendered then these will be determined according to the
-     *  aspect ratio of the SVG document, the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement}
-     *  policies or the size of the component the SVG is rendered into.
+     *  Creates a new {@link SvgIcon} with the specified width and height measured in "developer pixels".
+     *  Both supplied dimensions are developer pixel based, and <b>the existing width and height units
+     *  of this instance will be overridden to being pixel based in the returned instance</b>.
+     *  <p>
+     *  This method allows you to explicitly set both dimensions of the icon, giving you
+     *  complete control over its rendered size. However, be mindful that this may distort
+     *  the icon if the new dimensions don't maintain the original aspect ratio.
+     *  </p><br>
+     *  <p>
+     *      <b>Important:</b> This method implicitly converts any percentage-based
+     *      dimensions to developer pixel-based dimensions. The conversion preserves
+     *      the percentage value's intent by resolving it to -1 (unknown) when a negative
+     *      value is provided. This ensures that percentage-based sizing can be cleared
+     *      when needed.
+     *  </p>
+     *  <p>
+     *      For example, if you have an icon with width="50%" and height="100%",
+     *      calling {@code withIconSize(100, -1)} will result in an icon with
+     *      width=100px and height=-1 (undefined), allowing the height to be
+     *      determined by other factors like the component size or aspect ratio.
+     *  </p>
      *
-     * @param newWidth The width of the icon in developer pixel, or -1 if the icon should be rendered according
-     *              to the width of a given component or the width of the SVG document itself.
-     * @param newHeight The height of the icon in developer pixel, or -1 if the icon should be rendered according
-     *               to the height of a given component or the height of the SVG document itself.
+     * @param newWidth The width of the icon in developer pixels, or -1 to indicate
+     *                 an undefined width that should be determined by other factors.
+     * @param newHeight The height of the icon in developer pixels, or -1 to indicate
+     *                  an undefined height that should be determined by other factors.
      * @return A new {@link SvgIcon} with the given width and height.
-     *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
-     *        or the width or height of the SVG document itself.
+     *         Negative values indicate that the dimension should be determined
+     *         by the component, SVG document, or other layout policies.
+     * @see #withIconWidth(int) for setting only the width.
+     * @see #withIconHeight(int) for setting only the height.
+     * @see #withIconSizeFromWidth(int) for setting width while maintaining aspect ratio.
+     * @see #withIconSizeFromHeight(int) for setting height while maintaining aspect ratio.
      */
     public SvgIcon withIconSize( int newWidth, int newHeight ) {
         newWidth  = newWidth  < 0 ? NO_SIZE : newWidth;
@@ -508,16 +565,46 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Allows you to create an updated {@link SvgIcon} with the given size
-     *  in the form of a {@link Size} object containing the width and height.
-     *  These new dimensions are interpreted as "developer pixel" in the new SVG icon.
-     *  <b>So whatever units this icon instance has will be overridden in the new one.</b>
-     *  If the width or height is -1, the icon will be rendered according to the
-     *  width or height of a given component, the width or height of the SVG document
-     *  and the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement} policies.
+     * Creates a new {@link SvgIcon} with the specified width and height measured in "developer pixels".
+     * This method accepts a {@link Size} object containing the desired dimensions.
+     * Both supplied dimensions are developer pixel based, and <b>the existing width and height units
+     * of this instance will be overridden to being pixel based in the returned instance</b>.
+     * <p>
+     * This method allows you to explicitly set both dimensions of the icon using a {@link Size} object,
+     * giving you complete control over its rendered size. However, be mindful that this may distort
+     * the icon if the new dimensions don't maintain the original aspect ratio.
+     * </p><br>
+     * <p>
+     * <b>Important:</b> This method implicitly converts any percentage-based
+     * dimensions in the current icon to pixel-based dimensions in the returned icon.
+     * The conversion preserves the percentage value's intent by resolving it to -1 (unknown)
+     * when a negative value is provided in the {@link Size} object. This ensures that
+     * percentage-based sizing can be cleared when needed.
+     * </p>
+     * <p>
+     * For example, if you have an icon with width="50%" and height="100%",
+     * calling {@code withIconSize(Size.of(100, -1))} will result in an icon with
+     * width=100px and height=-1 (undefined), allowing the height to be
+     * determined by other factors like the component size or aspect ratio.
+     * </p>
+     * <p>
+     * The {@link Size} object can contain optional dimensions (using {@link Optional} semantics),
+     * allowing you to specify only width, only height, both, or neither. When a dimension
+     * is not present in the {@link Size} object, the corresponding dimension in the
+     * returned icon will be set to -1 (unknown).
+     * </p>
      *
-     * @param size The size of the icon in the form of a {@link Size}.
-     * @return A new {@link SvgIcon} with the given width and height.
+     * @param size A {@link Size} object containing the desired width and/or height for the icon.
+     *             Use negative values or empty optionals to indicate that a dimension should
+     *             remain undefined and be determined by other factors.
+     * @return A new {@link SvgIcon} with the given width and height from the {@link Size} object.
+     *         Negative values indicate that the dimension should be determined by the component,
+     *         SVG document, or other layout policies.
+     * @see #withIconSize(int, int) for the integer-based version of this method.
+     * @see #withIconWidth(int) for setting only the width.
+     * @see #withIconHeight(int) for setting only the height.
+     * @see #withIconSizeFromWidth(int) for setting width while maintaining aspect ratio.
+     * @see #withIconSizeFromHeight(int) for setting height while maintaining aspect ratio.
      */
     public SvgIcon withIconSize( Size size ) {
         return withIconSize(
@@ -527,22 +614,48 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Determines a new size of the icon (both width and height) using the provided width
-     *  and the inherent aspect ratio of the SVG document.
-     *  The new dimensions of the new returned SVG icon are interpreted as "developer pixel",
-     *  <b>so whatever units this icon instance has will be overridden in the new one.</b>
-     *  If the width is -1, the icon will lose its fixed width and will
-     *  be rendered according to the width of a given component.
-     *  <p>
-     *  For example, if the SVG document has an aspect ratio of 2:1, and the width is 200,
-     *  then the height will be 100.
-     *  <p>
-     *  Also see {@link #withIconSizeFromHeight(int)}.
+     * Creates a new {@link SvgIcon} with the specified width, calculating the height
+     * automatically to maintain the aspect ratio of the original SVG document.
+     * <p>
+     * This method is particularly useful when you want to scale an SVG icon proportionally
+     * while controlling only one dimension. Unlike {@link #withIconWidth(int)}, which can
+     * distort the icon by changing only the width independently, this method preserves
+     * the original aspect ratio by calculating the appropriate height.
+     * </p>
+     * <p>
+     * <b>Important behaviors and edge cases:</b>
+     * <ul>
+     *   <li>If {@code newWidth} is negative, returns an icon with both dimensions set to -1
+     *       (unknown), effectively resetting to undefined size.</li>
+     *   <li>If the current icon has percentage-based dimensions (e.g., width="50%"),
+     *       they are first resolved to pixel values using the SVG document's view box
+     *       as reference (via {@link #withPercentageSizeResolvedAsPixels()}) before
+     *       calculating the aspect ratio.</li>
+     *   <li>If the SVG document cannot be loaded or has no view box, the original icon
+     *       is returned unchanged.</li>
+     *   <li>The resulting icon will always have pixel-based units (PX) for both dimensions,
+     *       even if the original used percentages.</li>
+     *   <li>If the calculated height would be fractional, it's rounded up to the nearest
+     *       integer to prevent clipping.</li>
+     *   <li>When called on an icon with fixed pixel dimensions, this method simply
+     *       recalculates the height based on the existing aspect ratio.</li>
+     * </ul>
+     * </p>
+     * <p>
+     * This method is particularly useful in layout scenarios where you need to
+     * constrain an icon by width (e.g., fitting within a fixed-width toolbar)
+     * while maintaining its visual proportions.
+     * </p>
      *
-     * @param newWidth The width of the icon in pixels, or -1 if the icon should be rendered according
-     *              to the width of a given component or the width of the SVG document itself.
-     * @return A new {@link SvgIcon} with the given width and a logical height that is
-     *         determined by the aspect ratio of the SVG document.
+     * @param newWidth The desired width in developer pixels. Use -1 to reset to unknown size.
+     * @return A new {@link SvgIcon} with the specified width and a height calculated
+     *         to maintain the original aspect ratio. Returns the original icon if
+     *         the SVG document cannot provide aspect ratio information.
+     * @see #withIconSizeFromHeight(int) for the counterpart that sets height and calculates width.
+     * @see #withIconWidth(int) to set width independently (may distort aspect ratio).
+     * @see #withIconSize(int, int) to set both dimensions independently.
+     * @see #withPercentageSizeResolvedAsPixels() for understanding how percentage
+     *      dimensions are handled before aspect ratio calculation.
      */
     public SvgIcon withIconSizeFromWidth( int newWidth ) {
         if ( newWidth < 0 )
@@ -554,22 +667,48 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Determines the size of the icon (both width and height) using the provided height
-     *  and the aspect ratio of the SVG document.
-     *  The dimensions of the returned SVG icon are interpreted as "developer pixel",
-     *  <b>so whatever units this icon instance has will be overridden in the new one.</b>
-     *  If the height is -1, the icon will lose its fixed height and will
-     *  be rendered according to the height of a given component.
-     *  <p>
-     *  For example, if the SVG document has an aspect ratio of 2:1, and the height is 100,
-     *  then the width will be 200.
-     *  <p>
-     *  Also see {@link #withIconSizeFromWidth(int)}.
+     * Creates a new {@link SvgIcon} with the specified height, calculating the width
+     * automatically to maintain the aspect ratio of the original SVG document.
+     * <p>
+     * This method is the counterpart to {@link #withIconSizeFromWidth(int)} and is
+     * useful when you need to control the icon's height while preserving its
+     * proportional width. Like its width-based counterpart, this method prevents
+     * distortion by maintaining the original aspect ratio.
+     * </p>
+     * <p>
+     * <b>Important behaviors and edge cases:</b>
+     * <ul>
+     *   <li>If {@code newHeight} is negative, returns an icon with both dimensions set to -1
+     *       (unknown), effectively resetting to undefined size.</li>
+     *   <li>If the current icon has percentage-based dimensions (e.g., height="75%"),
+     *       they are first resolved to pixel values using the SVG document's view box
+     *       as reference (via {@link #withPercentageSizeResolvedAsPixels()}) before
+     *       calculating the aspect ratio.</li>
+     *   <li>If the SVG document cannot be loaded or has no view box, the original icon
+     *       is returned unchanged.</li>
+     *   <li>The resulting icon will always have pixel-based units (PX) for both dimensions,
+     *       even if the original used percentages.</li>
+     *   <li>If the calculated width would be fractional, it's rounded up to the nearest
+     *       integer to prevent clipping.</li>
+     *   <li>When called on an icon with fixed pixel dimensions, this method simply
+     *       recalculates the width based on the existing aspect ratio.</li>
+     * </ul>
+     * </p>
+     * <p>
+     * This method is particularly useful in layout scenarios where you need to
+     * constrain an icon by height (e.g., fitting within a fixed-height toolbar)
+     * while maintaining its visual proportions.
+     * </p>
      *
-     * @param newHeight The height of the icon in pixels, or -1 if the icon should be rendered according
-     *               to the height of a given component or the height of the SVG document itself.
-     * @return A new {@link SvgIcon} with the given height and a logical width that is
-     *         determined by the aspect ratio of the SVG document.
+     * @param newHeight The desired height in developer pixels. Use -1 to reset to unknown size.
+     * @return A new {@link SvgIcon} with the specified height and a width calculated
+     *         to maintain the original aspect ratio. Returns the original icon if
+     *         the SVG document cannot provide aspect ratio information.
+     * @see #withIconSizeFromWidth(int) for the counterpart that sets width and calculates height.
+     * @see #withIconHeight(int) to set height independently (may distort aspect ratio).
+     * @see #withIconSize(int, int) to set both dimensions independently.
+     * @see #withPercentageSizeResolvedAsPixels() for understanding how percentage
+     *      dimensions are handled before aspect ratio calculation.
      */
     public SvgIcon withIconSizeFromHeight( int newHeight ) {
         if ( newHeight < 0 )
