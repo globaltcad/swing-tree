@@ -50,7 +50,7 @@ import java.util.function.Function;
  *   <p>
  *   <b>Also note that the direct use of this class and it's API is discouraged in favour of simply
  *   calling the {@link UI#findIcon(String)} or {@link UI#findSvgIcon(String)} methods, which
- *   will automatically load and cache all of the icons for you.</b>
+ *   will automatically load and cache all the icons for you.</b>
  */
 public final class SvgIcon extends ImageIcon
 {
@@ -61,7 +61,7 @@ public final class SvgIcon extends ImageIcon
     private static final Insets          ZERO_INSETS           = new Insets(0,0,0,0);
 
 
-    private final @Nullable SVGDocument _svgDocument;
+    private final RawSVG                _core;
     private final Size                  _size;
     private final Unit                  _widthUnit;
     private final Unit                  _heightUnit;
@@ -77,7 +77,7 @@ public final class SvgIcon extends ImageIcon
      * @param path The path to the SVG document.
      */
     public static SvgIcon at( String path ) {
-        ConstructionArgs args = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
+        RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -87,7 +87,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon at( String path, Size size ) {
-        ConstructionArgs args = _loadSvgDocument(SvgIcon.class.getResource(path), size);
+        RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), size);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -100,7 +100,7 @@ public final class SvgIcon extends ImageIcon
      * @param svgUrl The URL to the SVG document.
      */
     public static SvgIcon at( URL svgUrl ) {
-        ConstructionArgs args = _loadSvgDocument(svgUrl, Size.unknown());
+        RawSVG args = _loadSvgDocument(svgUrl, Size.unknown());
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -109,7 +109,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon at( URL svgUrl, Size size ) {
-        ConstructionArgs args = _loadSvgDocument(svgUrl, size);
+        RawSVG args = _loadSvgDocument(svgUrl, size);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -135,7 +135,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon of( String svgString, Size size ) {
         InputStream inputStream = new ByteArrayInputStream(svgString.getBytes(StandardCharsets.UTF_8));
-        ConstructionArgs args = _loadSvgDocument(inputStream, size);
+        RawSVG args = _loadSvgDocument(inputStream, size);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -153,7 +153,7 @@ public final class SvgIcon extends ImageIcon
      * @param stream The input stream supplying the text data of the SVG document.
      */
     public static SvgIcon of( InputStream stream ) {
-        ConstructionArgs args = _loadSvgDocument(stream, Size.unknown());
+        RawSVG args = _loadSvgDocument(stream, Size.unknown());
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -172,7 +172,7 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon of( InputStream stream, Size size ) {
-        ConstructionArgs args = _loadSvgDocument(stream, size);
+        RawSVG args = _loadSvgDocument(stream, size);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -187,7 +187,7 @@ public final class SvgIcon extends ImageIcon
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
-        ConstructionArgs args = new ConstructionArgs(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN);
+        RawSVG args = new RawSVG(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
@@ -201,25 +201,27 @@ public final class SvgIcon extends ImageIcon
      * @param size The size of the icon in the form of a {@link Size}.
      */
     public static SvgIcon of( SVGDocument svgDocument, Size size ) {
-        ConstructionArgs args = new ConstructionArgs(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN);
+        RawSVG args = new RawSVG(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
-    private static ConstructionArgs _loadSvgDocument( URL svgUrl, Size size ) {
+    private static RawSVG _loadSvgDocument(@Nullable URL svgUrl, Size size ) {
+        if ( svgUrl == null )
+            return new RawSVG(null, size, Unit.UNKNOWN, Unit.UNKNOWN);
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
         }, size);
     }
 
-    private static ConstructionArgs _loadSvgDocument( InputStream stream, Size size ) {
+    private static RawSVG _loadSvgDocument(InputStream stream, Size size ) {
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(stream, null, LoaderContext.builder().preProcessor(processor).build());
         }, size);
     }
 
-    private static ConstructionArgs _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
+    private static RawSVG _loadSvgDocument(Function<DomProcessor, @Nullable SVGDocument> loader, Size size) {
         SVGDocument tempSVGDocument = null;
         Unit widthUnit  = Unit.UNKNOWN;
         Unit heightUnit = Unit.UNKNOWN;
@@ -237,19 +239,13 @@ public final class SvgIcon extends ImageIcon
         }
         if ( tempSVGDocument != null ) {
             if ( widthUnit != Unit.UNKNOWN && !size.hasPositiveWidth() ) {
-                if ( widthUnit == Unit.PERCENTAGE )
-                    size = size.withWidth(-1); // A percentage is NOT a concrete size! (computed dynamically)
-                else
-                    size = size.withWidth(tempSVGDocument.size().width);
+                size = size.withWidth(tempSVGDocument.size().width);
             }
             if ( heightUnit != Unit.UNKNOWN && !size.hasPositiveHeight() ) {
-                if ( heightUnit == Unit.PERCENTAGE )
-                    size = size.withHeight(-1); // A percentage is NOT a concrete size! (computed dynamically)
-                else
-                    size = size.withHeight(tempSVGDocument.size().height);
+                size = size.withHeight(tempSVGDocument.size().height);
             }
         }
-        return new ConstructionArgs(tempSVGDocument, size, widthUnit, heightUnit);
+        return new RawSVG(tempSVGDocument, size, widthUnit, heightUnit);
     }
 
     private static Unit _unitOf(String unitString) {
@@ -277,15 +273,15 @@ public final class SvgIcon extends ImageIcon
     }
 
     private SvgIcon(
-        ConstructionArgs args,
+        RawSVG args,
         UI.FitComponent  fitComponent,
         UI.Placement     preferredPlacement
     ) {
-        this(args.svgDocument, args.size, args.widthUnit, args.heightUnit, fitComponent, preferredPlacement);
+        this(args, args.size, args.widthUnit, args.heightUnit, fitComponent, preferredPlacement);
     }
 
     private SvgIcon(
-        @Nullable SVGDocument svgDocument, // nullable
+        RawSVG core,
         Size                  size,
         Unit                  widthUnit,
         Unit                  heightUnit,
@@ -293,7 +289,7 @@ public final class SvgIcon extends ImageIcon
         UI.Placement          preferredPlacement
     ) {
         super();
-        _svgDocument        = svgDocument;
+        _core               = Objects.requireNonNull(core);
         _size               = Objects.requireNonNull(size);
         _widthUnit          = Objects.requireNonNull(widthUnit);
         _heightUnit         = Objects.requireNonNull(heightUnit);
@@ -301,9 +297,47 @@ public final class SvgIcon extends ImageIcon
         _preferredPlacement = Objects.requireNonNull(preferredPlacement);
     }
 
+    private Size _size() {
+        if ( _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE )
+            return _size;
+        return Size.of(
+                _widthUnit == Unit.PERCENTAGE ? -1 : _size.width().orElse(-1f),
+                _heightUnit == Unit.PERCENTAGE ? -1 : _size.height().orElse(-1f)
+            );
+    }
+
     /**
-     *  Exposes the width of the icon, or -1 if the icon should be rendered according
-     *  to the width of a given component or the width of the SVG document itself.
+     * Returns the unit of the width of the icon or an empty {@link String} if the encountered unit is unknown.
+     * If the underlying document reports a valid width without a unit postfix, then it will be interpreted as "px"!<br>
+     * <b>
+     *     Please note that this method does not return the exact same unit found in the underlying
+     *     document, since not all units are supported by the SwingTree icon...
+     * </b>
+     * @return The unit of the width of the SVG icon in the form of a string similar
+     *          to how it is present in the underlying document.
+     */
+    public String widthUnitString() {
+        return _widthUnit.toPublicString();
+    }
+
+    /**
+     * Returns the unit of the height of the icon or an empty {@link String} if the encountered unit is unknown.
+     * If the underlying document reports a valid height without a unit postfix, then it will be interpreted as "px"!<br>
+     * <b>
+     *     Please note that this method does not return the exact same unit found in the underlying
+     *     document, since not all units are supported by the SwingTree icon...
+     * </b>
+     * @return The unit of the height of the SVG icon in the form of a string similar
+     *          to how it is present in the underlying document.
+     */
+    public String heightUnitString() {
+        return _heightUnit.toPublicString();
+    }
+
+    /**
+     *  Exposes the width of the icon <b>in component pixel space</b>,
+     *  or -1 if the icon should be rendered according to the width of
+     *  a given component or the width of the SVG document itself.
      *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).<br>
      *  <b>
      *      Note that the returned width is dynamically scaled according to
@@ -312,17 +346,22 @@ public final class SvgIcon extends ImageIcon
      *      according to the current DPI settings.
      *      If you want the unscaled width, use {@link #getBaseWidth()}.
      *  </b>
-     * @return The width of the icon, or -1 if the icon should be rendered according
+     * @return The width of the icon <b>in component pixel space</b>, or -1 if the icon should be rendered according
      *         to the width of a given component or the width of the SVG document itself.
+     * @see #getBaseWidth() to access the icon width in <b>developer pixel space</b>.
      */
     @Override
     public int getIconWidth() {
-        Size adjustedSize = _sizeWithAspectRatioCorrection(_size);
+        Size adjustedSize = _sizeWithAspectRatioCorrection(_size());
         return adjustedSize.width().map(UI::scale).map(Math::round).orElse(NO_SIZE);
     }
 
     /**
-     *  Creates an updated {@link SvgIcon} with the given width returned by {@link #getIconWidth()}.
+     *  Creates an updated {@link SvgIcon} with a new width, which is
+     *  the same as what is reported by {@link #getIconWidth()}.
+     *  The supplied width will be interpreted as having "developer pixel"
+     *  as unit, and <b>whatever unit the weight has in this instance will
+     *  be overridden in the new one</b>
      *
      * @param newWidth The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
@@ -332,13 +371,20 @@ public final class SvgIcon extends ImageIcon
      */
     public SvgIcon withIconWidth( int newWidth ) {
         int width = _size.width().map(Math::round).orElse(NO_SIZE);
-        if ( newWidth == width )
+        if ( newWidth == width && _widthUnit != Unit.PERCENTAGE )
             return this;
-        return new SvgIcon(_svgDocument, _size.withWidth(newWidth), _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
+        return new SvgIcon(
+                _core,
+                _heightUnit == Unit.PERCENTAGE ? Size.of(newWidth, -1) : _size.withWidth(newWidth),
+                Unit.PX,
+                Unit.PX,
+                _fitComponent,
+                _preferredPlacement
+            );
     }
 
     /**
-     *  Exposes the height of the icon, or -1 if the icon should be rendered according
+     *  Exposes the height of the icon <b>in component pixel space</b>, or -1 if the icon should be rendered according
      *  to the height of a given component or the height of the SVG document itself.
      *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).<br>
      *  <b>
@@ -349,78 +395,93 @@ public final class SvgIcon extends ImageIcon
      *      If you want the unscaled height, use {@link #getBaseHeight()}.
      *  </b>
      *
-     * @return A new {@link SvgIcon} with the given width and height.
-     *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
-     *        or the width or height of the SVG document itself.
+     * @return The height of the icon <b>in component pixel space</b>, or -1 if the icon to
+     *          indicate an undefined height, which implies that the icon ought to be
+     *          rendered according to the height of a given component or other properties...
+     * @see #getBaseHeight() to access the icon height in <b>developer pixel space</b>.
      */
     @Override
     public int getIconHeight() {
-        Size adjustedSize = _sizeWithAspectRatioCorrection(_size);
+        Size adjustedSize = _sizeWithAspectRatioCorrection(_size());
         return adjustedSize.height().map(UI::scale).map(Math::round).orElse(NO_SIZE);
     }
 
     /**
-     *  Exposes the fixed width defined for the icon, which is the width
+     *  Exposes the width of the icon <b>in developer pixels</b>, which is the width
      *  that was set when the icon was created or updated using the
      *  {@link #withIconWidth(int)} method.<br>
      *  <b>
-     *      Note that this width is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      Note that this width is not scaled to component pixel space using
+     *      the current {@link swingtree.UI#scale()} factor.
      *      If you want a scaled width, that is more suitable for rendering the icon,
      *      use the {@link #getIconWidth()} method.
      *  </b>
      *
      * @return The width of the icon without scaling.
+     * @see #getIconWidth() to access the icon width in <b>component pixel space</b>.
      */
     public int getBaseWidth() {
-        return _size.width().map(Math::round).orElse(NO_SIZE);
+        return _size().width().map(Math::round).orElse(NO_SIZE);
     }
 
     /**
-     *  Exposes the fixed height defined for the icon, which is the height
-     *  that was set when the icon was created or updated using the
+     *  Exposes the height of the icon <b>in developer pixels</b>, which is
+     *  also the height that was set when the icon was created or updated using the
      *  {@link #withIconHeight(int)} method.<br>
      *  <b>
-     *      Note that this height is not scaled according to the current {@link swingtree.UI#scale()} value.
+     *      Note that this height is not scaled to component pixel space using
+     *      the current {@link swingtree.UI#scale()} factor.
      *      If you want a scaled height, that is more suitable for rendering the icon,
      *      use the {@link #getIconHeight()} method.
      *  </b>
      *
      * @return The height of the icon without scaling.
+     * @see #getIconHeight() to access the icon height in <b>component pixel space</b>.
      */
     public int getBaseHeight() {
-        return _size.height().map(Math::round).orElse(NO_SIZE);
+        return _size().height().map(Math::round).orElse(NO_SIZE);
     }
 
     /**
      *  Creates an updated {@link SvgIcon} with the supplied integer used
-     *  as the icon height, which you can retrieve using {@link #getIconHeight()}.
+     *  as the icon height, which you can also retrieve using {@link #getIconHeight()}.
+     *  The supplied height will be interpreted as having "developer pixel"
+     *  as its unit, and <b>whatever unit the height has in this instance will be overridden in the new one.</b>
      *  If the height is -1, the icon will be rendered according to the height of a given component
-     *  or the height of the SVG document itself.
+     *  or the height of the "view box" of the SVG document itself.
      *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
      *
-     * @param height The height of the icon, or -1 if the icon should be rendered according
+     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
      *               to the height of a given component or the height of the SVG document itself.
-     * @return A new {@link SvgIcon} with the given height.
+     * @return A new {@link SvgIcon} with the given height in developer pixel.
      *        If the height is -1, the icon will be rendered according to the height of a given component
      *        or the height of the SVG document itself.
      */
-    public SvgIcon withIconHeight( int height ) {
+    public SvgIcon withIconHeight( int newHeight ) {
         int currentHeight = _size.height().map(Math::round).orElse(NO_SIZE);
-        if ( height == currentHeight )
+        if ( newHeight == currentHeight && _heightUnit != Unit.PERCENTAGE )
             return this;
-        return new SvgIcon(_svgDocument, _size.withHeight(height), _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
+        return new SvgIcon(
+                _core,
+                _widthUnit == Unit.PERCENTAGE ? Size.of(-1, newHeight) : _size.withHeight(newHeight),
+                Unit.PX,
+                Unit.PX,
+                _fitComponent,
+                _preferredPlacement
+            );
     }
 
     /**
-     *  Creates an updated {@link SvgIcon} with the given width and height.
+     *  Creates an updated {@link SvgIcon} with the given width and height, interpreted as "developer pixel".
+     *  <b>So Whatever units this icon instance has will be overridden in the new one.</b>
      *  Dimensions smaller than 0 are considered "undefined".
      *  When the icon is being rendered then these will be determined according to the
      *  aspect ratio of the SVG document, the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement}
      *  policies or the size of the component the SVG is rendered into.
      *
-     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
+     * @param newWidth The width of the icon in developer pixel, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
-     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
+     * @param newHeight The height of the icon in developer pixel, or -1 if the icon should be rendered according
      *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
@@ -431,14 +492,26 @@ public final class SvgIcon extends ImageIcon
         newHeight = newHeight < 0 ? NO_SIZE : newHeight;
         int width  = _size.width().map(Math::round).orElse(NO_SIZE);
         int height = _size.height().map(Math::round).orElse(NO_SIZE);
-        if ( newWidth == width && newHeight == height )
+        if ( newWidth == width && newHeight == height && _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE )
             return this;
-        return new SvgIcon(_svgDocument, Size.of(newWidth, newHeight), _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
+        return new SvgIcon(
+                _core,
+                Size.of(
+                    newWidth < 0 &&  _widthUnit == Unit.PERCENTAGE ?  -1 : newWidth,
+                    newHeight < 0 && _heightUnit == Unit.PERCENTAGE ? -1 : newHeight
+                ),
+                Unit.PX,
+                Unit.PX,
+                _fitComponent,
+                _preferredPlacement
+            );
     }
 
     /**
      *  Allows you to create an updated {@link SvgIcon} with the given size
      *  in the form of a {@link Size} object containing the width and height.
+     *  These new dimensions are interpreted as "developer pixel" in the new SVG icon.
+     *  <b>So whatever units this icon instance has will be overridden in the new one.</b>
      *  If the width or height is -1, the icon will be rendered according to the
      *  width or height of a given component, the width or height of the SVG document
      *  and the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement} policies.
@@ -454,8 +527,10 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Determines the size of the icon (both width and height) using the provided width
-     *  and the aspect ratio of the SVG document.
+     *  Determines a new size of the icon (both width and height) using the provided width
+     *  and the inherent aspect ratio of the SVG document.
+     *  The new dimensions of the new returned SVG icon are interpreted as "developer pixel",
+     *  <b>so whatever units this icon instance has will be overridden in the new one.</b>
      *  If the width is -1, the icon will lose its fixed width and will
      *  be rendered according to the width of a given component.
      *  <p>
@@ -464,7 +539,7 @@ public final class SvgIcon extends ImageIcon
      *  <p>
      *  Also see {@link #withIconSizeFromHeight(int)}.
      *
-     * @param newWidth The width of the icon, or -1 if the icon should be rendered according
+     * @param newWidth The width of the icon in pixels, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width and a logical height that is
      *         determined by the aspect ratio of the SVG document.
@@ -473,13 +548,16 @@ public final class SvgIcon extends ImageIcon
         if ( newWidth < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));
-        return new SvgIcon(_svgDocument, adjustedSize, _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
+        SvgIcon icon = this.withPercentageSizeResolvedAsPixels();
+        Size adjustedSize = icon._sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));
+        return icon.withIconSize(adjustedSize);
     }
 
     /**
      *  Determines the size of the icon (both width and height) using the provided height
      *  and the aspect ratio of the SVG document.
+     *  The dimensions of the returned SVG icon are interpreted as "developer pixel",
+     *  <b>so whatever units this icon instance has will be overridden in the new one.</b>
      *  If the height is -1, the icon will lose its fixed height and will
      *  be rendered according to the height of a given component.
      *  <p>
@@ -488,7 +566,7 @@ public final class SvgIcon extends ImageIcon
      *  <p>
      *  Also see {@link #withIconSizeFromWidth(int)}.
      *
-     * @param newHeight The height of the icon, or -1 if the icon should be rendered according
+     * @param newHeight The height of the icon in pixels, or -1 if the icon should be rendered according
      *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given height and a logical width that is
      *         determined by the aspect ratio of the SVG document.
@@ -497,8 +575,71 @@ public final class SvgIcon extends ImageIcon
         if ( newHeight < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));
-        return new SvgIcon(_svgDocument, adjustedSize, _widthUnit, _heightUnit, _fitComponent, _preferredPlacement);
+        SvgIcon icon = this.withPercentageSizeResolvedAsPixels();
+        Size adjustedSize = icon._sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));
+        return icon.withIconSize(adjustedSize);
+    }
+
+    /**
+     *  Creates a new {@link SvgIcon} where percentage based dimensions
+     *  are converted to developer pixel based dimensions using the SVG document's
+     *  view box as reference dimensions.
+     *  This method is specifically designed for SVG documents with percentage
+     *  based dimensions. Icons which do not have at least one percentage based dimension
+     *  are returned as is.<br>
+     *  <p>
+     *  Consider the following example:
+     *  <pre>{@code
+     *      <svg width="100%" height="50%" viewBox="0 0 24 24">
+     *          ...
+     *      </svg>
+     *  }</pre>
+     *  An {@link SvgIcon} with this header will resolve to having
+     *  the following dimensions:
+     *  <ul>
+     *      <li>{@link #getIconWidth()} == 24</li>
+     *      <li>{@link #getIconHeight()} == 12</li>
+     *  </ul>
+     *  <b>Note that if this {@link SvgIcon} is "empty", meaning that
+     *  it's {@link #getSvgDocument()} does not return an {@link SVGDocument}
+     *  instance, then this method will also return this instance.</b>
+     *
+     * @return A new {@link SvgIcon} with its percentage based dimensions
+     *         converted to being pixel based, <b>using the view box of the
+     *         SVG document as reference frame.</b>
+     */
+    public SvgIcon withPercentageSizeResolvedAsPixels() {
+        if ( _core.svgDocument == null || _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
+            return this;
+        }
+        return new SvgIcon(
+                _core,
+                _percentageResolvedSize(),
+                _widthUnit == Unit.PERCENTAGE ? Unit.PX : _widthUnit,
+                _heightUnit == Unit.PERCENTAGE ? Unit.PX : _heightUnit,
+                _fitComponent,
+                _preferredPlacement
+            );
+    }
+
+    private Size _percentageResolvedSize() {
+        if ( _core.svgDocument == null || _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
+            return _size;
+        }
+        if ( _widthUnit == Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
+            // We resolve the width from the height!
+            return _sizeWithAspectRatioCorrection(_size());
+        }
+        if ( _widthUnit != Unit.PERCENTAGE && _heightUnit == Unit.PERCENTAGE ) {
+            // We resolve the width from the height!
+            return _sizeWithAspectRatioCorrection(_size());
+        }
+        float boxWidth = _core.svgDocument.viewBox().width;
+        float boxHeight = _core.svgDocument.viewBox().height;
+        return Size.of(
+                   _size.width().map( w -> w >= 0 && _widthUnit == Unit.PERCENTAGE ? boxWidth * w/100f : w ).orElse(-1f),
+                   _size.height().map( h -> h >= 0 && _heightUnit == Unit.PERCENTAGE ? boxHeight * h/100f : h ).orElse(-1f)
+                );
     }
 
     /**
@@ -508,9 +649,9 @@ public final class SvgIcon extends ImageIcon
      * @return The size of the SVG document in the form of a {@link Size}.
      */
     public Size getSvgSize() {
-        if ( _svgDocument == null )
+        if ( _core.svgDocument == null )
             return Size.unknown();
-        FloatSize svgSize = _svgDocument.size();
+        FloatSize svgSize = _core.svgDocument.size();
         return Size.of(svgSize.width, svgSize.height);
     }
 
@@ -520,7 +661,7 @@ public final class SvgIcon extends ImageIcon
      * @return The underlying {@link SVGDocument} that is used to render the icon.
      */
     public @Nullable SVGDocument getSvgDocument() {
-        return _svgDocument;
+        return _core.svgDocument;
     }
 
     /**
@@ -596,7 +737,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
-        return new SvgIcon(_svgDocument, _size, _widthUnit, _heightUnit, fit, _preferredPlacement);
+        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, fit, _preferredPlacement);
     }
 
     /**
@@ -622,7 +763,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(placement);
         if ( placement == _preferredPlacement )
             return this;
-        return new SvgIcon(_svgDocument, _size, _widthUnit, _heightUnit, _fitComponent, placement);
+        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, _fitComponent, placement);
     }
 
     /**
@@ -638,17 +779,17 @@ public final class SvgIcon extends ImageIcon
         int width  = getIconWidth();
         int height = getIconHeight();
 
-        if ( _svgDocument != null ) {
+        if ( _core.svgDocument != null ) {
             if (width < 0)
-                width = (int) UI.scale(_svgDocument.size().width);
+                width = (int) UI.scale(_core.svgDocument.size().width);
             if (height < 0)
-                height = (int) UI.scale(_svgDocument.size().height);
+                height = (int) UI.scale(_core.svgDocument.size().height);
         }
 
         // We create a new buffered image, render into it, and then return it.
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        if ( _svgDocument != null )
-            _svgDocument.render(
+        if ( _core.svgDocument != null )
+            _core.svgDocument.render(
                     null,
                     image.createGraphics(),
                     new ViewBox(0, 0, width, height)
@@ -673,9 +814,9 @@ public final class SvgIcon extends ImageIcon
      * @param y the Y coordinate of the icon's top-left corner
      */
     @Override
-    public synchronized void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
+    public synchronized void paintIcon( java.awt.@Nullable Component c, java.awt.Graphics g, int x, int y )
     {
-        if ( _svgDocument == null )
+        if ( _core.svgDocument == null )
             return;
 
         final int scaledWidth = getIconWidth();
@@ -724,13 +865,6 @@ public final class SvgIcon extends ImageIcon
         width  = scaledWidth  >= 0 && weNeedToRenderLikeTheInvokerWantsTo ? scaledWidth  : width  - insets.right  - insets.left;
         height = scaledHeight >= 0 && weNeedToRenderLikeTheInvokerWantsTo ? scaledHeight : height - insets.bottom - insets.top ;
 
-        if ( _widthUnit == Unit.PERCENTAGE ) {
-            width = (int) (( width * _svgDocument.size().width ) / 100f);
-        }
-        if ( _heightUnit == Unit.PERCENTAGE ) {
-            height = (int) (( height * _svgDocument.size().height ) / 100f);
-        }
-
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
             int larger  = (int) Math.ceil(  width / 2.0 );
@@ -771,40 +905,60 @@ public final class SvgIcon extends ImageIcon
         final Bounds bounds,
         final Offset offset
     ) {
+        Size size = _size();
         UI.FitComponent fitComponent = _fitComponent;
-        if ( fitComponent == UI.FitComponent.UNDEFINED && !_size.width().isPresent() && !_size.height().isPresent() )
+        if ( fitComponent == UI.FitComponent.UNDEFINED && !size.width().isPresent() && !size.height().isPresent() )
             fitComponent = UI.FitComponent.MIN_DIM; // best default!
         _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent);
     }
 
     private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
-        if ( _svgDocument == null )
+        if ( _core.svgDocument == null )
             return Size.unknown();
         final int iconWidth  = getIconWidth();
         final int iconHeight = getIconHeight();
-        final FloatSize svgSize = _svgDocument.size();
+        final FloatSize svgSize = _core.svgDocument.size();
 
         float finalWidth  = ( iconWidth  > 0 || areaWidth  < 0 ? iconWidth  : -1 );
         float finalHeight = ( iconHeight > 0 || areaHeight < 0 ? iconHeight : -1 );
+        boolean hasPercentageScaling = false;
         if ( finalWidth <= 0 || finalHeight <= 0 ) {
-            finalWidth = iconWidth < 0 ? svgSize.width : iconWidth;
-            finalHeight = iconHeight < 0 ? svgSize.height : iconHeight;
-            float scale = 1f;
-            if ( areaWidth < areaHeight ) { // <- Tall area
-                if ( finalWidth > finalHeight ) {
-                    scale = areaWidth / finalWidth;
+            finalWidth = iconWidth;
+            if ( iconWidth < 0 ) {
+                if ( _widthUnit == Unit.PERCENTAGE && _size.width().isPresent() ) {
+                    finalWidth = areaWidth * _size.width().get() / 100f;
+                    hasPercentageScaling = true;
                 } else {
-                    scale = areaHeight / finalHeight;
-                }
-            } else { // < - Wide area
-                if ( finalWidth < finalHeight ) {
-                    scale = areaWidth / finalWidth;
-                } else {
-                    scale = areaHeight / finalHeight;
+                    finalWidth = svgSize.width;
                 }
             }
-            finalWidth = finalWidth * scale;
-            finalHeight = finalHeight * scale;
+            finalHeight = iconHeight;
+            if ( iconHeight < 0 ) {
+                if ( _heightUnit == Unit.PERCENTAGE && _size.height().isPresent() ) {
+                    finalHeight = areaHeight * _size.height().get() / 100f;
+                    hasPercentageScaling = true;
+                } else {
+                    finalHeight = svgSize.height;
+                }
+            }
+            if ( !hasPercentageScaling ) {
+                float scale;
+                if (areaWidth < areaHeight) { // <- Tall area
+                    if (finalWidth > finalHeight) {
+                        scale = areaWidth / finalWidth;
+                    } else {
+                        scale = areaHeight / finalHeight;
+                    }
+                } else { // < - Wide area
+                    if (finalWidth < finalHeight) {
+                        scale = areaWidth / finalWidth;
+                    } else {
+                        scale = areaHeight / finalHeight;
+                    }
+                }
+                finalWidth = finalWidth * scale;
+                finalHeight = finalHeight * scale;
+            }
         }
         return Size.of(finalWidth, finalHeight);
     }
@@ -822,7 +976,7 @@ public final class SvgIcon extends ImageIcon
         final int areaWidth  = bounds.size().width().map(Math::round).orElse(0);
         final int areaHeight = bounds.size().height().map(Math::round).orElse(0);
                 
-        if ( _svgDocument == null )
+        if ( _core.svgDocument == null )
             return;
 
         final Size iconSize = _computeBaseSizeFrom(areaWidth, areaHeight);
@@ -836,39 +990,27 @@ public final class SvgIcon extends ImageIcon
 
         Graphics2D g2d = (Graphics2D) g.create();
 
-        FloatSize svgSize = _svgDocument.size();
-        float svgRefWidth  = ( svgSize.width  > svgSize.height ? 1f : svgSize.width  / svgSize.height );
-        float svgRefHeight = ( svgSize.height > svgSize.width  ? 1f : svgSize.height / svgSize.width  );
-        float imgRefWidth  = (   iconWidth    >=   iconHeight  ? 1f : (float) iconWidth /  iconHeight );
-        float imgRefHeight = (   iconHeight   >=   iconWidth   ? 1f : (float) iconHeight / iconWidth  );
+        float scaleX = 1f;
+        float scaleY = 1f;
 
-        float scaleX = imgRefWidth  / svgRefWidth;
-        float scaleY = imgRefHeight / svgRefHeight;
-
-        boolean isEffectivelyFitHeight = false;
-        boolean isEffectivelyFitWidth = false;
         if ( fitComponent == UI.FitComponent.MIN_DIM || fitComponent == UI.FitComponent.MAX_DIM ) {
             if ( fitComponent == UI.FitComponent.MIN_DIM ) {
                  if (areaWidth < areaHeight) {
                     scaleX = (float) width / iconWidth;
                     scaleY = scaleX;
-                     isEffectivelyFitWidth = true;
                  }
                 if (areaHeight < areaWidth) {
                     scaleY = (float) height / iconHeight;
                     scaleX = scaleY;
-                    isEffectivelyFitHeight = true;
                 }
             } else {
                 if (areaWidth > areaHeight) {
                     scaleX = (float) width / iconWidth;
                     scaleY = scaleX;
-                    isEffectivelyFitWidth = true;
                 }
                 if (areaHeight > areaWidth) {
                     scaleY = (float) height / iconHeight;
                     scaleX = scaleY;
-                    isEffectivelyFitHeight = true;
                 }
             }
         }
@@ -881,20 +1023,19 @@ public final class SvgIcon extends ImageIcon
             scaleY = (float) height / iconHeight;
         }
 
-        if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
-            scaleX = 1f;
-            scaleY = 1f;
-        }
-
         boolean sizeIsUnknown = false;
-        if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED ) {
+        if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED && fitComponent == UI.FitComponent.UNDEFINED ) {
             sizeIsUnknown = true;
         }
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
 
         if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
-            final int newWidth   = iconWidth  >= 0 ? iconWidth  : (int) svgSize.width;
-            final int newHeight  = iconHeight >= 0 ? iconHeight : (int) svgSize.height;
+            final FloatSize svgSize = _core.svgDocument.size();
+            float newWidth   = iconWidth  >= 0 ? iconWidth  : svgSize.width;
+            float newHeight  = iconHeight >= 0 ? iconHeight : svgSize.height;
+            final FloatSize viewBoxSize = _core.svgDocument.viewBox().size();
+            newWidth   = newWidth  >= 0 ? newWidth  : viewBoxSize.width;
+            newHeight  = newHeight >= 0 ? newHeight : viewBoxSize.height;
             viewBox = new ViewBox( x, y, newWidth, newHeight );
         }
 
@@ -906,34 +1047,7 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
-        if (
-            fitComponent != UI.FitComponent.WIDTH &&
-            fitComponent != UI.FitComponent.HEIGHT &&
-            fitComponent != UI.FitComponent.WIDTH_AND_HEIGHT  &&
-            !isEffectivelyFitHeight &&
-            !isEffectivelyFitWidth
-        ) {
-            // Let's make sure the view box has the correct dimension ratio:
-            float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;
-            float boxRatio     =      viewBox.width        /      viewBox.height;
-            if ( boxRatio > viewBoxRatio ) {
-                // The view box is too wide, we need to make it narrower:
-                float newWidth = viewBox.height * viewBoxRatio;
-                viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );
-            }
-            if ( boxRatio < viewBoxRatio ) {
-                // The view box is too tall, we need to make it shorter:
-                float newHeight = viewBox.width / viewBoxRatio;
-                viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );
-            }
-        }
-
-        /*
-            Before we do the actual rendering we first check if there
-            is a preferred placement that is not the center.
-            If that is the case we move the view box accordingly.
-        */
-        // First we correct if the component area is smaller than the view box:
+        // We correct if the component area is smaller than the view box:
         width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
         width += (int) Math.max(0, x - viewBox.x );
         height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
@@ -941,6 +1055,23 @@ public final class SvgIcon extends ImageIcon
         x = (int) Math.min(x, viewBox.x);
         y = (int) Math.min(y, viewBox.y);
 
+        {
+            viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
+            FloatSize svgSize = _core.svgDocument.viewBox().size();
+            float svgRefWidth = ((svgSize.width) / (svgSize.height));
+            float svgRefHeight = ((svgSize.height) / (svgSize.width));
+            float imgRefWidth = (viewBox.width / viewBox.height);
+            float imgRefHeight = (viewBox.height / viewBox.width);
+
+            scaleX = Math.max(1f, imgRefWidth / svgRefWidth);
+            scaleY = Math.max(1f, imgRefHeight / svgRefHeight);
+            viewBox = new ViewBox(viewBox.x / scaleX, viewBox.y / scaleY, viewBox.width / scaleX, viewBox.height / scaleY);
+        }
+        /*
+            Before we do the actual rendering we first check if there
+            is a preferred placement that is not the center.
+            If that is the case we move the view box accordingly.
+        */
         final float scaledAreaX = x / scaleX;
         final float scaledAreaY = y / scaleY;
         final float scaledWidth = width / scaleX;
@@ -977,7 +1108,7 @@ public final class SvgIcon extends ImageIcon
                 viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
                 break;
             default:
-                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: " + preferredPlacement);
+                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
         }
 
         // Now onto the actual rendering:
@@ -999,7 +1130,7 @@ public final class SvgIcon extends ImageIcon
         try {
             // We also have to scale x and y, this is because the SVGDocument does not
             // account for the scale of the transform with respect to the view box!
-            _svgDocument.render(c, g2d, viewBox);
+            _core.svgDocument.render(c, g2d, viewBox);
         } catch (Exception e) {
             log.warn(SwingTree.get().logMarker(), "Failed to render SVG document.", e);
         }
@@ -1013,7 +1144,7 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public int hashCode() {
-        return Objects.hash(_svgDocument, _size, _fitComponent, _preferredPlacement);
+        return Objects.hash(_core.svgDocument, _widthUnit, _heightUnit, _size, _fitComponent, _preferredPlacement);
     }
 
     @Override
@@ -1023,7 +1154,9 @@ public final class SvgIcon extends ImageIcon
         if ( obj.getClass() != getClass() ) return false;
         SvgIcon rhs = (SvgIcon) obj;
         return Objects.equals(_size,               rhs._size)        &&
-               Objects.equals(_svgDocument,        rhs._svgDocument)  &&
+               Objects.equals(_core.svgDocument,   rhs._core.svgDocument)  &&
+               Objects.equals(_widthUnit,          rhs._heightUnit)  &&
+               Objects.equals(_heightUnit,         rhs._widthUnit)  &&
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
                Objects.equals(_preferredPlacement, rhs._preferredPlacement);
     }
@@ -1033,11 +1166,11 @@ public final class SvgIcon extends ImageIcon
         int width  = _size.width().map(Math::round).orElse(NO_SIZE);
         int height = _size.height().map(Math::round).orElse(NO_SIZE);
         String typeName           = getClass().getSimpleName();
-        String widthAsStr              = width  < 0 ? "?" : String.valueOf(width);
-        String heightAsStr             = height < 0 ? "?" : String.valueOf(height);
+        String widthAsStr         = _dimeToString(width , _widthUnit);
+        String heightAsStr        = _dimeToString(height, _heightUnit);
         String fitComponent       = _fitComponent.toString();
         String preferredPlacement = _preferredPlacement.toString();
-        String svgDocument        = Optional.ofNullable(_svgDocument)
+        String svgDocument        = Optional.ofNullable(_core.svgDocument)
                                             .map(it -> {
                                                 String docClass = it.getClass().getSimpleName();
                                                 FloatSize size = it.size();
@@ -1053,8 +1186,12 @@ public final class SvgIcon extends ImageIcon
                 "]";
     }
 
+    private static String _dimeToString(int dim, Unit unit) {
+        return dim < 0 ? "?" : (dim +unit.toPublicString());
+    }
+
     private Size _sizeWithAspectRatioCorrection( Size size ) {
-        if ( _svgDocument == null )
+        if ( _core.svgDocument == null )
             return size;
         if ( size.hasPositiveWidth() && size.hasPositiveHeight() )
             return size;
@@ -1087,7 +1224,7 @@ public final class SvgIcon extends ImageIcon
     }
 
     private Optional<Double> _aspectRatio() {
-        if ( _svgDocument == null )
+        if ( _core.svgDocument == null )
             return Optional.empty();
         if ( _widthUnit == Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE )
             return Optional.empty(); // The ration cannot be known ahead of time!
@@ -1097,13 +1234,25 @@ public final class SvgIcon extends ImageIcon
         double aspectRatio1 = 0;
         double aspectRatio2 = 0;
 
-        ViewBox viewBox = _svgDocument.viewBox();
+        ViewBox viewBox = _core.svgDocument.viewBox();
         if ( viewBox.width > 0 && viewBox.height > 0 )
             aspectRatio1 = viewBox.width / viewBox.height;
 
-        FloatSize svgSize = _svgDocument.size();
-        if ( svgSize.width > 0 && svgSize.height > 0 )
-            aspectRatio2 = svgSize.width / svgSize.height;
+        if ( _widthUnit == Unit.PERCENTAGE && _heightUnit == Unit.PERCENTAGE ) {
+            Size svgSize = _percentageResolvedSize();
+            if (svgSize.width().isPresent() && svgSize.height().isPresent())
+                aspectRatio2 = svgSize.width().get() / svgSize.height().get();
+        } else {
+            if ( _core.widthUnit != Unit.PERCENTAGE && _core.heightUnit != Unit.PERCENTAGE ) {
+                FloatSize svgSize = _core.svgDocument.size();
+                if (svgSize.width > 0 && svgSize.height > 0)
+                    aspectRatio2 = svgSize.width / svgSize.height;
+            } else {
+                // Percentages do not represent the innate ratio! So let's use the viewbox ratio:
+                aspectRatio2 = aspectRatio1;
+                // In this case, the view box is a better source for the ratio.
+            }
+        }
 
         // We prefer the "svgSize" aspect ratio over the "viewBox" aspect ratio:
         double aspectRatio = aspectRatio2 > 0 ? aspectRatio2 : aspectRatio1;
@@ -1115,19 +1264,28 @@ public final class SvgIcon extends ImageIcon
     }
 
     private enum Unit {
-        PX, PERCENTAGE, UNKNOWN
+        PX, PERCENTAGE, UNKNOWN;
+
+        String toPublicString() {
+            String unitAsStr = "";
+            if ( this == Unit.PX )
+                unitAsStr = "px";
+            if ( this == Unit.PERCENTAGE )
+                unitAsStr = "%";
+            return unitAsStr;
+        }
     }
 
-    private static class ConstructionArgs { // This should be a record
+    private static final class RawSVG { // This should be a record
         final @Nullable SVGDocument svgDocument;
         final Size                  size;
         final Unit                  widthUnit;
         final Unit                  heightUnit;
-        private ConstructionArgs(@Nullable SVGDocument svgDocument, Size size, Unit widthUnit, Unit heightUnit) {
+        private RawSVG(@Nullable SVGDocument svgDocument, Size size, Unit widthUnit, Unit heightUnit) {
             this.svgDocument = svgDocument;
-            this.size = size;
-            this.widthUnit = widthUnit;
-            this.heightUnit = heightUnit;
+            this.size        = size;
+            this.widthUnit   = widthUnit;
+            this.heightUnit  = heightUnit;
         }
     }
 }

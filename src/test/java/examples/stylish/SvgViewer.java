@@ -58,7 +58,7 @@ public class SvgViewer extends Panel
         .add("push, grow",
             tabbedPane()
             .add(
-                tab("Style Based").add(
+                tab("SVG Icon Style Based").add(
                     panel("fill")
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center",
@@ -67,6 +67,29 @@ public class SvgViewer extends Panel
                         .withStyle( conf -> conf
                             .image( img -> img
                                 .image(svgIconCreator.get())
+                            )
+                            .border(12, Color.LIGHTSTEELBLUE)
+                            .shadowColor(Color.BLACK)
+                            .shadowBlurRadius(3)
+                            .shadowSpreadRadius(-1)
+                            .borderRadius(8)
+                            .margin(13)
+                        )
+                    )
+                )
+            )
+            .add(
+                tab("Image Icon Style Based").add(
+                    panel("fill")
+                    .withBackground(Color.LIGHTSTEELBLUE.brighter())
+                    .add("center",
+                        UI.box().withMinSize(290, 220)
+                        .withRepaintOn(svgText, placement, fitComponent)
+                        .withStyle( conf -> conf
+                            .image( img -> img
+                                .image(svgIconCreator.get().getImage())
+                                .fitMode(fitComponent.get())
+                                .placement(placement.get())
                             )
                             .border(12, Color.LIGHTSTEELBLUE)
                             .shadowColor(Color.BLACK)

@@ -1,9 +1,11 @@
 package swingtree.api;
 
 import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
 import swingtree.layout.Size;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  *  A basic implementation of the {@link IconDeclaration} interface.
@@ -11,18 +13,18 @@ import java.util.Objects;
 @Immutable
 final class BasicIconDeclaration implements IconDeclaration
 {
-    private final Size   size;
+    private final @Nullable Size size;
     private final String path;
 
 
-    public BasicIconDeclaration( Size size, String path ) {
+    public BasicIconDeclaration( @Nullable Size size, String path ) {
         this.size = size;
         this.path = path;
     }
 
     @Override
-    public Size size() {
-        return size;
+    public Optional<Size> size() {
+        return Optional.ofNullable(size);
     }
 
     @Override
@@ -33,8 +35,8 @@ final class BasicIconDeclaration implements IconDeclaration
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"["+
-                "size=" + ( size().equals(Size.unknown()) ? "?" : size() ) + ", " +
-                "path='" + path() + "'" +
+                    "size=" + ( size().map(it->it.equals(Size.unknown()) ? "?" : String.valueOf(it) ).orElse("?") ) + ", " +
+                    "path='" + path() + "'" +
                 "]";
     }
 

@@ -1,7 +1,5 @@
 package swingtree;
 
-import com.github.weisj.jsvg.SVGDocument;
-import com.github.weisj.jsvg.parser.SVGLoader;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
@@ -6516,7 +6514,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 icon = _tryLoadIcon(unscaled);
                 if ( icon != null )
                     cache.put(unscaled, icon);
-                icon = (ImageIcon) scaleIconTo(declaration.size(), icon);
+                Optional<Size> optionalSize = declaration.size();
+                if ( optionalSize.isPresent() )
+                    icon = (ImageIcon) scaleIconTo(optionalSize.get(), icon);
                 if ( icon != null )
                     cache.put(declaration, icon);
             }
@@ -6707,7 +6707,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             if ( svgIcon.getSvgDocument() == null ) {
                 return null;
             }
-            return svgIcon.withIconSize(declaration.size());
+            Optional<Size> optionalSize = declaration.size();
+            if ( optionalSize.isPresent() )
+                return svgIcon.withIconSize(optionalSize.get());
+            else
+                return svgIcon;
         } else {
             /*
                 Not that we explicitly use the "createImage" method of the toolkit here.
@@ -6717,7 +6721,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 which is why we use our own cache.)
             */
             ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
-            return ScalableImageIcon.of(declaration.size(), icon);
+            return ScalableImageIcon.of(declaration.size().orElse(Size.unknown()), icon);
         }
     }
 
