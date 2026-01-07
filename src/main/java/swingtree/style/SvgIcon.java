@@ -548,8 +548,9 @@ public final class SvgIcon extends ImageIcon
         if ( newWidth < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));
-        return this.withIconSize(adjustedSize);
+        SvgIcon icon = this.withPercentageSizeResolvedAsPixels();
+        Size adjustedSize = icon._sizeWithAspectRatioCorrection(Size.unknown().withWidth(newWidth));
+        return icon.withIconSize(adjustedSize);
     }
 
     /**
@@ -574,8 +575,9 @@ public final class SvgIcon extends ImageIcon
         if ( newHeight < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        Size adjustedSize = _sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));
-        return this.withIconSize(adjustedSize);
+        SvgIcon icon = this.withPercentageSizeResolvedAsPixels();
+        Size adjustedSize = icon._sizeWithAspectRatioCorrection(Size.unknown().withHeight(newHeight));
+        return icon.withIconSize(adjustedSize);
     }
 
     /**
@@ -623,6 +625,14 @@ public final class SvgIcon extends ImageIcon
     private Size _percentageResolvedSize() {
         if ( _core.svgDocument == null || _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
             return _size;
+        }
+        if ( _widthUnit == Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
+            // We resolve the width from the height!
+            return _sizeWithAspectRatioCorrection(_size());
+        }
+        if ( _widthUnit != Unit.PERCENTAGE && _heightUnit == Unit.PERCENTAGE ) {
+            // We resolve the width from the height!
+            return _sizeWithAspectRatioCorrection(_size());
         }
         float boxWidth = _core.svgDocument.viewBox().width;
         float boxHeight = _core.svgDocument.viewBox().height;

@@ -262,7 +262,7 @@ class SvgIcon_Spec extends Specification
     }
 
     def 'An `SvgIcon` can resolve percentage-based dimensions to pixel-based dimensions using the view box as reference.'(
-        float uiScale, Size initialSize, Size expectedSize, String svg
+        float uiScale, Size initialSize, Size resultingBaseSize, Size resultingIconSize, String svg
     ) {
         reportInfo """
             The `SvgIcon.withPercentageSizeResolvedAsPixels()` method is specifically designed for SVG documents 
@@ -288,43 +288,48 @@ class SvgIcon_Spec extends Specification
 
         when : 'We call withPercentageSizeResolvedAsPixels() to convert percentage dimensions.'
             var resolvedIcon = originalIcon.withPercentageSizeResolvedAsPixels()
+        then :
+            resolvedIcon.widthUnitString() == "px"
+            resolvedIcon.heightUnitString() == "px"
         then : 'The icon has the expected dimensions after resolution.'
-            resolvedIcon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1f)
-            resolvedIcon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1f)
+            resolvedIcon.getIconWidth() == resultingIconSize.width().map(UI::scale).map(Math::round).orElse(-1f)
+            resolvedIcon.getIconHeight() == resultingIconSize.height().map(UI::scale).map(Math::round).orElse(-1f)
         and :
-            resolvedIcon.getBaseWidth() == expectedSize.width().map(Math::round).orElse(-1f)
-            resolvedIcon.getBaseHeight() == expectedSize.height().map(Math::round).orElse(-1f)
+            resolvedIcon.getBaseWidth() == resultingBaseSize.width().map(Math::round).orElse(-1f)
+            resolvedIcon.getBaseHeight() == resultingBaseSize.height().map(Math::round).orElse(-1f)
 
         where :
-            uiScale |  initialSize      |  expectedSize   || svg
-
+            uiScale |  initialSize      | resultingBaseSize | resultingIconSize || svg
             // Basic percentage conversions with viewBox 100x100
-            1       | Size.of(-1, -1)   | Size.of(100,  50) || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
-            1       | Size.of(-1, -1)   | Size.of( 50, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
-            1       | Size.of(-1, -1)   | Size.of( 75,  25) || "<svg width=\"75%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of(100,  50) | Size.of(100,  50) || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of( 50, 100) | Size.of( 50, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of( 75,  25) | Size.of( 75,  25) || "<svg width=\"75%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of(200, 100) | Size.of(200, 100) || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 200 200\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of(100, 200) | Size.of(100, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 200\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of(150,  50) | Size.of(150,  50) || "<svg width=\"75%\" height=\"25%\" viewBox=\"0 0 200 200\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>\n</svg>"
 
             // Mixed units (percentage and pixels)
-            1       | Size.of(24, -1)   | Size.of(24, 50)   || "<svg width=\"24\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"white\"/>\n</svg>"
-            1       | Size.of(-1, 16)   | Size.of(50, 16)   || "<svg width=\"50%\" height=\"16\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(24, -1)   | Size.of(24, -1)   | Size.of(24, 24)   || "<svg width=\"24\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"white\"/>\n</svg>"
+            1       | Size.of(-1, 16)   | Size.of(-1, 16)   | Size.of(16, 16)   || "<svg width=\"50%\" height=\"16\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
 
             // Different viewBox dimensions
-            1       | Size.of(-1, -1)   | Size.of(48, 24)   || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 48 48\">\n<circle cx=\"24\" cy=\"24\" r=\"20\" fill=\"red\"/>\n</svg>"
-            1       | Size.of(-1, -1)   | Size.of(32, 64)   || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 64 64\">\n<circle cx=\"32\" cy=\"32\" r=\"30\" fill=\"salmon\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of(48, 24)   | Size.of(48, 24)   || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 48 48\">\n<circle cx=\"24\" cy=\"24\" r=\"20\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1, -1)   | Size.of(32, 64)   | Size.of(32, 64)   || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 64 64\">\n<circle cx=\"32\" cy=\"32\" r=\"30\" fill=\"salmon\"/>\n</svg>"
 
             // Only one percentage dimension
-            1       | Size.of(-1, 60)   | Size.of(100, 60 ) || "<svg width=\"100%\" height=\"60\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
-            1       | Size.of(30, -1)   | Size.of( 30, 50)  || "<svg width=\"30\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"lime\"/>\n</svg>"
+            1       | Size.of(-1, 60)   | Size.of(-1, 60 )  | Size.of(60, 60 )  || "<svg width=\"100%\" height=\"60\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(30, -1)   | Size.of( 30, -1)  | Size.of( 30, 30)  || "<svg width=\"30\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"lime\"/>\n</svg>"
 
             // No percentages (should remain unchanged)
-            1       | Size.of(100, 100) | Size.of(100, 100) || "<svg width=\"100\" height=\"100\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
-            1       | Size.of(50, 75)   | Size.of( 50,  75) || "<svg width=\"50\" height=\"75\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100, 100) | Size.of(100, 100) | Size.of(100, 100) || "<svg width=\"100\" height=\"100\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(50, 75)   | Size.of( 50,  75) | Size.of( 50,  75) || "<svg width=\"50\" height=\"75\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
 
             // With UI scaling
-            2       | Size.of(-1, -1)   | Size.of(100,  50) || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
-            3       | Size.of(-1, -1)   | Size.of( 50, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
-            2       | Size.of(-1, -1)   | Size.of( 50,  25) || "<svg width=\"50%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
-            3       | Size.of(24, -1)   | Size.of(24, 50)   || "<svg width=\"24\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"white\"/>\n</svg>"
-            2       | Size.of(-1, 16)   | Size.of(50, 16)   || "<svg width=\"50%\" height=\"16\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1, -1)   | Size.of(100,  50) | Size.of(100,  50) || "<svg width=\"100%\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1, -1)   | Size.of( 50, 100) | Size.of( 50, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1, -1)   | Size.of( 50,  25) | Size.of( 50,  25) || "<svg width=\"50%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(24, -1)   | Size.of(24, -1)   | Size.of(24, 24)   || "<svg width=\"24\" height=\"50%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"white\"/>\n</svg>"
+            2       | Size.of(-1, 16)   | Size.of(-1, 16)   | Size.of(16, 16)   || "<svg width=\"50%\" height=\"16\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
     }
 
     def 'The `withIconSizeFromWidth` method converts percentage-based icons to pixel-based icons and maintains aspect ratio.'(
@@ -373,7 +378,8 @@ class SvgIcon_Spec extends Specification
             2       | 200      | Size.of(200, 100) || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"200\" height=\"100\" fill=\"blue\"/>\n</svg>"
 
             // Different percentage values
-            1       | 75       | Size.of(75f,37.5f)|| "<svg width=\"50%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            1       | 75       | Size.of(75, 75)   || "<svg width=\"50%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            2       | 6        | Size.of(6,   3)   || "<svg width=\"60%\" height=\"75%\" viewBox=\"0 0 200 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
     }
 
     def 'The `withIconSizeFromHeight` method converts percentage-based icons to pixel-based icons and maintains aspect ratio.'(
@@ -381,7 +387,7 @@ class SvgIcon_Spec extends Specification
     ) {
         reportInfo """
             The `withIconSizeFromHeight` method should convert percentage-based dimensions
-            to pixel-based dimensions while maintaining the aspect ratio of the SVG document.
+            to pixel-based dimensions while maintaining the view box based aspect ratio of the SVG document.
             
             When called on an SVG with percentage dimensions, the resulting icon should:
             1. Have pixel-based units (PX) instead of percentage units
@@ -398,7 +404,10 @@ class SvgIcon_Spec extends Specification
 
         when : 'We call withIconSizeFromHeight with a new height.'
             var modifiedIcon = originalIcon.withIconSizeFromHeight(newHeight)
-        then : 'The modified icon has pixel-based dimensions with correct aspect ratio.'
+        then :
+            modifiedIcon.widthUnitString() == "px"
+            modifiedIcon.heightUnitString() == "px"
+        and : 'The modified icon has pixel-based dimensions with correct aspect ratio.'
             modifiedIcon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1f)
             modifiedIcon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1f)
         and : 'The base dimensions are as expected.'
@@ -417,29 +426,29 @@ class SvgIcon_Spec extends Specification
             3       | 100       | Size.of(100, 100) || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
 
             // Percentage based square aspect ratio (1:1)
-            1       | 200       | Size.of(200, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
-            2       | 100       | Size.of(100, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"yellow\"/>\n</svg>"
-            3       | 200       | Size.of(200, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            1       | 200       | Size.of(400, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            2       | 100       | Size.of(200, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"yellow\"/>\n</svg>"
+            3       | 200       | Size.of(400, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 200 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
 
             // Rectangular aspect ratio (1:2)
-            1       | 200       | Size.of(100, 200) || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
-            2       | 100       | Size.of(50, 100)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"black\"/>\n</svg>"
-            3       | 200       | Size.of(100, 200) || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            1       | 200       | Size.of(200, 200) || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            2       | 100       | Size.of(100,100)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"black\"/>\n</svg>"
+            3       | 200       | Size.of(200, 200) || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
 
             // Rectangular aspect ratio (1:2)
-            1       | 200       | Size.of(50, 200)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 200\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
-            2       | 100       | Size.of(25, 100)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 200\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"black\"/>\n</svg>"
-            3       | 200       | Size.of(50, 200)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 200\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            1       | 200       | Size.of(100,200)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 200\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            2       | 100       | Size.of(50, 100)  || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 200\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"black\"/>\n</svg>"
+            3       | 200       | Size.of(100, 200) || "<svg width=\"100%\" height=\"200%\" viewBox=\"0 0 100 200\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
 
             // Percentage based aspect ratio (1:2)
-            1       | 200       | Size.of(100, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
-            2       | 100       | Size.of(50, 100)  || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"yellow\"/>\n</svg>"
-            3       | 200       | Size.of(100, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            1       | 200       | Size.of(200, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
+            2       | 100       | Size.of(100, 100) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"yellow\"/>\n</svg>"
+            3       | 200       | Size.of(200, 200) || "<svg width=\"50%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<rect x=\"0\" y=\"0\" width=\"100\" height=\"200\" fill=\"blue\"/>\n</svg>"
 
             // Different percentage values
-            1       | 60        | Size.of(180, 60)  || "<svg width=\"75%\" height=\"50%\" viewBox=\"0 0 200 100\">\n<circle cx=\"100\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
-            2       | 60        | Size.of(180, 60)  || "<svg width=\"75%\" height=\"50%\" viewBox=\"0 0 200 100\">\n<circle cx=\"100\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
-            3       | 60        | Size.of(180, 60)  || "<svg width=\"75%\" height=\"50%\" viewBox=\"0 0 200 100\">\n<circle cx=\"100\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            1       | 60        | Size.of(120, 60)  || "<svg width=\"75%\" height=\"50%\" viewBox=\"0 0 200 100\">\n<circle cx=\"100\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            2       | 60        | Size.of(120, 60)  || "<svg width=\"75%\" height=\"50%\" viewBox=\"0 0 200 100\">\n<circle cx=\"100\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+            3       | 60        | Size.of(120, 60)  || "<svg width=\"75%\" height=\"50%\" viewBox=\"0 0 200 100\">\n<circle cx=\"100\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
     }
 
     def 'The `withIconSize` method may convert percentage-based icons to pixel-based icons and maintains aspect ratio.'(
@@ -495,6 +504,146 @@ class SvgIcon_Spec extends Specification
             3       | Size.of(-1,100)  | ["%","px"] | Size.of(-1,  4)  | Size.of( 4,  4)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
             1       | Size.of(-1,100)  | ["%","px"] | Size.of(2,  -1)  | Size.of( 2,  2)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
             2       | Size.of(100,-2)  | ["px","%"] | Size.of(-1,  4)  | Size.of( 4,  4)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+    }
+
+    def 'The `withIconSizeFromWidth` derives SVG icons with complete size.'(
+        float uiScale,
+        Size initSize,
+        Tuple2<String,String> initUnits,
+        int newWidth,
+        Size expectedSize,
+        Tuple2<String,String> expectedUnits,
+        String svg
+    ) {
+        given : 'We start with an initial UI scale.'
+            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+        and : 'We create an SvgIcon from the provided SVG string.'
+            var originalIcon = SvgIcon.of(svg)
+        expect : 'The original icon has percentage-based dimensions.'
+            originalIcon.getIconWidth() == initSize.width().map(UI::scale).map(Math::round).orElse(-1)
+            originalIcon.getIconHeight() == initSize.height().map(UI::scale).map(Math::round).orElse(-1)
+            originalIcon.getBaseWidth() == initSize.width().map(Math::round).orElse(-1)
+            originalIcon.getBaseHeight() == initSize.height().map(Math::round).orElse(-1)
+        and : 'The units are as expected:'
+            originalIcon.widthUnitString() == initUnits.v1
+            originalIcon.heightUnitString() == initUnits.v2
+
+        when : 'We call withIconSizeFromHeight with a new height.'
+            var modifiedIcon = originalIcon.withIconSizeFromWidth(newWidth)
+        then : 'The modified icon has pixel-based dimensions with correct aspect ratio.'
+            modifiedIcon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1)
+            modifiedIcon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1)
+        and : 'The base dimensions are as expected.'
+            modifiedIcon.getBaseWidth() == (newWidth < 0 ? -1 : expectedSize.width().map(Math::round).orElse(-1))
+            modifiedIcon.getBaseHeight() == (expectedUnits.v2 == "%" ? -1 : expectedSize.height().map(Math::round).orElse(-1))
+        and : 'The units are as expected:'
+            modifiedIcon.widthUnitString() == expectedUnits.v1
+            modifiedIcon.heightUnitString() == expectedUnits.v2
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale |  initSize        | initUnits  | newWidth | expectedSize      | expectedUnits || svg
+            1       | Size.of(-1,-1)   | ["%","%"]  | 100      | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 50       | Size.of(50, 50)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | 100      | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1,-1)   | ["%","%"]  | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 2        | Size.of( 2,  2)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| 100      | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(100,-1)  | ["px","%"] | 50       | Size.of(50, 50)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,100)  | ["%","px"] | 100      | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(100,-1)  | ["px","%"] | 2        | Size.of( 2,  2)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,100)  | ["%","px"] | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1,100)  | ["%","px"] | 2        | Size.of( 2,  2)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(100,-1)  | ["px","%"] | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+
+            1       | Size.of(-1,-1)   | ["%","%"]  | 100      | Size.of(100, 50)  | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 50       | Size.of(50, 25)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | 100      | Size.of(100, 50)  | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1,-1)   | ["%","%"]  | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 2        | Size.of( 2,  1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| 100      | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(100,-1)  | ["px","%"] | 50       | Size.of(50, 25)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,100)  | ["%","px"] | 100      | Size.of(100,  50) | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(100,-1)  | ["px","%"] | 2        | Size.of( 2,  1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,100)  | ["%","px"] | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1,100)  | ["%","px"] | 2        | Size.of( 2,  1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(100,-1)  | ["px","%"] | -1       | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+    }
+
+    def 'The `withIconSizeFromHeight` derives SVG icons with complete size.'(
+        float uiScale,
+        Size initSize,
+        Tuple2<String,String> initUnits,
+        int newHeight,
+        Size expectedSize,
+        Tuple2<String,String> expectedUnits,
+        String svg
+    ) {
+        given : 'We start with an initial UI scale.'
+            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+        and : 'We create an SvgIcon from the provided SVG string.'
+            var originalIcon = SvgIcon.of(svg)
+        expect : 'The original icon has the expected dimensions.'
+            originalIcon.getIconWidth() == initSize.width().map(UI::scale).map(Math::round).orElse(-1)
+            originalIcon.getIconHeight() == initSize.height().map(UI::scale).map(Math::round).orElse(-1)
+            originalIcon.getBaseWidth() == initSize.width().map(Math::round).orElse(-1)
+            originalIcon.getBaseHeight() == initSize.height().map(Math::round).orElse(-1)
+        and : 'The units are as expected:'
+            originalIcon.widthUnitString() == initUnits.v1
+            originalIcon.heightUnitString() == initUnits.v2
+
+        when : 'We call withIconSizeFromHeight with a new height.'
+            var modifiedIcon = originalIcon.withIconSizeFromHeight(newHeight)
+        then : 'The modified icon has pixel-based dimensions with correct aspect ratio.'
+            modifiedIcon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1)
+            modifiedIcon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1)
+        and : 'The base dimensions are as expected.'
+            modifiedIcon.getBaseWidth() == (expectedUnits.v1 == "%" ? -1 : expectedSize.width().map(Math::round).orElse(-1))
+            modifiedIcon.getBaseHeight() == (newHeight < 0 ? -1 : expectedSize.height().map(Math::round).orElse(-1))
+        and : 'The units are as expected:'
+            modifiedIcon.widthUnitString() == expectedUnits.v1
+            modifiedIcon.heightUnitString() == expectedUnits.v2
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale |  initSize        | initUnits  | newHeight | expectedSize      | expectedUnits || svg
+            1       | Size.of(-1,-1)   | ["%","%"]  | 100       | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 50        | Size.of(50, 50)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | 100       | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1,-1)   | ["%","%"]  | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 2         | Size.of(2, 2)     | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| 100       | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,100)  | ["%","px"] | 50        | Size.of(50, 50)   | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(100,-1)  | ["px","%"] | 100       | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,100)  | ["%","px"] | 2         | Size.of(2, 2)     | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(100,-1)  | ["px","%"] | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,100)  | ["%","px"] | 2         | Size.of(2, 2)     | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(100,-1)  | ["px","%"] | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/>\n</svg>"
+
+            1       | Size.of(-1,-1)   | ["%","%"]  | 50        | Size.of(100, 50)  | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 25        | Size.of(50, 25)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | 50        | Size.of(100, 50)  | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(-1,-1)   | ["%","%"]  | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,-1)   | ["%","%"]  | 1         | Size.of(2, 1)     | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(-1,-1)   | ["%","%"]  | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| 100       | Size.of(100, 100) | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,100)  | ["%","px"] | 50        | Size.of(100, 50)  | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(100,-1)  | ["px","%"] | 25        | Size.of(50, 25)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            1       | Size.of(100,100) | ["px","px"]| -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,100)  | ["%","px"] | 1         | Size.of(2, 1)     | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(100,-1)  | ["px","%"] | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            2       | Size.of(-1,100)  | ["%","px"] | 1         | Size.of(2, 1)     | ["px","px"]   || "<svg width=\"100%\" height=\"100px\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
+            3       | Size.of(100,-1)  | ["px","%"] | -1        | Size.of(-1, -1)   | ["px","px"]   || "<svg width=\"100px\" height=\"100%\" viewBox=\"0 0 100 50\">\n<circle cx=\"50\" cy=\"25\" r=\"20\" fill=\"red\"/>\n</svg>"
     }
 
     def 'The `String` representation of `SvgIcon` correctly formats different configurations with proper units and properties.'(
