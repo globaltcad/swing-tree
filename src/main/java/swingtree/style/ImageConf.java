@@ -364,7 +364,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *
      * @param svg A {@link String} holding an XML based SVG document.
      * @return A new {@link ImageConf} instance with the specified SVG String as source to be rendered as image.
-     * @throws NullPointerException If the specified {@code image} is null.
+     * @throws NullPointerException If the specified {@code svg} is null.
      */
     public ImageConf svg( String svg ) {
         Objects.requireNonNull(svg);
