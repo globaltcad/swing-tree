@@ -349,7 +349,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * an SVG string in your style. <br>
      * The supplied {@link String} will be parsed and converted
      * into a {@link SvgIcon}, which can render itself onto a component
-     * according to you desired configuration...<br>
+     * according to your desired configuration...<br>
      * This is equivalent to calling:
      * <pre>{@code
      *     .image(IconDeclaration.ofSvg("..."))
