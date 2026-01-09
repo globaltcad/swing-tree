@@ -5,10 +5,7 @@ import org.jspecify.annotations.Nullable;
 import swingtree.layout.Size;
 
 import java.lang.ref.WeakReference;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -27,18 +24,20 @@ final class PooledIconDeclaration implements IconDeclaration
      * of this in order to ensure that cache entries are not cleared too early.<br>
      * This optimizes both cache hits as well as memory consumption!
      */
-    private static final Map<PooledIconDeclaration, WeakReference<PooledIconDeclaration>> POOL = new WeakHashMap<>();
+    private static final Map<PooledIconDeclaration, WeakReference<PooledIconDeclaration>> POOL = Collections.synchronizedMap(new WeakHashMap<>());
 
-    private static PooledIconDeclaration intern(PooledIconDeclaration value ) {
-        WeakReference<PooledIconDeclaration> ref = POOL.get(value);
-        if (ref != null) {
-            PooledIconDeclaration canonical = ref.get();
-            if (canonical != null) {
-                return canonical;
+    private static PooledIconDeclaration intern(PooledIconDeclaration value) {
+        synchronized (POOL) {
+            WeakReference<PooledIconDeclaration> ref = POOL.get(value);
+            if (ref != null) {
+                PooledIconDeclaration canonical = ref.get();
+                if (canonical != null) {
+                    return canonical;
+                }
             }
+            POOL.put(value, new WeakReference<>(value));
+            return value;
         }
-        POOL.put(value, new WeakReference<>(value));
-        return value;
     }
     
     private final @Nullable Size size;
