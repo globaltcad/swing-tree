@@ -362,7 +362,7 @@ public interface IconDeclaration
      */
     static IconDeclaration ofSvg(String svg) {
         Objects.requireNonNull(svg);
-        return BasicIconDeclaration.of(null, SourceFormat.SVG_STRING, svg);
+        return PooledIconDeclaration.of(null, SourceFormat.SVG_STRING, svg);
     }
 
     /**
@@ -412,6 +412,6 @@ public interface IconDeclaration
         Objects.requireNonNull(size);
         Objects.requireNonNull(sourceFormat);
         Objects.requireNonNull(source);
-        return BasicIconDeclaration.of( size, sourceFormat, source );
+        return PooledIconDeclaration.of( size, sourceFormat, source );
     }
 }

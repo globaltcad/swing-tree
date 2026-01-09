@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Immutable
 @SuppressWarnings("Immutable")
-final class BasicIconDeclaration implements IconDeclaration
+final class PooledIconDeclaration implements IconDeclaration
 {
     /**
      * Implementations of {@link IconDeclaration} are used as weak cache keys
@@ -27,12 +27,12 @@ final class BasicIconDeclaration implements IconDeclaration
      * of this in order to ensure that cache entries are not cleared too early.<br>
      * This optimizes both cache hits as well as memory consumption!
      */
-    private static final Map<BasicIconDeclaration, WeakReference<BasicIconDeclaration>> POOL = new WeakHashMap<>();
+    private static final Map<PooledIconDeclaration, WeakReference<PooledIconDeclaration>> POOL = new WeakHashMap<>();
 
-    private static BasicIconDeclaration intern( BasicIconDeclaration value ) {
-        WeakReference<BasicIconDeclaration> ref = POOL.get(value);
+    private static PooledIconDeclaration intern(PooledIconDeclaration value ) {
+        WeakReference<PooledIconDeclaration> ref = POOL.get(value);
         if (ref != null) {
-            BasicIconDeclaration canonical = ref.get();
+            PooledIconDeclaration canonical = ref.get();
             if (canonical != null) {
                 return canonical;
             }
@@ -47,11 +47,11 @@ final class BasicIconDeclaration implements IconDeclaration
     private final AtomicReference<@Nullable Integer> _hashCache = new AtomicReference<>();
     
 
-    public static BasicIconDeclaration of( @Nullable Size size, SourceFormat sourceFormat, String source) {
-        return intern(new BasicIconDeclaration( size, sourceFormat, source ));
+    public static PooledIconDeclaration of(@Nullable Size size, SourceFormat sourceFormat, String source) {
+        return intern(new PooledIconDeclaration( size, sourceFormat, source ));
     }
 
-    private BasicIconDeclaration( @Nullable Size size, SourceFormat sourceFormat, String source) {
+    private PooledIconDeclaration(@Nullable Size size, SourceFormat sourceFormat, String source) {
         this.size = size;
         this.sourceFormat = sourceFormat;
         this.source = source;
