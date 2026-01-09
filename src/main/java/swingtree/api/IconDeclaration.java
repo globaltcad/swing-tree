@@ -66,7 +66,7 @@ import java.util.Optional;
  *  <p>
  *  <strong>SVG Support:</strong>
  *  In addition to traditional image files, {@code IconDeclaration} supports
- *  programmatically defined SVG icons through the {@link #ofSvg(String)} factory method.
+ *  programmatically defined SVG icons through the {@link #ofAutoScaledSvg(String)} factory method.
  *  This enables creation of resolution-independent vector icons directly in code:
  *  <pre>{@code
  *  // Create a custom SVG icon declaration
@@ -293,7 +293,46 @@ public interface IconDeclaration
     }
 
     /**
-     * Creates an {@link IconDeclaration} instance from an SVG document string.
+     * Creates an {@link IconDeclaration} instance from an SVG document string,
+     * <b>which will be resolved to an {@link SvgIcon} with an unknown size,
+     * effectively making it scale depending on its usage context.</b>
+     * This factory method is specifically designed for creating vector-based
+     * icons programmatically without requiring external files.
+     * <p>
+     * The provided SVG string must be a complete, well-formed SVG XML document.
+     * The resulting icon declaration will have its {@link #sourceFormat()}
+     * set to {@link SourceFormat#SVG_STRING}.
+     * <p>
+     * Icon declarations produced by this method will resolve to
+     * {@link swingtree.style.SvgIcon} instances, which support dynamic
+     * scaling while maintaining crisp edges at any scale.
+     * <p>
+     * Example:
+     * <pre>{@code
+     * String checkmarkSvg = "<svg width='16' height='16'>" +
+     *                       "<path d='M2 8l4 4l8-8' stroke='green' stroke-width='2' fill='none'/>" +
+     *                       "</svg>";
+     * IconDeclaration checkmark = IconDeclaration.ofAutoScaledSvg(checkmarkSvg)
+     *                                            .withSize(24, 24);
+     * }</pre>
+     * In the above example, an {@link SvgIcon} loaded using this declaration will report {@code -1}
+     * for both {@link SvgIcon#getIconWidth()} and {@link SvgIcon#getIconHeight()} instead of 16!
+     * This is to ensure that the svg is scalable when used as component icons...
+     *
+     * @param svg The complete SVG document as a string.
+     *           Must not be {@code null}.
+     * @return A new {@link IconDeclaration} instance representing the SVG icon.
+     * @throws NullPointerException if {@code svg} is {@code null}.
+     */
+    static IconDeclaration ofAutoScaledSvg(String svg) {
+        Objects.requireNonNull(svg);
+        return IconDeclaration.of(Size.unknown(), SourceFormat.SVG_STRING, svg);
+    }
+
+    /**
+     * Creates an {@link IconDeclaration} instance from an SVG document string,
+     * <b>which will be resolved to an {@link SvgIcon} with an unknown size,
+     * effectively making it scale depending on its usage context.</b>
      * This factory method is specifically designed for creating vector-based
      * icons programmatically without requiring external files.
      * <p>
@@ -313,6 +352,8 @@ public interface IconDeclaration
      * IconDeclaration checkmark = IconDeclaration.ofSvg(checkmarkSvg)
      *                                            .withSize(24, 24);
      * }</pre>
+     * In the above example, an {@link SvgIcon} loaded using this declaration will report {@code 16}
+     * for both {@link SvgIcon#getIconWidth()} and {@link SvgIcon#getIconHeight()}.
      *
      * @param svg The complete SVG document as a string.
      *           Must not be {@code null}.
@@ -321,7 +362,7 @@ public interface IconDeclaration
      */
     static IconDeclaration ofSvg(String svg) {
         Objects.requireNonNull(svg);
-        return IconDeclaration.of(Size.unknown(), SourceFormat.SVG_STRING, svg);
+        return BasicIconDeclaration.of(null, SourceFormat.SVG_STRING, svg);
     }
 
     /**

@@ -295,7 +295,7 @@ class Icon_Spec extends Specification
         given :
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'An icon declaration created from the SVG string.'
-            IconDeclaration iconDecl = IconDeclaration.ofSvg("""
+            IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg("""
                                 <svg width="${width}" height="${height}" viewBox="0 0 16 16">
                                     <circle cx="8" cy="8" r="6" fill="red"/>
                                 </svg>
@@ -306,6 +306,15 @@ class Icon_Spec extends Specification
             component.icon.getIconWidth() ==  -1
             component.icon.getIconHeight() == -1
         and : 'The icon should be an SvgIcon instance.'
+            (component.icon instanceof swingtree.style.SvgIcon)
+
+        when : 'We create a raw SVG icon declaration based component:'
+            iconDecl = IconDeclaration.ofSvg(iconDecl.source())
+            component = UI.icon(iconDecl).get(JIcon)
+        then : 'The icon should have the specified size scaled by UI scale.'
+            component.icon.getIconWidth() ==  (int) Math.round(width * uiScale)
+            component.icon.getIconHeight() == (int) Math.round(height * uiScale)
+        and : 'The icon should also be an SvgIcon instance.'
             (component.icon instanceof swingtree.style.SvgIcon)
 
         when : 'We create another UI declaration directly from an `SvgIcon`:'
@@ -342,7 +351,7 @@ class Icon_Spec extends Specification
         given :
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'Create an icon declaration from the SVG string.'
-            IconDeclaration iconDecl = IconDeclaration.ofSvg(svg)
+            IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)
         when : 'Create a UI declaration and extract the component.'
             var component = UI.icon(iconDecl).get(JIcon)
         then : 'The icon should not have the specified size, since they are loaded as having a context dependent size.'
@@ -352,6 +361,15 @@ class Icon_Spec extends Specification
             (component.icon instanceof swingtree.style.SvgIcon)
         and : 'The source format should be SVG_STRING.'
             iconDecl.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING
+
+        when : 'Now use the `IconDeclaration.ofSvg` method to create a raw SVG:'
+            iconDecl = IconDeclaration.ofSvg(svg)
+            component = UI.icon(iconDecl).get(JIcon)
+        then : 'The icon should have the specified size scaled by UI scale.'
+            component.icon.getIconWidth() == (int) Math.round(width * uiScale)
+            component.icon.getIconHeight() == (int) Math.round(height * uiScale)
+        and : 'The icon should be an SvgIcon instance.'
+            (component.icon instanceof swingtree.style.SvgIcon)
 
         when : 'Create a UI declaration with a custom `SvgIcon` from the same source:'
             component = UI.icon(SvgIcon.of(iconDecl.source())).get(JIcon)
@@ -387,8 +405,8 @@ class Icon_Spec extends Specification
         given :
             SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'Create an icon declaration from the SVG string.'
-            IconDeclaration iconDecl = IconDeclaration.ofSvg(svg)
-        when : 'Find the icon and get its dimensions.'
+            IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)
+        when : 'We look for the icon:'
             var iconOpt = UI.findIcon(iconDecl)
             var icon = iconOpt.get()
         then : 'The icon should be present.'
@@ -399,6 +417,20 @@ class Icon_Spec extends Specification
         and : 'The base size is also unknown:'
             icon.getBaseWidth() == -1
             icon.getBaseHeight() == -1
+        and : 'The icon should be an SvgIcon.'
+            (icon instanceof swingtree.style.SvgIcon)
+
+        when : 'We use the `ofSvg` method:'
+            iconDecl = IconDeclaration.ofSvg(svg)
+        and : 'Again find the icon:'
+            iconOpt = UI.findIcon(iconDecl)
+            icon = iconOpt.get()
+        then : 'The icon should have no pixel-based dimensions (percentage-based is always dynamic).'
+            icon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1)
+            icon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1)
+        and : 'The base size reflects the percentages:'
+            icon.getBaseWidth() == expectedSize.width().orElse(-1)
+            icon.getBaseHeight() == expectedSize.height().orElse(-1)
         and : 'The icon should be an SvgIcon.'
             (icon instanceof swingtree.style.SvgIcon)
 

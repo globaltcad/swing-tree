@@ -58,7 +58,7 @@ public class SvgViewer extends Panel
         .add("push, grow",
             tabbedPane()
             .add(
-                tab("SVG Icon Style Based").add(
+                tab("Icon in Style API").add(
                     panel("fill")
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center",
@@ -79,7 +79,30 @@ public class SvgViewer extends Panel
                 )
             )
             .add(
-                tab("Image Icon Style Based").add(
+                tab("SVG String in Style API").add(
+                    panel("fill")
+                    .withBackground(Color.LIGHTSTEELBLUE.brighter())
+                    .add("center",
+                        UI.box().withMinSize(290, 220)
+                        .withRepaintOn(svgText, placement, fitComponent)
+                        .withStyle( conf -> conf
+                            .image( img -> img
+                                .svg(svgText.get())
+                                .fitMode(fitComponent.get())
+                                .placement(placement.get())
+                            )
+                            .border(12, Color.LIGHTSTEELBLUE)
+                            .shadowColor(Color.BLACK)
+                            .shadowBlurRadius(3)
+                            .shadowSpreadRadius(-1)
+                            .borderRadius(8)
+                            .margin(13)
+                        )
+                    )
+                )
+            )
+            .add(
+                tab("Buffered Image").add(
                     panel("fill")
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center",
@@ -102,7 +125,7 @@ public class SvgViewer extends Panel
                 )
             )
             .add(
-                tab("Icon Based").add(
+                tab("Component Icon").add(
                     panel("fill")
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center",
