@@ -6503,18 +6503,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Optional<ImageIcon> findIcon( IconDeclaration declaration ) {
         Objects.requireNonNull(declaration, "declaration");
-        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
-            return _parseSvgIcon(declaration).map(ImageIcon.class::cast);
-        }
+        Function<IconDeclaration, @Nullable ImageIcon> loader = _loaderFor(declaration.sourceFormat());
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = _tryLoadIcon(declaration);
+            icon = loader.apply(declaration);
             if ( icon != null )
                 cache.put(declaration, icon);
             else {
                 IconDeclaration unscaled = IconDeclaration.of(declaration.source());
-                icon = _tryLoadIcon(unscaled);
+                icon = loader.apply(unscaled);
                 if ( icon != null )
                     cache.put(unscaled, icon);
                 Optional<Size> optionalSize = declaration.size();
@@ -6633,18 +6631,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Optional<SvgIcon> findSvgIcon( IconDeclaration declaration ) {
         Objects.requireNonNull(declaration, "declaration");
-        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
-            return _parseSvgIcon(declaration);
-        }
-        if ( declaration.sourceFormat() != IconDeclaration.SourceFormat.PATH_TO_ICON )
-            return Optional.empty();
-        if ( !declaration.source().endsWith(".svg") )
+        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.PATH_TO_ICON && !declaration.source().endsWith(".svg") )
             return Optional.empty();
 
+        Function<IconDeclaration, @Nullable ImageIcon> loader = _loaderFor(declaration.sourceFormat());
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = _tryLoadIcon(declaration);
+            icon = loader.apply(declaration);
             if ( icon != null )
                 cache.put(declaration, icon);
         }
@@ -6654,17 +6648,30 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             return Optional.of(icon).map(SvgIcon.class::cast);
     }
 
-    public static Optional<SvgIcon> _parseSvgIcon( IconDeclaration declaration ) {
-        Objects.requireNonNull(declaration, "declaration");
-        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
-            SvgIcon icon = SvgIcon.of(declaration.source());
-            Optional<Size> size = declaration.size();
-            if ( size.isPresent() ) {
-                icon = icon.withIconSize(size.get());
-            }
-            return Optional.of(icon);
+    private static Function<IconDeclaration, @Nullable ImageIcon> _loaderFor(IconDeclaration.SourceFormat sourceFormat) {
+        if ( sourceFormat == IconDeclaration.SourceFormat.SVG_STRING ) {
+            return i -> _parseSvgIcon(i).map(ImageIcon.class::cast).orElse(null);
+        } else {
+            return UIFactoryMethods::_tryLoadIcon;
         }
-        return Optional.empty();
+    }
+
+    private static Optional<SvgIcon> _parseSvgIcon( IconDeclaration declaration ) {
+        Objects.requireNonNull(declaration, "declaration");
+        SvgIcon icon = null;
+        try {
+            if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
+                icon = SvgIcon.of(declaration.source());
+                Optional<Size> size = declaration.size();
+                if ( size.isPresent() ) {
+                    icon = icon.withIconSize(size.get());
+                }
+                return Optional.of(icon);
+            }
+        } catch (Exception e) {
+            log.error(SwingTree.get().logMarker(), "Failed to parse SVG icon from declaration: {}", declaration, e);
+        }
+        return Optional.ofNullable(icon);
     }
 
     /**
@@ -6674,13 +6681,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    private static @Nullable ImageIcon _tryLoadIcon(IconDeclaration declaration )
+    private static @Nullable ImageIcon _tryLoadIcon( IconDeclaration declaration )
     {
         ImageIcon icon = null;
         try {
             icon = _loadIcon(declaration);
         } catch (Exception e) {
-            log.error(SwingTree.get().logMarker(), "Failed to load icon from declaration: " + declaration, e);
+            log.error(SwingTree.get().logMarker(), "Failed to load icon from declaration: {}", declaration, e);
         }
         return icon;
     }
