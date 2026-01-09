@@ -14,12 +14,14 @@ import java.util.Optional;
 final class BasicIconDeclaration implements IconDeclaration
 {
     private final @Nullable Size size;
-    private final String path;
+    private final SourceFormat sourceFormat;
+    private final String source;
 
 
-    public BasicIconDeclaration( @Nullable Size size, String path ) {
+    public BasicIconDeclaration( @Nullable Size size, SourceFormat sourceFormat, String source) {
         this.size = size;
-        this.path = path;
+        this.sourceFormat = sourceFormat;
+        this.source = source;
     }
 
     @Override
@@ -28,20 +30,26 @@ final class BasicIconDeclaration implements IconDeclaration
     }
 
     @Override
-    public String path() {
-        return path;
+    public String source() {
+        return source;
+    }
+
+    @Override
+    public SourceFormat sourceFormat() {
+        return sourceFormat;
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"["+
                     "size=" + ( size().map(it->it.equals(Size.unknown()) ? "?" : String.valueOf(it) ).orElse("?") ) + ", " +
-                    "path='" + path() + "'" +
+                    "sourceFormat=" + sourceFormat + ", " +
+                    "source='" + source + "'" +
                 "]";
     }
 
     @Override public int hashCode() {
-        return Objects.hash(path(), size());
+        return Objects.hash(source, sourceFormat, size);
     }
 
     @Override public boolean equals( Object other ) {
@@ -49,7 +57,8 @@ final class BasicIconDeclaration implements IconDeclaration
         if ( other == null ) return false;
         if ( other.getClass() != this.getClass() ) return false;
         IconDeclaration that = (IconDeclaration) other;
-        return Objects.equals(this.path(), that.path())
+        return Objects.equals(this.source(), that.source())
+                && Objects.equals(this.sourceFormat(), that.sourceFormat())
                 && Objects.equals(this.size(), that.size());
     }
 }

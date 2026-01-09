@@ -6510,7 +6510,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             if ( icon != null )
                 cache.put(declaration, icon);
             else {
-                IconDeclaration unscaled = IconDeclaration.of(declaration.path());
+                IconDeclaration unscaled = IconDeclaration.of(declaration.source());
                 icon = _tryLoadIcon(unscaled);
                 if ( icon != null )
                     cache.put(unscaled, icon);
@@ -6630,7 +6630,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Optional<SvgIcon> findSvgIcon( IconDeclaration declaration ) {
         Objects.requireNonNull(declaration, "declaration");
-        if ( !declaration.path().endsWith(".svg") )
+        if ( !declaration.source().endsWith(".svg") )
             return Optional.empty();
 
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
@@ -6674,7 +6674,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     private static @Nullable ImageIcon _loadIcon( IconDeclaration declaration )
     {
         Objects.requireNonNull(declaration, "declaration");
-        String path = declaration.path();
+        String path = declaration.source();
         Objects.requireNonNull(path, "path");
         path = path.trim();
         if ( path.isEmpty() )
