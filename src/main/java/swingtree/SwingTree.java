@@ -98,7 +98,7 @@ public final class SwingTree
     private SwingTreeInitConfig _config;
 
     private final LazyRef<UiScale> _uiScale;
-    private final Map<IconDeclaration, ImageIcon> _iconCache = new HashMap<>();
+    private final Map<IconDeclaration, ImageIcon> _iconCache = new WeakHashMap<>();
 
 
     private SwingTree() { this(config -> config); }

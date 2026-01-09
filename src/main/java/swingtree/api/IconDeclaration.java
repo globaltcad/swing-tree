@@ -371,6 +371,6 @@ public interface IconDeclaration
         Objects.requireNonNull(size);
         Objects.requireNonNull(sourceFormat);
         Objects.requireNonNull(source);
-        return new BasicIconDeclaration( size, sourceFormat, source );
+        return BasicIconDeclaration.of( size, sourceFormat, source );
     }
 }
