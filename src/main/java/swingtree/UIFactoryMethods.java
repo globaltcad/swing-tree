@@ -6511,7 +6511,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             if ( icon != null )
                 cache.put(declaration, icon);
             else {
-                IconDeclaration unscaled = IconDeclaration.of(declaration.source());
+                IconDeclaration unscaled = IconDeclaration.of(Size.unknown(), declaration.sourceFormat(), declaration.source());
                 icon = loader.apply(unscaled);
                 if ( icon != null )
                     cache.put(unscaled, icon);
