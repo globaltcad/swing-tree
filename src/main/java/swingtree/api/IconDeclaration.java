@@ -331,8 +331,7 @@ public interface IconDeclaration
 
     /**
      * Creates an {@link IconDeclaration} instance from an SVG document string,
-     * <b>which will be resolved to an {@link SvgIcon} with an unknown size,
-     * effectively making it scale depending on its usage context.</b>
+     * <b>which will be resolved to an {@link SvgIcon} with the same size declared in the SVG text.</b>
      * This factory method is specifically designed for creating vector-based
      * icons programmatically without requiring external files.
      * <p>
