@@ -375,7 +375,7 @@ public interface IconDeclaration
      *  <p>
      *  <b>Size Handling:</b>
      *  If the provided {@code size} parameter is {@link Size#unknown()}, it will
-     *  indicate to raster based icons that their should use their natural dimensions
+     *  indicate to raster based icons that they should use their natural dimensions
      *  (for raster images), whereas SVG based icons will be loaded without any size
      *  to make their size effectively context-dependent (automatic scaling).
      *  <p>
