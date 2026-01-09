@@ -292,7 +292,12 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  Here you can specify the <b>image</b> which will be drawn onto the component.
-     *  The supplied object must be an instance of {@link Image} implementation.
+     *  The supplied object must be an instance of {@link Image} implementation.<br>
+     * <p><b>
+     *     Please note that using this method will override whatever information
+     *     was previously passed to {@link #image(ImageIcon)}, {@link #image(IconDeclaration)},
+     *     {@link #image(String)} and {@link #svg(String)}!
+     * </b></p>
      *
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
@@ -303,7 +308,12 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  Here you can specify the <b>image icon</b> which will be drawn onto the component.
-     *  The supplied object must be an instance of {@link ImageIcon} implementation.
+     *  The supplied object must be an instance of {@link ImageIcon} implementation.<br>
+     * <p><b>
+     *     Please note that using this method will override whatever information
+     *     was previously passed to {@link #svg(String)}, {@link #image(IconDeclaration)},
+     *     {@link #image(String)} and {@link #image(Image)}!
+     * </b></p>
      *
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
@@ -313,13 +323,20 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  Here you can specify the <b>path to the image in the form of an {@link IconDeclaration}</b>
-     *  for which the icon will be loaded and drawn onto the component.
-     *  If the icon could not be found, then the image will not be drawn.
-     *  The path is relative to the classpath or may be an absolute path.
+     *  Here you can specify an image in the form of an {@link IconDeclaration},
+     *  which typically has a <b>{@link IconDeclaration#source()} that holds a path to an image.</b>
+     *  If the supplied {@link IconDeclaration} is path based, then it will be resolved
+     *  relative to the classpath or as an absolute path. However, the declaration
+     *  may also be based on an SVG String as source.<br>
+     *  If the icon could not be found or parsed, then the image will not be drawn.<br>
+     * <p><b>
+     *     Please note that using this method will override whatever information
+     *     was previously passed to {@link #image(ImageIcon)}, {@link #svg(String)},
+     *     {@link #image(String)} and {@link #image(Image)}!
+     * </b></p>
      *
-     * @param image The path to the (icon) image in the form of an {@link IconDeclaration}.
-     * @return A new {@link ImageConf} instance with the specified image.
+     * @param image The path to the (icon) image or SVG String in the form of an {@link IconDeclaration}.
+     * @return A new {@link ImageConf} instance with the specified icon declaration for resolving an image.
      * @throws NullPointerException If the specified {@code image} is null.
      */
     public ImageConf image( IconDeclaration image ) {
@@ -328,11 +345,43 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
+     * Use this to specify an image directly in the form of
+     * an SVG string in your style. <br>
+     * The supplied {@link String} will be parsed and converted
+     * into a {@link SvgIcon}, which can render itself onto a component
+     * according to your desired configuration...<br>
+     * This is equivalent to calling:
+     * <pre>{@code
+     *     .image(IconDeclaration.ofSvg("..."))
+     * }</pre>
+     * If the supplied SVG is invalid, then this will
+     * result in an empty {@link SvgIcon}, which will simply not render anything.<br>
+     * <p><b>
+     *     Please note that using this method will override whatever information
+     *     was previously passed to {@link #image(ImageIcon)}, {@link #image(IconDeclaration)},
+     *     {@link #image(String)} and {@link #image(Image)}!
+     * </b></p>
+     *
+     * @param svg A {@link String} holding an XML based SVG document.
+     * @return A new {@link ImageConf} instance with the specified SVG String as source to be rendered as image.
+     * @throws NullPointerException If the specified {@code svg} is null.
+     */
+    public ImageConf svg( String svg ) {
+        Objects.requireNonNull(svg);
+        return this.image(IconDeclaration.ofSvg(svg));
+    }
+
+    /**
      *  Here you can specify the <b>path to the image</b> for which the icon will be loaded,
      *  cached and drawn onto the component.
      *  If the icon could not be found, then the image will not be drawn.
      *  The path is relative to the classpath or may be an absolute path.
-     *  (see {@link swingtree.UI#findIcon(String)}).
+     *  (see {@link swingtree.UI#findIcon(String)}).<br>
+     * <p><b>
+     *     Please note that using this method will override whatever information
+     *     was previously passed to {@link #image(ImageIcon)}, {@link #image(IconDeclaration)},
+     *     {@link #svg(String)} and {@link #image(Image)}!
+     * </b></p>
      *
      * @param path The path to the (icon) image.
      * @return A new {@link ImageConf} instance with the specified image.
