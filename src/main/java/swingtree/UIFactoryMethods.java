@@ -6503,6 +6503,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Optional<ImageIcon> findIcon( IconDeclaration declaration ) {
         Objects.requireNonNull(declaration, "declaration");
+        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
+            return _parseSvgIcon(declaration).map(ImageIcon.class::cast);
+        }
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
@@ -6630,6 +6633,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static Optional<SvgIcon> findSvgIcon( IconDeclaration declaration ) {
         Objects.requireNonNull(declaration, "declaration");
+        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
+            return _parseSvgIcon(declaration);
+        }
+        if ( declaration.sourceFormat() != IconDeclaration.SourceFormat.PATH_TO_ICON )
+            return Optional.empty();
         if ( !declaration.source().endsWith(".svg") )
             return Optional.empty();
 
@@ -6644,6 +6652,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             return Optional.empty();
         else
             return Optional.of(icon).map(SvgIcon.class::cast);
+    }
+
+    public static Optional<SvgIcon> _parseSvgIcon( IconDeclaration declaration ) {
+        Objects.requireNonNull(declaration, "declaration");
+        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {
+            SvgIcon icon = SvgIcon.of(declaration.source());
+            Optional<Size> size = declaration.size();
+            if ( size.isPresent() ) {
+                icon = icon.withIconSize(size.get());
+            }
+            return Optional.of(icon);
+        }
+        return Optional.empty();
     }
 
     /**
