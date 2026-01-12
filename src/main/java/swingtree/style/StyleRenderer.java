@@ -33,9 +33,9 @@ final class StyleRenderer
 
 
     public static void renderStyleOn(
-        UI.Layer layer,
-        LayerRenderConf conf,
-        Graphics2D g2d
+        final UI.Layer layer,
+        final LayerRenderConf conf,
+        final Graphics2D g2d
     ) {
         // 1. Foundation + Background fill (not every layer has this):
         _drawBackgroundFill(conf, g2d);
@@ -76,11 +76,14 @@ final class StyleRenderer
         // And that's it! We have rendered a style layer!
     }
 
-    private static void _drawBackgroundFill( LayerRenderConf conf, Graphics2D g2d ) {
-        Color foundationColor = conf.baseColors().foundationColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
-        Color backgroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
-        boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaque();
-        boolean bodyIsOpaque = backgroundColor.getAlpha() == 255;
+    private static void _drawBackgroundFill(
+        final LayerRenderConf conf,
+        final Graphics2D g2d
+    ) {
+        final Color foundationColor = conf.baseColors().foundationColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
+        final Color backgroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
+        final boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaque();
+        final boolean bodyIsOpaque = backgroundColor.getAlpha() == 255;
         if ( bodyIsOpaque && borderIsOpaque ) {
             g2d.setColor(foundationColor);
             g2d.fill(conf.areas().get(UI.ComponentArea.ALL)); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
@@ -98,8 +101,11 @@ final class StyleRenderer
         }
     }
 
-    private static void _drawBorder( LayerRenderConf conf, BorderColorsConf colors, Graphics2D g2d )
-    {
+    private static void _drawBorder(
+        final LayerRenderConf conf,
+        final BorderColorsConf colors,
+        final Graphics2D g2d
+    ) {
         if ( colors.equals(BorderColorsConf.none()) )
             return;
 
@@ -145,15 +151,15 @@ final class StyleRenderer
     }
 
     private static void _renderShadows(
-        LayerRenderConf conf,
-        ShadowConf    shadow,
-        Graphics2D    g2d
+        final LayerRenderConf conf,
+        final ShadowConf    shadow,
+        final Graphics2D    g2d
     ) {
         if ( !shadow.color().isPresent() )
             return;
 
-        Color shadowColor = shadow.color().orElse(Color.BLACK);
-        Size  size        = conf.boxModel().size();
+        final Color shadowColor = shadow.color().orElse(Color.BLACK);
+        final Size  size        = conf.boxModel().size();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -217,7 +223,7 @@ final class StyleRenderer
             baseArea = new Area(conf.areas().get(UI.ComponentArea.BODY));
 
         // Apply the clipping to avoid overlapping the shadow and the box
-        Area shadowArea = new Area(outerShadowRect);
+        final Area shadowArea = new Area(outerShadowRect);
 
         if ( shadow.isOutset() )
             shadowArea.subtract(baseArea);
@@ -236,20 +242,20 @@ final class StyleRenderer
         _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
         _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
-        Area outerMostArea = new Area(outerShadowRect);
+        final Area outerMostArea = new Area(outerShadowRect);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         _renderShadowBody(shadow, baseArea, innerShadowRect, outerMostArea, g2d);
 
     }
 
     private static void _renderShadowBody(
-        ShadowConf shadowConf,
-        Area              baseArea,
-        Rectangle2D.Float innerShadowRect,
-        Area              outerShadowBox,
-        Graphics2D        g2d
+        final ShadowConf shadowConf,
+        final Area              baseArea,
+        final Rectangle2D.Float innerShadowRect,
+        final Area              outerShadowBox,
+        final Graphics2D        g2d
     ) {
-        Graphics2D g2d2 = (Graphics2D) g2d.create();
+        final Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(shadowConf.color().orElse(Color.BLACK));
         if ( !shadowConf.isOutset() ) {
             baseArea.subtract(outerShadowBox);
@@ -263,26 +269,26 @@ final class StyleRenderer
     }
 
     private static void _renderCornerShadow(
-        ShadowConf shadowConf,
-        UI.Corner         corner,
-        Area              areaWhereShadowIsAllowed,
-        Rectangle2D.Float innerShadowRect,
-        Rectangle2D.Float outerShadowRect,
-        int               gradientStartOffset,
-        Graphics2D        g2d
+        final ShadowConf shadowConf,
+        final UI.Corner         corner,
+        final Area              areaWhereShadowIsAllowed,
+        final Rectangle2D.Float innerShadowRect,
+        final Rectangle2D.Float outerShadowRect,
+        final int               gradientStartOffset,
+        final Graphics2D        g2d
     ) {
         // We define a clipping box so that corners don't overlap
-        float clipBoxWidth   = outerShadowRect.width / 2f;
-        float clipBoxHeight  = outerShadowRect.height / 2f;
-        float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;
-        float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;
-        Rectangle2D.Float cornerClipBox; // outer box!
+        final float clipBoxWidth   = outerShadowRect.width / 2f;
+        final float clipBoxHeight  = outerShadowRect.height / 2f;
+        final float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;
+        final float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;
+        final Rectangle2D.Float cornerClipBox; // outer box!
 
         // The defining the corner shadow bound (where it starts and ends
-        Rectangle2D.Float cornerBox;
-        float cx;
-        float cy;
-        float cr; // depending on the corner, this is either the corner box width or height
+        final Rectangle2D.Float cornerBox;
+        final float cx;
+        final float cy;
+        final float cr; // depending on the corner, this is either the corner box width or height
         switch (corner) {
             case TOP_LEFT:
                 cornerBox = new Rectangle2D.Float(
@@ -351,9 +357,9 @@ final class StyleRenderer
 
         if (cr <= 0) return;
 
-        Color innerColor;
-        Color outerColor;
-        Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
+        final Color innerColor;
+        final Color outerColor;
+        final Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
         if ( shadowConf.isOutset() ) {
             innerColor = shadowConf.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
@@ -361,16 +367,16 @@ final class StyleRenderer
             innerColor = shadowBackgroundColor;
             outerColor = shadowConf.color().orElse(Color.BLACK);
         }
-        float gradientStart = (float) gradientStartOffset / cr;
+        final float gradientStart = (float) gradientStartOffset / cr;
 
         // The first thing we can do is to clip the corner box to the area where the shadow is allowed
-        Area cornerArea = new Area(cornerBox);
+        final Area cornerArea = new Area(cornerBox);
         cornerArea.intersect(areaWhereShadowIsAllowed);
 
         // In the simplest case we don't need to do any gradient painting:
         if ( gradientStart == 1f || gradientStart == 0f ) {
             // Simple, we just draw a circle and clip it
-            Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));
+            final Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));
             if ( shadowConf.isInset() ) {
                 g2d.setColor(outerColor);
                 cornerArea.subtract(circle);
@@ -382,7 +388,7 @@ final class StyleRenderer
             return;
         }
 
-        RadialGradientPaint cornerPaint;
+        final RadialGradientPaint cornerPaint;
         if ( gradientStart > 1f || gradientStart < 0f )
             cornerPaint = new RadialGradientPaint(
                              cx, cy, cr,
@@ -399,31 +405,31 @@ final class StyleRenderer
         // We need to clip the corner paint to the corner box
         cornerArea.intersect(new Area(cornerClipBox));
 
-        Graphics2D cornerG2d = (Graphics2D) g2d.create();
+        final Graphics2D cornerG2d = (Graphics2D) g2d.create();
         cornerG2d.setPaint(cornerPaint);
         cornerG2d.fill(cornerArea);
         cornerG2d.dispose();
     }
 
     private static void _renderEdgeShadow(
-        ShadowConf        shadowConf,
-        UI.Edge           edge,
-        Area              contentArea,
-        Rectangle2D.Float innerShadowRect,
-        Rectangle2D.Float outerShadowRect,
-        int               gradientStartOffset,
-        Graphics2D        g2d
+        final ShadowConf        shadowConf,
+        final UI.Edge           edge,
+        final Area              contentArea,
+        final Rectangle2D.Float innerShadowRect,
+        final Rectangle2D.Float outerShadowRect,
+        final int               gradientStartOffset,
+        final Graphics2D        g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
-        float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;
-        float clipBoundaryY = outerShadowRect.y + outerShadowRect.height / 2f;
+        final float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;
+        final float clipBoundaryY = outerShadowRect.y + outerShadowRect.height / 2f;
         Rectangle2D.Float edgeClipBox = null;
 
-        Rectangle2D.Float edgeBox;
-        float gradEndX;
-        float gradEndY;
-        float gradStartX;
-        float gradStartY;
+        final Rectangle2D.Float edgeBox;
+        final float gradEndX;
+        final float gradEndY;
+        final float gradStartX;
+        final float gradStartY;
         switch (edge) {
             case TOP:
                 edgeBox = new Rectangle2D.Float(
@@ -501,10 +507,10 @@ final class StyleRenderer
 
         if ( gradStartX == gradEndX && gradStartY == gradEndY ) return;
 
-        Color innerColor;
-        Color outerColor;
+        final Color innerColor;
+        final Color outerColor;
         // Same as shadow color but without alpha:
-        Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
+        final Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
         if (shadowConf.isOutset()) {
             innerColor = shadowConf.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
@@ -514,11 +520,11 @@ final class StyleRenderer
         }
         LinearGradientPaint edgePaint;
         // distance between start and end of gradient
-        float dist = (float) Math.sqrt(
+        final float dist = (float) Math.sqrt(
                                     (gradEndX - gradStartX) * (gradEndX - gradStartX) +
                                     (gradEndY - gradStartY) * (gradEndY - gradStartY)
                                 );
-        float gradientStart = (float) gradientStartOffset / dist;
+        final float gradientStart = (float) gradientStartOffset / dist;
         if ( gradientStart > 1f || gradientStart < 0f )
             edgePaint = new LinearGradientPaint(
                                gradStartX, gradStartY,
@@ -545,18 +551,18 @@ final class StyleRenderer
         }
 
         // We need to clip the edge paint to the edge box
-        Area edgeArea = new Area(edgeBox);
+        final Area edgeArea = new Area(edgeBox);
         edgeArea.intersect(contentArea);
         if ( edgeClipBox != null )
             edgeArea.intersect(new Area(edgeClipBox));
 
-        Graphics2D edgeG2d = (Graphics2D) g2d.create();
+        final Graphics2D edgeG2d = (Graphics2D) g2d.create();
         edgeG2d.setPaint(edgePaint);
         edgeG2d.fill(edgeArea);
         edgeG2d.dispose();
     }
 
-    private static Color _transparentShadowBackground(ShadowConf shadow) {
+    private static Color _transparentShadowBackground(final ShadowConf shadow) {
         return shadow.color()
                     .map(c -> new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
@@ -595,7 +601,7 @@ final class StyleRenderer
             g2d.fill(conf.areas().get(gradient.area()));
         }
         else {
-            Paint paint = _createGradientPaint(conf.boxModel(), gradient);
+            final Paint paint = _createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
@@ -605,15 +611,15 @@ final class StyleRenderer
     }
 
     static @Nullable Paint _createGradientPaint(
-        BoxModelConf boxModel,
-        GradientConf gradient
+        final BoxModelConf boxModel,
+        final GradientConf gradient
     ) {
         final Size dimensions = boxModel.size();
         Outline insets;
         if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
-            Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, boxModel);
-            float verticalInset = dimensions.height().orElse(0f) / 2f;
-            float horizontalInset = dimensions.width().orElse(0f) / 2f;
+            final Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, boxModel);
+            final float verticalInset = dimensions.height().orElse(0f) / 2f;
+            final float horizontalInset = dimensions.width().orElse(0f) / 2f;
             insets = Outline.of(verticalInset, horizontalInset);
             switch ( gradient.span() ) {
                 case TOP_TO_BOTTOM:
@@ -656,9 +662,8 @@ final class StyleRenderer
         final float realX  = insets.left().orElse(0f) + gradient.offset().x();
         final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
 
-        Point2D.Float corner1;
-        Point2D.Float corner2;
-
+        final Point2D.Float corner1;
+        final Point2D.Float corner2;
         final UI.Span type = gradient.span();
         if ( type.isOneOf(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
             corner1 = new Point2D.Float(realX, realY);
@@ -705,14 +710,14 @@ final class StyleRenderer
     }
 
     private static Paint _createConicGradientPaint(
-        Point2D.Float  corner1,
-        Point2D.Float  corner2,
-        GradientConf   gradient
+        final Point2D.Float  corner1,
+        final Point2D.Float  corner2,
+        final GradientConf   gradient
     ) {
         final Color[] colors    = gradient.colors();
         final float[] fractions = _fractionsFrom(gradient);
-        float rotation = gradient.rotation() + _rotationBetween(corner1, corner2);
 
+        float rotation = gradient.rotation() + _rotationBetween(corner1, corner2);
         // we normalize the rotation to be between -180 and 180
         rotation = ((((rotation+180f) % 360f + 360f) % 360f)-180f);
 
@@ -734,8 +739,8 @@ final class StyleRenderer
         final LayerRenderConf conf,
         final Graphics2D g2d
     ) {
-        Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
-        Shape areaToFill = conf.areas().get(noise.get().area());
+        final Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
+        final Shape areaToFill = conf.areas().get(noise.get().area());
         g2d.setPaint(noisePaint);
         g2d.fill(areaToFill);
     }
@@ -789,10 +794,10 @@ final class StyleRenderer
 
         final Color[] colors    = noise.get().colors();
         final float[] fractions = _fractionsFrom(colors, noise.get().fractions());
-        float rotation = noise.get().rotation();
-        Scale scale = noise.get().scale();
-        float scaleX = scale.x();
-        float scaleY = scale.y();
+        final float rotation = noise.get().rotation();
+        final Scale scale = noise.get().scale();
+        final float scaleX = scale.x();
+        final float scaleY = scale.y();
 
         paint = new NoiseGradientPaint(
                         center,
@@ -937,16 +942,20 @@ final class StyleRenderer
         }
     }
 
-    private static Point2D.Float projectPointOntoLine(Point2D.Float A, Point2D.Float n, Point2D.Float C) {
+    private static Point2D.Float projectPointOntoLine(
+        final Point2D.Float A,
+        final Point2D.Float n,
+        final Point2D.Float C
+    ) {
         Point2D.Float B = new Point2D.Float(A.x + n.x, A.y + n.y);
         float t = ((C.x - A.x) * (B.x - A.x) + (C.y - A.y) * (B.y - A.y)) / ((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y));
         return new Point2D.Float(A.x + t * (B.x - A.x), A.y + t * (B.y - A.y));
     }
 
     private static Paint _createRadialGradientPaint(
-        Point2D.Float  corner1,
-        Point2D.Float  corner2,
-        GradientConf   gradient
+        final Point2D.Float  corner1,
+        final Point2D.Float  corner2,
+        final GradientConf   gradient
     ) {
         final UI.Cycle cycle  = gradient.cycle();
         final Color[]  colors = gradient.colors();
@@ -959,9 +968,9 @@ final class StyleRenderer
         float corner2Y = corner2.y;
 
 
-        float[] fractions = _fractionsFrom(gradient);
+        final float[] fractions = _fractionsFrom(gradient);
 
-        float radius;
+        final float radius;
 
         if ( size < 0 )
             radius = (float) Math.sqrt(
@@ -1025,14 +1034,14 @@ final class StyleRenderer
         }
     }
 
-    private static float[] _fractionsFrom(GradientConf style ) {
-        Color[] colors   = style.colors();
-        float[] fractions = style.fractions();
+    private static float[] _fractionsFrom( final GradientConf style ) {
+        final Color[] colors   = style.colors();
+        final float[] fractions = style.fractions();
         return _fractionsFrom(colors, fractions);
     }
 
     private static float[] _fractionsFrom(
-        Color[] colors,
+        final Color[] colors,
         float[] fractions
     ) {
         if ( fractions.length == colors.length )
@@ -1099,7 +1108,7 @@ final class StyleRenderer
      * @param p2 The second point which is rotated around point 1.
      * @return The rotation in degrees.
      */
-    private static final float _rotationBetween(
+    private static float _rotationBetween(
         final Point2D.Float p1,
         final Point2D.Float p2
     ){
@@ -1286,8 +1295,8 @@ final class StyleRenderer
         Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
         font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
         g2d.setFont(font);
-        FontMetrics fm = g2d.getFontMetrics(font);
-        Rectangle2D rect = fm.getStringBounds(textToRender, g2d);
+        final FontMetrics fm = g2d.getFontMetrics(font);
+        final Rectangle2D rect = fm.getStringBounds(textToRender, g2d);
 
         Outline insets = _insetsFrom(placementBoundary, boxModel);
         float x = insets.left().orElse(0f); // Top left is always the starting point
@@ -1356,7 +1365,11 @@ final class StyleRenderer
         }
     }
 
-    private static void _executeUserPainters( UI.Layer layer, LayerRenderConf conf, Graphics2D g2d ) {
+    private static void _executeUserPainters(
+        final UI.Layer layer,
+        final LayerRenderConf conf,
+        final Graphics2D g2d
+    ) {
         List<PainterConf> painters = conf.layer().painters().sortedByNames();
 
         if ( painters.isEmpty() )
@@ -1419,12 +1432,12 @@ final class StyleRenderer
     }
 
     static void renderParentFilter(
-        FilterConf    filterConf,
-        BufferedImage parentRendering,
-        Graphics2D    g2d,
+        final FilterConf    filterConf,
+        final BufferedImage parentRendering,
+        final Graphics2D    g2d,
         int offsetX,
         int offsetY,
-        Pooled<BoxModelConf> boxModelConf
+        final Pooled<BoxModelConf> boxModelConf
     ) {
         final Size       size   = boxModelConf.get().size();
         final float      width  = size.width().orElse(0f);
@@ -1480,7 +1493,7 @@ final class StyleRenderer
         }
     }
 
-    private static Kernel _makeKernel( float radius, boolean transpose ) {
+    private static Kernel _makeKernel( final float radius, final boolean transpose ) {
         final int maxRadius = (int)Math.ceil(radius);
         final int rows = maxRadius * 2 + 1;
         final float[] matrix = new float[rows];
