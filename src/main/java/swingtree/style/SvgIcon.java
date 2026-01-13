@@ -928,10 +928,13 @@ public final class SvgIcon extends ImageIcon
         // We create a new buffered image, render into it, and then return it.
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         if ( _core.svgDocument != null )
-            _core.svgDocument.render(
+            _paintIcon(
                     null,
                     image.createGraphics(),
-                    new ViewBox(0, 0, width, height)
+                    Bounds.of(0, 0, width, height),
+                    Offset.none(),
+                    UI.Placement.CENTER,
+                    UI.FitComponent.WIDTH_AND_HEIGHT
                 );
 
         return image;
