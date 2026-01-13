@@ -1176,19 +1176,24 @@ final class StyleRenderer
                         imgWidth  = style.width().orElse(componentWidth);
                         imgHeight = style.height().orElse(componentHeight);
                     }
+                    if ( fit == UI.FitComponent.WIDTH ) {
+                        imgWidth  = style.width().orElse(componentWidth);
+                    }
+                    if ( fit == UI.FitComponent.HEIGHT ) {
+                        imgHeight = style.height().orElse(componentHeight);
+                    }
                     if (
-                            fit == UI.FitComponent.WIDTH ||
-                                    (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
-                                    (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
+                        (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
+                        (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
                     ) {
                         imgWidth = style.width().orElse(componentWidth);
                         double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;
                         // We preserve the aspect ratio:
                         imgHeight = (int) (imgWidth * aspectRatio);
-                    } if (
-                            fit == UI.FitComponent.HEIGHT ||
-                                    (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
-                                    (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
+                    }
+                    if (
+                        (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
+                        (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
                     ) {
                         imgHeight = style.height().orElse(componentHeight);
                         double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;
