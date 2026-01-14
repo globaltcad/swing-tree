@@ -540,9 +540,11 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  {@link #fitMode(UI.FitComponent)} which, for example, stretches the image to fill out the
      *  entire component, then supplying a custom {@code width} to this method will force this stretched
      *  image to have that specific {@code width} <b>without preserving its aspect ratio!</b><br>
-     *  <b>So you may end up rendering a distorted image if not careful.</b>
+     *  <b>So you may end up rendering a distorted image if not careful.</b><br
+     *  Also note that the provided width is considered to include any padding supplied to methods like
+     *  {@link #padding(int)}, {@link #padding(int, int)}, or {@link #padding(int, int, int, int)}.
      *
-     * @param width The desired width of the image.
+     * @param width The desired width of the rendered image.
      * @return A new {@link ImageConf} instance with the specified {@code width}.
      */
     public ImageConf width( int width ) {
@@ -555,9 +557,11 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  {@link #fitMode(UI.FitComponent)} which, for example, stretches the image to fill out
      *  the entire component, then supplying a custom {@code height} to this method will force this
      *  stretched image to have that specific {@code height} <b>without preserving its aspect ratio!</b><br>
-     *  <b>So you may end up rendering a distorted image if not careful.</b>
+     *  <b>So you may end up rendering a distorted image if not careful.</b><br
+     *  Also note that the provided height is considered to include any padding supplied to methods like
+     *  {@link #padding(int)}, {@link #padding(int, int)}, or {@link #padding(int, int, int, int)}.
      *
-     * @param height The desired height of the image.
+     * @param height The desired height of the rendered image, including top and bottom padding.
      * @return A new {@link ImageConf} instance with the specified {@code height}.
      */
     public ImageConf height( int height ) {
@@ -565,10 +569,13 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  Ensures that the image has the specified width and height.
+     *  Ensures that the image has the specified width and height (including padding).<br>
+     *  <b>Note that the image may be rendered smaller than the specified
+     *  dimensions if a padding was specified through methods like {@link #padding(int)},
+     *  {@link #padding(int, int)}, or {@link #padding(int, int, int, int)}.</b>
      *
-     * @param width The width of the image.
-     * @param height The height of the image.
+     * @param width The width of the image, including left and right padding if specified.
+     * @param height The height of the image, including top and bottom padding if specified.
      * @return A new {@link ImageConf} instance with the specified {@code width} and {@code height}.
      */
     public ImageConf size( int width, int height ) {
@@ -577,8 +584,11 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  Ensures that the image has the specified width and height.
+     *  Note that if the aspect ratio of these two dimensions does not
+     *  match the innate aspect ratio of the image, then the final render
+     *  of the image will end up looking distorted.
      *
-     * @param size The size of the image.
+     * @param size The desired size of the rendered image.
      * @return A new {@link ImageConf} instance with the specified {@code size}.
      */
     public ImageConf size( Size size ) {
@@ -598,8 +608,9 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  This method allows you to specify the padding of the image.
-     *  The padding is the space between the image and the inner component area.
+     *  This method allows you to specify extra padding to the rectangle where the image is drawn.
+     *  <b>This will eat into the native size of the image, or the custom image dimensions
+     *  supplied to methods like {@link #width(int)}, {@link #height(int)} and {@link #size(int, int)}.</b>
      *
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
@@ -609,8 +620,9 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  This method allows you to specify the padding of the image.
-     *  The padding is the space between the image and the inner component area.
+     *  This method allows you to specify extra padding to the rectangle where the image is drawn.
+     *  <b>This will eat into the native size of the image, or the custom image dimensions
+     *  supplied to methods like {@link #width(int)}, {@link #height(int)} and {@link #size(int, int)}.</b>
      *
      * @param top The top padding of the image.
      * @param right The right padding of the image.
@@ -623,8 +635,9 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  This method allows you to specify the padding of the image.
-     *  The padding is the space between the image and the inner component area.
+     *  This method allows you to specify extra padding of the image's bounding rectangle.
+     *  <b>This will eat into the native size of the image, or the custom image dimensions
+     *  supplied to methods like {@link #width(int)}, {@link #height(int)} and {@link #size(int, int)}.</b>
      *
      * @param topBottom The top and bottom padding of the image.
      * @param leftRight The left and right padding of the image.
@@ -636,7 +649,8 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  This method allows you to specify the padding for all sides of the image.
-     *  The padding is the space between the image and the inner component area.
+     *  <b>This will eat into the native size of the image, or the custom image dimensions
+     *  supplied to methods like {@link #width(int)}, {@link #height(int)} and {@link #size(int, int)}.</b>
      *
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.

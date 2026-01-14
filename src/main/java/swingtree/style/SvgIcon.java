@@ -930,7 +930,8 @@ public final class SvgIcon extends ImageIcon
                     Bounds.of(0, 0, width, height),
                     Offset.none(),
                     UI.Placement.CENTER,
-                    UI.FitComponent.WIDTH_AND_HEIGHT
+                    UI.FitComponent.WIDTH_AND_HEIGHT,
+                    Outline.none()
                 );
 
         return image;
@@ -1021,12 +1022,12 @@ public final class SvgIcon extends ImageIcon
                 g.drawImage(_cache, x, y, width, height, null);
             else {
                 _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.of(0, 0) );
+                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.none(), Outline.none() );
                 g.drawImage(_cache, x, y, width, height, null);
             }
         }
         else
-            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent );
+            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent, Outline.none() );
     }
 
     @SuppressWarnings("DoNotCall")
@@ -1041,13 +1042,14 @@ public final class SvgIcon extends ImageIcon
         final @Nullable Component c,
         final Graphics g,
         final Bounds bounds,
-        final Offset offset
+        final Offset offset,
+        final Outline padding
     ) {
         Size size = _size();
         UI.FitComponent fitComponent = _fitComponent;
         if ( fitComponent == UI.FitComponent.UNDEFINED && !size.width().isPresent() && !size.height().isPresent() )
             fitComponent = UI.FitComponent.MIN_DIM; // best default!
-        _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent);
+        _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent, padding);
     }
 
     private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
@@ -1107,7 +1109,8 @@ public final class SvgIcon extends ImageIcon
         final Bounds bounds,
         final Offset offset,
         final UI.Placement preferredPlacement,
-        final UI.FitComponent fitComponent
+        final UI.FitComponent fitComponent,
+        final Outline padding
     ) {
         final int areaX = Math.round(bounds.location().x() + offset.x());
         final int areaY = Math.round(bounds.location().y() + offset.y());
@@ -1247,6 +1250,16 @@ public final class SvgIcon extends ImageIcon
                 break;
             default:
                 log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
+        }
+
+        // Finally, the padding:
+        if ( !Outline.none().equals(padding) ) {
+            viewBox = new ViewBox(
+                    viewBox.x + padding.left().orElse(0f),
+                    viewBox.y + padding.top().orElse(0f),
+                    viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)),
+                    viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
+            );
         }
 
         // Now onto the actual rendering:
