@@ -389,7 +389,7 @@ class SvgIcon_Spec extends Specification
         reportInfo """
             You can easily convert an `SvgIcon` into a `BufferedImage` using the `getImage()` method.
             This will return a buffered image which has the same DPI dimensions as the `SvgIcon`
-            reported by `getIconWidth()` and `gtIconHeight()`.
+            reported by `getIconWidth()` and `getIconHeight()`.
             
             Note that if the SVG icon has a distorted aspect ratio, which happens when the
             view box aspect ratio does not match the width and height aspect ratio, then
