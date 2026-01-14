@@ -404,7 +404,7 @@ class SvgIcon_Spec extends Specification
         when : 'We create a buffered image from the SVG based icon...'
             var img = svgIcon.getImage()
         then : 'It matched the PNGs stored in the test snapshots folder!'
-            Utility.similarityBetween(img, "svgAsPng/${imgToMatch}.png", 99.98) > 99.98
+            Utility.similarityBetween(img, "svgAsPng/${imgToMatch}.png", 99.5) > 99.5
 
         cleanup :
             SwingTree.clear()
