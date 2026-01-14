@@ -144,7 +144,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param observable The observable to store using a strong reference
      *                   to ensure it is not garbage collected.
      */
-    public void storeBoundObservable(Observable observable ) {
+    public void storeBoundObservable( Observable observable ) {
         _boundProps.add(observable);
     }
 

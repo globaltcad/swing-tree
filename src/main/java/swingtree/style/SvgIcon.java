@@ -75,6 +75,7 @@ public final class SvgIcon extends ImageIcon
      *  defined by the supplied string.
      *
      * @param path The path to the SVG document.
+     * @return A new {@link SvgIcon} created from the SVG found at the given path.
      */
     public static SvgIcon at( String path ) {
         RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
@@ -85,6 +86,7 @@ public final class SvgIcon extends ImageIcon
      *  Creates an {@link SvgIcon} from a resource path and a custom size.
      * @param path The path to the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} created from the SVG found at the given path and with the given size.
      */
     public static SvgIcon at( String path, Size size ) {
         RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), size);
@@ -98,6 +100,7 @@ public final class SvgIcon extends ImageIcon
      *  meaning that it will be rendered according to the size of the component
      *  it is rendered into (see {@link #paintIcon(Component, Graphics, int, int)}).
      * @param svgUrl The URL to the SVG document.
+     * @return A new {@link SvgIcon} created from the SVG found at the supplied URL.
      */
     public static SvgIcon at( URL svgUrl ) {
         RawSVG args = _loadSvgDocument(svgUrl, Size.unknown());
@@ -107,6 +110,7 @@ public final class SvgIcon extends ImageIcon
     /**
      * @param svgUrl The URL to the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} created from the SVG found at the supplied URL and with the given size.
      */
     public static SvgIcon at( URL svgUrl, Size size ) {
         RawSVG args = _loadSvgDocument(svgUrl, size);

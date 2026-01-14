@@ -540,7 +540,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  {@link #fitMode(UI.FitComponent)} which, for example, stretches the image to fill out the
      *  entire component, then supplying a custom {@code width} to this method will force this stretched
      *  image to have that specific {@code width} <b>without preserving its aspect ratio!</b><br>
-     *  <b>So you may end up rendering a distorted image if not careful.</b><br
+     *  <b>So you may end up rendering a distorted image if not careful.</b><br>
      *  Also note that the provided width is considered to include any padding supplied to methods like
      *  {@link #padding(int)}, {@link #padding(int, int)}, or {@link #padding(int, int, int, int)}.
      *
@@ -557,7 +557,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  {@link #fitMode(UI.FitComponent)} which, for example, stretches the image to fill out
      *  the entire component, then supplying a custom {@code height} to this method will force this
      *  stretched image to have that specific {@code height} <b>without preserving its aspect ratio!</b><br>
-     *  <b>So you may end up rendering a distorted image if not careful.</b><br
+     *  <b>So you may end up rendering a distorted image if not careful.</b><br>
      *  Also note that the provided height is considered to include any padding supplied to methods like
      *  {@link #padding(int)}, {@link #padding(int, int)}, or {@link #padding(int, int, int, int)}.
      *
