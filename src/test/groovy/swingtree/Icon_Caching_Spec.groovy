@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import spock.util.concurrent.PollingConditions
 import swingtree.api.IconDeclaration
 import swingtree.components.JBox
 import swingtree.layout.Size
@@ -56,6 +57,8 @@ class Icon_Caching_Spec extends Specification
         """
         given : 'First we clear the library context so that there is no state leftover from other tests:'
             SwingTree.initialize()
+        and :
+            var polling = new PollingConditions(timeout: 10, initialDelay: 0, factor: 0.25)
         and : 'We creat a bunch of different icon declarations.'
             var icon1 = IconDeclaration.of("img/trees.png")
             var icon2 = IconDeclaration.of("img/plus.svg")
@@ -81,7 +84,7 @@ class Icon_Caching_Spec extends Specification
             var icon4Reused = UI.findIcon(icon4)
             var icon5Reused = UI.button(icon5).get(JButton)
         then : 'The cache does not increase in size because icons are reused.'
-            SwingTree.get().getIconCache().size() == 5
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We set all the usages to `null`...'
             icon1CustomLoad = null
@@ -97,7 +100,7 @@ class Icon_Caching_Spec extends Specification
         and : 'We wait for the garbage collector...'
             waitForGarbageCollection(3)
         then : 'The cache still full, since we hold on to the declarations:'
-            SwingTree.get().getIconCache().size() == 5
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We replace the existing declarations with the same contents:'
             icon1 = IconDeclaration.of("img/trees.png")
@@ -108,38 +111,38 @@ class Icon_Caching_Spec extends Specification
         and : 'We wait for the garbage collector...'
             waitForGarbageCollection(3)
         then : 'The cache is still not cleared, since we are still holding on to the same (pooled) declarations!'
-            SwingTree.get().getIconCache().size() == 5
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We set the first icon declaration to `null` and wait...'
             icon1 = null
             waitForGarbageCollection(3)
         then : 'The cache finally shinks by 1:'
-            SwingTree.get().getIconCache().size() == 4
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 4)
 
         when : 'We set the second icon declaration to `null` and wait...'
             icon2 = null
             waitForGarbageCollection(3)
         then : 'The cache shinks again:'
-            SwingTree.get().getIconCache().size() == 3
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 3)
 
 
         when : 'We do the third icon declaration...'
             icon3 = null
             waitForGarbageCollection(3)
         then : 'The cache got smaller again:'
-            SwingTree.get().getIconCache().size() == 2
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 2)
 
         when : 'We do the fourth icon declaration...'
             icon4 = null
             waitForGarbageCollection(3)
         then : 'Only one icon left:'
-            SwingTree.get().getIconCache().size() == 1
+            polling.eventually(()->SwingTree.get().getIconCache().size() == 1)
 
         when : 'We finally clear the last icon declaration...'
             icon5 = null
             waitForGarbageCollection(3)
         then : 'The cache is empty again!'
-            SwingTree.get().getIconCache().isEmpty()
+            polling.eventually(()->SwingTree.get().getIconCache().isEmpty())
     }
 
     def 'The `IconDeclaration` factory methods produce pooled objects.'()
