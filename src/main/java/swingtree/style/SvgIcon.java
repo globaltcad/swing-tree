@@ -75,6 +75,7 @@ public final class SvgIcon extends ImageIcon
      *  defined by the supplied string.
      *
      * @param path The path to the SVG document.
+     * @return A new {@link SvgIcon} created from the SVG found at the given path.
      */
     public static SvgIcon at( String path ) {
         RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
@@ -85,6 +86,7 @@ public final class SvgIcon extends ImageIcon
      *  Creates an {@link SvgIcon} from a resource path and a custom size.
      * @param path The path to the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} created from the SVG found at the given path and with the given size.
      */
     public static SvgIcon at( String path, Size size ) {
         RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), size);
@@ -98,6 +100,7 @@ public final class SvgIcon extends ImageIcon
      *  meaning that it will be rendered according to the size of the component
      *  it is rendered into (see {@link #paintIcon(Component, Graphics, int, int)}).
      * @param svgUrl The URL to the SVG document.
+     * @return A new {@link SvgIcon} created from the SVG found at the supplied URL.
      */
     public static SvgIcon at( URL svgUrl ) {
         RawSVG args = _loadSvgDocument(svgUrl, Size.unknown());
@@ -107,6 +110,7 @@ public final class SvgIcon extends ImageIcon
     /**
      * @param svgUrl The URL to the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} created from the SVG found at the supplied URL and with the given size.
      */
     public static SvgIcon at( URL svgUrl, Size size ) {
         RawSVG args = _loadSvgDocument(svgUrl, size);
@@ -622,7 +626,6 @@ public final class SvgIcon extends ImageIcon
      * distort the icon by changing only the width independently, this method preserves
      * the original aspect ratio by calculating the appropriate height.
      * </p>
-     * <p>
      * <b>Important behaviors and edge cases:</b>
      * <ul>
      *   <li>If {@code newWidth} is negative, returns an icon with both dimensions set to -1
@@ -640,7 +643,6 @@ public final class SvgIcon extends ImageIcon
      *   <li>When called on an icon with fixed pixel dimensions, this method simply
      *       recalculates the height based on the existing aspect ratio.</li>
      * </ul>
-     * </p>
      * <p>
      * This method is particularly useful in layout scenarios where you need to
      * constrain an icon by width (e.g., fitting within a fixed-width toolbar)
@@ -675,7 +677,6 @@ public final class SvgIcon extends ImageIcon
      * proportional width. Like its width-based counterpart, this method prevents
      * distortion by maintaining the original aspect ratio.
      * </p>
-     * <p>
      * <b>Important behaviors and edge cases:</b>
      * <ul>
      *   <li>If {@code newHeight} is negative, returns an icon with both dimensions set to -1
@@ -693,7 +694,6 @@ public final class SvgIcon extends ImageIcon
      *   <li>When called on an icon with fixed pixel dimensions, this method simply
      *       recalculates the width based on the existing aspect ratio.</li>
      * </ul>
-     * </p>
      * <p>
      * This method is particularly useful in layout scenarios where you need to
      * constrain an icon by height (e.g., fitting within a fixed-height toolbar)
@@ -934,7 +934,8 @@ public final class SvgIcon extends ImageIcon
                     Bounds.of(0, 0, width, height),
                     Offset.none(),
                     UI.Placement.CENTER,
-                    UI.FitComponent.WIDTH_AND_HEIGHT
+                    UI.FitComponent.WIDTH_AND_HEIGHT,
+                    Outline.none()
                 );
 
         return image;
@@ -1025,12 +1026,12 @@ public final class SvgIcon extends ImageIcon
                 g.drawImage(_cache, x, y, width, height, null);
             else {
                 _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.of(0, 0) );
+                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.none(), Outline.none() );
                 g.drawImage(_cache, x, y, width, height, null);
             }
         }
         else
-            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent );
+            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent, Outline.none() );
     }
 
     @SuppressWarnings("DoNotCall")
@@ -1045,13 +1046,14 @@ public final class SvgIcon extends ImageIcon
         final @Nullable Component c,
         final Graphics g,
         final Bounds bounds,
-        final Offset offset
+        final Offset offset,
+        final Outline padding
     ) {
         Size size = _size();
         UI.FitComponent fitComponent = _fitComponent;
         if ( fitComponent == UI.FitComponent.UNDEFINED && !size.width().isPresent() && !size.height().isPresent() )
             fitComponent = UI.FitComponent.MIN_DIM; // best default!
-        _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent);
+        _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent, padding);
     }
 
     private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
@@ -1111,7 +1113,8 @@ public final class SvgIcon extends ImageIcon
         final Bounds bounds,
         final Offset offset,
         final UI.Placement preferredPlacement,
-        final UI.FitComponent fitComponent
+        final UI.FitComponent fitComponent,
+        final Outline padding
     ) {
         final int areaX = Math.round(bounds.location().x() + offset.x());
         final int areaY = Math.round(bounds.location().y() + offset.y());
@@ -1251,6 +1254,16 @@ public final class SvgIcon extends ImageIcon
                 break;
             default:
                 log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
+        }
+
+        // Finally, the padding:
+        if ( !Outline.none().equals(padding) ) {
+            viewBox = new ViewBox(
+                    viewBox.x + padding.left().orElse(0f),
+                    viewBox.y + padding.top().orElse(0f),
+                    viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)),
+                    viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
+            );
         }
 
         // Now onto the actual rendering:

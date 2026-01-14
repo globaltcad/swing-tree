@@ -1758,8 +1758,8 @@ import java.util.function.Consumer;
         else {
 <span class="nc" id="L1759">            log.warn(SwingTree.get().logMarker(),</span>
                     &quot;Failed to load from 'IconDeclaration' instance '{}', &quot; +
-                    &quot;with path '{}' and size '{}', and set it as the icon of 'AbstractButton' '{}'.&quot;,
-<span class="nc" id="L1762">                    icon, icon.path(), icon.size(), button,</span>
+                    &quot;with source '{}', format {}, and size '{}', and set it as the icon of 'AbstractButton' '{}'.&quot;,
+<span class="nc" id="L1762">                    icon, icon.source(), icon.sourceFormat(), icon.size(), button,</span>
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
 <span class="nc" id="L1765">            iconSetter.accept(button, null);</span>

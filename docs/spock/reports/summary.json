@@ -1,10 +1,10 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Mon Dec 29 21:51:35 JST 2025",
+  "created": "Thu Jan 15 05:47:13 JST 2026",
   "statistics":{
-    "runs":"59",
-    "passed":"59",
+    "runs":"60",
+    "passed":"60",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
@@ -203,16 +203,28 @@
       "executedFeatures":[{"id":"A SwingTree UI.Font can define text placement information for JTextPane components reactively.","extraInfo":[]},{"id":"A SwingTree UI.Font can define text placement information for JTextPane components.","extraInfo":[]},{"id":"A SwingTree `Font` object has insightful String representations.","extraInfo":[]},{"id":"A SwingTree `Font` object has value semantics.","extraInfo":[]},{"id":"A SwingTree `UI.Font` can define text placement information for button types reactively.","extraInfo":[]},{"id":"A SwingTree `UI.Font` can define text placement information for button types.","extraInfo":[]},{"id":"A SwingTree `UI.Font` can define text placement information for labels reactively.","extraInfo":[]},{"id":"A SwingTree `UI.Font` can define text placement information for labels.","extraInfo":[]},{"id":"A SwingTree `UI.Font` can define text placement information for text fields reactively.","extraInfo":[]},{"id":"A SwingTree `UI.Font` can define text placement information for text fields.","extraInfo":[]},{"id":"JTextPane alignment handles edge cases correctly.","extraInfo":[]},{"id":"JTextPane alignment is preserved when text content changes.","extraInfo":[]},{"id":"Simply pass the desired font name to the `UI.font(String)` to get a properly sized font object.","extraInfo":[]},{"id":"Text alignment for JTextPane components can be configured through the style API.","extraInfo":[]},{"id":"The `UI.font(String)` factory method can create a font merely bz specifying the family.","extraInfo":[]},{"id":"The `UI.font(String)` factory method can fetch fonts from system properties and apply the correct scaling factor.","extraInfo":[]},{"id":"The `UI.font(String)` method allows you to access fonts from a system property.","extraInfo":[]},{"id":"Use the `UI.font(String)` method to parse a font string.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
-      "className":"swingtree.Icon_Spec",
-      "title":"Displaying Icons",
-      "narrative":"For displaying icons in you UI declarations,\n    SwingTree offers a dedicated component called ´JIcon´,\n    an alternative to the standard `JLabel` component,\n    commonly used for displaying icons.\n\n    The `JIcon` component extends `JLabel` and \n    is more deliberate in its handling of icons.\n\n    In this specification, we will explore how\n    you can create declarative UIs\n    with the `JIcon` component.",
-      "featureCount":"8",
+      "className":"swingtree.Icon_Caching_Spec",
+      "title":"SwingTree Icon Caching",
+      "narrative":"SwingTree does a lot of heavy lifting for\n    you when it comes to image asset management.\n    It can load, instantiate, cache and unload \n    image resources for you fully automatically.\n\n    This is possible through instances of the `IconDeclaration`,\n    which is a meta-data holder that can tell you where and\n    how to obtain an image.\n    Typically, this is a path to a png/jpg/svg but it\n    may also be an SVG string...\n    Instead of loading and instantiating `ImageIcon`s yourself,\n    you only need to create a declaration pointing to the resource:\n\n    `var cancel = IconDeclaration.of(path/to/cancel.svg);`\n\n    You can then pass this declaration to a SwingTree GUI,\n    and the heavy lifting will be done under the hood for you.\n    This is especially powerful because SwingTree uses these icon\n    declarations as weak cache keys for icons. So when you no longer\n    need an icon, you simply get rid of a strong reference to an icon\n    declaration! Under the hood these `IconDeclaration`s are also pooled,\n    so you can create and hold them in multiple places of your project\n    with the guarantee that the cache will be hit and not cleared prematurely.",
+      "featureCount":"2",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"An already loaded icon will dynamically scale to mach the current DPI scale factor.","extraInfo":[]},{"id":"Build an icon UI declaration from the `IconDeclaration` type.","extraInfo":[]},{"id":"Create a `JIcon` dynamically bound to a `Var<IconDeclaration> property.","extraInfo":[]},{"id":"Create a icon UI declaration from a non existing image path with a size.","extraInfo":[]},{"id":"Create a icon UI declaration from a path not leading to an existing image.","extraInfo":[]},{"id":"Create a icon UI declaration from an existing image path with a size.","extraInfo":[]},{"id":"Create a icon UI declaration from an existing image source.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will load an icon with the correct size and scale.","extraInfo":[]}],
+      "executedFeatures":[{"id":"SwingTree maintains a resourceful and robust image cache.","extraInfo":[]},{"id":"The `IconDeclaration` factory methods produce pooled objects.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.Icon_Spec",
+      "title":"Displaying Icons",
+      "narrative":"For displaying icons in you UI declarations,\n    SwingTree offers a dedicated component called ´JIcon´,\n    an alternative to the standard `JLabel` component,\n    commonly used for displaying icons.\n\n    The `JIcon` component extends `JLabel` and \n    is more deliberate in its handling of icons.\n\n    In this specification, we will explore how\n    you can create declarative UIs\n    with the `JIcon` component.",
+      "featureCount":"11",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"An SVG created from a String source has the correct dimensions.","extraInfo":[]},{"id":"An already loaded icon will dynamically scale to mach the current DPI scale factor.","extraInfo":[]},{"id":"Build an icon UI declaration from the `IconDeclaration` type.","extraInfo":[]},{"id":"Create a `JIcon` dynamically bound to a `Var<IconDeclaration> property.","extraInfo":[]},{"id":"Create a icon UI declaration from a non existing image path with a size.","extraInfo":[]},{"id":"Create a icon UI declaration from a path not leading to an existing image.","extraInfo":[]},{"id":"Create a icon UI declaration from an existing image path with a size.","extraInfo":[]},{"id":"Create a icon UI declaration from an existing image source.","extraInfo":[]},{"id":"Create an icon UI declaration from an SVG string source.","extraInfo":[]},{"id":"SVG string icon declarations support percentage-based dimensions that do not resolve to pixels.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will load an icon with the correct size and scale.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Individual_Component_Styling_Spec",
@@ -626,13 +638,13 @@
       "className":"swingtree.SvgIcon_Spec",
       "title":"SVG Support through SvgIcon",
       "narrative":"Swing-Tree supports SVG icons through the `SvgIcon` class,\n    which is a subclass of `javax.swing.ImageIcon`.\n    This allows for smooth integration of SVG icons into regular\n    Swing components, like buttons, labels, etc.\n\n    In this specification we will see how to use the `SvgIcon` class.",
-      "featureCount":"8",
+      "featureCount":"16",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A basic `SvgIcon` does not have a size.","extraInfo":[]},{"id":"An `SvgIcon` has the correct dimensions when parsed from a string.","extraInfo":[]},{"id":"The `String` representation of the `SvgIcon` shows its properties.","extraInfo":[]},{"id":"The `SvgIcon` is immutable, and its size must be specified through wither methods.","extraInfo":[]},{"id":"The `SvgIcon` will determine missing image size dimensions through the aspect ratio of the SVG document.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"The `UI.findSvgIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A basic `SvgIcon` does not have a size.","extraInfo":[]},{"id":"An `SvgIcon` can be converted to a buffered image.","extraInfo":[]},{"id":"An `SvgIcon` can resolve percentage-based dimensions to pixel-based dimensions using the view box as reference.","extraInfo":[]},{"id":"An `SvgIcon` has the correct dimensions when parsed from a string.","extraInfo":[]},{"id":"The `String` representation of `SvgIcon` correctly formats different configurations with proper units and properties.","extraInfo":[]},{"id":"The `String` representation of the `SvgIcon` shows its properties.","extraInfo":[]},{"id":"The `SvgIcon` is immutable, and its size must be specified through wither methods.","extraInfo":[]},{"id":"The `SvgIcon` will determine missing image size dimensions through the aspect ratio of the SVG document.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"The `UI.findSvgIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"The `withIconSizeFromHeight` derives SVG icons with complete size.","extraInfo":[]},{"id":"The `withIconSizeFromHeight` method converts percentage-based icons to pixel-based icons and maintains aspect ratio.","extraInfo":[]},{"id":"The `withIconSizeFromWidth` derives SVG icons with complete size.","extraInfo":[]},{"id":"The `withIconSizeFromWidth` method converts percentage-based icons to pixel-based icons and maintains aspect ratio.","extraInfo":[]},{"id":"The `withIconSize` method may convert percentage-based icons to pixel-based icons and maintains aspect ratio.","extraInfo":[]},{"id":"Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.Tab_Binding_Spec",
