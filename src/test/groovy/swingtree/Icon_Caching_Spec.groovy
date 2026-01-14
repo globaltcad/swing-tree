@@ -110,12 +110,12 @@ class Icon_Caching_Spec extends Specification
 
         when : 'We set the first icon declaration to `null` and wait...'
             icon1 = null
-        then : 'The cache finally shinks by 1:'
+        then : 'The cache finally shrinks by 1:'
             eventually(10, ()->SwingTree.get().getIconCache().size() == 4)
 
         when : 'We set the second icon declaration to `null` and wait...'
             icon2 = null
-        then : 'The cache shinks again:'
+        then : 'The cache shrinks again:'
             eventually(10, ()->SwingTree.get().getIconCache().size() == 3)
 
 
