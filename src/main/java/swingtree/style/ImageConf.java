@@ -34,7 +34,10 @@ import java.util.Optional;
  *      <li><b>Primer:</b>
  *          The primer color of the image style which will
  *          be used as a filler color for the image background.
- *          The background is the inner component area of the component.
+ *          It will fill whatever area was specified using
+ *          {@link #clipTo(UI.ComponentArea)}. <br>
+ *          The default area used for rendering the image
+ *          style is {@link swingtree.UI.ComponentArea#INTERIOR}
  *      </li>
  *      <li><b>Image:</b>
  *          The image which will be drawn onto the component,
@@ -124,7 +127,7 @@ import java.util.Optional;
  *          whereas the exterior component area is the area surrounding the border.
  *          The component body area is the interior/inner component area plus the border.</b>
  *          <p>
- *          The default clip area is {@link swingtree.UI.ComponentArea#BODY}
+ *          The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR}
  *          as this is the area which is most commonly used.
  *      </li>
  *  </ol>
@@ -149,9 +152,8 @@ import java.util.Optional;
  *      without being scaled to fit the inner component area, instead the size of the image
  *      will be used. <br>
  *      If it does not fill the entire inner component area based on its size, then
- *      it will be repeated across said area, and the primer color
- *      will be used as a filler color for the parts of the image which
- *      are transparent.
+ *      it will be repeated across said area. The primer color serves as a consistent
+ *      background color which will leak through the transparent parts of the image.
  *  </p>
  **/
 @Immutable
@@ -275,8 +277,9 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  Here you can specify the <b>primer color of the image style</b> which will be used
-     *  as a filler color for the image background. <br>
-     *  Note that the primer color will not be visible if the image is opaque and it fills the entire component.
+     *  as background color rendered before the image is rendered. <br>
+     *  Note that the primer color may not necessarily visible if the specified image is
+     *  fully opaque, and fills the entire component.
      *
      * @param color The primer color of the image style.
      * @return A new {@link ImageConf} instance with the specified primer color.
@@ -292,12 +295,13 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  Here you can specify the <b>image</b> which will be drawn onto the component.
-     *  The supplied object must be an instance of {@link Image} implementation.<br>
-     * <p><b>
+     *  The supplied object must be aa subtype of {@link Image}, like
+     *  {@link java.awt.image.BufferedImage} for example.<br>
+     *  <p><b>
      *     Please note that using this method will override whatever information
      *     was previously passed to {@link #image(ImageIcon)}, {@link #image(IconDeclaration)},
-     *     {@link #image(String)} and {@link #svg(String)}!
-     * </b></p>
+     *     {@link #image(String)} or {@link #svg(String)}!
+     *  </b></p>
      *
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageConf} instance with the specified image.
@@ -308,7 +312,8 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  Here you can specify the <b>image icon</b> which will be drawn onto the component.
-     *  The supplied object must be an instance of {@link ImageIcon} implementation.<br>
+     *  The supplied object must be an instance of {@link ImageIcon} implementation.
+     *  So this may also be an {@link SvgIcon} for example, which is a {@link ImageIcon} subtype...<br>
      * <p><b>
      *     Please note that using this method will override whatever information
      *     was previously passed to {@link #svg(String)}, {@link #image(IconDeclaration)},
@@ -327,7 +332,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  which typically has a <b>{@link IconDeclaration#source()} that holds a path to an image.</b>
      *  If the supplied {@link IconDeclaration} is path based, then it will be resolved
      *  relative to the classpath or as an absolute path. However, the declaration
-     *  may also be based on an SVG String as source.<br>
+     *  may also be based on an SVG String as source (see {@link IconDeclaration#ofSvg(String)}).<br>
      *  If the icon could not be found or parsed, then the image will not be drawn.<br>
      * <p><b>
      *     Please note that using this method will override whatever information
@@ -372,8 +377,8 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  Here you can specify the <b>path to the image</b> for which the icon will be loaded,
-     *  cached and drawn onto the component.
+     *  Here you can specify the <b>path to the image</b> you want to draw onto the component.
+     *  The underlying icon will be loaded, cached and rendered for you automatically.
      *  If the icon could not be found, then the image will not be drawn.
      *  The path is relative to the classpath or may be an absolute path.
      *  (see {@link swingtree.UI#findIcon(String)}).<br>
@@ -449,11 +454,11 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  If this flag is set to {@code true}, then the image may be painted
-     *  multiple times so that it fills up the entire inner component area.
+     *  multiple times so that it fills out the entire inner component area.
      *  There will not be a noticeable effect of this flag if the
      *  image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
      *
-     * @param repeat Weather the image should be painted repeatedly across the inner component area.
+     * @param repeat Whether the image should be painted repeatedly across the inner component area.
      * @return A new {@link ImageConf} instance with the specified {@code repeat} flag value.
      */
     public ImageConf repeat( boolean repeat ) {
@@ -462,13 +467,13 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     /**
      *  If this flag is set to {@code true}, then the image will be stretched or shrunk
-     *  to fill the inner component area dependent on the specified width and height,
-     *  meaning that if the width was not specified explicitly through {@link #width(int)}
-     *  then the image will be scaled to fit the inner component width,
-     *  and if a height was not specified through {@link #height(int)} then
+     *  to fill the inner component area dependent on the specified width and height.
+     *  This means that if no custom width was specified through {@link #width(int)}
+     *  then the image will be scaled to fit the inner component width.
+     *  Also, if no custom height was passed to {@link #height(int)} then
      *  the image will be scaled to fit the inner component height. <br>
-     *  <b>Note that the inner component area is the area enclosed by the border, which
-     *  is itself not part of said area!</b>
+     *  <b>Note that what we mean by the "inner component area" is the area enclosed
+     *  by the border. It is represented by the {@link UI.ComponentArea#INTERIOR} constant.</b>
      *
      * @param autoFit If true the image will be scaled to fit the inner component area for every
      *                dimension which was not specified,
@@ -530,9 +535,14 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  Ensures that the image has the specified width.
+     *  Ensures that the image has the specified width, irrespective of other configurations.<br>
+     *  So, if a {@link swingtree.UI.FitComponent} policy was supplied to
+     *  {@link #fitMode(UI.FitComponent)} which, for example, stretches the image to fill out the
+     *  entire component, then supplying a custom {@code width} to this method will force this stretched
+     *  image to have that specific {@code width} <b>without preserving its aspect ratio!</b><br>
+     *  <b>So you may end up rendering a distorted image if not careful.</b>
      *
-     * @param width The width of the image.
+     * @param width The desired width of the image.
      * @return A new {@link ImageConf} instance with the specified {@code width}.
      */
     public ImageConf width( int width ) {
@@ -540,9 +550,14 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     *  Ensures that the image has the specified height.
+     *  Ensures that the image has the specified height, irrespective of other configurations.<br>
+     *  So, if a {@link swingtree.UI.FitComponent} policy was supplied to
+     *  {@link #fitMode(UI.FitComponent)} which, for example, stretches the image to fill out
+     *  the entire component, then supplying a custom {@code height} to this method will force this
+     *  stretched image to have that specific {@code height} <b>without preserving its aspect ratio!</b><br>
+     *  <b>So you may end up rendering a distorted image if not careful.</b>
      *
-     * @param height The height of the image.
+     * @param height The desired height of the image.
      * @return A new {@link ImageConf} instance with the specified {@code height}.
      */
     public ImageConf height( int height ) {
