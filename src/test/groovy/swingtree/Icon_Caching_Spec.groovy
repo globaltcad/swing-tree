@@ -4,7 +4,6 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import spock.util.concurrent.PollingConditions
 import swingtree.api.IconDeclaration
 import swingtree.components.JBox
 import swingtree.layout.Size
@@ -13,6 +12,7 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JToggleButton
 import java.lang.ref.WeakReference
+import java.util.function.Supplier
 
 @Title("SwingTree Icon Caching")
 @Narrative('''
@@ -57,8 +57,6 @@ class Icon_Caching_Spec extends Specification
         """
         given : 'First we clear the library context so that there is no state leftover from other tests:'
             SwingTree.initialize()
-        and :
-            var polling = new PollingConditions(timeout: 10, initialDelay: 0, factor: 0.25)
         and : 'We creat a bunch of different icon declarations.'
             var icon1 = IconDeclaration.of("img/trees.png")
             var icon2 = IconDeclaration.of("img/plus.svg")
@@ -84,7 +82,7 @@ class Icon_Caching_Spec extends Specification
             var icon4Reused = UI.findIcon(icon4)
             var icon5Reused = UI.button(icon5).get(JButton)
         then : 'The cache does not increase in size because icons are reused.'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 5)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We set all the usages to `null`...'
             icon1CustomLoad = null
@@ -97,10 +95,8 @@ class Icon_Caching_Spec extends Specification
             icon3Reused = null
             icon4Reused = null
             icon5Reused = null
-        and : 'We wait for the garbage collector...'
-            waitForGarbageCollection(3)
         then : 'The cache still full, since we hold on to the declarations:'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 5)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We replace the existing declarations with the same contents:'
             icon1 = IconDeclaration.of("img/trees.png")
@@ -108,41 +104,35 @@ class Icon_Caching_Spec extends Specification
             icon3 = IconDeclaration.of(Size.unknown(), "img/a-window-svg")
             icon4 = IconDeclaration.of(Size.of(-1, 32), "img/seed.png")
             icon5 = IconDeclaration.ofSvg("<svg width=\"24\" height=\"24\" viewBox=\"0 0 16 16\"><circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/></svg>")
-        and : 'We wait for the garbage collector...'
-            waitForGarbageCollection(3)
+
         then : 'The cache is still not cleared, since we are still holding on to the same (pooled) declarations!'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 5)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We set the first icon declaration to `null` and wait...'
             icon1 = null
-            waitForGarbageCollection(3)
         then : 'The cache finally shinks by 1:'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 4)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 4)
 
         when : 'We set the second icon declaration to `null` and wait...'
             icon2 = null
-            waitForGarbageCollection(3)
         then : 'The cache shinks again:'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 3)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 3)
 
 
         when : 'We do the third icon declaration...'
             icon3 = null
-            waitForGarbageCollection(3)
         then : 'The cache got smaller again:'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 2)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 2)
 
         when : 'We do the fourth icon declaration...'
             icon4 = null
-            waitForGarbageCollection(3)
         then : 'Only one icon left:'
-            polling.eventually(()->SwingTree.get().getIconCache().size() == 1)
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 1)
 
         when : 'We finally clear the last icon declaration...'
             icon5 = null
-            waitForGarbageCollection(3)
         then : 'The cache is empty again!'
-            polling.eventually(()->SwingTree.get().getIconCache().isEmpty())
+            eventually(10, ()->SwingTree.get().getIconCache().isEmpty())
     }
 
     def 'The `IconDeclaration` factory methods produce pooled objects.'()
@@ -182,15 +172,17 @@ class Icon_Caching_Spec extends Specification
      * done unlike <code>{@link System#gc()}</code> for
      * {@code numberOfCycles} times!
      */
-    static void waitForGarbageCollection(int numberOfCycles) {
-        Object obj = new Object();
-        if ( numberOfCycles > 1 )
-            waitForGarbageCollection(numberOfCycles-1);
-        WeakReference ref = new WeakReference<>(obj);
-        obj = null;
-        while(ref.get() != null) {
-            System.gc();
+    static boolean eventually(int numberOfCycles, Supplier<Boolean> condition) {
+        if ( condition.get() )
+            return true;
+        while ( numberOfCycles > 0 ) {
+            waitForGarbageCollection();
+            if ( condition.get() )
+                return true;
+            else
+                numberOfCycles--;
         }
+        return condition.get();
     }
 
     /**
