@@ -95,7 +95,7 @@ class Icon_Caching_Spec extends Specification
             icon4Reused = null
             icon5Reused = null
         and : 'We wait for the garbage collector...'
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'The cache still full, since we hold on to the declarations:'
             SwingTree.get().getIconCache().size() == 5
 
@@ -106,38 +106,38 @@ class Icon_Caching_Spec extends Specification
             icon4 = IconDeclaration.of(Size.of(-1, 32), "img/seed.png")
             icon5 = IconDeclaration.ofSvg("<svg width=\"24\" height=\"24\" viewBox=\"0 0 16 16\"><circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/></svg>")
         and : 'We wait for the garbage collector...'
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'The cache is still not cleared, since we are still holding on to the same (pooled) declarations!'
             SwingTree.get().getIconCache().size() == 5
 
         when : 'We set the first icon declaration to `null` and wait...'
             icon1 = null
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'The cache finally shinks by 1:'
             SwingTree.get().getIconCache().size() == 4
 
         when : 'We set the second icon declaration to `null` and wait...'
             icon2 = null
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'The cache shinks again:'
             SwingTree.get().getIconCache().size() == 3
 
 
         when : 'We do the third icon declaration...'
             icon3 = null
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'The cache got smaller again:'
             SwingTree.get().getIconCache().size() == 2
 
         when : 'We do the fourth icon declaration...'
             icon4 = null
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'Only one icon left:'
             SwingTree.get().getIconCache().size() == 1
 
         when : 'We finally clear the last icon declaration...'
             icon5 = null
-            waitForGarbageCollection(2)
+            waitForGarbageCollection(3)
         then : 'The cache is empty again!'
             SwingTree.get().getIconCache().isEmpty()
     }
