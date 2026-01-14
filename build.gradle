@@ -22,18 +22,15 @@ String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
 String VERSION  = "0.19.0"
 
-group GROUP_ID
-version VERSION
-
-sourceCompatibility = 8
-targetCompatibility = 8
+group = GROUP_ID
+version = VERSION
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
@@ -213,6 +210,8 @@ artifacts {
 }
 
 java {
+    sourceCompatibility = 8
+    targetCompatibility = 8
     withJavadocJar()
     withSourcesJar()
 }
@@ -235,7 +234,7 @@ sourceSets.main.output.dir genOutputDir, builtBy: generateVersionTxt
 
 
 signing {
-    required { !VERSION.startsWith("0.") && gradle.taskGraph.hasTask("publish") }
+    required = { !VERSION.startsWith("0.") && gradle.taskGraph.hasTask("publish") }
     sign configurations.archives
     sign publishing.publications
 }
