@@ -70,15 +70,7 @@ final class StyleEngine
         return new StyleEngine(new Pooled<>(boxModelConf), new Pooled<>(componentConf), _layerCaches);
     }
 
-    void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y )
-    {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( IS_ANTIALIASING_ENABLED() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
+    void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y ) {
         // A component may have a filter on the parent:
         if ( parentRendering != null ) {
             FilterConf filter = _componentConf.get().style().layers().filter();
@@ -92,26 +84,11 @@ final class StyleEngine
             }
         }
         _render(UI.Layer.BACKGROUND, g2d);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    void paintBorder( Graphics2D g2d, Consumer<Graphics> formerBorderPainter )
-    {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( IS_ANTIALIASING_ENABLED() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
+    void paintBorder( Graphics2D g2d, Consumer<Graphics> formerBorderPainter ) {
         _render(UI.Layer.CONTENT, g2d);
         _render(UI.Layer.BORDER, g2d);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-
         try {
             formerBorderPainter.accept(g2d);
         } catch ( Exception ex ) {
@@ -124,8 +101,12 @@ final class StyleEngine
         }
     }
 
-    void paintForeground( Graphics2D g2d )
-    {
+    void paintForeground( Graphics2D g2d ) {
+        _render(UI.Layer.FOREGROUND, g2d);
+    }
+
+    private void _render( UI.Layer layer, Graphics2D g2d ) {
+
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -133,13 +114,6 @@ final class StyleEngine
         if ( IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        _render(UI.Layer.FOREGROUND, g2d);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-    }
-
-    private void _render( UI.Layer layer, Graphics2D g2d ) {
         LayerCache cache = null;
         switch ( layer ) {
             case BACKGROUND: cache = _layerCaches[0]; break;
@@ -156,6 +130,14 @@ final class StyleEngine
                     "Layer cache is null for layer: {}",
                     layer, new Throwable("Stack trace for debugging purposes.")
                 );
+
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
+                antialiasingWasEnabled
+                        ? RenderingHints.VALUE_ANTIALIAS_ON
+                        : RenderingHints.VALUE_ANTIALIAS_OFF
+        );
     }
 
 }

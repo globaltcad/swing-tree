@@ -12,6 +12,7 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JToggleButton
 import java.lang.ref.WeakReference
+import java.util.function.Supplier
 
 @Title("SwingTree Icon Caching")
 @Narrative('''
@@ -81,7 +82,7 @@ class Icon_Caching_Spec extends Specification
             var icon4Reused = UI.findIcon(icon4)
             var icon5Reused = UI.button(icon5).get(JButton)
         then : 'The cache does not increase in size because icons are reused.'
-            SwingTree.get().getIconCache().size() == 5
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We set all the usages to `null`...'
             icon1CustomLoad = null
@@ -94,10 +95,8 @@ class Icon_Caching_Spec extends Specification
             icon3Reused = null
             icon4Reused = null
             icon5Reused = null
-        and : 'We wait for the garbage collector...'
-            waitForGarbageCollection()
         then : 'The cache still full, since we hold on to the declarations:'
-            SwingTree.get().getIconCache().size() == 5
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We replace the existing declarations with the same contents:'
             icon1 = IconDeclaration.of("img/trees.png")
@@ -105,44 +104,86 @@ class Icon_Caching_Spec extends Specification
             icon3 = IconDeclaration.of(Size.unknown(), "img/a-window-svg")
             icon4 = IconDeclaration.of(Size.of(-1, 32), "img/seed.png")
             icon5 = IconDeclaration.ofSvg("<svg width=\"24\" height=\"24\" viewBox=\"0 0 16 16\"><circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/></svg>")
-        and : 'We wait for the garbage collector...'
-            waitForGarbageCollection()
+
         then : 'The cache is still not cleared, since we are still holding on to the same (pooled) declarations!'
-            SwingTree.get().getIconCache().size() == 5
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 5)
 
         when : 'We set the first icon declaration to `null` and wait...'
             icon1 = null
-            waitForGarbageCollection()
-        then : 'The cache finally shinks by 1:'
-            SwingTree.get().getIconCache().size() == 4
+        then : 'The cache finally shrinks by 1:'
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 4)
 
         when : 'We set the second icon declaration to `null` and wait...'
             icon2 = null
-            waitForGarbageCollection()
-        then : 'The cache shinks again:'
-            SwingTree.get().getIconCache().size() == 3
+        then : 'The cache shrinks again:'
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 3)
 
 
         when : 'We do the third icon declaration...'
             icon3 = null
-            waitForGarbageCollection()
         then : 'The cache got smaller again:'
-            SwingTree.get().getIconCache().size() == 2
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 2)
 
         when : 'We do the fourth icon declaration...'
             icon4 = null
-            waitForGarbageCollection()
         then : 'Only one icon left:'
-            SwingTree.get().getIconCache().size() == 1
+            eventually(10, ()->SwingTree.get().getIconCache().size() == 1)
 
         when : 'We finally clear the last icon declaration...'
             icon5 = null
-            waitForGarbageCollection()
         then : 'The cache is empty again!'
-            SwingTree.get().getIconCache().isEmpty()
+            eventually(10, ()->SwingTree.get().getIconCache().isEmpty())
     }
 
+    def 'The `IconDeclaration` factory methods produce pooled objects.'()
+    {
+        given :
+            var path1 = "img/dandelion.png"
+            var path2 = "img/seed.png"
+            var svg1 = "<svg width=\"24\" height=\"24\" viewBox=\"0 0 16 16\"><circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/></svg>"
+            var svg2 = "<svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\"><circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"green\"/></svg>"
+        expect :
+            IconDeclaration.of(path1) == IconDeclaration.of(path1)
+            IconDeclaration.of(path1) === IconDeclaration.of(path1)
+            IconDeclaration.of(path1) != IconDeclaration.of(path2)
+            IconDeclaration.of(path1) !== IconDeclaration.of(path2)
+        and :
+            IconDeclaration.of(Size.of(-1, 8), path1) == IconDeclaration.of(Size.of(-1, 8), path1)
+            IconDeclaration.of(Size.of(-1, 8), path1) === IconDeclaration.of(Size.of(-1, 8), path1)
+            IconDeclaration.of(Size.of(4, 6), path1) != IconDeclaration.of(Size.of(-1, 8), path1)
+            IconDeclaration.of(Size.of(4, 6), path1) !== IconDeclaration.of(Size.of(-1, 8), path1)
+        and :
+            IconDeclaration.of(Size.unknown(), path1) == IconDeclaration.of(path1)
+            IconDeclaration.of(Size.unknown(), path1) === IconDeclaration.of(path1)
+        and :
+            IconDeclaration.ofSvg(svg1) == IconDeclaration.ofSvg(svg1)
+            IconDeclaration.ofSvg(svg1) === IconDeclaration.ofSvg(svg1)
+            IconDeclaration.ofSvg(svg1) != IconDeclaration.ofSvg(svg2)
+            IconDeclaration.ofSvg(svg1) !== IconDeclaration.ofSvg(svg2)
+        and :
+            IconDeclaration.ofAutoScaledSvg(svg1) == IconDeclaration.ofAutoScaledSvg(svg1)
+            IconDeclaration.ofAutoScaledSvg(svg1) === IconDeclaration.ofAutoScaledSvg(svg1)
+            IconDeclaration.ofAutoScaledSvg(svg1) != IconDeclaration.ofAutoScaledSvg(svg2)
+            IconDeclaration.ofAutoScaledSvg(svg1) !== IconDeclaration.ofAutoScaledSvg(svg2)
+    }
 
+    /**
+     * This method guarantees that garbage collection is
+     * done unlike <code>{@link System#gc()}</code> for
+     * {@code numberOfCycles} times!
+     */
+    static boolean eventually(int numberOfCycles, Supplier<Boolean> condition) {
+        if ( condition.get() )
+            return true;
+        while ( numberOfCycles > 0 ) {
+            waitForGarbageCollection();
+            if ( condition.get() )
+                return true;
+            else
+                numberOfCycles--;
+        }
+        return condition.get();
+    }
 
     /**
      * This method guarantees that garbage collection is

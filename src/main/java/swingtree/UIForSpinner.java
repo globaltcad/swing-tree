@@ -69,8 +69,6 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
                     Number newValue;
                     Number value = this.getNumber();
                     Number stepSize = this.getStepSize();
-                    Comparable<Number> maximum = (Comparable<Number>) this.getMaximum();
-                    Comparable<Number> minimum = (Comparable<Number>) this.getMinimum();
                     boolean valueIsRational = (value instanceof Float) || (value instanceof Double);
                     boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);
                     if ( valueIsRational || stepIsRational ) {
@@ -89,11 +87,36 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
                         else
                             newValue = (byte) v;
                     }
-                    if ( (maximum != null) && (maximum.compareTo(newValue) < 0) ) return null;
-                    if ( (minimum != null) && (minimum.compareTo(newValue) > 0) ) return null;
+                    Comparable<Number> maximum = numberAgnosticComparableFrom(this.getMaximum());
+                    Comparable<Number> minimum = numberAgnosticComparableFrom(this.getMinimum());
+                    if ( (maximum != null) && (maximum.compareTo(newValue) < 0) )
+                        return null;// out of range!
+                    if ( (minimum != null) && (minimum.compareTo(newValue) > 0) )
+                        return null;// out of range!
                     else
                         return newValue;
                 }
+
+                @SuppressWarnings("ComparableType")
+                private @Nullable Comparable<Number> numberAgnosticComparableFrom(@Nullable Comparable<?> otherComparable) {
+                    if ( otherComparable == null )
+                        return null;
+                    if ( otherComparable instanceof Number ) {
+                        return new Comparable<Number>() {
+                            private final Number number = (Number) otherComparable;
+                            @Override
+                            public int compareTo(Number other) {
+                                // Convert both numbers to double for comparison
+                                double thisValue = this.number.doubleValue();
+                                double otherValue = other.doubleValue();
+                                return Double.compare(thisValue, otherValue);
+                            }
+                        };
+                    } else {
+                        return (Comparable<Number>) otherComparable;
+                    }
+                }
+
                 private void updateEditorFormatter() {
                     JComponent editor = thisComponent.getEditor();
                     if (editor instanceof JSpinner.DefaultEditor) {

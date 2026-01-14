@@ -778,20 +778,11 @@ public final class ComponentExtension<C extends JComponent>
             else
                 superPaint.accept(internalGraphics);
 
-            // We remember if antialiasing was enabled before we render:
-            boolean antialiasingWasEnabled = internalGraphics.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-            // Reset antialiasing to its previous state:
-            if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
-                internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
             Font componentFont = _owner.getFont();
             if ( componentFont != null && !componentFont.equals(internalGraphics.getFont()) )
                 internalGraphics.setFont( componentFont );
 
             _styleEngine.paintForeground(internalGraphics);
-
-            // Reset antialiasing to its previous state:
-            internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
             // We restore the clip:
             if ( internalGraphics.getClip() != formerClip )

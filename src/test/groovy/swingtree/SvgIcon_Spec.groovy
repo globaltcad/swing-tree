@@ -7,6 +7,7 @@ import spock.lang.Title
 import swingtree.api.IconDeclaration
 import swingtree.layout.Size
 import swingtree.style.SvgIcon
+import utility.Utility
 
 @Title("SVG Support through SvgIcon")
 @Narrative('''
@@ -380,6 +381,40 @@ class SvgIcon_Spec extends Specification
             // Different percentage values
             1       | 75       | Size.of(75, 75)   || "<svg width=\"50%\" height=\"25%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
             2       | 6        | Size.of(6,   3)   || "<svg width=\"60%\" height=\"75%\" viewBox=\"0 0 200 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+    }
+
+    def 'An `SvgIcon` can be converted to a buffered image.'(
+            float uiScale, String imgToMatch, String svg
+    ) {
+        reportInfo """
+            You can easily convert an `SvgIcon` into a `BufferedImage` using the `getImage()` method.
+            This will return a buffered image which has the same DPI dimensions as the `SvgIcon`
+            reported by `getIconWidth()` and `getIconHeight()`.
+            
+            Note that if the SVG icon has a distorted aspect ratio, which happens when the
+            view box aspect ratio does not match the width and height aspect ratio, then
+            the resulting image will be rendered with the expected distortion, exactly
+            like the `SvgIcon` would render itself onto a component for example...
+        """
+        given :
+            SwingTree.initialiseUsing( it -> it.uiScaleFactor(uiScale) )
+        and :
+            var declaration = IconDeclaration.ofSvg(svg)
+            var svgIcon = declaration.find().orElseThrow(IllegalStateException::new)
+        when : 'We create a buffered image from the SVG based icon...'
+            var img = svgIcon.getImage()
+        then : 'It matched the PNGs stored in the test snapshots folder!'
+            Utility.similarityBetween(img, "svgAsPng/${imgToMatch}.png", 99.98) > 99.98
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+          uiScale | imgToMatch                ||  svg
+              1   | 'blue-circle-1'           || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>\n</svg>"
+              2   | 'blue-circle-2'           || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>\n</svg>"
+              1   | 'green-stretched-circle-1'|| "<svg width=\"200px\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+              2   | 'green-stretched-circle-2'|| "<svg width=\"100px\" height=\"200px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
     }
 
     def 'The `withIconSizeFromHeight` method converts percentage-based icons to pixel-based icons and maintains aspect ratio.'(
