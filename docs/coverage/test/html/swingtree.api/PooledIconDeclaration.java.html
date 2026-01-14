@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PooledIconDeclaration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">PooledIconDeclaration.java</span></div><h1>PooledIconDeclaration.java</h1><pre class="source lang-java linenums">package swingtree.api;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import swingtree.layout.Size;
+
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ *  A basic implementation of the {@link IconDeclaration} interface
+ *  with object pooling built in. So repeated calls to the {@link #of(Size, SourceFormat, String)}
+ *  factory method with the same values, will always return the same instance.
+ *  This is because the {@link IconDeclaration} is used as key in weak hash map based caches.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class PooledIconDeclaration implements IconDeclaration
+{
+    /**
+     * Implementations of {@link IconDeclaration} are used as weak cache keys
+     * in the style engine as well as the image cache... So we pool instances
+     * of this in order to ensure that cache entries are not cleared too early.&lt;br&gt;
+     * This optimizes both cache hits as well as memory consumption!
+     */
+<span class="fc" id="L27">    private static final Map&lt;PooledIconDeclaration, WeakReference&lt;PooledIconDeclaration&gt;&gt; POOL = Collections.synchronizedMap(new WeakHashMap&lt;&gt;());</span>
+
+    private static PooledIconDeclaration intern(PooledIconDeclaration value) {
+<span class="fc" id="L30">        synchronized (POOL) {</span>
+<span class="fc" id="L31">            WeakReference&lt;PooledIconDeclaration&gt; ref = POOL.get(value);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if (ref != null) {</span>
+<span class="fc" id="L33">                PooledIconDeclaration canonical = ref.get();</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">                if (canonical != null) {</span>
+<span class="fc" id="L35">                    return canonical;</span>
+                }
+            }
+<span class="fc" id="L38">            POOL.put(value, new WeakReference&lt;&gt;(value));</span>
+<span class="fc" id="L39">            return value;</span>
+        }
+    }
+    
+    private final @Nullable Size size;
+    private final SourceFormat sourceFormat;
+    private final String source;
+<span class="fc" id="L46">    private final AtomicReference&lt;@Nullable Integer&gt; _hashCache = new AtomicReference&lt;&gt;();</span>
+    
+
+    public static PooledIconDeclaration of(@Nullable Size size, SourceFormat sourceFormat, String source) {
+<span class="fc" id="L50">        return intern(new PooledIconDeclaration( size, sourceFormat, source ));</span>
+    }
+
+<span class="fc" id="L53">    private PooledIconDeclaration(@Nullable Size size, SourceFormat sourceFormat, String source) {</span>
+<span class="fc" id="L54">        this.size = size;</span>
+<span class="fc" id="L55">        this.sourceFormat = sourceFormat;</span>
+<span class="fc" id="L56">        this.source = source;</span>
+<span class="fc" id="L57">    }</span>
+
+    @Override
+    public Optional&lt;Size&gt; size() {
+<span class="fc" id="L61">        return Optional.ofNullable(size);</span>
+    }
+
+    @Override
+    public String source() {
+<span class="fc" id="L66">        return source;</span>
+    }
+
+    @Override
+    public SourceFormat sourceFormat() {
+<span class="fc" id="L71">        return sourceFormat;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L76">        return this.getClass().getSimpleName()+&quot;[&quot;+</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">                    &quot;size=&quot; + ( size().map(it-&gt;it.equals(Size.unknown()) ? &quot;?&quot; : String.valueOf(it) ).orElse(&quot;?&quot;) ) + &quot;, &quot; +</span>
+                    &quot;sourceFormat=&quot; + sourceFormat + &quot;, &quot; +
+                    &quot;source='&quot; + source + &quot;'&quot; +
+                &quot;]&quot;;
+    }
+
+    @Override public int hashCode() {
+<span class="fc" id="L84">        return Objects.requireNonNull(</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">                _hashCache.updateAndGet(h -&gt; h != null ? h : Objects.hash(source, sourceFormat, size))</span>
+            );
+    }
+
+    @Override public boolean equals( Object other ) {
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if ( other == this ) return true;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if ( other == null ) return false;</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if ( other.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L93">        IconDeclaration that = (IconDeclaration) other;</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        return Objects.equals(this.source(), that.source())</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(this.sourceFormat(), that.sourceFormat())</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">                &amp;&amp; Objects.equals(this.size(), that.size());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

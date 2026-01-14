@@ -1,0 +1,189 @@
+{
+  "className":"swingtree.Scroll_Pane_Spec",
+  "title":"The Scroll Pane",
+  "narrative":"Just like for any other main component in Swing,\n    Swing-Tree also supports a nice API for\n    building UIs with scroll panes.\n\n    A scroll pane is a component that allows\n    the user to scroll through a larger view\n    of a component. It is a container that\n    contains a single component, called the\n    viewport. The viewport is the area that\n    is actually visible to the user.\n\n    The scroll pane also contains a set of\n    scrollbars that allow the user to scroll\n    the viewport.\n\n    In this specification, we will see how\n    to build a scroll pane with Swing-Tree.",
+  "subjects":["swingtree.UIForScrollPane","javax.swing.JScrollPane"],
+  "statistics":{
+    "runs":"9",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Use the `UI.ScrollBarPolicy` enum to configure the scroll pane scroll bars.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `with` method.\n            We are using it because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method is used to configure a component\n            using an enum instance. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withScrollBarPolicy(UI.Active.NEVER)"]},
+
+        {"kind":"and","text":"Then we build the scroll pane component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll bar policies.","code":["scrollPane.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER","scrollPane.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_NEVER"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Configure both the horizontal and vertical scroll policy individually.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `withHorizontal` \n            and `withVertical` methods.\n            We are using them because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method, or variations of it, are used to configure a component\n            in a fluent way.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withHorizontalScrollBarPolicy(UI.Active.NEVER)","        .withVerticalScrollBarPolicy(UI.Active.ALWAYS)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll bar policies.","code":["scrollPane.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER","scrollPane.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_ALWAYS"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can configure the vertical and horizontal scroll bar scroll increment of a scroll pane.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll increment.","code":["var ui =","        UI.scrollPane()","        .withHorizontalScrollIncrement(42)","        .withVerticalScrollIncrement(24)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll increments.","code":["scrollPane.getHorizontalScrollBar().getUnitIncrement() == 42","scrollPane.getVerticalScrollBar().getUnitIncrement() == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can configure the general scroll increment of the scroll pane scroll bars.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this sets the scroll increment unit for both\n            the vertical and horizontal scroll bars.\n            So any previously set scroll increment unit for the\n            vertical or horizontal scroll bar will be overwritten.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll increment.","code":["var ui =","        UI.scrollPane()","        .withScrollIncrement(42)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll increments, both vertical and horizontally.","code":["scrollPane.getHorizontalScrollBar().getUnitIncrement() == 42","scrollPane.getVerticalScrollBar().getUnitIncrement() == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The horizontal as well as vertical block scroll increment can be configured easily.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom block scroll increment.","code":["var ui =","        UI.scrollPane()","        .withHorizontalBlockScrollIncrement(42)","        .withVerticalBlockScrollIncrement(24)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected block scroll increments.","code":["scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42","scrollPane.getVerticalScrollBar().getBlockIncrement() == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Configure the block scroll increment for both scroll bars in one line.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this sets the block scroll increment unit for both\n            the vertical and horizontal scroll bars.\n            So any previously set block scroll increment unit for the\n            vertical or horizontal scroll bar will be overwritten.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom block scroll increment.","code":["var ui =","        UI.scrollPane()","        .withBlockScrollIncrement(42)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected block scroll increments, both vertical and horizontally.","code":["scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42","scrollPane.getVerticalScrollBar().getBlockIncrement() == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use a declarative configurator lambda instead implementing the `Scrollable` interface manually.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Classical Swing has the `Scrollable` interface, which is an optional\n            interface the scroll pane content component may implement in order\n            to configure how the component should be scrolled in the\n            viewport of the scroll pane.\n\n            This is a bit cumbersome to implement, and it prevents you from keeping your\n            UI declarative, as you have to use inheritance instead of composition.\n\n            Swing-Tree offers a solution to this through a declarative configurator lambda\n            passed to the ´UI.scrollPane(Configurator)´ factory method.\n            In this lambda, you can configure the scroll pane content component\n            behavior in the viewport as you would with the `Scrollable` interface.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scrollable configurator.","code":["var ui =","        UI.scrollPane( it -> it","            .prefSize(160, 130)","            .blockIncrement(7)","            .unitIncrement(5)","            .fitHeight(false)","            .fitWidth(true)","        )","        .add(","            UI.panel().withSize(140, 100)","            .add(","                UI.html(\"<p> This is a long text that should be scrollable. </p>\")","            )","        )"]},
+
+        {"kind":"and","text":"We then build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scrollable behavior.","code":["scrollPane.getViewport().getView().getPreferredScrollableViewportSize() == new java.awt.Dimension(160, 130)","scrollPane.getViewport().getView().getScrollableBlockIncrement(null, 0,0) == 7","scrollPane.getViewport().getView().getScrollableUnitIncrement(null, 0,0) == 5","scrollPane.getViewport().getView().getScrollableTracksViewportHeight() == false","scrollPane.getViewport().getView().getScrollableTracksViewportWidth() == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The scroll configuration API produces a scroll pane whose content layout is calculated correctly.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In this little test we check if the layout of the content\n            of a scroll pane is calculated correctly, for both the\n            case where we use the scroll conf API to fit the viewport\n            and for the case where we do not.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A bit of content for the scroll pane content layout test.","code":["var TEXT =  \"This is a little story about a long sentence which is unfortunately too long to fit horizontally \" +","            \"placed on a single line of text in a panel inside a scroll pane. This is why it is a good idea \" +","            \"to place me in a scroll pane.\";"]},
+
+        {"kind":"and","text":"We create a UI with a scroll pane layout.","code":["var ui =","    UI.frame(\"Scroll Pane Layout Test\")","    .peek(it->it.setPreferredSize(new Dimension(350, 550)))","    .add(","        UI.panel(\"wrap, fill\").withPrefSize(350, 550)","        .add(\"shrink\",UI.label(\"Not implementing Scrollable:\"))","        .add(\"grow, push\",","            UI.scrollPane().id(\"scroll-1\")","            .add(","                UI.panel(\"wrap\", \"\", \"[]push[]\").id(\"content-1\")","                .withBackground(UI.Color.LIGHT_GRAY)","                .add(UI.html(TEXT).withFont(new Font(\"Ubuntu\", Font.BOLD, 12)))","                .add(UI.html(\"END\").withFont(new Font(\"Ubuntu\", Font.BOLD, 12)))","            )","        )","        .add(\"shrink\",UI.label(\"Using Scroll Conf:\"))","        .add(\"grow, push\",","            UI.scrollPane(it -> it.fitWidth(true))","            .id(\"scroll-2\")","            .add(","                UI.panel(\"wrap\", \"\", \"[]push[]\").id(\"content-2\")","                .withBackground(UI.Color.LIGHT_GRAY)","                .add(UI.html(TEXT).withFont(new Font(\"Ubuntu\", Font.BOLD, 12)))","                .add(UI.html(\"END\").withFont(new Font(\"Ubuntu\", Font.BOLD, 12)))","            )","        )","    );"]},
+
+        {"kind":"and","text":"We build the UI:","code":["var frame = ui.get(JFrame)"]},
+
+        {"kind":"when","text":"We do the layout of the component...","code":["UI.runNow(()->frame.pack())"]},
+
+        {"kind":"then","text":"The layout is calculated correctly.","code":["frame.getWidth() == 350","frame.getHeight() == 550"]},
+
+        {"kind":"when","text":"We filter out the content panels...","code":["var scroll1 = new Utility.Query(frame).find(JScrollPane, \"scroll-1\").orElseThrow(NoSuchElementException::new)","var scroll2 = new Utility.Query(frame).find(JScrollPane, \"scroll-2\").orElseThrow(NoSuchElementException::new)","var content1 = new Utility.Query(frame).find(JPanel, \"content-1\").orElseThrow(NoSuchElementException::new)","var content2 = new Utility.Query(frame).find(JPanel, \"content-2\").orElseThrow(NoSuchElementException::new)"]},
+
+        {"kind":"then","text":"The content panels have the covariance relative to their viewport.","code":["content1.getSize() != scroll1.getViewport().getSize()","content2.getSize() == scroll2.getViewport().getSize()"]},
+
+        {"kind":"and","text":"","code":["content1.getWidth() > scroll1.getViewport().getWidth()","content1.getHeight() == scroll1.getViewport().getHeight()"]},
+
+        {"kind":"and","text":"The content panels have the expected size.","code":["content1.getWidth() > 910","200 <= content1.getHeight() && content1.getHeight() <= 230","315 <= content2.getWidth()  && content2.getWidth()  <= 335","215 <= content2.getHeight() && content2.getHeight() <= 245"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can add a custom ´Scrollable´ component to a scroll pane with layout constraints that work.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In this little test we check if the usage of layout constraints\n            when adding a custom Scrollable component to a scroll pane works.\n            Note that this is not something supported in regular Swing, \n            SwingTree however, will wrap and delegate your custom Scrollable\n            component in a JPanel, with a ´MigLayout´ instance that\n            respects the layout constraints you set.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We create a UI with 2 different scroll panes each containing a custom\n            ´Scrollable´ component. The first one however receives no layout constraints,\n            while the second one does.\n        ","code":["var ui =","    UI.frame(\"Scrollable Pane Layout Test\")","    .peek(it->it.setPreferredSize(new Dimension(500, 300)))","    .add(","        UI.panel(\"fill\", \"[grow][grow]\").withPrefSize(500, 300)","        .add(\"shrink\",UI.label(\"Without Constraints:\"))","        .add(\"grow, push, wrap\",","            UI.scrollPane().id(\"scroll-1\")","            .add(","                UI.of(new CustomScrollablePanel()).withLayout(\"wrap 2\").id(\"content-1\")","                .add(UI.label(\"Forename: \"))","                .add(UI.textField(\"Joey\"))","                .add(UI.label(\"Surname: \"))","                .add(UI.textField(\"Carbstrong\"))","            )","        )","        .add(\"shrink\",UI.label(\"With Constraints:\"))","        .add(\"grow, push, wrap\",","            UI.scrollPane().id(\"scroll-2\")","            .id(\"scroll-2\")","            .add(\"grow, push\",","                UI.of(new CustomScrollablePanel()).id(\"content-2\")","                .add(UI.label(\"Forename: \"))","                .add(UI.textField(\"Joey\"))","                .add(UI.label(\"Surname: \"))","                .add(UI.textField(\"Carbstrong\"))","            )","        )","    );"]},
+
+        {"kind":"and","text":"Then we just build the UI:","code":["var frame = ui.get(JFrame)"]},
+
+        {"kind":"when","text":"We do the layout of the component...","code":["UI.runNow( () -> frame.pack() )"]},
+
+        {"kind":"and","text":"We fetch the content panels so we can check their layout.","code":["var scroll1 = new Utility.Query(frame).find(JScrollPane, \"scroll-1\" ).orElseThrow(NoSuchElementException::new)","var scroll2 = new Utility.Query(frame).find(JScrollPane, \"scroll-2\" ).orElseThrow(NoSuchElementException::new)","var content1    = new Utility.Query(frame).find(JPanel,      \"content-1\").orElseThrow(NoSuchElementException::new)","var content2    = new Utility.Query(frame).find(JPanel,      \"content-2\").orElseThrow(NoSuchElementException::new)"]},
+
+        {"kind":"then","text":"The content panels have the covariance relative to their viewport.","code":["content1.getSize().getWidth()  == scroll1.getViewport().getSize().getWidth()","content1.getSize().getHeight() <  scroll1.getViewport().getSize().getHeight()","content2.getSize().getWidth()  == scroll2.getViewport().getSize().getWidth()","content2.getSize().getHeight() <  scroll2.getViewport().getSize().getHeight()"]},
+
+        {"kind":"and","text":"The content components are in fact of the custom scrollable type we use for testing.","code":["content1 instanceof CustomScrollablePanel","content2 instanceof CustomScrollablePanel"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

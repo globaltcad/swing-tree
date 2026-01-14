@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectPool.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ObjectPool.java</span></div><h1>ObjectPool.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+final class ObjectPool {
+<span class="fc" id="L10">    private static @Nullable ObjectPool INSTANCE = null;</span>
+
+    static ObjectPool get() {
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if ( INSTANCE == null )</span>
+<span class="fc" id="L14">            INSTANCE = new ObjectPool();</span>
+<span class="fc" id="L15">        return INSTANCE;</span>
+    }
+
+<span class="fc" id="L18">    private final Map&lt;Pooled&lt;?&gt;, WeakReference&lt;Pooled&lt;?&gt;&gt;&gt; pool = new WeakHashMap&lt;&gt;();</span>
+
+<span class="fc" id="L20">    private ObjectPool(){}</span>
+
+    public &lt;T&gt; Pooled&lt;T&gt; intern(Pooled&lt;T&gt; value ) {
+<span class="fc" id="L23">        WeakReference&lt;Pooled&lt;T&gt;&gt; ref = (WeakReference) pool.get(value);</span>
+
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (ref != null) {</span>
+<span class="fc" id="L26">            Pooled&lt;T&gt; canonical = ref.get();</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">            if (canonical != null) {</span>
+<span class="fc" id="L28">                return canonical;</span>
+            }
+        }
+<span class="fc" id="L31">        pool.put(value, new WeakReference&lt;&gt;(value));</span>
+<span class="fc" id="L32">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
