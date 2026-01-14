@@ -622,7 +622,6 @@ public final class SvgIcon extends ImageIcon
      * distort the icon by changing only the width independently, this method preserves
      * the original aspect ratio by calculating the appropriate height.
      * </p>
-     * <p>
      * <b>Important behaviors and edge cases:</b>
      * <ul>
      *   <li>If {@code newWidth} is negative, returns an icon with both dimensions set to -1
@@ -640,7 +639,6 @@ public final class SvgIcon extends ImageIcon
      *   <li>When called on an icon with fixed pixel dimensions, this method simply
      *       recalculates the height based on the existing aspect ratio.</li>
      * </ul>
-     * </p>
      * <p>
      * This method is particularly useful in layout scenarios where you need to
      * constrain an icon by width (e.g., fitting within a fixed-width toolbar)
@@ -675,7 +673,6 @@ public final class SvgIcon extends ImageIcon
      * proportional width. Like its width-based counterpart, this method prevents
      * distortion by maintaining the original aspect ratio.
      * </p>
-     * <p>
      * <b>Important behaviors and edge cases:</b>
      * <ul>
      *   <li>If {@code newHeight} is negative, returns an icon with both dimensions set to -1
@@ -693,7 +690,6 @@ public final class SvgIcon extends ImageIcon
      *   <li>When called on an icon with fixed pixel dimensions, this method simply
      *       recalculates the width based on the existing aspect ratio.</li>
      * </ul>
-     * </p>
      * <p>
      * This method is particularly useful in layout scenarios where you need to
      * constrain an icon by height (e.g., fitting within a fixed-height toolbar)
