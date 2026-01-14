@@ -174,9 +174,19 @@ class Icon_Caching_Spec extends Specification
             IconDeclaration.ofAutoScaledSvg(svg1) !== IconDeclaration.ofAutoScaledSvg(svg2)
     }
 
+    /**
+     * This method guarantees that garbage collection is
+     * done unlike <code>{@link System#gc()}</code> for
+     * {@code numberOfCycles} times!
+     */
     static void waitForGarbageCollection(int numberOfCycles) {
-        numberOfCycles.times {
-            waitForGarbageCollection()
+        Object obj = new Object();
+        if ( numberOfCycles > 1 )
+            waitForGarbageCollection(numberOfCycles-1);
+        WeakReference ref = new WeakReference<>(obj);
+        obj = null;
+        while(ref.get() != null) {
+            System.gc();
         }
     }
 
