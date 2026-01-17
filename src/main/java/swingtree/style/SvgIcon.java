@@ -1192,14 +1192,6 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
-        // We correct if the component area is smaller than the view box:
-        width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
-        width += (int) Math.max(0, x - viewBox.x );
-        height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
-        height += (int) Math.max(0, y - viewBox.y );
-        x = (int) Math.min(x, viewBox.x);
-        y = (int) Math.min(y, viewBox.y);
-
         {
             viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
             FloatSize svgSize = _core.svgDocument.viewBox().size();
