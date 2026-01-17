@@ -37,7 +37,7 @@ import java.util.Optional;
  *          It will fill whatever area was specified using
  *          {@link #clipTo(UI.ComponentArea)}. <br>
  *          The default area used for rendering the image
- *          style is {@link swingtree.UI.ComponentArea#INTERIOR}
+ *          style is {@link swingtree.UI.ComponentArea#BODY}
  *      </li>
  *      <li><b>Image:</b>
  *          The image which will be drawn onto the component,
