@@ -9,8 +9,10 @@ import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
 import swingtree.animation.LifeTime
+import swingtree.api.Configurator
 import swingtree.components.JBox
 import swingtree.components.JSplitButton
+import swingtree.style.ImageConf
 import swingtree.style.SvgIcon
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
@@ -4161,5 +4163,63 @@ class Individual_Component_Styling_Spec extends Specification
         where : 'We test this using the following scaling values:'
             scale << [5.5f]
     }
+
+
+    def 'The Style API can render an SVG String onto a component as expected.'(
+        float uiScale, String imgToMatch, Configurator<ImageConf> configurator
+    ) {
+        reportInfo """
+            You can use the Style API of SwingTree to directly render
+            SVG code onto a Swing component as part of the "image" sub style.
+            In this example/test we take a simple SVG document and combine
+            it with a unique style.
+            
+            ${Utility.linkSnapshot("components/svgInStyle/${imgToMatch}.png")}
+            
+            The style configuration is then matched with a previously made snapshot.
+            We expect the style engine to produce this exact same rendering!
+        """
+        given : """
+            We initialize SwingTree with a custom UI scaling factor:
+        """
+            SwingTree.initialiseUsing(it->it.uiScaleFactor(uiScale))
+        and : 'A simple SVG consisting of a rounded rectangle and a circle inside.'
+            var svg = "<svg width=\"300\" height=\"150\" viewBox=\"0 0 300 150\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
+                        "    <rect x=\"0\" y=\"0\" width=\"300\" height=\"150\" rx=\"30\" ry=\"30\" fill=\"blue\" />\n" +
+                        "    <circle cx=\"150\" cy=\"75\" r=\"75\" fill=\"green\" />\n" +
+                        "</svg>\n"
+        and : 'We pass the following style rules to a `JBox` UI:'
+            var ui =
+                        UI.box().withStyle( it -> it
+                            .margin(3)
+                            .padding(5) // ignored by SVGs
+                            .border(2, "dark cyan")
+                            .size(64, 32)
+                            .image(
+                                conf -> configurator.configure(conf.svg(svg))
+                            )
+                        )
+
+        when : 'We create a buffered image from the SVG based icon...'
+            var box = ui.get(JBox)
+            var img = Utility.renderSingleComponent(box)
+        then : 'It matched the PNGs stored in the test snapshots folder!'
+            Utility.similarityBetween(img, "components/svgInStyle/${imgToMatch}.png", 99.5) > 99.5
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+          uiScale | imgToMatch | configurator
+              1   | 'variant-1'| {it}
+              2   | 'variant-2'| {it.fitMode(UI.FitComponent.MIN_DIM)}
+              3   | 'variant-3'| {it.fitMode(UI.FitComponent.MAX_DIM)}
+              1   | 'variant-4'| {it.padding(1, 2, 3, 8).fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}
+              3   | 'variant-5'| {it.width(35)}
+              3   | 'variant-6'| {it.size(15, 15)}
+              3   | 'variant-6'| {it.padding(5).size(25, 25)}
+              3   | 'variant-6'| {it.padding(10, 5).size(35, 35)}
+    }
+
 
 }
