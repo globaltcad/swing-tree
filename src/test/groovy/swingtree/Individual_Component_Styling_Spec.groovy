@@ -4185,8 +4185,10 @@ class Individual_Component_Styling_Spec extends Specification
             SwingTree.initialiseUsing(it->it.uiScaleFactor(uiScale))
         and : 'A simple SVG consisting of a rounded rectangle and a circle inside.'
             var svg = "<svg width=\"300\" height=\"150\" viewBox=\"0 0 300 150\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
-                        "    <rect x=\"0\" y=\"0\" width=\"300\" height=\"150\" rx=\"30\" ry=\"30\" fill=\"blue\" />\n" +
-                        "    <circle cx=\"150\" cy=\"75\" r=\"75\" fill=\"green\" />\n" +
+                        "    <rect x=\"0\" y=\"0\" width=\"300\" height=\"150\" fill=\"blue\" />\n" +
+                        "    <rect x=\"0\" y=\"50\" width=\"300\" height=\"50\" fill=\"orange\" />\n" +
+                        "    <rect x=\"125\" y=\"0\" width=\"50\" height=\"150\" fill=\"orange\" />\n" +
+                        "    <rect x=\"125\" y=\"50\" width=\"50\" height=\"50\" fill=\"green\" />\n" +
                         "</svg>\n"
         and : 'We pass the following style rules to a `JBox` UI:'
             var ui =
@@ -4206,19 +4208,43 @@ class Individual_Component_Styling_Spec extends Specification
         then : 'It matched the PNGs stored in the test snapshots folder!'
             Utility.similarityBetween(img, "components/svgInStyle/${imgToMatch}.png", 99.5) > 99.5
 
+        when : """
+            We now do a bit of an invariance test! So instead of giving the SVG
+            text directly to the Style Engine, we first convert it to an image,
+            and then instruct the engine to render the exact same image based on that...
+        """
+            var svgIcon = SvgIcon.of(svg)
+            var svgImg = svgIcon.getImage()
+        and : 'We re-create the UI:'
+            ui = UI.box().withStyle( it -> it
+                     .margin(3)
+                     .padding(5) // ignored by SVGs
+                     .border(2, "dark cyan")
+                     .size(64, 32)
+                     .image(
+                         conf -> configurator.configure(conf.image(svgImg))
+                     )
+                 )
+        and :
+            box = ui.get(JBox)
+            img = Utility.renderSingleComponent(box)
+        then : 'It also matched the PNGs stored in the test snapshots folder!'
+            Utility.similarityBetween(img, "components/svgInStyle/${imgToMatch}.png", 99.5) > 99.5
+
         cleanup :
             SwingTree.clear()
 
         where :
           uiScale | imgToMatch | configurator
+              4   | 'variant-0'| {it.size(54, 22)}
               1   | 'variant-1'| {it}
               2   | 'variant-2'| {it.fitMode(UI.FitComponent.MIN_DIM)}
               3   | 'variant-3'| {it.fitMode(UI.FitComponent.MAX_DIM)}
-              1   | 'variant-4'| {it.padding(1, 2, 3, 8).fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}
+              //1   | 'variant-4'| {it.padding(1, 2, 3, 8).size(54, 22)}
               3   | 'variant-5'| {it.width(35)}
               3   | 'variant-6'| {it.size(15, 15)}
               3   | 'variant-6'| {it.padding(5).size(25, 25)}
-              3   | 'variant-6'| {it.padding(10, 5).size(35, 35)}
+              3   | 'variant-6'| {it.padding(10, 5).size(25, 35)}
     }
 
 

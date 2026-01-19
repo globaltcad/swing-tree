@@ -1193,6 +1193,15 @@ public final class SvgIcon extends ImageIcon
             return;
 
         {
+            // Finally, the padding:
+            if ( !Outline.none().equals(padding) ) {
+                viewBox = new ViewBox(
+                        viewBox.x + padding.left().orElse(0f),
+                        viewBox.y + padding.top().orElse(0f),
+                        viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)),
+                        viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
+                );
+            }
             viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
             FloatSize svgSize = _core.svgDocument.viewBox().size();
             float svgRefWidth = ((svgSize.width) / (svgSize.height));
@@ -1246,16 +1255,6 @@ public final class SvgIcon extends ImageIcon
                 break;
             default:
                 log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
-        }
-
-        // Finally, the padding:
-        if ( !Outline.none().equals(padding) ) {
-            viewBox = new ViewBox(
-                    viewBox.x + padding.left().orElse(0f) / scaleX,
-                    viewBox.y + padding.top().orElse(0f) / scaleY,
-                    viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)) / scaleX,
-                    viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f)) / scaleY
-            );
         }
 
         // Now onto the actual rendering:
