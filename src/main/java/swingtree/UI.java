@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -1150,21 +1151,25 @@ public final class UI extends UIFactoryMethods
     private UI(){ super(); } // This is a static API
 
     /**
-     * A convenience method for
+     * A convenience method which ensures that a supplied {@link Runnable}
+     * is executed on the GUI thead (AWT event dispatch thread)
+     * using the following condition:<br>
      * <pre>{@code
      *      if ( !UI.thisIsUIThread() )
      *          SwingUtilities.invokeLater(runnable);
      *      else
      *          runnable.run();
-     * }</pre>,
-     * which causes <i>runnable.run()</i> to be executed asynchronously on the
-     * AWT event dispatching thread if this current thread is not already
-     * the AWT thread.
+     * }</pre>
+     * The <i>runnable.run()</i> will be executed immediately, if the invoker already
+     * is the GUI thread. Otherwise, it will be queued for execution on the GUI thread.
      * The 'invokeLater' execution will happen after all pending AWT events have been processed.
      * This method should be used when an application thread needs to update the GUI.
      *
-     * @param runnable the instance of {@code Runnable}
+     * @param runnable the instance of {@code Runnable} which needs to be run by the GUI thread.
      * @see #runNow
+     * @see #runLater(int, Runnable)
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @see #thisIsUIThread()
      */
     public static void run( Runnable runnable ) {
         NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
@@ -1176,26 +1181,34 @@ public final class UI extends UIFactoryMethods
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
-     * which causes a provided {@link Runnable} to be executed asynchronously on the
-     * AWT event dispatching thread.  This will happen after all
-     * pending AWT events have been processed.  This method should
-     * be used when an application thread needs to update the GUI.
+     * which causes the supplied {@link Runnable} to be executed asynchronously on the
+     * AWT event dispatching thread at a later point in time. <br>
+     * This will happen after all pending AWT events have been processed.
+     * This method should be used when an application thread needs to update the GUI.
      * In the following example the <code>runLater</code> call queues
-     * the <code>Runnable</code> lambda
-     * on the event dispatching thread and
-     * then prints a message.
+     * the <code>Runnable</code> lambda on the event dispatching thread and
+     * then prints a message:
      * <pre>{@code
-     *  UI.run( () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     *  System.out.println("This might well be displayed before the other message.");
+     *  UI.run( ()-> System.out.println(
+     *          "Hello World on " + Thread.currentThread()
+     *      ));
+     *
+     *  System.out.println(
+     *      "This will probably be displayed first!"
+     *  );
      * }</pre>
-     * If runLater is called from the event dispatching thread --
+     * If {@code runLater} is called from the event dispatching thread --
      * for example, from a JButton's ActionListener -- the <code>Runnable</code> will
      * still be deferred until all pending events have been processed.
      * Note that if the <code>Runnable</code> throws an uncaught exception
      * the event dispatching thread will unwind (not the current thread).
      *
-     * @param runnable the instance of {@code Runnable}
+     * @param runnable the instance of {@code Runnable} to be executed later by the GUI thread
+     * @see #run
      * @see #runNow
+     * @see #runLater(int, Runnable)
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @see #thisIsUIThread()
      */
     public static void runLater( Runnable runnable ) {
         NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
@@ -1207,27 +1220,43 @@ public final class UI extends UIFactoryMethods
      * which causes {@link Runnable} to be executed asynchronously on the
      * AWT event dispatching thread after the specified delay.
      * This method should be used when an application thread needs to update the GUI
-     * after a particular delay.
+     * after a particular delay.<br>
+     * If the supplied delay is smaller or equal to {@code 0}, then the runnable
+     * will be passed to {@link #run(Runnable)} to ensure the task is executed on the
+     * GUI thread as fast as possible.<br>
+     * <br>
      * In the following example the <code>invokeLater</code> call queues
      * the <code>Runnable</code> lambda containing a print statement
      * on the event dispatching thread and
      * then prints a message.
      * <pre>{@code
-     *  UI.runLater( 1000, () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     *  System.out.println("This might well be displayed before the other message.");
+     *  UI.runLater( 1000, ()->System.out.println(
+     *          "Hello World on " + Thread.currentThread())
+     *      );
+     *
+     *  System.out.println(
+     *      "This will probably be displayed first!"
+     *  );
      * }</pre>
-     * If runLater is called from the event dispatching thread --
+     * If {@code runLater} is called from the event dispatching thread --
      * for example, from a JButton's ActionListener -- the <code>Runnable</code> will
      * still be deferred until the specified delay has passed.
      * Note that if the <code>Runnable</code> throws an uncaught exception
      * the event dispatching thread will unwind (not the current thread).
      *
      * @param delay The delay in milliseconds.
-     * @param runnable the instance of {@code Runnable}
+     * @param runnable the instance of {@code Runnable} to be executed by the GUI thread after the desired delay.
+     * @see #run
      * @see #runNow
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @see #thisIsUIThread()
      */
     public static void runLater( int delay, Runnable runnable ) {
         NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        if ( delay <= 0 ) {
+            run(runnable);
+            return;
+        }
         Timer timer = new Timer( delay, e -> { runnable.run(); } );
         timer.setRepeats(false); // Execute only once
         timer.setInitialDelay(delay);
@@ -1236,21 +1265,27 @@ public final class UI extends UIFactoryMethods
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
-     * which causes {@link Runnable} to be executed asynchronously on the
+     * which causes the supplied {@link Runnable} to be executed asynchronously on the
      * AWT event dispatching thread after the specified delay
-     * has passed in the given time unit.
+     * has passed in the given time unit.<br>
+     * If the supplied delay is smaller or equal to {@code 0}, then the runnable
+     * will be passed to {@link #run(Runnable)} to ensure the task is executed on the
+     * GUI thread as fast as possible.<br>
+     * <br>
      * This method should be used when an application thread needs to update the GUI
      * after a particular delay.
      * In the following example the <code>invokeLater</code> call queues
      * the <code>Runnable</code> lambda containing a print statement
-     * on the event dispatching thread and
-     * then prints a message.
+     * on the event dispatching thread and then prints a message.
      * <pre>{@code
-     *  UI.runLater( 1000, TimeUnit.MILLISECONDS, () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     *  System.out.println("This might well be displayed before the other message.");
+     *  UI.runLater( 1000, TimeUnit.MILLISECONDS, ()->
+     *          System.out.println("Hello World on " + Thread.currentThread()
+     *      ));
+     *
+     *  System.out.println("This will certainly be displayed first!");
      * }</pre>
-     * If runLater is called from the event dispatching thread --
-     * for example, from a JButton's ActionListener -- the <code>Runnable</code> will
+     * If {@code runLater} is called from the event dispatching thread --
+     * for example, from a {@code JButton}'s ActionListener -- the <code>Runnable</code> will
      * still be deferred until the specified delay has passed.
      * Note that if the <code>Runnable</code> throws an uncaught exception
      * the event dispatching thread will unwind (not the current thread).
@@ -1258,11 +1293,18 @@ public final class UI extends UIFactoryMethods
      * @param delay The delay in the given time unit.
      * @param unit The time unit of the delay parameter.
      * @param runnable the instance of {@code Runnable}
+     * @see #run
      * @see #runNow
+     * @see #runLater(int, Runnable)
+     * @see #thisIsUIThread()
      */
-    public static void runLater( double delay, TimeUnit unit,  Runnable runnable ) {
+    public static void runLater( double delay, TimeUnit unit, Runnable runnable ) {
         NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         NullUtil.nullArgCheck(unit, "unit", TimeUnit.class);
+        if ( delay <= 0 ) {
+            run(runnable);
+            return;
+        }
         long millis = (long) (delay * unit.toMillis(1));
         long remainderMillis = (long) (delay * unit.toMillis(1) - millis);
         long convertedDelay = TimeUnit.MILLISECONDS.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);
@@ -1315,17 +1357,17 @@ public final class UI extends UIFactoryMethods
      *
      * @param runnable the instance of {@code Runnable}
      * @see #run
+     * @see #runLater(int, Runnable)
+     * @see #runLater(double, TimeUnit, Runnable)
      */
     public static void runNow( Runnable runnable ) {
         NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        try {
+        Result.ofTry(()->{
             if ( !UI.thisIsUIThread() )
                 SwingUtilities.invokeAndWait(runnable);
             else
                 runnable.run();
-        } catch ( Exception e ) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     /**
@@ -1362,9 +1404,9 @@ public final class UI extends UIFactoryMethods
      */
     public static <T> T runAndGet( Supplier<T> supplier ) {
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
-        T[] ref = (T[]) new Object[1];
-        runNow( () -> ref[0] = supplier.get() );
-        return ref[0];
+        AtomicReference<@Nullable T> ref = new AtomicReference<>();
+        runNow( () -> ref.set(supplier.get()) );
+        return Objects.requireNonNull(ref.get());
     }
 
     /**
