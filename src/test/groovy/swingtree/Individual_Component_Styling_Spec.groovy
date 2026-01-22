@@ -4235,16 +4235,21 @@ class Individual_Component_Styling_Spec extends Specification
             SwingTree.clear()
 
         where :
-          uiScale | imgToMatch | configurator
-              4   | 'variant-0'| {it.size(54, 22)}
-              1   | 'variant-1'| {it}
-              2   | 'variant-2'| {it.fitMode(UI.FitComponent.MIN_DIM)}
-              3   | 'variant-3'| {it.fitMode(UI.FitComponent.MAX_DIM)}
-              //1   | 'variant-4'| {it.padding(1, 2, 3, 8).size(54, 22)}
-              3   | 'variant-5'| {it.width(35)}
-              3   | 'variant-6'| {it.size(15, 15)}
-              3   | 'variant-6'| {it.padding(5).size(25, 25)}
-              3   | 'variant-6'| {it.padding(10, 5).size(25, 35)}
+          uiScale | imgToMatch  | configurator
+              4   | 'variant-0' | {it.size(54, 22)}
+              1   | 'variant-1' | {it}
+              2   | 'variant-2' | {it.fitMode(UI.FitComponent.MIN_DIM)}
+              3   | 'variant-3' | {it.fitMode(UI.FitComponent.MAX_DIM)}
+              //1   | 'variant-4' | {it.padding(1, 2, 3, 8).size(54, 22)}
+              3   | 'variant-5' | {it.width(35)}
+              3   | 'variant-6' | {it.size(15, 15)}
+              3   | 'variant-6' | {it.padding(5).size(25, 25)}
+              3   | 'variant-6' | {it.padding(10, 5).size(25, 35)}
+              2   | 'variant-7' | {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}
+              2   | 'variant-7' | {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}
+              2   | 'variant-8' | {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}
+              2   | 'variant-9' | {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}
+              2   | 'variant-10'| {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}
     }
 
 

@@ -165,6 +165,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
                                                 null,
                                                 null,
                                                 UI.Placement.UNDEFINED,
+                                                UI.ComponentBoundary.BORDER_TO_INTERIOR,
                                                 false,
                                                 UI.FitComponent.UNDEFINED,
                                                 Size.unknown(),
@@ -177,16 +178,17 @@ public final class ImageConf implements Simplifiable<ImageConf>
     static ImageConf none() { return _NONE; }
 
     static ImageConf of(
-        @Nullable Color     primer,
-        @Nullable ImageIcon image,
-        UI.Placement        placement,
-        boolean             repeat,
-        UI.FitComponent     fitMode,
-        Size                size,
-        float               opacity,
-        Outline             padding,
-        Offset              offset,
-        UI.ComponentArea    clipArea
+        @Nullable Color      primer,
+        @Nullable ImageIcon  image,
+        UI.Placement         placement,
+        UI.ComponentBoundary placementBoundary,
+        boolean              repeat,
+        UI.FitComponent      fitMode,
+        Size                 size,
+        float                opacity,
+        Outline              padding,
+        Offset               offset,
+        UI.ComponentArea     clipArea
     ) {
         if (
             Objects.equals( primer, _NONE._primer )   &&
@@ -202,26 +204,28 @@ public final class ImageConf implements Simplifiable<ImageConf>
         )
             return _NONE;
         else
-            return new ImageConf(primer, image, placement, repeat, fitMode, size, opacity, padding, offset, clipArea);
+            return new ImageConf(primer, image, placement, placementBoundary, repeat, fitMode, size, opacity, padding, offset, clipArea);
     }
 
 
-    private final @Nullable Color     _primer;
-    private final @Nullable ImageIcon _image;
-    private final UI.Placement        _placement;
-    private final boolean             _repeat;
-    private final UI.FitComponent     _fitMode;
-    private final Size                _size;
-    private final float               _opacity;
-    private final Outline             _padding;
-    private final Offset              _offset;
-    private final UI.ComponentArea    _clipArea;
+    private final @Nullable Color      _primer;
+    private final @Nullable ImageIcon  _image;
+    private final UI.Placement         _placement;
+    private final UI.ComponentBoundary _placementBoundary;
+    private final boolean              _repeat;
+    private final UI.FitComponent      _fitMode;
+    private final Size                 _size;
+    private final float                _opacity;
+    private final Outline              _padding;
+    private final Offset               _offset;
+    private final UI.ComponentArea     _clipArea;
 
 
     private ImageConf(
         @Nullable Color      primer,
         @Nullable ImageIcon  image,
         UI.Placement         placement,
+        UI.ComponentBoundary placementBoundary,
         boolean              repeat,
         UI.FitComponent      fitMode,
         Size                 size,
@@ -233,6 +237,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
         _primer    = primer;
         _image     = image;
         _placement = Objects.requireNonNull(placement);
+        _placementBoundary = Objects.requireNonNull(placementBoundary);
         _repeat    = repeat;
         _fitMode   = Objects.requireNonNull(fitMode);
         _size      = Objects.requireNonNull(size);
@@ -253,6 +258,10 @@ public final class ImageConf implements Simplifiable<ImageConf>
             return ((SvgIcon) _image).getPreferredPlacement();
 
         return _placement;
+    }
+
+    UI.ComponentBoundary placementBoundary() {
+        return _placementBoundary;
     }
 
     boolean repeat() { return _repeat; }
@@ -290,7 +299,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
             color = null;
         if ( Objects.equals(color, _primer) )
             return this;
-        return ImageConf.of(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(color, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -307,7 +316,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified image.
      */
     public ImageConf image( Image image ) {
-        return ImageConf.of(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, image == null ? null : new ImageIcon(image), _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -324,7 +333,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified image.
      */
     public ImageConf image( ImageIcon image ) {
-        return ImageConf.of(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -449,7 +458,44 @@ public final class ImageConf implements Simplifiable<ImageConf>
      */
     public ImageConf placement( UI.Placement placement ) {
         Objects.requireNonNull(placement);
-        return ImageConf.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
+
+    /**
+     * Returns a new {@link ImageConf} object with the given placement boundary
+     * defined by a {@link UI.ComponentBoundary} enum.
+     * The placement boundary defines the boundary of the component onto which
+     * the image placement should be bound to.
+     * <p>
+     * The following placement boundaries are available:
+     * <ul>
+     *     <li>{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     </li>
+     *     <li>{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link UI.ComponentArea#BODY}.
+     *     </li>
+     *     <li>{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     </li>
+     *     <li>{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     typically the sub-components of the component.
+     *     </li>
+     * </ul>
+     * <b>The default value of this property is {@link UI.ComponentBoundary#BORDER_TO_INTERIOR}</b>.
+     * So the {@link ComponentStyleDelegate#padding(double, double, double, double)} of the component
+     * will not be taken into account by default when placing an image through this API!
+     *
+     * @param placementBoundary The placement boundary of the component defining the rectangular bounds in which to place the image.
+     * @return A new {@link ImageConf} object with the given placement boundary.
+     */
+    public ImageConf placementBoundary( UI.ComponentBoundary placementBoundary ) {
+        Objects.requireNonNull(placementBoundary);
+        return ImageConf.of(_primer, _image, _placement, placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -462,7 +508,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified {@code repeat} flag value.
      */
     public ImageConf repeat( boolean repeat ) {
-        return ImageConf.of(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -482,7 +528,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      */
     public ImageConf autoFit( boolean autoFit ) {
         UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.UNDEFINED;
-        return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -531,7 +577,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      */
     public ImageConf fitMode( UI.FitComponent fit ) {
         Objects.requireNonNull(fit);
-        return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -548,7 +594,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified {@code width}.
      */
     public ImageConf width( int width ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -565,7 +611,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified {@code height}.
      */
     public ImageConf height( int height ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -592,7 +638,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified {@code size}.
      */
     public ImageConf size( Size size ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -604,7 +650,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified opacity.
      */
     public ImageConf opacity( float opacity ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -616,7 +662,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     ImageConf padding( Outline padding ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
     }
 
     /**
@@ -671,7 +717,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
     public ImageConf offset( int x, int y ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
     }
 
     /**
@@ -685,7 +731,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
     public ImageConf horizontalOffset( int x ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
     }
 
     /**
@@ -699,7 +745,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  @return A new {@link ImageConf} instance with the specified offset.
      */
     public ImageConf verticalOffset( int y ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
     }
 
     /**
@@ -741,11 +787,11 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  @return A new {@link ImageConf} instance with the specified clip area.
      */
     public ImageConf clipTo(UI.ComponentArea clipArea ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
     }
 
     ImageConf _scale(double scaleFactor ) {
-        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
     }
 
     @Override
@@ -766,6 +812,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
                     simplifiedPrimer,
                     simplifiedImage,
                     _placement,
+                    _placementBoundary,
                     _repeat,
                     _fitMode,
                     _size,
@@ -778,7 +825,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     @Override
     public int hashCode() {
-        return Objects.hash(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return Objects.hash(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     @Override
@@ -787,12 +834,13 @@ public final class ImageConf implements Simplifiable<ImageConf>
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         ImageConf rhs = (ImageConf) obj;
-        return Objects.equals(_primer,    rhs._primer)    &&
-               Objects.equals(_image,     rhs._image)     &&
-               Objects.equals(_placement, rhs._placement) &&
+        return Objects.equals(_primer,            rhs._primer)    &&
+               Objects.equals(_image,             rhs._image)     &&
+               Objects.equals(_placement,         rhs._placement) &&
+               Objects.equals(_placementBoundary, rhs._placementBoundary) &&
                _repeat == rhs._repeat    &&
-               Objects.equals(_fitMode,   rhs._fitMode)   &&
-               Objects.equals(_size,      rhs._size)      &&
+               Objects.equals(_fitMode, rhs._fitMode)   &&
+               Objects.equals(_size,    rhs._size)      &&
                _opacity == rhs._opacity   &&
                Objects.equals(_padding,   rhs._padding)   &&
                Objects.equals(_offset,    rhs._offset)    &&
@@ -803,17 +851,18 @@ public final class ImageConf implements Simplifiable<ImageConf>
     public String toString() {
         if ( this.equals(_NONE) ) return this.getClass().getSimpleName()+"[NONE]";
         return this.getClass().getSimpleName() + "[" +
-                    "primer="        + StyleUtil.toString(_primer)                          + ", " +
-                    "image="         + ( _image == null ? "?" : _image.toString() )            + ", " +
-                    "placement="     + _placement                                              + ", " +
-                    "repeat="        + _repeat                                                 + ", " +
-                    "fitComponent="  + _fitMode                                                + ", " +
-                    "width="         + _size.width().map(Objects::toString).orElse("?")  + ", " +
-                    "height="        + _size.height().map(Objects::toString).orElse("?") + ", " +
-                    "opacity="       + _opacity                                                + ", " +
-                    "padding="       + _padding                                                + ", " +
-                    "offset="        + _offset                                                 + ", " +
-                    "clipArea="      + _clipArea                                               +
+                    "primer="            + StyleUtil.toString(_primer)                             + ", " +
+                    "image="             + ( _image == null ? "?" : _image.toString() )            + ", " +
+                    "placement="         + _placement                                              + ", " +
+                    "placementBoundary=" + _placementBoundary                                      + ", " +
+                    "repeat="            + _repeat                                                 + ", " +
+                    "fitComponent="      + _fitMode                                                + ", " +
+                    "width="             + _size.width().map(Objects::toString).orElse("?")  + ", " +
+                    "height="            + _size.height().map(Objects::toString).orElse("?") + ", " +
+                    "opacity="           + _opacity                                                + ", " +
+                    "padding="           + _padding                                                + ", " +
+                    "offset="            + _offset                                                 + ", " +
+                    "clipArea="          + _clipArea                                               +
                 "]";
     }
 
