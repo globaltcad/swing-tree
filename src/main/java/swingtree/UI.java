@@ -5,12 +5,11 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Action;
 import sprouts.Result;
 import sprouts.Val;
-import swingtree.api.Configurator;
-import swingtree.api.Layout;
-import swingtree.api.NoiseFunction;
-import swingtree.api.Styler;
+import swingtree.api.*;
+import swingtree.api.Painter;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.components.JBox;
@@ -652,6 +651,12 @@ public final class UI extends UIFactoryMethods
      *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
      *      </li>
      *  </ul>
+     * @see TextConf#clipTo(ComponentArea)
+     * @see ImageConf#clipTo(ComponentArea)
+     * @see ComponentStyleDelegate#painter(Layer, ComponentArea, Painter)
+     * @see UIForAnySwing#onMouseEnter(ComponentArea, Action)
+     * @see UIForAnySwing#onMouseExit(ComponentArea, Action)
+     * @see ComponentBoundary
      */
     @Immutable
     public enum ComponentArea implements UIEnum<ComponentArea>
@@ -660,7 +665,12 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     * Enum representing the different boundaries of a UI component.
+     * An enum representing the different boundaries of a UI component.
+     * These boundaries can be thought of as rectangular bounding boxes that capture
+     * <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
+     * box model (margin|border|padding) of a styled component.</b><br>
+     * These bounding rectangles consisting of infinitely thin boundary lines,
+     * whereas the {@link UI.ComponentArea} refer to the areas bordering between these lines.
      * Here's a brief explanation of each enum entry:
      * <ul>
      *     <li>{@link ComponentBoundary#OUTER_TO_EXTERIOR} -
@@ -680,6 +690,10 @@ public final class UI extends UIFactoryMethods
      *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
      *     </li>
      * </ul>
+     * @see TextConf#placementBoundary(ComponentBoundary)
+     * @see ImageConf#placementBoundary(ComponentBoundary)
+     * @see GradientConf#boundary(ComponentBoundary)
+     * @see ComponentArea
      */
     @Immutable
     public enum ComponentBoundary implements UIEnum<ComponentBoundary> {
@@ -712,6 +726,7 @@ public final class UI extends UIFactoryMethods
      *  This is especially important for components that display text.
      *  <br>
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(swingtree.UI.ComponentOrientation)}.
+     * @see Container#applyComponentOrientation(java.awt.ComponentOrientation)
      */
     @Immutable
     public enum ComponentOrientation implements UIEnum<ComponentOrientation>

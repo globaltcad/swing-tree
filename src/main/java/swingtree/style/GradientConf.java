@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -413,14 +412,19 @@ public final class GradientConf implements Simplifiable<GradientConf>
 
     /**
      *  Define the boundary at which the gradient should start in terms of its base position.
+     *  Generally speaking, the component different boundaries refer to the rectangular bounding boxes that capture
+     *  <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
+     *  box model (margin|border|padding) of a styled component.</b><br>
      *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
-     *  then the gradient position will be determined by the margin of the component. <br>
+     *  then the gradient position will be determined by the margin of the component,
+     *  whereas {@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} for example, includes margin,
+     *  border widths, as well as padding. <br>
      *  Here a complete list of the available boundaries:
      * <ul>
      *     <li>{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
      *     The outermost boundary of the entire component, including any margin that might be applied.
      *     Using this boundary will cause the gradient to be positioned somewhere at
-     *     the outer most edge of the component.
+     *     the outermost edge of the component.
      *     </li>
      *     <li>{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
      *     The boundary located after the margin but before the border.
@@ -432,14 +436,14 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *     The boundary located after the border but before the padding.
      *     It represents the edge of the component's interior.
      *     Using this boundary will cause the gradient to be positioned somewhere at
-     *     the outer most edge of the component's interior, which is between the border and the padding area.
+     *     the outermost edge of the component's interior, which is between the border and the padding area.
      *     </li>
      *     <li>{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
      *     The boundary located after the padding.
      *     It represents the innermost boundary of the component, where the actual content of the component begins,
      *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
      *     Using this boundary will cause the gradient to be positioned somewhere after the padding area
-     *     and before the content area, which is where all of the child components are located.
+     *     and before the content area, which is where all the child components are located.
      *     </li>
      * </ul>
      *  <p>

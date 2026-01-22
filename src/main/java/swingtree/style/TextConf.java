@@ -230,10 +230,11 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     /**
-     * Returns a new {@link TextConf} object with the given placement boundary
-     * defined by a {@link UI.ComponentBoundary} enum.
-     * The placement boundary defines the boundary of the component onto which
-     * the text placement should be bound to.
+     * Allows you to narrow down the rectangular placement area of the text in the box
+     * model of the underlying component using a {@link UI.ComponentBoundary} enum constant.
+     * The component boundaries can be thought of as rectangular bounding boxes that capture
+     * the transitional edges between different {@link UI.ComponentArea}s.<br>
+     * This property ensures that the text is placed inside the transitional bounding box.
      * <p>
      * The following placement boundaries are available:
      * <ul>

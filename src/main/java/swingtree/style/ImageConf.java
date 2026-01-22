@@ -462,10 +462,12 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
-     * Returns a new {@link ImageConf} object with the given placement boundary
-     * defined by a {@link UI.ComponentBoundary} enum.
-     * The placement boundary defines the boundary of the component onto which
-     * the image placement should be bound to.
+     * Allows you to narrow down the bounding box area of the image in the box
+     * model of the underlying component using a {@link UI.ComponentBoundary} enum constant.
+     * The component boundaries can be thought of as rectangular bounding boxes that capture
+     * the transitional edges between different {@link UI.ComponentArea}s.<br>
+     * This property ensures that the images is always placed inside and relative
+     * to one of the well-defined {@link UI.ComponentBoundary} (box model bounds).
      * <p>
      * The following placement boundaries are available:
      * <ul>
