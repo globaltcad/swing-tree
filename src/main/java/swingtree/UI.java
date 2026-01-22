@@ -65,6 +65,8 @@ public final class UI extends UIFactoryMethods
      *  An enum set of all the available swing cursors which
      *  map to the cursor type id.
      *  This exists simply because swing was created before enums were added to Java.
+     * @see UIForAnySwing#withCursor(Cursor)
+     * @see UIForAnySwing#withCursor(Val) 
      */
     @Immutable
     public enum Cursor implements UIEnum<Cursor>
@@ -147,6 +149,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Overflow policy of UI components.
+     * @see UIForTabbedPane#withOverflowPolicy(OverflowPolicy)
+     * @see UIForTabbedPane#withOverflowPolicy(Val) 
      */
     @Immutable
     public enum OverflowPolicy implements UIEnum<OverflowPolicy>
@@ -164,6 +168,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Vertical or horizontal alignment.
+     * @see UI#progressBar(Align, double)
+     * @see UI#slider(Align)
      */
     @Immutable
     public enum Align implements UIEnum<Align>
@@ -261,6 +267,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  The logical combination of a vertical and horizontal alignment.
+     * @see UIForLabel#withTextPosition(Alignment) 
+     * @see ComponentStyleDelegate#fontAlignment(Alignment) 
      */
     @Immutable
     public enum Alignment implements UIEnum<Alignment>
@@ -377,6 +385,10 @@ public final class UI extends UIFactoryMethods
     /**
      *  Instances of this enum are used to configure onto which
      *  layer a particular style configuration should be applied.
+     * @see ComponentStyleDelegate#painter(Layer, Painter) 
+     * @see ComponentStyleDelegate#image(Layer, Configurator) 
+     * @see ComponentStyleDelegate#text(Layer, String, Configurator) 
+     * @see ComponentStyleDelegate#gradient(Layer, Configurator) 
      */
     @Immutable
     public enum Layer implements UIEnum<Layer>
@@ -522,6 +534,7 @@ public final class UI extends UIFactoryMethods
      *          and ending with the last color.
      *      </li>
      *  </ul>
+     * @see ComponentStyleDelegate#gradient(Configurator)
      */
     @Immutable
     public enum Cycle implements UIEnum<Cycle>
@@ -550,6 +563,9 @@ public final class UI extends UIFactoryMethods
      *  Use this to specify the placement of an image as part of the {@link ImageConf} through
      *  the {@link ImageConf#placement(swingtree.UI.Placement)} method exposed by the
      *  style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     * @see ImageConf#placement(Placement)
+     * @see TextConf#placement(Placement)
+     * @see SvgIcon#withPreferredPlacement(Placement) 
      */
     @Immutable
     public enum Placement implements UIEnum<Placement>
@@ -814,7 +830,10 @@ public final class UI extends UIFactoryMethods
     /**
      *  Use this to specify the font style of a component.
      *  <br>
-     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)}.
+     *  @see UIForAnySwing#withStyle(Styler)
+     *  @see ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)
+     *  @see FontConf#style(FontStyle)
+     *  @see Font#of(String, FontStyle, int) 
      */
     @Immutable
     public enum FontStyle implements UIEnum<FontStyle>
@@ -837,6 +856,8 @@ public final class UI extends UIFactoryMethods
      * the type of action(s) to be performed by a Drag and Drop operation.
      * These constants are a direct mapping to the constants defined in the {@link TransferHandler} class
      * as well as the {@link java.awt.dnd.DnDConstants} class.
+     * 
+     * @see DragAwayComponentConf#dragAction(DragAction) 
      */
     @Immutable
     public enum DragAction implements UIEnum<DragAction>
