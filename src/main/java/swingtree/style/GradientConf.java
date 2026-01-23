@@ -412,7 +412,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
 
     /**
      *  Define the boundary at which the gradient should start in terms of its base position.
-     *  Generally speaking, the component different boundaries refer to the rectangular bounding boxes that capture
+     *  Generally speaking, the different component boundaries refer to the rectangular bounding boxes that capture
      *  <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
      *  box model (margin|border|padding) of a styled component.</b><br>
      *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}

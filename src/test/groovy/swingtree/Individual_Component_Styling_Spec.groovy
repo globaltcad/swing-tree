@@ -4194,7 +4194,7 @@ class Individual_Component_Styling_Spec extends Specification
             var ui =
                         UI.box().withStyle( it -> it
                             .margin(3)
-                            .padding(5) // ignored by SVGs
+                            .padding(5) // with the default image placement boundary this padding does not affect image placement
                             .border(2, "dark cyan")
                             .size(64, 32)
                             .image(
@@ -4218,7 +4218,7 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'We re-create the UI:'
             ui = UI.box().withStyle( it -> it
                      .margin(3)
-                     .padding(5) // ignored by SVGs
+                     .padding(5) // with the default image placement boundary this padding does not affect image placement
                      .border(2, "dark cyan")
                      .size(64, 32)
                      .image(
