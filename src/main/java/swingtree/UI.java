@@ -1188,7 +1188,7 @@ public final class UI extends UIFactoryMethods
 
     /**
      * A convenience method which ensures that a supplied {@link Runnable}
-     * is executed on the GUI thead (AWT event dispatch thread)
+     * is executed on the GUI thread (AWT event dispatch thread)
      * using the following condition:<br>
      * <pre>{@code
      *      if ( !UI.thisIsUIThread() )
