@@ -1438,11 +1438,11 @@ public final class UI extends UIFactoryMethods
      * @param <T> The return type of the result value produced by the supplier.
      * @return The result provided by the supplier.
      */
-    public static <T> T runAndGet( Supplier<T> supplier ) {
+    public static <T extends @Nullable Object> T runAndGet( Supplier<T> supplier ) {
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
         AtomicReference<@Nullable T> ref = new AtomicReference<>();
         runNow( () -> ref.set(supplier.get()) );
-        return Objects.requireNonNull(ref.get());
+        return ref.get();
     }
 
     /**
