@@ -299,6 +299,7 @@ class Styles_Spec extends Specification
                                                         "primer=?, " +
                                                         "image=${style.images(UI.Layer.FOREGROUND).get(0).image().get()}, " +
                                                         "placement=UNDEFINED, " +
+                                                        "placementBoundary=BORDER_TO_INTERIOR, " +
                                                         "repeat=true, " +
                                                         "fitComponent=WIDTH, " +
                                                         "width=?, height=?, " +

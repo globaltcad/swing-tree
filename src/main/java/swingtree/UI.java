@@ -5,12 +5,11 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Action;
 import sprouts.Result;
 import sprouts.Val;
-import swingtree.api.Configurator;
-import swingtree.api.Layout;
-import swingtree.api.NoiseFunction;
-import swingtree.api.Styler;
+import swingtree.api.*;
+import swingtree.api.Painter;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.components.JBox;
@@ -36,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -65,6 +65,8 @@ public final class UI extends UIFactoryMethods
      *  An enum set of all the available swing cursors which
      *  map to the cursor type id.
      *  This exists simply because swing was created before enums were added to Java.
+     * @see UIForAnySwing#withCursor(Cursor)
+     * @see UIForAnySwing#withCursor(Val) 
      */
     @Immutable
     public enum Cursor implements UIEnum<Cursor>
@@ -147,6 +149,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Overflow policy of UI components.
+     * @see UIForTabbedPane#withOverflowPolicy(OverflowPolicy)
+     * @see UIForTabbedPane#withOverflowPolicy(Val) 
      */
     @Immutable
     public enum OverflowPolicy implements UIEnum<OverflowPolicy>
@@ -164,6 +168,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Vertical or horizontal alignment.
+     * @see UI#progressBar(Align, double)
+     * @see UI#slider(Align)
      */
     @Immutable
     public enum Align implements UIEnum<Align>
@@ -261,6 +267,8 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  The logical combination of a vertical and horizontal alignment.
+     * @see UIForLabel#withTextPosition(Alignment) 
+     * @see ComponentStyleDelegate#fontAlignment(Alignment) 
      */
     @Immutable
     public enum Alignment implements UIEnum<Alignment>
@@ -377,6 +385,10 @@ public final class UI extends UIFactoryMethods
     /**
      *  Instances of this enum are used to configure onto which
      *  layer a particular style configuration should be applied.
+     * @see ComponentStyleDelegate#painter(Layer, Painter) 
+     * @see ComponentStyleDelegate#image(Layer, Configurator) 
+     * @see ComponentStyleDelegate#text(Layer, String, Configurator) 
+     * @see ComponentStyleDelegate#gradient(Layer, Configurator) 
      */
     @Immutable
     public enum Layer implements UIEnum<Layer>
@@ -522,6 +534,7 @@ public final class UI extends UIFactoryMethods
      *          and ending with the last color.
      *      </li>
      *  </ul>
+     * @see ComponentStyleDelegate#gradient(Configurator)
      */
     @Immutable
     public enum Cycle implements UIEnum<Cycle>
@@ -550,6 +563,9 @@ public final class UI extends UIFactoryMethods
      *  Use this to specify the placement of an image as part of the {@link ImageConf} through
      *  the {@link ImageConf#placement(swingtree.UI.Placement)} method exposed by the
      *  style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     * @see ImageConf#placement(Placement)
+     * @see TextConf#placement(Placement)
+     * @see SvgIcon#withPreferredPlacement(Placement) 
      */
     @Immutable
     public enum Placement implements UIEnum<Placement>
@@ -651,6 +667,12 @@ public final class UI extends UIFactoryMethods
      *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
      *      </li>
      *  </ul>
+     * @see TextConf#clipTo(ComponentArea)
+     * @see ImageConf#clipTo(ComponentArea)
+     * @see ComponentStyleDelegate#painter(Layer, ComponentArea, Painter)
+     * @see UIForAnySwing#onMouseEnter(ComponentArea, Action)
+     * @see UIForAnySwing#onMouseExit(ComponentArea, Action)
+     * @see ComponentBoundary
      */
     @Immutable
     public enum ComponentArea implements UIEnum<ComponentArea>
@@ -659,7 +681,12 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     * Enum representing the different boundaries of a UI component.
+     * An enum representing the different boundaries of a UI component.
+     * These boundaries can be thought of as rectangular bounding boxes that capture
+     * <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
+     * box model (margin|border|padding) of a styled component.</b><br>
+     * These bounding rectangles consisting of infinitely thin boundary lines,
+     * whereas the {@link UI.ComponentArea} refer to the areas bordering between these lines.
      * Here's a brief explanation of each enum entry:
      * <ul>
      *     <li>{@link ComponentBoundary#OUTER_TO_EXTERIOR} -
@@ -679,6 +706,10 @@ public final class UI extends UIFactoryMethods
      *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
      *     </li>
      * </ul>
+     * @see TextConf#placementBoundary(ComponentBoundary)
+     * @see ImageConf#placementBoundary(ComponentBoundary)
+     * @see GradientConf#boundary(ComponentBoundary)
+     * @see ComponentArea
      */
     @Immutable
     public enum ComponentBoundary implements UIEnum<ComponentBoundary> {
@@ -711,6 +742,7 @@ public final class UI extends UIFactoryMethods
      *  This is especially important for components that display text.
      *  <br>
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(swingtree.UI.ComponentOrientation)}.
+     * @see Container#applyComponentOrientation(java.awt.ComponentOrientation)
      */
     @Immutable
     public enum ComponentOrientation implements UIEnum<ComponentOrientation>
@@ -798,7 +830,10 @@ public final class UI extends UIFactoryMethods
     /**
      *  Use this to specify the font style of a component.
      *  <br>
-     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)}.
+     *  @see UIForAnySwing#withStyle(Styler)
+     *  @see ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)
+     *  @see FontConf#style(FontStyle)
+     *  @see Font#of(String, FontStyle, int) 
      */
     @Immutable
     public enum FontStyle implements UIEnum<FontStyle>
@@ -821,6 +856,8 @@ public final class UI extends UIFactoryMethods
      * the type of action(s) to be performed by a Drag and Drop operation.
      * These constants are a direct mapping to the constants defined in the {@link TransferHandler} class
      * as well as the {@link java.awt.dnd.DnDConstants} class.
+     * 
+     * @see DragAwayComponentConf#dragAction(DragAction) 
      */
     @Immutable
     public enum DragAction implements UIEnum<DragAction>
@@ -1150,55 +1187,74 @@ public final class UI extends UIFactoryMethods
     private UI(){ super(); } // This is a static API
 
     /**
-     * A convenience method for
+     * A convenience method which ensures that a supplied {@link Runnable}
+     * is executed on the GUI thread (AWT event dispatch thread)
+     * using the following condition:<br>
      * <pre>{@code
      *      if ( !UI.thisIsUIThread() )
      *          SwingUtilities.invokeLater(runnable);
      *      else
      *          runnable.run();
-     * }</pre>,
-     * which causes <i>runnable.run()</i> to be executed asynchronously on the
-     * AWT event dispatching thread if this current thread is not already
-     * the AWT thread.
+     * }</pre>
+     * The <i>runnable.run()</i> will be executed immediately, if the invoker already
+     * is the GUI thread. Otherwise, it will be queued for execution on the GUI thread.
      * The 'invokeLater' execution will happen after all pending AWT events have been processed.
      * This method should be used when an application thread needs to update the GUI.
+     * Any exceptions thrown in the supplied runnable, <b>which are not considered fatal</b>,
+     * will be caught and logged. <b>Fatal exceptions like thead interrupts, are re-thrown!</b>
      *
-     * @param runnable the instance of {@code Runnable}
+     * @param runnable the instance of {@code Runnable} which needs to be run by the GUI thread.
      * @see #runNow
+     * @see #runLater(int, Runnable)
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @see #thisIsUIThread()
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void run( Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        if ( !UI.thisIsUIThread() )
-            SwingUtilities.invokeLater(runnable);
-        else
-            runnable.run();
+        Objects.requireNonNull(runnable);
+        Result.ofTry(()->{
+            if ( !UI.thisIsUIThread() )
+                SwingUtilities.invokeLater(runnable);
+            else
+                runnable.run();
+        })
+        .logProblemsAsError();
     }
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
-     * which causes a provided {@link Runnable} to be executed asynchronously on the
-     * AWT event dispatching thread.  This will happen after all
-     * pending AWT events have been processed.  This method should
-     * be used when an application thread needs to update the GUI.
+     * which causes the supplied {@link Runnable} to be executed asynchronously on the
+     * AWT event dispatching thread at a later point in time. <br>
+     * This will happen after all pending AWT events have been processed.
+     * This method should be used when an application thread needs to update the GUI.
      * In the following example the <code>runLater</code> call queues
-     * the <code>Runnable</code> lambda
-     * on the event dispatching thread and
-     * then prints a message.
+     * the <code>Runnable</code> lambda on the event dispatching thread and
+     * then prints a message:
      * <pre>{@code
-     *  UI.run( () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     *  System.out.println("This might well be displayed before the other message.");
+     *  UI.run( ()-> System.out.println(
+     *          "Hello World on " + Thread.currentThread()
+     *      ));
+     *
+     *  System.out.println(
+     *      "This will probably be displayed first!"
+     *  );
      * }</pre>
-     * If runLater is called from the event dispatching thread --
+     * If {@code runLater} is called from the event dispatching thread --
      * for example, from a JButton's ActionListener -- the <code>Runnable</code> will
      * still be deferred until all pending events have been processed.
      * Note that if the <code>Runnable</code> throws an uncaught exception
      * the event dispatching thread will unwind (not the current thread).
      *
-     * @param runnable the instance of {@code Runnable}
+     * @param runnable the instance of {@code Runnable} to be executed later by the GUI thread
+     * @see #run
      * @see #runNow
+     * @see #runLater(int, Runnable)
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @see #thisIsUIThread()
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void runLater( Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        Objects.requireNonNull(runnable, "runnable");
         SwingUtilities.invokeLater(runnable);
     }
 
@@ -1207,27 +1263,44 @@ public final class UI extends UIFactoryMethods
      * which causes {@link Runnable} to be executed asynchronously on the
      * AWT event dispatching thread after the specified delay.
      * This method should be used when an application thread needs to update the GUI
-     * after a particular delay.
+     * after a particular delay.<br>
+     * If the supplied delay is smaller or equal to {@code 0}, then the runnable
+     * will be passed to {@link #run(Runnable)} to ensure the task is executed on the
+     * GUI thread as fast as possible.<br>
+     * <br>
      * In the following example the <code>invokeLater</code> call queues
      * the <code>Runnable</code> lambda containing a print statement
      * on the event dispatching thread and
      * then prints a message.
      * <pre>{@code
-     *  UI.runLater( 1000, () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     *  System.out.println("This might well be displayed before the other message.");
+     *  UI.runLater( 1000, ()->System.out.println(
+     *          "Hello World on " + Thread.currentThread())
+     *      );
+     *
+     *  System.out.println(
+     *      "This will probably be displayed first!"
+     *  );
      * }</pre>
-     * If runLater is called from the event dispatching thread --
+     * If {@code runLater} is called from the event dispatching thread --
      * for example, from a JButton's ActionListener -- the <code>Runnable</code> will
      * still be deferred until the specified delay has passed.
      * Note that if the <code>Runnable</code> throws an uncaught exception
      * the event dispatching thread will unwind (not the current thread).
      *
      * @param delay The delay in milliseconds.
-     * @param runnable the instance of {@code Runnable}
+     * @param runnable the instance of {@code Runnable} to be executed by the GUI thread after the desired delay.
+     * @see #run
      * @see #runNow
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @see #thisIsUIThread()
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void runLater( int delay, Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        Objects.requireNonNull(runnable, "runnable");
+        if ( delay <= 0 ) {
+            run(runnable);
+            return;
+        }
         Timer timer = new Timer( delay, e -> { runnable.run(); } );
         timer.setRepeats(false); // Execute only once
         timer.setInitialDelay(delay);
@@ -1236,21 +1309,27 @@ public final class UI extends UIFactoryMethods
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
-     * which causes {@link Runnable} to be executed asynchronously on the
+     * which causes the supplied {@link Runnable} to be executed asynchronously on the
      * AWT event dispatching thread after the specified delay
-     * has passed in the given time unit.
+     * has passed in the given time unit.<br>
+     * If the supplied delay is smaller or equal to {@code 0}, then the runnable
+     * will be passed to {@link #run(Runnable)} to ensure the task is executed on the
+     * GUI thread as fast as possible.<br>
+     * <br>
      * This method should be used when an application thread needs to update the GUI
      * after a particular delay.
      * In the following example the <code>invokeLater</code> call queues
      * the <code>Runnable</code> lambda containing a print statement
-     * on the event dispatching thread and
-     * then prints a message.
+     * on the event dispatching thread and then prints a message.
      * <pre>{@code
-     *  UI.runLater( 1000, TimeUnit.MILLISECONDS, () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     *  System.out.println("This might well be displayed before the other message.");
+     *  UI.runLater( 1000, TimeUnit.MILLISECONDS, ()->
+     *          System.out.println("Hello World on " + Thread.currentThread()
+     *      ));
+     *
+     *  System.out.println("This will certainly be displayed first!");
      * }</pre>
-     * If runLater is called from the event dispatching thread --
-     * for example, from a JButton's ActionListener -- the <code>Runnable</code> will
+     * If {@code runLater} is called from the event dispatching thread --
+     * for example, from a {@code JButton}'s ActionListener -- the <code>Runnable</code> will
      * still be deferred until the specified delay has passed.
      * Note that if the <code>Runnable</code> throws an uncaught exception
      * the event dispatching thread will unwind (not the current thread).
@@ -1258,11 +1337,19 @@ public final class UI extends UIFactoryMethods
      * @param delay The delay in the given time unit.
      * @param unit The time unit of the delay parameter.
      * @param runnable the instance of {@code Runnable}
+     * @see #run
      * @see #runNow
+     * @see #runLater(int, Runnable)
+     * @see #thisIsUIThread()
+     * @throws NullPointerException if either the supplied {@link TimeUnit} or {@link Runnable} is {@code null}.
      */
-    public static void runLater( double delay, TimeUnit unit,  Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        NullUtil.nullArgCheck(unit, "unit", TimeUnit.class);
+    public static void runLater( double delay, TimeUnit unit, Runnable runnable ) {
+        Objects.requireNonNull(runnable, "runnable");
+        Objects.requireNonNull(unit, "unit");
+        if ( delay <= 0 ) {
+            run(runnable);
+            return;
+        }
         long millis = (long) (delay * unit.toMillis(1));
         long remainderMillis = (long) (delay * unit.toMillis(1) - millis);
         long convertedDelay = TimeUnit.MILLISECONDS.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);
@@ -1311,21 +1398,25 @@ public final class UI extends UIFactoryMethods
      * Note that contrary to the {@link SwingUtilities#invokeAndWait(Runnable)} method,
      * this method does not throw an exception if it is called from the
      * event dispatching thread. Instead, it just executes the runnable
-     * immediately.
+     * immediately. Any exceptions thrown in the supplied runnable, <b>which
+     * ae not considered fatal</b>, will be caught and logged. <b>Fatal exceptions
+     * like thead interrupts, are re-thrown!</b>
      *
      * @param runnable the instance of {@code Runnable}
      * @see #run
+     * @see #runLater(int, Runnable)
+     * @see #runLater(double, TimeUnit, Runnable)
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void runNow( Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        try {
+        Objects.requireNonNull(runnable, "runnable");
+        Result.ofTry(()->{
             if ( !UI.thisIsUIThread() )
                 SwingUtilities.invokeAndWait(runnable);
             else
                 runnable.run();
-        } catch ( Exception e ) {
-            throw new RuntimeException(e);
-        }
+        })
+        .logProblemsAsError();
     }
 
     /**
@@ -1359,12 +1450,13 @@ public final class UI extends UIFactoryMethods
      * @param supplier The supplier which should be executed on the UI thread.
      * @param <T> The return type of the result value produced by the supplier.
      * @return The result provided by the supplier.
+     * @throws NullPointerException if the supplied {@link Supplier} is null.
      */
-    public static <T> T runAndGet( Supplier<T> supplier ) {
-        NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
-        T[] ref = (T[]) new Object[1];
-        runNow( () -> ref[0] = supplier.get() );
-        return ref[0];
+    public static <T extends @Nullable Object> T runAndGet( Supplier<T> supplier ) {
+        Objects.requireNonNull(supplier, "callable");
+        AtomicReference<@Nullable T> ref = new AtomicReference<>();
+        runNow( () -> ref.set(supplier.get()) );
+        return NullUtil.fakeNonNull(ref.get());
     }
 
     /**

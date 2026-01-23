@@ -1184,23 +1184,16 @@ public final class SvgIcon extends ImageIcon
             viewBox = new ViewBox( x, y, newWidth, newHeight );
         }
 
-        // Let's check if the view box exists:
-        if ( viewBox.width <= 0 || viewBox.height <= 0 )
-            return;
-
-        // Also let's check if the view box has valid values:
-        if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
-            return;
-
-        // We correct if the component area is smaller than the view box:
-        width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
-        width += (int) Math.max(0, x - viewBox.x );
-        height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
-        height += (int) Math.max(0, y - viewBox.y );
-        x = (int) Math.min(x, viewBox.x);
-        y = (int) Math.min(y, viewBox.y);
-
         {
+            // Finally, the padding:
+            if ( !Outline.none().equals(padding) ) {
+                viewBox = new ViewBox(
+                        viewBox.x + padding.left().orElse(0f),
+                        viewBox.y + padding.top().orElse(0f),
+                        viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)),
+                        viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
+                );
+            }
             viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
             FloatSize svgSize = _core.svgDocument.viewBox().size();
             float svgRefWidth = ((svgSize.width) / (svgSize.height));
@@ -1256,18 +1249,15 @@ public final class SvgIcon extends ImageIcon
                 log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
         }
 
-        // Finally, the padding:
-        if ( !Outline.none().equals(padding) ) {
-            viewBox = new ViewBox(
-                    viewBox.x + padding.left().orElse(0f),
-                    viewBox.y + padding.top().orElse(0f),
-                    viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)),
-                    viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
-            );
-        }
+        // Let's check if the view box exists:
+        if ( viewBox.width <= 0 || viewBox.height <= 0 )
+            return;
+
+        // Also let's check if the view box has valid values:
+        if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
+            return;
 
         // Now onto the actual rendering:
-
         boolean doAntiAliasing  = StyleEngine.IS_ANTIALIASING_ENABLED();
         boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
         if ( doAntiAliasing && !wasAntiAliasing )

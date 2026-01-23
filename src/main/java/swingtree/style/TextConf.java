@@ -61,11 +61,12 @@ import java.util.Objects;
  *          The default clip area is {@link UI.ComponentArea#INTERIOR}.
  *      </li>
  *      <li><b>Placement Boundary</b>
- *          The placement boundary is an enum which defines the boundary of the component
- *          onto which the text placement should be bound to.
+ *          The placement boundary refers to one of many rectangular bounding boxes that capture
+ *          <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
+ *          box model (margin|border|padding) of a styled component.</b><br>
  *          You can configure it through {@link TextConf#placementBoundary(UI.ComponentBoundary)}.<br>
  *          The default placement boundary is {@link UI.ComponentBoundary#INTERIOR_TO_CONTENT},
- *          which honours the padding of the component.
+ *          which honors the padding of the component.
  *          If you want to ignore the padding and place the text directly after the border
  *          of the component, you can set it to {@link UI.ComponentBoundary#BORDER_TO_INTERIOR}.
  *      </li>
@@ -230,10 +231,11 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     /**
-     * Returns a new {@link TextConf} object with the given placement boundary
-     * defined by a {@link UI.ComponentBoundary} enum.
-     * The placement boundary defines the boundary of the component onto which
-     * the text placement should be bound to.
+     * Allows you to narrow down the rectangular placement area of the text in the box
+     * model of the underlying component using a {@link UI.ComponentBoundary} enum constant.
+     * The component boundaries can be thought of as rectangular bounding boxes that capture
+     * the transitional edges between different {@link UI.ComponentArea}s.<br>
+     * This property ensures that the text is placed inside the transitional bounding box.
      * <p>
      * The following placement boundaries are available:
      * <ul>

@@ -391,6 +391,8 @@ class SvgIcon_Spec extends Specification
             This will return a buffered image which has the same DPI dimensions as the `SvgIcon`
             reported by `getIconWidth()` and `getIconHeight()`.
             
+            ${Utility.linkSnapshot("svgAsPng/${imgToMatch}.png")}
+            
             Note that if the SVG icon has a distorted aspect ratio, which happens when the
             view box aspect ratio does not match the width and height aspect ratio, then
             the resulting image will be rendered with the expected distortion, exactly
