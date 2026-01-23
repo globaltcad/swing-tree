@@ -1442,7 +1442,7 @@ public final class UI extends UIFactoryMethods
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
         AtomicReference<@Nullable T> ref = new AtomicReference<>();
         runNow( () -> ref.set(supplier.get()) );
-        return ref.get();
+        return NullUtil.fakeNonNull(ref.get());
     }
 
     /**
