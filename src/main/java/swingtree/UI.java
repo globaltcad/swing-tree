@@ -1200,19 +1200,25 @@ public final class UI extends UIFactoryMethods
      * is the GUI thread. Otherwise, it will be queued for execution on the GUI thread.
      * The 'invokeLater' execution will happen after all pending AWT events have been processed.
      * This method should be used when an application thread needs to update the GUI.
+     * Any exceptions thrown in the supplied runnable, <b>which are not considered fatal</b>,
+     * will be caught and logged. <b>Fatal exceptions like thead interrupts, are re-thrown!</b>
      *
      * @param runnable the instance of {@code Runnable} which needs to be run by the GUI thread.
      * @see #runNow
      * @see #runLater(int, Runnable)
      * @see #runLater(double, TimeUnit, Runnable)
      * @see #thisIsUIThread()
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void run( Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        if ( !UI.thisIsUIThread() )
-            SwingUtilities.invokeLater(runnable);
-        else
-            runnable.run();
+        Objects.requireNonNull(runnable);
+        Result.ofTry(()->{
+            if ( !UI.thisIsUIThread() )
+                SwingUtilities.invokeLater(runnable);
+            else
+                runnable.run();
+        })
+        .logProblemsAsError();
     }
 
     /**
@@ -1245,9 +1251,10 @@ public final class UI extends UIFactoryMethods
      * @see #runLater(int, Runnable)
      * @see #runLater(double, TimeUnit, Runnable)
      * @see #thisIsUIThread()
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void runLater( Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        Objects.requireNonNull(runnable, "runnable");
         SwingUtilities.invokeLater(runnable);
     }
 
@@ -1286,9 +1293,10 @@ public final class UI extends UIFactoryMethods
      * @see #runNow
      * @see #runLater(double, TimeUnit, Runnable)
      * @see #thisIsUIThread()
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void runLater( int delay, Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        Objects.requireNonNull(runnable, "runnable");
         if ( delay <= 0 ) {
             run(runnable);
             return;
@@ -1333,10 +1341,11 @@ public final class UI extends UIFactoryMethods
      * @see #runNow
      * @see #runLater(int, Runnable)
      * @see #thisIsUIThread()
+     * @throws NullPointerException if either the supplied {@link TimeUnit} or {@link Runnable} is {@code null}.
      */
     public static void runLater( double delay, TimeUnit unit, Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        NullUtil.nullArgCheck(unit, "unit", TimeUnit.class);
+        Objects.requireNonNull(runnable, "runnable");
+        Objects.requireNonNull(unit, "unit");
         if ( delay <= 0 ) {
             run(runnable);
             return;
@@ -1389,21 +1398,25 @@ public final class UI extends UIFactoryMethods
      * Note that contrary to the {@link SwingUtilities#invokeAndWait(Runnable)} method,
      * this method does not throw an exception if it is called from the
      * event dispatching thread. Instead, it just executes the runnable
-     * immediately.
+     * immediately. Any exceptions thrown in the supplied runnable, <b>which
+     * ae not considered fatal</b>, will be caught and logged. <b>Fatal exceptions
+     * like thead interrupts, are re-thrown!</b>
      *
      * @param runnable the instance of {@code Runnable}
      * @see #run
      * @see #runLater(int, Runnable)
      * @see #runLater(double, TimeUnit, Runnable)
+     * @throws NullPointerException if the supplied {@link Runnable} is null.
      */
     public static void runNow( Runnable runnable ) {
-        NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        Objects.requireNonNull(runnable, "runnable");
         Result.ofTry(()->{
             if ( !UI.thisIsUIThread() )
                 SwingUtilities.invokeAndWait(runnable);
             else
                 runnable.run();
-        });
+        })
+        .logProblemsAsError();
     }
 
     /**
@@ -1437,9 +1450,10 @@ public final class UI extends UIFactoryMethods
      * @param supplier The supplier which should be executed on the UI thread.
      * @param <T> The return type of the result value produced by the supplier.
      * @return The result provided by the supplier.
+     * @throws NullPointerException if the supplied {@link Supplier} is null.
      */
     public static <T extends @Nullable Object> T runAndGet( Supplier<T> supplier ) {
-        NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
+        Objects.requireNonNull(supplier, "callable");
         AtomicReference<@Nullable T> ref = new AtomicReference<>();
         runNow( () -> ref.set(supplier.get()) );
         return NullUtil.fakeNonNull(ref.get());
