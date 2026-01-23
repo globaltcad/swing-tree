@@ -12,10 +12,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  This class represents the style of an image which can be drawn onto the inner
- *  area of a component.
- *  <b>Note that the inner component area is the area enclosed by the border, which
- *  is itself not part of said area!</b>
+ *  This class represents the style of an image which can be drawn onto a component area,
+ *  typically the inner area of a component, which is the area enclosed by the component border.
  *  <p>
  *  The following properties with their respective purpose are available:
  *  <br>
@@ -58,6 +56,16 @@ import java.util.Optional;
  *              <li> {@link swingtree.UI.Placement#LEFT} </li>
  *              <li> {@link swingtree.UI.Placement#RIGHT} </li>
  *          </ul>
+ *      </li>
+ *      <li><b>Placement Boundary:</b>
+ *          The placement boundary refers to one of many rectangular bounding boxes that capture
+ *          <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
+ *          box model (margin|border|padding) of a styled component.</b><br>
+ *          You can configure it through {@link ImageConf#placementBoundary(UI.ComponentBoundary)}.<br>
+ *          The default placement boundary is {@link UI.ComponentBoundary#BORDER_TO_INTERIOR},
+ *          <b>which does not honor the padding of the component.</b>
+ *          If you want to include the padding int the placement policy of the image,
+ *          then you may want to use {@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} to achieve that.
  *      </li>
  *      <li><b>Repeat:</b>
  *          If this flag is set to {@code true}, then the image may be painted
