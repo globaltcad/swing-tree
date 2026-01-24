@@ -7,6 +7,7 @@ import sprouts.Observable;
 import swingtree.SwingTree;
 import swingtree.SwingTreeConfigurator;
 import swingtree.api.Styler;
+import swingtree.api.laf.SwingTreeStyledComponentUI;
 
 import javax.swing.JComponent;
 import java.util.*;
@@ -68,7 +69,10 @@ import java.util.function.Supplier;
  *  through {@link swingtree.SwingTree#initialiseUsing(SwingTreeConfigurator)}, or if
  *  you want to apply ste sheets to specific scopes through {@link swingtree.UI#use(StyleSheet, Supplier)}.
  *  The second argument is a supplier lambda for your SwingTree GUI declaration where each component
- *  will be bound to the {@link StyleSheet} you supplied!
+ *  will be bound to the {@link StyleSheet} you supplied!<br>
+ *
+ * @see swingtree.UIForAnySwing#withStyle(Styler) Styling for a specific component instance
+ * @see SwingTreeStyledComponentUI Using the SwingTree style engine in a custom look and feel!
  */
 public abstract class StyleSheet
 {
