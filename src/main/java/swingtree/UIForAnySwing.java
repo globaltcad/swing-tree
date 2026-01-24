@@ -2326,7 +2326,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *    Allows you to configure how the component wrapped by this builder
      *    looks and behaves, by passing a {@link Styler} lambda to this method
-     *    which receiving a {@link swingtree.style.ComponentStyleDelegate} and returns
+     *    which receives a {@link swingtree.style.ComponentStyleDelegate} and returns
      *    an updated version with the desired style rules applied.
      *    <p>
      *    Here a typical example of how to style a button
@@ -2353,7 +2353,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               by receiving a {@link swingtree.style.ComponentStyleDelegate} and returning
      *               an updated version with the desired style rules applied.
      *
-     * @return This very instance, which enables builder-style method chaining.
+     * @return This very instance, which allows for builder-style method chaining.
      */
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Styler.class);
@@ -2368,9 +2368,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    to make a border which can transition between 2 colors based on a boolean property:
      *    <pre>{@code
      *      UI.button("Click Me!")
-     *      .withTransitionalStyle(vm.isError(), LifeTime.of(1, TimeUnit.SECONDS), (state, it) -> it
+     *      .withTransitionalStyle(vm.isError(), LifeTime.of(1, TimeUnit.SECONDS), (status, it) -> it
      *          .backgroundColor(Color.CYAN)
-     *          .border(3, new Color((int)(state.progress() * 255), 0, 0))
+     *          .border(3, new Color((int)(status.progress() * 255), 0, 0))
      *      )
      *    }</pre>
      *
@@ -2422,9 +2422,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    defines a custom background and border color on a label:
      *    <pre>{@code
      *      UI.label("I have a highlight animation!")
-     *      .withTransitoryStyle(vm.highlightEvent().observable(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -> it
-     *          .backgroundColor(new Color(0, 0, 0, (int)(state.progress() * 255)))
-     *          .borderColor(new Color(255, 255, 255, (int)(state.progress() * 255)))
+     *      .withTransitoryStyle(vm.highlightEvent().observable(), LifeTime.of(0.5, TimeUnit.SECONDS), (status, it) -> it
+     *          .backgroundColor(new Color(0, 0, 0, (int)(status.progress() * 255)))
+     *          .borderColor(new Color(255, 255, 255, (int)(status.progress() * 255)))
      *      )
      *    }</pre>
      *
