@@ -28,7 +28,6 @@ final class DynamicLaF
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(DynamicLaF.class);
 
     private static final DynamicLaF _NONE = new DynamicLaF(null, null, false);
-    private static final UIUpdateListenerAndSwingTreeLookAndFeelRestorer _UI_UPDATE_LISTENER = new UIUpdateListenerAndSwingTreeLookAndFeelRestorer();
 
     static DynamicLaF none() { return _NONE; }
 
@@ -133,77 +132,91 @@ final class DynamicLaF
         // First we check if we already have a custom LaF installed:
         ComponentUI formerLaF = _formerLaF;
         ComponentUI styleLaF  = _styleLaF;
-
-        if ( !customLookAndFeelIsInstalled() || isUpdate ) {
-            if ( !isUpdate && !_UI_UPDATE_LISTENER.isRegisteredOnComponent) {
-                owner.addPropertyChangeListener("UI", _UI_UPDATE_LISTENER);
-                _UI_UPDATE_LISTENER.isRegisteredOnComponent = true;
+        Object o = owner.getClientProperty(UIUpdateListenerAndSwingTreeLookAndFeelRestorer.class);
+        try {
+            if ( o instanceof UIUpdateListenerAndSwingTreeLookAndFeelRestorer ) {
+                UIUpdateListenerAndSwingTreeLookAndFeelRestorer uiUpdateListener = (UIUpdateListenerAndSwingTreeLookAndFeelRestorer) o;
+                uiUpdateListener.beSilent = true;
             }
+            if ( !customLookAndFeelIsInstalled() || isUpdate ) {
+                if ( !isUpdate && o == null) {
+                    UIUpdateListenerAndSwingTreeLookAndFeelRestorer uiUpdateListener = new UIUpdateListenerAndSwingTreeLookAndFeelRestorer();
+                    owner.addPropertyChangeListener("UI", uiUpdateListener);
+                    owner.putClientProperty(UIUpdateListenerAndSwingTreeLookAndFeelRestorer.class, uiUpdateListener);
+                    uiUpdateListener.beSilent = true;
+                    o = uiUpdateListener;
+                }
 
-            if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.
-                JBox p = (JBox) owner;
-                formerLaF = p.getUI();
-                styleLaF = formerLaF;
-            } else if (owner instanceof JIcon) { // This is a SwingTree component, so it already has a custom LaF.
-                JIcon i = (JIcon) owner;
-                formerLaF = i.getUI();
-                styleLaF = formerLaF;
-            } else if (owner instanceof JPanel) {
-                JPanel p = (JPanel) owner;
-                formerLaF = p.getUI();
-                PanelStyler laf = PanelStyler.INSTANCE;
-                boolean success = _tryInstallingUISilently(p, laf);
-                if ( !success ) {
-                    p.setUI(laf);
-                    if (formerLaF != null) {
-                        PanelUI panelUI = (PanelUI) formerLaF;
-                        panelUI.installUI(p);
-                        // We make the former LaF believe that it is still in charge of the component.
+                if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.
+                    JBox p = (JBox) owner;
+                    formerLaF = p.getUI();
+                    styleLaF = formerLaF;
+                } else if (owner instanceof JIcon) { // This is a SwingTree component, so it already has a custom LaF.
+                    JIcon i = (JIcon) owner;
+                    formerLaF = i.getUI();
+                    styleLaF = formerLaF;
+                } else if (owner instanceof JPanel) {
+                    JPanel p = (JPanel) owner;
+                    formerLaF = p.getUI();
+                    PanelStyler laf = PanelStyler.INSTANCE;
+                    boolean success = _tryInstallingUISilently(p, laf);
+                    if ( !success ) {
+                        p.setUI(laf);
+                        if (formerLaF != null) {
+                            PanelUI panelUI = (PanelUI) formerLaF;
+                            panelUI.installUI(p);
+                            // We make the former LaF believe that it is still in charge of the component.
+                        }
                     }
-                }
-                styleLaF = laf;
-            } else if (owner instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton) owner;
-                formerLaF = b.getUI();
-                ButtonStyler laf = new ButtonStyler(b.getUI());
-                boolean success = _tryInstallingUISilently(b, laf);
-                if ( !success ) {
-                    b.setUI(laf);
-                    if ( formerLaF != null ) {
-                        ButtonUI buttonUI = (ButtonUI) formerLaF;
-                        buttonUI.installUI(b);
-                        // We make the former LaF believe that it is still in charge of the component.
+                    styleLaF = laf;
+                } else if (owner instanceof AbstractButton) {
+                    AbstractButton b = (AbstractButton) owner;
+                    formerLaF = b.getUI();
+                    ButtonStyler laf = new ButtonStyler(b.getUI());
+                    boolean success = _tryInstallingUISilently(b, laf);
+                    if ( !success ) {
+                        b.setUI(laf);
+                        if ( formerLaF != null ) {
+                            ButtonUI buttonUI = (ButtonUI) formerLaF;
+                            buttonUI.installUI(b);
+                            // We make the former LaF believe that it is still in charge of the component.
+                        }
                     }
-                }
-                styleLaF = laf;
-            } else if (owner instanceof JLabel) {
-                JLabel l = (JLabel) owner;
-                formerLaF = l.getUI();
-                LabelStyler laf = new LabelStyler(l.getUI());
-                boolean success = _tryInstallingUISilently(l, laf);
-                if ( !success ) {
-                    l.setUI(laf);
-                    if (formerLaF != null) {
-                        LabelUI labelUI = (LabelUI) formerLaF;
-                        labelUI.installUI(l);
-                        // We make the former LaF believe that it is still in charge of the component.
+                    styleLaF = laf;
+                } else if (owner instanceof JLabel) {
+                    JLabel l = (JLabel) owner;
+                    formerLaF = l.getUI();
+                    LabelStyler laf = new LabelStyler(l.getUI());
+                    boolean success = _tryInstallingUISilently(l, laf);
+                    if ( !success ) {
+                        l.setUI(laf);
+                        if (formerLaF != null) {
+                            LabelUI labelUI = (LabelUI) formerLaF;
+                            labelUI.installUI(l);
+                            // We make the former LaF believe that it is still in charge of the component.
+                        }
                     }
-                }
-                styleLaF = laf;
-            } else if (owner instanceof JTextField && !(owner instanceof JPasswordField)) {
-                JTextField t = (JTextField) owner;
-                formerLaF = t.getUI();
-                TextFieldStyler laf = new TextFieldStyler(t.getUI());
-                boolean success = _tryInstallingUISilently(t, laf);
-                if ( !success ) {
-                    t.setUI(laf);
-                    if ( formerLaF != null ) {
-                        TextUI textFieldUI = (TextUI) formerLaF;
-                        textFieldUI.installUI(t);
-                        // We make the former LaF believe that it is still in charge of the component.
+                    styleLaF = laf;
+                } else if (owner instanceof JTextField && !(owner instanceof JPasswordField)) {
+                    JTextField t = (JTextField) owner;
+                    formerLaF = t.getUI();
+                    TextFieldStyler laf = new TextFieldStyler(t.getUI());
+                    boolean success = _tryInstallingUISilently(t, laf);
+                    if ( !success ) {
+                        t.setUI(laf);
+                        if ( formerLaF != null ) {
+                            TextUI textFieldUI = (TextUI) formerLaF;
+                            textFieldUI.installUI(t);
+                            // We make the former LaF believe that it is still in charge of the component.
+                        }
                     }
+                    styleLaF = laf;
                 }
-                styleLaF = laf;
+            }
+        } finally {
+            if ( o instanceof UIUpdateListenerAndSwingTreeLookAndFeelRestorer ) {
+                UIUpdateListenerAndSwingTreeLookAndFeelRestorer uiUpdateListener = (UIUpdateListenerAndSwingTreeLookAndFeelRestorer) o;
+                uiUpdateListener.beSilent = false;
             }
         }
 
@@ -215,8 +228,12 @@ final class DynamicLaF
         ComponentUI styleLaF = _styleLaF;
 
         if ( customLookAndFeelIsInstalled() ) {
-            _owner.removePropertyChangeListener(_UI_UPDATE_LISTENER);
-            _UI_UPDATE_LISTENER.isRegisteredOnComponent = false;
+            Object o = _owner.getClientProperty(UIUpdateListenerAndSwingTreeLookAndFeelRestorer.class);
+            if ( o instanceof UIUpdateListenerAndSwingTreeLookAndFeelRestorer ) {
+                UIUpdateListenerAndSwingTreeLookAndFeelRestorer uiUpdateListener = (UIUpdateListenerAndSwingTreeLookAndFeelRestorer) o;
+                _owner.removePropertyChangeListener("UI", uiUpdateListener);
+                _owner.putClientProperty(UIUpdateListenerAndSwingTreeLookAndFeelRestorer.class, null);
+            }
             if ( _owner instanceof JPanel ) {
                 JPanel p = (JPanel) _owner;
                 boolean success = _tryInstallingUISilently(p, _formerLaF);
@@ -437,9 +454,11 @@ final class DynamicLaF
      *  }</pre>
      */
     private static final class UIUpdateListenerAndSwingTreeLookAndFeelRestorer implements PropertyChangeListener {
-        boolean isRegisteredOnComponent = false;
+        boolean beSilent = false;
         @Override
         public void propertyChange(PropertyChangeEvent event) {
+            if ( beSilent )
+                return;
             Object oldValue = event.getOldValue();
             Object newValue = event.getNewValue();
             Object source   = event.getSource();

@@ -9,12 +9,10 @@ import swingtree.layout.Size
 import swingtree.style.ComponentExtension
 import swingtree.style.StyleSheet
 
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTextField
+import javax.swing.*
 import javax.swing.plaf.metal.MetalButtonUI
-import java.awt.Color
+import javax.swing.plaf.metal.MetalTextFieldUI
+import java.awt.*
 import java.awt.image.BufferedImage
 
 @Title("Style Installation")
@@ -85,7 +83,7 @@ class Style_Installation_Spec extends Specification
             BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
             button.paint(image.createGraphics())
         then : 'The original UI should be installed because the component is no longer styled'
-            button.getUI() instanceof MetalButtonUI
+            (button.getUI() instanceof MetalButtonUI)
 
         where :
             isCustom | styler
@@ -138,6 +136,103 @@ class Style_Installation_Spec extends Specification
             false    | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
 
             true     | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.ALL, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+
+            false    | { it.parentFilter( conf -> conf.blur(1) ) }
+            false    | { it.parentFilter( conf -> conf.blur(0.75) ) }
+            false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
+            false    | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+    }
+
+    def 'Applying styles to a regular Swing component may or may not lead to the installation of a custom UI.'(
+        boolean isCustom, Styler<JButton> styler
+    ){
+        reportInfo """
+            SwingTree also supports passing custom components
+            to its declarative API and then working with the component
+            as if it was SwingTree native (like `UI.TextField` or `UI.Button`).
+            This includes support for styling the component.
+            
+            As expected, SwingTree will try to modify the underlying `ComponentUI`
+            to meet your styling requirements!
+        """
+        given: 'We create a UI declaration for a plain old `JTextField` saying "Hello World!".'
+            var applyStyle = true
+            var ui =
+                    UI.of(new JTextField("Hello World!"))
+                    .withSize(95,36)
+                    .withStyle( it -> applyStyle ? styler(it) : it )
+        when:
+            var textField = ui.get(JTextField.class)
+        then: 'The `ComponentUI` of the text field may or may not be overridden!'
+            !(textField.getUI() instanceof MetalTextFieldUI) == isCustom
+        when : """
+            We re-install the component UI of the text field, to check that if 
+            SwingTree style is robust enough to survive look and feel switches.
+        """
+            textField.updateUI()
+        then :
+            !(textField.getUI() instanceof MetalTextFieldUI) == isCustom
+
+        when : """
+            We deactivate the custom style, and then simulate the component being used (painted and displayed).
+            Internally this should trigger a re-evaluation of the styles...
+        """
+            applyStyle = false
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            textField.paint(image.createGraphics())
+        then : 'The native look and feel is back!'
+            (textField.getUI() instanceof MetalTextFieldUI)
+
+        where :
+            isCustom | styler
+            false    | { it }
+            false    | { it.backgroundColor(Color.BLACK) }
+            false    | { it.foregroundColor(Color.BLUE) }
+            false    | { it.foregroundColor(Color.WHITE).cursor(UI.Cursor.WAIT).margin(2) }
+            false    | { it.padding(5).margin(5).border(2, "oak") }
+            false    | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
+            false    | { it.shadowColor("green").shadowBlurRadius(5).shadowSpreadRadius(7) }
+            false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").offset(0,5).spreadRadius(7).isOutset(true)) }
+            false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("salmon").spreadRadius(1).blurRadius(5)) }
+            true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }// ERROR!
+            true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }//ERROR
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
+            false    | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+
+            true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }//ERROR!
+            false    | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
+            false    | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }//ERROR
+            true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }//ERROR
+            false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([] as Color[])) }
+            false    | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            true     | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }//ERROR
+            false    | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+
+            true     | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }//ERROR
             false    | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
             false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
             false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.ALL, "myPainter", g2d -> {}) }
