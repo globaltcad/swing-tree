@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import sprouts.Pair;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -23,7 +24,7 @@ final class ComponentAreas
 {
     private static final Map<Pooled<BoxModelConf>, ComponentAreas> _CACHE = new WeakHashMap<>();
 
-    private final BoxModelConf    _sourceState;
+    private final BoxModelConf _boxModel;
     private final LazyRef<Area>   _borderArea;
     private final LazyRef<Area>   _interiorArea;
     private final LazyRef<Area>   _exteriorArea;
@@ -36,16 +37,16 @@ final class ComponentAreas
 
 
     private ComponentAreas(BoxModelConf conf) {
-        _sourceState = conf;
-        _borderArea      = new LazyRef<>(_sourceState, s->ComponentAreas._produceBorderArea(this));
-        _interiorArea    = new LazyRef<>(_sourceState, ComponentAreas::_produceInteriorArea);
-        _exteriorArea    = new LazyRef<>(_sourceState, s->ComponentAreas._produceExteriorArea(s,this));
-        _bodyArea        = new LazyRef<>(_sourceState, ComponentAreas::_produceBodyArea);
-        _borderEdgeAreas = new LazyRef<>(_sourceState, ComponentAreas::calculateEdgeBorderAreas);
+        _boxModel        = conf;
+        _bodyArea        = new LazyRef<>(_boxModel, ComponentAreas::_produceBodyArea);
+        _interiorArea    = new LazyRef<>(_boxModel, ComponentAreas::_produceInteriorArea);
+        _borderArea      = new LazyRef<>(Pair.of(_interiorArea, _bodyArea), s->ComponentAreas._produceBorderArea(s.first(), s.second()));
+        _exteriorArea    = new LazyRef<>(Pair.of(_boxModel, _bodyArea), s->ComponentAreas._produceExteriorArea(s.first(),s.second()));
+        _borderEdgeAreas = new LazyRef<>(_boxModel, ComponentAreas::calculateEdgeBorderAreas);
     }
 
     public Shape get( UI.ComponentArea areaType ) {
-        BoxModelConf boxModel = _sourceState;
+        BoxModelConf boxModel = _boxModel;
         switch ( areaType ) {
             case BODY:
                 return _bodyArea.get(); // all - exterior == interior + border
@@ -96,9 +97,9 @@ final class ComponentAreas
                 );
     }
 
-    private static Area _produceBorderArea(ComponentAreas currentAreas) {
-        Area componentArea = currentAreas._interiorArea.get();
-        Area borderArea = new Area(currentAreas._bodyArea.get());
+    private static Area _produceBorderArea(LazyRef<Area> interiorArea, LazyRef<Area> bodyArea) {
+        Area componentArea = interiorArea.get();
+        Area borderArea = new Area(bodyArea.get());
         borderArea.subtract(componentArea);
         return borderArea;
     }
@@ -118,12 +119,12 @@ final class ComponentAreas
                );
     }
 
-    private static Area _produceExteriorArea(BoxModelConf currentState, ComponentAreas currentAreas) {
+    private static Area _produceExteriorArea(BoxModelConf currentState, LazyRef<Area> bodyArea) {
         Size size = currentState.size();
         float width  = size.width().orElse(0f);
         float height = size.height().orElse(0f);
         Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
-        exteriorComponentArea.subtract(currentAreas._bodyArea.get());
+        exteriorComponentArea.subtract(bodyArea.get());
         return exteriorComponentArea;
     }
 

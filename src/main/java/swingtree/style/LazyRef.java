@@ -9,19 +9,19 @@ import java.util.function.Supplier;
 final class LazyRef<T>
 {
     private final Object _source;
-    private final Supplier<T> _producer;
+    private final Function<Object, T> _producer;
     private @Nullable T _value;
 
-
+    @SuppressWarnings("unchecked")
     <S> LazyRef(S source, Function<S, T> producer) {
         Objects.requireNonNull(producer);
         _source = Objects.requireNonNull(source);
-        _producer = ()->producer.apply(source);
+        _producer = (Function<Object, T>) producer;
     }
 
     final T get() {
         if ( _value == null )
-            _value = _producer.get();
+            _value = _producer.apply(_source);
         return _value;
     }
 
