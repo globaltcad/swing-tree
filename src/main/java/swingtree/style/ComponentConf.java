@@ -70,7 +70,7 @@ final class ComponentConf
             case BORDER:     return _renderConf.get().borderConf();
             case FOREGROUND: return _renderConf.get().foregroundConf();
         }
-        throw new IllegalStateException("Not possible!");
+        throw new IllegalStateException("Unexpected UI.Layer: " + layer);
     }
 
     @Override
