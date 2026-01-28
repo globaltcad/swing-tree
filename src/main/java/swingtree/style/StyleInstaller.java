@@ -116,28 +116,11 @@ final class StyleInstaller<C extends JComponent>
         final Outline     marginCorrection
     ) {
         _lastInsideBackgroundColor = owner.getBackground();
-
-        final ComponentConf currentConf = engine.getComponentConf();
-        final boolean sameStyle      = currentConf.style().equals(newStyle);
-        final boolean sameBounds     = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
-        final boolean sameCorrection = currentConf.areaMarginCorrection().equals(marginCorrection);
-
-        ComponentConf newConf;
-        if ( sameStyle && sameBounds && sameCorrection )
-            newConf = currentConf;
-        else
-            newConf = new ComponentConf(
-                            newStyle,
-                            Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
-                            marginCorrection
-                        );
-
-        LayerCache[] layerCaches = engine.getLayerCaches();
-        for ( LayerCache layerCache : layerCaches )
-            layerCache.validate(currentConf, newConf);
-
-        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.areaMarginCorrection(), newConf.currentBounds().size());
-        return engine.with(newBoxModelConf, newConf);
+        return engine.update(
+                Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
+                newStyle,
+                marginCorrection
+            );
     }
 
     StyleEngine applyStyleToComponentState(

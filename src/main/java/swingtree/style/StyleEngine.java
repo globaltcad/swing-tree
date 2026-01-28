@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
+import swingtree.layout.Bounds;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -66,8 +67,29 @@ final class StyleEngine
         return Optional.empty();
     }
 
-    StyleEngine with( BoxModelConf boxModelConf, ComponentConf componentConf ) {
-        return new StyleEngine(new Pooled<>(boxModelConf), new Pooled<>(componentConf), _layerCaches);
+    StyleEngine update(
+        final Bounds      newBounds,
+        final StyleConf   newStyle,
+        final Outline     marginCorrection
+    ) {
+        final StyleEngine engine = this;
+        final ComponentConf currentConf = engine.getComponentConf();
+        final boolean sameStyle      = currentConf.style().equals(newStyle);
+        final boolean sameBounds     = currentConf.currentBounds().equals(newBounds);
+        final boolean sameCorrection = currentConf.areaMarginCorrection().equals(marginCorrection);
+
+        ComponentConf newConf;
+        if ( sameStyle && sameBounds && sameCorrection )
+            newConf = currentConf;
+        else
+            newConf = new ComponentConf(newStyle, newBounds, marginCorrection);
+
+        LayerCache[] layerCaches = engine.getLayerCaches();
+        for ( LayerCache layerCache : layerCaches )
+            layerCache.validate(currentConf, newConf);
+
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.areaMarginCorrection(), newConf.currentBounds().size());
+        return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
     }
 
     void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y ) {
