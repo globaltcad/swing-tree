@@ -88,7 +88,7 @@ public final class ComponentExtension<C extends JComponent>
         @Nullable Font defaultFont = UIManager.getDefaults().getFont("defaultFont");
         @Nullable Integer defaultFontSize = (defaultFont != null ? defaultFont.getSize() : null);
         AtomicReference<@Nullable Font> referenceFont = new AtomicReference<>();
-        AtomicReference<Boolean> hasDefaultSize = new AtomicReference<>(false);
+        AtomicReference<@Nullable Boolean> hasDefaultSize = new AtomicReference<>(false);
         _localUiScaleFactor = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it -> {
             Font currentFont = referenceFont.get();
             if ( currentFont == null ) {
@@ -99,20 +99,16 @@ public final class ComponentExtension<C extends JComponent>
                 }
             }
             if ( currentFont != null ) {
-                if ( Boolean.TRUE.equals(hasDefaultSize.get()) )
+                if ( Optional.ofNullable(hasDefaultSize.get()).orElse(false) )
                     owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));
                 else
                     owner.setFont(scale(currentFont, it.oldValue().orElseThrowUnchecked()));
             }
             gatherApplyAndInstallStyle(false);
-            UI.runLater(()->{
-                owner.revalidate();
-            });
+            UI.runLater(owner::revalidate);
         });
         if ( _styleSource.styleSheet() != StyleSheet.none() ) {
-            storeBoundObservable(_styleSource.styleSheet().observable().subscribe(()->{
-                gatherApplyAndInstallStyleConfig();
-            }));
+            storeBoundObservable(_styleSource.styleSheet().observable().subscribe(this::gatherApplyAndInstallStyleConfig));
         }
     }
 
@@ -278,7 +274,7 @@ public final class ComponentExtension<C extends JComponent>
      *
      * @param id The id to set.
      */
-    public final void setId( String id ) {
+    public void setId(String id) {
         _owner.setName(id);
     }
 
@@ -293,7 +289,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param id The id to set.
      * @param <E> The type of the enum.
      */
-    public final <E extends Enum<E>> void setId( E id ) {
+    public <E extends Enum<E>> void setId(E id) {
         this.setId(StyleUtil.toString(id));
     }
 
@@ -303,7 +299,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param id The id to check.
      * @return {@code true} if the component has the given id.
      */
-    public final boolean hasId( String id ) {
+    public boolean hasId(String id) {
         return Objects.equals(_owner.getName(), id);
     }
 
@@ -313,11 +309,11 @@ public final class ComponentExtension<C extends JComponent>
      * @param id The id to check.
      * @return {@code true} if the component has the given id.
      */
-    public final boolean hasId( Enum<?> id ) {
+    public boolean hasId(Enum<?> id) {
         return hasId(StyleUtil.toString(id));
     }
 
-    final UI.Placement preferredIconPlacement() {
+    UI.Placement preferredIconPlacement() {
         UI.Placement preferredPlacement = UI.Placement.UNDEFINED;
         if ( _hasText(_owner) )
             preferredPlacement = UI.Placement.LEFT;
@@ -591,7 +587,7 @@ public final class ComponentExtension<C extends JComponent>
                 superPaint.accept((Graphics2D) graphics);
             }
         } catch ( Exception e ) {
-            log.error(SwingTree.get().logMarker(), "Error while painting step '"+step+"'!", e);
+            log.error(SwingTree.get().logMarker(), "Error while painting step '{}'!", step, e);
         }
     }
 
@@ -771,9 +767,7 @@ public final class ComponentExtension<C extends JComponent>
                     So we use the inner component area as the clip for the children.
                 */
                 Shape localClip = StyleUtil.intersect( _styleEngine.componentAreaIfCalculated(UI.ComponentArea.BODY).orElse(formerClip), formerClip );
-                paintWithClip(internalGraphics, localClip, ()->{
-                    superPaint.accept(internalGraphics);
-                });
+                paintWithClip(internalGraphics, localClip, ()-> superPaint.accept(internalGraphics));
             }
             else
                 superPaint.accept(internalGraphics);
