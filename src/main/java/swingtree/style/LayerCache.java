@@ -113,8 +113,8 @@ final class LayerCache
             return;
         }
 
-        final LayerRenderConf oldState = oldConf.toRenderConfFor(_layer);
-        final LayerRenderConf newState = newConf.toRenderConfFor(_layer);
+        final LayerRenderConf oldState = oldConf.renderConfFor(_layer);
+        final LayerRenderConf newState = newConf.renderConfFor(_layer);
 
         boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );
 

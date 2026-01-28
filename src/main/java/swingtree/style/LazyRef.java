@@ -1,11 +1,13 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
+@Immutable
+@SuppressWarnings("Immutable")
 final class LazyRef<T>
 {
     private final Object _source;

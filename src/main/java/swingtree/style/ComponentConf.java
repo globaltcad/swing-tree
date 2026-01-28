@@ -26,6 +26,7 @@ final class ComponentConf
     private final StyleConf _styleConf;
     private final Bounds    _currentBounds;
     private final Outline   _marginCorrection;
+    private final LazyRef<RenderConf> _renderConf; // Computed constant, used for rendering!
 
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
@@ -39,6 +40,7 @@ final class ComponentConf
         _styleConf        = Objects.requireNonNull(styleConf);
         _currentBounds    = Objects.requireNonNull(currentBounds);
         _marginCorrection = Objects.requireNonNull(marginCorrection);
+        _renderConf = new LazyRef<>(this, RenderConf::new);
     }
 
     StyleConf style() { return _styleConf; }
@@ -61,8 +63,14 @@ final class ComponentConf
      * @param layer The layer to retain.
      * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    LayerRenderConf toRenderConfFor(UI.Layer layer ) {
-        return LayerRenderConf.of(layer,this);
+    LayerRenderConf renderConfFor( UI.Layer layer ) {
+        switch ( layer ) {
+            case BACKGROUND: return _renderConf.get().backgroundConf();
+            case CONTENT:    return _renderConf.get().contentConf();
+            case BORDER:     return _renderConf.get().borderConf();
+            case FOREGROUND: return _renderConf.get().foregroundConf();
+        }
+        throw new IllegalStateException("Not possible!");
     }
 
     @Override
