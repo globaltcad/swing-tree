@@ -8,9 +8,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.lang.ref.WeakReference;
 import java.util.Map;
-import java.util.Optional;
 import java.util.WeakHashMap;
 
 /**
@@ -25,12 +23,12 @@ final class ComponentAreas
 {
     private static final Map<Pooled<BoxModelConf>, ComponentAreas> _CACHE = new WeakHashMap<>();
 
-    private final LazyRef<Area>   _borderArea      = new LazyRef<>(ComponentAreas::_produceBorderArea);
-    private final LazyRef<Area>   _interiorArea    = new LazyRef<>(ComponentAreas::_produceInteriorArea);
-    private final LazyRef<Area>   _exteriorArea    = new LazyRef<>(ComponentAreas::_produceExteriorArea);
-    private final LazyRef<Area>   _bodyArea        = new LazyRef<>(ComponentAreas::_produceBodyArea);
-    private final LazyRef<Area[]> _borderEdgeAreas = new LazyRef<>((currentState, currentAreas) -> calculateEdgeBorderAreas(currentState));
-    private final BoxModelConf _sourceState;
+    private final BoxModelConf    _sourceState;
+    private final LazyRef<Area>   _borderArea;
+    private final LazyRef<Area>   _interiorArea;
+    private final LazyRef<Area>   _exteriorArea;
+    private final LazyRef<Area>   _bodyArea;
+    private final LazyRef<Area[]> _borderEdgeAreas;
 
     static ComponentAreas of( Pooled<BoxModelConf> state ) {
         return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state.get()));
@@ -39,19 +37,24 @@ final class ComponentAreas
 
     private ComponentAreas(BoxModelConf conf) {
         _sourceState = conf;
+        _borderArea      = new LazyRef<>(_sourceState, s->ComponentAreas._produceBorderArea(this));
+        _interiorArea    = new LazyRef<>(_sourceState, ComponentAreas::_produceInteriorArea);
+        _exteriorArea    = new LazyRef<>(_sourceState, s->ComponentAreas._produceExteriorArea(s,this));
+        _bodyArea        = new LazyRef<>(_sourceState, ComponentAreas::_produceBodyArea);
+        _borderEdgeAreas = new LazyRef<>(_sourceState, ComponentAreas::calculateEdgeBorderAreas);
     }
 
     public Shape get( UI.ComponentArea areaType ) {
         BoxModelConf boxModel = _sourceState;
         switch ( areaType ) {
             case BODY:
-                return _bodyArea.getFor(boxModel, this); // all - exterior == interior + border
+                return _bodyArea.get(); // all - exterior == interior + border
             case INTERIOR:
-                return _interiorArea.getFor(boxModel, this); // all - exterior - border == content - border
+                return _interiorArea.get(); // all - exterior - border == content - border
             case BORDER:
-                return _borderArea.getFor(boxModel, this); // all - exterior - interior
+                return _borderArea.get(); // all - exterior - interior
             case EXTERIOR:
-                return _exteriorArea.getFor(boxModel, this); // all - border - interior
+                return _exteriorArea.get(); // all - border - interior
             case ALL:
             default:
                 return new Rectangle(
@@ -63,7 +66,7 @@ final class ComponentAreas
     }
 
     public Area[] getEdgeAreas() {
-        return _borderEdgeAreas.getFor(_sourceState, this);
+        return _borderEdgeAreas.get();
     }
 
     public boolean areaExists(UI.ComponentArea area) {
@@ -93,14 +96,14 @@ final class ComponentAreas
                 );
     }
 
-    private static Area _produceBorderArea(BoxModelConf currentState, ComponentAreas currentAreas) {
-        Area componentArea = currentAreas._interiorArea.getFor(currentState, currentAreas);
-        Area borderArea = new Area(currentAreas._bodyArea.getFor(currentState, currentAreas));
+    private static Area _produceBorderArea(ComponentAreas currentAreas) {
+        Area componentArea = currentAreas._interiorArea.get();
+        Area borderArea = new Area(currentAreas._bodyArea.get());
         borderArea.subtract(componentArea);
         return borderArea;
     }
 
-    private static Area _produceInteriorArea(BoxModelConf currentState, ComponentAreas currentAreas) {
+    private static Area _produceInteriorArea(BoxModelConf currentState) {
         Outline widths = currentState.widths();
         float leftBorderWidth   = widths.left().orElse(0f);
         float topBorderWidth    = widths.top().orElse(0f);
@@ -120,11 +123,11 @@ final class ComponentAreas
         float width  = size.width().orElse(0f);
         float height = size.height().orElse(0f);
         Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
-        exteriorComponentArea.subtract(currentAreas._bodyArea.getFor(currentState, currentAreas));
+        exteriorComponentArea.subtract(currentAreas._bodyArea.get());
         return exteriorComponentArea;
     }
 
-    private static Area _produceBodyArea(BoxModelConf currentState, ComponentAreas currentAreas) {
+    private static Area _produceBodyArea(BoxModelConf currentState) {
         return calculateComponentBodyArea(currentState, 0, 0, 0, 0);
     }
 
