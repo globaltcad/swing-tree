@@ -41,21 +41,6 @@ final class LayerRenderConf
         _layer        = Objects.requireNonNull(layers);
     }
 
-    static LayerRenderConf of(
-        BoxModelConf   boxModelConf,
-        BaseColorConf  base,
-        StyleConfLayer layers
-    ) {
-        if (
-            boxModelConf .equals( BoxModelConf.none()  ) &&
-            base         .equals( BaseColorConf.none() ) &&
-            layers       .equals( _NONE._layer )
-        )
-            return _NONE;
-        else
-            return new LayerRenderConf(boxModelConf, base, layers);
-    }
-
     static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
         BoxModelConf boxModelConf = BoxModelConf.of(
                                         fullConf.style().border(),
@@ -72,6 +57,21 @@ final class LayerRenderConf
                     colorConf,
                     fullConf.style().layer(layer)
                 );
+    }
+
+    private static LayerRenderConf of(
+        final BoxModelConf   boxModelConf,
+        final BaseColorConf  base,
+        final StyleConfLayer layers
+    ) {
+        if (
+                boxModelConf .equals( BoxModelConf.none()  ) &&
+                        base         .equals( BaseColorConf.none() ) &&
+                        layers       .equals( _NONE._layer )
+        )
+            return _NONE;
+        else
+            return new LayerRenderConf(boxModelConf, base, layers);
     }
 
     BoxModelConf boxModel() { return _boxModelConf.get(); }
