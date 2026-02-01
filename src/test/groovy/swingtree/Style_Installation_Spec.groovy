@@ -7,6 +7,7 @@ import spock.lang.Title
 import swingtree.api.Styler
 import swingtree.layout.Size
 import swingtree.style.ComponentExtension
+import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
 
 import javax.swing.*
@@ -694,5 +695,93 @@ class Style_Installation_Spec extends Specification
              true       | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}).fontWeight(73) }
     }
 
+    def 'Some styles, which would not lead to any visual effect when rendered, will be simplified to "no-style".'(
+        boolean hasEffect, Styler<JButton> styler
+    ){
+        reportInfo """
+            Certain style information does not make any sense in that it
+            would not lead to any visual effect at all. For example, a border
+            with a width of 0 would not lead to any difference. In such cases, 
+            SwingTree will simplify the style and then install that.
+            Very often, such a style can be simplified to no style at alL!
+        """
+        given :
+            var applyStyle = true
+        and : 'We create a button UI with the given styler:'
+            var ui =
+                    UI.button("Click me!")
+                    .withStyle( it -> applyStyle ? styler(it) : it )
+                    .withSize(80,50)
+        when: 'We build the button'
+            var button = ui.get(JButton)
+        then:
+            (ComponentExtension.from(button).getStyle() != StyleConf.none()) == hasEffect
+
+        when : """
+            We de-activate the style and check if the style was properly reset to being "none"!
+        """
+            applyStyle = false
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics())
+        then :
+            ComponentExtension.from(button).getStyle() == StyleConf.none()
+
+        where : """
+            We populate this test with various styles and "hasEffect" flags
+            If the flag is `false`, then this means the style produced by the lambda 
+            was simplified to being no-style.
+        """
+            hasEffect | styler
+             false    | { it }
+             true     | { it.backgroundColor(Color.BLACK) }
+             true     | { it.foregroundColor(Color.BLUE) }
+             true     | { it.foundationColor(Color.GREEN) }
+             true     | { it.cursor(UI.Cursor.HAND) }
+             false    | { it.margin(0) }
+             true     | { it.margin(5) }
+             true     | { it.padding(5).margin(5) }
+             true     | { it.border(2, "black") }
+             false    | { it.border(0, "black") }
+             true     | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
+             true     | { it.shadowColor("green") }
+             true     | { it.shadowColor("blue").shadowBlurRadius(5) }
+             true     | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
+             false    | { it.shadowColor("rgba(0,0,0,0)").shadowBlurRadius(2).shadowSpreadRadius(7) }
+             true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+             true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+             true     | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+             true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+             true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+             true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+             true     | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+             false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
+             false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
+             true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+             true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+             false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).blurRadius(5).isOutset(true)) }
+             true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+             false    | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
+             true     | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+             true     | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+             true     | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+             true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }
+             true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }
+             false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([] as Color[])) }
+             true     | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+             true     | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+             true     | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+             true     | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+             true     | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
+             true     | { it.parentFilter( conf -> conf.blur(1) ) }
+             true     | { it.parentFilter( conf -> conf.blur(0.75) ) }
+             false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
+             true     | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+    }
 
 }
