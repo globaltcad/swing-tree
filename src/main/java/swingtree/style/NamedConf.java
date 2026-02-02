@@ -52,26 +52,38 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
 
     @Override
     public NamedConf<S> simplified() {
+        if ( this.isNone() ) {
+            return this;
+        }
         if ( _style instanceof Simplifiable ) {
             Simplifiable<S> asSimplifiable = ((Simplifiable<S>)_style);
             S simplifiedStyle = asSimplifiable.simplified();
-            if (simplifiedStyle == _style)
-                return this;
-            return new NamedConf<>(_name, simplifiedStyle);
+            if ( ((Simplifiable<Object>)simplifiedStyle).isNone() )
+                return new NamedConf<>(_simplifiedName(), simplifiedStyle);
+            else {
+                if (simplifiedStyle == _style)
+                    return this;
+                return new NamedConf<>(_name, simplifiedStyle);
+            }
         }
         if ( _style instanceof Pooled ) {
             Pooled<Object> pooled = (Pooled<Object>) _style;
-            pooled = pooled.map( it -> {
-                if ( it instanceof Simplifiable<?> ) {
-                    return ((Simplifiable<S>)it).simplified();
-                }
-                return it;
-            });
+            if ( pooled.get() instanceof Simplifiable<?> ) {
+                pooled = pooled.map( it -> ((Simplifiable<S>)it).simplified());
+                Simplifiable<?> simplifiable = (Simplifiable<?>)pooled.get();
+                if (simplifiable.isNone() )
+                    return new NamedConf<>(_simplifiedName(), (S)pooled);
+            }
             pooled = pooled.intern();
             if ( pooled != _style )
                 return new NamedConf<>(_name, (S)pooled);
         }
         return this;
+    }
+
+    private String _simplifiedName() {
+        return StyleUtil.DEFAULT_KEY.equals(_name) ? StyleUtil.DEFAULT_KEY : "";
+        // Note: The default style can not be simplified away entirely! The default always exists!
     }
 
     @Override

@@ -88,10 +88,6 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
 
     public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
-        return mapAndFilterNamedStyles(f, null);
-    }
-
-    private NamedConfigs<S> mapAndFilterNamedStyles( Configurator<NamedConf<S>> f, @Nullable Predicate<NamedConf<S>> predicate ) {
         Objects.requireNonNull(f);
 
         NamedConf<S>[] newStyles = null;
@@ -116,24 +112,21 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         if ( newStyles == null )
             return this;
 
-        if ( predicate != null ) {
-            List<NamedConf<S>> filtered = null;
-            for (NamedConf<S> namedConf : newStyles) {
-                if (predicate.test(namedConf)) {
-                    if (filtered != null) {
-                        filtered.add(namedConf);
-                    }
-                } else if (filtered == null) {
-                    if ( newStyles.length > 1 )
-                        filtered = new ArrayList<>(Arrays.asList(newStyles).subList(0, newStyles.length-1));
-                    else
-                        filtered = new ArrayList<>();
-                }
+        List<NamedConf<S>> filtered = null;
+        for (int i = 0; i < newStyles.length; i++) {
+            NamedConf<S> namedConf = newStyles[i];
+            boolean isNone = namedConf.isNone();
+            if ( isNone && filtered == null ) {
+                filtered = new ArrayList<>(Arrays.asList(newStyles).subList(0, i));
             }
-            if (filtered != null)
-                return new NamedConfigs<>(filtered.toArray(new NamedConf[0]));
+            if ( !isNone && filtered != null ) {
+                filtered.add(namedConf);
+            }
         }
-        return new NamedConfigs<>(newStyles);
+        if (filtered != null)
+            return new NamedConfigs<>(filtered.toArray(new NamedConf[0]));
+        else
+            return new NamedConfigs<>(newStyles);
     }
 
     private int _findNamedStyle( String name ) {
@@ -228,7 +221,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
     @Override
     public NamedConfigs<S> simplified() {
-        return mapNamedStyles(NamedConf::simplified);//mapAndFilterNamedStyles(NamedConf::simplified, conf -> !conf.isNone());
+        return mapNamedStyles(NamedConf::simplified);
     }
 
     @Override
