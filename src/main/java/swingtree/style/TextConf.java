@@ -327,6 +327,11 @@ public final class TextConf implements Simplifiable<TextConf>
         return this;
     }
 
+    @Override
+    public boolean isNone() {
+        return this.equals(_NONE);
+    }
+
     TextConf _scale(double scale) {
         return of(
             _content,

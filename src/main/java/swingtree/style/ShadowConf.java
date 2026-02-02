@@ -403,4 +403,9 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
         return this;
     }
+
+    @Override
+    public boolean isNone() {
+        return this.equals(_NONE);
+    }
 }

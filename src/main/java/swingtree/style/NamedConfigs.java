@@ -41,9 +41,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
 
     @SafeVarargs
-    private NamedConfigs(NamedConf<S>... styles ) {
+    private NamedConfigs( NamedConf<S>... styles ) {
         _styles = Objects.requireNonNull(styles);
-        // No nll entries:
+        // No null entries:
         for ( NamedConf<S> style : styles )
             Objects.requireNonNull(style);
 
@@ -86,7 +86,12 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.configure(ns.style())) );
     }
 
+
     public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
+        return mapAndFilterNamedStyles(f, null);
+    }
+
+    private NamedConfigs<S> mapAndFilterNamedStyles( Configurator<NamedConf<S>> f, @Nullable Predicate<NamedConf<S>> predicate ) {
         Objects.requireNonNull(f);
 
         NamedConf<S>[] newStyles = null;
@@ -96,9 +101,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
                 mapped = f.configure(_styles[i]);
             } catch ( Exception e ) {
                 log.error(
-                        "Failed to map named style '" + _styles[i] + "' using " +
-                        "the provided function '" + f + "'.",
-                        e
+                        "Failed to map named style '{}' " +
+                        "using the provided function '{}'.",
+                        _styles[i], f, e
                     );
             }
             if ( newStyles == null && !mapped.equals(_styles[i]) ) {
@@ -111,6 +116,23 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         if ( newStyles == null )
             return this;
 
+        if ( predicate != null ) {
+            List<NamedConf<S>> filtered = null;
+            for (NamedConf<S> namedConf : newStyles) {
+                if (predicate.test(namedConf)) {
+                    if (filtered != null) {
+                        filtered.add(namedConf);
+                    }
+                } else if (filtered == null) {
+                    if ( newStyles.length > 1 )
+                        filtered = new ArrayList<>(Arrays.asList(newStyles).subList(0, newStyles.length-1));
+                    else
+                        filtered = new ArrayList<>();
+                }
+            }
+            if (filtered != null)
+                return new NamedConfigs<>(filtered.toArray(new NamedConf[0]));
+        }
         return new NamedConfigs<>(newStyles);
     }
 
@@ -206,6 +228,11 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
     @Override
     public NamedConfigs<S> simplified() {
-        return mapNamedStyles(NamedConf::simplified);
+        return mapNamedStyles(NamedConf::simplified);//mapAndFilterNamedStyles(NamedConf::simplified, conf -> !conf.isNone());
+    }
+
+    @Override
+    public boolean isNone() {
+        return this.equals(EMPTY);
     }
 }

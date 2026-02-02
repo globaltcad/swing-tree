@@ -642,6 +642,11 @@ public final class GradientConf implements Simplifiable<GradientConf>
         return this;
     }
 
+    @Override
+    public boolean isNone() {
+        return this.equals(_NONE);
+    }
+
     @SuppressWarnings("ReferenceEquality")
     private static void _avoidTransparentBlackLeakage(Color[] realColors) {
         for ( int i = 0; i < realColors.length; i++ ) {

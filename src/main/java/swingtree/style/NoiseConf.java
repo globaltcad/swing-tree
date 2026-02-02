@@ -432,4 +432,9 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
         return this;
     }
+
+    @Override
+    public boolean isNone() {
+        return this.equals(_NONE);
+    }
 }

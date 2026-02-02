@@ -53,7 +53,8 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
     @Override
     public NamedConf<S> simplified() {
         if ( _style instanceof Simplifiable ) {
-            S simplifiedStyle = ((Simplifiable<S>)_style).simplified();
+            Simplifiable<S> asSimplifiable = ((Simplifiable<S>)_style);
+            S simplifiedStyle = asSimplifiable.simplified();
             if (simplifiedStyle == _style)
                 return this;
             return new NamedConf<>(_name, simplifiedStyle);
@@ -71,5 +72,23 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
                 return new NamedConf<>(_name, (S)pooled);
         }
         return this;
+    }
+
+    @Override
+    public boolean isNone() {
+        boolean hasName = !_name.isEmpty();
+        if ( hasName )
+            return false;
+
+        Simplifiable<?> asSimplifiable = null;
+        if ( _style instanceof Simplifiable<?> ) {
+            asSimplifiable = ((Simplifiable<?>)_style);
+        }
+        if ( _style instanceof Pooled<?> && ((Pooled<?>)_style).get() instanceof Simplifiable<?> ) {
+            asSimplifiable = ((Simplifiable<?>)((Pooled<?>)_style).get());
+        }
+        if ( asSimplifiable != null )
+            return asSimplifiable.isNone();
+        return false;
     }
 }

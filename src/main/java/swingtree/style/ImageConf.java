@@ -834,6 +834,11 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     @Override
+    public boolean isNone() {
+        return this.equals(_NONE);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
