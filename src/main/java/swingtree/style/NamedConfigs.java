@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.api.Configurator;
 
 import java.util.*;
@@ -96,7 +97,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
             try {
                 mapped = f.configure(_styles[i]);
             } catch ( Exception e ) {
-                log.error(
+                log.error(SwingTree.get().logMarker(),
                         "Failed to map named style '{}' " +
                         "using the provided function '{}'.",
                         _styles[i], f, e
