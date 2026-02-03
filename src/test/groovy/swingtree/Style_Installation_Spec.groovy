@@ -28,15 +28,15 @@ import java.awt.image.BufferedImage
     which is most commonly used through the `withStyle(Styler)` method
     on any declarative builder node.
    
-   The installation of styles is a complex process that involves
-   the partial override of the component's UI delegate, the application of
-   the style's properties to the component and the installation of
-   a custom border, all depending on the style configuration.
+    The installation of styles is a complex process that involves
+    the partial override of the component's UI delegate, the application of
+    the style's properties to the component and the installation of
+    a custom border, all depending on the style configuration.
    
-   This is a very finicky process that requires a lot of 
-   testing to ensure that the styles are applied correctly.
-   Here you will find most of the tests that ensure that after the
-   installation of a style, the component has the expected plugin installed.
+    This is a very finicky process that requires a lot of 
+    testing to ensure that the styles are applied correctly.
+    Here you will find most of the tests that ensure that after the
+    installation of a style, the component has the expected plugin installed.
    
 ''')
 @Subject([UI, Styler])
@@ -753,6 +753,7 @@ class Style_Installation_Spec extends Specification
              true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
              true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
              true     | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+             false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("").spreadRadius(1).blurRadius(5)) }
              true     | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
              false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
              false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
@@ -782,6 +783,11 @@ class Style_Installation_Spec extends Specification
              true     | { it.parentFilter( conf -> conf.blur(0.75) ) }
              false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
              true     | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+             false    | { it.shadow(UI.Layer.BACKGROUND, "s", c->c.color("").blurRadius(5)).gradient(UI.Layer.BACKGROUND, "g", c->c.colors("", "")) }
+             false    | { it.gradient(UI.Layer.CONTENT, "g1", c->c.colors("","")).gradient(UI.Layer.CONTENT, "g2", c->c.colors("","")).gradient(UI.Layer.CONTENT, "g3", c->c.colors("","")) }
+             true     | { it.gradient(UI.Layer.CONTENT, "g1", c->c.colors("","")).gradient(UI.Layer.CONTENT, "g2", c->c.colors("blue","green")).gradient(UI.Layer.CONTENT, "g3", c->c.colors("white","red")) }
+             false    | { it.border(0, "black").shadow(UI.Layer.CONTENT, "s1", c->c.color("").blurRadius(5)).shadow(UI.Layer.CONTENT, "s2", c->c.color("")) }
+             true     | { it.border(0, "black").shadow(UI.Layer.CONTENT, "s2", c->c.color("")).shadow(UI.Layer.CONTENT, "s1", c->c.color("blue").blurRadius(5)).shadow(UI.Layer.CONTENT, "s2", c->c.color("")) }
     }
 
 }
