@@ -847,14 +847,17 @@ class Styles_Spec extends Specification
                 "]"
     }
 
-    def 'Named shadow styles will be simplified away if their style config does not lead to any visible effect'()
-    {
+    def 'Named shadow styles will be simplified away if their style config does not lead to any visible effect'(
+        int uiScale
+    ) {
         reportInfo """
             In in SwingTree's Style API you can create multiple sub-styles for shadows,
             by giving them unique names. However, if the style does not make sense, or would
             provably not lead to any visual result, SwingTree will optimize it away under the hood.
         """
-        given : """
+        given : 'We first setup the global environment stuff (library context and DPI scale):'
+            SwingTree.initialiseUsing {it.uiScaleFactor(uiScale)}
+        and : """
             We crate a label with various shadow sub-styles.
             Some of those make no sense, and so we expect them to be simplified away!
         """
@@ -887,8 +890,8 @@ class Styles_Spec extends Specification
                                 "shadows=NamedConfigs[" +
                                     "default=ShadowConf[NONE], " +
                                     "x=ShadowConf[" +
-                                        "horizontalOffset=3, " +
-                                        "verticalOffset=3, " +
+                                        "horizontalOffset=${3*uiScale}, " +
+                                        "verticalOffset=${3*uiScale}, " +
                                         "blurRadius=0, " +
                                         "spreadRadius=0, " +
                                         "color=rgba(0,0,255,255), " +
@@ -914,6 +917,10 @@ class Styles_Spec extends Specification
                         "], " +
                         "properties=[]" +
                     "]"
+        cleanup :
+            SwingTree.clear()
+        where :
+            uiScale << [ 1, 2, 3, 4 ]
     }
 
     def 'The style API allows you to configure a custom paint for a component font.'( float uiScale )
