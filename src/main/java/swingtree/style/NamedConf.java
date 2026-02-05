@@ -52,24 +52,55 @@ final class NamedConf<S> implements Simplifiable<NamedConf<S>>
 
     @Override
     public NamedConf<S> simplified() {
+        if ( this.isNone() ) {
+            return this;
+        }
         if ( _style instanceof Simplifiable ) {
-            S simplifiedStyle = ((Simplifiable<S>)_style).simplified();
-            if (simplifiedStyle == _style)
-                return this;
-            return new NamedConf<>(_name, simplifiedStyle);
+            Simplifiable<S> asSimplifiable = ((Simplifiable<S>)_style);
+            S simplifiedStyle = asSimplifiable.simplified();
+            if ( ((Simplifiable<Object>)simplifiedStyle).isNone() )
+                return new NamedConf<>(_simplifiedName(), simplifiedStyle);
+            else {
+                if (simplifiedStyle == _style)
+                    return this;
+                return new NamedConf<>(_name, simplifiedStyle);
+            }
         }
         if ( _style instanceof Pooled ) {
             Pooled<Object> pooled = (Pooled<Object>) _style;
-            pooled = pooled.map( it -> {
-                if ( it instanceof Simplifiable<?> ) {
-                    return ((Simplifiable<S>)it).simplified();
-                }
-                return it;
-            });
+            if ( pooled.get() instanceof Simplifiable<?> ) {
+                pooled = pooled.map( it -> ((Simplifiable<S>)it).simplified());
+                Simplifiable<?> simplifiable = (Simplifiable<?>)pooled.get();
+                if (simplifiable.isNone() )
+                    return new NamedConf<>(_simplifiedName(), (S)pooled);
+            }
             pooled = pooled.intern();
             if ( pooled != _style )
                 return new NamedConf<>(_name, (S)pooled);
         }
         return this;
+    }
+
+    private String _simplifiedName() {
+        return StyleUtil.DEFAULT_KEY.equals(_name) ? StyleUtil.DEFAULT_KEY : "";
+        // Note: The default style can not be simplified away entirely! The default always exists!
+    }
+
+    @Override
+    public boolean isNone() {
+        boolean hasName = !_name.isEmpty();
+        if ( hasName )
+            return false;
+
+        Simplifiable<?> asSimplifiable = null;
+        if ( _style instanceof Simplifiable<?> ) {
+            asSimplifiable = ((Simplifiable<?>)_style);
+        }
+        if ( _style instanceof Pooled<?> && ((Pooled<?>)_style).get() instanceof Simplifiable<?> ) {
+            asSimplifiable = ((Simplifiable<?>)((Pooled<?>)_style).get());
+        }
+        if ( asSimplifiable != null )
+            return asSimplifiable.isNone();
+        return false;
     }
 }

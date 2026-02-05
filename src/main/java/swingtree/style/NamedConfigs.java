@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.api.Configurator;
 
 import java.util.*;
@@ -41,9 +42,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
 
     @SafeVarargs
-    private NamedConfigs(NamedConf<S>... styles ) {
+    private NamedConfigs( NamedConf<S>... styles ) {
         _styles = Objects.requireNonNull(styles);
-        // No nll entries:
+        // No null entries:
         for ( NamedConf<S> style : styles )
             Objects.requireNonNull(style);
 
@@ -86,6 +87,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.configure(ns.style())) );
     }
 
+
     public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
         Objects.requireNonNull(f);
 
@@ -95,10 +97,10 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
             try {
                 mapped = f.configure(_styles[i]);
             } catch ( Exception e ) {
-                log.error(
-                        "Failed to map named style '" + _styles[i] + "' using " +
-                        "the provided function '" + f + "'.",
-                        e
+                log.error(SwingTree.get().logMarker(),
+                        "Failed to map named style '{}' " +
+                        "using the provided function '{}'.",
+                        _styles[i], f, e
                     );
             }
             if ( newStyles == null && !mapped.equals(_styles[i]) ) {
@@ -111,7 +113,21 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         if ( newStyles == null )
             return this;
 
-        return new NamedConfigs<>(newStyles);
+        List<NamedConf<S>> filtered = null;
+        for (int i = 0; i < newStyles.length; i++) {
+            NamedConf<S> namedConf = newStyles[i];
+            boolean isNone = namedConf.isNone();
+            if ( isNone && filtered == null ) {
+                filtered = new ArrayList<>(Arrays.asList(newStyles).subList(0, i));
+            }
+            if ( !isNone && filtered != null ) {
+                filtered.add(namedConf);
+            }
+        }
+        if (filtered != null)
+            return new NamedConfigs<>(filtered.toArray(new NamedConf[0]));
+        else
+            return new NamedConfigs<>(newStyles);
     }
 
     private int _findNamedStyle( String name ) {
@@ -207,5 +223,10 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
     @Override
     public NamedConfigs<S> simplified() {
         return mapNamedStyles(NamedConf::simplified);
+    }
+
+    @Override
+    public boolean isNone() {
+        return this.equals(EMPTY);
     }
 }

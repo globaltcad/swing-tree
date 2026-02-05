@@ -432,11 +432,11 @@ public abstract class StyleSheet
                 try {
                     startingStyle = styler.style(delegate).style();
                 } catch ( Exception e ) {
-                    log.error(
-                        "An exception occurred while applying the style for trait '" + trait + "' " +
-                        "to component '" + toBeStyled + "' using styler '" + styler + "'!",
-                        e
-                    );
+                    log.error(SwingTree.get().logMarker(),
+                            "An exception occurred while applying the style for " +
+                            "trait '{}' to component '{}' using styler '{}'!",
+                            trait, toBeStyled, styler, e
+                        );
                     /*
                         Exceptions inside a style sheet should not be fatal.
                         We just log the stack trace for debugging purposes

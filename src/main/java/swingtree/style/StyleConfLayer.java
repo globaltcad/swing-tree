@@ -247,4 +247,9 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
                     simplifiedTexts
                 );
     }
+
+    @Override
+    public boolean isNone() {
+        return this.equals(_EMPTY);
+    }
 }

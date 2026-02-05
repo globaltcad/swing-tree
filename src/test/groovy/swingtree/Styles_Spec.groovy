@@ -13,6 +13,7 @@ import swingtree.style.ComponentStyleDelegate
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -844,6 +845,82 @@ class Styles_Spec extends Specification
                     "], " +
                     "properties=[]" +
                 "]"
+    }
+
+    def 'Named shadow styles will be simplified away if their style config does not lead to any visible effect'(
+        int uiScale
+    ) {
+        reportInfo """
+            In in SwingTree's Style API you can create multiple sub-styles for shadows,
+            by giving them unique names. However, if the style does not make sense, or would
+            provably not lead to any visual result, SwingTree will optimize it away under the hood.
+        """
+        given : 'We first setup the global environment stuff (library context and DPI scale):'
+            SwingTree.initialiseUsing {it.uiScaleFactor(uiScale)}
+        and : """
+            We crate a label with various shadow sub-styles.
+            Some of those make no sense, and so we expect them to be simplified away!
+        """
+            var aLabel =
+                        UI.label("Task Done").withStyle( conf -> conf
+                            .shadow("a", {it.color("").blurRadius(12)})
+                            .shadow("x", {it.color("bright blue").offset(3)})
+                            .shadow("b", {it.color("rgba(0.4,0.2,1,0)").offset(23)})
+                            .shadow("c", {it.color(0.1,0.1,0.1,0)})
+                            .shadow("d", {it.color(UI.Color.UNDEFINED).offset(23)})
+                            .shadow("y", {it.color("dark red").isOutset(true)})
+                            .shadow("e", {it.color("rgba(0.1,1,0.7,0%)")})
+                            .shadow("f", {it.color(UI.Color.UNDEFINED).isOutset(false)})
+                        )
+                        .get(JLabel)
+        expect : """
+            The style configuration resulting from the above declaration
+            will only contain two named shadow styles! The "x" and "y" shadows:
+        """
+            ComponentExtension.from(aLabel).getStyle().toString() == "StyleConf[" +
+                        "LayoutConf[NONE], " +
+                        "BorderConf[NONE], " +
+                        "BaseConf[NONE], " +
+                        "FontConf[NONE], " +
+                        "DimensionalityConf[NONE], " +
+                        "StyleConfLayers[" +
+                            "filter=FilterConf[NONE], " +
+                            "background=StyleConfLayer[EMPTY], " +
+                            "content=StyleConfLayer[" +
+                                "shadows=NamedConfigs[" +
+                                    "default=ShadowConf[NONE], " +
+                                    "x=ShadowConf[" +
+                                        "horizontalOffset=${3*uiScale}, " +
+                                        "verticalOffset=${3*uiScale}, " +
+                                        "blurRadius=0, " +
+                                        "spreadRadius=0, " +
+                                        "color=rgba(0,0,255,255), " +
+                                        "isInset=false" +
+                                    "], " +
+                                    "y=ShadowConf[" +
+                                        "horizontalOffset=0, " +
+                                        "verticalOffset=0, " +
+                                        "blurRadius=0, " +
+                                        "spreadRadius=0, " +
+                                        "color=rgba(179,0,0,255), " +
+                                        "isInset=false" +
+                                    "]" +
+                                "], " +
+                                "painters=PainterConf[NONE], " +
+                                "gradients=GradientConf[NONE], " +
+                                "noises=NoiseConf[NONE], " +
+                                "images=ImageConf[NONE], " +
+                                "texts=TextConf[NONE]" +
+                            "], " +
+                            "border=StyleConfLayer[EMPTY], " +
+                            "foreground=StyleConfLayer[EMPTY]" +
+                        "], " +
+                        "properties=[]" +
+                    "]"
+        cleanup :
+            SwingTree.clear()
+        where :
+            uiScale << [ 1, 2, 3, 4 ]
     }
 
     def 'The style API allows you to configure a custom paint for a component font.'( float uiScale )
