@@ -3,10 +3,13 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentExtension;
+import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.JComponent;
+import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -124,6 +127,7 @@ final class BuilderState<C extends java.awt.Component>
      *  @return The component managed by this builder.
      *  @throws IllegalStateException If this builder state is disposed (it's reference to the component is null).
      */
+    @SuppressWarnings("DoNotCall")
     C component()
     {
         if ( this.isDisposed() )
@@ -136,7 +140,14 @@ final class BuilderState<C extends java.awt.Component>
         if ( _componentFetcher == null )
             throw new IllegalStateException("This builder state is disposed and cannot be used for building.");
 
-        return _componentType.cast(_componentFetcher.get());
+        C component = _componentType.cast(_componentFetcher.get());
+        if ( component instanceof JComponent ) {
+            ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf((JComponent) component);
+            if ( componentUI instanceof SwingTreeStyledComponentUI<?> ) {
+                ComponentExtension.from(((JComponent) component)).gatherApplyAndInstallStyle(false);
+            }
+        }
+        return component;
     }
 
     /**

@@ -89,7 +89,7 @@ final class StyleInstaller<C extends JComponent>
     }
 
     boolean customLookAndFeelIsInstalled(C owner) {
-        return _dynamicLaF.customLookAndFeelIsInstalled(owner);
+        return _dynamicLaF.customLookAndFeelIsInstalled(owner) || _dynamicLaF.currentLookAndFeelSupportsSwingTree(owner);
     }
 
     Outline _formerBorderMarginCorrection( C owner ) {
@@ -345,7 +345,7 @@ final class StyleInstaller<C extends JComponent>
 
         final Color   backgroundColor = owner.getBackground();
         final boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
-        final boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled(owner);
+        final boolean customLookAndFeelInstalled = customLookAndFeelIsInstalled(owner);
         final boolean requiresBackgroundPainting =
                                              hasBackgroundGradients ||
                                              hasBackgroundNoise     ||

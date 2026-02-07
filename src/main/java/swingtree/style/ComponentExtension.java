@@ -131,6 +131,11 @@ public final class ComponentExtension<C extends JComponent>
 
     public Viewable<Float> localUiScaleFactor() { return _localUiScaleFactor; }
 
+
+    public void paintBackground( Graphics graphics, Painter lookAndFeelPainting ) {
+        paintBackground(graphics, Painter.none().equals(lookAndFeelPainting), g2d->lookAndFeelPainting.paint((Graphics2D) g2d));
+    }
+
     /**
      *  Stores the given observable in the extension in order to ensure that
      *  it is not garbage collected before the component is garbage collected.
@@ -670,8 +675,8 @@ public final class ComponentExtension<C extends JComponent>
                     int height = _owner.getHeight();
                     internalGraphics.fillRect(0, 0, width, height);
                     /*
-                        If "lookAndFeelPainting" is null then this means there is no
-                        native ComponentUI, instead it is upd to SwingTree to override what was
+                        If "needsCustomWipe" is true then this means there is no
+                        native ComponentUI, instead it is up to SwingTree to override what was
                         rendered previously in the buffer.
                     */
                 }
