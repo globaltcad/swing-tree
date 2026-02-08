@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
+import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
 
@@ -13,6 +14,7 @@ import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
+import javax.swing.text.JTextComponent;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
@@ -59,7 +61,28 @@ final class DynamicLaF
         return _styleLaF != null || owner instanceof JBox || owner instanceof JIcon;
     }
 
+    boolean currentLookAndFeelSupportsSwingTree(JComponent owner) {
+        return findSwingTreeStyledComponentUIOf(owner)
+                .map(SwingTreeStyledComponentUI::canForwardPaintingToSwingTree)
+                .orElse(false);
+    }
+
+    @SuppressWarnings("DoNotCall")
+    <C extends JComponent> Optional<SwingTreeStyledComponentUI<C>> findSwingTreeStyledComponentUIOf(C owner) {
+        ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf(owner);
+        if ( componentUI instanceof SwingTreeStyledComponentUI) {
+            SwingTreeStyledComponentUI swingTreeUI = (SwingTreeStyledComponentUI<?>) componentUI;
+            return Optional.of(swingTreeUI);
+        }
+        return Optional.empty();
+    }
+
     DynamicLaF establishLookAndFeelFor(StyleConf styleConf, JComponent owner ) {
+
+        Optional<SwingTreeStyledComponentUI<JComponent>> lafSupport = findSwingTreeStyledComponentUIOf(owner);
+        if ( lafSupport.isPresent() && lafSupport.get().canForwardPaintingToSwingTree() ) {
+            return this;
+        }
 
         DynamicLaF result = this;
 
@@ -158,7 +181,7 @@ final class DynamicLaF
                 } else if (owner instanceof JPanel) {
                     JPanel p = (JPanel) owner;
                     formerLaF = p.getUI();
-                    PanelStyler laf = PanelStyler.INSTANCE;
+                    PanelStyler laf = new PanelStyler(p.getUI());
                     boolean success = _tryInstallingUISilently(p, laf);
                     if ( !success ) {
                         p.setUI(laf);
@@ -296,7 +319,7 @@ final class DynamicLaF
                 return true;
             }
         } catch (Exception e) {
-            log.error(SwingTree.get().logMarker(), "Failed to install custom SwingTree UI for component '"+owner+"'!", e);
+            log.error(SwingTree.get().logMarker(), "Failed to install custom SwingTree UI for component '{}'!", owner, e);
         }
         return false;
     }
@@ -306,7 +329,7 @@ final class DynamicLaF
     void installCustomUIFor(JComponent owner )
     {
         if ( owner instanceof JBox )
-            ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {
+            ((JBox)owner).setUI(new DynamicLaF.PanelStyler(null) {
                 @Override public void installUI(JComponent c) { installDefaults((JBox)c); }
                 @Override public void uninstallUI(JComponent c) { uninstallDefaults((JBox)c); }
                 private void installDefaults(JBox b) {
@@ -322,19 +345,29 @@ final class DynamicLaF
         // Other types of components are not supported yet!
     }
 
-    static class PanelStyler extends BasicPanelUI
+    static class PanelStyler extends BasicPanelUI implements SwingTreeStyledComponentUI<JPanel>
     {
-        static final PanelStyler INSTANCE = new PanelStyler();
+        private final @Nullable PanelUI _formerUI;
 
-        PanelStyler() {}
+        PanelStyler( @Nullable PanelUI formerUI ) {
+            _formerUI = ( formerUI instanceof PanelStyler ) ? ((PanelStyler)formerUI)._formerUI : formerUI;
+        }
 
         @Override public void paint(Graphics g, JComponent c ) {
             ComponentExtension.from(c).paintBackground(g, true, null);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+
+        @Override
+        public ComponentStyleDelegate<JPanel> style(ComponentStyleDelegate<JPanel> delegate) throws Exception {
+            return _maybeStyleThroughFormerUI(_formerUI, delegate);
+        }
+
+        @Override
+        public boolean canForwardPaintingToSwingTree() { return true; }
     }
 
-    static class ButtonStyler extends BasicButtonUI
+    static class ButtonStyler extends BasicButtonUI implements SwingTreeStyledComponentUI<AbstractButton>
     {
         private final @Nullable ButtonUI _formerUI;
 
@@ -350,9 +383,16 @@ final class DynamicLaF
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+
+        @Override
+        public ComponentStyleDelegate<AbstractButton> style(ComponentStyleDelegate<AbstractButton> delegate) throws Exception {
+            return _maybeStyleThroughFormerUI(_formerUI, delegate);
+        }
+
+        @Override public boolean canForwardPaintingToSwingTree() { return true; }
     }
 
-    static class LabelStyler extends BasicLabelUI
+    static class LabelStyler extends BasicLabelUI implements SwingTreeStyledComponentUI<JLabel>
     {
         private final @Nullable LabelUI _formerUI;
 
@@ -369,9 +409,16 @@ final class DynamicLaF
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+
+        @Override
+        public ComponentStyleDelegate<JLabel> style(ComponentStyleDelegate<JLabel> delegate) throws Exception {
+            return _maybeStyleThroughFormerUI(_formerUI, delegate);
+        }
+
+        @Override public boolean canForwardPaintingToSwingTree() { return true; }
     }
 
-    static class TextFieldStyler extends BasicTextFieldUI
+    static class TextFieldStyler extends BasicTextFieldUI implements SwingTreeStyledComponentUI<JTextField>
     {
         private final @Nullable TextUI _formerUI;
 
@@ -412,6 +459,13 @@ final class DynamicLaF
         }
 
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+
+        @Override
+        public ComponentStyleDelegate<JTextField> style(ComponentStyleDelegate<JTextField> delegate) throws Exception {
+            return _maybeStyleThroughFormerUI(_formerUI, delegate);
+        }
+
+        @Override public boolean canForwardPaintingToSwingTree() { return true; }
     }
 
     private static void _paintComponentThroughFormerUI(
@@ -497,4 +551,13 @@ final class DynamicLaF
             });
         }
     }
+
+    private static <T extends JComponent> ComponentStyleDelegate<T> _maybeStyleThroughFormerUI(@Nullable ComponentUI ui, ComponentStyleDelegate<T> delegate) throws Exception {
+        if ( ui instanceof SwingTreeStyledComponentUI ) {
+            return ((SwingTreeStyledComponentUI)ui).style(delegate);
+        } else {
+            return delegate;
+        }
+    }
+
 }

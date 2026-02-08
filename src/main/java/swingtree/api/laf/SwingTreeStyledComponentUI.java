@@ -10,12 +10,14 @@ import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleSheet;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.function.Supplier;
 
 /**
- *  This interface is intended to be implemented by the various {@link javax.swing.plaf.ComponentUI}
- *  extensions of an external Look and Feel which desires to utilize the SwingTree style API.<br>
- *  SwingTree ships with a rich style rendering engine and three main ways for configuring styles.<br>
+ *  This interface is intended to be implemented by the various {@link javax.swing.plaf.ComponentUI} extensions
+ *  of a custom <i>Look and Feel</i> which desires to fully integrate with the SwingTree style engine.<br>
+ *  For context, it is important to note that <i>SwingTree</i> ships with a rich style rendering engine
+ *  and three main ways for configuring styles.<br>
  *  The most prominent once, which are typically used to build an application, are:
  *  <ul>
  *      <li>
@@ -33,26 +35,64 @@ import java.util.function.Supplier;
  *  </ul>
  *  <b>
  *      The third major way of styling is through the {@link javax.swing.plaf.ComponentUI}
- *      of a custom look and feel implementing <b>this marker interface {@link SwingTreeStyledComponentUI}</b>.
+ *      of a custom <i>Look and Feel</i> implementing this marker interface {@link SwingTreeStyledComponentUI}.
  *  </b><br>
+ *  <p>
+ *      So if you develop your own <i>Look and Feel</i>, then you can make it compatible with <i>SwingTree</i> by having your
+ *      {@link javax.swing.plaf.ComponentUI} extensions implement this {@link SwingTreeStyledComponentUI} interface.
+ *      <i>SwingTree</i> will cooperate with the {@code ComponentUI} in two major ways:
+ *  </p>
+ *  <ol>
+ *      <li>
+ *          Gathering style information to the <i>SwingTree</i> style engine
+ *          by invoking the {@link #style(ComponentStyleDelegate)} implementation.
+ *      </li>
+ *      <li>
+ *          Checking if {@link #canForwardPaintingToSwingTree()} returns {@code true} and then expecting
+ *          the {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)} to delegate to <i>SwingTree</i>s
+ *          {@link swingtree.style.ComponentExtension#paintBackground(Graphics, swingtree.api.Painter)} method.
+ *      </li>
+ *  </ol>
  *  When SwingTree resolves a style, it will detect that the {@link javax.swing.plaf.ComponentUI}
  *  of a particular {@link JComponent} implements this interface, and then invoke the
- *  {@link #style(ComponentStyleDelegate)} method.<br>
+ *  {@link #style(ComponentStyleDelegate)} method to gather style information.<br>
  *  That way a custom look and feel can delegate the complex rendering directly to the SwingTree style engine.
- *  You as <i>look and feel</i> developer can then also focus on writing code which conveys the intent of how a
+ *  You as <i>Look and Feel</i> developer can thereby focus on writing code which conveys the intent of how a
  *  particular type of component ought to look like much more clearly.<br>
  *  <p>
  *      Note that the <b>order</b> in which a <b>renderable style</b> is computed in
  *      SwingTree follows the following order:
- *      <li>
- *          <ul><b>1. Global Defaults</b> - (see {@link StyleSheet})</ul>
- *          <ul><b>2. Component Look and Feel</b> - (this {@link SwingTreeStyledComponentUI})</ul>
- *          <ul><b>3. Component Declaration</b> - (see {@link swingtree.UIForAnySwing#withStyle(Styler)})</ul>
- *      </li>
+ *      <ol>
+ *          <li><b>Global Defaults</b> - (see {@link StyleSheet})</li>
+ *          <li><b>Component Look and Feel</b> - (this {@link SwingTreeStyledComponentUI})</li>
+ *          <li><b>Component Declaration</b> - (see {@link swingtree.UIForAnySwing#withStyle(Styler)})</li>
+ *      </ol>
  *      In other words:<br>
  *      A {@link ComponentStyleDelegate} will be sent through
  *      a {@link StyleSheet}, then it will go through this {@link SwingTreeStyledComponentUI}
  *      and finally {@link swingtree.UIForAnySwing#withStyle(Styler)} on a concrete component.
+ *  </p><br>
+ *  <p>
+ *      But for full interoperability you may also want to have {@link #canForwardPaintingToSwingTree()}
+ *      always return {@code true}, and then implement {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)}
+ *      to delegate to <i>SwingTree</i> like so:
+ *      <pre>{@code
+ *        @Override
+ *        public void paint(
+ *            Graphics g,
+ *            JComponent comp
+ *        ) {
+ *            ComponentExtension.from(comp)
+ *                .paintBackground(g, g2d->{
+ *                    super.paint(g2d, comp);
+ *                });
+ *        }
+ *        @Override
+ *        public boolean canForwardPaintingToSwingTree() {
+ *            return true;
+ *        }
+ *      }</pre>
+ *      That way, the <i>SwingTree</i>s style engine works reliably for all components!
  *  </p>
  *
  * @param <C> The type of {@link JComponent} for which a particular {@link javax.swing.plaf.ComponentUI} is designed.
@@ -63,14 +103,13 @@ public interface SwingTreeStyledComponentUI<C extends JComponent> {
      *  Receives a {@link ComponentStyleDelegate} and applies style information to it by
      *  transforming it to a new {@link ComponentStyleDelegate}. <br>
      *  <b>
-     *      This styling will happen after/on-top of the style of a {@link StyleSheet}
-     *      and it will happen before the style directly declared for a specific component instance.
+     *      This styling will happen after/on-top of the style supplied by a {@link StyleSheet}
+     *      but it will happen before the style directly declared for a specific component instance
+     *      using the {@link swingtree.UIForAnySwing#withStyle(Styler)} method.
      *  </b>
      *  <br>
-     *  Note that this method deliberately requires the handling of checked exceptions.
-     *  This is because there may be any number of implementations
-     *  hiding behind this interface and so it is unwise to assume that
-     *  all of them will be able to execute gracefully without throwing exceptions.
+     *  Note that this method is designed to only be invoked by <i>SwingTree</i> internal code.
+     *  You should never invoke it yourself.
      *
      * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
      * @return A new {@link ComponentStyleDelegate} that has the style applied.
@@ -78,4 +117,43 @@ public interface SwingTreeStyledComponentUI<C extends JComponent> {
      */
     ComponentStyleDelegate<C> style( ComponentStyleDelegate<C> delegate ) throws Exception;
 
+    /**
+     *  If you want to achieve full compatibility and interoperability with SwingTree in your <i>Look and Feel</i>
+     *  you have to forward {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)} and
+     *  {@link javax.swing.plaf.ComponentUI#update(Graphics, JComponent)} draw calls to SwingTrees's
+     *  {@link swingtree.style.ComponentExtension#paintBackground(Graphics, swingtree.api.Painter)} method!
+     *  To inform SwingTree that you are going to do this, you also have to override <b>this method</b> and
+     *  make it return {@code true}. This will turn your {@link javax.swing.plaf.ComponentUI} implementation
+     *  into the main way in which <i>SwingTree</i> renders its style onto a specific component type.<br>
+     *  So your implementation would look something like this:
+     *  <pre>{@code
+     *    @Override
+     *    public void paint(
+     *        Graphics g,
+     *        JComponent comp
+     *    ) {
+     *        ComponentExtension.from(comp)
+     *            .paintBackground(g, g2d->{
+     *                super.paint(g2d, comp);
+     *            });
+     *    }
+     *    @Override
+     *    public boolean canForwardPaintingToSwingTree() {
+     *        return true;
+     *    }
+     *  }</pre>
+     *  <p>
+     *      <b>WARNING:</b> <br>
+     *      If this method returns {@code true}, but the {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)}
+     *      implementation does NOT delegate to {@link swingtree.style.ComponentExtension#paintBackground(Graphics, swingtree.api.Painter)},
+     *      <b>then you will effectively break the style rendering of your components!</b><br>
+     *      This is because in that case, <i>SwingTree</i> relies entirely on your override
+     *      to be the sole way of hooking into <i>Swing</i>s component rendering.
+     *  </p>
+     * @return A flag which informs <i>SwingTree</i> if it can rely on your {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)}
+     *         implementation to be used for hooking its style engine into the rendering pipeline of a component.
+     */
+    default boolean canForwardPaintingToSwingTree() {
+        return false;
+    }
 }

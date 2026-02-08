@@ -1,6 +1,5 @@
 package swingtree.style;
 
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
@@ -10,7 +9,6 @@ import swingtree.api.laf.SwingTreeStyledComponentUI;
 
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.text.JTextComponent;
 import java.util.*;
 
 /**
@@ -73,6 +71,7 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<>(_localStyler, new Expirable[0], _styleSheet);
     }
 
+    @SuppressWarnings("DoNotCall")
     StyleConf gatherStyleFor( C owner )
     {
         // 0: Some things are inherited from the parent component:
@@ -101,7 +100,7 @@ final class StyleSource<C extends JComponent>
 
         // 2. Look and Feel
         try {
-            ComponentUI componentUI = _findComponentUIOf(owner);
+            ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf(owner);
             if ( componentUI instanceof SwingTreeStyledComponentUI) {
                 SwingTreeStyledComponentUI<C> swingTreeUI = (SwingTreeStyledComponentUI) componentUI;
                 ComponentStyleDelegate<C> updated = swingTreeUI.style(new ComponentStyleDelegate<>(owner, styleConf));
@@ -160,100 +159,6 @@ final class StyleSource<C extends JComponent>
             return styleConf;
 
         return styleConf.scale( UI.scale() );
-    }
-
-    private static @Nullable ComponentUI _findComponentUIOf(JComponent component) {
-        // Try to cast to known component types that have getUI() method
-        if (component instanceof AbstractButton) {
-            return ((AbstractButton) component).getUI();
-            /*
-                Note, this branch also covers:
-                    JButton, JToggleButton, JMenu, JMenuItem,
-                    JCheckBox, JCheckBoxMenuItem and JRadioButtonMenuItem
-            */
-        }
-        if (component instanceof JTextComponent) {
-            return ((JTextComponent) component).getUI();
-            /*
-                Note, this branch also covers:
-                    JTextField, JPasswordField, JFormattedTextField,
-                    JTextArea,
-            */
-        }
-        if (component instanceof JPanel) {
-            return ((JPanel) component).getUI();
-        }
-        if (component instanceof JLabel) {
-            return ((JLabel) component).getUI();
-        }
-        if (component instanceof JScrollBar) {
-            return ((JScrollBar) component).getUI();
-        }
-        if (component instanceof JScrollPane) {
-            return ((JScrollPane) component).getUI();
-        }
-        if (component instanceof JSplitPane) {
-            return ((JSplitPane) component).getUI();
-        }
-        if (component instanceof JTabbedPane) {
-            return ((JTabbedPane) component).getUI();
-        }
-        if (component instanceof JToolBar) {
-            return ((JToolBar) component).getUI();
-        }
-        if (component instanceof JRootPane) {
-            return ((JRootPane) component).getUI();
-        }
-        if (component instanceof JPopupMenu) {
-            return ((JPopupMenu) component).getUI();
-        }
-        if (component instanceof JMenuBar) {
-            return ((JMenuBar) component).getUI();
-        }
-        if (component instanceof JProgressBar) {
-            return ((JProgressBar) component).getUI();
-        }
-        if (component instanceof JSlider) {
-            return ((JSlider) component).getUI();
-        }
-        if (component instanceof JSpinner) {
-            return ((JSpinner) component).getUI();
-        }
-        if (component instanceof JToolTip) {
-            return ((JToolTip) component).getUI();
-        }
-        if (component instanceof JTable) {
-            return ((JTable) component).getUI();
-        }
-        if (component instanceof JTree) {
-            return ((JTree) component).getUI();
-        }
-        if (component instanceof JList<?>) {
-            return ((JList<?>) component).getUI();
-        }
-        if (component instanceof JColorChooser) {
-            return ((JColorChooser) component).getUI();
-        }
-        if (component instanceof JFileChooser) {
-            return ((JFileChooser) component).getUI();
-        }
-        if (component instanceof JDesktopPane) {
-            return ((JDesktopPane) component).getUI();
-        }
-        if (component instanceof JInternalFrame) {
-            return ((JInternalFrame) component).getUI();
-        }
-        if (component instanceof JViewport) {
-            return ((JViewport) component).getUI();
-        }
-        if (component instanceof JComboBox<?>) {
-            return ((JComboBox<?>) component).getUI();
-        }
-        if (component instanceof JOptionPane) {
-            return ((JOptionPane) component).getUI();
-        }
-
-        return null;
     }
 
 }
