@@ -78,7 +78,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             extensions implement the `SwingTreeStyledComponentUI` interface.
             The `SwingTree` library will detect the UI and ask the interface
             if it can cooperate with the `SwingTree` style backend.
-            This corporation has two parts:
+            This cooperation has two parts:
             
             1. Supplying style information for the `SwingTree` style engine.
             2. Delegating the `paint` call to `SwingTree`s `ComponentExtension`. 
