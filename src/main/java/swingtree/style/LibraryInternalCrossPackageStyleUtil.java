@@ -8,6 +8,7 @@ import swingtree.UI;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.table.JTableHeader;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -125,6 +126,15 @@ public final class LibraryInternalCrossPackageStyleUtil {
         }
         if (component instanceof JPanel) {
             return ((JPanel) component).getUI();
+        }
+        if ( component instanceof JTableHeader) {
+            return ((JTableHeader)component).getUI();
+        }
+        if ( component instanceof JLayer<?>) {
+            return ((JLayer<?>)component).getUI();
+        }
+        if (component instanceof JSeparator) {
+            return ((JSeparator)component).getUI();
         }
         if (component instanceof JLabel) {
             return ((JLabel) component).getUI();
