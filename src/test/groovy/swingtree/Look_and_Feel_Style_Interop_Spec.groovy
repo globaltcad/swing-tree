@@ -73,7 +73,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             overridden or not. An override can take place if a look and
             feel is not fully compatible with `SwingTree`
             
-            If your develop your own look and feel, then you can
+            If you develop your own look and feel, then you can
             make it compatible with `SwingTree` by having your `ComponentUI`
             extensions implement the `SwingTreeStyledComponentUI` interface.
             The `SwingTree` library will detect the UI and ask the interface
@@ -181,7 +181,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
         Styler<JButton> styler
     ){
         reportInfo """
-            If your develop your own look and feel, then you can
+            If you develop your own look and feel, then you can
             make it compatible with `SwingTree` by having your `ComponentUI`
             extensions implement the `SwingTreeStyledComponentUI` interface.
             The `SwingTree` library will detect the UI and ask the interface
