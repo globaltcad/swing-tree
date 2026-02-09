@@ -62,7 +62,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
 
 
     def 'Styles may lead to the installation of a custom UI depending on how well a particular LaF supports SwingTree.'(
-        boolean isStyled, boolean isCustom, Styler<JButton> styler
+        boolean isStyled, boolean overridden, Styler<JButton> styler
     ){
         reportInfo """
             This is a data driven test verifying how a partially `SwingTree` compatible
@@ -105,8 +105,8 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             button = ui.get(JButton)
         then : 'Depending on the applied style, there may or may not be a `StyleConf` installed:'
             (ComponentExtension.from(button).getStyle() != StyleConf.none()) == isStyled
-        and : 'The custom UI also may or may not be installed:'
-            !(button.getUI() instanceof MyButtonUI) == isCustom
+        and : 'The custom `MyButtonUI` may or may not be overridden by `SwingTree`:'
+            !(button.getUI() instanceof MyButtonUI) == overridden
 
         when : """
             The style is deactivated, then we expect the original UI to be reinstalled.
@@ -121,60 +121,60 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             (button.getUI() instanceof MyButtonUI)
 
         where :
-            isStyled | isCustom | styler
-            false    | false    | { it }
-            true     | false    | { it.backgroundColor(Color.BLACK) }
-            true     | false    | { it.foregroundColor(Color.BLUE) }
-            true     | false    | { it.foundationColor(Color.GREEN) }
-            true     | false    | { it.cursor(UI.Cursor.HAND) }
-            true     | false    | { it.margin(5) }
-            true     | false    | { it.padding(5).margin(5) }
-            true     | false    | { it.border(2, "black") }
-            true     | false    | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
+            isStyled | overridden | styler
+            false    | false      | { it }
+            true     | false      | { it.backgroundColor(Color.BLACK) }
+            true     | false      | { it.foregroundColor(Color.BLUE) }
+            true     | false      | { it.foundationColor(Color.GREEN) }
+            true     | false      | { it.cursor(UI.Cursor.HAND) }
+            true     | false      | { it.margin(5) }
+            true     | false      | { it.padding(5).margin(5) }
+            true     | false      | { it.border(2, "black") }
+            true     | false      | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
 
-            true     | false    | { it.shadowColor("green") }
-            true     | false    | { it.shadowColor("blue").shadowBlurRadius(5) }
-            true     | false    | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
-            true     | false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
-            true     | false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
-            true     | false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
-            true     | false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
-            true     | false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
-            true     | false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
-            true     | false    | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
-            false    | false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
-            false    | false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
-            true     | true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
-            true     | true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
-            false    | false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).blurRadius(5).isOutset(true)) }
+            true     | false      | { it.shadowColor("green") }
+            true     | false      | { it.shadowColor("blue").shadowBlurRadius(5) }
+            true     | false      | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
+            true     | false      | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | false      | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | false      | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            true     | false      | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | false      | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            true     | false      | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            true     | false      | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+            false    | false      | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
+            false    | false      | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
+            true     | true       | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
+            true     | true       | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            false    | false      | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).blurRadius(5).isOutset(true)) }
 
-            true     | true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
-            false    | false    | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
-            true     | false    | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
-            true     | false    | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
-            true     | false    | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | true       | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | false      | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])) }
+            true     | false      | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | false      | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | false      | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
 
-            true     | true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }
-            true     | true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }
-            false    | false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([] as Color[])) }
-            true     | false    | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
-            true     | false    | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
-            true     | false    | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | true       | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }
+            true     | true       | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }
+            false    | false      | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([] as Color[])) }
+            true     | false      | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+            true     | false      | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            true     | false      | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
 
-            true     | true     | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
-            true     | false    | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
-            true     | false    | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
-            true     | false    | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+            true     | true       | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
+            true     | false      | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
+            true     | false      | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
+            true     | false      | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
 
-            true     | true     | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
-            true     | false    | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
-            true     | false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
-            true     | false    | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
+            true     | true       | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
+            true     | false      | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
+            true     | false      | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+            true     | false      | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
 
-            true     | false    | { it.parentFilter( conf -> conf.blur(1) ) }
-            true     | false    | { it.parentFilter( conf -> conf.blur(0.75) ) }
-            false    | false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
-            true     | false    | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+            true     | false      | { it.parentFilter( conf -> conf.blur(1) ) }
+            true     | false      | { it.parentFilter( conf -> conf.blur(0.75) ) }
+            false    | false      | { it.parentFilter( conf -> conf.blur(0.0) ) }
+            true     | false      | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
     }
 
     def 'The `SwingTree` style engine will never replace a `SwingTree` compatible `ComponentUI`.'(
