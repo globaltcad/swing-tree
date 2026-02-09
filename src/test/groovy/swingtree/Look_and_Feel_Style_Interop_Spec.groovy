@@ -66,7 +66,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
     ){
         reportInfo """
             This is a data driven test verifying how a partially `SwingTree` compatible
-            component UI can be integrates with `SwingTree`s style engine on a regular component.
+            component UI can be integrated with `SwingTree`s style engine on a regular component.
             It takes a `Styler` which will be applied to a `JButton` 
             by passing it to the `withStyle(Styler)` method.
             Then we build the component and check if the custom UI was
