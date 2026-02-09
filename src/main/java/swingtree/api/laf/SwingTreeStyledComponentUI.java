@@ -97,7 +97,87 @@ import java.util.function.Supplier;
  *
  * @param <C> The type of {@link JComponent} for which a particular {@link javax.swing.plaf.ComponentUI} is designed.
  */
-public interface SwingTreeStyledComponentUI<C extends JComponent> {
+public interface SwingTreeStyledComponentUI<C extends JComponent>
+{
+    /**
+     * This method must be implemented through {@link javax.swing.plaf.ComponentUI#installUI(JComponent)}!
+     * It configures the specified component appropriately for a <i>SwingTree</i> compatible look and feel.
+     * This method is invoked when the <code>ComponentUI</code> instance is being installed
+     * as the UI delegate on the specified component.  This method should
+     * completely configure the component for the look and feel,
+     * including the following:
+     * <ol>
+     *     <li>Install default property values for color, fonts, borders,
+     *         icons, opacity, etc. on the component.  Whenever possible,
+     *         property values initialized by the client program should <i>not</i>
+     *         be overridden.
+     *     <li>Install a <code>LayoutManager</code> on the component if necessary.
+     *     <li>Create/add any required subcomponents to the component.
+     *     <li>Create/install event listeners on the component.
+     *     <li>Create/install a <code>PropertyChangeListener</code> on the component in order
+     *         to detect and respond to component property changes appropriately.
+     *     <li>Install keyboard UI (mnemonics, traversal, etc.) on the component.
+     *     <li>Initialize any appropriate instance data.
+     * </ol><br>
+     * <p>
+     *     <b>IMPORTANT:</b><br>
+     *     For full <i>SwingTree</i> interoperability, implementations of this
+     *     should invoke {@link swingtree.style.ComponentExtension#gatherApplyAndInstallStyle(boolean)}
+     *     to ensure that the <i>SwingTree</i> style of a particular component is installed correctly.<br>
+     *     So an implementation may look something like this:
+     * </p>
+     *  <pre>{@code
+     *    @Override
+     *    public void installUI(
+     *        JComponent comp
+     *    ) {
+     *        ComponentExtension.from(comp)
+     *            .gatherApplyAndInstallStyle(true);
+     *    }
+     *  }</pre>
+     *
+     * @param c the component where this UI delegate is being installed
+     *
+     * @see javax.swing.plaf.ComponentUI#uninstallUI
+     * @see javax.swing.JComponent#updateUI
+     */
+    void installUI(JComponent c);
+
+    /**
+     * This method must be implemented through {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)}!
+     * It paints the specified component appropriately for the look and feel.
+     * This method is invoked from the {@link javax.swing.plaf.ComponentUI#update(Graphics, JComponent)}
+     * method when the specified component is being painted. Subclasses should override
+     * this method and use the specified <code>Graphics</code> object to
+     * render the content of the component.<br>
+     * <b>
+     *     For full <i>SwingTree</i> interoperability, you
+     *     should override {@link #canForwardPaintingToSwingTree()} to return {@code true}
+     *     and then forward the paint request to <i>SwingTree</i> like so:
+     * </b>
+     *  <pre>{@code
+     *    @Override
+     *    public void paint(
+     *        Graphics g,
+     *        JComponent comp
+     *    ) {
+     *        ComponentExtension.from(comp)
+     *            .paintBackground(g, g2d->{
+     *                super.paint(g2d, comp);
+     *            });
+     *    }
+     *  }</pre>
+     *
+     * @param g the <code>Graphics</code> context in which to paint
+     * @param c the component being painted;
+     *          this argument is often ignored,
+     *          but might be used if the UI object is stateless
+     *          and shared by multiple components
+     *
+     * @see #canForwardPaintingToSwingTree()
+     */
+    void paint(Graphics g, JComponent c);
+
 
     /**
      *  Receives a {@link ComponentStyleDelegate} and applies style information to it by
@@ -156,4 +236,5 @@ public interface SwingTreeStyledComponentUI<C extends JComponent> {
     default boolean canForwardPaintingToSwingTree() {
         return false;
     }
+
 }
