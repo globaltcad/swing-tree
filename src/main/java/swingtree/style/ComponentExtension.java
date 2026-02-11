@@ -129,7 +129,66 @@ public final class ComponentExtension<C extends JComponent>
 
     C getOwner() { return _owner; }
 
+    /**
+     * Returns a reactive view of the current UI scale factor as applied to this component.
+     * You can use it to register change listeners onto it and react to changes to the factor.
+     * The value in the property always reflects {@link SwingTree#getUiScaleFactor()} and
+     * it is automatically updated when it changes...
+     *
+     * @return A reactive/read-only {@code float} based property
+     *         which will always reflect the state of the library
+     *         global {@link SwingTree#getUiScaleFactor()} value.
+     *
+     */
     public Viewable<Float> localUiScaleFactor() { return _localUiScaleFactor; }
+
+    /**
+     * <p><b>
+     *     Primary painting entry point for SwingTree-compatible
+     *     {@link javax.swing.plaf.ComponentUI} implementations
+     *     to ensure correct <i>SwingTree</i> style installation and
+     *     {@link UI.Layer#BACKGROUND} rendering.
+     * </b></p>
+     *
+     * <p>This method is specifically designed to be called from within the
+     * {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)} method
+     * of any {@link javax.swing.plaf.ComponentUI} that implements the
+     * {@link swingtree.api.laf.SwingTreeStyledComponentUI} interface and returns
+     * {@code true} from {@link swingtree.api.laf.SwingTreeStyledComponentUI#canForwardPaintingToSwingTree()}.</p>
+     *
+     * <h3>Typical Usage:</h3>
+     * <pre>{@code
+     * @Override
+     * public void paint(Graphics g, JComponent comp) {
+     *     ComponentExtension.from(comp).paintBackground(g, g2d -> {
+     *         super.paint(g2d, comp); // Native look and feel painting
+     *     });
+     * }
+     * }</pre>
+     *
+     * <h3>What This Does Generally:</h3>
+     * <ul>
+     *   <li>Ensures that the component's {@link StyleConf} is gathered and installed correctly</li>
+     *   <li>Renders the {@link UI.Layer#BACKGROUND} of a {@link StyleConf}</li>
+     *   <li>Clips the graphics context to the {@link UI.ComponentArea#BODY}</li>
+     *   <li>Invokes the supplied look and feel {@link Painter} for additional native component rendering</li>
+     *   <li>Handles buffering for components with parent filters</li>
+     * </ul>
+     *
+     * @param graphics The graphics context to paint into
+     * @param lookAndFeelPainting Callback that performs native Swing painting
+     *                            (will be clipped to the {@link UI.ComponentArea#BODY}, which is based on the current style)
+     * @throws ClassCastException if the provided {@code graphics} is not a {@link Graphics2D} instance
+     *         (should never happen in standard Swing usage)
+     *
+     * @see swingtree.api.laf.SwingTreeStyledComponentUI
+     * @see swingtree.api.laf.SwingTreeStyledComponentUI#canForwardPaintingToSwingTree()
+     * @see #gatherApplyAndInstallStyle(boolean)
+     * @see StyleConf
+     */
+    public void paintBackground( Graphics graphics, Painter lookAndFeelPainting ) {
+        paintBackground(graphics, true, g2d->lookAndFeelPainting.paint((Graphics2D) g2d));
+    }
 
     /**
      *  Stores the given observable in the extension in order to ensure that
@@ -670,8 +729,8 @@ public final class ComponentExtension<C extends JComponent>
                     int height = _owner.getHeight();
                     internalGraphics.fillRect(0, 0, width, height);
                     /*
-                        If "lookAndFeelPainting" is null then this means there is no
-                        native ComponentUI, instead it is upd to SwingTree to override what was
+                        If "needsCustomWipe" is true then this means there is no
+                        native ComponentUI, instead it is up to SwingTree to override what was
                         rendered previously in the buffer.
                     */
                 }
