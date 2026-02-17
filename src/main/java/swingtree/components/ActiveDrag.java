@@ -119,7 +119,8 @@ final class ActiveDrag {
     public ActiveDrag renderComponentIntoImage()
     {
         Objects.requireNonNull(dragConf);
-        BufferedImage image = dragConf.customDragImage().map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
+        Optional<Image> customDragImage = dragConf.customDragImage();
+        BufferedImage image = customDragImage.map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
         Component component = Objects.requireNonNull(draggedComponent);
 
         int currentComponentHash = 0;
@@ -135,22 +136,26 @@ final class ActiveDrag {
 
         boolean weNeedClearing = image != null;
 
-        if ( image == null )
-            image = new BufferedImage(
+        if ( !customDragImage.isPresent() ) {
+            // We make the drag image based on the component!
+            if (image == null)
+                image = new BufferedImage(
                         component.getWidth(),
                         component.getHeight(),
                         BufferedImage.TYPE_INT_ARGB
-                    );
+                );
 
-        // We wipe the image before rendering the component
-        Graphics2D g = image.createGraphics();
-        if ( weNeedClearing ) {
-            Composite oldComp = g.getComposite();
-            g.setComposite(AlphaComposite.Clear);
-            g.fillRect(0, 0, image.getWidth(), image.getHeight());
-            g.setComposite(oldComp);
+            // We wipe the image before rendering the component
+            Graphics2D g = image.createGraphics();
+            if ( weNeedClearing ) {
+                Composite oldComp = g.getComposite();
+                g.setComposite(AlphaComposite.Clear);
+                g.fillRect(0, 0, image.getWidth(), image.getHeight());
+                g.setComposite(oldComp);
+            }
+            component.paint(g);
+            g.dispose();
         }
-        component.paint(g);
 
         try {
             if ( dragConf.opacity() < 1.0 && dragConf.opacity() > 0.0 ) {
@@ -163,7 +168,6 @@ final class ActiveDrag {
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to make the rendering of dragged component transparent.", e);
         }
-        g.dispose();
 
         return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset, dragConf);
     }
@@ -184,7 +188,9 @@ final class ActiveDrag {
     }
 
     Size draggedComponentSize() {
-        if ( draggedComponent != null ) {
+        if ( currentDragImage != null ) {
+            return Size.of(currentDragImage.getWidth(), currentDragImage.getHeight());
+        } else if ( draggedComponent != null ) {
             return Size.of(draggedComponent.getSize());
         }
         return Size.unknown();
