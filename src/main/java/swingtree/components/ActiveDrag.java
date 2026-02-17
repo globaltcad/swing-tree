@@ -9,8 +9,7 @@ import swingtree.layout.Position;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
-import javax.swing.JComponent;
-import javax.swing.JRootPane;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
@@ -123,7 +122,7 @@ final class ActiveDrag {
         BufferedImage image = customDragImage.map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
         Component component = Objects.requireNonNull(draggedComponent);
 
-        int currentComponentHash = 0;
+        int currentComponentHash;
         if ( component instanceof JComponent ) {
             currentComponentHash = ComponentExtension.from((JComponent) component).viewStateHashCode();
             if ( currentComponentHash == this.componentHash && image != null )
@@ -172,18 +171,17 @@ final class ActiveDrag {
         return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag dragged(MouseEvent e, @Nullable JRootPane rootPane)
+    ActiveDrag dragged(MouseEvent e)
     {
         if ( draggedComponent != null ) {
             Point point = e.getPoint();
-            ActiveDrag updatedDrag = this.withOffset(Position.of(point.x - start.x(), point.y - start.y()))
-                                         .renderComponentIntoImage();
-            return updatedDrag;
+            return this.withOffset(Position.of(point.x - start.x(), point.y - start.y()))
+                       .renderComponentIntoImage();
         }
         return this;
     }
 
-    public boolean hasDraggedComponent() {
+    boolean hasDraggedComponent() {
         return draggedComponent != null;
     }
 
@@ -196,7 +194,7 @@ final class ActiveDrag {
         return Size.unknown();
     }
 
-    public void paint(Graphics g){
+    void paint(Graphics g){
         if ( !DragSource.isDragImageSupported() ) {
             /*
                 If the drag image is not supported by the platform, we
@@ -225,23 +223,23 @@ final class ActiveDrag {
         return Bounds.of(getRenderPosition(), draggedComponentSize());
     }
 
-    public ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
+    ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withStart(Position start) {
+    ActiveDrag withStart(Position start) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withOffset(Position offset) {
+    ActiveDrag withOffset(Position offset) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withLocalOffset(Position localOffset) {
+    ActiveDrag withLocalOffset(Position localOffset) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withDragConf( DragAwayComponentConf<?> dragConf ) {
+    ActiveDrag withDragConf( DragAwayComponentConf<?> dragConf ) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
