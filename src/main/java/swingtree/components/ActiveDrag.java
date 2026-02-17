@@ -9,8 +9,7 @@ import swingtree.layout.Position;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
-import javax.swing.JComponent;
-import javax.swing.JRootPane;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
@@ -119,10 +118,11 @@ final class ActiveDrag {
     public ActiveDrag renderComponentIntoImage()
     {
         Objects.requireNonNull(dragConf);
-        BufferedImage image = dragConf.customDragImage().map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
+        Optional<Image> customDragImage = dragConf.customDragImage();
+        BufferedImage image = customDragImage.map(ActiveDrag::toBufferedImage).orElse(this.currentDragImage);
         Component component = Objects.requireNonNull(draggedComponent);
 
-        int currentComponentHash = 0;
+        int currentComponentHash;
         if ( component instanceof JComponent ) {
             currentComponentHash = ComponentExtension.from((JComponent) component).viewStateHashCode();
             if ( currentComponentHash == this.componentHash && image != null )
@@ -135,22 +135,26 @@ final class ActiveDrag {
 
         boolean weNeedClearing = image != null;
 
-        if ( image == null )
-            image = new BufferedImage(
+        if ( !customDragImage.isPresent() ) {
+            // We make the drag image based on the component!
+            if (image == null)
+                image = new BufferedImage(
                         component.getWidth(),
                         component.getHeight(),
                         BufferedImage.TYPE_INT_ARGB
-                    );
+                );
 
-        // We wipe the image before rendering the component
-        Graphics2D g = image.createGraphics();
-        if ( weNeedClearing ) {
-            Composite oldComp = g.getComposite();
-            g.setComposite(AlphaComposite.Clear);
-            g.fillRect(0, 0, image.getWidth(), image.getHeight());
-            g.setComposite(oldComp);
+            // We wipe the image before rendering the component
+            Graphics2D g = image.createGraphics();
+            if ( weNeedClearing ) {
+                Composite oldComp = g.getComposite();
+                g.setComposite(AlphaComposite.Clear);
+                g.fillRect(0, 0, image.getWidth(), image.getHeight());
+                g.setComposite(oldComp);
+            }
+            component.paint(g);
+            g.dispose();
         }
-        component.paint(g);
 
         try {
             if ( dragConf.opacity() < 1.0 && dragConf.opacity() > 0.0 ) {
@@ -163,34 +167,34 @@ final class ActiveDrag {
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to make the rendering of dragged component transparent.", e);
         }
-        g.dispose();
 
         return new ActiveDrag(draggedComponent, image, currentComponentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag dragged(MouseEvent e, @Nullable JRootPane rootPane)
+    ActiveDrag dragged(MouseEvent e)
     {
         if ( draggedComponent != null ) {
             Point point = e.getPoint();
-            ActiveDrag updatedDrag = this.withOffset(Position.of(point.x - start.x(), point.y - start.y()))
-                                         .renderComponentIntoImage();
-            return updatedDrag;
+            return this.withOffset(Position.of(point.x - start.x(), point.y - start.y()))
+                       .renderComponentIntoImage();
         }
         return this;
     }
 
-    public boolean hasDraggedComponent() {
+    boolean hasDraggedComponent() {
         return draggedComponent != null;
     }
 
     Size draggedComponentSize() {
-        if ( draggedComponent != null ) {
+        if ( currentDragImage != null ) {
+            return Size.of(currentDragImage.getWidth(), currentDragImage.getHeight());
+        } else if ( draggedComponent != null ) {
             return Size.of(draggedComponent.getSize());
         }
         return Size.unknown();
     }
 
-    public void paint(Graphics g){
+    void paint(Graphics g){
         if ( !DragSource.isDragImageSupported() ) {
             /*
                 If the drag image is not supported by the platform, we
@@ -219,23 +223,23 @@ final class ActiveDrag {
         return Bounds.of(getRenderPosition(), draggedComponentSize());
     }
 
-    public ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
+    ActiveDrag withDraggedComponent(@Nullable Component draggedComponent) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withStart(Position start) {
+    ActiveDrag withStart(Position start) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withOffset(Position offset) {
+    ActiveDrag withOffset(Position offset) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withLocalOffset(Position localOffset) {
+    ActiveDrag withLocalOffset(Position localOffset) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 
-    public ActiveDrag withDragConf( DragAwayComponentConf<?> dragConf ) {
+    ActiveDrag withDragConf( DragAwayComponentConf<?> dragConf ) {
         return new ActiveDrag(draggedComponent, currentDragImage, componentHash, start, offset, localOffset, dragConf);
     }
 

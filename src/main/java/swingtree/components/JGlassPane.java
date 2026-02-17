@@ -117,7 +117,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
                     }
                 });
                 ActiveDrag previousActiveDrag = activeDrag;
-                activeDrag = activeDrag.dragged(e, rootPane);
+                activeDrag = activeDrag.dragged(e);
                 setActiveDrag(activeDrag);
                 /*
                     Note that if the drag image is not supported by the platform, we
