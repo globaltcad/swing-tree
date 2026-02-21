@@ -5,6 +5,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.SwingTree;
@@ -43,12 +45,14 @@ import static javax.swing.SwingUtilities.*;
  *  Also, cursors are handled as if the glass pane was invisible
  *  (if no cursor gets explicitly set to the glass pane).
  */
-public class JGlassPane extends JPanel implements AWTEventListener, StylableComponent
+public class JGlassPane extends JPanel implements StylableComponent
 {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(JGlassPane.class);
 
     private final EventListenerList listeners = new EventListenerList();
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Viewable<AWTEvent> awtEventView; // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
 
     protected @Nullable JRootPane rootPane;
     private static final Map<JGlassPane, ActiveDrag> activeDrags = new WeakHashMap<>();
@@ -56,11 +60,10 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
     public JGlassPane() {
         setLayout(new MigLayout("fill, ins 0"));
-        Toolkit.getDefaultToolkit()
-                .addAWTEventListener(
-                    this,
-                    MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
-                );
+        awtEventView = SwingTree.get().createAndGetAwtEventView(MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK);
+        awtEventView.onChange(From.ALL, it -> {
+            it.currentValue().ifPresent(this::eventDispatched);
+        });
 
         final DragSource dragSource = DragSource.getDefaultDragSource();
         DragGestureRecognizer[] gestureRecognizer = {null};
@@ -362,8 +365,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         listeners.remove(MouseWheelListener.class,listener);
     }
 
-    @Override
-    public void eventDispatched( AWTEvent event ) {
+    private void eventDispatched( AWTEvent event ) {
         if ( rootPane != null && event instanceof MouseEvent ) {
             MouseEvent mouseEvent = (MouseEvent)event, newMouseEvent;
 

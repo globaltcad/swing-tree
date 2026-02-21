@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
+import sprouts.Pair;
 import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.api.IconDeclaration;
@@ -15,6 +16,8 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.event.AWTEventListener;
+import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
@@ -66,7 +69,17 @@ public final class SwingTree
      *  reconfigure your application with a different {@link SwingTreeInitConfig}.
      *  (see {@link #initialiseUsing(SwingTreeConfigurator)}).
      */
-    public static void clear() { _INSTANCE = null; }
+    public static void clear() {
+        if ( _INSTANCE != null && _INSTANCE.hasValue()) {
+            SwingTree swingTree = _INSTANCE.get();
+            swingTree._iconCache.clear();
+            swingTree._globalAwtBinding.values().forEach( pair ->{
+                Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
+            });
+            swingTree._globalAwtBinding.clear();
+        }
+        _INSTANCE = null;
+    }
 
     /**
      *  A lazy initialization of the singleton instance of the {@link SwingTree} class
@@ -99,6 +112,7 @@ public final class SwingTree
 
     private final LazyRef<UiScale> _uiScale;
     private final Map<IconDeclaration, ImageIcon> _iconCache = new WeakHashMap<>();
+    private final Map<Long, Pair<AWTEventListener, Var<AWTEvent>>> _globalAwtBinding = new HashMap<>();
 
 
     private SwingTree() { this(config -> config); }
@@ -144,6 +158,48 @@ public final class SwingTree
             Object value = UIManager.get (key);
             if ( value instanceof javax.swing.plaf.FontUIResource )
                 UIManager.put(key, f);
+        }
+    }
+
+    /**
+     * This method constitutes a memory safe alternative to {@link Toolkit#addAWTEventListener(AWTEventListener, long)}
+     * as it returns a weakly referenced reactive property that will automatically be garbage collected
+     * alongside its change listeners when you no longer reference it strongly in your code.<br>
+     * You use the reactive {@link Viewable} returned by this method to register change listeners
+     * that will be invoked whenever an AWT event matching the given mask is fired anywhere in the application.<br>
+     * The supplied <code>eventMask</code> is a bitmask of event types to receive.
+     * It is constructed by bitwise OR-ing together the event masks defined in <code>AWTEvent</code>.<br>
+     * There are many event ids, like {@link java.awt.event.MouseEvent#BUTTON1}, {@link java.awt.event.MouseEvent#MOUSE_CLICKED},
+     * {@link java.awt.event.KeyEvent#KEY_PRESSED}, {@link ComponentEvent#COMPONENT_MOVED},
+     * {@link java.awt.event.WindowEvent#COMPONENT_MOVED}, etc...<br>
+     * <br>
+     * <p><b>
+     *     Note that when the {@link SwingTree} library context gets cleared through {@link #clear()}
+     *     or replaced through {@link #initialize()} or {@link #initialiseUsing(SwingTreeConfigurator)}, then
+     *     the reactive view returned by this method will no longer receive updates and will be effectively dead!
+     * </b></p>
+     *
+     * @param mask the bitmask of event types to receive, constructed by bitwise OR-ing together the event masks defined in <code>AWTEvent</code>.
+     *             For example, if you want to listen to mouse clicks and key presses, you would pass in
+     *             <code>AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK</code> as the mask.
+     * @return a reactive {@link Viewable} that will update itself and invoke all of its change listeners whenever an AWT event matching the given mask is fired anywhere in the application.
+     * @see Toolkit#addAWTEventListener(AWTEventListener, long) for more information on the event mask and the types of events you can listen to.
+     */
+    public Viewable<AWTEvent> createAndGetAwtEventView(long mask) {
+        Pair<AWTEventListener, Var<AWTEvent>> existingBinding = _globalAwtBinding.get(mask);
+        if ( existingBinding != null )
+            return existingBinding.second().view();
+        else {
+            Var<AWTEvent> awtEventProperty = Var.ofNull(AWTEvent.class);
+            AWTEventListener listener = awtEvent -> {
+                awtEventProperty.set(awtEvent);
+                awtEventProperty.set(NullUtil.fakeNonNull(null));
+                // Reset to null to allow for consecutive events of the same type and not hold onto
+                // the previous event reference longer than necessary, which could lead to memory leaks...
+            };
+            Toolkit.getDefaultToolkit().addAWTEventListener(listener, mask);
+            _globalAwtBinding.put(mask, Pair.of(listener, awtEventProperty));
+            return awtEventProperty.view();
         }
     }
 
@@ -230,7 +286,13 @@ public final class SwingTree
      * <p>
      * You can configure this scaling factor through the library initialization
      * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
-     * or directly through the system property "swingtree.uiScale".
+     * or directly through the system property "swingtree.uiScale".<br>
+     * <br>
+     * <p><b>
+     *     Also note that when the {@link SwingTree} library context gets cleared through {@link #clear()}
+     *     or replaced through {@link #initialize()} or {@link #initialiseUsing(SwingTreeConfigurator)}, then
+     *     the reactive view returned by this method will no longer receive updates and will be effectively dead!
+     * </b></p>
      *
      * @return A reactive property holding the current user scale factor used
      *         for scaling the UI of your application. You may hold onto such a view
@@ -1357,6 +1419,10 @@ public final class SwingTree
 
         LazyRef( Supplier<T> supplier ) {
             this.supplier = Objects.requireNonNull( supplier );
+        }
+
+        boolean hasValue() {
+            return value != null;
         }
 
         T get() {
