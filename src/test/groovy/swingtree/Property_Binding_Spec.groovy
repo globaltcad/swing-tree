@@ -30,7 +30,7 @@ class Property_Binding_Spec extends Specification
     enum Accept { YES, NO, MAYBE }
 
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
@@ -260,7 +260,7 @@ class Property_Binding_Spec extends Specification
         float scalingFactor
     ) {
         given: 'We first initialise SwingTree using the given scaling factor'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'We create a property representing the font of a component.'
             Val<UI.Font> property = Var.of(UI.Font.of("Ubuntu", UI.FontStyle.PLAIN, 12))
             property.get().toAwtFont()

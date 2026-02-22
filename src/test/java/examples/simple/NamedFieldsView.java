@@ -243,7 +243,7 @@ public class NamedFieldsView extends JPanel {
     public static void main(String... args) {
         // First we set nimbus as the look and feel.
         // This is not necessary, but it looks better.
-        SwingTree.initialiseUsing(it->it.isUiScaleFactorEnabled(false));
+        SwingTree.initializeUsing(it->it.isUiScaleFactorEnabled(false));
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ( "Nimbus".equals(info.getName()) ) {

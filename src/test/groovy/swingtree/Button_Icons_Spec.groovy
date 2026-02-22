@@ -42,7 +42,7 @@ import java.awt.image.BufferedImage
 class Button_Icons_Spec extends Specification
 {
     def setup() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
     }
 

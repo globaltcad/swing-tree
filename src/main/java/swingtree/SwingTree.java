@@ -67,7 +67,7 @@ public final class SwingTree
      *  Clears the singleton instance of the {@link SwingTree}.
      *  This is useful for testing purposes, or if you want to
      *  reconfigure your application with a different {@link SwingTreeInitConfig}.
-     *  (see {@link #initialiseUsing(SwingTreeConfigurator)}).
+     *  (see {@link #initializeUsing(SwingTreeConfigurator)}).
      */
     public static void clear() {
         if ( _INSTANCE != null && _INSTANCE.hasValue()) {
@@ -86,7 +86,7 @@ public final class SwingTree
      *  causing it to be recreated the next time it is requested through {@link #get()}.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #initialiseUsing(SwingTreeConfigurator)}.
+     *  Also see {@link #initializeUsing(SwingTreeConfigurator)}.
      */
     public static void initialize() {
         _INSTANCE = new LazyRef<>(SwingTree::new);
@@ -104,7 +104,7 @@ public final class SwingTree
      * @param configurator the {@link SwingTreeConfigurator} that is used
      *                     to configure the {@link SwingTree} instance.
      */
-    public static void initialiseUsing( SwingTreeConfigurator configurator ) {
+    public static void initializeUsing( SwingTreeConfigurator configurator ) {
         _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
     }
 
@@ -175,7 +175,7 @@ public final class SwingTree
      * <br>
      * <p><b>
      *     Note that when the {@link SwingTree} library context gets cleared through {@link #clear()}
-     *     or replaced through {@link #initialize()} or {@link #initialiseUsing(SwingTreeConfigurator)}, then
+     *     or replaced through {@link #initialize()} or {@link #initializeUsing(SwingTreeConfigurator)}, then
      *     the reactive view returned by this method will no longer receive updates and will be effectively dead!
      * </b></p>
      *
@@ -236,7 +236,7 @@ public final class SwingTree
      * or to scale custom {@link Graphics2D} based painting operations.
      * <br>
      * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".<br>
      * You may also set it using {@link SwingTree#setUiScaleFactor(float)}.
      *
@@ -254,7 +254,7 @@ public final class SwingTree
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * <p>
      * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".
      *
      * @param scaleFactor The user scale factor.
@@ -285,12 +285,12 @@ public final class SwingTree
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * <p>
      * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".<br>
      * <br>
      * <p><b>
      *     Also note that when the {@link SwingTree} library context gets cleared through {@link #clear()}
-     *     or replaced through {@link #initialize()} or {@link #initialiseUsing(SwingTreeConfigurator)}, then
+     *     or replaced through {@link #initialize()} or {@link #initializeUsing(SwingTreeConfigurator)}, then
      *     the reactive view returned by this method will no longer receive updates and will be effectively dead!
      * </b></p>
      *
@@ -495,7 +495,7 @@ public final class SwingTree
      *  You may use this marker to channel SwingTree logs to a separate log file
      *  or to filter them in any other way you like.<br>
      *  To configure the logging {@link Marker}, check out the
-     *  {@link SwingTree#initialiseUsing(SwingTreeConfigurator)} method,
+     *  {@link SwingTree#initializeUsing(SwingTreeConfigurator)} method,
      *  where you may provide a custom {@link SwingTreeConfigurator} that sets the logging {@link Marker}
      *  through the {@link SwingTreeInitConfig}.
      *
@@ -912,7 +912,7 @@ public final class SwingTree
          * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
          * <p>
          * You can configure this scaling factor through the library initialization
-         * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+         * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
          * or through the system property "swingtree.uiScale".
          *
          * @return The user scale factor.

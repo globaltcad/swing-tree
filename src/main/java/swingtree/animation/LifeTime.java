@@ -172,7 +172,7 @@ public final class LifeTime
      *  The default interval is 16 ms which corresponds to 60 fps.
      *  <br>
      *  If you want a custom interval default, you can configure it
-     *  during library initialization through the {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}
+     *  during library initialization through the {@link SwingTree#initializeUsing(SwingTreeConfigurator)}
      *  method or change it at any other time using the
      *  {@link SwingTree#setDefaultAnimationInterval(long)} method.
      *  
@@ -214,7 +214,7 @@ public final class LifeTime
      *  The default interval is 16 ms which corresponds to 60 fps.
      *  <br>
      *  If you want a custom interval default, you can configure it
-     *  during library initialization through the {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}
+     *  during library initialization through the {@link SwingTree#initializeUsing(SwingTreeConfigurator)}
      *  method or change it at any other time using the
      *  {@link SwingTree#setDefaultAnimationInterval(long)} method.
      *  

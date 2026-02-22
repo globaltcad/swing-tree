@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  *          <b>Global Styling:</b>
  *          see {@link swingtree.style.StyleSheet},
  *              {@link swingtree.UI#use(StyleSheet, Supplier)},
- *              {@link swingtree.SwingTree#initialiseUsing(SwingTreeConfigurator)}
+ *              {@link swingtree.SwingTree#initializeUsing(SwingTreeConfigurator)}
  *      </li>
  *      <li>
  *          <b>Direct Styling in the GUI:</b><br>

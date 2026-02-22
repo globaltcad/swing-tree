@@ -40,7 +40,7 @@ import java.awt.Font
 class Scroll_Pane_Spec extends Specification
 {
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.

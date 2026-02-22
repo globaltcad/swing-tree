@@ -58,7 +58,7 @@ import java.awt.*
 class Examples_Spec extends Specification
 {
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
@@ -339,7 +339,7 @@ class Examples_Spec extends Specification
             Here we will only test the UI.
         """
         given :
-            SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+            SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
             var view = new SomeSettingsView(new SomeSettingsViewModel())
             var speedTextField = new Utility.Query(view).find(JTextField, "speed-text-field").orElse(null)
         expect :

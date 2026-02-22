@@ -32,7 +32,7 @@ import utility.SwingTreeTestConfigurator
 class Icon_Spec extends Specification
 {
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
@@ -105,7 +105,7 @@ class Icon_Spec extends Specification
         float uiScale
     ) {
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create a UI declaration for an icon at a given path with a size.'
             var ui = UI.icon(Size.of(32, 32), "img/swing.png")
         when : 'We create a UI component from the declaration.'
@@ -135,7 +135,7 @@ class Icon_Spec extends Specification
             deal with IO loading complexities.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and :
             var icon = IconDeclaration.of(Size.of(32, 42), "img/swing.png")
         when : 'We create a UI declaration from the icon declaration.'
@@ -165,7 +165,7 @@ class Icon_Spec extends Specification
             from the business logic.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create a `Var` property with an icon declaration.'
             var icon = Var.of(IconDeclaration.of(Size.of(16, 16), "img/swing.png"))
         and : 'We create a UI declaration for the icon property.'
@@ -200,7 +200,7 @@ class Icon_Spec extends Specification
             from an `IconDeclaration` constant.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'Five different kinds of icon declarations.'
             var iconDeclaration1 = IconDeclaration.of("img/trees.png")
             var iconDeclaration2 = IconDeclaration.of(Size.unknown(), "img/trees.png")
@@ -256,7 +256,7 @@ class Icon_Spec extends Specification
             then the icon will internally reload itself to match the new DPI scale factor.
         """
         given : 'We start with an initial scale of 1.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(1f) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
         and : 'We load two different types of images, an SVG and a PNG image.'
             var icon1 = UI.findIcon(IconDeclaration.of("img/trees.png").withSize(128, 512))
             var icon2 = UI.findIcon(IconDeclaration.of("img/dandelion.svg").withSize(128, 512))
@@ -293,7 +293,7 @@ class Icon_Spec extends Specification
             icon sizes across your application.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'An icon declaration created from the SVG string.'
             IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg("""
                                 <svg width="${width}" height="${height}" viewBox="0 0 16 16">
@@ -349,7 +349,7 @@ class Icon_Spec extends Specification
             and rendered as a vector icon that scales crisply at any resolution.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'Create an icon declaration from the SVG string.'
             IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)
         when : 'Create a UI declaration and extract the component.'
@@ -403,7 +403,7 @@ class Icon_Spec extends Specification
             relative to their container.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'Create an icon declaration from the SVG string.'
             IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)
         when : 'We look for the icon:'

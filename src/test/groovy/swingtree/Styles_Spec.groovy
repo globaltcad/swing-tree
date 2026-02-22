@@ -13,7 +13,6 @@ import swingtree.style.ComponentStyleDelegate
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.JButton
-import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -40,7 +39,7 @@ import java.awt.geom.Point2D
 class Styles_Spec extends Specification
 {
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
@@ -143,7 +142,7 @@ class Styles_Spec extends Specification
     def 'The String representation of a style config will tell you everything about it!'( float uiScale )
     {
         given :
-            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            SwingTree.initializeUsing { it.uiScaleFactor(uiScale) }
             var scale = { it * uiScale }
             var scaledToString = { String.valueOf(scale(it)).replace(".0", "") }
             var roundScaledToString = { String.valueOf(Math.round(scale(it))).replace(".0", "") }
@@ -488,7 +487,7 @@ class Styles_Spec extends Specification
             It is also memory efficient, as the default style objects are global null objects.
         """
         given :
-            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            SwingTree.initializeUsing { it.uiScaleFactor(uiScale) }
             var scale = { it * uiScale }
             var scaledToString = { String.valueOf(scale(it)).replace(".0", "") }
             var roundScaledToString = { String.valueOf(Math.round(scale(it))).replace(".0", "") }
@@ -600,7 +599,7 @@ class Styles_Spec extends Specification
             It is also memory efficient, as the default style objects are global null objects.
         """
         given :
-            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            SwingTree.initializeUsing { it.uiScaleFactor(uiScale) }
         and : 'We create a highly simplifiable style through the style API.'
             var panel =
                         UI.panel().withStyle(conf -> conf
@@ -856,7 +855,7 @@ class Styles_Spec extends Specification
             provably not lead to any visual result, SwingTree will optimize it away under the hood.
         """
         given : 'We first setup the global environment stuff (library context and DPI scale):'
-            SwingTree.initialiseUsing {it.uiScaleFactor(uiScale)}
+            SwingTree.initializeUsing {it.uiScaleFactor(uiScale)}
         and : """
             We crate a label with various shadow sub-styles.
             Some of those make no sense, and so we expect them to be simplified away!

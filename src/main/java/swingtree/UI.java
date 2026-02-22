@@ -974,7 +974,7 @@ public final class UI extends UIFactoryMethods
      *  or to scale custom {@link Graphics2D} based painting operations.
      *  <br>
      *  For configuring a manual scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
-     *  or {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
+     *  or {@link SwingTree#initializeUsing(SwingTreeConfigurator)}.
      *
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
      */

@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  *  An immutable configuration object for the {@link SwingTree} library,
  *  which can be configured using a functional {@link SwingTreeConfigurator} lambda
- *  passed to {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
+ *  passed to {@link SwingTree#initializeUsing(SwingTreeConfigurator)}.
  *  <p>
  *  It allows for the configuration of the default
  *  font, font installation, scaling, event processing and
