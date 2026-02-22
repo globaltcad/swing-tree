@@ -81,7 +81,7 @@ public final class SwingTreeInitConfig
 
     public static SwingTreeInitConfig standard() {
         return new SwingTreeInitConfig(
-                        null,
+                        tryToFindDefaultFontInUIManager(),
                         FontInstallation.SOFT,
                         EventProcessor.COUPLED_STRICT,
                         StyleSheet.none(),
@@ -100,6 +100,13 @@ public final class SwingTreeInitConfig
                         code, but that should be negligible, and in the worst case
                         the animation will be a bit slower than 60 fps.
                     */
+    }
+
+    private static @Nullable Font tryToFindDefaultFontInUIManager() {
+        Object defaultFont = javax.swing.UIManager.getDefaults().get("defaultFont");
+        if ( defaultFont instanceof Font )
+            return (Font) defaultFont;
+        return null;
     }
 
 

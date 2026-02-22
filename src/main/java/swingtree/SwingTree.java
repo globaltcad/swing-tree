@@ -77,6 +77,9 @@ public final class SwingTree
                 Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
             });
             swingTree._globalAwtBinding.clear();
+            if ( swingTree._uiScale.hasValue() ) {
+                swingTree._uiScale.get().cleanup();
+            }
         }
         _INSTANCE = null;
     }
@@ -138,13 +141,17 @@ public final class SwingTree
 
     private static void _establishMainFont( SwingTreeInitConfig config ) {
         try {
-            if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.HARD)
-                config.defaultFont().ifPresent(font -> {
+            config.defaultFont().ifPresent(font -> {
+                if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.HARD) {
                     if (font instanceof FontUIResource)
                         _installFontInUIManager((FontUIResource) font);
                     else
                         _installFontInUIManager(new FontUIResource(font));
-                });
+                    UIManager.getDefaults().put(_DEFAULT_FONT, font);
+                } else if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.SOFT) {
+                    UIManager.getDefaults().put(_DEFAULT_FONT, font);
+                }
+            });
         } catch (Exception ex) {
             log.error(config.logMarker(), "Error installing font in UIManager", ex);
             ex.printStackTrace();
@@ -546,6 +553,7 @@ public final class SwingTree
 
         private final Var<Float> scaleFactor = Var.of(1f);
         private boolean initialized;
+        private @Nullable PropertyChangeListener listener;
 
 
         private UiScale( SwingTreeInitConfig config ) // private to prevent instantiation from outside
@@ -563,7 +571,10 @@ public final class SwingTree
                     return;
                 }
 
-                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {
+                if (
+                    config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT &&
+                    config.fontInstallation() != SwingTreeInitConfig.FontInstallation.NONE
+                ) {
                     Font uiScaleReferenceFont = config.defaultFont().orElse(null);
                     if ( uiScaleReferenceFont != null ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
@@ -759,7 +770,7 @@ public final class SwingTree
 
         private void _setScalePropertyListeners() {
             // listener to update scale factor if LaF changed, "defaultFont" or "Label.font" changed
-            PropertyChangeListener listener = new PropertyChangeListener() {
+            this.listener = new PropertyChangeListener() {
                 @Override
                 public void propertyChange( PropertyChangeEvent e ) {
                     switch( e.getPropertyName() ) {
@@ -783,12 +794,22 @@ public final class SwingTree
             UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );
         }
 
+        void cleanup() {
+            if ( listener != null ) {
+                UIManager.removePropertyChangeListener( listener );
+                UIManager.getDefaults().removePropertyChangeListener( listener );
+                UIManager.getLookAndFeelDefaults().removePropertyChangeListener( listener );
+            }
+        }
+
         private Font _getDefaultFont() {
             // use font size to calculate scale factor (instead of DPI)
             // because even if we are on a HiDPI display it is not sure
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
             Font font = UIManager.getFont( _DEFAULT_FONT );
+            if ( font == null )
+                font = config.defaultFont().orElse(null);
             if ( font == null )
                 font = UIManager.getFont( "Label.font" );
 
