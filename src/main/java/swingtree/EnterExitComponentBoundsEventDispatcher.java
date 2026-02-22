@@ -1,7 +1,10 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Viewable;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -26,18 +29,34 @@ final class EnterExitComponentBoundsEventDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(EnterExitComponentBoundsEventDispatcher.class);
     private static final MouseListener EMPTY_NO_OP_MOUSE_LISTENER = new MouseAdapter() { };
-    static {
-        Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_EVENT_MASK);
-        Toolkit.getDefaultToolkit().addAWTEventListener(EnterExitComponentBoundsEventDispatcher::onMouseEvent, AWTEvent.MOUSE_MOTION_EVENT_MASK);
+    private static @Nullable EnterExitComponentBoundsEventDispatcher INSTANCE = null;
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Viewable<AWTEvent> mouseEventListener;// IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Viewable<AWTEvent> mouseMotionEventListener;// IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
+
+    private EnterExitComponentBoundsEventDispatcher() {
+        this.mouseEventListener = SwingTree.get().createAndGetAwtEventView(AWTEvent.MOUSE_EVENT_MASK);
+        this.mouseMotionEventListener = SwingTree.get().createAndGetAwtEventView(AWTEvent.MOUSE_MOTION_EVENT_MASK);
+        this.mouseEventListener.onChange(From.ALL, it -> it.currentValue().ifPresent(this::onMouseEvent));
+        this.mouseMotionEventListener.onChange(From.ALL, it -> it.currentValue().ifPresent(this::onMouseEvent));
     }
 
-    static void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+    static EnterExitComponentBoundsEventDispatcher get() {
+        if ( INSTANCE == null ) {
+            INSTANCE = new EnterExitComponentBoundsEventDispatcher();
+        }
+        return INSTANCE;
+    }
+
+    void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
         component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addEnterListener(listener);
     }
 
-    static void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
+    void addMouseExitListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
         component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];
         listeners.addExitListener(listener);
@@ -60,7 +79,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         return listenerArray;
     }
 
-    private static void onMouseEvent(AWTEvent event) {
+    private void onMouseEvent(AWTEvent event) {
         if (event instanceof MouseEvent) {
             MouseEvent mouseEvent = (MouseEvent) event;
 
