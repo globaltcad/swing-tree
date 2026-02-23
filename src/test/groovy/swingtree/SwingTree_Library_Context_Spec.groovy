@@ -231,7 +231,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             will be garbage collected together with all of the listeners it holds.
             
             In this test we demonstrate that the property view receives change events
-            whenever the scale changes in the library cotext.
+            whenever the scale changes in the library context.
         """
         given:
             boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
