@@ -228,7 +228,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             More specifically you can create a weakly referenced property view
             which you can register listeners to.
             When no longer referenced by your code, the property view
-            will be garbage collected together with all of te listener it holds.
+            will be garbage collected together with all of the listeners it holds.
             
             In this test we demonstrate that the property view receives change events
             whenever the scale changes in the library cotext.
