@@ -50,6 +50,10 @@ final class EnterExitComponentBoundsEventDispatcher {
         return INSTANCE;
     }
 
+    static void clear() {
+        INSTANCE = null; // This is called so that we can get new 'Viewable' instances from the 'SwingTree' library context.
+    }
+
     void addMouseEnterListener(UI.ComponentArea area, JComponent component, MouseListener listener) {
         component.addMouseListener(EMPTY_NO_OP_MOUSE_LISTENER); // <- ensures that mouse events are enabled
         ComponentEnterExitListeners listeners = fetchListenersInitialized(component)[area.ordinal()];

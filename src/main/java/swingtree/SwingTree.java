@@ -80,6 +80,7 @@ public final class SwingTree
             if ( swingTree._uiScale.hasValue() ) {
                 swingTree._uiScale.get().cleanup();
             }
+            EnterExitComponentBoundsEventDispatcher.clear(); // The singleton may hold a now outdated AWTEvent binding!
         }
         _INSTANCE = null;
     }
