@@ -92,7 +92,9 @@ class SwingTree_Library_Context_Spec extends Specification {
             as the default font size. This scale factor is then used to scale the UI.
             You can configure this default font in when initializing the library context!
         """
-        given: 'We snapshot the original default and panel fonts to reset them after the test.'
+        given :
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+        and : 'We snapshot the original default and panel fonts to reset them after the test.'
             var originalDefaultFont = UIManager.getDefaults().get("defaultFont")
             var originalPanelFont = UIManager.getDefaults().get("Panel.font")
         and: 'We create a custom and unique default font as well as a custom panel font'
@@ -105,8 +107,8 @@ class SwingTree_Library_Context_Spec extends Specification {
             )
 
         expect: 'SwingTree has its scaling factor computed from the default font size:'
-            SwingTree.get().getUiScaleFactor() == 4.75f
-            UI.scale() == 4.75f // delegates to the above method
+            SwingTree.get().getUiScaleFactor() == (isWindows ? 6f : 4.75f)
+            UI.scale() == (isWindows ? 6f : 4.75f) // delegates to the above method
         and: 'The default font is changed to the custom one.'
             UIManager.getDefaults().get("defaultFont") === myDefaultFont
         and: 'The panel font is not changed to the custom one, because we only installed the default font softly.'
@@ -127,7 +129,9 @@ class SwingTree_Library_Context_Spec extends Specification {
             This means that the default font is not only installed as the "defaultFont" but also as every 
             regular font like "Panel.font", "Button.font" and so on.
         """
-        given: 'We snapshot the original default and panel fonts to reset them after the test.'
+        given :
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+        and : 'We snapshot the original default and panel fonts to reset them after the test.'
             var originalDefaultFont = UIManager.getDefaults().get("defaultFont")
             var originalPanelFont = UIManager.getDefaults().get("Panel.font")
         and: 'We create a custom and unique default font as well as a custom panel font'
@@ -140,8 +144,8 @@ class SwingTree_Library_Context_Spec extends Specification {
             )
 
         expect: 'SwingTree has its scaling factor computed from the default font size:'
-            SwingTree.get().getUiScaleFactor() == 4.75f
-            UI.scale() == 4.75f // delegates to the above method
+            SwingTree.get().getUiScaleFactor() == (isWindows ? 6f : 4.75f)
+            UI.scale() == (isWindows ? 6f : 4.75f) // delegates to the above method
         and: 'The default font is changed to the custom one.'
             UIManager.getDefaults().get("defaultFont") === myDefaultFont
         and: 'The panel font is also changed to the custom one, because we installed every regular font hard.'
@@ -160,7 +164,9 @@ class SwingTree_Library_Context_Spec extends Specification {
             but you do not want to install this font in the `UIManager`, you can choose the "none" 
             font installation when initializing the library context. 
         """
-        given: 'We snapshot the original default font to check if it stays the same!'
+        given:
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+        and : 'We snapshot the original default font to check if it stays the same!'
             var originalDefaultFont = UIManager.getDefaults().get("defaultFont")
         and: 'We create a custom and unique default font'
             var myDefaultFont = new java.awt.Font("Arial", java.awt.Font.ITALIC, 73)
@@ -170,8 +176,8 @@ class SwingTree_Library_Context_Spec extends Specification {
             )
 
         expect: 'SwingTree has its scaling factor computed from the default font size:'
-            SwingTree.get().getUiScaleFactor() == 4.75f
-            UI.scale() == 4.75f // delegates to the above method
+            SwingTree.get().getUiScaleFactor() == (isWindows ? 6f : 4.75f)
+            UI.scale() == (isWindows ? 6f : 4.75f) // delegates to the above method
         and: 'The default font is not installed in the UIManager.'
             UIManager.getDefaults().get("defaultFont") !== myDefaultFont
             UIManager.getDefaults().get("defaultFont") === originalDefaultFont
@@ -187,7 +193,9 @@ class SwingTree_Library_Context_Spec extends Specification {
             So when you change the default font through the `UIManager` in your code, then
             the entire SwingTree UI will scale up or down accordingly.
         """
-        given: 'We snapshot the original default font to reset it after the test'
+        given :
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+        and : 'We snapshot the original default font to reset it after the test'
             var originalDefaultFont = UIManager.getDefaults().get("defaultFont")
         and: 'We create a custom and unique default font in the `UIManager`:'
             var myDefaultFont = new java.awt.Font("Arial", java.awt.Font.BOLD, 42)
@@ -196,16 +204,16 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.initialize()
 
         expect: 'The UI scale factor is computed from our custom default font:'
-            SwingTree.get().getUiScaleFactor() == 2.75f
-            UI.scale() == 2.75f // delegates to the above method
+            SwingTree.get().getUiScaleFactor() == (isWindows ? 3.5f : 2.75f)
+            UI.scale() == (isWindows ? 3.5f : 2.75f) // delegates to the above method
 
         when: 'We change the default font in the `UIManager` to another custom font...'
             var anotherDefaultFont = new java.awt.Font("Comic Sans MS", java.awt.Font.ITALIC, 73)
             UIManager.getDefaults().put("defaultFont", anotherDefaultFont)
 
         then: 'SwingTree notices this change and updates its UI scale factor accordingly:'
-            SwingTree.get().getUiScaleFactor() == 4.75f
-            UI.scale() == 4.75f // delegates to the above method
+            SwingTree.get().getUiScaleFactor() == (isWindows ? 6f : 4.75f)
+            UI.scale() == (isWindows ? 6f : 4.75f) // delegates to the above method
 
         cleanup: 'Reset the library context to be `null` again internally, as well as the default font in the `UIManager`!'
             SwingTree.clear()
@@ -225,7 +233,9 @@ class SwingTree_Library_Context_Spec extends Specification {
             In this test we demonstrate that the property view receives change events
             whenever the scale changes in the library cotext.
         """
-        given: 'We snapshot the original default font to reset it after the test'
+        given:
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+        and : 'We snapshot the original default font to reset it after the test'
             var originalDefaultFont = UIManager.getDefaults().get("defaultFont")
         and: 'We create a custom and unique default font in the `UIManager`:'
             var myDefaultFont = new java.awt.Font("Arial", java.awt.Font.BOLD, 42)
@@ -241,17 +251,17 @@ class SwingTree_Library_Context_Spec extends Specification {
             var anotherDefaultFont = new java.awt.Font("Comic Sans MS", java.awt.Font.ITALIC, 73)
             UIManager.getDefaults().put("defaultFont", anotherDefaultFont)
         then : 'The property view receives the new scale value:'
-            trace == [4.75f]
+            trace == [(isWindows ? 6f : 4.75f)]
 
         when : 'We set the scale factor manually through the library context...'
             SwingTree.get().setUiScaleFactor(1.25f)
         then : 'The property view receives the manually specified scale:'
-            trace == [4.75f, 1.25f]
+            trace == [(isWindows ? 6f : 4.75f), 1.25f]
 
         when : 'We change back to the previous default font...'
             UIManager.getDefaults().put("defaultFont", myDefaultFont)
         then : 'The property view receives the previous scale value again:'
-            trace == [4.75f, 1.25f, 2.75f]
+            trace == [(isWindows ? 6f : 4.75f), 1.25f, (isWindows ? 3.5f : 2.75f)]
 
         cleanup: 'Reset the library context and set the "defaultFont" back to the original value!'
             SwingTree.clear()
