@@ -1196,8 +1196,8 @@ public final class SvgIcon extends ImageIcon
             }
             viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
             FloatSize svgSize = _core.svgDocument.viewBox().size();
-            float svgRefWidth = ((svgSize.width) / (svgSize.height));
-            float svgRefHeight = ((svgSize.height) / (svgSize.width));
+            float svgRefWidth = (svgSize.width / svgSize.height);
+            float svgRefHeight = (svgSize.height / svgSize.width);
             float imgRefWidth = (viewBox.width / viewBox.height);
             float imgRefHeight = (viewBox.height / viewBox.width);
 

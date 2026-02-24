@@ -73,8 +73,9 @@ final class PooledIconDeclaration implements IconDeclaration
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+"["+
-                    "size=" + ( size().map(it->it.equals(Size.unknown()) ? "?" : String.valueOf(it) ).orElse("?") ) + ", " +
+        String sizeAsString = size().map(it->it.equals(Size.unknown()) ? "?" : String.valueOf(it) ).orElse("?");
+        return this.getClass().getSimpleName() + "["+
+                    "size=" + sizeAsString + ", " +
                     "sourceFormat=" + sourceFormat + ", " +
                     "source='" + source + "'" +
                 "]";

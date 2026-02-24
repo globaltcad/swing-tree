@@ -127,7 +127,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *     So an implementation may look something like this:
      * </p>
      *  <pre>{@code
-     *    @Override
+     *    // Override
      *    public void installUI(
      *        JComponent comp
      *    ) {
@@ -156,7 +156,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *     and then forward the paint request to <i>SwingTree</i> like so:
      * </b>
      *  <pre>{@code
-     *    @Override
+     *    // Override
      *    public void paint(
      *        Graphics g,
      *        JComponent comp
@@ -207,7 +207,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *  into the main way in which <i>SwingTree</i> renders its style onto a specific component type.<br>
      *  So your implementation would look something like this:
      *  <pre>{@code
-     *    @Override
+     *    // Override
      *    public void paint(
      *        Graphics g,
      *        JComponent comp
@@ -217,7 +217,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *                super.paint(g2d, comp);
      *            });
      *    }
-     *    @Override
+     *    // Override
      *    public boolean canForwardPaintingToSwingTree() {
      *        return true;
      *    }
