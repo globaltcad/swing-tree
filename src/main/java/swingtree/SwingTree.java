@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
+import sprouts.Pair;
 import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.api.IconDeclaration;
@@ -15,6 +16,8 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.event.AWTEventListener;
+import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
@@ -64,16 +67,30 @@ public final class SwingTree
      *  Clears the singleton instance of the {@link SwingTree}.
      *  This is useful for testing purposes, or if you want to
      *  reconfigure your application with a different {@link SwingTreeInitConfig}.
-     *  (see {@link #initialiseUsing(SwingTreeConfigurator)}).
+     *  (see {@link #initializeUsing(SwingTreeConfigurator)}).
      */
-    public static void clear() { _INSTANCE = null; }
+    public static void clear() {
+        if ( _INSTANCE != null && _INSTANCE.hasValue()) {
+            SwingTree swingTree = _INSTANCE.get();
+            swingTree._iconCache.clear();
+            swingTree._globalAwtBinding.values().forEach( pair ->{
+                Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
+            });
+            swingTree._globalAwtBinding.clear();
+            if ( swingTree._uiScale.hasValue() ) {
+                swingTree._uiScale.get().cleanup();
+            }
+            EnterExitComponentBoundsEventDispatcher.clear(); // The singleton may hold a now outdated AWTEvent binding!
+        }
+        _INSTANCE = null;
+    }
 
     /**
      *  A lazy initialization of the singleton instance of the {@link SwingTree} class
      *  causing it to be recreated the next time it is requested through {@link #get()}.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #initialiseUsing(SwingTreeConfigurator)}.
+     *  Also see {@link #initializeUsing(SwingTreeConfigurator)}.
      */
     public static void initialize() {
         _INSTANCE = new LazyRef<>(SwingTree::new);
@@ -91,7 +108,7 @@ public final class SwingTree
      * @param configurator the {@link SwingTreeConfigurator} that is used
      *                     to configure the {@link SwingTree} instance.
      */
-    public static void initialiseUsing( SwingTreeConfigurator configurator ) {
+    public static void initializeUsing( SwingTreeConfigurator configurator ) {
         _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
     }
 
@@ -99,6 +116,7 @@ public final class SwingTree
 
     private final LazyRef<UiScale> _uiScale;
     private final Map<IconDeclaration, ImageIcon> _iconCache = new WeakHashMap<>();
+    private final Map<Long, Pair<AWTEventListener, Var<AWTEvent>>> _globalAwtBinding = new HashMap<>();
 
 
     private SwingTree() { this(config -> config); }
@@ -124,13 +142,17 @@ public final class SwingTree
 
     private static void _establishMainFont( SwingTreeInitConfig config ) {
         try {
-            if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.HARD)
-                config.defaultFont().ifPresent(font -> {
+            config.defaultFont().ifPresent(font -> {
+                if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.HARD) {
                     if (font instanceof FontUIResource)
                         _installFontInUIManager((FontUIResource) font);
                     else
                         _installFontInUIManager(new FontUIResource(font));
-                });
+                    UIManager.getDefaults().put(_DEFAULT_FONT, font);
+                } else if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.SOFT) {
+                    UIManager.getDefaults().put(_DEFAULT_FONT, font);
+                }
+            });
         } catch (Exception ex) {
             log.error(config.logMarker(), "Error installing font in UIManager", ex);
             ex.printStackTrace();
@@ -144,6 +166,48 @@ public final class SwingTree
             Object value = UIManager.get (key);
             if ( value instanceof javax.swing.plaf.FontUIResource )
                 UIManager.put(key, f);
+        }
+    }
+
+    /**
+     * This method constitutes a memory safe alternative to {@link Toolkit#addAWTEventListener(AWTEventListener, long)}
+     * as it returns a weakly referenced reactive property that will automatically be garbage collected
+     * alongside its change listeners when you no longer reference it strongly in your code.<br>
+     * You use the reactive {@link Viewable} returned by this method to register change listeners
+     * that will be invoked whenever an AWT event matching the given mask is fired anywhere in the application.<br>
+     * The supplied <code>eventMask</code> is a bitmask of event types to receive.
+     * It is constructed by bitwise OR-ing together the event masks defined in <code>AWTEvent</code>.<br>
+     * There are many event ids, like {@link java.awt.event.MouseEvent#BUTTON1}, {@link java.awt.event.MouseEvent#MOUSE_CLICKED},
+     * {@link java.awt.event.KeyEvent#KEY_PRESSED}, {@link ComponentEvent#COMPONENT_MOVED},
+     * {@link java.awt.event.WindowEvent#COMPONENT_MOVED}, etc...<br>
+     * <br>
+     * <p><b>
+     *     Note that when the {@link SwingTree} library context gets cleared through {@link #clear()}
+     *     or replaced through {@link #initialize()} or {@link #initializeUsing(SwingTreeConfigurator)}, then
+     *     the reactive view returned by this method will no longer receive updates and will be effectively dead!
+     * </b></p>
+     *
+     * @param mask the bitmask of event types to receive, constructed by bitwise OR-ing together the event masks defined in <code>AWTEvent</code>.
+     *             For example, if you want to listen to mouse clicks and key presses, you would pass in
+     *             <code>AWTEvent.MOUSE_EVENT_MASK | AWTEvent.KEY_EVENT_MASK</code> as the mask.
+     * @return a reactive {@link Viewable} that will update itself and invoke all of its change listeners whenever an AWT event matching the given mask is fired anywhere in the application.
+     * @see Toolkit#addAWTEventListener(AWTEventListener, long) for more information on the event mask and the types of events you can listen to.
+     */
+    public Viewable<AWTEvent> createAndGetAwtEventView(long mask) {
+        Pair<AWTEventListener, Var<AWTEvent>> existingBinding = _globalAwtBinding.get(mask);
+        if ( existingBinding != null )
+            return existingBinding.second().view();
+        else {
+            Var<AWTEvent> awtEventProperty = Var.ofNull(AWTEvent.class);
+            AWTEventListener listener = awtEvent -> {
+                awtEventProperty.set(awtEvent);
+                awtEventProperty.set(NullUtil.fakeNonNull(null));
+                // Reset to null to allow for consecutive events of the same type and not hold onto
+                // the previous event reference longer than necessary, which could lead to memory leaks...
+            };
+            Toolkit.getDefaultToolkit().addAWTEventListener(listener, mask);
+            _globalAwtBinding.put(mask, Pair.of(listener, awtEventProperty));
+            return awtEventProperty.view();
         }
     }
 
@@ -180,7 +244,7 @@ public final class SwingTree
      * or to scale custom {@link Graphics2D} based painting operations.
      * <br>
      * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".<br>
      * You may also set it using {@link SwingTree#setUiScaleFactor(float)}.
      *
@@ -198,7 +262,7 @@ public final class SwingTree
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * <p>
      * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
      * or directly through the system property "swingtree.uiScale".
      *
      * @param scaleFactor The user scale factor.
@@ -229,8 +293,14 @@ public final class SwingTree
      * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * <p>
      * You can configure this scaling factor through the library initialization
-     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
-     * or directly through the system property "swingtree.uiScale".
+     * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
+     * or directly through the system property "swingtree.uiScale".<br>
+     * <br>
+     * <p><b>
+     *     Also note that when the {@link SwingTree} library context gets cleared through {@link #clear()}
+     *     or replaced through {@link #initialize()} or {@link #initializeUsing(SwingTreeConfigurator)}, then
+     *     the reactive view returned by this method will no longer receive updates and will be effectively dead!
+     * </b></p>
      *
      * @return A reactive property holding the current user scale factor used
      *         for scaling the UI of your application. You may hold onto such a view
@@ -433,7 +503,7 @@ public final class SwingTree
      *  You may use this marker to channel SwingTree logs to a separate log file
      *  or to filter them in any other way you like.<br>
      *  To configure the logging {@link Marker}, check out the
-     *  {@link SwingTree#initialiseUsing(SwingTreeConfigurator)} method,
+     *  {@link SwingTree#initializeUsing(SwingTreeConfigurator)} method,
      *  where you may provide a custom {@link SwingTreeConfigurator} that sets the logging {@link Marker}
      *  through the {@link SwingTreeInitConfig}.
      *
@@ -484,6 +554,7 @@ public final class SwingTree
 
         private final Var<Float> scaleFactor = Var.of(1f);
         private boolean initialized;
+        private @Nullable PropertyChangeListener listener;
 
 
         private UiScale( SwingTreeInitConfig config ) // private to prevent instantiation from outside
@@ -501,7 +572,10 @@ public final class SwingTree
                     return;
                 }
 
-                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {
+                if (
+                    config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT &&
+                    config.fontInstallation() != SwingTreeInitConfig.FontInstallation.NONE
+                ) {
                     Font uiScaleReferenceFont = config.defaultFont().orElse(null);
                     if ( uiScaleReferenceFont != null ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
@@ -697,7 +771,7 @@ public final class SwingTree
 
         private void _setScalePropertyListeners() {
             // listener to update scale factor if LaF changed, "defaultFont" or "Label.font" changed
-            PropertyChangeListener listener = new PropertyChangeListener() {
+            this.listener = new PropertyChangeListener() {
                 @Override
                 public void propertyChange( PropertyChangeEvent e ) {
                     switch( e.getPropertyName() ) {
@@ -721,12 +795,22 @@ public final class SwingTree
             UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );
         }
 
+        void cleanup() {
+            if ( listener != null ) {
+                UIManager.removePropertyChangeListener( listener );
+                UIManager.getDefaults().removePropertyChangeListener( listener );
+                UIManager.getLookAndFeelDefaults().removePropertyChangeListener( listener );
+            }
+        }
+
         private Font _getDefaultFont() {
             // use font size to calculate scale factor (instead of DPI)
             // because even if we are on a HiDPI display it is not sure
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
             Font font = UIManager.getFont( _DEFAULT_FONT );
+            if ( font == null )
+                font = config.defaultFont().orElse(null);
             if ( font == null )
                 font = UIManager.getFont( "Label.font" );
 
@@ -850,7 +934,7 @@ public final class SwingTree
          * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
          * <p>
          * You can configure this scaling factor through the library initialization
-         * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+         * method {@link SwingTree#initializeUsing(SwingTreeConfigurator)},
          * or through the system property "swingtree.uiScale".
          *
          * @return The user scale factor.
@@ -1357,6 +1441,10 @@ public final class SwingTree
 
         LazyRef( Supplier<T> supplier ) {
             this.supplier = Objects.requireNonNull( supplier );
+        }
+
+        boolean hasValue() {
+            return value != null;
         }
 
         T get() {

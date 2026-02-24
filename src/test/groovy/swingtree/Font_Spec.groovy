@@ -35,7 +35,7 @@ import java.awt.Font
 class Font_Spec extends Specification
 {
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
@@ -83,7 +83,7 @@ class Font_Spec extends Specification
             current look and feel's scaling factor.
         """
         given: 'We first initialise SwingTree using the given scaling factor'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'A new font object based on the Buggie font family.'
             var font = UI.font('Buggie').toAwtFont()
         expect: 'The font object has the correct family and size.'
@@ -103,7 +103,7 @@ class Font_Spec extends Specification
             system properties, the correct scaling factor is also applied to the font size.
         """
         given: 'We first initialise SwingTree using the given scaling factor'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))
         and : 'We setup a system property for a font'
             System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')
         when : 'We fetch the font using the UI.font factory method'
@@ -125,7 +125,7 @@ class Font_Spec extends Specification
             the current look and feel's scaling factor is used.
         """
         given: 'We first initialise SwingTree using the given scaling factor'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))
         when : 'We create a font using only the family name'
             var font = UI.font('Dancing Script').toAwtFont()
         then : 'The font has the correct family and scaled size'

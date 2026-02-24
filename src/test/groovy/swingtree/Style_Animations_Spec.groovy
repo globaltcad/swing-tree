@@ -329,7 +329,7 @@ class Style_Animations_Spec extends Specification
             its box model being fractional... This will make more sense 
             if you continue reading. 
         """
-            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            SwingTree.initializeUsing { it.uiScaleFactor(uiScale) }
             var scale = { it * uiScale }
             var scaledToString = { String.valueOf(scale(it)).replace(".0", "") }
             var scaleError = { 1 - ( scale(it) % 1 ) }

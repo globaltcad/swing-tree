@@ -66,7 +66,7 @@ import java.util.function.Supplier;
  *  {@link #computeStyleFrom(JComponent)} or {@link #computeStyleFrom(JComponent, StyleConf)} methods.
  *  <br>
  *  The intended way to use a {@link StyleSheet} is by configuring it globally
- *  through {@link swingtree.SwingTree#initialiseUsing(SwingTreeConfigurator)}, or if
+ *  through {@link swingtree.SwingTree#initializeUsing(SwingTreeConfigurator)}, or if
  *  you want to apply ste sheets to specific scopes through {@link swingtree.UI#use(StyleSheet, Supplier)}.
  *  The second argument is a supplier lambda for your SwingTree GUI declaration where each component
  *  will be bound to the {@link StyleSheet} you supplied!<br>

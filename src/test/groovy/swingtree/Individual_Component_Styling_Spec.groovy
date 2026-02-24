@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit
 class Individual_Component_Styling_Spec extends Specification
 {
     def setupSpec() {
-        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
@@ -4182,7 +4182,7 @@ class Individual_Component_Styling_Spec extends Specification
         given : """
             We initialize SwingTree with a custom UI scaling factor:
         """
-            SwingTree.initialiseUsing(it->it.uiScaleFactor(uiScale))
+            SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))
         and : 'A simple SVG consisting of a rounded rectangle and a circle inside.'
             var svg = "<svg width=\"300\" height=\"150\" viewBox=\"0 0 300 150\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
                         "    <rect x=\"0\" y=\"0\" width=\"300\" height=\"150\" fill=\"blue\" />\n" +

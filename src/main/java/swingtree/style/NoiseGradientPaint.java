@@ -38,8 +38,8 @@ final class NoiseGradientPaint implements Paint
             cachedContext = context;
         }
 
-        private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
-            if (/*this.bounds.equals(bounds) && */this.center.equals(center) && this.transform.equals(transform))
+        private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Point2D center, AffineTransform transform) {
+            if (this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
                 return null;
@@ -215,7 +215,7 @@ final class NoiseGradientPaint implements Paint
     ) {
 
         if (cached != null) {
-            NoiseGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
+            NoiseGradientPaintContext c = cached.get(center, TRANSFORM);
             if (c != null)
                 return c;
         }

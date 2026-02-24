@@ -3904,7 +3904,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 });
                         }
                     };
-                    EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(area, thisComponent, listener);
+                    EnterExitComponentBoundsEventDispatcher.get().addMouseEnterListener(area, thisComponent, listener);
                 })
                 ._this();
     }
@@ -4011,7 +4011,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                                 });
                         }
                     };
-                    EnterExitComponentBoundsEventDispatcher.addMouseExitListener(area, thisComponent, listener);
+                    EnterExitComponentBoundsEventDispatcher.get().addMouseExitListener(area, thisComponent, listener);
                 })
                 ._this();
     }

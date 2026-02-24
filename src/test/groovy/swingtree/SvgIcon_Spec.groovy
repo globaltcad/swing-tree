@@ -193,7 +193,7 @@ class SvgIcon_Spec extends Specification
             can call `getBaseWidth()` and `getBaseHeight()`.
         """
         given : 'We start with an initial scale of 1.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(1f) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
         and : 'Then we load two SVG icons with different `Size` objects.'
             var icon1 = UI.findIcon(IconDeclaration.of(Size.of(-1, 17), "img/dandelion.svg"))
             var icon2 = UI.findIcon(IconDeclaration.of(Size.of(17, -1), "img/dandelion.svg"))
@@ -218,7 +218,7 @@ class SvgIcon_Spec extends Specification
         float uiScale, int expectedWidth, int expectedHeight, String svg
     ) {
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and :
             var svgIcon = SvgIcon.of(svg)
         expect :
@@ -277,7 +277,7 @@ class SvgIcon_Spec extends Specification
             Icons without percentage-based dimensions are returned unchanged.
         """
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create an SvgIcon from the provided SVG string.'
             var originalIcon = SvgIcon.of(svg)
         expect : 'The initial icon has the expected dimensions:'
@@ -346,7 +346,7 @@ class SvgIcon_Spec extends Specification
             3. Apply the UI scaling factor correctly
         """
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create an SvgIcon from the provided SVG string.'
             var originalIcon = SvgIcon.of(svg)
         expect : 'The original icon has percentage-based dimensions.'
@@ -399,7 +399,7 @@ class SvgIcon_Spec extends Specification
             like the `SvgIcon` would render itself onto a component for example...
         """
         given :
-            SwingTree.initialiseUsing( it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and :
             var declaration = IconDeclaration.ofSvg(svg)
             var svgIcon = declaration.find().orElseThrow(IllegalStateException::new)
@@ -432,7 +432,7 @@ class SvgIcon_Spec extends Specification
             3. Apply the UI scaling factor correctly
         """
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create an SvgIcon from the provided SVG string.'
             var originalIcon = SvgIcon.of(svg)
         expect : 'The original icon has percentage-based dimensions.'
@@ -498,7 +498,7 @@ class SvgIcon_Spec extends Specification
         String svg
     ) {
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create an SvgIcon from the provided SVG string.'
             var originalIcon = SvgIcon.of(svg)
         expect : 'The original icon has percentage-based dimensions.'
@@ -553,7 +553,7 @@ class SvgIcon_Spec extends Specification
         String svg
     ) {
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create an SvgIcon from the provided SVG string.'
             var originalIcon = SvgIcon.of(svg)
         expect : 'The original icon has percentage-based dimensions.'
@@ -623,7 +623,7 @@ class SvgIcon_Spec extends Specification
         String svg
     ) {
         given : 'We start with an initial UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
         and : 'We create an SvgIcon from the provided SVG string.'
             var originalIcon = SvgIcon.of(svg)
         expect : 'The original icon has the expected dimensions.'
@@ -696,7 +696,7 @@ class SvgIcon_Spec extends Specification
             of these properties.
         """
         given : 'We start with a consistent UI scale.'
-            SwingTree.initialiseUsing(it -> it.uiScaleFactor(1f) )
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
         and :
             int width = size.width().map(Math::round).orElse(-1) as int
             int height = size.height().map(Math::round).orElse(-1) as int

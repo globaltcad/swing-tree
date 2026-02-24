@@ -6,6 +6,7 @@ import utility.Utility
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import utility.Wait
 
 import javax.swing.*
 import java.time.LocalDateTime
@@ -42,11 +43,13 @@ class UI_Updates_Spec extends Specification
 
 
         when :
-            Thread.sleep(200)
+            Wait.until(
+                {new Utility.Query(panel).find(JLabel, "L1").map(l->l.text != "Label 1").orElse(false)},
+                2_000
+            )
 
         then :
             new Utility.Query(panel).find(JLabel, "L1").isPresent()
-        and :
             new Utility.Query(panel).find(JLabel, "L1").get().text != "Label 1"
     }
 
