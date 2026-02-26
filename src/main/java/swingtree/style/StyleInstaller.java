@@ -27,12 +27,12 @@ import java.util.Optional;
  *  This contains all the logic needed for installing the SwingTree style
  *  configurations on a particular component reasonably gracefully.
  *  SwingTree adds a lot of features on top of
- *  regular AWT/Swing.
+ *  regular AWT/Swing. <br>
  *  But it turns out, this is actually fairly difficult,
- *  because when it comes to rendering the UI, Swing has an all or nothing approach,
- *  where you either completely reinstall the look and feel of a component ({@link javax.swing.plaf.ComponentUI}),
+ *  because when it comes to rendering the UI, Swing has an all or nothing approach:
+ *  Either completely reinstall the look and feel of a component ({@link javax.swing.plaf.ComponentUI}),
  *  or you leave it be. Anything in between is a finicky situation which
- *  is exactly where SwingTree is situated.
+ *  is exactly where SwingTree is situated. <br>
  *  The core problem here is that the transition between a SwingTree style and the look and feel
  *  and border of a raw Swing component should be as smooth as possible.
  *  If the user defines a border radius for a component, then this should
@@ -44,7 +44,23 @@ import java.util.Optional;
  *  important property for the performance of Swing components.
  *  <p>
  *  So this class orchestrates under which precise condition, and how, the component should be mutated to
- *  enable the SwingTree style to be effective.
+ *  enable the SwingTree style to be effective. <br>
+ *  Naturally, there are various workarounds and hacks to make this work.
+ *  The most noteworthy is that when a component is styled to have things rendered in the background layer,
+ *  such as a gradient or a shadow. In that case SwingTree needs to paint this stuff
+ *  before the Look and Feel renders the contents of the component.
+ * <p>
+ *  This is not a problem by itself, especially for naturally non-opaque components like {@code JLabel} or
+ *  {@link swingtree.components.JBox}, but for opaque components like {@code JPanel} most Look and Feel's
+ *  {@link javax.swing.plaf.ComponentUI}s will always fill out the entire background with the AWT background
+ *  color taken from {@code Component.getBackground()}.<br>
+ *  This is a problem because it will cover up any custom painting done in the background layer of the style!<br>
+ * <p>
+ *  Now, to overcome this problem, this class implements a special "background color bypass" mechanism that it
+ *  applies to opaque components that have background layer styles.
+ *  It takes the {@code Component.getBackground()} and sets it in the SwingTree style,
+ *  and then sets the AWT background color to {@code UI.Color.UNDEFINED}, which is transparent.
+ *  That way SwingTree will effectively take over the responsibility of painting the component background!
  *
  * @param <C> The type of the component.
  */
@@ -53,6 +69,7 @@ final class StyleInstaller<C extends JComponent>
     private static final Logger log = LoggerFactory.getLogger(StyleInstaller.class);
 
     private DynamicLaF        _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
+    private @Nullable Color   _overriddenBackgroundColor = null;
     private @Nullable Color   _outSideBackgroundColor    = null;
     private @Nullable Color   _lastInsideBackgroundColor = null;
     private @Nullable Boolean _initialIsOpaque           = null;
@@ -115,10 +132,15 @@ final class StyleInstaller<C extends JComponent>
         final StyleConf   newStyle,
         final Outline     marginCorrection
     ) {
+        StyleConf adjustedStyle = newStyle;
+        if ( StyleUtil.isUndefinedColor(owner.getBackground()) ) {
+            if (owner.isOpaque() && _overriddenBackgroundColor != null && !adjustedStyle.base().backgroundColor().isPresent())
+                adjustedStyle = adjustedStyle.backgroundColor(_overriddenBackgroundColor);
+        }
         _lastInsideBackgroundColor = owner.getBackground();
         return engine.update(
                 Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
-                newStyle,
+                adjustedStyle,
                 marginCorrection
             );
     }
@@ -408,6 +430,9 @@ final class StyleInstaller<C extends JComponent>
                     if ( !Objects.equals( owner.getBackground(), UI.Color.UNDEFINED ) )
                         owner.setBackground(UI.Color.UNDEFINED);
                 };
+                Color currentBackground = owner.getBackground();
+                if ( !StyleUtil.isUndefinedColor(currentBackground) )
+                    _overriddenBackgroundColor = currentBackground;
             }
             if ( !hasBackground && isNaturallyTransparent )
                 shouldBeOpaque = false;
