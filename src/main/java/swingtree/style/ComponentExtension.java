@@ -724,7 +724,8 @@ public final class ComponentExtension<C extends JComponent>
         _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -> {
             if ( needsCustomWipe ) {
                 if ( _owner.isOpaque() ) {
-                    internalGraphics.setColor(_owner.getBackground());
+                    Color background = findBackgroundColorForWiping(_owner, _styleEngine.getComponentConf());
+                    internalGraphics.setColor(background);
                     int width = _owner.getWidth();
                     int height = _owner.getHeight();
                     internalGraphics.fillRect(0, 0, width, height);
@@ -785,6 +786,26 @@ public final class ComponentExtension<C extends JComponent>
 
             internalGraphics.setClip(baseClip);
         });
+    }
+
+    private static Color findBackgroundColorForWiping(Container owner, ComponentConf componentConf) {
+        Color background = owner.getBackground();
+        if ( StyleUtil.isUndefinedColor(background) ) {
+            background = componentConf
+                        .style()
+                        .base()
+                        .backgroundColor()
+                        .orElseGet(()->
+                            Optional.ofNullable(owner.getParent())
+                            .map(Container::getBackground)
+                            .orElse(java.awt.Color.WHITE)
+                        );
+        }
+        if ( background.getAlpha() < 255 ) {
+            // If the background is not fully opaque, we need to fill with a fully opaque color to wipe the previous rendering
+            background = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);
+        }
+        return background;
     }
 
     void paintBorder( Graphics2D graphics, Consumer<Graphics> formerBorderPainter )

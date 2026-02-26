@@ -8,6 +8,7 @@ import swingtree.animation.LifeTime
 import swingtree.api.Styler
 import swingtree.components.JBox
 import swingtree.style.ComponentExtension
+import swingtree.style.StyleConf
 
 import javax.swing.*
 import java.awt.*
@@ -1571,6 +1572,7 @@ class Opaqueness_Styles_Spec extends Specification
             UI.Color.GREEN              | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
             UI.Color.GREEN              | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
             UI.Color.GREEN              | true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+            UI.Color.GREEN              | true   | {it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}
             UI.Color.RED.withAlpha(100) | false  | {it}
             UI.Color.RED.withAlpha(200) | true   | {it.backgroundColor("red")}
             UI.Color.RED.withAlpha(240) | false  | {it.backgroundColor("transparent red")}
@@ -1583,6 +1585,75 @@ class Opaqueness_Styles_Spec extends Specification
             UI.Color.RED.withAlpha(254) | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
             UI.Color.RED.withAlpha(254) | false  | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
             UI.Color.RED.withAlpha(254) | false  | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+    }
+
+
+    def 'SwingTree may bypass the AWT background color using its own style based background color.'(
+        boolean isColorBypass, boolean opaque, Styler<JBox> styler
+    ) {
+        reportInfo """
+            This unit test covers an interesting but important and unfortunately
+            unavoidable implementation detail of SwingTree's styling system.
+            When a component is styled to have things rendered in the background layer, 
+            such as a gradient or a shadow, then SwingTree needs to paint this stuff 
+            before the Look and Feel renders the contents of the component.
+            
+            This is not a problem by itself, especially for naturally non-opaque components like `JLabel` or `JBox`,
+            but for opaque components like `JPanel` most Look and Feels will always fill out
+            the entire background with the AWT background color taken from `Component.getBackground()`.
+            This is a problem because it will cover up any custom painting done in the background layer of the style!
+            
+            Now, to overcome this problem, SwingTree has a special "color bypass" mechanism that it 
+            applies to opaque components that have background layer styles.
+            It takes the `Component.getBackground()` and sets it in the SwingTree style,
+            and then sets the AWT background color to `UI.Color.UNDEFINED`, which is transparent.
+            SwingTree will effectively take over the responsibility of painting the component background!
+        """
+        given : 'We first define a boolean flag that we will use to control the style:'
+            var isOn = false
+        and : 'Then we create the opaque colored panel based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.panel().withSize(60, 100)
+                    .withBackground(UI.Color.WHEAT)
+                    .withStyle({ isOn ? styler(it) : it })
+        and : 'We build the underlying panel:'
+            var panel = ui.get(JPanel)
+        expect : 'The panel is opaque initially:'
+            panel.isOpaque()
+            ComponentExtension.from(panel).getStyle() == StyleConf.none()
+        when : 'We set the `isOn` flag to true and then refresh the UI:'
+            isOn = true
+            UI.runNow(()->{
+                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The panel has the expected opaqueness:'
+            panel.isOpaque() == opaque
+            ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass
+            !isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED
+
+        when : 'We set the `isOn` flag to false and then refresh the UI:'
+            isOn = false
+            UI.runNow(()->{
+                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+            })
+        then : 'The panel, once again, is opaque:'
+            panel.isOpaque()
+            ComponentExtension.from(panel).getStyle() == StyleConf.none()
+        where :
+            isColorBypass | opaque | styler
+             false        | true   | {it}
+             true         | true   | {it.backgroundColor("red")}
+             true         | false  | {it.backgroundColor("transparent red")}
+             true         | true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+             true         | true   | {it.backgroundColor("blue").foundationColor("red")}
+             true         | false  | {it.backgroundColor("blue").foundationColor("red").border(2, "transparent oak")}
+             true         | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+             true         | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+             true         | false  | {it.foundationColor("transparent light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}
+             true         | true   | {it.backgroundColor("rgb(220,220,220)").foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+             true         | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
+             false        | true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
+             true         | true   | {it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}
     }
 
 }

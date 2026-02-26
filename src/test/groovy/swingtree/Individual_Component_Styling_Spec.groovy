@@ -559,7 +559,7 @@ class Individual_Component_Styling_Spec extends Specification
             panel.border.getBorderInsets(panel) == new Insets(0, 64 * uiScale, 0, 42 * uiScale)
         and :
             panel.layout != null
-            panel.layout instanceof MigLayout
+            (panel.layout instanceof MigLayout)
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
@@ -607,7 +607,7 @@ class Individual_Component_Styling_Spec extends Specification
             panel.border.getBorderInsets(panel) == new Insets(11 * uiScale, 84 * uiScale, 30 * uiScale, 52 * uiScale)
         and :
             panel.layout != null
-            panel.layout instanceof MigLayout
+            (panel.layout instanceof MigLayout)
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
@@ -654,7 +654,7 @@ class Individual_Component_Styling_Spec extends Specification
             panel.border.getBorderInsets(panel) == new Insets(12 * uiScale, 19 * uiScale, 5 * uiScale, 7 * uiScale)
         and : 'We also expect there to be the mig layout manager by default.'
             panel.layout != null
-            panel.layout instanceof MigLayout
+            (panel.layout instanceof MigLayout)
 
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
@@ -4252,5 +4252,44 @@ class Individual_Component_Styling_Spec extends Specification
               2   | 'variant-10'| {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}
     }
 
+    def 'You can render a radial gradient onto a panel using the style API.'( float scale )
+    {
+        reportInfo """
+            The SwingTree style engine allows you to render a radial gradient
+            onto any Swing component using the "gradient" sub style.
+            In this example/test we configure a radial gradient which 
+            transitions from dark blue in the center to transparent white at the edges,
+            
+            ${Utility.linkSnapshot("components/radial-gradient-panel.png")}
+            
+            The rendered component is then matched with a previously made snapshot.
+            We expect the style engine to produce this exact same rendering!
+        """
+        given : """
+            For more thorough testing, we initialize SwingTree with a custom UI scaling factor:
+        """
+            SwingTree.initializeUsing(it->it.uiScaleFactor(scale))
+        and : 'We create a panel with a radial gradient style rules:'
+            var ui =
+                    UI.panel("ins 24, fill, wrap 1").withBackground(Color.PINK)
+                    .add("grow",
+                        UI.panel("fill, wrap 1").withPrefSize(100, 80)
+                        .withStyle( it -> it
+                            .gradient( g -> g
+                                .type(UI.GradientType.RADIAL)
+                                .colors(UI.Color.DARKBLUE, UI.Color.WHITE.withAlpha(0))
+                            )
+                        )
+                    )
+
+        when : 'We render the UI into a `BufferedImage` instance.'
+            var image = Utility.offscreenRender(ui.get(JPanel))
+
+        then : 'The image is as expected (compared with the snapshot above).'
+            Utility.similarityBetween(image, "components/radial-gradient-panel.png", 99.5) > 99.5
+
+        where : 'We test this using the following scaling values:'
+            scale << [1f, 2f]
+    }
 
 }
