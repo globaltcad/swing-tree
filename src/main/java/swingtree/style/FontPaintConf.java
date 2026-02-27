@@ -141,6 +141,16 @@ final class FontPaintConf
                 _noise    == null;
     }
 
+    FontPaintConf _scale( double scale ) {
+        if ( _noise != null ) {
+            return of(null, null, _noise.map( it -> it._scale(scale) ), null);
+        }
+        if ( _gradient != null ) {
+            return of(null, null, null, _gradient._scale(scale));
+        }
+        return this;
+    }
+
     @Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;

@@ -271,13 +271,13 @@ public final class GradientConf implements Simplifiable<GradientConf>
     }
 
     GradientConf _scale( double scale ) {
-        if ( _size > 0 && scale != 1 )
+        if ( scale != 1 )
             return of(
-                    _span,
+                        _span,
                         _type,
                         _colors,
                         _offset.scale(scale),
-                        (float) (_size * scale),
+                        _size <= 0 ? _size : (float) (_size * scale),
                         _area,
                         _boundary,
                         _focus.scale(scale),

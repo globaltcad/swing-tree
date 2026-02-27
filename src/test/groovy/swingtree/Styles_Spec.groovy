@@ -982,8 +982,8 @@ class Styles_Spec extends Specification
         then : """
             We find that both paint objects are font paints.
         """
-            paint instanceof swingtree.style.FontPaint
-            backgroundPaint instanceof swingtree.style.FontPaint
+            (paint instanceof swingtree.style.FontPaint)
+            (backgroundPaint instanceof swingtree.style.FontPaint)
         when : 'We unpack their delegated paint...'
             paint           = paint.getDelegatedPaint()
             backgroundPaint = backgroundPaint.getDelegatedPaint()
@@ -991,21 +991,56 @@ class Styles_Spec extends Specification
             We find tha both paint objects are gradient paints.
             But one is a linear gradient and the other is a simple 2 color based gradient.
         """
-            paint instanceof LinearGradientPaint
-            backgroundPaint instanceof GradientPaint
+            (paint instanceof LinearGradientPaint)
+            (backgroundPaint instanceof GradientPaint)
         when : 'We cast them to their respective types...'
             var grad1 = paint as LinearGradientPaint
             var grad2 = backgroundPaint as GradientPaint
         then : 'They have the expected start and end points:'
             grad1.getStartPoint() == new Point2D.Float((float)(3*uiScale), (float)(3*uiScale))
             grad1.getEndPoint() == new Point2D.Float((float)(3*uiScale), (float)(47*uiScale))
-            grad2.getPoint1() == new Point2D.Float((float)(100*uiScale+94.0-100), (float)(25*uiScale-6))
-            grad2.getPoint2() == new Point2D.Float((float)(3*uiScale-6), (float)(25*uiScale-6))
+            grad2.getPoint1() == new Point2D.Float((float)(100*uiScale-6*uiScale), (float)(25*uiScale-6*uiScale))
+            grad2.getPoint2() == new Point2D.Float((float)(3*uiScale-6*uiScale), (float)(25*uiScale-6*uiScale))
         and : 'They also both have the expected colors:'
             grad1.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ] as Color[]
             grad2.getColor1() == Color.CYAN
             grad2.getColor2() == Color.MAGENTA
-
+        and : 'Finally, we verify if the string representation of the style config is as expected:'
+            ComponentExtension.from(label).getStyle().toString().contains(
+                    "paint=FontPaintConf[" +
+                        "GradientConf[" +
+                            "transition=TOP_TO_BOTTOM, " +
+                            "type=LINEAR, " +
+                            "colors=[java.awt.Color[r=255,g=0,b=0], java.awt.Color[r=0,g=255,b=0], java.awt.Color[r=0,g=0,b=255]], " +
+                            "offset=Offset[x=0, y=0], " +
+                            "size=-1.0, " +
+                            "area=BODY, " +
+                            "boundary=INTERIOR_TO_CONTENT, " +
+                            "focus=Offset[x=0, y=0], " +
+                            "rotation=0.0, " +
+                            "fractions=[], " +
+                            "cycle=NONE" +
+                        "]" +
+                    "]"
+                )
+                and :
+                    ComponentExtension.from(label).getStyle().toString().contains(
+                        "backgroundPaint=FontPaintConf[" +
+                            "GradientConf[" +
+                                "transition=RIGHT_TO_LEFT, " +
+                                "type=LINEAR, " +
+                                "colors=[java.awt.Color[r=0,g=255,b=255], java.awt.Color[r=255,g=0,b=255]], " +
+                                "offset=Offset[x=${(-6*uiScale).intValue()}, y=${(-6*uiScale).intValue()}], " +
+                                "size=-1.0, " +
+                                "area=BODY, " +
+                                "boundary=CENTER_TO_CONTENT, " +
+                                "focus=Offset[x=0, y=0], " +
+                                "rotation=0.0, " +
+                                "fractions=[], " +
+                                "cycle=NONE" +
+                            "]" +
+                        "]"
+                    )
         where :
             uiScale << [ 1.0f, 2.0f, 3.0f ]
     }
@@ -1071,24 +1106,24 @@ class Styles_Spec extends Specification
         then : """
             We find that both paint objects are font paints.
         """
-            paint instanceof swingtree.style.FontPaint
-            backgroundPaint instanceof swingtree.style.FontPaint
+            (paint instanceof swingtree.style.FontPaint)
+            (backgroundPaint instanceof swingtree.style.FontPaint)
         when : 'We unpack their delegated paint...'
             paint           = paint.getDelegatedPaint()
             backgroundPaint = backgroundPaint.getDelegatedPaint()
         then : """
             We find that both paint objects are noise paints.
         """
-            paint instanceof swingtree.style.NoiseGradientPaint
-            backgroundPaint instanceof swingtree.style.NoiseGradientPaint
+            (paint instanceof swingtree.style.NoiseGradientPaint)
+            (backgroundPaint instanceof swingtree.style.NoiseGradientPaint)
         and : 'They have the expected colors and noise functions:'
             paint.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ]
             paint.getNoiseFunction() == UI.NoiseType.RETRO
             backgroundPaint.getColors() == [ Color.CYAN, Color.MAGENTA ]
             backgroundPaint.getNoiseFunction() == UI.NoiseType.MANDELBROT
         and : 'They also both have the expected scale:'
-            paint.getScale() == new Point2D.Float(1, 1)
-            backgroundPaint.getScale() == new Point2D.Float(3, 4)
+            paint.getScale() == new Point2D.Float(uiScale, uiScale)
+            backgroundPaint.getScale() == new Point2D.Float(3f * uiScale as float, 4f * uiScale as float)
 
         where :
             uiScale << [ 1.0f, 2.0f, 3.0f ]
