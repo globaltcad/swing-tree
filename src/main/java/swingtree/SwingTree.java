@@ -117,6 +117,7 @@ public final class SwingTree
     private final LazyRef<UiScale> _uiScale;
     private final Map<IconDeclaration, ImageIcon> _iconCache = new WeakHashMap<>();
     private final Map<Long, Pair<AWTEventListener, Var<AWTEvent>>> _globalAwtBinding = new HashMap<>();
+    private final Var<Boolean> _isDevToolsEnabled = Var.of(false);
 
 
     private SwingTree() { this(config -> config); }
@@ -209,6 +210,95 @@ public final class SwingTree
             _globalAwtBinding.put(mask, Pair.of(listener, awtEventProperty));
             return awtEventProperty.view();
         }
+    }
+
+    /**
+     *  Returns whether the library is configured to record debug source traces for components during their creation.<br>
+     *  If this is the case, then <i>SwingTree</i> will record the stack trace of a component at the moment of its
+     *  creation. It will be captured as a {@link sprouts.Tuple} of {@link StackTraceElement}s and then stored
+     *  as a client properties under the "built-at" key.<br>
+     *  This source location trace is primarily used by the <i>SwingTree</i> dev-tool, which can be
+     *  enabled through pressing the {@link SwingTree#devToolKeyStrokeShortcut()} keystroke shortcut.
+     *  It creates an overlay on top of the UI that shows debug information about the component under the mouse cursor.
+     *  When pressing control together with a left click on a component, it opens a dialog
+     *  showing a lot of important debug information about the component, including the source code location trace.
+     *
+     * @return true if the library is configured to record debug source traces
+     *          for components during their creation, false otherwise.
+     * @see #devToolKeyStrokeShortcut()
+     * @see SwingTreeInitConfig#recordDebugSourceTrace(boolean)
+     **/
+    public boolean isRecordingDebugSourceTrace() {
+        return this._config.recordDebugSourceTrace();
+    }
+
+    /**
+     *  Returns the keystroke shortcut that is used to toggle the <i>SwingTree</i> dev-tool,
+     *  which is a classical inspector tool that creates an overlay on top of the UI and
+     *  shows debug information about the component under the mouse cursor.
+     *  By default, the shortcut to enable it is "ctrl shift I", but you can configure it through the
+     *  {@link SwingTreeInitConfig#devToolKeyStrokeShortcut(String)} method
+     *  of the {@link SwingTreeInitConfig} class, which is used to configure the
+     *  {@link SwingTree} instance through the {@link SwingTreeConfigurator}
+     *  in {@link SwingTree#initializeUsing(SwingTreeConfigurator)}.
+     *
+     * @return The keystroke shortcut that is used to toggle the <i>SwingTree</i> dev-tool / inspection-tool.
+     * @see #isRecordingDebugSourceTrace()
+     * @see SwingTreeInitConfig#devToolKeyStrokeShortcut(String)
+     **/
+    public String devToolKeyStrokeShortcut() {
+        return this._config.devToolKeyStrokeShortcut();
+    }
+
+    /**
+     *  Returns whether the <i>SwingTree</i> dev-tool is currently enabled or not.
+     *  The dev-tool is a classical inspector tool that creates an overlay on top of the UI and
+     *  shows debug information about the component under the mouse cursor.
+     *  You can toggle it through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()}.
+     *
+     * @return true if the <i>SwingTree</i> dev-tool is currently enabled, false otherwise.
+     * @see #devToolKeyStrokeShortcut()
+     * @see #createAndGetDevToolsEnabledView() Use this method create a reactive property for this boolean.
+     **/
+    public boolean isDevToolEnabled() {
+        return this._isDevToolsEnabled.get();
+    }
+
+    /**
+     *  Enables or disables the <i>SwingTree</i> dev-tool, which is a classical inspector tool that
+     *  creates an overlay on top of the UI and shows debug information about the component under the mouse cursor.<br>
+     *  You can also toggle it through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()},
+     *  which is "ctrl shift I" by default. <br>
+     *  This method is useful when you want to enable or disable the dev-tool programmatically,
+     *  for example through a button in your UI, or through a command in your application's console.
+     *
+     * @param enabled true to enable the <i>SwingTree</i> dev-tool, false to disable it.
+     * @see #devToolKeyStrokeShortcut()
+     * @see #createAndGetDevToolsEnabledView() Use this method create a reactive property for this boolean.
+     **/
+    public void setIsDevToolsEnabled(boolean enabled) {
+        this._isDevToolsEnabled.set(enabled);
+    }
+
+    /**
+     *  Creates and returns a reactive {@link Viewable} of the library context's dev-tool enabled state
+     *  which will update itself and invoke all of its change listeners when the dev-tool enabled state changes,
+     *  through methods like {@link #setIsDevToolsEnabled(boolean)} or through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()}.<br>
+     *  If you no longer reference a reactive property view strongly in your
+     *  code, then it will be garbage collected alongside all of its change
+     *  listeners automatically for you!<br>
+     *  <br>
+     *  The dev-tool is a classical inspector tool that creates an overlay on top of the UI and
+     *  shows debug information about the component under the mouse cursor. You can toggle it through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()},
+     *  which is "ctrl shift I" by default.
+     *
+     * @return A reactive property holding whether the <i>SwingTree</i> dev-tool is currently enabled or not. You may hold onto such a view
+     *         and register change listeners on it to ensure your components always know whether the dev-tool is enabled or not!
+     * @see #devToolKeyStrokeShortcut()
+     * @see #setIsDevToolsEnabled(boolean)
+     */
+    public Viewable<Boolean> createAndGetDevToolsEnabledView() {
+        return _isDevToolsEnabled.view();
     }
 
     /**

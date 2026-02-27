@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Tuple;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentExtension;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
@@ -10,6 +11,7 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
+import java.awt.*;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -83,7 +85,7 @@ final class BuilderState<C extends java.awt.Component>
             SwingTree.get().getEventProcessor(),
             Mode.FUNCTIONAL_FACTORY_BUILDER,
             (Class<C>) type,
-            ()->initializeComponent(componentSource.get()).get()
+            initializeComponent(componentSource)
         );
     }
 
@@ -93,7 +95,7 @@ final class BuilderState<C extends java.awt.Component>
             SwingTree.get().getEventProcessor(),
             Mode.DECLARATIVE_ONLY,
             (Class<C>) component.getClass(),
-            initializeComponent(component)
+            initializeComponent(()->component)
         );
     }
 
@@ -114,14 +116,22 @@ final class BuilderState<C extends java.awt.Component>
         _componentFetcher = componentFetcher;
     }
 
-    private static <C extends java.awt.Component> Supplier<C> initializeComponent( C component )
+    private static <C extends java.awt.Component> Supplier<C> initializeComponent( Supplier<C> componentSupplier )
     {
-        Objects.requireNonNull(component, "component");
-        if ( component instanceof JComponent)
-            ComponentExtension.initializeFor( (JComponent) component );
+        Tuple<StackTraceElement> stackTraceElement = InternalUtil.ifInDebugModeExtractUserSourceCodeTrace().orElse(null);
+        return () -> {
+            C component = componentSupplier.get();
+            if ( stackTraceElement != null && component instanceof JComponent ) {
+                ((JComponent)component).putClientProperty("built-at", stackTraceElement);
+            }
+            Objects.requireNonNull(component, "component");
+            if (component instanceof JComponent)
+                ComponentExtension.initializeFor((JComponent) component);
 
-        return () -> component;
+            return component;
+        };
     }
+
 
     /**
      *  @return The component managed by this builder.
@@ -142,11 +152,15 @@ final class BuilderState<C extends java.awt.Component>
 
         C component = _componentType.cast(_componentFetcher.get());
         if ( component instanceof JComponent ) {
+            JComponent jComponent = ((JComponent) component);
             ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf((JComponent) component);
             if ( componentUI instanceof SwingTreeStyledComponentUI<?> ) {
-                ComponentExtension.from(((JComponent) component)).gatherApplyAndInstallStyle(false);
+                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
             }
         }
+
+
+
         return component;
     }
 

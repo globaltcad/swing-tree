@@ -1,13 +1,32 @@
 package swingtree;
 
+import sprouts.Tuple;
 import swingtree.components.JBox;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Optional;
 
 final class InternalUtil
 {
     private InternalUtil() {}
+
+    static Optional<Tuple<StackTraceElement>> ifInDebugModeExtractUserSourceCodeTrace() {
+        if ( !SwingTree.get().isRecordingDebugSourceTrace() ) {
+            return Optional.empty();
+        }
+        StackTraceElement[] traceElements = Thread.currentThread().getStackTrace();
+        for (int i = 0; i < traceElements.length; i++) {
+            StackTraceElement element = traceElements[i];
+            String className = element.getClassName();
+            if (!className.startsWith("java.") && !className.startsWith("swingtree.")) {
+                Tuple<StackTraceElement> fullTrace = Tuple.of(StackTraceElement.class, traceElements);
+                Tuple<StackTraceElement> subTrace = fullTrace.slice(i, fullTrace.size());
+                return Optional.of(subTrace);
+            }
+        }
+        return Optional.empty();
+    }
 
     static int _actualComponentCountFrom(Container container) {
         if ( container instanceof JMenu ) {
