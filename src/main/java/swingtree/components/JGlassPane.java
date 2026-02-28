@@ -64,7 +64,7 @@ public class JGlassPane extends JPanel implements StylableComponent
                 })
         );
         putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
-            SwingTree.get().createAndGetDevToolsEnabledView()
+            SwingTree.get().createAndGetDevToolEnabledView()
                 .onChange(From.ALL, it -> {
                     if ( rootPane != null ) {
                         if (it.currentValue().is(true)) {

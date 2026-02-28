@@ -117,7 +117,7 @@ public final class SwingTree
     private final LazyRef<UiScale> _uiScale;
     private final Map<IconDeclaration, ImageIcon> _iconCache = new WeakHashMap<>();
     private final Map<Long, Pair<AWTEventListener, Var<AWTEvent>>> _globalAwtBinding = new HashMap<>();
-    private final Var<Boolean> _isDevToolsEnabled = Var.of(false);
+    private final Var<Boolean> _isDevToolEnabled = Var.of(false);
 
 
     private SwingTree() { this(config -> config); }
@@ -258,10 +258,10 @@ public final class SwingTree
      *
      * @return true if the <i>SwingTree</i> dev-tool is currently enabled, false otherwise.
      * @see #devToolKeyStrokeShortcut()
-     * @see #createAndGetDevToolsEnabledView() Use this method create a reactive property for this boolean.
+     * @see #createAndGetDevToolEnabledView() Use this method create a reactive property for this boolean.
      **/
     public boolean isDevToolEnabled() {
-        return this._isDevToolsEnabled.get();
+        return this._isDevToolEnabled.get();
     }
 
     /**
@@ -274,16 +274,16 @@ public final class SwingTree
      *
      * @param enabled true to enable the <i>SwingTree</i> dev-tool, false to disable it.
      * @see #devToolKeyStrokeShortcut()
-     * @see #createAndGetDevToolsEnabledView() Use this method create a reactive property for this boolean.
+     * @see #createAndGetDevToolEnabledView() Use this method create a reactive property for this boolean.
      **/
-    public void setIsDevToolsEnabled(boolean enabled) {
-        this._isDevToolsEnabled.set(enabled);
+    public void setIsDevToolEnabled(boolean enabled) {
+        this._isDevToolEnabled.set(enabled);
     }
 
     /**
      *  Creates and returns a reactive {@link Viewable} of the library context's dev-tool enabled state
      *  which will update itself and invoke all of its change listeners when the dev-tool enabled state changes,
-     *  through methods like {@link #setIsDevToolsEnabled(boolean)} or through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()}.<br>
+     *  through methods like {@link #setIsDevToolEnabled(boolean)} or through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()}.<br>
      *  If you no longer reference a reactive property view strongly in your
      *  code, then it will be garbage collected alongside all of its change
      *  listeners automatically for you!<br>
@@ -295,10 +295,10 @@ public final class SwingTree
      * @return A reactive property holding whether the <i>SwingTree</i> dev-tool is currently enabled or not. You may hold onto such a view
      *         and register change listeners on it to ensure your components always know whether the dev-tool is enabled or not!
      * @see #devToolKeyStrokeShortcut()
-     * @see #setIsDevToolsEnabled(boolean)
+     * @see #setIsDevToolEnabled(boolean)
      */
-    public Viewable<Boolean> createAndGetDevToolsEnabledView() {
-        return _isDevToolsEnabled.view();
+    public Viewable<Boolean> createAndGetDevToolEnabledView() {
+        return _isDevToolEnabled.view();
     }
 
     /**

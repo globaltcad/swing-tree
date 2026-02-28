@@ -11,7 +11,6 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
-import java.awt.*;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -121,13 +120,13 @@ final class BuilderState<C extends java.awt.Component>
         Tuple<StackTraceElement> stackTraceElement = InternalUtil.ifInDebugModeExtractUserSourceCodeTrace().orElse(null);
         return () -> {
             C component = componentSupplier.get();
-            if ( stackTraceElement != null && component instanceof JComponent ) {
-                ((JComponent)component).putClientProperty("built-at", stackTraceElement);
-            }
             Objects.requireNonNull(component, "component");
-            if (component instanceof JComponent)
+            if (component instanceof JComponent) {
+                if ( stackTraceElement != null ) {
+                    ((JComponent)component).putClientProperty("built-at", stackTraceElement);
+                }
                 ComponentExtension.initializeFor((JComponent) component);
-
+            }
             return component;
         };
     }

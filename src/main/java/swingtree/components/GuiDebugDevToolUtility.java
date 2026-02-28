@@ -27,7 +27,7 @@ final class GuiDebugDevToolUtility {
     private static final UI.Color SELECTION_COLOR = UI.Color.ofRgb(0, 142, 83);
     private static final javax.swing.Action toggleDevToolsShortcutAction = new AbstractAction() {
         @Override public void actionPerformed(ActionEvent e) {
-            SwingTree.get().setIsDevToolsEnabled(
+            SwingTree.get().setIsDevToolEnabled(
                 !SwingTree.get().isDevToolEnabled()
             );
         }
@@ -185,10 +185,10 @@ final class GuiDebugDevToolUtility {
         // Debug information should also be allowed to look good! :)
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        if ( selectedDebugComponent != focusedDebugComponent ) {
+        if ( selectedDebugComponent != focusedDebugComponent && focusedDebugComponent.isShowing() ) {
             renderDebugOverlayFor(g2d, glassPane, focusedDebugComponent, FOCUS_COLOR);
         }
-        if ( selectedDebugComponent != null ) {
+        if ( selectedDebugComponent != null && selectedDebugComponent.isShowing() ) {
             renderDebugOverlayFor(g2d, glassPane, selectedDebugComponent, SELECTION_COLOR);
         }
     }
@@ -314,7 +314,7 @@ final class GuiDebugDevToolUtility {
     }
 
     private static class DebugInfoDialog extends JDialog {
-        private final Viewable<Boolean> isDevToolsEnabled = SwingTree.get().createAndGetDevToolsEnabledView();
+        private final Viewable<Boolean> isDevToolsEnabled = SwingTree.get().createAndGetDevToolEnabledView();
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
 
@@ -467,12 +467,13 @@ final class GuiDebugDevToolUtility {
         int depth = 0;
         boolean newLine = false;
 
+        java.util.regex.Pattern colorPattern = java.util.regex.Pattern.compile("rgb[a]?\\([^)]*\\)");
         for (int i = 0; i < input.length(); i++) {
             try {
                 i = maybeSkip(i, input, "[]", out);
                 i = maybeSkip(i, input, "[NONE]", out);
                 i = maybeSkip(i, input, "[EMPTY]", out);
-                i = maybeSkipRegex(i, input, "rgb[a]?\\([^)]*\\)", out);
+                i = maybeSkipRegex(i, input, colorPattern, out);
             } catch (Exception e) {
                 log.error("Error while pretty-printing record: {}", e.getMessage(), e);
             }
@@ -517,7 +518,7 @@ final class GuiDebugDevToolUtility {
     }
 
     private static int maybeSkip(int i, String input, String toMatch, StringBuilder out) {
-        if ( (i+toMatch.length()) < input.length() ) {
+        if ( (i+toMatch.length()) <= input.length() ) {
             // Special handling for 'toMatch' to keep it compact
             if ( input.startsWith(toMatch, i) ) {
                 out.append(toMatch);
@@ -527,8 +528,7 @@ final class GuiDebugDevToolUtility {
         return i;
     }
 
-    private static int maybeSkipRegex(int i, String input, String regex, StringBuilder out) {
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+    private static int maybeSkipRegex(int i, String input, java.util.regex.Pattern pattern, StringBuilder out) {
         java.util.regex.Matcher matcher = pattern.matcher(input);
         matcher.region(i, input.length());
         if (matcher.lookingAt()) {

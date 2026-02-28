@@ -122,7 +122,7 @@ public final class SwingTreeInitConfig
     private final long             _defaultAnimationInterval;
     private final Marker           _logMarker;
     private final boolean          _recordDebugSourceTrace;
-    private final String _devToolKeyStrokeShortcut;
+    private final String           _devToolKeyStrokeShortcut;
 
 
     private SwingTreeInitConfig(
@@ -136,19 +136,19 @@ public final class SwingTreeInitConfig
         long                defaultAnimationInterval,
         Marker              logMarker,
         boolean             recordDebugSourceTrace,
-        String              enableDevToolKeyStroke
+        String              devToolKeyStroke
     ) {
-        _defaultFont                  = defaultFont;
-        _fontInstallation             = Objects.requireNonNull(fontInstallation);
-        _eventProcessor               = Objects.requireNonNull(eventProcessor);
-        _styleSheet                   = Objects.requireNonNull(styleSheet);
-        _uiScale                      = uiScale;
-        _uiScaleEnabled               = uiScaleEnabled;
-        _uiScaleAllowScaleDown        = uiScaleAllowScaleDown;
-        _defaultAnimationInterval     = defaultAnimationInterval;
-        _logMarker                    = logMarker;
-        _recordDebugSourceTrace       = recordDebugSourceTrace;
-        _devToolKeyStrokeShortcut = Objects.requireNonNull(enableDevToolKeyStroke);
+        _defaultFont              = defaultFont;
+        _fontInstallation         = Objects.requireNonNull(fontInstallation);
+        _eventProcessor           = Objects.requireNonNull(eventProcessor);
+        _styleSheet               = Objects.requireNonNull(styleSheet);
+        _uiScale                  = uiScale;
+        _uiScaleEnabled           = uiScaleEnabled;
+        _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;
+        _defaultAnimationInterval = defaultAnimationInterval;
+        _logMarker                = logMarker;
+        _recordDebugSourceTrace   = recordDebugSourceTrace;
+        _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);
     }
 
     /**
@@ -505,7 +505,7 @@ public final class SwingTreeInitConfig
      * @see SwingTree#isDevToolEnabled()
      * @see SwingTree#devToolKeyStrokeShortcut()
      */
-    public SwingTreeInitConfig devToolKeyStrokeShortcut(String keyStroke ) {
+    public SwingTreeInitConfig devToolKeyStrokeShortcut( String keyStroke ) {
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
@@ -577,7 +577,7 @@ public final class SwingTreeInitConfig
          * {@link #RECORD_DEBUG_SOURCE_TRACE} mode is set to {@code true} (which by default it is).<br>
          * Because this is the mode that creates the source code trace in the first place. <br>
          */
-        String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.enableDevToolKeyStroke";
+        String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.devToolKeyStroke";
 
         /**
          * Checks whether a system property is set and returns {@code true} if its value
