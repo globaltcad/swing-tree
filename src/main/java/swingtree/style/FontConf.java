@@ -1231,8 +1231,8 @@ public final class FontConf
                     _isUnderlined,
                     _isStrike,
                     _transform,
-                    _paint,
-                    _backgroundPaint,
+                    _paint._scale(scale),
+                    _backgroundPaint._scale(scale),
                     _horizontalAlignment,
                     _verticalAlignment
                 );
