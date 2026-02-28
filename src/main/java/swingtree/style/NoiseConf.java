@@ -165,7 +165,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         return of(
             _function,
             _colors,
-            _offset,
+            _offset.scale(scale),
             _scale.scale(scale),
             _area,
             _boundary,

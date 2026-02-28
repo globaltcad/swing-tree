@@ -1030,7 +1030,7 @@ class Styles_Spec extends Specification
                                 "transition=RIGHT_TO_LEFT, " +
                                 "type=LINEAR, " +
                                 "colors=[java.awt.Color[r=0,g=255,b=255], java.awt.Color[r=255,g=0,b=255]], " +
-                                "offset=Offset[x=${(-6*uiScale).intValue()}, y=${(-6*uiScale).intValue()}], " +
+                                "offset=Offset[x=${Math.round(-6*uiScale)}, y=${Math.round(-6*uiScale)}], " +
                                 "size=-1.0, " +
                                 "area=BODY, " +
                                 "boundary=CENTER_TO_CONTENT, " +
@@ -1124,6 +1124,8 @@ class Styles_Spec extends Specification
         and : 'They also both have the expected scale:'
             paint.getScale() == new Point2D.Float(uiScale, uiScale)
             backgroundPaint.getScale() == new Point2D.Float(3f * uiScale as float, 4f * uiScale as float)
+        and : 'The configured offset for the background noise paint is also scaled with the UI scale:'
+            backgroundPaint.getCenter() == new Point2D.Float((uiScale * 100 - 6f * uiScale) as float, (uiScale * 25 - 6f * uiScale) as float)
 
         where :
             uiScale << [ 1.0f, 2.0f, 3.0f ]
