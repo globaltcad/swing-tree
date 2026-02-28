@@ -403,6 +403,7 @@ final class GuiDebugDevToolUtility {
                                 UI.textArea(
                                     debugState.viewAsString(it -> it.type().getCanonicalName() +"\n"+ stackTraceToString(it.sourceCodeLocation()))
                                 )
+                                .isEditableIf(false)
                             )
                         )
                     )
@@ -420,6 +421,7 @@ final class GuiDebugDevToolUtility {
                                         }
                                     })
                                 )
+                                .isEditableIf(false)
                             )
                         )
                     )
@@ -430,6 +432,7 @@ final class GuiDebugDevToolUtility {
                                 UI.textArea(
                                     debugState.viewAsString(ComponentDebugInfo::layoutInformation)
                                 )
+                                .isEditableIf(false)
                             )
                         )
                     )
@@ -447,6 +450,7 @@ final class GuiDebugDevToolUtility {
                                         }
                                     })
                                 )
+                                .isEditableIf(false)
                             )
                         )
                     )
