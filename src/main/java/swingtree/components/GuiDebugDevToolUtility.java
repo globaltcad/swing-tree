@@ -151,7 +151,6 @@ final class GuiDebugDevToolUtility {
                     Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent))
             );
             newDialog.pack();
-            //newDialog.setLocationRelativeTo(glassPane.rootPane);
             newDialog.setVisible(true);
             newDialog.addWindowListener(new WindowAdapter() {
                 @Override

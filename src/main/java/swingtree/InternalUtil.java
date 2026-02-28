@@ -19,7 +19,11 @@ final class InternalUtil
         for (int i = 0; i < traceElements.length; i++) {
             StackTraceElement element = traceElements[i];
             String className = element.getClassName();
-            if (!className.startsWith("java.") && !className.startsWith("swingtree.")) {
+            if (
+                !className.startsWith("java.") &&
+                !className.startsWith("javax.") &&
+                !className.startsWith("swingtree.")
+            ) {
                 Tuple<StackTraceElement> fullTrace = Tuple.of(StackTraceElement.class, traceElements);
                 Tuple<StackTraceElement> subTrace = fullTrace.slice(i, fullTrace.size());
                 return Optional.of(subTrace);
