@@ -89,7 +89,7 @@ public final class ComponentExtension<C extends JComponent>
         @Nullable Integer defaultFontSize = (defaultFont != null ? defaultFont.getSize() : null);
         AtomicReference<@Nullable Font> referenceFont = new AtomicReference<>();
         AtomicReference<@Nullable Boolean> hasDefaultSize = new AtomicReference<>(false);
-        _localUiScaleFactor = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, it -> {
+        _localUiScaleFactor = SwingTree.get().getUiScaleView().onChange(From.ALL, it -> {
             Font currentFont = referenceFont.get();
             if ( currentFont == null ) {
                 currentFont = owner.getFont();

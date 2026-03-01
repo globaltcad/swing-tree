@@ -37,8 +37,8 @@ final class EnterExitComponentBoundsEventDispatcher {
     private final Viewable<AWTEvent> mouseMotionEventListener;// IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
 
     private EnterExitComponentBoundsEventDispatcher() {
-        this.mouseEventListener = SwingTree.get().createAndGetAwtEventView(AWTEvent.MOUSE_EVENT_MASK);
-        this.mouseMotionEventListener = SwingTree.get().createAndGetAwtEventView(AWTEvent.MOUSE_MOTION_EVENT_MASK);
+        this.mouseEventListener = SwingTree.get().getAwtEventView(AWTEvent.MOUSE_EVENT_MASK);
+        this.mouseMotionEventListener = SwingTree.get().getAwtEventView(AWTEvent.MOUSE_MOTION_EVENT_MASK);
         this.mouseEventListener.onChange(From.ALL, it -> it.currentValue().ifPresent(this::onMouseEvent));
         this.mouseMotionEventListener.onChange(From.ALL, it -> it.currentValue().ifPresent(this::onMouseEvent));
     }
