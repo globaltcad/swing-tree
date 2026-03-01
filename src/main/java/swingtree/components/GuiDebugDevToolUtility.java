@@ -44,6 +44,9 @@ final class GuiDebugDevToolUtility {
         if ( !keyStrokeString.isEmpty() ) {
             try {
                 KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);
+                if (keyStroke == null) {
+                    throw new IllegalArgumentException("Invalid key stroke string for dev tools shortcut: '" + keyStrokeString + "'");
+                }
                 rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY);
                 rootPane.getActionMap().put(SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY, toggleDevToolsShortcutAction);
             } catch (Exception e) {
@@ -57,6 +60,9 @@ final class GuiDebugDevToolUtility {
         if ( !keyStrokeString.isEmpty() ) {
             try {
                 KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);
+                if (keyStroke == null) {
+                    throw new IllegalArgumentException("Invalid key stroke string for dev tools shortcut: '" + keyStrokeString + "'");
+                }
                 rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).remove(keyStroke);
                 rootPane.getActionMap().remove(SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY);
             } catch (Exception e) {
