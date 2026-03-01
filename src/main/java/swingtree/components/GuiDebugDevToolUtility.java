@@ -185,10 +185,10 @@ final class GuiDebugDevToolUtility {
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         if ( selectedDebugComponent != focusedDebugComponent && focusedDebugComponent.isShowing() ) {
-            renderDebugOverlayFor(g2d, glassPane, focusedDebugComponent, FOCUS_COLOR);
+            renderDebugOverlayFor((Graphics2D) g2d.create(), glassPane, focusedDebugComponent, FOCUS_COLOR);
         }
         if ( selectedDebugComponent != null && selectedDebugComponent.isShowing() ) {
-            renderDebugOverlayFor(g2d, glassPane, selectedDebugComponent, SELECTION_COLOR);
+            renderDebugOverlayFor((Graphics2D) g2d.create(), glassPane, selectedDebugComponent, SELECTION_COLOR);
         }
     }
 
