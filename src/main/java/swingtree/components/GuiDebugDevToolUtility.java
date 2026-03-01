@@ -319,14 +319,15 @@ final class GuiDebugDevToolUtility {
     }
 
     private static class DebugInfoDialog extends JDialog {
-        private final Viewable<Boolean> isDevToolsEnabled = SwingTree.get().isDevToolEnabledView();
+        @SuppressWarnings({"FieldCanBeLocal", "unused"})
+        private final Viewable<Boolean> isDevToolsEnabled; // Important, we need to keep the reference to keep the binding alive! (otherwise it can get garbage collected...)
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
 
         DebugInfoDialog(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
             this.debugState = debugState;
             this.selectedDebugState = selectedDebugState;
-            this.isDevToolsEnabled.onChange(From.ALL, it -> {
+            this.isDevToolsEnabled = SwingTree.get().isDevToolEnabledView().onChange(From.ALL, it -> {
                 if ( !it.currentValue().orElse(false) ) {
                     this.dispose();
                     GuiDebugDevToolUtility.debugInfoDialog = null;
