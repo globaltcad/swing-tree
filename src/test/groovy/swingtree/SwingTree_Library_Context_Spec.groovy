@@ -305,7 +305,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             You can summon it through a custom keystroke which you can configure when
             initializing the library context. 
             
-            By default, the keystroke is "ctrl shift alt I", exactly the same as in modern browsers, 
+            By default, the keystroke is "ctrl shift I", exactly the same as in modern browsers, 
             but you can change it to whatever you like. 
             In this test we change it to "ctrl shift alt D" and verify that the new keystroke 
             is applied in the library context.
