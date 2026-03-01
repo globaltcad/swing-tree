@@ -56,7 +56,7 @@ public class JGlassPane extends JPanel implements StylableComponent
         setLayout(new MigLayout("fill, ins 0"));
         // Binding:
         putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
-            SwingTree.get().createAndGetAwtEventView(
+            SwingTree.get().getAwtEventView(
                     MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
                 )
                 .onChange(From.ALL, it -> {
@@ -64,7 +64,7 @@ public class JGlassPane extends JPanel implements StylableComponent
                 })
         );
         putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
-            SwingTree.get().createAndGetDevToolEnabledView()
+            SwingTree.get().isDevToolEnabledView()
                 .onChange(From.ALL, it -> {
                     if ( rootPane != null ) {
                         if (it.currentValue().is(true)) {

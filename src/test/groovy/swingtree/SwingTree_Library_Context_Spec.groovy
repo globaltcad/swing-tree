@@ -244,7 +244,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.initialize()
         and : 'Finally, we create a reactive property view with a trace list:'
             var trace = []
-            var scaleView = SwingTree.get().createAndGetUiScaleView()
+            var scaleView = SwingTree.get().getUiScaleView()
             scaleView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
 
         when : 'We change the default font in the `UIManager` to another custom font...'

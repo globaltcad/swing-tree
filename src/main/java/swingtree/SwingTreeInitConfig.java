@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  *  <p>
  *  It allows for the configuration of the default
  *  font, font installation, scaling, event processing and
- *  application wide {@link StyleSheet}.
+ *  application wide {@link StyleSheet} among other things.
  */
 public final class SwingTreeInitConfig
 {
@@ -79,7 +79,7 @@ public final class SwingTreeInitConfig
         FROM_SYSTEM_FONT
     }
 
-    public static SwingTreeInitConfig standard() {
+    public static SwingTreeInitConfig defaults() {
         return new SwingTreeInitConfig(
                         tryToFindDefaultFontInUIManager(),
                         FontInstallation.SOFT,
@@ -244,7 +244,7 @@ public final class SwingTreeInitConfig
      *  the smoother the animation will look.
      *  However, the smaller the interval, the more CPU time will be used.
      *  The default interval is 16 ms which corresponds to 60 fps.
-     *  See {@link #standard()}, returning an instance of this config with the default value. <br>
+     *  See {@link #defaults()}, returning an instance of this config with the default value. <br>
      *  This property is used as default value by the {@link swingtree.animation.LifeTime}
      *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
      */
@@ -432,7 +432,7 @@ public final class SwingTreeInitConfig
      *  the smoother the animation will look.
      *  However, the smaller the interval, the more CPU time will be used.
      *  The default interval is 16 ms which corresponds to 60 fps.
-     *  See {@link #standard()}, returning an instance of this config with the default value. <br>
+     *  See {@link #defaults()}, returning an instance of this config with the default value. <br>
      *  This property is used as default value by the {@link swingtree.animation.LifeTime}
      *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
      *
@@ -478,7 +478,7 @@ public final class SwingTreeInitConfig
      * @param isEnabled Whether the recording of the source code trace should be enabled.
      * @return A new {@link SwingTreeInitConfig} instance with the new recording mode for the source code trace.
      * @see SwingTree#isRecordingDebugSourceTrace()
-     * @see SwingTree#devToolKeyStrokeShortcut()
+     * @see SwingTree#getDevToolKeyStrokeShortcut()
      * @see #devToolKeyStrokeShortcut(String)
      */
     public SwingTreeInitConfig recordDebugSourceTrace( boolean isEnabled ) {
@@ -503,7 +503,7 @@ public final class SwingTreeInitConfig
      * @param keyStroke The new keystroke to access the <i>SwingTree</i> dev tools, e.g. "ctrl shift I".
      * @return A new {@link SwingTreeInitConfig} instance with the new keystroke to access the <i>SwingTree</i> dev tools.
      * @see SwingTree#isDevToolEnabled()
-     * @see SwingTree#devToolKeyStrokeShortcut()
+     * @see SwingTree#getDevToolKeyStrokeShortcut()
      */
     public SwingTreeInitConfig devToolKeyStrokeShortcut( String keyStroke ) {
         return new SwingTreeInitConfig(
@@ -559,14 +559,14 @@ public final class SwingTreeInitConfig
          * <strong>Allowed Values</strong> must be a positive integer<br>
          * <strong>Default</strong> {@code 16}
          */
-        String ANIMATION_INTERVAL = "swingtree.animationInterval";
+        String ANIMATION_INTERVAL = "swingtree.animation.interval";
 
         /**
          * Specifies whether SwingTree should record the source code trace of the component creation
          * and hierarchy modification calls for debugging purposes. In practice, this is a {@link sprouts.Tuple}
          * of {@link StackTraceElement}s stored as a client property of the component under the key "built-at".
          */
-        String RECORD_DEBUG_SOURCE_TRACE = "swingtree.recordDebugSourceTrace";
+        String RECORD_DEBUG_SOURCE_TRACE = "swingtree.devTool.recordDebugSourceTrace";
 
         /**
          * Specifies the keystroke to access the <i>SwingTree</i> dev tool, which by default is {@code "ctrl shift I"}.
@@ -577,7 +577,7 @@ public final class SwingTreeInitConfig
          * {@link #RECORD_DEBUG_SOURCE_TRACE} mode is set to {@code true} (which by default it is).<br>
          * Because this is the mode that creates the source code trace in the first place. <br>
          */
-        String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.devToolKeyStroke";
+        String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.devTool.keyStrokeShortcut";
 
         /**
          * Checks whether a system property is set and returns {@code true} if its value

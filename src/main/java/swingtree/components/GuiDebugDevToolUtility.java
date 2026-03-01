@@ -40,7 +40,7 @@ final class GuiDebugDevToolUtility {
     private GuiDebugDevToolUtility() {} // A utility class can not be instantiated!
 
     static void setupGlobalDevToolsShortcutFor(JRootPane rootPane) {
-        String keyStrokeString = SwingTree.get().devToolKeyStrokeShortcut();
+        String keyStrokeString = SwingTree.get().getDevToolKeyStrokeShortcut();
         if ( !keyStrokeString.isEmpty() ) {
             try {
                 KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);
@@ -53,7 +53,7 @@ final class GuiDebugDevToolUtility {
     }
 
     static void teardownGlobalDevToolsShortcutFor(JRootPane rootPane) {
-        String keyStrokeString = SwingTree.get().devToolKeyStrokeShortcut();
+        String keyStrokeString = SwingTree.get().getDevToolKeyStrokeShortcut();
         if ( !keyStrokeString.isEmpty() ) {
             try {
                 KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);
@@ -313,7 +313,7 @@ final class GuiDebugDevToolUtility {
     }
 
     private static class DebugInfoDialog extends JDialog {
-        private final Viewable<Boolean> isDevToolsEnabled = SwingTree.get().createAndGetDevToolEnabledView();
+        private final Viewable<Boolean> isDevToolsEnabled = SwingTree.get().isDevToolEnabledView();
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
 

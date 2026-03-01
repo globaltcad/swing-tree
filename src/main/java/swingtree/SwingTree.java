@@ -131,13 +131,13 @@ public final class SwingTree
     private SwingTreeInitConfig _resolveConfiguration( SwingTreeConfigurator configurator ) {
         try {
             Objects.requireNonNull(configurator);
-            SwingTreeInitConfig config = configurator.configure(SwingTreeInitConfig.standard());
+            SwingTreeInitConfig config = configurator.configure(SwingTreeInitConfig.defaults());
             Objects.requireNonNull(config);
             return config;
         } catch (Exception ex) {
             log.error(SwingTree.get().logMarker(), "Error resolving SwingTree configuration", ex);
             ex.printStackTrace();
-            return SwingTreeInitConfig.standard();
+            return SwingTreeInitConfig.defaults();
         }
     }
 
@@ -194,7 +194,7 @@ public final class SwingTree
      * @return a reactive {@link Viewable} that will update itself and invoke all of its change listeners whenever an AWT event matching the given mask is fired anywhere in the application.
      * @see Toolkit#addAWTEventListener(AWTEventListener, long) for more information on the event mask and the types of events you can listen to.
      */
-    public Viewable<AWTEvent> createAndGetAwtEventView(long mask) {
+    public Viewable<AWTEvent> getAwtEventView( long mask ) {
         Pair<AWTEventListener, Var<AWTEvent>> existingBinding = _globalAwtBinding.get(mask);
         if ( existingBinding != null )
             return existingBinding.second().view();
@@ -218,14 +218,14 @@ public final class SwingTree
      *  creation. It will be captured as a {@link sprouts.Tuple} of {@link StackTraceElement}s and then stored
      *  as a client properties under the "built-at" key.<br>
      *  This source location trace is primarily used by the <i>SwingTree</i> dev-tool, which can be
-     *  enabled through pressing the {@link SwingTree#devToolKeyStrokeShortcut()} keystroke shortcut.
+     *  enabled through pressing the {@link SwingTree#getDevToolKeyStrokeShortcut()} keystroke shortcut.
      *  It creates an overlay on top of the UI that shows debug information about the component under the mouse cursor.
      *  When pressing control together with a left click on a component, it opens a dialog
      *  showing a lot of important debug information about the component, including the source code location trace.
      *
      * @return true if the library is configured to record debug source traces
      *          for components during their creation, false otherwise.
-     * @see #devToolKeyStrokeShortcut()
+     * @see #getDevToolKeyStrokeShortcut()
      * @see SwingTreeInitConfig#recordDebugSourceTrace(boolean)
      **/
     public boolean isRecordingDebugSourceTrace() {
@@ -246,7 +246,7 @@ public final class SwingTree
      * @see #isRecordingDebugSourceTrace()
      * @see SwingTreeInitConfig#devToolKeyStrokeShortcut(String)
      **/
-    public String devToolKeyStrokeShortcut() {
+    public String getDevToolKeyStrokeShortcut() {
         return this._config.devToolKeyStrokeShortcut();
     }
 
@@ -254,11 +254,11 @@ public final class SwingTree
      *  Returns whether the <i>SwingTree</i> dev-tool is currently enabled or not.
      *  The dev-tool is a classical inspector tool that creates an overlay on top of the UI and
      *  shows debug information about the component under the mouse cursor.
-     *  You can toggle it through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()}.
+     *  You can toggle it through the keystroke shortcut returned by {@link #getDevToolKeyStrokeShortcut()}.
      *
      * @return true if the <i>SwingTree</i> dev-tool is currently enabled, false otherwise.
-     * @see #devToolKeyStrokeShortcut()
-     * @see #createAndGetDevToolEnabledView() Use this method create a reactive property for this boolean.
+     * @see #getDevToolKeyStrokeShortcut()
+     * @see #isDevToolEnabledView() Use this method create a reactive property for this boolean.
      **/
     public boolean isDevToolEnabled() {
         return this._isDevToolEnabled.get();
@@ -266,38 +266,39 @@ public final class SwingTree
 
     /**
      *  Enables or disables the <i>SwingTree</i> dev-tool, which is a classical inspector tool that
-     *  creates an overlay on top of the UI and shows debug information about the component under the mouse cursor.<br>
-     *  You can also toggle it through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()},
+     *  creates an overlay on top of the UI and summons an additional dialog showing debug information
+     *  about the component under the mouse cursor.<br>
+     *  You can also toggle it through the keystroke shortcut returned by {@link #getDevToolKeyStrokeShortcut()},
      *  which is "ctrl shift I" by default. <br>
      *  This method is useful when you want to enable or disable the dev-tool programmatically,
      *  for example through a button in your UI, or through a command in your application's console.
      *
      * @param enabled true to enable the <i>SwingTree</i> dev-tool, false to disable it.
-     * @see #devToolKeyStrokeShortcut()
-     * @see #createAndGetDevToolEnabledView() Use this method create a reactive property for this boolean.
+     * @see #getDevToolKeyStrokeShortcut()
+     * @see #isDevToolEnabledView() Use this method create a reactive property for this boolean.
      **/
-    public void setIsDevToolEnabled(boolean enabled) {
+    public void setIsDevToolEnabled( boolean enabled ) {
         this._isDevToolEnabled.set(enabled);
     }
 
     /**
      *  Creates and returns a reactive {@link Viewable} of the library context's dev-tool enabled state
      *  which will update itself and invoke all of its change listeners when the dev-tool enabled state changes,
-     *  through methods like {@link #setIsDevToolEnabled(boolean)} or through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()}.<br>
+     *  through methods like {@link #setIsDevToolEnabled(boolean)} or through the keystroke shortcut returned by {@link #getDevToolKeyStrokeShortcut()}.<br>
      *  If you no longer reference a reactive property view strongly in your
      *  code, then it will be garbage collected alongside all of its change
      *  listeners automatically for you!<br>
      *  <br>
      *  The dev-tool is a classical inspector tool that creates an overlay on top of the UI and
-     *  shows debug information about the component under the mouse cursor. You can toggle it through the keystroke shortcut returned by {@link #devToolKeyStrokeShortcut()},
+     *  shows debug information about the component under the mouse cursor. You can toggle it through the keystroke shortcut returned by {@link #getDevToolKeyStrokeShortcut()},
      *  which is "ctrl shift I" by default.
      *
      * @return A reactive property holding whether the <i>SwingTree</i> dev-tool is currently enabled or not. You may hold onto such a view
      *         and register change listeners on it to ensure your components always know whether the dev-tool is enabled or not!
-     * @see #devToolKeyStrokeShortcut()
+     * @see #getDevToolKeyStrokeShortcut()
      * @see #setIsDevToolEnabled(boolean)
      */
-    public Viewable<Boolean> createAndGetDevToolEnabledView() {
+    public Viewable<Boolean> isDevToolEnabledView() {
         return _isDevToolEnabled.view();
     }
 
@@ -397,7 +398,7 @@ public final class SwingTree
      *         and register change listeners on it to ensure your components always have
      *         the correct scale!
      */
-    public Viewable<Float> createAndGetUiScaleView() {
+    public Viewable<Float> getUiScaleView() {
         return _uiScale.get().createScaleFactorViewable();
     }
 
@@ -775,7 +776,7 @@ public final class SwingTree
             return (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
         }
 
-        public Viewable<Float> createScaleFactorViewable() {
+        Viewable<Float> createScaleFactorViewable() {
             return scaleFactor.view();
         }
 
@@ -1451,7 +1452,7 @@ public final class SwingTree
                     if( dpi < 50 )
                         dpi = 50;
                 } catch( NumberFormatException ex ) {
-                    log.error(marker, "Failed to parse DPI scale from font size String '"+forceFontDPI+"'", ex);
+                    log.error(marker, "Failed to parse DPI scale from font size String '{}'", forceFontDPI, ex);
                 }
             }
 
