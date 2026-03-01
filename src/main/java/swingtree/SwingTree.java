@@ -277,14 +277,14 @@ public final class SwingTree
      * @see #getDevToolKeyStrokeShortcut()
      * @see #isDevToolEnabledView() Use this method create a reactive property for this boolean.
      **/
-    public void setIsDevToolEnabled( boolean enabled ) {
+    public void setDevToolEnabled( boolean enabled ) {
         this._isDevToolEnabled.set(enabled);
     }
 
     /**
      *  Creates and returns a reactive {@link Viewable} of the library context's dev-tool enabled state
      *  which will update itself and invoke all of its change listeners when the dev-tool enabled state changes,
-     *  through methods like {@link #setIsDevToolEnabled(boolean)} or through the keystroke shortcut returned by {@link #getDevToolKeyStrokeShortcut()}.<br>
+     *  through methods like {@link #setDevToolEnabled(boolean)} or through the keystroke shortcut returned by {@link #getDevToolKeyStrokeShortcut()}.<br>
      *  If you no longer reference a reactive property view strongly in your
      *  code, then it will be garbage collected alongside all of its change
      *  listeners automatically for you!<br>
@@ -296,7 +296,7 @@ public final class SwingTree
      * @return A reactive property holding whether the <i>SwingTree</i> dev-tool is currently enabled or not. You may hold onto such a view
      *         and register change listeners on it to ensure your components always know whether the dev-tool is enabled or not!
      * @see #getDevToolKeyStrokeShortcut()
-     * @see #setIsDevToolEnabled(boolean)
+     * @see #setDevToolEnabled(boolean)
      */
     public Viewable<Boolean> isDevToolEnabledView() {
         return _isDevToolEnabled.view();

@@ -27,7 +27,7 @@ final class GuiDebugDevToolUtility {
     private static final UI.Color SELECTION_COLOR = UI.Color.ofRgb(0, 142, 83);
     private static final javax.swing.Action toggleDevToolsShortcutAction = new AbstractAction() {
         @Override public void actionPerformed(ActionEvent e) {
-            SwingTree.get().setIsDevToolEnabled(
+            SwingTree.get().setDevToolEnabled(
                 !SwingTree.get().isDevToolEnabled()
             );
         }

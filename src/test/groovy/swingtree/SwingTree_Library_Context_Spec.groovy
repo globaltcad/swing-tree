@@ -267,4 +267,34 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.clear()
             UIManager.getDefaults().put("defaultFont", originalDefaultFont)
     }
+
+    def 'You an listen to `isDevToolEnabled` property changes through a reactive property!'()
+    {
+        reportInfo """
+            Similar to the UI scale factor, you can react to changes of the `isDevToolEnabled` property
+            through a reactive property view, without having to poll for it.
+            The "dev tool" is an inspector tool for 
+        """
+        given: 'We initialize `SwingTree`, by default, the dev tool is always disabled:'
+            SwingTree.initializeUsing(conf -> conf )
+        and : 'We create a reactive property view with a trace list:'
+            var trace = []
+            var devToolEnabledView = SwingTree.get().isDevToolEnabledView()
+            devToolEnabledView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
+        expect: 'We verify, `SwingTree` reports the "isDevToolEnabled" value as `false`:'
+            !SwingTree.get().isDevToolEnabled()
+
+        when : 'We enable the dev tool through the library context...'
+            SwingTree.get().setDevToolEnabled(true)
+        then : 'The property view receives the new value:'
+            trace == [true]
+
+        when : 'We disable the dev tool again...'
+            SwingTree.get().setDevToolEnabled(false)
+        then : 'The property view receives the new value again:'
+            trace == [true, false]
+
+        cleanup: 'Reset the library context!'
+            SwingTree.clear()
+    }
 }
