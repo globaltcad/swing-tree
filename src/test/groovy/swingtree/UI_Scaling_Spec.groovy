@@ -428,7 +428,7 @@ class UI_Scaling_Spec extends Specification
             SwingTree.get().setUiScaleFactor(1f)
         and : 'Then we create a reactive property and a list acting as change listener trace...'
             var trace = []
-            var reactiveScale = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, {
+            var reactiveScale = SwingTree.get().getUiScaleView().onChange(From.ALL, {
                 trace.add(it.currentValue().orElseThrow())
             })
 

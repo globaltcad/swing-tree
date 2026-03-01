@@ -244,7 +244,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.initialize()
         and : 'Finally, we create a reactive property view with a trace list:'
             var trace = []
-            var scaleView = SwingTree.get().createAndGetUiScaleView()
+            var scaleView = SwingTree.get().getUiScaleView()
             scaleView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
 
         when : 'We change the default font in the `UIManager` to another custom font...'
@@ -266,5 +266,58 @@ class SwingTree_Library_Context_Spec extends Specification {
         cleanup: 'Reset the library context and set the "defaultFont" back to the original value!'
             SwingTree.clear()
             UIManager.getDefaults().put("defaultFont", originalDefaultFont)
+    }
+
+    def 'You an listen to `isDevToolEnabled` property changes through a reactive property!'()
+    {
+        reportInfo """
+            Similar to the UI scale factor, you can react to changes of the `isDevToolEnabled` property
+            through a reactive property view, without having to poll for it.
+            The "dev tool" is an inspector tool for 
+        """
+        given: 'We initialize `SwingTree`, by default, the dev tool is always disabled:'
+            SwingTree.initializeUsing(conf -> conf )
+        and : 'We create a reactive property view with a trace list:'
+            var trace = []
+            var devToolEnabledView = SwingTree.get().isDevToolEnabledView()
+            devToolEnabledView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
+        expect: 'We verify, `SwingTree` reports the "isDevToolEnabled" value as `false`:'
+            !SwingTree.get().isDevToolEnabled()
+
+        when : 'We enable the dev tool through the library context...'
+            SwingTree.get().setDevToolEnabled(true)
+        then : 'The property view receives the new value:'
+            trace == [true]
+
+        when : 'We disable the dev tool again...'
+            SwingTree.get().setDevToolEnabled(false)
+        then : 'The property view receives the new value again:'
+            trace == [true, false]
+
+        cleanup: 'Reset the library context!'
+            SwingTree.clear()
+    }
+
+    def 'You can configure the keystroke for summoning the dev tool in the library context!'()
+    {
+        reportInfo """
+            The dev tool is a powerful inspector tool for inspecting the internal state of SwingTree.
+            You can summon it through a custom keystroke which you can configure when
+            initializing the library context. 
+            
+            By default, the keystroke is "ctrl shift alt I", exactly the same as in modern browsers, 
+            but you can change it to whatever you like. 
+            In this test we change it to "ctrl shift alt D" and verify that the new keystroke 
+            is applied in the library context.
+        """
+        given: 'We initialize `SwingTree` with a custom dev tool keystroke:'
+            SwingTree.initializeUsing(conf -> conf
+                .devToolKeyStrokeShortcut("ctrl shift alt D")
+            )
+        expect: 'The dev tool keystroke is the one we specified:'
+            SwingTree.get().getDevToolKeyStrokeShortcut().toString() == "ctrl shift alt D"
+
+        cleanup: 'Reset the library context!'
+            SwingTree.clear()
     }
 }

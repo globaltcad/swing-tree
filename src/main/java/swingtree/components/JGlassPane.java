@@ -6,7 +6,6 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.From;
-import sprouts.Viewable;
 import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.SwingTree;
@@ -27,10 +26,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import static java.awt.AWTEvent.*;
 import static java.awt.event.MouseEvent.*;
@@ -51,8 +47,6 @@ public class JGlassPane extends JPanel implements StylableComponent
     private static final Logger log = LoggerFactory.getLogger(JGlassPane.class);
 
     private final EventListenerList listeners = new EventListenerList();
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Viewable<AWTEvent> awtEventView; // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
 
     protected @Nullable JRootPane rootPane;
     private static final Map<JGlassPane, ActiveDrag> activeDrags = new WeakHashMap<>();
@@ -60,10 +54,28 @@ public class JGlassPane extends JPanel implements StylableComponent
 
     public JGlassPane() {
         setLayout(new MigLayout("fill, ins 0"));
-        awtEventView = SwingTree.get().createAndGetAwtEventView(MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK);
-        awtEventView.onChange(From.ALL, it -> {
-            it.currentValue().ifPresent(this::eventDispatched);
-        });
+        // Binding:
+        putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
+            SwingTree.get().getAwtEventView(
+                    MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
+                )
+                .onChange(From.ALL, it -> {
+                    it.currentValue().ifPresent(this::eventDispatched);
+                })
+        );
+        putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
+            SwingTree.get().isDevToolEnabledView()
+                .onChange(From.ALL, it -> {
+                    if ( rootPane != null ) {
+                        if (it.currentValue().is(true)) {
+                            GuiDebugDevToolUtility.initializeDebugToolFor(rootPane);
+                            rootPane.repaint();
+                        } else {
+                            rootPane.repaint();
+                        }
+                    }
+                })
+        );
 
         final DragSource dragSource = DragSource.getDefaultDragSource();
         DragGestureRecognizer[] gestureRecognizer = {null};
@@ -133,6 +145,19 @@ public class JGlassPane extends JPanel implements StylableComponent
             }
         });
         setActiveDrag(ActiveDrag.none());
+        this.addMouseMotionListener(new MouseAdapter() {
+            @Override public void mouseMoved(MouseEvent e) {
+                if (rootPane != null )
+                    GuiDebugDevToolUtility.processMouseMovementForLiveDebugging(JGlassPane.this, rootPane, e);
+            }
+        });
+        this.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                if (rootPane != null ) {
+                    GuiDebugDevToolUtility.findAndSelectComponentForDebug(rootPane, e);
+                }
+            }
+        });
     }
 
     public JGlassPane(JRootPane rootPane) {
@@ -223,6 +248,8 @@ public class JGlassPane extends JPanel implements StylableComponent
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
+        if (rootPane != null)
+            GuiDebugDevToolUtility.paintDebugOverlay((Graphics2D) g, this);
         getActiveDrag().paint(g);
         /*
             Maybe another window has a glass pane with an ongoing drag operation
@@ -302,6 +329,7 @@ public class JGlassPane extends JPanel implements StylableComponent
         if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);
         this.setOpaque(false);
         ( this.rootPane = rootPane ).setGlassPane(this);
+        GuiDebugDevToolUtility.setupGlobalDevToolsShortcutFor(rootPane);
         this.setVisible(true);
     }
 
@@ -316,6 +344,7 @@ public class JGlassPane extends JPanel implements StylableComponent
         if ( rootPane.getGlassPane() == this ) {
             rootPane.setGlassPane(null);
             setVisible(false);
+            GuiDebugDevToolUtility.teardownGlobalDevToolsShortcutFor(rootPane);
         }
     }
 

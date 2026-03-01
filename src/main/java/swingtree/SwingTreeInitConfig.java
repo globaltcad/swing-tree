@@ -6,7 +6,7 @@ import org.slf4j.MarkerFactory;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
-import java.awt.Font;
+import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  *  <p>
  *  It allows for the configuration of the default
  *  font, font installation, scaling, event processing and
- *  application wide {@link StyleSheet}.
+ *  application wide {@link StyleSheet} among other things.
  */
 public final class SwingTreeInitConfig
 {
@@ -79,7 +79,7 @@ public final class SwingTreeInitConfig
         FROM_SYSTEM_FONT
     }
 
-    public static SwingTreeInitConfig standard() {
+    public static SwingTreeInitConfig defaults() {
         return new SwingTreeInitConfig(
                         tryToFindDefaultFontInUIManager(),
                         FontInstallation.SOFT,
@@ -89,7 +89,9 @@ public final class SwingTreeInitConfig
                         SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),
                         SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),
                         SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    ),
-                        MarkerFactory.getMarker("")
+                        MarkerFactory.getMarker(""),
+                        SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),
+                        System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,"ctrl shift I")
                     );
                     /*
                         Note that we want the refresh rate to be as high as possible so that the animation
@@ -110,7 +112,7 @@ public final class SwingTreeInitConfig
     }
 
 
-    private final @Nullable Font   _defaultFont; // may be null
+    private final @Nullable Font   _defaultFont;
     private final FontInstallation _fontInstallation;
     private final EventProcessor   _eventProcessor;
     private final StyleSheet       _styleSheet;
@@ -119,18 +121,22 @@ public final class SwingTreeInitConfig
     private final boolean          _uiScaleAllowScaleDown;
     private final long             _defaultAnimationInterval;
     private final Marker           _logMarker;
+    private final boolean          _recordDebugSourceTrace;
+    private final String           _devToolKeyStrokeShortcut;
 
 
     private SwingTreeInitConfig(
-        @Nullable Font   defaultFont,
-        FontInstallation fontInstallation,
-        EventProcessor   eventProcessor,
-        StyleSheet       styleSheet,
-        float            uiScale,
-        boolean          uiScaleEnabled,
-        boolean          uiScaleAllowScaleDown,
-        long             defaultAnimationInterval,
-        Marker           logMarker
+        @Nullable Font      defaultFont,
+        FontInstallation    fontInstallation,
+        EventProcessor      eventProcessor,
+        StyleSheet          styleSheet,
+        float               uiScale,
+        boolean             uiScaleEnabled,
+        boolean             uiScaleAllowScaleDown,
+        long                defaultAnimationInterval,
+        Marker              logMarker,
+        boolean             recordDebugSourceTrace,
+        String              devToolKeyStroke
     ) {
         _defaultFont              = defaultFont;
         _fontInstallation         = Objects.requireNonNull(fontInstallation);
@@ -141,6 +147,8 @@ public final class SwingTreeInitConfig
         _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;
         _defaultAnimationInterval = defaultAnimationInterval;
         _logMarker                = logMarker;
+        _recordDebugSourceTrace   = recordDebugSourceTrace;
+        _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);
     }
 
     /**
@@ -236,7 +244,7 @@ public final class SwingTreeInitConfig
      *  the smoother the animation will look.
      *  However, the smaller the interval, the more CPU time will be used.
      *  The default interval is 16 ms which corresponds to 60 fps.
-     *  See {@link #standard()}, returning an instance of this config with the default value. <br>
+     *  See {@link #defaults()}, returning an instance of this config with the default value. <br>
      *  This property is used as default value by the {@link swingtree.animation.LifeTime}
      *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
      */
@@ -255,6 +263,36 @@ public final class SwingTreeInitConfig
     }
 
     /**
+     *  Returns whether <i>SwingTree</i> should record the source code trace during every component creation in the form
+     *  of a {@link sprouts.Tuple} of {@link StackTraceElement}s stored as a client property on the component
+     *  under the key "built-at".<br>
+     *  So for every component built by SwingTree, you can retrieve this
+     *  stack trace tuple like so:
+     *   <pre>{@code
+     *   var trace = mycomp.getClientProperty("built-at");
+     *  }</pre>
+     *  You can inspect the source code trace using the SwingTree dev tools by pressing the keystroke specified
+     *  by {@link #devToolKeyStrokeShortcut(String)}, which is by default "ctrl shift I". In the dev tool you can hold
+     *  control and click on a component to see the source code trace among other debug information about the component.
+     */
+    boolean recordDebugSourceTrace() {
+        return _recordDebugSourceTrace;
+    }
+
+    /**
+     *  Returns the keystroke {@link String} used to open the <i>SwingTree</i> dev tools,
+     *  which by default is {@code "ctrl shift I"}.
+     *  In the dev tool you can hold control and click on a component to view valuable debug information.
+     *  This includes a source code trace created during the component creation, a pretty print of its style,
+     *  the layout configuration and other debug information about the component...<br>
+     *  To read if the dev tools are enabled, use {@link SwingTree#isDevToolEnabled()}, and
+     *  to initialize it programmatically use {@link SwingTreeInitConfig#devToolKeyStrokeShortcut(String)}.
+     */
+    String devToolKeyStrokeShortcut() {
+        return _devToolKeyStrokeShortcut;
+    }
+
+    /**
      *  Used to configure the default font, which may be used by the {@link SwingTree}
      *  to derive the UI scaling factor and or to install the font in the {@link javax.swing.UIManager}
      *  depending on the {@link FontInstallation} mode (see {@link #defaultFont(Font, FontInstallation)}).
@@ -262,7 +300,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -282,7 +324,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -296,7 +342,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -307,7 +357,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -326,7 +380,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
      */
     public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -340,7 +398,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -354,7 +416,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -366,7 +432,7 @@ public final class SwingTreeInitConfig
      *  the smoother the animation will look.
      *  However, the smaller the interval, the more CPU time will be used.
      *  The default interval is 16 ms which corresponds to 60 fps.
-     *  See {@link #standard()}, returning an instance of this config with the default value. <br>
+     *  See {@link #defaults()}, returning an instance of this config with the default value. <br>
      *  This property is used as default value by the {@link swingtree.animation.LifeTime}
      *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
      *
@@ -374,7 +440,11 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default animation interval.
      */
     public SwingTreeInitConfig defaultAnimationInterval( long newDefaultAnimationInterval ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
     }
 
     /**
@@ -388,7 +458,59 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new logging {@link Marker}.
      */
     public SwingTreeInitConfig logMarker( Marker newLogMarker ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker);
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut
+        );
+    }
+
+    /**
+     *  Used to configure whether <i>SwingTree</i> should record a source code trace for every
+     *  component built by <i>SwingTree</i> for debugging purposes. Such a source code trace is stored in the form
+     *  of a {@link sprouts.Tuple} of {@link StackTraceElement}s as a client property on the component
+     *  under the key "built-at".<br>
+     *  You can inspect the source code trace using the SwingTree dev tools by pressing the keystroke specified
+     *  by {@link #devToolKeyStrokeShortcut(String)}, which is by default "ctrl shift I".
+     *  In the dev tool you can hold control and click on a component to see the source code
+     *  trace among other debug information about the component.
+     *
+     * @param isEnabled Whether the recording of the source code trace should be enabled.
+     * @return A new {@link SwingTreeInitConfig} instance with the new recording mode for the source code trace.
+     * @see SwingTree#isRecordingDebugSourceTrace()
+     * @see SwingTree#getDevToolKeyStrokeShortcut()
+     * @see #devToolKeyStrokeShortcut(String)
+     */
+    public SwingTreeInitConfig recordDebugSourceTrace( boolean isEnabled ) {
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, isEnabled,
+                _devToolKeyStrokeShortcut
+        );
+    }
+
+    /**
+     *  Use this method to configure the keystroke to access the <i>SwingTree</i> dev tools,
+     *  which by default is {@code "ctrl shift I"}.<br>
+     *  In the dev tool you can hold control and click on a component to summon a
+     *  dialog showing valuable debug information about the component.<br>
+     *  This includes basic things like the name, style, layout information and the dimensions of the component.<br>
+     *  However, you may also want to see a stack trace of when the component was created and added to the
+     *  component hierarchy. This is also something you can inspect in this dev tool <i>if</i> the
+     *  {@link #recordDebugSourceTrace(boolean)} mode is set to {@code true} (which by default it is).<br>
+     *  Because this is the mode that creates the source code trace in the first place. <br>
+     *
+     * @param keyStroke The new keystroke to access the <i>SwingTree</i> dev tools, e.g. "ctrl shift I".
+     * @return A new {@link SwingTreeInitConfig} instance with the new keystroke to access the <i>SwingTree</i> dev tools.
+     * @see SwingTree#isDevToolEnabled()
+     * @see SwingTree#getDevToolKeyStrokeShortcut()
+     */
+    public SwingTreeInitConfig devToolKeyStrokeShortcut( String keyStroke ) {
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                keyStroke
+        );
     }
 
     /**
@@ -437,7 +559,25 @@ public final class SwingTreeInitConfig
          * <strong>Allowed Values</strong> must be a positive integer<br>
          * <strong>Default</strong> {@code 16}
          */
-        String ANIMATION_INTERVAL = "swingtree.animationInterval";
+        String ANIMATION_INTERVAL = "swingtree.animation.interval";
+
+        /**
+         * Specifies whether SwingTree should record the source code trace of the component creation
+         * and hierarchy modification calls for debugging purposes. In practice, this is a {@link sprouts.Tuple}
+         * of {@link StackTraceElement}s stored as a client property of the component under the key "built-at".
+         */
+        String RECORD_DEBUG_SOURCE_TRACE = "swingtree.devTool.recordDebugSourceTrace";
+
+        /**
+         * Specifies the keystroke to access the <i>SwingTree</i> dev tool, which by default is {@code "ctrl shift I"}.
+         * In the dev tool you can hold control and click on a component to view valuable debug information about the component.<br>
+         * This includes basic things like the name, style, layout information and the dimensions of the component.<br>
+         * However, you may also want to see a stack trace of when the component was created and added to the
+         * component hierarchy. This is also something you can inspect in this dev tool <i>if</i> the
+         * {@link #RECORD_DEBUG_SOURCE_TRACE} mode is set to {@code true} (which by default it is).<br>
+         * Because this is the mode that creates the source code trace in the first place. <br>
+         */
+        String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.devTool.keyStrokeShortcut";
 
         /**
          * Checks whether a system property is set and returns {@code true} if its value
