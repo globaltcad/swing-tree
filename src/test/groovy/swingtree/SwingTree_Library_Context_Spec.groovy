@@ -297,4 +297,27 @@ class SwingTree_Library_Context_Spec extends Specification {
         cleanup: 'Reset the library context!'
             SwingTree.clear()
     }
+
+    def 'You can configure the keystroke for summoning the dev tool in the library context!'()
+    {
+        reportInfo """
+            The dev tool is a powerful inspector tool for inspecting the internal state of SwingTree.
+            You can summon it through a custom keystroke which you can configure when
+            initializing the library context. 
+            
+            By default, the keystroke is "ctrl shift alt I", exactly the same as in modern browsers, 
+            but you can change it to whatever you like. 
+            In this test we change it to "ctrl shift alt D" and verify that the new keystroke 
+            is applied in the library context.
+        """
+        given: 'We initialize `SwingTree` with a custom dev tool keystroke:'
+            SwingTree.initializeUsing(conf -> conf
+                .devToolKeyStrokeShortcut("ctrl shift alt D")
+            )
+        expect: 'The dev tool keystroke is the one we specified:'
+            SwingTree.get().getDevToolKeyStrokeShortcut().toString() == "ctrl shift alt D"
+
+        cleanup: 'Reset the library context!'
+            SwingTree.clear()
+    }
 }
