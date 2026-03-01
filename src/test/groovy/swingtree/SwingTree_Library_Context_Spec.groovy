@@ -273,7 +273,8 @@ class SwingTree_Library_Context_Spec extends Specification {
         reportInfo """
             Similar to the UI scale factor, you can react to changes of the `isDevToolEnabled` property
             through a reactive property view, without having to poll for it.
-            The "dev tool" is an inspector tool for 
+            The "dev tool" is an inspector tool for inspecting the internal state of SwingTree
+            and your UI while the application is running.
         """
         given: 'We initialize `SwingTree`, by default, the dev tool is always disabled:'
             SwingTree.initializeUsing(conf -> conf )
