@@ -268,7 +268,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", originalDefaultFont)
     }
 
-    def 'You an listen to `isDevToolEnabled` property changes through a reactive property!'()
+    def 'You can listen to `isDevToolEnabled` property changes through a reactive property!'()
     {
         reportInfo """
             Similar to the UI scale factor, you can react to changes of the `isDevToolEnabled` property
