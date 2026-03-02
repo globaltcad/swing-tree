@@ -209,7 +209,13 @@ final class GuiDebugDevToolUtility {
             overlayGraphics = (Graphics2D) g2d.create();
             renderDebugOverlayFor(overlayGraphics, glassPane, toBeDebugged, themeColor);
         } catch (Exception e) {
-            log.error("Error while rendering debug overlay for focused component: {}", e.getMessage(), e);
+            String componentName = toBeDebugged.getName() != null ? toBeDebugged.getName() : "<unnamed>";
+            log.error(
+                "Error while rendering debug overlay for component '{}' ({})",
+                componentName,
+                toBeDebugged.getClass().getName(),
+                e
+            );
         } finally {
             if (overlayGraphics != null) {
                 overlayGraphics.dispose();
