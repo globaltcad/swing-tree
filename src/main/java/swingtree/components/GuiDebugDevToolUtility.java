@@ -191,10 +191,29 @@ final class GuiDebugDevToolUtility {
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         if ( selectedDebugComponent != focusedDebugComponent && focusedDebugComponent.isShowing() ) {
-            renderDebugOverlayFor((Graphics2D) g2d.create(), glassPane, focusedDebugComponent, FOCUS_COLOR);
+            tryRenderDebugOverlayFor(g2d, glassPane, focusedDebugComponent, FOCUS_COLOR);
         }
         if ( selectedDebugComponent != null && selectedDebugComponent.isShowing() ) {
-            renderDebugOverlayFor((Graphics2D) g2d.create(), glassPane, selectedDebugComponent, SELECTION_COLOR);
+            tryRenderDebugOverlayFor(g2d, glassPane, selectedDebugComponent, SELECTION_COLOR);
+        }
+    }
+
+    private static void tryRenderDebugOverlayFor(
+        Graphics2D g2d,
+        JGlassPane glassPane,
+        java.awt.Component toBeDebugged,
+        Color themeColor
+    ){
+        Graphics2D overlayGraphics = null;
+        try {
+            overlayGraphics = (Graphics2D) g2d.create();
+            renderDebugOverlayFor(overlayGraphics, glassPane, toBeDebugged, themeColor);
+        } catch (Exception e) {
+            log.error("Error while rendering debug overlay for focused component: {}", e.getMessage(), e);
+        } finally {
+            if (overlayGraphics != null) {
+                overlayGraphics.dispose();
+            }
         }
     }
 
