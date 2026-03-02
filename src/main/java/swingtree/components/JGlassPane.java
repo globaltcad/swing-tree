@@ -10,6 +10,7 @@ import swingtree.ComponentDelegate;
 import swingtree.DragAwayComponentConf;
 import swingtree.SwingTree;
 import swingtree.UI;
+import swingtree.api.Painter;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 import swingtree.layout.Size;
@@ -39,20 +40,44 @@ import static javax.swing.SwingUtilities.*;
  *  this pane <b>handles any mouse events, without interrupting the controls underneath
  *  the glass pane (in the content pane of the root pane)</b>.
  *  Also, cursors are handled as if the glass pane was invisible
- *  (if no cursor gets explicitly set to the glass pane).
+ *  (if no cursor gets explicitly set to the glass pane).<br>
+ *  <p>
+ *      This glass pane is also the backbone of how SwingTree renders its
+ *      drag and drop operations. It renders an illustration of what is being dragged
+ *      on top of the entire component hierarchy of the root pane.<br>
+ *      Through this class SwingTree also draws the overlays for the GUI debug dev tool.
+ *      The debug dev tool can be enabled by calling {@link SwingTree#setDevToolEnabled(boolean)} or more commonly
+ *      by pressing the shortcut Ctrl+Shift+I (similar to the shortcut for the dev tools in web browsers).
+ *  </p><br>
+ *  <p>
+ *      The {@link #isVisible()} flag of this glass pane is self-managed based on
+ *      the existence of active named paint jobs registered through the {@link #setPaintJobWithId(String, Painter)} method.
+ *      So if there is at least one named paint job registered, then the glass pane will be visible,
+ *      and if there are no active named paint jobs, then the glass pane will be invisible.
+ *      Paint jobs can be removed by their id through the {@link #removePaintJobWithId(String)} method.<br>
+ *      Both the drag and drop visualization and the GUI debug dev tool overlays are implemented as named paint
+ *      jobs on this glass pane, so they will automatically show and hide the glass pane when they are active or inactive. <br>
+ *  </p>
+ *  <p>
+ *      Note that both {@link #paintComponent(Graphics)} and {@link #paintChildren(Graphics)} methods are final
+ *      and cannot be overridden by subclasses of this glass pane. To do custom painting on this glass pane,
+ *      you must do so through the {@link #setPaintJobWithId(String, Painter)} method.<br>
+ *      This is important to ensure that existing functionality can not break!
+ *  </p>
  */
 public class JGlassPane extends JPanel implements StylableComponent
 {
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(JGlassPane.class);
+    private static final Map<JGlassPane, ActiveDrag> activeDrags = new WeakHashMap<>();
 
     private final EventListenerList listeners = new EventListenerList();
-
+    private final Map<String, Painter> activePaintJobs = new LinkedHashMap<>();
     protected @Nullable JRootPane rootPane;
-    private static final Map<JGlassPane, ActiveDrag> activeDrags = new WeakHashMap<>();
 
 
     public JGlassPane() {
+        this.setVisible(false);
         setLayout(new MigLayout("fill, ins 0"));
         // Binding:
         putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!
@@ -70,8 +95,13 @@ public class JGlassPane extends JPanel implements StylableComponent
                         if (it.currentValue().is(true)) {
                             GuiDebugDevToolUtility.initializeDebugToolFor(rootPane);
                             rootPane.repaint();
+                            setPaintJobWithId("devToolOverlay", g2d -> {
+                                if (rootPane != null)
+                                    GuiDebugDevToolUtility.paintDebugOverlay(g2d, this);
+                            });
                         } else {
                             rootPane.repaint();
+                            removePaintJobWithId("devToolOverlay");
                         }
                     }
                 })
@@ -166,12 +196,62 @@ public class JGlassPane extends JPanel implements StylableComponent
         attachToRootPane(rootPane);
     }
 
+    /**
+     *  Schedules a permanent paint job on this glass pane with the given name/id and painter,
+     *  which will be active until the {@link #removePaintJobWithId(String)} method is called with the same id.
+     *  If there is already an active paint job with the same id, then this method does nothing.
+     *  Note that paint jobs are executed in the order they were added...
+     *  @param id The id of the paint job. It must be unique, otherwise the paint job will not be added.
+     *  @param painter The painter that will be executed from this glass pane's {@code paintChildren} method while the paint job is active.
+     */
+    protected final void setPaintJobWithId( String id, Painter painter ) {
+        if ( !activePaintJobs.containsKey(id) ) {
+            if ( activePaintJobs.isEmpty() )
+                setVisible(true);
+            activePaintJobs.put(id, painter);
+            repaint();
+        }
+    }
+
+    /**
+     *  Removes the active paint job with the given id from this glass pane, if it exists.
+     *  If there is no active paint job with the given id, then this method does nothing.
+     *  Note that paint jobs are executed in the order they were added...
+     *  @param id The id of the paint job to be removed.
+     */
+    protected final void removePaintJobWithId(String id ) {
+        if ( activePaintJobs.containsKey(id) ) {
+            activePaintJobs.remove(id);
+            if ( activePaintJobs.isEmpty() )
+                setVisible(false);
+            repaint();
+        }
+    }
+
     private ActiveDrag getActiveDrag() {
         return Optional.ofNullable(activeDrags.get(this)).orElse(ActiveDrag.none());
     }
 
     private void setActiveDrag(ActiveDrag activeDrag) {
+        // Update the drag state for this glass pane.
         activeDrags.put(this, activeDrag);
+
+        // Determine if there is at least one active drag across all glass panes.
+        boolean anyActiveDrag = activeDrags.values().stream()
+                .anyMatch(drag -> !drag.equals(ActiveDrag.none()));
+
+        if ( anyActiveDrag ) {
+            // Ensure that all relevant glass panes have the drag-visualization paint job
+            // so that foreign drags are rendered across windows.
+            for ( JGlassPane pane : activeDrags.keySet() ) {
+                pane.setPaintJobWithId("activeDragVisualization", pane::paintActiveDrag);
+            }
+        } else {
+            // No active drags anywhere: remove the visualization paint job from all panes.
+            for ( JGlassPane pane : activeDrags.keySet() ) {
+                pane.removePaintJobWithId("activeDragVisualization");
+            }
+        }
     }
 
     private void repaintRootPaneFor(ActiveDrag previousActiveDrag, ActiveDrag currentActiveDrag) {
@@ -241,15 +321,32 @@ public class JGlassPane extends JPanel implements StylableComponent
     }
 
     /** {@inheritDoc} */
-    @Override public void paintComponent(Graphics g){
+    @Override public final void paintComponent(Graphics g){
         paintBackground(g, super::paintComponent);
     }
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g) {
+    @Override public final void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
-        if (rootPane != null)
-            GuiDebugDevToolUtility.paintDebugOverlay((Graphics2D) g, this);
+        for (Map.Entry<String, Painter> paintJob : activePaintJobs.entrySet()) {
+            Graphics2D g2d = null;
+            try {
+                g2d = (Graphics2D) g.create();
+                paintJob.getValue().paint(g2d);
+            } catch (Exception ex) {
+                log.error(SwingTree.get().logMarker(),
+                    "Error while executing paint job with id '{}' on glass pane of root pane '{}'.",
+                    paintJob.getKey(), rootPane, ex
+                );
+            } finally {
+                if (g2d != null) {
+                    g2d.dispose();
+                }
+            }
+        }
+    }
+
+    private void paintActiveDrag(Graphics g) {
         getActiveDrag().paint(g);
         /*
             Maybe another window has a glass pane with an ongoing drag operation
@@ -330,7 +427,7 @@ public class JGlassPane extends JPanel implements StylableComponent
         this.setOpaque(false);
         ( this.rootPane = rootPane ).setGlassPane(this);
         GuiDebugDevToolUtility.setupGlobalDevToolsShortcutFor(rootPane);
-        this.setVisible(true);
+        this.setVisible(false);
     }
 
     /**

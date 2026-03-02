@@ -5687,7 +5687,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     private static JFrame _withGlassPane( JFrame frame ) {
         JGlassPane glassPane = new JGlassPane();
-        frame.setGlassPane(new JGlassPane());
         glassPane.toRootPane(frame.getRootPane());
         return frame;
     }
@@ -5730,7 +5729,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     private static JDialog _withGlassPane( JDialog dialog ) {
         JGlassPane glassPane = new JGlassPane();
-        dialog.setGlassPane(new JGlassPane());
         glassPane.toRootPane(dialog.getRootPane());
         return dialog;
     }
@@ -6449,7 +6447,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 // We set the size to fit the component:
                 _determineSize();
                 JGlassPane glassPane = new JGlassPane();
-                frame.setGlassPane(new JGlassPane());
                 glassPane.toRootPane(frame.getRootPane());
                 frame.setVisible(true);
             });
