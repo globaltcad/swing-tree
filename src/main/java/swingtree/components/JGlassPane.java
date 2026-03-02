@@ -202,7 +202,7 @@ public class JGlassPane extends JPanel implements StylableComponent
      *  If there is already an active paint job with the same id, then this method does nothing.
      *  Note that paint jobs are executed in the order they were added...
      *  @param id The id of the paint job. It must be unique, otherwise the paint job will not be added.
-     *  @param painter The painter that will be executed in the paintComponent method of this glass pane, if the paint job is active.
+     *  @param painter The painter that will be executed from this glass pane's {@code paintChildren} method while the paint job is active.
      */
     protected final void setPaintJobWithId( String id, Painter painter ) {
         if ( !activePaintJobs.containsKey(id) ) {
