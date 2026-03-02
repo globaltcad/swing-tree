@@ -316,13 +316,19 @@ public class JGlassPane extends JPanel implements StylableComponent
     @Override public final void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
         for (Map.Entry<String, Painter> paintJob : activePaintJobs.entrySet()) {
+            Graphics2D g2d = null;
             try {
-                paintJob.getValue().paint((Graphics2D) g.create());
+                g2d = (Graphics2D) g.create();
+                paintJob.getValue().paint(g2d);
             } catch (Exception ex) {
                 log.error(SwingTree.get().logMarker(),
                     "Error while executing paint job with id '{}' on glass pane of root pane '{}'.",
                     paintJob.getKey(), rootPane, ex
                 );
+            } finally {
+                if (g2d != null) {
+                    g2d.dispose();
+                }
             }
         }
     }
