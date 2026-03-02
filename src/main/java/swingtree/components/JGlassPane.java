@@ -233,11 +233,24 @@ public class JGlassPane extends JPanel implements StylableComponent
     }
 
     private void setActiveDrag(ActiveDrag activeDrag) {
+        // Update the drag state for this glass pane.
         activeDrags.put(this, activeDrag);
-        if ( activeDrag.equals(ActiveDrag.none()) ) {
-            removePaintJobWithId("activeDragVisualization");
+
+        // Determine if there is at least one active drag across all glass panes.
+        boolean anyActiveDrag = activeDrags.values().stream()
+                .anyMatch(drag -> !drag.equals(ActiveDrag.none()));
+
+        if ( anyActiveDrag ) {
+            // Ensure that all relevant glass panes have the drag-visualization paint job
+            // so that foreign drags are rendered across windows.
+            for ( JGlassPane pane : activeDrags.keySet() ) {
+                pane.setPaintJobWithId("activeDragVisualization", pane::paintActiveDrag);
+            }
         } else {
-            setPaintJobWithId("activeDragVisualization", this::paintActiveDrag);
+            // No active drags anywhere: remove the visualization paint job from all panes.
+            for ( JGlassPane pane : activeDrags.keySet() ) {
+                pane.removePaintJobWithId("activeDragVisualization");
+            }
         }
     }
 
