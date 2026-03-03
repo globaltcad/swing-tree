@@ -92,17 +92,8 @@ public class JGlassPane extends JPanel implements StylableComponent
             SwingTree.get().isDevToolEnabledView()
                 .onChange(From.ALL, it -> {
                     if ( rootPane != null ) {
-                        if (it.currentValue().is(true)) {
-                            GuiDebugDevToolUtility.initializeDebugToolFor(rootPane);
-                            rootPane.repaint();
-                            setPaintJobWithId("devToolOverlay", g2d -> {
-                                if (rootPane != null)
-                                    GuiDebugDevToolUtility.paintDebugOverlay(g2d, this);
-                            });
-                        } else {
-                            rootPane.repaint();
-                            removePaintJobWithId("devToolOverlay");
-                        }
+                        toggleDevTool(it.currentValue().is(true));
+                        rootPane.repaint();
                     }
                 })
         );
@@ -427,7 +418,26 @@ public class JGlassPane extends JPanel implements StylableComponent
         this.setOpaque(false);
         ( this.rootPane = rootPane ).setGlassPane(this);
         GuiDebugDevToolUtility.setupGlobalDevToolsShortcutFor(rootPane);
-        this.setVisible(false);
+        if ( SwingTree.get().isDevToolEnabled() ) {
+            toggleDevTool(true);
+            this.setVisible(true);
+        } else {
+            toggleDevTool(false);
+            this.setVisible(false);
+        }
+    }
+
+    private void toggleDevTool(boolean enabled) {
+        if (enabled) {
+            if ( rootPane != null )
+                GuiDebugDevToolUtility.initializeDebugToolFor(rootPane);
+            setPaintJobWithId("devToolOverlay", g2d -> {
+                if (rootPane != null)
+                    GuiDebugDevToolUtility.paintDebugOverlay(g2d, this);
+            });
+        } else {
+            removePaintJobWithId("devToolOverlay");
+        }
     }
 
     /**
