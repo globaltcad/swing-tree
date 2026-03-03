@@ -49,7 +49,7 @@ final class GuiDebugDevToolUtility {
                 }
                 rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY);
                 rootPane.getActionMap().put(SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY, toggleDevToolsShortcutAction);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 log.error("Error while setting up dev tools shortcut with key stroke '{}': {}", keyStrokeString, e.getMessage(), e);
             }
         }
@@ -65,7 +65,7 @@ final class GuiDebugDevToolUtility {
                 }
                 rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).remove(keyStroke);
                 rootPane.getActionMap().remove(SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 log.error("Error while tearing down dev tools shortcut with key stroke '{}': {}", keyStrokeString, e.getMessage(), e);
             }
         }
@@ -191,22 +191,47 @@ final class GuiDebugDevToolUtility {
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         if ( selectedDebugComponent != focusedDebugComponent && focusedDebugComponent.isShowing() ) {
-            renderDebugOverlayFor((Graphics2D) g2d.create(), glassPane, focusedDebugComponent, FOCUS_COLOR);
+            tryRenderDebugOverlayFor(g2d, glassPane, focusedDebugComponent, FOCUS_COLOR);
         }
         if ( selectedDebugComponent != null && selectedDebugComponent.isShowing() ) {
-            renderDebugOverlayFor((Graphics2D) g2d.create(), glassPane, selectedDebugComponent, SELECTION_COLOR);
+            tryRenderDebugOverlayFor(g2d, glassPane, selectedDebugComponent, SELECTION_COLOR);
+        }
+    }
+
+    private static void tryRenderDebugOverlayFor(
+        Graphics2D g2d,
+        JGlassPane glassPane,
+        java.awt.Component inspectedComponent,
+        Color themeColor
+    ){
+        Graphics2D overlayGraphics = null;
+        try {
+            overlayGraphics = (Graphics2D) g2d.create();
+            renderDebugOverlayFor(overlayGraphics, glassPane, inspectedComponent, themeColor);
+        } catch (RuntimeException e) {
+            String componentName = inspectedComponent.getName() != null ? inspectedComponent.getName() : "<unnamed>";
+            log.error(
+                "Error while rendering debug overlay for component '{}' ({})",
+                componentName,
+                inspectedComponent.getClass().getName(),
+                e
+            );
+        } finally {
+            if (overlayGraphics != null) {
+                overlayGraphics.dispose();
+            }
         }
     }
 
     private static void renderDebugOverlayFor(
             Graphics2D g2d,
             JGlassPane glassPane,
-            java.awt.Component toBeDebugged,
+            java.awt.Component inspectedComponent,
             Color themeColor
     ) {
         Insets insets = new Insets(0,0,0,0);
-        if ( toBeDebugged instanceof JComponent ) {
-            insets = ((JComponent)toBeDebugged).getInsets(insets);
+        if ( inspectedComponent instanceof JComponent ) {
+            insets = ((JComponent)inspectedComponent).getInsets(insets);
         }
 
         final int entireWidth = glassPane.getWidth();
@@ -215,8 +240,8 @@ final class GuiDebugDevToolUtility {
 
         // Convert component bounds → glass pane coordinate space
         final Rectangle bounds = SwingUtilities.convertRectangle(
-                toBeDebugged.getParent(),
-                toBeDebugged.getBounds(),
+                inspectedComponent.getParent(),
+                inspectedComponent.getBounds(),
                 glassPane
         );
         final Rectangle contentBounds = new Rectangle(
@@ -267,7 +292,7 @@ final class GuiDebugDevToolUtility {
         g2d.setPaintMode(); // Reset XOR mode!!
 
         // Optional: component info label
-        String label = getClassNameWithoutPackage(toBeDebugged.getClass())
+        String label = getClassNameWithoutPackage(inspectedComponent.getClass())
                 + "  " + bounds.width + "x" + bounds.height;
 
         FontMetrics fm = g2d.getFontMetrics();
@@ -421,7 +446,7 @@ final class GuiDebugDevToolUtility {
                                     debugState.viewAsString(it -> {
                                         try {
                                             return prettyRecord(it.styleConf().toString());
-                                        } catch (Exception e) {
+                                        } catch (RuntimeException e) {
                                             log.error("Error while pretty-printing style conf: {}", e.getMessage(), e);
                                             return it.styleConf().toString();
                                         }
@@ -450,7 +475,7 @@ final class GuiDebugDevToolUtility {
                                     debugState.viewAsString(it -> {
                                         try {
                                             return prettyRecord(it.asString());
-                                        } catch (Exception e) {
+                                        } catch (RuntimeException e) {
                                             log.error("Error while pretty-printing style conf: {}", e.getMessage(), e);
                                             return it.asString();
                                         }
@@ -480,7 +505,7 @@ final class GuiDebugDevToolUtility {
                 i = maybeSkip(i, input, "[NONE]", out);
                 i = maybeSkip(i, input, "[EMPTY]", out);
                 i = maybeSkipRegex(i, input, colorPattern, out);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 log.error("Error while pretty-printing record: {}", e.getMessage(), e);
             }
             char c = input.charAt(i);
