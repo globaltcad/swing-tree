@@ -1296,6 +1296,24 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
+        if ( _opacity >= 1 ) {
+            render(g2d, c, viewBox, scaleX, scaleY);
+        } else if ( _opacity > 0 ) {
+            // We render into a buffered image first, and then we draw that buffered image with the appropriate opacity!
+            // This is important, because doing it directly causes overlapped elements in the SVG to leak through each other, which looks wrong.
+            BufferedImage image = new BufferedImage(Math.round(viewBox.width*scaleX), Math.round(viewBox.height*scaleY), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D bufferGraphics = image.createGraphics();
+            StyleUtil.transferConfigurations(g2d, bufferGraphics);
+            render(bufferGraphics, c, new ViewBox(0, 0, viewBox.width, viewBox.height), scaleX, scaleY);
+            bufferGraphics.dispose();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity));
+            g2d.drawImage(image, Math.round(viewBox.x*scaleX), Math.round(viewBox.y*scaleY), null);
+        }
+    }
+
+    private void render( Graphics2D g2d, @Nullable Component c, ViewBox viewBox, float scaleX, float scaleY ) {
+        if ( _core.svgDocument == null )
+            return;
         // Now onto the actual rendering:
         boolean doAntiAliasing  = StyleEngine.IS_ANTIALIASING_ENABLED();
         boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -1310,11 +1328,6 @@ public final class SvgIcon extends ImageIcon
             newTransform.scale(scaleX, scaleY);
             g2d.setTransform(newTransform);
         }
-
-        // Set the opacity (alpha) for all subsequent drawings
-        // AlphaComposite.SRC_OVER is the standard compositing rule
-        if ( _opacity < 1f )
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity));
 
         try {
             // We also have to scale x and y, this is because the SVGDocument does not
