@@ -1304,7 +1304,9 @@ public final class SvgIcon extends ImageIcon
         } else if ( _opacity > 0 ) {
             // We render into a buffered image first, and then we draw that buffered image with the appropriate opacity!
             // This is important, because doing it directly causes overlapped elements in the SVG to leak through each other, which looks wrong.
-            BufferedImage image = new BufferedImage(Math.round(viewBox.width*scaleX), Math.round(viewBox.height*scaleY), BufferedImage.TYPE_INT_ARGB);
+            int imageWidth  = Math.max(1, Math.round(viewBox.width * scaleX));
+            int imageHeight = Math.max(1, Math.round(viewBox.height * scaleY));
+            BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
             Graphics2D bufferGraphics = image.createGraphics();
             StyleUtil.transferConfigurations(g2d, bufferGraphics);
             render(bufferGraphics, c, new ViewBox(0, 0, viewBox.width, viewBox.height), scaleX, scaleY);
