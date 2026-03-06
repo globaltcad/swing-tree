@@ -4250,6 +4250,7 @@ class Individual_Component_Styling_Spec extends Specification
               2   | 'variant-8' | {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}
               2   | 'variant-9' | {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}
               2   | 'variant-10'| {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}
+              3   | 'variant-11'| {it.size(25, 15).opacity(0.5f)}
     }
 
     def 'You can render a radial gradient onto a panel using the style API.'( float scale )
