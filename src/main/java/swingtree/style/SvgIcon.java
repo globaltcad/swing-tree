@@ -59,14 +59,16 @@ public final class SvgIcon extends ImageIcon
     private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
     private static final int             NO_SIZE               = -1;
     private static final Insets          ZERO_INSETS           = new Insets(0,0,0,0);
+    private static final float           DEFAULT_OPACITY       = 1f;
 
 
-    private final RawSVG                _core;
-    private final Size                  _size;
-    private final Unit                  _widthUnit;
-    private final Unit                  _heightUnit;
-    private final UI.FitComponent       _fitComponent;
-    private final UI.Placement          _preferredPlacement;
+    private final RawSVG          _core;
+    private final Size            _size;
+    private final Unit            _widthUnit;
+    private final Unit            _heightUnit;
+    private final UI.FitComponent _fitComponent;
+    private final UI.Placement    _preferredPlacement;
+    private final float           _opacity;
 
     private @Nullable BufferedImage _cache = null;
 
@@ -79,7 +81,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon at( String path ) {
         RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), Size.unknown());
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -90,7 +92,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon at( String path, Size size ) {
         RawSVG args = _loadSvgDocument(SvgIcon.class.getResource(path), size);
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -104,7 +106,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon at( URL svgUrl ) {
         RawSVG args = _loadSvgDocument(svgUrl, Size.unknown());
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -114,7 +116,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon at( URL svgUrl, Size size ) {
         RawSVG args = _loadSvgDocument(svgUrl, size);
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -140,7 +142,7 @@ public final class SvgIcon extends ImageIcon
     public static SvgIcon of( String svgString, Size size ) {
         InputStream inputStream = new ByteArrayInputStream(svgString.getBytes(StandardCharsets.UTF_8));
         RawSVG args = _loadSvgDocument(inputStream, size);
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -158,7 +160,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon of( InputStream stream ) {
         RawSVG args = _loadSvgDocument(stream, Size.unknown());
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -177,7 +179,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon of( InputStream stream, Size size ) {
         RawSVG args = _loadSvgDocument(stream, size);
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -192,7 +194,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
         RawSVG args = new RawSVG(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN);
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     /**
@@ -206,7 +208,7 @@ public final class SvgIcon extends ImageIcon
      */
     public static SvgIcon of( SVGDocument svgDocument, Size size ) {
         RawSVG args = new RawSVG(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN);
-        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+        return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     private static RawSVG _loadSvgDocument(@Nullable URL svgUrl, Size size ) {
@@ -279,18 +281,20 @@ public final class SvgIcon extends ImageIcon
     private SvgIcon(
         RawSVG args,
         UI.FitComponent  fitComponent,
-        UI.Placement     preferredPlacement
+        UI.Placement     preferredPlacement,
+        float opacity
     ) {
-        this(args, args.size, args.widthUnit, args.heightUnit, fitComponent, preferredPlacement);
+        this(args, args.size, args.widthUnit, args.heightUnit, fitComponent, preferredPlacement, opacity);
     }
 
     private SvgIcon(
-        RawSVG core,
-        Size                  size,
-        Unit                  widthUnit,
-        Unit                  heightUnit,
-        UI.FitComponent       fitComponent,
-        UI.Placement          preferredPlacement
+        RawSVG          core,
+        Size            size,
+        Unit            widthUnit,
+        Unit            heightUnit,
+        UI.FitComponent fitComponent,
+        UI.Placement    preferredPlacement,
+        float           opacity
     ) {
         super();
         _core               = Objects.requireNonNull(core);
@@ -299,6 +303,7 @@ public final class SvgIcon extends ImageIcon
         _heightUnit         = Objects.requireNonNull(heightUnit);
         _fitComponent       = Objects.requireNonNull(fitComponent);
         _preferredPlacement = Objects.requireNonNull(preferredPlacement);
+        _opacity            = opacity;
     }
 
     private Size _size() {
@@ -403,7 +408,8 @@ public final class SvgIcon extends ImageIcon
                 Unit.PX,
                 Unit.PX,
                 _fitComponent,
-                _preferredPlacement
+                _preferredPlacement,
+                _opacity
             );
     }
 
@@ -509,7 +515,8 @@ public final class SvgIcon extends ImageIcon
                 Unit.PX,
                 Unit.PX,
                 _fitComponent,
-                _preferredPlacement
+                _preferredPlacement,
+                _opacity
             );
     }
 
@@ -564,7 +571,8 @@ public final class SvgIcon extends ImageIcon
                 Unit.PX,
                 Unit.PX,
                 _fitComponent,
-                _preferredPlacement
+                _preferredPlacement,
+                _opacity
             );
     }
 
@@ -757,7 +765,8 @@ public final class SvgIcon extends ImageIcon
                 _widthUnit == Unit.PERCENTAGE ? Unit.PX : _widthUnit,
                 _heightUnit == Unit.PERCENTAGE ? Unit.PX : _heightUnit,
                 _fitComponent,
-                _preferredPlacement
+                _preferredPlacement,
+                _opacity
             );
     }
 
@@ -876,7 +885,7 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
-        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, fit, _preferredPlacement);
+        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, fit, _preferredPlacement, _opacity);
     }
 
     /**
@@ -902,7 +911,37 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(placement);
         if ( placement == _preferredPlacement )
             return this;
-        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, _fitComponent, placement);
+        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, _fitComponent, placement, _opacity);
+    }
+
+    /**
+     *  The opacity of the icon, which is a value between 0 and 1 inclusive.
+     *  A value of 0 means the icon is completely transparent (as in effectively invisible),
+     *  while a value of 1 means the icon is fully opaque.
+     *
+     * @return The opacity of the icon, which is always between 0 and 1 inclusive.
+     */
+    public float getOpacity() { return _opacity; }
+
+    /**
+     *  Creates a new {@link SvgIcon} with the specified opacity.
+     *  If the provided opacity value is outside the valid range of 0 to 1,
+     *  it will be clamped to the nearest valid value (0 or 1) and a warning will be logged.
+     *
+     * @param opacity The opacity of the icon, between 0 and 1 inclusive.
+     * @return A new {@link SvgIcon} with the given opacity.
+     */
+    public SvgIcon withOpacity( float opacity ) {
+        if ( opacity < 0f || opacity > 1f )
+            log.warn(SwingTree.get().logMarker(),
+                "Bad argument detected: The specified opacity value {} is out of bounds! " +
+                "Opacity must be between 0.0f and 1.0f. Clamping to the nearest valid value.", opacity,
+                new Throwable()
+            );
+        opacity = Math.max(0f, Math.min(1f, opacity));
+        if ( opacity == _opacity )
+            return this;
+        return new SvgIcon(_core, _size, _widthUnit, _heightUnit, _fitComponent, _preferredPlacement, opacity);
     }
 
     /**
@@ -927,16 +966,19 @@ public final class SvgIcon extends ImageIcon
 
         // We create a new buffered image, render into it, and then return it.
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        if ( _core.svgDocument != null )
+        if ( _core.svgDocument != null ) {
+            Graphics2D g2d = image.createGraphics();
             _paintIcon(
                     null,
-                    image.createGraphics(),
+                    g2d,
                     Bounds.of(0, 0, width, height),
                     Offset.none(),
                     UI.Placement.CENTER,
                     UI.FitComponent.WIDTH_AND_HEIGHT,
                     Outline.none()
                 );
+            g2d.dispose();
+        }
 
         return image;
     }
@@ -1257,6 +1299,26 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
+        if ( _opacity >= 1 ) {
+            render(g2d, c, viewBox, scaleX, scaleY);
+        } else if ( _opacity > 0 ) {
+            // We render into a buffered image first, and then we draw that buffered image with the appropriate opacity!
+            // This is important, because doing it directly causes overlapped elements in the SVG to leak through each other, which looks wrong.
+            int imageWidth  = Math.max(1, Math.round(viewBox.width * scaleX));
+            int imageHeight = Math.max(1, Math.round(viewBox.height * scaleY));
+            BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D bufferGraphics = image.createGraphics();
+            StyleUtil.transferConfigurations(g2d, bufferGraphics);
+            render(bufferGraphics, c, new ViewBox(0, 0, viewBox.width, viewBox.height), scaleX, scaleY);
+            bufferGraphics.dispose();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity));
+            g2d.drawImage(image, Math.round(viewBox.x*scaleX), Math.round(viewBox.y*scaleY), null);
+        }
+    }
+
+    private void render( Graphics2D g2d, @Nullable Component c, ViewBox viewBox, float scaleX, float scaleY ) {
+        if ( _core.svgDocument == null )
+            return;
         // Now onto the actual rendering:
         boolean doAntiAliasing  = StyleEngine.IS_ANTIALIASING_ENABLED();
         boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -1275,7 +1337,8 @@ public final class SvgIcon extends ImageIcon
         try {
             // We also have to scale x and y, this is because the SVGDocument does not
             // account for the scale of the transform with respect to the view box!
-            _core.svgDocument.render(c, g2d, viewBox);
+            if ( _opacity > 0f )
+                _core.svgDocument.render(c, g2d, viewBox);
         } catch (Exception e) {
             log.warn(SwingTree.get().logMarker(), "Failed to render SVG document.", e);
         }
@@ -1289,7 +1352,9 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public int hashCode() {
-        return Objects.hash(_core.svgDocument, _widthUnit, _heightUnit, _size, _fitComponent, _preferredPlacement);
+        return Objects.hash(
+                _core.svgDocument, _widthUnit, _heightUnit, _size, _fitComponent, _preferredPlacement, _opacity
+            );
     }
 
     @Override
@@ -1303,7 +1368,8 @@ public final class SvgIcon extends ImageIcon
                Objects.equals(_widthUnit,          rhs._heightUnit)  &&
                Objects.equals(_heightUnit,         rhs._widthUnit)  &&
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
-               Objects.equals(_preferredPlacement, rhs._preferredPlacement);
+               Objects.equals(_preferredPlacement, rhs._preferredPlacement) &&
+               Float.compare(_opacity, rhs._opacity) == 0;
     }
 
     @Override
@@ -1327,6 +1393,7 @@ public final class SvgIcon extends ImageIcon
                     "height=" + heightAsStr + ", " +
                     "fitComponent=" + fitComponent + ", " +
                     "preferredPlacement=" + preferredPlacement + ", " +
+                    "opacity=" + _opacity + ", " +
                     "doc=" + svgDocument +
                 "]";
     }

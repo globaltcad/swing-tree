@@ -1165,7 +1165,8 @@ final class StyleRenderer
                 UI.Placement localPlacement = placement == UI.Placement.UNDEFINED ? svgIcon.getPreferredPlacement() : placement;
                 localPlacement = localPlacement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : localPlacement;
                 UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;
-                svgIcon.withFitComponent(localFit)
+                svgIcon.withOpacity(opacity)
+                        .withFitComponent(localFit)
                         .withPreferredPlacement(localPlacement)
                         .paintIcon(null, g2d, Bounds.of(areaX, areaY, componentWidth, componentHeight), style.offset(), padding);
             } else {
