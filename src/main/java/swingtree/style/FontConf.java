@@ -1014,26 +1014,35 @@ public final class FontConf
 
         float posture = font.isItalic() ? 0.2f : 0f;
         try {
-            if (attributeMap.containsKey(TextAttribute.POSTURE))
-                posture = ((Number) attributeMap.get(TextAttribute.POSTURE)).floatValue();
+            if (attributeMap.containsKey(TextAttribute.POSTURE)) {
+                Object thing = attributeMap.get(TextAttribute.POSTURE);
+                if ( thing instanceof Number )
+                    posture = ((Number) thing).floatValue();
+            }
         } catch (Exception e) {
-            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.POSTURE in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.POSTURE in font attributes '{}' of font '{}'", attributeMap, font, e);
         }
 
         float weight = font.isBold() ? 2f : 0f;
         try {
-            if (attributeMap.containsKey(TextAttribute.WEIGHT))
-                weight = ((Number) attributeMap.get(TextAttribute.WEIGHT)).floatValue();
+            if (attributeMap.containsKey(TextAttribute.WEIGHT)) {
+                Object thing = attributeMap.get(TextAttribute.WEIGHT);
+                if ( thing instanceof Number )
+                    weight = ((Number) thing).floatValue();
+            }
         } catch (Exception e) {
-            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.WEIGHT in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.WEIGHT in font attributes '{}' of font '{}'", attributeMap, font, e);
         }
 
         float spacing = _spacing;
         try {
-            if (attributeMap.containsKey(TextAttribute.TRACKING))
-                spacing = ((Number) attributeMap.get(TextAttribute.TRACKING)).floatValue();
+            if (attributeMap.containsKey(TextAttribute.TRACKING)) {
+                Object thing = attributeMap.get(TextAttribute.TRACKING);
+                if ( thing instanceof Number )
+                    spacing = ((Number) thing).floatValue();
+            }
         } catch (Exception e) {
-            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.TRACKING in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.TRACKING in font attributes '{}' of font '{}'", attributeMap, font, e);
         }
 
         Color selectionColor = _selectionColor;
@@ -1044,7 +1053,7 @@ public final class FontConf
             if (attributeMap.containsKey(TextAttribute.UNDERLINE))
                 isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);
         } catch (Exception e) {
-            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.UNDERLINE in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.UNDERLINE in font attributes '{}' of font '{}'", attributeMap, font, e);
         }
 
         boolean isStriked   = ( _isStrike != null ? _isStrike : false );
@@ -1052,7 +1061,7 @@ public final class FontConf
             if (attributeMap.containsKey(TextAttribute.STRIKETHROUGH))
                 isStriked   = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);
         } catch (Exception e) {
-            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.STRIKETHROUGH in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.STRIKETHROUGH in font attributes '{}' of font '{}'", attributeMap, font, e);
         }
 
         AffineTransform transform = _transform;
@@ -1060,7 +1069,7 @@ public final class FontConf
             if (attributeMap.containsKey(TextAttribute.TRANSFORM))
                 transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
         } catch (Exception e) {
-            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.TRANSFORM in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+            log.debug(SwingTree.get().logMarker(), "Failed to fetch TextAttribute.TRANSFORM in font attributes '{}' of font '{}'", attributeMap, font, e);
         }
 
         FontPaintConf paint = _paint;
@@ -1071,7 +1080,7 @@ public final class FontConf
             if (found != null)
                 paint = FontPaintConf.of(null, found, null, null);
         } catch (Exception e) {
-            log.warn(SwingTree.get().logMarker(), "Failed to extract font attributes from font: " + font, e);
+            log.warn(SwingTree.get().logMarker(), "Failed to extract font attributes from font: {}", font, e);
         }
 
         FontPaintConf backgroundPaint = _backgroundPaint;
@@ -1082,7 +1091,7 @@ public final class FontConf
             if (found != null)
                 backgroundPaint = FontPaintConf.of(null, found, null, null);
         } catch (Exception e) {
-            log.warn(SwingTree.get().logMarker(), "Failed to extract font attributes from font: " + font, e);
+            log.warn(SwingTree.get().logMarker(), "Failed to extract font attributes from font: {}", font, e);
         }
 
         Objects.requireNonNull(font);
