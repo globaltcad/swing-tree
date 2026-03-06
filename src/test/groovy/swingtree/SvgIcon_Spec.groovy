@@ -763,5 +763,78 @@ class SvgIcon_Spec extends Specification
             Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.MAX_DIM          | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=MAX_DIM, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
             Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.MIN_DIM          | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=MIN_DIM, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
     }
+
+    def 'The `SvgIcon` has value semantics.'()
+    {
+        reportInfo """
+            In this unit test we both ensure that the `SvgIcon`
+            expresses value semantics and we also introduce you
+            to the various of its properties.
+            
+            You can derive new icons from an existing one
+            using the `withXXX` methods, which return a new instance
+            with the specified property changed.
+        """
+        given : 'We start off with two identical SVG icons created from the same SVG string.'
+            String svg = """
+                <svg width="100px" height="100px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="40" fill="red"/>
+                </svg>
+            """.trim()
+            var icon1 = UI.findSvgIcon(IconDeclaration.ofSvg(svg)).get()
+            var icon2 = UI.findSvgIcon(IconDeclaration.ofSvg(svg)).get()
+        expect : 'The two icons are equal and have the same hash code.'
+            icon1 == icon2
+            icon1.hashCode() == icon2.hashCode()
+
+        when : """
+            We now derive both icons to have different opacities
+            and then check that they are no longer equal.
+            The opacity is a property that can be set on an `SvgIcon` to control its transparency when rendered.
+             An opacity of 1.0 means fully opaque, while 0.0 means fully transparent.
+        """
+            var modifiedIcon1 = icon1.withOpacity(0.15f)
+            var modifiedIcon2 = icon2.withOpacity(0.8f)
+        then : 'The modified icons are not equal to each other or to the original.'
+            modifiedIcon1 != modifiedIcon2
+            modifiedIcon1 != icon1
+            modifiedIcon2 != icon2
+        and : 'The modified icons have the expected opacities.'
+            modifiedIcon1.getOpacity() == 0.15f
+            modifiedIcon2.getOpacity() == 0.8f
+
+        when : """
+            We now re-derive the initial icons by
+            setting the `UI.FitComponent` property.
+            
+            This property controls how the icon should be scaled to 
+            fit within a component when rendered.
+        """
+            modifiedIcon1 = icon1.withFitComponent(UI.FitComponent.WIDTH)
+            modifiedIcon2 = icon2.withFitComponent(UI.FitComponent.HEIGHT)
+        then : 'The modified icons are not equal to each other or to the original.'
+            modifiedIcon1 != modifiedIcon2
+            modifiedIcon1 != icon1
+            modifiedIcon2 != icon2
+        and : 'The modified icons have the expected fit component policies.'
+            modifiedIcon1.getFitComponent() == UI.FitComponent.WIDTH
+            modifiedIcon2.getFitComponent() == UI.FitComponent.HEIGHT
+
+        when : """
+            We now re-derive the initial icons by
+            setting the `UI.Placement` property.
+
+            This property controls the preferred placement of the icon within a component when rendered.
+        """
+            modifiedIcon1 = icon1.withPreferredPlacement(UI.Placement.BOTTOM)
+            modifiedIcon2 = icon2.withPreferredPlacement(UI.Placement.RIGHT)
+        then : 'The modified icons are not equal to each other or to the original.'
+            modifiedIcon1 != modifiedIcon2
+            modifiedIcon1 != icon1
+            modifiedIcon2 != icon2
+        and : 'The modified icons have the expected preferred placements.'
+            modifiedIcon1.getPreferredPlacement() == UI.Placement.BOTTOM
+            modifiedIcon2.getPreferredPlacement() == UI.Placement.RIGHT
+    }
 }
 

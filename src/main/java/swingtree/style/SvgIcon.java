@@ -1347,7 +1347,9 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public int hashCode() {
-        return Objects.hash(_core.svgDocument, _widthUnit, _heightUnit, _size, _fitComponent, _preferredPlacement);
+        return Objects.hash(
+                _core.svgDocument, _widthUnit, _heightUnit, _size, _fitComponent, _preferredPlacement, _opacity
+            );
     }
 
     @Override
@@ -1361,7 +1363,8 @@ public final class SvgIcon extends ImageIcon
                Objects.equals(_widthUnit,          rhs._heightUnit)  &&
                Objects.equals(_heightUnit,         rhs._widthUnit)  &&
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
-               Objects.equals(_preferredPlacement, rhs._preferredPlacement);
+               Objects.equals(_preferredPlacement, rhs._preferredPlacement) &&
+               Float.compare(_opacity, rhs._opacity) == 0;
     }
 
     @Override
@@ -1385,6 +1388,7 @@ public final class SvgIcon extends ImageIcon
                     "height=" + heightAsStr + ", " +
                     "fitComponent=" + fitComponent + ", " +
                     "preferredPlacement=" + preferredPlacement + ", " +
+                    "opacity=" + _opacity + ", " +
                     "doc=" + svgDocument +
                 "]";
     }
