@@ -2,6 +2,9 @@ package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
@@ -168,6 +171,7 @@ import java.util.Optional;
 @SuppressWarnings("Immutable")
 public final class ImageConf implements Simplifiable<ImageConf>
 {
+    private static final Logger log = LoggerFactory.getLogger(ImageConf.class);
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
     private static final ImageConf _NONE = new ImageConf(
                                                 null,
@@ -654,12 +658,21 @@ public final class ImageConf implements Simplifiable<ImageConf>
     /**
      *  This method allows you to specify the opacity of the image.
      *  The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
-     *  and 1.0f means that the image is completely opaque.
+     *  and 1.0f means that the image is completely opaque.<br>
+     *  If the specified opacity value is out of bounds, then it will be clamped to the
+     *  nearest valid value and a warning will be logged.
      *
      * @param opacity The opacity of the image.
      * @return A new {@link ImageConf} instance with the specified opacity.
      */
     public ImageConf opacity( float opacity ) {
+        if ( opacity < 0f || opacity > 1f )
+            log.warn(SwingTree.get().logMarker(),
+                "Bad argument detected: The specified opacity value '{}' is out of bounds! " +
+                "Opacity must be between 0.0f and 1.0f. Clamping to the nearest valid value now...", opacity,
+                new Throwable()
+            );
+        opacity = Math.max(0f, Math.min(1f, opacity));
         return ImageConf.of(_primer, _image, _placement, _placementBoundary, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
     }
 
