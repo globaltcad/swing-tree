@@ -110,6 +110,7 @@ class SvgIcon_Spec extends Specification
             var icon3 = icon.withIconSize(27, 16)
             var icon4 = icon.withIconSizeFromWidth(31).withPreferredPlacement(UI.Placement.BOTTOM_RIGHT)
             var icon5 = icon.withIconSizeFromHeight(24)
+            var icon6  = icon.withOpacity(0.123f)
         and : 'We turn each icon into its String representation:'
             icon  = icon .toString()
             icon1 = icon1.toString()
@@ -117,14 +118,16 @@ class SvgIcon_Spec extends Specification
             icon3 = icon3.toString()
             icon4 = icon4.toString()
             icon5 = icon5.toString()
+            icon6 = icon6.toString()
 
         expect : 'They all have the expected String representations:'
-            icon.matches( /SvgIcon\[width=\?, height=\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon1.matches( /SvgIcon\[width=\?, height=13px, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon2.matches( /SvgIcon\[width=12px, height=\?, fitComponent=NO, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon3.matches( /SvgIcon\[width=27px, height=16px, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
-            icon4.matches( /SvgIcon\[width=31px, height=31px, fitComponent=UNDEFINED, preferredPlacement=BOTTOM_RIGHT, doc=.*\]/ )
-            icon5.matches( /SvgIcon\[width=24px, height=24px, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon.matches( /SvgIcon\[width=\?, height=\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, opacity=1\.0, doc=.*\]/ )
+            icon1.matches( /SvgIcon\[width=\?, height=13px, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, opacity=1\.0, doc=.*\]/ )
+            icon2.matches( /SvgIcon\[width=12px, height=\?, fitComponent=NO, preferredPlacement=UNDEFINED, opacity=1\.0, doc=.*\]/ )
+            icon3.matches( /SvgIcon\[width=27px, height=16px, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, opacity=1\.0, doc=.*\]/ )
+            icon4.matches( /SvgIcon\[width=31px, height=31px, fitComponent=UNDEFINED, preferredPlacement=BOTTOM_RIGHT, opacity=1\.0, doc=.*\]/ )
+            icon5.matches( /SvgIcon\[width=24px, height=24px, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, opacity=1\.0, doc=.*\]/ )
+            icon6.matches( /SvgIcon\[width=\?, height=\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, opacity=0\.123, doc=.*\]/ )
     }
 
     def 'Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.'()
