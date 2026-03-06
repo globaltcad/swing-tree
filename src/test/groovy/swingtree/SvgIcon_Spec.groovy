@@ -727,41 +727,41 @@ class SvgIcon_Spec extends Specification
             size             | widthUnit | heightUnit | fitComponent                     | placement                  || expectedPattern
 
             // Unknown dimensions (represented as ?)
-            Size.of(-1, -1)  | ''        | ''         | UI.FitComponent.UNDEFINED        | UI.Placement.UNDEFINED    || /SvgIcon\[width=\?, height=\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, doc=SVGDocument\[width=100\.0, height=100\.0\]\]/
-            Size.of(-1, -1)  | ''        | ''         | UI.FitComponent.NO               | UI.Placement.TOP_LEFT     || /SvgIcon\[width=\?, height=\?, fitComponent=NO, preferredPlacement=TOP_LEFT, doc=SVGDocument\[width=100\.0, height=100\.0\]\]/
+            Size.of(-1, -1)  | ''        | ''         | UI.FitComponent.UNDEFINED        | UI.Placement.UNDEFINED    || /SvgIcon\[width=\?, height=\?, fitComponent=UNDEFINED, preferredPlacement=UNDEFINED, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=100\.0\]\]/
+            Size.of(-1, -1)  | ''        | ''         | UI.FitComponent.NO               | UI.Placement.TOP_LEFT     || /SvgIcon\[width=\?, height=\?, fitComponent=NO, preferredPlacement=TOP_LEFT, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=100\.0\]\]/
 
             // Pixel dimensions
-            Size.of(100, 50 )| 'px'      | 'px'       | UI.FitComponent.WIDTH            | UI.Placement.CENTER       || /SvgIcon\[width=100px, height=50px, fitComponent=WIDTH, preferredPlacement=CENTER, doc=SVGDocument\[width=100\.0, height=50\.0\]\]/
-            Size.of(75 , 75 )| 'px'      | 'px'       | UI.FitComponent.HEIGHT           | UI.Placement.TOP_RIGHT    || /SvgIcon\[width=75px, height=75px, fitComponent=HEIGHT, preferredPlacement=TOP_RIGHT, doc=SVGDocument\[width=75\.0, height=75\.0\]\]/
-            Size.of(200, 100)| 'px'      | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.BOTTOM_LEFT || /SvgIcon\[width=200px, height=100px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=BOTTOM_LEFT, doc=SVGDocument\[width=200\.0, height=100\.0\]\]/
+            Size.of(100, 50 )| 'px'      | 'px'       | UI.FitComponent.WIDTH            | UI.Placement.CENTER       || /SvgIcon\[width=100px, height=50px, fitComponent=WIDTH, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=50\.0\]\]/
+            Size.of(75 , 75 )| 'px'      | 'px'       | UI.FitComponent.HEIGHT           | UI.Placement.TOP_RIGHT    || /SvgIcon\[width=75px, height=75px, fitComponent=HEIGHT, preferredPlacement=TOP_RIGHT, opacity=1\.0, doc=SVGDocument\[width=75\.0, height=75\.0\]\]/
+            Size.of(200, 100)| 'px'      | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.BOTTOM_LEFT  || /SvgIcon\[width=200px, height=100px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=BOTTOM_LEFT, opacity=1\.0, doc=SVGDocument\[width=200\.0, height=100\.0\]\]/
 
             // Percentage dimensions
-            Size.of(100, 50 )| '%'       | '%'        | UI.FitComponent.MAX_DIM          | UI.Placement.RIGHT        || /SvgIcon\[width=100%, height=50%, fitComponent=MAX_DIM, preferredPlacement=RIGHT, doc=SVGDocument\[width=100\.0, height=50\.0\]\]/
-            Size.of(75 , 100)| '%'       | '%'        | UI.FitComponent.MIN_DIM          | UI.Placement.BOTTOM       || /SvgIcon\[width=75%, height=100%, fitComponent=MIN_DIM, preferredPlacement=BOTTOM, doc=SVGDocument\[width=75\.0, height=100\.0\]\]/
+            Size.of(100, 50 )| '%'       | '%'        | UI.FitComponent.MAX_DIM          | UI.Placement.RIGHT        || /SvgIcon\[width=100%, height=50%, fitComponent=MAX_DIM, preferredPlacement=RIGHT, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=50\.0\]\]/
+            Size.of(75 , 100)| '%'       | '%'        | UI.FitComponent.MIN_DIM          | UI.Placement.BOTTOM       || /SvgIcon\[width=75%, height=100%, fitComponent=MIN_DIM, preferredPlacement=BOTTOM, opacity=1\.0, doc=SVGDocument\[width=75\.0, height=100\.0\]\]/
 
             // Mixed units (one pixel, one percentage)
-            Size.of(200,50)  | 'px'      | '%'        | UI.FitComponent.NO               | UI.Placement.TOP          || /SvgIcon\[width=200px, height=50%, fitComponent=NO, preferredPlacement=TOP, doc=SVGDocument\[width=200\.0, height=50\.0\]\]/
-            Size.of(100,75)  | '%'       | 'px'       | UI.FitComponent.WIDTH            | UI.Placement.LEFT         || /SvgIcon\[width=100%, height=75px, fitComponent=WIDTH, preferredPlacement=LEFT, doc=SVGDocument\[width=100\.0, height=75\.0\]\]/
+            Size.of(200,50)  | 'px'      | '%'        | UI.FitComponent.NO               | UI.Placement.TOP          || /SvgIcon\[width=200px, height=50%, fitComponent=NO, preferredPlacement=TOP, opacity=1\.0, doc=SVGDocument\[width=200\.0, height=50\.0\]\]/
+            Size.of(100,75)  | '%'       | 'px'       | UI.FitComponent.WIDTH            | UI.Placement.LEFT         || /SvgIcon\[width=100%, height=75px, fitComponent=WIDTH, preferredPlacement=LEFT, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=75\.0\]\]/
 
             // Mixed: one known, one unknown
-            Size.of(32, -1)  | 'px'      | ''         | UI.FitComponent.HEIGHT           | UI.Placement.BOTTOM_RIGHT || /SvgIcon\[width=32px, height=\?, fitComponent=HEIGHT, preferredPlacement=BOTTOM_RIGHT, doc=SVGDocument\[width=32\.0, height=100\.0\]\]/
-            Size.of(-1, 24)  | ''        | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.UNDEFINED    || /SvgIcon\[width=\?, height=24px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=UNDEFINED, doc=SVGDocument\[width=100\.0, height=24\.0\]\]/
-            Size.of(32, 3 )  | 'px'      | ''         | UI.FitComponent.HEIGHT           | UI.Placement.BOTTOM_RIGHT || /SvgIcon\[width=32px, height=\?, fitComponent=HEIGHT, preferredPlacement=BOTTOM_RIGHT, doc=SVGDocument\[width=32\.0, height=100\.0\]\]/
-            Size.of(4 , 24)  | ''        | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.UNDEFINED    || /SvgIcon\[width=\?, height=24px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=UNDEFINED, doc=SVGDocument\[width=100\.0, height=24\.0\]\]/
+            Size.of(32, -1)  | 'px'      | ''         | UI.FitComponent.HEIGHT           | UI.Placement.BOTTOM_RIGHT || /SvgIcon\[width=32px, height=\?, fitComponent=HEIGHT, preferredPlacement=BOTTOM_RIGHT, opacity=1\.0, doc=SVGDocument\[width=32\.0, height=100\.0\]\]/
+            Size.of(-1, 24)  | ''        | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.UNDEFINED    || /SvgIcon\[width=\?, height=24px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=UNDEFINED, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=24\.0\]\]/
+            Size.of(32, 3 )  | 'px'      | ''         | UI.FitComponent.HEIGHT           | UI.Placement.BOTTOM_RIGHT || /SvgIcon\[width=32px, height=\?, fitComponent=HEIGHT, preferredPlacement=BOTTOM_RIGHT, opacity=1\.0, doc=SVGDocument\[width=32\.0, height=100\.0\]\]/
+            Size.of(4 , 24)  | ''        | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.UNDEFINED    || /SvgIcon\[width=\?, height=24px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=UNDEFINED, opacity=1\.0, doc=SVGDocument\[width=100\.0, height=24\.0\]\]/
 
             // All placement options
-            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.TOP          || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=TOP, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
-            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.BOTTOM       || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=BOTTOM, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
-            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.LEFT         || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=LEFT, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
-            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.RIGHT        || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=RIGHT, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
+            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.TOP          || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=TOP, opacity=1\.0, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
+            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.BOTTOM       || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=BOTTOM, opacity=1\.0, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
+            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.LEFT         || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=LEFT, opacity=1\.0, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
+            Size.of(64,64)   | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.RIGHT        || /SvgIcon\[width=64px, height=64px, fitComponent=NO, preferredPlacement=RIGHT, opacity=1\.0, doc=SVGDocument\[width=64\.0, height=64\.0\]\]/
 
             // All fit component options
-            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=NO, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
-            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.WIDTH            | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=WIDTH, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
-            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.HEIGHT           | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=HEIGHT, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
-            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
-            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.MAX_DIM          | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=MAX_DIM, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
-            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.MIN_DIM          | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=MIN_DIM, preferredPlacement=CENTER, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
+            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.NO               | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=NO, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
+            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.WIDTH            | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=WIDTH, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
+            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.HEIGHT           | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=HEIGHT, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
+            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=WIDTH_AND_HEIGHT, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
+            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.MAX_DIM          | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=MAX_DIM, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
+            Size.of(128,96)  | 'px'      | 'px'       | UI.FitComponent.MIN_DIM          | UI.Placement.CENTER       || /SvgIcon\[width=128px, height=96px, fitComponent=MIN_DIM, preferredPlacement=CENTER, opacity=1\.0, doc=SVGDocument\[width=128\.0, height=96\.0\]\]/
     }
 
     def 'The `SvgIcon` has value semantics.'()
