@@ -76,7 +76,7 @@ final class GuiDebugDevToolUtility {
             return;
         }
         Component any = rootPane.getContentPane();
-        checkDebugging(any);
+        checkDebugging(any, rootPane);
         summonInfoDialog(rootPane);
     }
 
@@ -85,7 +85,7 @@ final class GuiDebugDevToolUtility {
             return;
         }
         Component deepest = findComponentForLiveDebugging(glassPane, rootPane, e);
-        if ( checkDebugging(deepest) ) {
+        if ( checkDebugging(deepest, rootPane) ) {
             rootPane.repaint();
         }
     }
@@ -114,8 +114,15 @@ final class GuiDebugDevToolUtility {
                 );
     }
 
-    private static boolean checkDebugging(java.awt.@Nullable Component deepest) {
+    private static boolean checkDebugging(java.awt.@Nullable Component deepest, JRootPane currentRootPane) {
         if (deepest != null && GuiDebugDevToolUtility.focusedDebugComponent != deepest) {
+            if ( GuiDebugDevToolUtility.focusedDebugComponent != null ) {
+                JRootPane rootPaneOfFocused = SwingUtilities.getRootPane(GuiDebugDevToolUtility.focusedDebugComponent);
+                if ( rootPaneOfFocused != null && rootPaneOfFocused != currentRootPane ) {
+                    // We ae switching to a different root pane, so we need to repaint the old one to clear the debug overlay there!
+                    rootPaneOfFocused.repaint();
+                }
+            }
             GuiDebugDevToolUtility.focusedDebugComponent = deepest;
             // The debug component is being highlighted similarly as in inspector mode on a browser...
             if ( GuiDebugDevToolUtility.debugInfoWindow != null ) {
@@ -148,6 +155,14 @@ final class GuiDebugDevToolUtility {
         if ( selectedDebugComponent != focusedDebugComponent )
             rootPane.repaint(); // Repaint to clear previous selection highlight
 
+        if ( GuiDebugDevToolUtility.selectedDebugComponent != null ) {
+            JRootPane rootPaneOfSelected = SwingUtilities.getRootPane(GuiDebugDevToolUtility.selectedDebugComponent);
+            if ( rootPaneOfSelected != null && rootPaneOfSelected != rootPane ) {
+                // We are switching the selection to a different root pane,
+                // so we need to repaint the old one to clear the selection debug overlay there!
+                rootPaneOfSelected.repaint();
+            }
+        }
         // Select the currently focused debug component:
         selectedDebugComponent = focusedDebugComponent;
 
@@ -278,6 +293,12 @@ final class GuiDebugDevToolUtility {
         java.awt.Component inspectedComponent,
         Color themeColor
     ){
+        // We only render the overlay, if the inspected component has the same root pane as the glass pane:
+        JRootPane rootPaneOfInspected = SwingUtilities.getRootPane(inspectedComponent);
+        JRootPane rootPaneOfGlass = SwingUtilities.getRootPane(glassPane);
+        if ( rootPaneOfInspected != rootPaneOfGlass ) {
+            return;
+        }
         Graphics2D overlayGraphics = null;
         try {
             overlayGraphics = (Graphics2D) g2d.create();
