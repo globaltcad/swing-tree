@@ -216,7 +216,7 @@ final class GuiDebugDevToolUtility {
             Rectangle bounds = mainScreen.getDefaultConfiguration().getBounds();
             debugWindow.setBounds(
                     bounds.x, bounds.y,
-                    debugWindow.getWidth(),
+                    Math.max(1, debugWindow.getWidth()),
                     Math.max(debugWindow.getHeight(), bounds.height)
             );
             if ( rootWindow != null ) {
@@ -225,19 +225,20 @@ final class GuiDebugDevToolUtility {
                 Rectangle rootBounds = rootWindow.getBounds();
                 int epsilon = UI.scale(325); // To account for task bars and such, we give it some tolerance, so that the debug window can still be placed even if the root window is not exactly in full screen mode.
                 if (
-                    isFullScreen ||
-                    Math.abs(rootBounds.width - bounds.width) <= epsilon &&
-                    Math.abs(rootBounds.height - bounds.height) <= (epsilon * 2) &&
-                    Math.abs(rootBounds.x - bounds.x) <= epsilon &&
-                    Math.abs(rootBounds.y - bounds.y) <= (epsilon * 2)
+                    isFullScreen || (
+                        Math.abs(rootBounds.width - bounds.width) <= epsilon &&
+                        Math.abs(rootBounds.height - bounds.height) <= (epsilon * 2) &&
+                        Math.abs(rootBounds.x - bounds.x) <= epsilon &&
+                        Math.abs(rootBounds.y - bounds.y) <= (epsilon * 2)
+                    )
                 ) {
                     if ( isFullScreen ) // We need to set it to normal first, otherwise the bounds change might not work correctly!
                         ((Frame)rootWindow).setExtendedState( Frame.NORMAL );
                     rootWindow.setBounds(
                             bounds.x + debugWindow.getWidth(),
                             rootBounds.y,
-                            rootBounds.width - debugWindow.getWidth(),
-                            rootBounds.height
+                            Math.max(1, rootBounds.width - debugWindow.getWidth()),
+                            Math.max(1, rootBounds.height)
                     );
                 }
             }
