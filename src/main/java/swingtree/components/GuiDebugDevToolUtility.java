@@ -219,13 +219,13 @@ final class GuiDebugDevToolUtility {
                 // If the root window is in full screen mode, we make room for the debug window by resizing the root window:
                 boolean isFullScreen = rootWindow instanceof Frame && (((Frame)rootWindow).getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
                 Rectangle rootBounds = rootWindow.getBounds();
-                int EPSILON = UI.scale(325); // To account for task bars and such, we give it some tolerance, so that the debug window can still be placed even if the root window is not exactly in full screen mode.
+                int epsilon = UI.scale(325); // To account for task bars and such, we give it some tolerance, so that the debug window can still be placed even if the root window is not exactly in full screen mode.
                 if (
                     isFullScreen ||
-                    Math.abs(rootBounds.width - bounds.width) <= EPSILON &&
-                    Math.abs(rootBounds.height - bounds.height) <= (EPSILON * 2) &&
-                    Math.abs(rootBounds.x - bounds.x) <= EPSILON &&
-                    Math.abs(rootBounds.y - bounds.y) <= (EPSILON * 2)
+                    Math.abs(rootBounds.width - bounds.width) <= epsilon &&
+                    Math.abs(rootBounds.height - bounds.height) <= (epsilon * 2) &&
+                    Math.abs(rootBounds.x - bounds.x) <= epsilon &&
+                    Math.abs(rootBounds.y - bounds.y) <= (epsilon * 2)
                 ) {
                     if ( isFullScreen ) // We need to set it to normal first, otherwise the bounds change might not work correctly!
                         ((Frame)rootWindow).setExtendedState( Frame.NORMAL );
