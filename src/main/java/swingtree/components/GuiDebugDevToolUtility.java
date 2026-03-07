@@ -34,7 +34,7 @@ final class GuiDebugDevToolUtility {
     };
     private static @Nullable Component focusedDebugComponent = null;
     private static @Nullable Component selectedDebugComponent = null;
-    private static @Nullable DebugInfoDialog debugInfoDialog = null;
+    private static @Nullable DebugInfoWindow debugInfoWindow = null;
 
 
     private GuiDebugDevToolUtility() {} // A utility class can not be instantiated!
@@ -118,8 +118,8 @@ final class GuiDebugDevToolUtility {
         if (deepest != null && GuiDebugDevToolUtility.focusedDebugComponent != deepest) {
             GuiDebugDevToolUtility.focusedDebugComponent = deepest;
             // The debug component is being highlighted similarly as in inspector mode on a browser...
-            if ( GuiDebugDevToolUtility.debugInfoDialog != null ) {
-                GuiDebugDevToolUtility.debugInfoDialog.debugState.set(new ComponentDebugInfo(deepest));
+            if ( GuiDebugDevToolUtility.debugInfoWindow != null ) {
+                GuiDebugDevToolUtility.debugInfoWindow.debugState.set(new ComponentDebugInfo(deepest));
             }
             return true;
         }
@@ -151,23 +151,25 @@ final class GuiDebugDevToolUtility {
         // Select the currently focused debug component:
         selectedDebugComponent = focusedDebugComponent;
 
-        if ( GuiDebugDevToolUtility.debugInfoDialog == null ) {
-            DebugInfoDialog newDialog = new DebugInfoDialog(
+        if ( GuiDebugDevToolUtility.debugInfoWindow == null ) {
+            DebugInfoWindow newWindow = new DebugInfoWindow(
                     Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.focusedDebugComponent)),
                     Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent))
             );
-            newDialog.pack();
-            newDialog.setVisible(true);
-            newDialog.addWindowListener(new WindowAdapter() {
+            newWindow.pack();
+            newWindow.setVisible(true);
+            newWindow.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    GuiDebugDevToolUtility.debugInfoDialog = null;
-                    newDialog.dispose();
+                    GuiDebugDevToolUtility.debugInfoWindow = null;
+                    newWindow.dispose();
+                    // Disable debug mode:
+                    SwingTree.get().setDevToolEnabled(false);
                 }
             });
-            GuiDebugDevToolUtility.debugInfoDialog = newDialog;
+            GuiDebugDevToolUtility.debugInfoWindow = newWindow;
         } else {
-            GuiDebugDevToolUtility.debugInfoDialog.selectedDebugState.set(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent));
+            GuiDebugDevToolUtility.debugInfoWindow.selectedDebugState.set(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent));
         }
     }
 
@@ -343,19 +345,19 @@ final class GuiDebugDevToolUtility {
         return rawName.replace("$", ".");
     }
 
-    private static class DebugInfoDialog extends JDialog {
+    private static class DebugInfoWindow extends JFrame {
         @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final Viewable<Boolean> isDevToolsEnabled; // Important, we need to keep the reference to keep the binding alive! (otherwise it can get garbage collected...)
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
 
-        DebugInfoDialog(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
+        DebugInfoWindow(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
             this.debugState = debugState;
             this.selectedDebugState = selectedDebugState;
             this.isDevToolsEnabled = SwingTree.get().isDevToolEnabledView().onChange(From.ALL, it -> {
                 if ( !it.currentValue().orElse(false) ) {
                     this.dispose();
-                    GuiDebugDevToolUtility.debugInfoDialog = null;
+                    GuiDebugDevToolUtility.debugInfoWindow = null;
                 }
             });
             setTitle(getClassNameWithoutPackage(debugState.get().type()));
