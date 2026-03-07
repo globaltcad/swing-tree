@@ -158,6 +158,11 @@ final class GuiDebugDevToolUtility {
             );
             newWindow.pack();
             newWindow.setVisible(true);
+            try {
+                findGoodPlacementForDebugWindow(newWindow, rootPane);
+            } catch (Exception e) {
+                log.error("Failed to establish a sensible layout for the inspection debug tool!", e);
+            }
             newWindow.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
@@ -170,6 +175,60 @@ final class GuiDebugDevToolUtility {
             GuiDebugDevToolUtility.debugInfoWindow = newWindow;
         } else {
             GuiDebugDevToolUtility.debugInfoWindow.selectedDebugState.set(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent));
+        }
+    }
+
+    private static void findGoodPlacementForDebugWindow(DebugInfoWindow debugWindow, JRootPane rootPane) {
+        // First up, let's get an overview of the setup: Get all screen devices!
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screens = ge.getScreenDevices();
+        GraphicsDevice mainScreen = null;
+
+        // We try to get the window of the root pane, since we want to place the debug window relative to it:
+        Window rootWindow = SwingUtilities.getWindowAncestor(rootPane);
+        if (rootWindow == null) {
+            // We can not find the main screen based on the root pane's window, so we just pick the primary screen:
+            mainScreen = ge.getDefaultScreenDevice();
+        } else {
+            // We try to find the screen device that contains the root window:
+            for (GraphicsDevice screen : screens) {
+                Rectangle screenBounds = screen.getDefaultConfiguration().getBounds();
+                if (screenBounds.contains(rootWindow.getLocation())) {
+                    mainScreen = screen;
+                    break;
+                }
+            }
+        }
+        if ( mainScreen != null ) {
+            // Get bounds where we want to place the debug window:
+            Rectangle bounds = mainScreen.getDefaultConfiguration().getBounds();
+            debugWindow.setBounds(
+                    bounds.x, bounds.y,
+                    debugWindow.getWidth(),
+                    Math.max(debugWindow.getHeight(), bounds.height)
+            );
+            if ( rootWindow != null ) {
+                // If the root window is in full screen mode, we make room for the debug window by resizing the root window:
+                boolean isFullScreen = rootWindow instanceof Frame && (((Frame)rootWindow).getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
+                Rectangle rootBounds = rootWindow.getBounds();
+                int EPSILON = UI.scale(325); // To account for task bars and such, we give it some tolerance, so that the debug window can still be placed even if the root window is not exactly in full screen mode.
+                if (
+                    isFullScreen ||
+                    Math.abs(rootBounds.width - bounds.width) <= EPSILON &&
+                    Math.abs(rootBounds.height - bounds.height) <= (EPSILON * 2) &&
+                    Math.abs(rootBounds.x - bounds.x) <= EPSILON &&
+                    Math.abs(rootBounds.y - bounds.y) <= (EPSILON * 2)
+                ) {
+                    if ( isFullScreen ) // We need to set it to normal first, otherwise the bounds change might not work correctly!
+                        ((Frame)rootWindow).setExtendedState( Frame.NORMAL );
+                    rootWindow.setBounds(
+                            bounds.x + debugWindow.getWidth(),
+                            rootBounds.y,
+                            rootBounds.width - debugWindow.getWidth(),
+                            rootBounds.height
+                    );
+                }
+            }
         }
     }
 
