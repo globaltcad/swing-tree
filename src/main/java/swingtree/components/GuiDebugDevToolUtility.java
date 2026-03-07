@@ -427,7 +427,10 @@ final class GuiDebugDevToolUtility {
                     GuiDebugDevToolUtility.debugInfoWindow = null;
                 }
             });
-            setTitle(getClassNameWithoutPackage(debugState.get().type()));
+            setTitle(titleFromFocus(focusedDebugComponent));
+            Viewable.cast(debugState).onChange(From.ALL, it ->{
+                setTitle(titleFromFocus(focusedDebugComponent));
+            });
             this.add(
                     UI.splitPane(UI.Align.HORIZONTAL)
                     .add(
@@ -448,6 +451,39 @@ final class GuiDebugDevToolUtility {
                     )
                     .get(JSplitPane.class)
             );
+        }
+
+        private static String titleFromFocus(@Nullable Component component) {
+            if ( component == null ) {
+                return "Inspecting: <no frame in focus>";
+            }
+            // Traversing upward, we want to find the last component in the hierarchy which is not Swing/AWT or SwingTree!
+            // So we are looking for the first user based component in the hierarchy from the roots perspective...
+            // So we traverse the hierarchy from the selected component up to the root,
+            // and check if the class name of the component contains "javax.swing", "java.awt" or "swingtree".
+            Component probablyUserBasedComponent = null;
+            Component current = component;
+            Component root = component;
+            while (current != null) {
+                String className = current.getClass().getName();
+                if (
+                     !className.startsWith("javax.swing") &&
+                     !className.startsWith("java.awt") &&
+                     !className.startsWith("swingtree")
+                ) {
+                    probablyUserBasedComponent = current;
+                }
+                current = current.getParent();
+                if (current != null) {
+                    root = current;
+                }
+            }
+            if ( probablyUserBasedComponent != null ) {
+                return "Inspecting: " + getClassNameWithoutPackage(probablyUserBasedComponent.getClass());
+            }
+
+            // If we can not find any user based component, we just return the root component's class name:
+            return "Inspecting: " + getClassNameWithoutPackage(root.getClass());
         }
 
         private static JPanel buildInfoDisplay(Var<ComponentDebugInfo> debugState, UI.Color themeColor, String toolTip) {
