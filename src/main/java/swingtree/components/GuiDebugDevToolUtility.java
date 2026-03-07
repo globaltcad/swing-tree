@@ -176,7 +176,7 @@ final class GuiDebugDevToolUtility {
                     Window rootWindow = SwingUtilities.getWindowAncestor(rootPane);
                     if ( rootWindow != null ) {
                         // When the window opens, we want to transfer focus back to the root panes window:
-                        rootWindow.requestFocus();
+                        SwingUtilities.invokeLater(rootWindow::requestFocus);
                     }
                 }
             });
