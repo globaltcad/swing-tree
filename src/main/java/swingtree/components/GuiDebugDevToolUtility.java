@@ -206,6 +206,10 @@ final class GuiDebugDevToolUtility {
                     break;
                 }
             }
+            // If no screen contains the root window (e.g. between displays), fall back to the default screen:
+            if (mainScreen == null) {
+                mainScreen = ge.getDefaultScreenDevice();
+            }
         }
         if ( mainScreen != null ) {
             // Get bounds where we want to place the debug window:
