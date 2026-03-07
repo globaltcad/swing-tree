@@ -431,16 +431,26 @@ final class GuiDebugDevToolUtility {
             this.add(
                     UI.splitPane(UI.Align.HORIZONTAL)
                     .add(
-                        buildInfoDisplay(debugState, FOCUS_COLOR)
+                        buildInfoDisplay(debugState, FOCUS_COLOR,
+                            "<html>" +
+                            "This overview shows <b>the component that is currently set to be in focus</b> by the mouse cursor. <br>" +
+                            "You can select this component <b>by holding CTRL and then clicking on it</b> in the application window." +
+                            "</html>"
+                        )
                     )
                     .add(
-                        buildInfoDisplay(selectedDebugState, SELECTION_COLOR)
+                        buildInfoDisplay(selectedDebugState, SELECTION_COLOR,
+                            "<html>" +
+                            "This is the currently selected component. <br>" +
+                            "To select another component, <b>hold CTRL and click on it</b> in the application window." +
+                            "</html>"
+                        )
                     )
                     .get(JSplitPane.class)
             );
         }
 
-        private static JPanel buildInfoDisplay(Var<ComponentDebugInfo> debugState, UI.Color themeColor) {
+        private static JPanel buildInfoDisplay(Var<ComponentDebugInfo> debugState, UI.Color themeColor, String toolTip) {
             return
                 UI.panel("fill, wrap 1").withPrefSize(650, 375)
                 .withStyle( it -> it
@@ -463,6 +473,7 @@ final class GuiDebugDevToolUtility {
                                 getClassNameWithoutPackage(it.type())
                             )
                         )
+                        .withTooltip(toolTip)
                         .withStyle( it -> it
                             .borderRadius(8)
                             .padding(4, 8, 4, 8)
