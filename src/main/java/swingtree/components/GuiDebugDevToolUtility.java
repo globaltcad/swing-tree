@@ -172,12 +172,12 @@ final class GuiDebugDevToolUtility {
                     Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent))
             );
             newWindow.pack();
-            newWindow.setVisible(true);
             try {
                 findGoodPlacementForDebugWindow(newWindow, rootPane);
             } catch (Exception e) {
                 log.error("Failed to establish a sensible layout for the inspection debug tool!", e);
             }
+            newWindow.setVisible(true);
             newWindow.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
