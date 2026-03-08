@@ -119,7 +119,7 @@ final class GuiDebugDevToolUtility {
             if ( GuiDebugDevToolUtility.focusedDebugComponent != null ) {
                 JRootPane rootPaneOfFocused = SwingUtilities.getRootPane(GuiDebugDevToolUtility.focusedDebugComponent);
                 if ( rootPaneOfFocused != null && rootPaneOfFocused != currentRootPane ) {
-                    // We ae switching to a different root pane, so we need to repaint the old one to clear the debug overlay there!
+                    // We are switching to a different root pane, so we need to repaint the old one to clear the debug overlay there!
                     rootPaneOfFocused.repaint();
                 }
             }
