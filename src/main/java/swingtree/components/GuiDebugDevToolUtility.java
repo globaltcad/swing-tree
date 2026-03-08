@@ -34,7 +34,7 @@ final class GuiDebugDevToolUtility {
     };
     private static @Nullable Component focusedDebugComponent = null;
     private static @Nullable Component selectedDebugComponent = null;
-    private static @Nullable DebugInfoDialog debugInfoDialog = null;
+    private static @Nullable DebugInfoWindow debugInfoWindow = null;
 
 
     private GuiDebugDevToolUtility() {} // A utility class can not be instantiated!
@@ -76,7 +76,7 @@ final class GuiDebugDevToolUtility {
             return;
         }
         Component any = rootPane.getContentPane();
-        checkDebugging(any);
+        checkDebugging(any, rootPane);
         summonInfoDialog(rootPane);
     }
 
@@ -85,7 +85,7 @@ final class GuiDebugDevToolUtility {
             return;
         }
         Component deepest = findComponentForLiveDebugging(glassPane, rootPane, e);
-        if ( checkDebugging(deepest) ) {
+        if ( checkDebugging(deepest, rootPane) ) {
             rootPane.repaint();
         }
     }
@@ -114,12 +114,19 @@ final class GuiDebugDevToolUtility {
                 );
     }
 
-    private static boolean checkDebugging(java.awt.@Nullable Component deepest) {
+    private static boolean checkDebugging(java.awt.@Nullable Component deepest, JRootPane currentRootPane) {
         if (deepest != null && GuiDebugDevToolUtility.focusedDebugComponent != deepest) {
+            if ( GuiDebugDevToolUtility.focusedDebugComponent != null ) {
+                JRootPane rootPaneOfFocused = SwingUtilities.getRootPane(GuiDebugDevToolUtility.focusedDebugComponent);
+                if ( rootPaneOfFocused != null && rootPaneOfFocused != currentRootPane ) {
+                    // We are switching to a different root pane, so we need to repaint the old one to clear the debug overlay there!
+                    rootPaneOfFocused.repaint();
+                }
+            }
             GuiDebugDevToolUtility.focusedDebugComponent = deepest;
             // The debug component is being highlighted similarly as in inspector mode on a browser...
-            if ( GuiDebugDevToolUtility.debugInfoDialog != null ) {
-                GuiDebugDevToolUtility.debugInfoDialog.debugState.set(new ComponentDebugInfo(deepest));
+            if ( GuiDebugDevToolUtility.debugInfoWindow != null ) {
+                GuiDebugDevToolUtility.debugInfoWindow.debugState.set(new ComponentDebugInfo(deepest));
             }
             return true;
         }
@@ -148,26 +155,108 @@ final class GuiDebugDevToolUtility {
         if ( selectedDebugComponent != focusedDebugComponent )
             rootPane.repaint(); // Repaint to clear previous selection highlight
 
+        if ( GuiDebugDevToolUtility.selectedDebugComponent != null ) {
+            JRootPane rootPaneOfSelected = SwingUtilities.getRootPane(GuiDebugDevToolUtility.selectedDebugComponent);
+            if ( rootPaneOfSelected != null && rootPaneOfSelected != rootPane ) {
+                // We are switching the selection to a different root pane,
+                // so we need to repaint the old one to clear the selection debug overlay there!
+                rootPaneOfSelected.repaint();
+            }
+        }
         // Select the currently focused debug component:
         selectedDebugComponent = focusedDebugComponent;
 
-        if ( GuiDebugDevToolUtility.debugInfoDialog == null ) {
-            DebugInfoDialog newDialog = new DebugInfoDialog(
+        if ( GuiDebugDevToolUtility.debugInfoWindow == null ) {
+            DebugInfoWindow newWindow = new DebugInfoWindow(
                     Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.focusedDebugComponent)),
                     Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent))
             );
-            newDialog.pack();
-            newDialog.setVisible(true);
-            newDialog.addWindowListener(new WindowAdapter() {
+            newWindow.pack();
+            try {
+                findGoodPlacementForDebugWindow(newWindow, rootPane);
+            } catch (Exception e) {
+                log.error("Failed to establish a sensible layout for the inspection debug tool!", e);
+            }
+            newWindow.setVisible(true);
+            newWindow.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
-                    GuiDebugDevToolUtility.debugInfoDialog = null;
-                    newDialog.dispose();
+                    GuiDebugDevToolUtility.debugInfoWindow = null;
+                    newWindow.dispose();
+                    // Disable debug mode:
+                    SwingTree.get().setDevToolEnabled(false);
+                }
+                @Override
+                public void windowOpened(WindowEvent e) {
+                    Window rootWindow = SwingUtilities.getWindowAncestor(rootPane);
+                    if ( rootWindow != null ) {
+                        // When the window opens, we want to transfer focus back to the root panes window:
+                        SwingUtilities.invokeLater(rootWindow::requestFocus);
+                    }
                 }
             });
-            GuiDebugDevToolUtility.debugInfoDialog = newDialog;
+            GuiDebugDevToolUtility.debugInfoWindow = newWindow;
         } else {
-            GuiDebugDevToolUtility.debugInfoDialog.selectedDebugState.set(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent));
+            GuiDebugDevToolUtility.debugInfoWindow.selectedDebugState.set(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent));
+        }
+    }
+
+    private static void findGoodPlacementForDebugWindow(DebugInfoWindow debugWindow, JRootPane rootPane) {
+        // First up, let's get an overview of the setup: Get all screen devices!
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] screens = ge.getScreenDevices();
+        GraphicsDevice mainScreen = null;
+
+        // We try to get the window of the root pane, since we want to place the debug window relative to it:
+        Window rootWindow = SwingUtilities.getWindowAncestor(rootPane);
+        if (rootWindow == null) {
+            // We can not find the main screen based on the root pane's window, so we just pick the primary screen:
+            mainScreen = ge.getDefaultScreenDevice();
+        } else {
+            // We try to find the screen device that contains the root window:
+            for (GraphicsDevice screen : screens) {
+                Rectangle screenBounds = screen.getDefaultConfiguration().getBounds();
+                if (screenBounds.contains(rootWindow.getLocation())) {
+                    mainScreen = screen;
+                    break;
+                }
+            }
+            // If no screen contains the root window (e.g. between displays), fall back to the default screen:
+            if (mainScreen == null) {
+                mainScreen = ge.getDefaultScreenDevice();
+            }
+        }
+        if ( mainScreen != null ) {
+            // Get bounds where we want to place the debug window:
+            Rectangle bounds = mainScreen.getDefaultConfiguration().getBounds();
+            debugWindow.setBounds(
+                    bounds.x, bounds.y,
+                    Math.max(1, debugWindow.getWidth()),
+                    Math.max(debugWindow.getHeight(), bounds.height)
+            );
+            if ( rootWindow != null ) {
+                // If the root window is in full screen mode, we make room for the debug window by resizing the root window:
+                boolean isFullScreen = rootWindow instanceof Frame && (((Frame)rootWindow).getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
+                Rectangle rootBounds = rootWindow.getBounds();
+                int epsilon = UI.scale(325); // To account for task bars and such, we give it some tolerance, so that the debug window can still be placed even if the root window is not exactly in full screen mode.
+                if (
+                    isFullScreen || (
+                        Math.abs(rootBounds.width - bounds.width) <= epsilon &&
+                        Math.abs(rootBounds.height - bounds.height) <= (epsilon * 2) &&
+                        Math.abs(rootBounds.x - bounds.x) <= epsilon &&
+                        Math.abs(rootBounds.y - bounds.y) <= (epsilon * 2)
+                    )
+                ) {
+                    if ( isFullScreen ) // We need to set it to normal first, otherwise the bounds change might not work correctly!
+                        ((Frame)rootWindow).setExtendedState( Frame.NORMAL );
+                    rootWindow.setBounds(
+                            bounds.x + debugWindow.getWidth(),
+                            rootBounds.y,
+                            Math.max(1, rootBounds.width - debugWindow.getWidth()),
+                            Math.max(1, rootBounds.height)
+                    );
+                }
+            }
         }
     }
 
@@ -204,6 +293,12 @@ final class GuiDebugDevToolUtility {
         java.awt.Component inspectedComponent,
         Color themeColor
     ){
+        // We only render the overlay, if the inspected component has the same root pane as the glass pane:
+        JRootPane rootPaneOfInspected = SwingUtilities.getRootPane(inspectedComponent);
+        JRootPane rootPaneOfGlass = SwingUtilities.getRootPane(glassPane);
+        if ( rootPaneOfInspected != rootPaneOfGlass ) {
+            return;
+        }
         Graphics2D overlayGraphics = null;
         try {
             overlayGraphics = (Graphics2D) g2d.create();
@@ -343,35 +438,81 @@ final class GuiDebugDevToolUtility {
         return rawName.replace("$", ".");
     }
 
-    private static class DebugInfoDialog extends JDialog {
+    private static class DebugInfoWindow extends JFrame {
         @SuppressWarnings({"FieldCanBeLocal", "unused"})
         private final Viewable<Boolean> isDevToolsEnabled; // Important, we need to keep the reference to keep the binding alive! (otherwise it can get garbage collected...)
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
 
-        DebugInfoDialog(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
+        DebugInfoWindow(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
             this.debugState = debugState;
             this.selectedDebugState = selectedDebugState;
             this.isDevToolsEnabled = SwingTree.get().isDevToolEnabledView().onChange(From.ALL, it -> {
                 if ( !it.currentValue().orElse(false) ) {
                     this.dispose();
-                    GuiDebugDevToolUtility.debugInfoDialog = null;
+                    GuiDebugDevToolUtility.debugInfoWindow = null;
                 }
             });
-            setTitle(getClassNameWithoutPackage(debugState.get().type()));
+            setTitle(titleFromFocus(focusedDebugComponent));
+            Viewable.cast(debugState).onChange(From.ALL, it ->{
+                setTitle(titleFromFocus(focusedDebugComponent));
+            });
             this.add(
                     UI.splitPane(UI.Align.HORIZONTAL)
                     .add(
-                        buildInfoDisplay(debugState, FOCUS_COLOR)
+                        buildInfoDisplay(debugState, FOCUS_COLOR,
+                            "<html>" +
+                            "This overview shows <b>the component that is currently set to be in focus</b> by the mouse cursor. <br>" +
+                            "You can select this component <b>by holding CTRL and then clicking on it</b> in the application window." +
+                            "</html>"
+                        )
                     )
                     .add(
-                        buildInfoDisplay(selectedDebugState, SELECTION_COLOR)
+                        buildInfoDisplay(selectedDebugState, SELECTION_COLOR,
+                            "<html>" +
+                            "This is the currently selected component. <br>" +
+                            "To select another component, <b>hold CTRL and click on it</b> in the application window." +
+                            "</html>"
+                        )
                     )
                     .get(JSplitPane.class)
             );
         }
 
-        private static JPanel buildInfoDisplay(Var<ComponentDebugInfo> debugState, UI.Color themeColor) {
+        private static String titleFromFocus(@Nullable Component component) {
+            if ( component == null ) {
+                return "Inspecting: <no frame in focus>";
+            }
+            // Traversing upward, we want to find the last component in the hierarchy which is not Swing/AWT or SwingTree!
+            // So we are looking for the first user based component in the hierarchy from the roots perspective...
+            // So we traverse the hierarchy from the selected component up to the root,
+            // and check if the class name of the component contains "javax.swing", "java.awt" or "swingtree".
+            Component probablyUserBasedComponent = null;
+            Component current = component;
+            Component root = component;
+            while (current != null) {
+                String className = current.getClass().getName();
+                if (
+                     !className.startsWith("javax.swing") &&
+                     !className.startsWith("java.awt") &&
+                     !className.startsWith("swingtree")
+                ) {
+                    probablyUserBasedComponent = current;
+                }
+                current = current.getParent();
+                if (current != null) {
+                    root = current;
+                }
+            }
+            if ( probablyUserBasedComponent != null ) {
+                return "Inspecting: " + getClassNameWithoutPackage(probablyUserBasedComponent.getClass());
+            }
+
+            // If we can not find any user based component, we just return the root component's class name:
+            return "Inspecting: " + getClassNameWithoutPackage(root.getClass());
+        }
+
+        private static JPanel buildInfoDisplay(Var<ComponentDebugInfo> debugState, UI.Color themeColor, String toolTip) {
             return
                 UI.panel("fill, wrap 1").withPrefSize(650, 375)
                 .withStyle( it -> it
@@ -394,6 +535,7 @@ final class GuiDebugDevToolUtility {
                                 getClassNameWithoutPackage(it.type())
                             )
                         )
+                        .withTooltip(toolTip)
                         .withStyle( it -> it
                             .borderRadius(8)
                             .padding(4, 8, 4, 8)
