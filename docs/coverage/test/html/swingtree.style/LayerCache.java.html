@@ -113,8 +113,8 @@ final class LayerCache
 <span class="fc" id="L113">            return;</span>
         }
 
-<span class="fc" id="L116">        final LayerRenderConf oldState = oldConf.toRenderConfFor(_layer);</span>
-<span class="fc" id="L117">        final LayerRenderConf newState = newConf.toRenderConfFor(_layer);</span>
+<span class="fc" id="L116">        final LayerRenderConf oldState = oldConf.renderConfFor(_layer);</span>
+<span class="fc" id="L117">        final LayerRenderConf newState = newConf.renderConfFor(_layer);</span>
 
 <span class="fc bfc" id="L119" title="All 4 branches covered.">        boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );</span>
 

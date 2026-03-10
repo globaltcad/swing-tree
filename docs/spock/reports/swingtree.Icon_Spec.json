@@ -78,7 +78,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"We create a UI declaration for an icon at a given path with a size.","code":["var ui = UI.icon(Size.of(32, 32), \"img/swing.png\")"]},
 
@@ -103,7 +103,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"We create a UI declaration for an icon at a given path with a size.","code":["var ui = UI.icon(Size.of(32, 32), \"img/swing.png\")"]},
 
@@ -128,7 +128,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"We create a UI declaration for an icon at a given path with a size.","code":["var ui = UI.icon(Size.of(32, 32), \"img/swing.png\")"]},
 
@@ -153,7 +153,7 @@
       "tags":{},"see":[],"extraInfo":["\n            the `IconDeclaration` type is a value oriented interface\n            which is designed to be used to implement constants \n            pointing to icon resources.\n\n            This allows you to specify icons with custom sizes\n            in your UI and business logic, without having to\n            deal with IO loading complexities.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"","code":["var icon = IconDeclaration.of(Size.of(32, 42), \"img/swing.png\")"]},
 
@@ -178,7 +178,7 @@
       "tags":{},"see":[],"extraInfo":["\n            the `IconDeclaration` type is a value oriented interface\n            which is designed to be used to implement constants \n            pointing to icon resources.\n\n            This allows you to specify icons with custom sizes\n            in your UI and business logic, without having to\n            deal with IO loading complexities.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"","code":["var icon = IconDeclaration.of(Size.of(32, 42), \"img/swing.png\")"]},
 
@@ -203,7 +203,7 @@
       "tags":{},"see":[],"extraInfo":["\n            the `IconDeclaration` type is a value oriented interface\n            which is designed to be used to implement constants \n            pointing to icon resources.\n\n            This allows you to specify icons with custom sizes\n            in your UI and business logic, without having to\n            deal with IO loading complexities.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"","code":["var icon = IconDeclaration.of(Size.of(32, 42), \"img/swing.png\")"]},
 
@@ -228,7 +228,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `Var` type is a reactive type that allows you to\n            bind UI components to a value that can change over time.\n\n            This is useful for creating dynamic UIs that respond to\n            changes in the application state and are also decoupled\n            from the business logic.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"We create a `Var` property with an icon declaration.","code":["var icon = Var.of(IconDeclaration.of(Size.of(16, 16), \"img/swing.png\"))"]},
 
@@ -259,7 +259,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `Var` type is a reactive type that allows you to\n            bind UI components to a value that can change over time.\n\n            This is useful for creating dynamic UIs that respond to\n            changes in the application state and are also decoupled\n            from the business logic.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"We create a `Var` property with an icon declaration.","code":["var icon = Var.of(IconDeclaration.of(Size.of(16, 16), \"img/swing.png\"))"]},
 
@@ -290,7 +290,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `Var` type is a reactive type that allows you to\n            bind UI components to a value that can change over time.\n\n            This is useful for creating dynamic UIs that respond to\n            changes in the application state and are also decoupled\n            from the business logic.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"We create a `Var` property with an icon declaration.","code":["var icon = Var.of(IconDeclaration.of(Size.of(16, 16), \"img/swing.png\"))"]},
 
@@ -321,7 +321,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.findIcon(IconDeclaration)` method is a utility method\n            that allows you to load an icon with the correct size and scale\n            from an `IconDeclaration` constant.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Five different kinds of icon declarations.","code":["var iconDeclaration1 = IconDeclaration.of(\"img/trees.png\")","var iconDeclaration2 = IconDeclaration.of(Size.unknown(), \"img/trees.png\")","var iconDeclaration3 = IconDeclaration.of(Size.of(-1, 12), \"img/trees.png\")","var iconDeclaration4 = IconDeclaration.of(Size.of(16, -1), \"img/trees.png\")","var iconDeclaration5 = IconDeclaration.of(Size.of(16, 12), \"img/trees.png\")"]},
 
@@ -350,7 +350,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.findIcon(IconDeclaration)` method is a utility method\n            that allows you to load an icon with the correct size and scale\n            from an `IconDeclaration` constant.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Five different kinds of icon declarations.","code":["var iconDeclaration1 = IconDeclaration.of(\"img/trees.png\")","var iconDeclaration2 = IconDeclaration.of(Size.unknown(), \"img/trees.png\")","var iconDeclaration3 = IconDeclaration.of(Size.of(-1, 12), \"img/trees.png\")","var iconDeclaration4 = IconDeclaration.of(Size.of(16, -1), \"img/trees.png\")","var iconDeclaration5 = IconDeclaration.of(Size.of(16, 12), \"img/trees.png\")"]},
 
@@ -379,7 +379,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.findIcon(IconDeclaration)` method is a utility method\n            that allows you to load an icon with the correct size and scale\n            from an `IconDeclaration` constant.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Five different kinds of icon declarations.","code":["var iconDeclaration1 = IconDeclaration.of(\"img/trees.png\")","var iconDeclaration2 = IconDeclaration.of(Size.unknown(), \"img/trees.png\")","var iconDeclaration3 = IconDeclaration.of(Size.of(-1, 12), \"img/trees.png\")","var iconDeclaration4 = IconDeclaration.of(Size.of(16, -1), \"img/trees.png\")","var iconDeclaration5 = IconDeclaration.of(Size.of(16, 12), \"img/trees.png\")"]},
 
@@ -408,7 +408,7 @@
       "tags":{},"see":[],"extraInfo":["\n            When an icon is loaded, it is loaded at the current DPI scale factor.\n            If the DPI scale factor changes after it was already loaded, \n            then the icon will internally reload itself to match the new DPI scale factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We start with an initial scale of 1.","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(1f) )"]},
+        {"kind":"given","text":"We start with an initial scale of 1.","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )"]},
 
         {"kind":"and","text":"We load two different types of images, an SVG and a PNG image.","code":["var icon1 = UI.findIcon(IconDeclaration.of(\"img/trees.png\").withSize(128, 512))","var icon2 = UI.findIcon(IconDeclaration.of(\"img/dandelion.svg\").withSize(128, 512))"]},
 
@@ -435,7 +435,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons created from a source string-based `IconDeclaration` have \n            the dimensions found in the string. \n            This is particularly useful for creating consistent\n            icon sizes across your application.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"An icon declaration created from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(\"\"\"","                    <svg width=\"${width}\" height=\"${height}\" viewBox=\"0 0 16 16\">","                        <circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/>","                    </svg>","                \"\"\")"]},
 
@@ -472,7 +472,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons created from a source string-based `IconDeclaration` have \n            the dimensions found in the string. \n            This is particularly useful for creating consistent\n            icon sizes across your application.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"An icon declaration created from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(\"\"\"","                    <svg width=\"${width}\" height=\"${height}\" viewBox=\"0 0 16 16\">","                        <circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/>","                    </svg>","                \"\"\")"]},
 
@@ -509,7 +509,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons created from a source string-based `IconDeclaration` have \n            the dimensions found in the string. \n            This is particularly useful for creating consistent\n            icon sizes across your application.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"An icon declaration created from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(\"\"\"","                    <svg width=\"${width}\" height=\"${height}\" viewBox=\"0 0 16 16\">","                        <circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/>","                    </svg>","                \"\"\")"]},
 
@@ -546,7 +546,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons created from a source string-based `IconDeclaration` have \n            the dimensions found in the string. \n            This is particularly useful for creating consistent\n            icon sizes across your application.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"An icon declaration created from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(\"\"\"","                    <svg width=\"${width}\" height=\"${height}\" viewBox=\"0 0 16 16\">","                        <circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/>","                    </svg>","                \"\"\")"]},
 
@@ -583,7 +583,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons created from a source string-based `IconDeclaration` have \n            the dimensions found in the string. \n            This is particularly useful for creating consistent\n            icon sizes across your application.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"An icon declaration created from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(\"\"\"","                    <svg width=\"${width}\" height=\"${height}\" viewBox=\"0 0 16 16\">","                        <circle cx=\"8\" cy=\"8\" r=\"6\" fill=\"red\"/>","                    </svg>","                \"\"\")"]},
 
@@ -620,7 +620,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can be created programmatically using XML strings.\n            This allows for dynamic icon generation without external files.\n\n            When using `IconDeclaration.ofSvg(String)`, the SVG content is parsed\n            and rendered as a vector icon that scales crisply at any resolution.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -659,7 +659,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can be created programmatically using XML strings.\n            This allows for dynamic icon generation without external files.\n\n            When using `IconDeclaration.ofSvg(String)`, the SVG content is parsed\n            and rendered as a vector icon that scales crisply at any resolution.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -698,7 +698,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can be created programmatically using XML strings.\n            This allows for dynamic icon generation without external files.\n\n            When using `IconDeclaration.ofSvg(String)`, the SVG content is parsed\n            and rendered as a vector icon that scales crisply at any resolution.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -737,7 +737,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can be created programmatically using XML strings.\n            This allows for dynamic icon generation without external files.\n\n            When using `IconDeclaration.ofSvg(String)`, the SVG content is parsed\n            and rendered as a vector icon that scales crisply at any resolution.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -776,7 +776,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can be created programmatically using XML strings.\n            This allows for dynamic icon generation without external files.\n\n            When using `IconDeclaration.ofSvg(String)`, the SVG content is parsed\n            and rendered as a vector icon that scales crisply at any resolution.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -815,7 +815,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -864,7 +864,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -913,7 +913,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -962,7 +962,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -1011,7 +1011,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -1060,7 +1060,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -1109,7 +1109,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 
@@ -1158,7 +1158,7 @@
       "tags":{},"see":[],"extraInfo":["\n            SVG icons can have percentage-based dimensions (e.g., width=\"100%\", height=\"50%\").\n            When loaded through `IconDeclaration`, these percentages cannot be resolved to pixel values\n            since percentages are always relative to something else. So the dimensions of the icon are -1!\n\n            This is particularly useful for SVG icons designed to be responsive or\n            relative to their container.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(uiScale) )"]},
+        {"kind":"given","text":"","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )"]},
 
         {"kind":"and","text":"Create an icon declaration from the SVG string.","code":["IconDeclaration iconDecl = IconDeclaration.ofAutoScaledSvg(svg)"]},
 

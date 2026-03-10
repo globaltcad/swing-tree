@@ -156,9 +156,9 @@ public final class ComponentExtension<C extends JComponent>
      * {@link swingtree.api.laf.SwingTreeStyledComponentUI} interface and returns
      * {@code true} from {@link swingtree.api.laf.SwingTreeStyledComponentUI#canForwardPaintingToSwingTree()}.</p>
      *
-     * <h3>Typical Usage:</h3>
+     * <b>Typical Usage:</b>
      * <pre>{@code
-     * @Override
+     * //Override
      * public void paint(Graphics g, JComponent comp) {
      *     ComponentExtension.from(comp).paintBackground(g, g2d -> {
      *         super.paint(g2d, comp); // Native look and feel painting
@@ -166,7 +166,7 @@ public final class ComponentExtension<C extends JComponent>
      * }
      * }</pre>
      *
-     * <h3>What This Does Generally:</h3>
+     * <b>What This Does Generally:</b>
      * <ul>
      *   <li>Ensures that the component's {@link StyleConf} is gathered and installed correctly</li>
      *   <li>Renders the {@link UI.Layer#BACKGROUND} of a {@link StyleConf}</li>

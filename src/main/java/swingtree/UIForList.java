@@ -23,6 +23,7 @@ import java.util.Optional;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
+ * @param <E> The type of the entries contained in the {@link JList} instance which will be managed by this builder.
  * @param <L> The type of the {@link JList} instance which will be managed by this builder.
  */
 public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E, L>, L>

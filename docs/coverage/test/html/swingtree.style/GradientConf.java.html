@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -135,18 +134,18 @@ import java.util.Objects;
 @SuppressWarnings(&quot;Immutable&quot;)
 public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
 {
-<span class="fc" id="L138">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientConf.class);</span>
-<span class="fc" id="L139">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
+<span class="fc" id="L137">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientConf.class);</span>
+<span class="fc" id="L138">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
 
-<span class="fc" id="L141">    private static final GradientConf _NONE = new GradientConf(</span>
+<span class="fc" id="L140">    private static final GradientConf _NONE = new GradientConf(</span>
                                                         UI.Span.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
                                                         new Color[0],
-<span class="fc" id="L145">                                                        Offset.none(),</span>
+<span class="fc" id="L144">                                                        Offset.none(),</span>
                                                         -1f,
                                                         UI.ComponentArea.BODY,
                                                         UI.ComponentBoundary.EXTERIOR_TO_BORDER,
-<span class="fc" id="L149">                                                        Offset.none(),</span>
+<span class="fc" id="L148">                                                        Offset.none(),</span>
                                                         0f,
                                                         new float[0],
                                                         UI.Cycle.NONE
@@ -158,7 +157,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      *  @return A gradient without any colors, effectively
      *          representing the absence of a gradient.
      */
-<span class="fc" id="L161">    public static GradientConf none() { return _NONE; }</span>
+<span class="fc" id="L160">    public static GradientConf none() { return _NONE; }</span>
     
     static GradientConf of(
         UI.Span span,
@@ -175,24 +174,24 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
     ) {
         // The rotation may be any number
         // which always has to be normalized to a value between -180 and 180
-<span class="fc" id="L178">        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );</span>
+<span class="fc" id="L177">        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );</span>
 
-<span class="fc" id="L180">        GradientConf none = none();</span>
-<span class="fc bfc" id="L181" title="All 4 branches covered.">        if ( span       == none._span &amp;&amp;</span>
+<span class="fc" id="L179">        GradientConf none = none();</span>
+<span class="fc bfc" id="L180" title="All 4 branches covered.">        if ( span       == none._span &amp;&amp;</span>
              type       == none._type       &amp;&amp;
-<span class="fc bfc" id="L183" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
-<span class="pc bpc" id="L184" title="4 of 8 branches missed.">             Objects.equals(offset, none._offset) &amp;&amp;</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
+<span class="pc bpc" id="L183" title="4 of 8 branches missed.">             Objects.equals(offset, none._offset) &amp;&amp;</span>
              size       == none._size &amp;&amp;
              area       == none._area       &amp;&amp;
              boundary   == none._boundary   &amp;&amp;
-<span class="pc bpc" id="L188" title="2 of 4 branches missed.">             Objects.equals(focus, none._focus) &amp;&amp;</span>
+<span class="pc bpc" id="L187" title="2 of 4 branches missed.">             Objects.equals(focus, none._focus) &amp;&amp;</span>
              rotation   == none._rotation   &amp;&amp;
-<span class="pc bpc" id="L190" title="2 of 4 branches missed.">             Arrays.equals(fractions, none._fractions) &amp;&amp;</span>
+<span class="pc bpc" id="L189" title="2 of 4 branches missed.">             Arrays.equals(fractions, none._fractions) &amp;&amp;</span>
              cycle      == none._cycle
         )
-<span class="fc" id="L193">            return none;</span>
+<span class="fc" id="L192">            return none;</span>
 
-<span class="fc" id="L195">        return new GradientConf(span, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);</span>
+<span class="fc" id="L194">        return new GradientConf(span, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);</span>
     }
 
 
@@ -221,73 +220,73 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
         float                rotation,
         float[]              fractions,
         UI.Cycle             cycle
-<span class="fc" id="L224">    ) {</span>
-<span class="fc" id="L225">        _span = Objects.requireNonNull(span);</span>
-<span class="fc" id="L226">        _type       = Objects.requireNonNull(type);</span>
-<span class="fc" id="L227">        _colors     = Objects.requireNonNull(colors);</span>
-<span class="fc" id="L228">        _offset     = Objects.requireNonNull(offset);</span>
-<span class="fc bfc" id="L229" title="All 2 branches covered.">        _size       = ( size &lt; 0 ? -1 : size );</span>
-<span class="fc" id="L230">        _area       = Objects.requireNonNull(area);</span>
-<span class="fc" id="L231">        _boundary   = Objects.requireNonNull(boundary);</span>
-<span class="fc" id="L232">        _focus      = Objects.requireNonNull(focus);</span>
-<span class="fc" id="L233">        _rotation   = rotation;</span>
-<span class="fc" id="L234">        _fractions  = Objects.requireNonNull(fractions);</span>
-<span class="fc" id="L235">        _cycle      = Objects.requireNonNull(cycle);</span>
-<span class="fc" id="L236">    }</span>
+<span class="fc" id="L223">    ) {</span>
+<span class="fc" id="L224">        _span = Objects.requireNonNull(span);</span>
+<span class="fc" id="L225">        _type       = Objects.requireNonNull(type);</span>
+<span class="fc" id="L226">        _colors     = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L227">        _offset     = Objects.requireNonNull(offset);</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        _size       = ( size &lt; 0 ? -1 : size );</span>
+<span class="fc" id="L229">        _area       = Objects.requireNonNull(area);</span>
+<span class="fc" id="L230">        _boundary   = Objects.requireNonNull(boundary);</span>
+<span class="fc" id="L231">        _focus      = Objects.requireNonNull(focus);</span>
+<span class="fc" id="L232">        _rotation   = rotation;</span>
+<span class="fc" id="L233">        _fractions  = Objects.requireNonNull(fractions);</span>
+<span class="fc" id="L234">        _cycle      = Objects.requireNonNull(cycle);</span>
+<span class="fc" id="L235">    }</span>
 
-<span class="fc" id="L238">    UI.Span span() { return _span; }</span>
+<span class="fc" id="L237">    UI.Span span() { return _span; }</span>
 
-<span class="fc" id="L240">    UI.GradientType type() { return _type; }</span>
+<span class="fc" id="L239">    UI.GradientType type() { return _type; }</span>
 
-<span class="fc" id="L242">    Color[] colors() { return _colors; }</span>
+<span class="fc" id="L241">    Color[] colors() { return _colors; }</span>
 
-<span class="fc" id="L244">    Offset offset() { return _offset; }</span>
+<span class="fc" id="L243">    Offset offset() { return _offset; }</span>
 
-<span class="fc" id="L246">    float size() { return _size; }</span>
+<span class="fc" id="L245">    float size() { return _size; }</span>
 
-<span class="fc" id="L248">    UI.ComponentArea area() { return _area; }</span>
+<span class="fc" id="L247">    UI.ComponentArea area() { return _area; }</span>
 
-<span class="fc" id="L250">    UI.ComponentBoundary boundary() { return _boundary; }</span>
+<span class="fc" id="L249">    UI.ComponentBoundary boundary() { return _boundary; }</span>
 
-<span class="fc" id="L252">    Offset focus() { return _focus; }</span>
+<span class="fc" id="L251">    Offset focus() { return _focus; }</span>
 
-<span class="fc" id="L254">    float rotation() { return _rotation; }</span>
+<span class="fc" id="L253">    float rotation() { return _rotation; }</span>
 
-<span class="fc" id="L256">    float[] fractions() { return _fractions; }</span>
+<span class="fc" id="L255">    float[] fractions() { return _fractions; }</span>
 
-<span class="fc" id="L258">    UI.Cycle cycle() { return _cycle; }</span>
+<span class="fc" id="L257">    UI.Cycle cycle() { return _cycle; }</span>
 
     boolean isOpaque() {
-<span class="fc bfc" id="L261" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
-<span class="fc" id="L262">            return false;</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
+<span class="fc" id="L261">            return false;</span>
 
-<span class="fc" id="L264">        boolean foundTransparentColor = false;</span>
-<span class="fc bfc" id="L265" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
-<span class="fc bfc" id="L266" title="All 2 branches covered.">            if ( c.getAlpha() &lt; 255 ) {</span>
-<span class="fc" id="L267">                foundTransparentColor = true;</span>
-<span class="fc" id="L268">                break;</span>
+<span class="fc" id="L263">        boolean foundTransparentColor = false;</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">            if ( c.getAlpha() &lt; 255 ) {</span>
+<span class="fc" id="L266">                foundTransparentColor = true;</span>
+<span class="fc" id="L267">                break;</span>
             }
         }
-<span class="fc bfc" id="L271" title="All 2 branches covered.">        return !foundTransparentColor;</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        return !foundTransparentColor;</span>
     }
 
     GradientConf _scale( double scale ) {
-<span class="pc bpc" id="L275" title="3 of 4 branches missed.">        if ( _size &gt; 0 &amp;&amp; scale != 1 )</span>
-<span class="nc" id="L276">            return of(</span>
-                    _span,
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">        if ( scale != 1 )</span>
+<span class="fc" id="L275">            return of(</span>
+                        _span,
                         _type,
                         _colors,
-<span class="nc" id="L280">                        _offset.scale(scale),</span>
-                        (float) (_size * scale),
+<span class="fc" id="L279">                        _offset.scale(scale),</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">                        _size &lt;= 0 ? _size : (float) (_size * scale),</span>
                         _area,
                         _boundary,
-<span class="nc" id="L284">                        _focus.scale(scale),</span>
+<span class="fc" id="L283">                        _focus.scale(scale),</span>
                         _rotation,
                         _fractions,
                         _cycle
                     );
         else
-<span class="fc" id="L290">            return this;</span>
+<span class="nc" id="L289">            return this;</span>
     }
 
     /**
@@ -301,10 +300,10 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public GradientConf colors( Color... colors ) {
-<span class="fc" id="L304">        Objects.requireNonNull(colors);</span>
-<span class="fc bfc" id="L305" title="All 2 branches covered.">        for ( Color color : colors )</span>
-<span class="fc" id="L306">            Objects.requireNonNull(color, &quot;Use UI.Color.UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
-<span class="fc" id="L307">        return of(_span, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L303">        Objects.requireNonNull(colors);</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        for ( Color color : colors )</span>
+<span class="fc" id="L305">            Objects.requireNonNull(color, &quot;Use UI.Color.UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc" id="L306">        return of(_span, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -318,16 +317,16 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public GradientConf colors( String... colors ) {
-<span class="fc" id="L321">        Objects.requireNonNull(colors);</span>
+<span class="fc" id="L320">        Objects.requireNonNull(colors);</span>
         try {
-<span class="fc" id="L323">            Color[] actualColors = new Color[colors.length];</span>
-<span class="fc bfc" id="L324" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="fc" id="L325">                actualColors[i] = UI.color(colors[i]);</span>
+<span class="fc" id="L322">            Color[] actualColors = new Color[colors.length];</span>
+<span class="fc bfc" id="L323" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L324">                actualColors[i] = UI.color(colors[i]);</span>
 
-<span class="fc" id="L327">            return of(_span, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
-<span class="nc" id="L328">        } catch ( Exception e ) {</span>
-<span class="nc" id="L329">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
-<span class="nc" id="L330">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="fc" id="L326">            return of(_span, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="nc" id="L327">        } catch ( Exception e ) {</span>
+<span class="nc" id="L328">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
+<span class="nc" id="L329">            return this; // We want to avoid side effects other than a wrong color</span>
         }
     }
 
@@ -350,8 +349,8 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @throws NullPointerException if the alignment is {@code null}.
      */
     public GradientConf span( UI.Span span ) {
-<span class="fc" id="L353">        Objects.requireNonNull(span);</span>
-<span class="fc" id="L354">        return of(span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L352">        Objects.requireNonNull(span);</span>
+<span class="fc" id="L353">        return of(span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -367,8 +366,8 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @throws NullPointerException if the type is {@code null}.
      */
     public GradientConf type( UI.GradientType type ) {
-<span class="fc" id="L370">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L371">        return of(_span, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L369">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L370">        return of(_span, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -381,7 +380,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return A new gradient style with the specified offset.
      */
     public GradientConf offset( double x, double y ) {
-<span class="fc" id="L384">        return of(_span, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L383">        return of(_span, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -396,7 +395,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return A new gradient style with the specified size.
      */
     public GradientConf size( double size ) {
-<span class="fc" id="L399">        return of(_span, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L398">        return of(_span, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -408,19 +407,24 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return A new gradient style with the specified area.
      */
     public GradientConf clipTo( UI.ComponentArea area ) {
-<span class="fc" id="L411">        return of(_span, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L410">        return of(_span, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
      *  Define the boundary at which the gradient should start in terms of its base position.
+     *  Generally speaking, the different component boundaries refer to the rectangular bounding boxes that capture
+     *  &lt;b&gt;the transitional bounding lines between different {@link UI.ComponentArea}s in the
+     *  box model (margin|border|padding) of a styled component.&lt;/b&gt;&lt;br&gt;
      *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
-     *  then the gradient position will be determined by the margin of the component. &lt;br&gt;
+     *  then the gradient position will be determined by the margin of the component,
+     *  whereas {@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} for example, includes margin,
+     *  border widths, as well as padding. &lt;br&gt;
      *  Here a complete list of the available boundaries:
      * &lt;ul&gt;
      *     &lt;li&gt;{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
      *     The outermost boundary of the entire component, including any margin that might be applied.
      *     Using this boundary will cause the gradient to be positioned somewhere at
-     *     the outer most edge of the component.
+     *     the outermost edge of the component.
      *     &lt;/li&gt;
      *     &lt;li&gt;{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
      *     The boundary located after the margin but before the border.
@@ -432,14 +436,14 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      *     The boundary located after the border but before the padding.
      *     It represents the edge of the component's interior.
      *     Using this boundary will cause the gradient to be positioned somewhere at
-     *     the outer most edge of the component's interior, which is between the border and the padding area.
+     *     the outermost edge of the component's interior, which is between the border and the padding area.
      *     &lt;/li&gt;
      *     &lt;li&gt;{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
      *     The boundary located after the padding.
      *     It represents the innermost boundary of the component, where the actual content of the component begins,
      *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
      *     Using this boundary will cause the gradient to be positioned somewhere after the padding area
-     *     and before the content area, which is where all of the child components are located.
+     *     and before the content area, which is where all the child components are located.
      *     &lt;/li&gt;
      * &lt;/ul&gt;
      *  &lt;p&gt;
@@ -456,7 +460,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return A new gradient style with the specified boundary.
      */
     public GradientConf boundary( UI.ComponentBoundary boundary ) {
-<span class="fc" id="L459">        return of(_span, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L463">        return of(_span, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -471,7 +475,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return An updated gradient configuration with the specified focus offset.
      */
     public GradientConf focus( double x, double y ) {
-<span class="fc" id="L474">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);</span>
+<span class="fc" id="L478">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -481,7 +485,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      *  @return An updated gradient configuration with the specified rotation.
      */
     public GradientConf rotation( float rotation ) {
-<span class="nc" id="L484">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
+<span class="nc" id="L488">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
     }
 
     /**
@@ -496,11 +500,11 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @return An updated gradient configuration with the specified fractions.
      */
     public GradientConf fractions( double... fractions ) {
-<span class="nc" id="L499">        float[] actualFractions = new float[fractions.length];</span>
-<span class="nc bnc" id="L500" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
-<span class="nc" id="L501">            actualFractions[i] = (float) fractions[i];</span>
+<span class="nc" id="L503">        float[] actualFractions = new float[fractions.length];</span>
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        for ( int i = 0; i &lt; fractions.length; i++ )</span>
+<span class="nc" id="L505">            actualFractions[i] = (float) fractions[i];</span>
 
-<span class="nc" id="L503">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);</span>
+<span class="nc" id="L507">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);</span>
     }
 
     /**
@@ -533,61 +537,61 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      * @throws NullPointerException if the cycle is {@code null}.
      */
     public GradientConf cycle(UI.Cycle cycle ) {
-<span class="nc" id="L536">        Objects.requireNonNull(cycle);</span>
-<span class="nc" id="L537">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);</span>
+<span class="nc" id="L540">        Objects.requireNonNull(cycle);</span>
+<span class="nc" id="L541">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);</span>
     }
 
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L543" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L544">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc" id="L545">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L547" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L548">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L549">        return getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;transition=&quot; + _span + &quot;, &quot; +
                     &quot;type=&quot;       + _type + &quot;, &quot; +
-<span class="fc" id="L548">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+<span class="fc" id="L552">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
                     &quot;offset=&quot;     + _offset + &quot;, &quot; +
                     &quot;size=&quot;       + _size + &quot;, &quot; +
                     &quot;area=&quot;       + _area + &quot;, &quot; +
                     &quot;boundary=&quot;   + _boundary + &quot;, &quot; +
                     &quot;focus=&quot;      + _focus + &quot;, &quot; +
                     &quot;rotation=&quot;   + _rotation + &quot;, &quot; +
-<span class="fc" id="L555">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) + &quot;, &quot; +</span>
+<span class="fc" id="L559">                    &quot;fractions=&quot;  + Arrays.toString(_fractions) + &quot;, &quot; +</span>
                     &quot;cycle=&quot;      + _cycle +
                 &quot;]&quot;;
     }
 
     @Override
     public boolean equals( @Nullable Object o ) {
-<span class="fc bfc" id="L562" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="fc bfc" id="L563" title="All 2 branches covered.">        if ( !(o instanceof GradientConf) ) return false;</span>
-<span class="fc" id="L564">        GradientConf that = (GradientConf) o;</span>
-<span class="fc bfc" id="L565" title="All 4 branches covered.">        return _span       == that._span &amp;&amp;</span>
+<span class="fc bfc" id="L566" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="fc bfc" id="L567" title="All 2 branches covered.">        if ( !(o instanceof GradientConf) ) return false;</span>
+<span class="fc" id="L568">        GradientConf that = (GradientConf) o;</span>
+<span class="fc bfc" id="L569" title="All 4 branches covered.">        return _span       == that._span &amp;&amp;</span>
                _type       == that._type             &amp;&amp;
-<span class="fc bfc" id="L567" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
-<span class="pc bpc" id="L568" title="4 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+<span class="fc bfc" id="L571" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L572" title="3 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
                _size       == that._size             &amp;&amp;
                _area       == that._area             &amp;&amp;
                _boundary   == that._boundary         &amp;&amp;
-<span class="pc bpc" id="L572" title="1 of 4 branches missed.">               Objects.equals(_focus, that._focus)   &amp;&amp;</span>
+<span class="pc bpc" id="L576" title="1 of 4 branches missed.">               Objects.equals(_focus, that._focus)   &amp;&amp;</span>
                _rotation   == that._rotation         &amp;&amp;
-<span class="pc bpc" id="L574" title="2 of 4 branches missed.">               Arrays.equals(_fractions, that._fractions) &amp;&amp;</span>
+<span class="pc bpc" id="L578" title="2 of 4 branches missed.">               Arrays.equals(_fractions, that._fractions) &amp;&amp;</span>
                _cycle      == that._cycle;
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L580">        return Objects.hash(</span>
+<span class="fc" id="L584">        return Objects.hash(</span>
                 _span,
                 _type,
-<span class="fc" id="L583">                Arrays.hashCode(_colors),</span>
+<span class="fc" id="L587">                Arrays.hashCode(_colors),</span>
                 _offset,
-<span class="fc" id="L585">                _size,</span>
+<span class="fc" id="L589">                _size,</span>
                 _area,
                 _boundary,
                 _focus,
-<span class="fc" id="L589">                _rotation,</span>
-<span class="fc" id="L590">                Arrays.hashCode(_fractions),</span>
+<span class="fc" id="L593">                _rotation,</span>
+<span class="fc" id="L594">                Arrays.hashCode(_fractions),</span>
                 _cycle
             );
     }
@@ -595,66 +599,71 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
     @Override
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     public GradientConf simplified() {
-<span class="fc bfc" id="L598" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L599">            return _NONE;</span>
+<span class="fc bfc" id="L602" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L603">            return _NONE;</span>
 
-<span class="pc bpc" id="L601" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
-<span class="nc" id="L602">            return _NONE;</span>
+<span class="pc bpc" id="L605" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L606">            return _NONE;</span>
 
-<span class="pc bpc" id="L604" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )</span>
-<span class="fc" id="L605">            return _NONE;</span>
+<span class="pc bpc" id="L608" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )</span>
+<span class="fc" id="L609">            return _NONE;</span>
 
-<span class="pc bpc" id="L607" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.Color.UNDEFINED ? 0 : 1 ).sum();</span>
+<span class="pc bpc" id="L611" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.Color.UNDEFINED ? 0 : 1 ).sum();</span>
 
-<span class="pc bpc" id="L609" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
-<span class="nc" id="L610">            return _NONE;</span>
+<span class="pc bpc" id="L613" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L614">            return _NONE;</span>
 
-<span class="fc" id="L612">        Offset focus = _focus;</span>
-<span class="fc" id="L613">        float  rotation = _rotation;</span>
+<span class="fc" id="L616">        Offset focus = _focus;</span>
+<span class="fc" id="L617">        float  rotation = _rotation;</span>
 
-<span class="fc bfc" id="L615" title="All 2 branches covered.">        if ( _type != UI.GradientType.RADIAL )</span>
-<span class="fc" id="L616">            focus = Offset.none();</span>
+<span class="fc bfc" id="L619" title="All 2 branches covered.">        if ( _type != UI.GradientType.RADIAL )</span>
+<span class="fc" id="L620">            focus = Offset.none();</span>
         else
-<span class="fc bfc" id="L618" title="All 2 branches covered.">            if ( focus.equals(Offset.none()) )</span>
-<span class="fc" id="L619">                rotation = 0f; // If the focus is not set, then the rotation is irrelevant</span>
+<span class="fc bfc" id="L622" title="All 2 branches covered.">            if ( focus.equals(Offset.none()) )</span>
+<span class="fc" id="L623">                rotation = 0f; // If the focus is not set, then the rotation is irrelevant</span>
 
-<span class="pc bpc" id="L621" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
-<span class="nc" id="L622">            Color[] realColors = new Color[numberOfRealColors];</span>
-<span class="nc" id="L623">            int index = 0;</span>
-<span class="nc bnc" id="L624" title="All 2 branches missed.">            for ( Color color : _colors )</span>
-<span class="nc bnc" id="L625" title="All 2 branches missed.">                if ( color != UI.Color.UNDEFINED )</span>
-<span class="nc" id="L626">                    realColors[index++] = color;</span>
+<span class="pc bpc" id="L625" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="nc" id="L626">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="nc" id="L627">            int index = 0;</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">            for ( Color color : _colors )</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">                if ( color != UI.Color.UNDEFINED )</span>
+<span class="nc" id="L630">                    realColors[index++] = color;</span>
 
-<span class="nc" id="L628">            _avoidTransparentBlackLeakage(realColors);</span>
-<span class="nc" id="L629">            return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
+<span class="nc" id="L632">            _avoidTransparentBlackLeakage(realColors);</span>
+<span class="nc" id="L633">            return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
         }
 
-<span class="fc bfc" id="L632" title="All 2 branches covered.">        if ( !focus.equals(_focus) ) {</span>
-<span class="fc" id="L633">            _avoidTransparentBlackLeakage(_colors);</span>
-<span class="fc" id="L634">            return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
+<span class="fc bfc" id="L636" title="All 2 branches covered.">        if ( !focus.equals(_focus) ) {</span>
+<span class="fc" id="L637">            _avoidTransparentBlackLeakage(_colors);</span>
+<span class="fc" id="L638">            return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);</span>
         }
 
-<span class="fc" id="L637">        _avoidTransparentBlackLeakage(_colors);</span>
-<span class="fc" id="L638">        return this;</span>
+<span class="fc" id="L641">        _avoidTransparentBlackLeakage(_colors);</span>
+<span class="fc" id="L642">        return this;</span>
+    }
+
+    @Override
+    public boolean isNone() {
+<span class="fc" id="L647">        return this.equals(_NONE);</span>
     }
 
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     private static void _avoidTransparentBlackLeakage(Color[] realColors) {
-<span class="fc bfc" id="L643" title="All 2 branches covered.">        for ( int i = 0; i &lt; realColors.length; i++ ) {</span>
-<span class="fc" id="L644">            Color currentColor = realColors[i];</span>
-<span class="fc bfc" id="L645" title="All 2 branches covered.">            if ( currentColor == UI.Color.TRANSPARENT ) {</span>
-<span class="pc bpc" id="L646" title="1 of 2 branches missed.">                Color leftColor  = ( i &gt; 0                     ? realColors[i - 1] : null);</span>
-<span class="pc bpc" id="L647" title="1 of 2 branches missed.">                Color rightColor = ( i &lt; realColors.length - 1 ? realColors[i + 1] : null);</span>
-<span class="pc bpc" id="L648" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? rightColor : leftColor);</span>
-<span class="pc bpc" id="L649" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? leftColor : rightColor);</span>
-<span class="pc bpc" id="L650" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? currentColor : leftColor);</span>
-<span class="pc bpc" id="L651" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? currentColor : rightColor);</span>
-<span class="fc" id="L652">                int averageR = ( leftColor.getRed()   + rightColor.getRed()   ) / 2;</span>
-<span class="fc" id="L653">                int averageG = ( leftColor.getGreen() + rightColor.getGreen() ) / 2;</span>
-<span class="fc" id="L654">                int averageB = ( leftColor.getBlue()  + rightColor.getBlue()  ) / 2;</span>
-<span class="fc" id="L655">                realColors[i] = new Color(averageR, averageG, averageB, 0);</span>
+<span class="fc bfc" id="L652" title="All 2 branches covered.">        for ( int i = 0; i &lt; realColors.length; i++ ) {</span>
+<span class="fc" id="L653">            Color currentColor = realColors[i];</span>
+<span class="fc bfc" id="L654" title="All 2 branches covered.">            if ( currentColor == UI.Color.TRANSPARENT ) {</span>
+<span class="pc bpc" id="L655" title="1 of 2 branches missed.">                Color leftColor  = ( i &gt; 0                     ? realColors[i - 1] : null);</span>
+<span class="pc bpc" id="L656" title="1 of 2 branches missed.">                Color rightColor = ( i &lt; realColors.length - 1 ? realColors[i + 1] : null);</span>
+<span class="pc bpc" id="L657" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? rightColor : leftColor);</span>
+<span class="pc bpc" id="L658" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? leftColor : rightColor);</span>
+<span class="pc bpc" id="L659" title="1 of 2 branches missed.">                leftColor  = (leftColor  == null ? currentColor : leftColor);</span>
+<span class="pc bpc" id="L660" title="1 of 2 branches missed.">                rightColor = (rightColor == null ? currentColor : rightColor);</span>
+<span class="fc" id="L661">                int averageR = ( leftColor.getRed()   + rightColor.getRed()   ) / 2;</span>
+<span class="fc" id="L662">                int averageG = ( leftColor.getGreen() + rightColor.getGreen() ) / 2;</span>
+<span class="fc" id="L663">                int averageB = ( leftColor.getBlue()  + rightColor.getBlue()  ) / 2;</span>
+<span class="fc" id="L664">                realColors[i] = new Color(averageR, averageG, averageB, 0);</span>
             }
         }
-<span class="fc" id="L658">    }</span>
+<span class="fc" id="L667">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

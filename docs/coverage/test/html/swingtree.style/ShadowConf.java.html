@@ -387,7 +387,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
     }
 
     private static String _toString( float value ) {
-<span class="pc bpc" id="L390" title="1 of 2 branches missed.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
@@ -402,6 +402,11 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
 <span class="nc" id="L402">            return _NONE;</span>
 
 <span class="fc" id="L404">        return this;</span>
+    }
+
+    @Override
+    public boolean isNone() {
+<span class="fc" id="L409">        return this.equals(_NONE);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -38,8 +38,8 @@ final class NoiseGradientPaint implements Paint
 <span class="fc" id="L38">            cachedContext = context;</span>
 <span class="fc" id="L39">        }</span>
 
-        private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
-<span class="pc bpc" id="L42" title="2 of 4 branches missed.">            if (/*this.bounds.equals(bounds) &amp;&amp; */this.center.equals(center) &amp;&amp; this.transform.equals(transform))</span>
+        private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Point2D center, AffineTransform transform) {
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">            if (this.center.equals(center) &amp;&amp; this.transform.equals(transform))</span>
 <span class="fc" id="L43">                return cachedContext;</span>
             else
 <span class="nc" id="L45">                return null;</span>
@@ -146,7 +146,7 @@ final class NoiseGradientPaint implements Paint
 <span class="fc" id="L146">    }</span>
 
     public Point2D getCenter() {
-<span class="nc" id="L149">        return center;</span>
+<span class="fc" id="L149">        return center;</span>
     }
 
     public Point2D getScale() {
@@ -215,7 +215,7 @@ final class NoiseGradientPaint implements Paint
     ) {
 
 <span class="fc bfc" id="L217" title="All 2 branches covered.">        if (cached != null) {</span>
-<span class="fc" id="L218">            NoiseGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);</span>
+<span class="fc" id="L218">            NoiseGradientPaintContext c = cached.get(center, TRANSFORM);</span>
 <span class="pc bpc" id="L219" title="1 of 2 branches missed.">            if (c != null)</span>
 <span class="fc" id="L220">                return c;</span>
         }

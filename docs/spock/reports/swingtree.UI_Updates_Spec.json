@@ -25,11 +25,9 @@
 
         {"kind":"and","text":"We actually build the component:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"when","text":"","code":["Thread.sleep(200)"]},
+        {"kind":"when","text":"","code":["Wait.until(","    {new Utility.Query(panel).find(JLabel, \"L1\").map(l->l.text != \"Label 1\").orElse(false)},","    2_000",")"]},
 
-        {"kind":"then","text":"","code":["new Utility.Query(panel).find(JLabel, \"L1\").isPresent()"]},
-
-        {"kind":"and","text":"","code":["new Utility.Query(panel).find(JLabel, \"L1\").get().text != \"Label 1\""]}
+        {"kind":"then","text":"","code":["new Utility.Query(panel).find(JLabel, \"L1\").isPresent()","new Utility.Query(panel).find(JLabel, \"L1\").get().text != \"Label 1\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

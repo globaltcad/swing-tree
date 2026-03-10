@@ -55,7 +55,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
@@ -74,7 +74,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
@@ -93,7 +93,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
@@ -112,7 +112,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
@@ -131,7 +131,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` method allows you to quickly instantiate a `Font` object\n            with the given font family name that has a default size of 12 multiplied by the\n            current look and feel's scaling factor.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"A new font object based on the Buggie font family.","code":["var font = UI.font('Buggie').toAwtFont()"]},
 
@@ -150,7 +150,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
 
@@ -171,7 +171,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
 
@@ -192,7 +192,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
 
@@ -213,7 +213,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
 
@@ -234,7 +234,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` not only parses font strings, but it can also fetch font\n            definitions from system properties if parsing fails. When fetching fonts from\n            system properties, the correct scaling factor is also applied to the font size.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We setup a system property for a font","code":["System.setProperty('my.fonts.TestFont', 'Ubuntu-BOLD-42')"]},
 
@@ -255,7 +255,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
 
@@ -274,7 +274,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
 
@@ -293,7 +293,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
 
@@ -312,7 +312,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
 
@@ -331,7 +331,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The `UI.font(String)` factory method can create a font merely by specifying\n            the font family name. In this case, the default size of 12 multiplied by\n            the current look and feel's scaling factor is used.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"when","text":"We create a font using only the family name","code":["var font = UI.font('Dancing Script').toAwtFont()"]},
 

@@ -41,37 +41,37 @@ final class LayerRenderConf
 <span class="fc" id="L41">        _layer        = Objects.requireNonNull(layers);</span>
 <span class="fc" id="L42">    }</span>
 
-    static LayerRenderConf of(
-        BoxModelConf   boxModelConf,
-        BaseColorConf  base,
-        StyleConfLayer layers
-    ) {
-<span class="fc" id="L49">        if (</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">            boxModelConf .equals( BoxModelConf.none()  ) &amp;&amp;</span>
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            base         .equals( BaseColorConf.none() ) &amp;&amp;</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            layers       .equals( _NONE._layer )</span>
-        )
-<span class="fc" id="L54">            return _NONE;</span>
-        else
-<span class="fc" id="L56">            return new LayerRenderConf(boxModelConf, base, layers);</span>
-    }
-
     static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
-<span class="fc" id="L60">        BoxModelConf boxModelConf = BoxModelConf.of(</span>
-<span class="fc" id="L61">                                        fullConf.style().border(),</span>
-<span class="fc" id="L62">                                        fullConf.areaMarginCorrection(),</span>
-<span class="fc" id="L63">                                        fullConf.currentBounds().size()</span>
+<span class="fc" id="L45">        BoxModelConf boxModelConf = BoxModelConf.of(</span>
+<span class="fc" id="L46">                                        fullConf.style().border(),</span>
+<span class="fc" id="L47">                                        fullConf.areaMarginCorrection(),</span>
+<span class="fc" id="L48">                                        fullConf.currentBounds().size()</span>
                                     );
-<span class="fc" id="L65">        BaseColorConf colorConf = BaseColorConf.of(</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">                                    fullConf.style().base().foundationColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
-<span class="fc bfc" id="L67" title="All 2 branches covered.">                                    fullConf.style().base().backgroundColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()</span>
+<span class="fc" id="L50">        BaseColorConf colorConf = BaseColorConf.of(</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">                                    fullConf.style().base().foundationColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">                                    fullConf.style().base().backgroundColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()</span>
                                 );
-<span class="fc" id="L70">        return of(</span>
+<span class="fc" id="L55">        return of(</span>
                     boxModelConf,
                     colorConf,
-<span class="fc" id="L73">                    fullConf.style().layer(layer)</span>
+<span class="fc" id="L58">                    fullConf.style().layer(layer)</span>
                 );
+    }
+
+    private static LayerRenderConf of(
+        final BoxModelConf   boxModelConf,
+        final BaseColorConf  base,
+        final StyleConfLayer layers
+    ) {
+<span class="fc" id="L67">        if (</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                boxModelConf .equals( BoxModelConf.none()  ) &amp;&amp;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                        base         .equals( BaseColorConf.none() ) &amp;&amp;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">                        layers       .equals( _NONE._layer )</span>
+        )
+<span class="fc" id="L72">            return _NONE;</span>
+        else
+<span class="fc" id="L74">            return new LayerRenderConf(boxModelConf, base, layers);</span>
     }
 
 <span class="fc" id="L77">    BoxModelConf boxModel() { return _boxModelConf.get(); }</span>
@@ -90,7 +90,7 @@ final class LayerRenderConf
 
     @Override
     public boolean equals( Object o ) {
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if ( o == this ) return true;</span>
 <span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
 <span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
 <span class="fc" id="L96">        LayerRenderConf other = (LayerRenderConf) o;</span>

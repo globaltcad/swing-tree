@@ -2326,7 +2326,7 @@ import java.util.function.Supplier;
     /**
      *    Allows you to configure how the component wrapped by this builder
      *    looks and behaves, by passing a {@link Styler} lambda to this method
-     *    which receiving a {@link swingtree.style.ComponentStyleDelegate} and returns
+     *    which receives a {@link swingtree.style.ComponentStyleDelegate} and returns
      *    an updated version with the desired style rules applied.
      *    &lt;p&gt;
      *    Here a typical example of how to style a button
@@ -2353,7 +2353,7 @@ import java.util.function.Supplier;
      *               by receiving a {@link swingtree.style.ComponentStyleDelegate} and returning
      *               an updated version with the desired style rules applied.
      *
-     * @return This very instance, which enables builder-style method chaining.
+     * @return This very instance, which allows for builder-style method chaining.
      */
     public final I withStyle( Styler&lt;C&gt; styler ) {
 <span class="fc" id="L2359">        NullUtil.nullArgCheck(styler, &quot;styler&quot;, Styler.class);</span>
@@ -2368,9 +2368,9 @@ import java.util.function.Supplier;
      *    to make a border which can transition between 2 colors based on a boolean property:
      *    &lt;pre&gt;{@code
      *      UI.button(&quot;Click Me!&quot;)
-     *      .withTransitionalStyle(vm.isError(), LifeTime.of(1, TimeUnit.SECONDS), (state, it) -&gt; it
+     *      .withTransitionalStyle(vm.isError(), LifeTime.of(1, TimeUnit.SECONDS), (status, it) -&gt; it
      *          .backgroundColor(Color.CYAN)
-     *          .border(3, new Color((int)(state.progress() * 255), 0, 0))
+     *          .border(3, new Color((int)(status.progress() * 255), 0, 0))
      *      )
      *    }&lt;/pre&gt;
      *
@@ -2422,9 +2422,9 @@ import java.util.function.Supplier;
      *    defines a custom background and border color on a label:
      *    &lt;pre&gt;{@code
      *      UI.label(&quot;I have a highlight animation!&quot;)
-     *      .withTransitoryStyle(vm.highlightEvent().observable(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -&gt; it
-     *          .backgroundColor(new Color(0, 0, 0, (int)(state.progress() * 255)))
-     *          .borderColor(new Color(255, 255, 255, (int)(state.progress() * 255)))
+     *      .withTransitoryStyle(vm.highlightEvent().observable(), LifeTime.of(0.5, TimeUnit.SECONDS), (status, it) -&gt; it
+     *          .backgroundColor(new Color(0, 0, 0, (int)(status.progress() * 255)))
+     *          .borderColor(new Color(255, 255, 255, (int)(status.progress() * 255)))
      *      )
      *    }&lt;/pre&gt;
      *
@@ -3904,7 +3904,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L3904">                                });</span>
 <span class="fc" id="L3905">                        }</span>
                     };
-<span class="fc" id="L3907">                    EnterExitComponentBoundsEventDispatcher.addMouseEnterListener(area, thisComponent, listener);</span>
+<span class="fc" id="L3907">                    EnterExitComponentBoundsEventDispatcher.get().addMouseEnterListener(area, thisComponent, listener);</span>
 <span class="fc" id="L3908">                })</span>
 <span class="fc" id="L3909">                ._this();</span>
     }
@@ -4011,7 +4011,7 @@ import java.util.function.Supplier;
 <span class="nc" id="L4011">                                });</span>
 <span class="nc" id="L4012">                        }</span>
                     };
-<span class="fc" id="L4014">                    EnterExitComponentBoundsEventDispatcher.addMouseExitListener(area, thisComponent, listener);</span>
+<span class="fc" id="L4014">                    EnterExitComponentBoundsEventDispatcher.get().addMouseExitListener(area, thisComponent, listener);</span>
 <span class="fc" id="L4015">                })</span>
 <span class="fc" id="L4016">                ._this();</span>
     }
@@ -4933,8 +4933,8 @@ import java.util.function.Supplier;
 <span class="fc" id="L4933">                   Timer timer = new Timer(delay, e -&gt; {</span>
                        try {
 <span class="fc" id="L4935">                           onUpdate.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="nc" id="L4936">                       } catch ( Exception ex ) {</span>
-<span class="nc" id="L4937">                           log.error(SwingTree.get().logMarker(), &quot;Error in update action handler!&quot;, ex);</span>
+<span class="fc" id="L4936">                       } catch ( Exception ex ) {</span>
+<span class="fc" id="L4937">                           log.error(SwingTree.get().logMarker(), &quot;Error in update action handler!&quot;, ex);</span>
 <span class="fc" id="L4938">                       }</span>
 <span class="fc" id="L4939">                   });</span>
                    {

@@ -38,7 +38,7 @@ final class NamedConf&lt;S&gt; implements Simplifiable&lt;NamedConf&lt;S&gt;&gt;
 <span class="fc bfc" id="L38" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
 <span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="fc" id="L40">        NamedConf&lt;?&gt; rhs = (NamedConf&lt;?&gt;) obj;</span>
-<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        return Objects.equals(_name, rhs._name) &amp;&amp;</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        return Objects.equals(_name, rhs._name) &amp;&amp;</span>
 <span class="fc bfc" id="L42" title="All 2 branches covered.">               Objects.equals(_style, rhs._style);</span>
     }
 
@@ -52,25 +52,56 @@ final class NamedConf&lt;S&gt; implements Simplifiable&lt;NamedConf&lt;S&gt;&gt;
 
     @Override
     public NamedConf&lt;S&gt; simplified() {
-<span class="fc bfc" id="L55" title="All 2 branches covered.">        if ( _style instanceof Simplifiable ) {</span>
-<span class="fc" id="L56">            S simplifiedStyle = ((Simplifiable&lt;S&gt;)_style).simplified();</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">            if (simplifiedStyle == _style)</span>
-<span class="fc" id="L58">                return this;</span>
-<span class="fc" id="L59">            return new NamedConf&lt;&gt;(_name, simplifiedStyle);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if ( this.isNone() ) {</span>
+<span class="nc" id="L56">            return this;</span>
         }
-<span class="fc bfc" id="L61" title="All 2 branches covered.">        if ( _style instanceof Pooled ) {</span>
-<span class="fc" id="L62">            Pooled&lt;Object&gt; pooled = (Pooled&lt;Object&gt;) _style;</span>
-<span class="fc" id="L63">            pooled = pooled.map( it -&gt; {</span>
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                if ( it instanceof Simplifiable&lt;?&gt; ) {</span>
-<span class="fc" id="L65">                    return ((Simplifiable&lt;S&gt;)it).simplified();</span>
-                }
-<span class="nc" id="L67">                return it;</span>
-            });
-<span class="fc" id="L69">            pooled = pooled.intern();</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if ( pooled != _style )</span>
-<span class="fc" id="L71">                return new NamedConf&lt;&gt;(_name, (S)pooled);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if ( _style instanceof Simplifiable ) {</span>
+<span class="fc" id="L59">            Simplifiable&lt;S&gt; asSimplifiable = ((Simplifiable&lt;S&gt;)_style);</span>
+<span class="fc" id="L60">            S simplifiedStyle = asSimplifiable.simplified();</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">            if ( ((Simplifiable&lt;Object&gt;)simplifiedStyle).isNone() )</span>
+<span class="fc" id="L62">                return new NamedConf&lt;&gt;(_simplifiedName(), simplifiedStyle);</span>
+            else {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                if (simplifiedStyle == _style)</span>
+<span class="fc" id="L65">                    return this;</span>
+<span class="fc" id="L66">                return new NamedConf&lt;&gt;(_name, simplifiedStyle);</span>
+            }
         }
-<span class="fc" id="L73">        return this;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if ( _style instanceof Pooled ) {</span>
+<span class="fc" id="L70">            Pooled&lt;Object&gt; pooled = (Pooled&lt;Object&gt;) _style;</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if ( pooled.get() instanceof Simplifiable&lt;?&gt; ) {</span>
+<span class="fc" id="L72">                pooled = pooled.map( it -&gt; ((Simplifiable&lt;S&gt;)it).simplified());</span>
+<span class="fc" id="L73">                Simplifiable&lt;?&gt; simplifiable = (Simplifiable&lt;?&gt;)pooled.get();</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">                if (simplifiable.isNone() )</span>
+<span class="fc" id="L75">                    return new NamedConf&lt;&gt;(_simplifiedName(), (S)pooled);</span>
+            }
+<span class="fc" id="L77">            pooled = pooled.intern();</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            if ( pooled != _style )</span>
+<span class="fc" id="L79">                return new NamedConf&lt;&gt;(_name, (S)pooled);</span>
+        }
+<span class="fc" id="L81">        return this;</span>
+    }
+
+    private String _simplifiedName() {
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        return StyleUtil.DEFAULT_KEY.equals(_name) ? StyleUtil.DEFAULT_KEY : &quot;&quot;;</span>
+        // Note: The default style can not be simplified away entirely! The default always exists!
+    }
+
+    @Override
+    public boolean isNone() {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        boolean hasName = !_name.isEmpty();</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if ( hasName )</span>
+<span class="fc" id="L93">            return false;</span>
+
+<span class="fc" id="L95">        Simplifiable&lt;?&gt; asSimplifiable = null;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if ( _style instanceof Simplifiable&lt;?&gt; ) {</span>
+<span class="fc" id="L97">            asSimplifiable = ((Simplifiable&lt;?&gt;)_style);</span>
+        }
+<span class="pc bpc" id="L99" title="1 of 4 branches missed.">        if ( _style instanceof Pooled&lt;?&gt; &amp;&amp; ((Pooled&lt;?&gt;)_style).get() instanceof Simplifiable&lt;?&gt; ) {</span>
+<span class="fc" id="L100">            asSimplifiable = ((Simplifiable&lt;?&gt;)((Pooled&lt;?&gt;)_style).get());</span>
+        }
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( asSimplifiable != null )</span>
+<span class="fc" id="L103">            return asSimplifiable.isNone();</span>
+<span class="nc" id="L104">        return false;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

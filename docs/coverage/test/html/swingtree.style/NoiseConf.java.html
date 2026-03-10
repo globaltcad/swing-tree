@@ -165,7 +165,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
 <span class="fc" id="L165">        return of(</span>
             _function,
             _colors,
-            _offset,
+<span class="fc" id="L168">            _offset.scale(scale),</span>
 <span class="fc" id="L169">            _scale.scale(scale),</span>
             _area,
             _boundary,
@@ -376,7 +376,7 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
 <span class="fc" id="L376">        NoiseConf that = (NoiseConf) o;</span>
 <span class="fc bfc" id="L377" title="All 2 branches covered.">        return Objects.equals(_function, that._function) &amp;&amp;</span>
 <span class="fc bfc" id="L378" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
-<span class="pc bpc" id="L379" title="1 of 2 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+<span class="fc bfc" id="L379" title="All 2 branches covered.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
 <span class="pc bpc" id="L380" title="3 of 8 branches missed.">                Objects.equals(_scale, that._scale)   &amp;&amp;</span>
                _area       == that._area             &amp;&amp;
                _boundary   == that._boundary         &amp;&amp;
@@ -431,6 +431,11 @@ public final class NoiseConf implements Simplifiable&lt;NoiseConf&gt;
         }
 
 <span class="fc" id="L433">        return this;</span>
+    }
+
+    @Override
+    public boolean isNone() {
+<span class="fc" id="L438">        return this.equals(_NONE);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

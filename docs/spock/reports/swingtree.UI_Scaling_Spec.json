@@ -156,7 +156,7 @@
       "blocks":[
         {"kind":"given","text":"We first reset the UI scale to a simple default!","code":["SwingTree.get().setUiScaleFactor(1f)"]},
 
-        {"kind":"and","text":"Then we create a reactive property and a list acting as change listener trace...","code":["var trace = []","var reactiveScale = SwingTree.get().createAndGetUiScaleView().onChange(From.ALL, {","    trace.add(it.currentValue().orElseThrow())","})"]},
+        {"kind":"and","text":"Then we create a reactive property and a list acting as change listener trace...","code":["var trace = []","var reactiveScale = SwingTree.get().getUiScaleView().onChange(From.ALL, {","    trace.add(it.currentValue().orElseThrow())","})"]},
 
         {"kind":"when","text":"","code":["SwingTree.get().setUiScaleFactor(2.0f)"]},
 

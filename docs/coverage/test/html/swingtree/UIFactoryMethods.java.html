@@ -5687,9 +5687,8 @@ import java.util.function.Supplier;
 
     private static JFrame _withGlassPane( JFrame frame ) {
 <span class="fc" id="L5689">        JGlassPane glassPane = new JGlassPane();</span>
-<span class="fc" id="L5690">        frame.setGlassPane(new JGlassPane());</span>
-<span class="fc" id="L5691">        glassPane.toRootPane(frame.getRootPane());</span>
-<span class="fc" id="L5692">        return frame;</span>
+<span class="fc" id="L5690">        glassPane.toRootPane(frame.getRootPane());</span>
+<span class="fc" id="L5691">        return frame;</span>
     }
 
     /**
@@ -5699,7 +5698,7 @@ import java.util.function.Supplier;
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame&lt;JFrame&gt; frame() {
-<span class="fc" id="L5702">        return new UIForJFrame&lt;&gt;(new BuilderState&lt;&gt;(JFrame.class, ()-&gt;_withGlassPane(new JFrame())));</span>
+<span class="fc" id="L5701">        return new UIForJFrame&lt;&gt;(new BuilderState&lt;&gt;(JFrame.class, ()-&gt;_withGlassPane(new JFrame())));</span>
     }
 
     /**
@@ -5708,8 +5707,8 @@ import java.util.function.Supplier;
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame&lt;JFrame&gt; frame( String title ) {
-<span class="fc" id="L5711">        return new UIForJFrame&lt;&gt;(new BuilderState&lt;&gt;(JFrame.class, ()-&gt;_withGlassPane(new JFrame())))</span>
-<span class="fc" id="L5712">                .withTitle(title);</span>
+<span class="fc" id="L5710">        return new UIForJFrame&lt;&gt;(new BuilderState&lt;&gt;(JFrame.class, ()-&gt;_withGlassPane(new JFrame())))</span>
+<span class="fc" id="L5711">                .withTitle(title);</span>
     }
 
     /**
@@ -5719,20 +5718,19 @@ import java.util.function.Supplier;
      * @param &lt;D&gt; The concrete type of this new dialog.
      */
     public static &lt;D extends JDialog&gt; UIForJDialog&lt;D&gt; of( D dialog ) {
-<span class="pc bpc" id="L5722" title="1 of 2 branches missed.">        if ( !(dialog.getGlassPane() instanceof JGlassPane) )</span>
-<span class="fc" id="L5723">            log.debug(SwingTree.get().logMarker(),</span>
+<span class="pc bpc" id="L5721" title="1 of 2 branches missed.">        if ( !(dialog.getGlassPane() instanceof JGlassPane) )</span>
+<span class="fc" id="L5722">            log.debug(SwingTree.get().logMarker(),</span>
                     &quot;Encountered a JDialog instance which does not have a JGlassPane as its glass pane. &quot; +
                     &quot;SwingTree based drag and drop functionality will not work as expected for this dialog.&quot;,
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
-<span class="fc" id="L5728">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(dialog));</span>
+<span class="fc" id="L5727">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(dialog));</span>
     }
 
     private static JDialog _withGlassPane( JDialog dialog ) {
-<span class="fc" id="L5732">        JGlassPane glassPane = new JGlassPane();</span>
-<span class="fc" id="L5733">        dialog.setGlassPane(new JGlassPane());</span>
-<span class="fc" id="L5734">        glassPane.toRootPane(dialog.getRootPane());</span>
-<span class="fc" id="L5735">        return dialog;</span>
+<span class="fc" id="L5731">        JGlassPane glassPane = new JGlassPane();</span>
+<span class="fc" id="L5732">        glassPane.toRootPane(dialog.getRootPane());</span>
+<span class="fc" id="L5733">        return dialog;</span>
     }
 
     /**
@@ -5742,7 +5740,7 @@ import java.util.function.Supplier;
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog&lt;JDialog&gt; dialog() {
-<span class="fc" id="L5745">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt;_withGlassPane(new JDialog())));</span>
+<span class="fc" id="L5743">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt;_withGlassPane(new JDialog())));</span>
     }
 
     /**
@@ -5751,7 +5749,7 @@ import java.util.function.Supplier;
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog&lt;JDialog&gt; dialog( Window owner ) {
-<span class="nc" id="L5754">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt;_withGlassPane(new JDialog(owner)) ));</span>
+<span class="nc" id="L5752">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt;_withGlassPane(new JDialog(owner)) ));</span>
     }
 
     /**
@@ -5760,8 +5758,8 @@ import java.util.function.Supplier;
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog&lt;JDialog&gt; dialog( String title ) {
-<span class="nc" id="L5763">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt; _withGlassPane(new JDialog())))</span>
-<span class="nc" id="L5764">                .withTitle(title);</span>
+<span class="nc" id="L5761">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt; _withGlassPane(new JDialog())))</span>
+<span class="nc" id="L5762">                .withTitle(title);</span>
     }
 
     /**
@@ -5771,8 +5769,8 @@ import java.util.function.Supplier;
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog&lt;JDialog&gt; dialog( Window owner, String title ) {
-<span class="nc" id="L5774">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt; _withGlassPane(new JDialog(owner))))</span>
-<span class="nc" id="L5775">                .withTitle(title);</span>
+<span class="nc" id="L5772">        return new UIForJDialog&lt;&gt;(new BuilderState&lt;&gt;(JDialog.class, ()-&gt; _withGlassPane(new JDialog(owner))))</span>
+<span class="nc" id="L5773">                .withTitle(title);</span>
     }
 
     /**
@@ -5794,17 +5792,17 @@ import java.util.function.Supplier;
      * @param &lt;T&gt; The type of the property or property lens.
      */
     public static &lt;T&gt; void animate( Var&lt;T&gt; state, Animatable&lt;T&gt; animatable ) {
-<span class="fc" id="L5797">        Optional&lt;T&gt;     initialState = animatable.initialState();</span>
-<span class="fc" id="L5798">        LifeTime        lifeTime     = animatable.lifeTime();</span>
-<span class="fc" id="L5799">        AnimationTransformation&lt;T&gt; animator     = animatable.animator();</span>
+<span class="fc" id="L5795">        Optional&lt;T&gt;     initialState = animatable.initialState();</span>
+<span class="fc" id="L5796">        LifeTime        lifeTime     = animatable.lifeTime();</span>
+<span class="fc" id="L5797">        AnimationTransformation&lt;T&gt; animator     = animatable.animator();</span>
 
-<span class="fc" id="L5801">        initialState.ifPresent(state::set);</span>
+<span class="fc" id="L5799">        initialState.ifPresent(state::set);</span>
 
-<span class="pc bpc" id="L5803" title="1 of 2 branches missed.">        if ( !lifeTime.equals(LifeTime.none()) ) {</span>
-<span class="fc" id="L5804">            Animation animation = Animation.of(state, animator);</span>
-<span class="fc" id="L5805">            UI.animateFor(lifeTime).go(animation);</span>
+<span class="pc bpc" id="L5801" title="1 of 2 branches missed.">        if ( !lifeTime.equals(LifeTime.none()) ) {</span>
+<span class="fc" id="L5802">            Animation animation = Animation.of(state, animator);</span>
+<span class="fc" id="L5803">            UI.animateFor(lifeTime).go(animation);</span>
         }
-<span class="fc" id="L5807">    }</span>
+<span class="fc" id="L5805">    }</span>
 
     /**
      *  Use this to animate the contents of a property through using an {@link Animatable}
@@ -5826,8 +5824,8 @@ import java.util.function.Supplier;
      * @param &lt;T&gt; The type of the property or property lens.
      */
     public static &lt;T&gt; void animate( Var&lt;T&gt; state, Function&lt;T, Animatable&lt;T&gt;&gt; animatable ) {
-<span class="nc" id="L5829">        animate(state, animatable.apply(state.get()));</span>
-<span class="nc" id="L5830">    }</span>
+<span class="nc" id="L5827">        animate(state, animatable.apply(state.get()));</span>
+<span class="nc" id="L5828">    }</span>
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
@@ -5853,8 +5851,8 @@ import java.util.function.Supplier;
      *  @return An {@link AnimationDispatcher} instance which allows you to configure the animation.
      */
     public static AnimationDispatcher animateFor( long duration, TimeUnit unit ) {
-<span class="fc" id="L5856">        Objects.requireNonNull(unit, &quot;unit&quot;);</span>
-<span class="fc" id="L5857">        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit) );</span>
+<span class="fc" id="L5854">        Objects.requireNonNull(unit, &quot;unit&quot;);</span>
+<span class="fc" id="L5855">        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit) );</span>
     }
 
     /**
@@ -5881,7 +5879,7 @@ import java.util.function.Supplier;
      *  @return An {@link AnimationDispatcher} instance which allows you to configure the animation.
      */
     public static AnimationDispatcher animateFor( double duration, TimeUnit unit ) {
-<span class="fc" id="L5884">        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit) );</span>
+<span class="fc" id="L5882">        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit) );</span>
     }
 
     /**
@@ -5910,7 +5908,7 @@ import java.util.function.Supplier;
      *  @return An {@link AnimationDispatcher} instance which allows you to configure the animation.
      */
     public static AnimationDispatcher animateFor( double duration, TimeUnit unit, Stride stride ) {
-<span class="fc" id="L5913">        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit), stride );</span>
+<span class="fc" id="L5911">        return AnimationDispatcher.animateFor( LifeTime.of(duration, unit), stride );</span>
     }
 
     /**
@@ -5937,7 +5935,7 @@ import java.util.function.Supplier;
      *  @return An {@link AnimationDispatcher} instance which allows you to configure and run the animation.
      */
     public static AnimationDispatcher animateFor( LifeTime duration ) {
-<span class="fc" id="L5940">        return AnimationDispatcher.animateFor( duration );</span>
+<span class="fc" id="L5938">        return AnimationDispatcher.animateFor( duration );</span>
     }
 
     /**
@@ -5964,7 +5962,7 @@ import java.util.function.Supplier;
      * @return An {@link AnimationDispatcher} instance which allows you to configure and then run the animation.
      */
     public static AnimationDispatcher animateFor( LifeTime duration, java.awt.Component component ) {
-<span class="nc" id="L5967">        return AnimationDispatcher.animateFor( duration, component );</span>
+<span class="nc" id="L5965">        return AnimationDispatcher.animateFor( duration, component );</span>
     }
 
     /**
@@ -5993,13 +5991,13 @@ import java.util.function.Supplier;
      * @param unit The time unit of the duration.
      * @return A {@link LifeTime} instance.
      */
-<span class="nc" id="L5996">    public static LifeTime lifeTime( long duration, TimeUnit unit ) { return LifeTime.of(duration, unit); }</span>
+<span class="nc" id="L5994">    public static LifeTime lifeTime( long duration, TimeUnit unit ) { return LifeTime.of(duration, unit); }</span>
 
     /**
      *  Shows an info dialog with the given message.
      * @param message The message to show in the dialog.
      */
-<span class="fc" id="L6002">    public static void info( String message ) { info(&quot;Info&quot;, message); }</span>
+<span class="fc" id="L6000">    public static void info( String message ) { info(&quot;Info&quot;, message); }</span>
 
     /**
      * Shows an info dialog with the given message and dialog title.
@@ -6008,16 +6006,16 @@ import java.util.function.Supplier;
      * @param message The message to show in the dialog.
      */
     public static void info( String title, String message ) {
-<span class="fc" id="L6011">        message(message)</span>
-<span class="fc" id="L6012">                .titled(title)</span>
-<span class="fc" id="L6013">                .showAsInfo();</span>
-<span class="fc" id="L6014">    }</span>
+<span class="fc" id="L6009">        message(message)</span>
+<span class="fc" id="L6010">                .titled(title)</span>
+<span class="fc" id="L6011">                .showAsInfo();</span>
+<span class="fc" id="L6012">    }</span>
 
     /**
      *  Shows a warning dialog with the given message.
      * @param message The warning message to show in the dialog.
      */
-<span class="fc" id="L6020">    public static void warn( String message ) { warn(&quot;Warning&quot;, message); }</span>
+<span class="fc" id="L6018">    public static void warn( String message ) { warn(&quot;Warning&quot;, message); }</span>
 
     /**
      * Shows a warning dialog with the given message and dialog title.
@@ -6026,16 +6024,16 @@ import java.util.function.Supplier;
      * @param message The warning message to show in the dialog.
      */
     public static void warn( String title, String message ) {
-<span class="fc" id="L6029">        message(message)</span>
-<span class="fc" id="L6030">                .titled(title)</span>
-<span class="fc" id="L6031">                .showAsWarning();</span>
-<span class="fc" id="L6032">    }</span>
+<span class="fc" id="L6027">        message(message)</span>
+<span class="fc" id="L6028">                .titled(title)</span>
+<span class="fc" id="L6029">                .showAsWarning();</span>
+<span class="fc" id="L6030">    }</span>
 
     /**
      *  Shows an error dialog with the given message.
      * @param message The error message to show in the dialog.
      */
-<span class="fc" id="L6038">    public static void error( String message ) { error(&quot;Error&quot;, message); }</span>
+<span class="fc" id="L6036">    public static void error( String message ) { error(&quot;Error&quot;, message); }</span>
 
     /**
      * Shows an error dialog with the given message and dialog title.
@@ -6044,10 +6042,10 @@ import java.util.function.Supplier;
      * @param message The error message to show in the dialog.
      */
     public static void error( String title, String message ) {
-<span class="fc" id="L6047">        message(message)</span>
-<span class="fc" id="L6048">                .titled(title)</span>
-<span class="fc" id="L6049">                .showAsError();</span>
-<span class="fc" id="L6050">    }</span>
+<span class="fc" id="L6045">        message(message)</span>
+<span class="fc" id="L6046">                .titled(title)</span>
+<span class="fc" id="L6047">                .showAsError();</span>
+<span class="fc" id="L6048">    }</span>
 
     /**
      *  Exposes the {@link MessageDialog} API, an immutable builder config
@@ -6058,7 +6056,7 @@ import java.util.function.Supplier;
      * @param text The text to show in the dialog.
      * @return A builder for creating an error dialog.
      */
-<span class="fc" id="L6061">    public static MessageDialog message( String text ) { return MessageDialog.saying(text); }</span>
+<span class="fc" id="L6059">    public static MessageDialog message( String text ) { return MessageDialog.saying(text); }</span>
 
     /**
      *  Shows a conformation dialog with the given message and
@@ -6068,7 +6066,7 @@ import java.util.function.Supplier;
      * @param message the message to show
      * @return {@code Answer.YES} if the user clicked &quot;Yes&quot;, {@code Answer.NO} if the user clicked &quot;No&quot;, {@code Answer.CANCEL} otherwise.
      */
-<span class="nc" id="L6071">    public static ConfirmAnswer confirm( String message ) { return confirm(&quot;Confirm&quot;, message); }</span>
+<span class="nc" id="L6069">    public static ConfirmAnswer confirm( String message ) { return confirm(&quot;Confirm&quot;, message); }</span>
 
     /**
      * Shows a conformation dialog with the given title and message and
@@ -6080,9 +6078,9 @@ import java.util.function.Supplier;
      * @return {@code Answer.YES} if the user clicked &quot;Yes&quot;, {@code Answer.NO} if the user clicked &quot;No&quot;, {@code Answer.CANCEL} otherwise.
      */
     public static ConfirmAnswer confirm( String title, String message ) {
-<span class="fc" id="L6083">        return ConfirmDialog.asking(message)</span>
-<span class="fc" id="L6084">                .titled(title)</span>
-<span class="fc" id="L6085">                .showAsQuestion();</span>
+<span class="fc" id="L6081">        return ConfirmDialog.asking(message)</span>
+<span class="fc" id="L6082">                .titled(title)</span>
+<span class="fc" id="L6083">                .showAsQuestion();</span>
     }
 
     /**
@@ -6095,7 +6093,7 @@ import java.util.function.Supplier;
      * @return A builder for creating a confirmation dialog designed to ask a question.
      */
     public static ConfirmDialog confirmation( String toBeConfirmed ) {
-<span class="fc" id="L6098">        return ConfirmDialog.asking(toBeConfirmed);</span>
+<span class="fc" id="L6096">        return ConfirmDialog.asking(toBeConfirmed);</span>
     }
 
     /**
@@ -6112,7 +6110,7 @@ import java.util.function.Supplier;
      * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; Optional&lt;E&gt; ask( String question, Var&lt;E&gt; selected ) {
-<span class="fc" id="L6115">        return ask(&quot;Select&quot;, question, selected );</span>
+<span class="fc" id="L6113">        return ask(&quot;Select&quot;, question, selected );</span>
     }
 
     /**
@@ -6128,12 +6126,12 @@ import java.util.function.Supplier;
      * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; Optional&lt;E&gt; ask( String title, String message, Var&lt;E&gt; selected ) {
-<span class="fc" id="L6131">        Objects.requireNonNull( message  );</span>
-<span class="fc" id="L6132">        Objects.requireNonNull( title    );</span>
-<span class="fc" id="L6133">        Objects.requireNonNull( selected );</span>
-<span class="fc" id="L6134">        return OptionsDialog.offering(message, selected)</span>
-<span class="fc" id="L6135">                .titled(title)</span>
-<span class="fc" id="L6136">                .showAsQuestion();</span>
+<span class="fc" id="L6129">        Objects.requireNonNull( message  );</span>
+<span class="fc" id="L6130">        Objects.requireNonNull( title    );</span>
+<span class="fc" id="L6131">        Objects.requireNonNull( selected );</span>
+<span class="fc" id="L6132">        return OptionsDialog.offering(message, selected)</span>
+<span class="fc" id="L6133">                .titled(title)</span>
+<span class="fc" id="L6134">                .showAsQuestion();</span>
     }
 
     /**
@@ -6149,14 +6147,14 @@ import java.util.function.Supplier;
      * @param &lt;E&gt; The type parameter defining the concrete enum type.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; void ask( String title, String message, Icon icon, Var&lt;E&gt; selected ) {
-<span class="fc" id="L6152">        Objects.requireNonNull( message  );</span>
-<span class="fc" id="L6153">        Objects.requireNonNull( title    );</span>
-<span class="fc" id="L6154">        Objects.requireNonNull( selected );</span>
-<span class="fc" id="L6155">        OptionsDialog.offering(message, selected)</span>
-<span class="fc" id="L6156">                .titled(title)</span>
-<span class="fc" id="L6157">                .icon(icon)</span>
-<span class="fc" id="L6158">                .showAsQuestion();</span>
-<span class="fc" id="L6159">    }</span>
+<span class="fc" id="L6150">        Objects.requireNonNull( message  );</span>
+<span class="fc" id="L6151">        Objects.requireNonNull( title    );</span>
+<span class="fc" id="L6152">        Objects.requireNonNull( selected );</span>
+<span class="fc" id="L6153">        OptionsDialog.offering(message, selected)</span>
+<span class="fc" id="L6154">                .titled(title)</span>
+<span class="fc" id="L6155">                .icon(icon)</span>
+<span class="fc" id="L6156">                .showAsQuestion();</span>
+<span class="fc" id="L6157">    }</span>
 
     /**
      *  Exposes the {@link OptionsDialog} API for creating a question dialog
@@ -6170,7 +6168,7 @@ import java.util.function.Supplier;
      */
     @SafeVarargs
     public static &lt;E extends Enum&lt;E&gt;&gt; OptionsDialog&lt;E&gt; choice( String offer, E... options ) {
-<span class="fc" id="L6173">        return OptionsDialog.offering(offer, options);</span>
+<span class="fc" id="L6171">        return OptionsDialog.offering(offer, options);</span>
     }
 
     /**
@@ -6184,7 +6182,7 @@ import java.util.function.Supplier;
      *         based on the provided array of enum values.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; OptionsDialog&lt;E&gt; choice( String offer, Var&lt;E&gt; selectable ) {
-<span class="fc" id="L6187">        return OptionsDialog.offering(offer, selectable);</span>
+<span class="fc" id="L6185">        return OptionsDialog.offering(offer, selectable);</span>
     }
 
     /**
@@ -6197,9 +6195,9 @@ import java.util.function.Supplier;
      * @param component The component to show in the window.
      */
     public static void show( java.awt.Component component ) {
-<span class="nc" id="L6200">        Objects.requireNonNull( component );</span>
-<span class="nc" id="L6201">        new TestWindow( &quot;&quot;, f -&gt; component );</span>
-<span class="nc" id="L6202">    }</span>
+<span class="nc" id="L6198">        Objects.requireNonNull( component );</span>
+<span class="nc" id="L6199">        new TestWindow( &quot;&quot;, f -&gt; component );</span>
+<span class="nc" id="L6200">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
@@ -6212,9 +6210,9 @@ import java.util.function.Supplier;
      * @param component The component to show in the window.
      */
     public static void show( String title, java.awt.Component component ) {
-<span class="nc" id="L6215">        Objects.requireNonNull( component );</span>
-<span class="nc" id="L6216">        new TestWindow( title, f -&gt; component );</span>
-<span class="nc" id="L6217">    }</span>
+<span class="nc" id="L6213">        Objects.requireNonNull( component );</span>
+<span class="nc" id="L6214">        new TestWindow( title, f -&gt; component );</span>
+<span class="nc" id="L6215">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
@@ -6227,8 +6225,8 @@ import java.util.function.Supplier;
      * @param &lt;C&gt; The type of the component to show in the window.
      */
     public static &lt;C extends JComponent&gt; void show( UIForAnySwing&lt;?, C&gt; ui ) {
-<span class="nc" id="L6230">        new TestWindow( &quot;&quot;, f -&gt; ui.get(ui.getType()) );</span>
-<span class="nc" id="L6231">    }</span>
+<span class="nc" id="L6228">        new TestWindow( &quot;&quot;, f -&gt; ui.get(ui.getType()) );</span>
+<span class="nc" id="L6229">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
@@ -6242,8 +6240,8 @@ import java.util.function.Supplier;
      * @param &lt;C&gt; The type of the component to show in the window.
      */
     public static &lt;C extends JComponent&gt; void show( String title, UIForAnySwing&lt;?, C&gt; ui ) {
-<span class="nc" id="L6245">        new TestWindow( title, f -&gt; ui.get(ui.getType()) );</span>
-<span class="nc" id="L6246">    }</span>
+<span class="nc" id="L6243">        new TestWindow( title, f -&gt; ui.get(ui.getType()) );</span>
+<span class="nc" id="L6244">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
@@ -6254,9 +6252,9 @@ import java.util.function.Supplier;
      *                   and returns the component to be shown.
      */
     public static void show( Function&lt;JFrame, java.awt.Component&gt; uiSupplier ) {
-<span class="nc" id="L6257">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L6258">        new TestWindow( &quot;&quot;, uiSupplier);</span>
-<span class="nc" id="L6259">    }</span>
+<span class="nc" id="L6255">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L6256">        new TestWindow( &quot;&quot;, uiSupplier);</span>
+<span class="nc" id="L6257">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
@@ -6268,9 +6266,9 @@ import java.util.function.Supplier;
      *                   and returns the component to be shown.
      */
     public static void show( String title, Function&lt;JFrame, java.awt.Component&gt; uiSupplier ) {
-<span class="nc" id="L6271">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L6272">        new TestWindow( title, uiSupplier);</span>
-<span class="nc" id="L6273">    }</span>
+<span class="nc" id="L6269">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L6270">        new TestWindow( title, uiSupplier);</span>
+<span class="nc" id="L6271">    }</span>
 
     /**
      *  Use this to quickly launch a UI component with a custom event processor
@@ -6280,19 +6278,19 @@ import java.util.function.Supplier;
      * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
     public static void showUsing(EventProcessor eventProcessor, Function&lt;JFrame, java.awt.Component&gt; uiSupplier ) {
-<span class="nc" id="L6283">        Objects.requireNonNull( eventProcessor );</span>
-<span class="nc" id="L6284">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L6285">        show(frame -&gt; use(eventProcessor, () -&gt; {</span>
+<span class="nc" id="L6281">        Objects.requireNonNull( eventProcessor );</span>
+<span class="nc" id="L6282">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L6283">        show(frame -&gt; use(eventProcessor, () -&gt; {</span>
             try {
-<span class="nc" id="L6287">                return uiSupplier.apply(frame);</span>
-<span class="nc" id="L6288">            } catch (Exception e) {</span>
-<span class="nc" id="L6289">                log.error(SwingTree.get().logMarker(), &quot;Error trying to create a UI component for a new JFrame.&quot;, e);</span>
-<span class="nc" id="L6290">                return panel(&quot;fill&quot;)</span>
-<span class="nc" id="L6291">                        .add(&quot;grow&quot;, label(&quot;Error: &quot; + e.getMessage()) )</span>
-<span class="nc" id="L6292">                        .get(JPanel.class);</span>
+<span class="nc" id="L6285">                return uiSupplier.apply(frame);</span>
+<span class="nc" id="L6286">            } catch (Exception e) {</span>
+<span class="nc" id="L6287">                log.error(SwingTree.get().logMarker(), &quot;Error trying to create a UI component for a new JFrame.&quot;, e);</span>
+<span class="nc" id="L6288">                return panel(&quot;fill&quot;)</span>
+<span class="nc" id="L6289">                        .add(&quot;grow&quot;, label(&quot;Error: &quot; + e.getMessage()) )</span>
+<span class="nc" id="L6290">                        .get(JPanel.class);</span>
             }
         }));
-<span class="nc" id="L6295">    }</span>
+<span class="nc" id="L6293">    }</span>
 
     /**
      *  Use this to quickly launch a UI component with a custom event processor
@@ -6307,10 +6305,10 @@ import java.util.function.Supplier;
             String title,
             Function&lt;JFrame, java.awt.Component&gt; uiSupplier
     ) {
-<span class="nc" id="L6310">        Objects.requireNonNull( eventProcessor );</span>
-<span class="nc" id="L6311">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L6312">        show(title, frame -&gt; use(eventProcessor, () -&gt; uiSupplier.apply(frame)));</span>
-<span class="nc" id="L6313">    }</span>
+<span class="nc" id="L6308">        Objects.requireNonNull( eventProcessor );</span>
+<span class="nc" id="L6309">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L6310">        show(title, frame -&gt; use(eventProcessor, () -&gt; uiSupplier.apply(frame)));</span>
+<span class="nc" id="L6311">    }</span>
 
 
     /**
@@ -6337,34 +6335,34 @@ import java.util.function.Supplier;
      * @return the result of the given scope, usually a {@link JComponent} or SwingTree UI.
      */
     public static &lt;T&gt; T use( StyleSheet styleSheet, Supplier&lt;T&gt; scope ) {
-<span class="fc bfc" id="L6340" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L6341">            return UI.runAndGet( ()-&gt; use(styleSheet, scope) );</span>
+<span class="fc bfc" id="L6338" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L6339">            return UI.runAndGet( ()-&gt; use(styleSheet, scope) );</span>
 
-<span class="fc" id="L6343">        SwingTree swingTreeContext = SwingTree.get();</span>
-<span class="fc" id="L6344">        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet();</span>
-<span class="fc" id="L6345">        swingTreeContext.setStyleSheet(styleSheet);</span>
+<span class="fc" id="L6341">        SwingTree swingTreeContext = SwingTree.get();</span>
+<span class="fc" id="L6342">        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet();</span>
+<span class="fc" id="L6343">        swingTreeContext.setStyleSheet(styleSheet);</span>
         try {
-<span class="fc" id="L6347">            T result = scope.get();</span>
-<span class="fc" id="L6348">            JComponent component = null;</span>
-<span class="fc bfc" id="L6349" title="All 2 branches covered.">            if ( result instanceof JComponent )</span>
-<span class="fc" id="L6350">                component = (JComponent) result;</span>
-<span class="fc bfc" id="L6351" title="All 2 branches covered.">            if ( result instanceof UIForAnySwing ) {</span>
-<span class="fc" id="L6352">                UIForAnySwing&lt;?,JComponent&gt; resultSwing = (UIForAnySwing) result;</span>
-<span class="fc" id="L6353">                component = resultSwing.get(resultSwing.getType());</span>
+<span class="fc" id="L6345">            T result = scope.get();</span>
+<span class="fc" id="L6346">            JComponent component = null;</span>
+<span class="fc bfc" id="L6347" title="All 2 branches covered.">            if ( result instanceof JComponent )</span>
+<span class="fc" id="L6348">                component = (JComponent) result;</span>
+<span class="fc bfc" id="L6349" title="All 2 branches covered.">            if ( result instanceof UIForAnySwing ) {</span>
+<span class="fc" id="L6350">                UIForAnySwing&lt;?,JComponent&gt; resultSwing = (UIForAnySwing) result;</span>
+<span class="fc" id="L6351">                component = resultSwing.get(resultSwing.getType());</span>
             }
-<span class="pc bpc" id="L6355" title="1 of 2 branches missed.">            if ( component != null ) {</span>
-<span class="fc" id="L6356">                ComponentExtension&lt;JComponent&gt; extension = ComponentExtension.from(component);</span>
-<span class="fc" id="L6357">                extension.gatherApplyAndInstallStyle(true);</span>
-<span class="pc bpc" id="L6358" title="1 of 2 branches missed.">                if ( styleSheet != StyleSheet.none() ) {</span>
-<span class="fc" id="L6359">                    JComponent finalComponent = component;</span>
-<span class="fc" id="L6360">                    extension.storeBoundObservable(styleSheet.observable().subscribe(() -&gt; {</span>
-<span class="fc" id="L6361">                        finalComponent.repaint();</span>
-<span class="fc" id="L6362">                    }));</span>
+<span class="pc bpc" id="L6353" title="1 of 2 branches missed.">            if ( component != null ) {</span>
+<span class="fc" id="L6354">                ComponentExtension&lt;JComponent&gt; extension = ComponentExtension.from(component);</span>
+<span class="fc" id="L6355">                extension.gatherApplyAndInstallStyle(true);</span>
+<span class="pc bpc" id="L6356" title="1 of 2 branches missed.">                if ( styleSheet != StyleSheet.none() ) {</span>
+<span class="fc" id="L6357">                    JComponent finalComponent = component;</span>
+<span class="fc" id="L6358">                    extension.storeBoundObservable(styleSheet.observable().subscribe(() -&gt; {</span>
+<span class="fc" id="L6359">                        finalComponent.repaint();</span>
+<span class="fc" id="L6360">                    }));</span>
                 }
             }
-<span class="fc" id="L6365">            return result;</span>
+<span class="fc" id="L6363">            return result;</span>
         } finally {
-<span class="fc" id="L6367">            swingTreeContext.setStyleSheet(oldStyleSheet);</span>
+<span class="fc" id="L6365">            swingTreeContext.setStyleSheet(oldStyleSheet);</span>
         }
     }
 
@@ -6396,16 +6394,16 @@ import java.util.function.Supplier;
      */
     public static &lt;T&gt; T use( EventProcessor processor, Supplier&lt;T&gt; scope )
     {
-<span class="fc bfc" id="L6399" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L6400">            return UI.runAndGet(()-&gt; use(processor, scope));</span>
+<span class="fc bfc" id="L6397" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L6398">            return UI.runAndGet(()-&gt; use(processor, scope));</span>
 
-<span class="fc" id="L6402">        SwingTree swingTreeContext = SwingTree.get();</span>
-<span class="fc" id="L6403">        EventProcessor oldProcessor = swingTreeContext.getEventProcessor();</span>
-<span class="fc" id="L6404">        swingTreeContext.setEventProcessor(processor);</span>
+<span class="fc" id="L6400">        SwingTree swingTreeContext = SwingTree.get();</span>
+<span class="fc" id="L6401">        EventProcessor oldProcessor = swingTreeContext.getEventProcessor();</span>
+<span class="fc" id="L6402">        swingTreeContext.setEventProcessor(processor);</span>
         try {
-<span class="fc" id="L6406">            return scope.get();</span>
+<span class="fc" id="L6404">            return scope.get();</span>
         } finally {
-<span class="fc" id="L6408">            swingTreeContext.setEventProcessor(oldProcessor);</span>
+<span class="fc" id="L6406">            swingTreeContext.setEventProcessor(oldProcessor);</span>
         }
     }
 
@@ -6417,57 +6415,56 @@ import java.util.function.Supplier;
         private final JFrame frame;
         private final java.awt.@Nullable Component component;
 
-<span class="nc" id="L6420">        private TestWindow( String title, Function&lt;JFrame, java.awt.Component&gt; uiSupplier ) {</span>
-<span class="nc" id="L6421">            Objects.requireNonNull( title );</span>
-<span class="nc" id="L6422">            Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L6423">            this.frame = new JFrame();</span>
-<span class="nc bnc" id="L6424" title="All 2 branches missed.">            if ( !title.isEmpty() ) this.frame.setTitle(title);</span>
-<span class="nc" id="L6425">            frame.setLocationRelativeTo(null); // Initial centering!</span>
-<span class="nc" id="L6426">            java.awt.Component c = null;</span>
-<span class="nc bnc" id="L6427" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L6418">        private TestWindow( String title, Function&lt;JFrame, java.awt.Component&gt; uiSupplier ) {</span>
+<span class="nc" id="L6419">            Objects.requireNonNull( title );</span>
+<span class="nc" id="L6420">            Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L6421">            this.frame = new JFrame();</span>
+<span class="nc bnc" id="L6422" title="All 2 branches missed.">            if ( !title.isEmpty() ) this.frame.setTitle(title);</span>
+<span class="nc" id="L6423">            frame.setLocationRelativeTo(null); // Initial centering!</span>
+<span class="nc" id="L6424">            java.awt.Component c = null;</span>
+<span class="nc bnc" id="L6425" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
                 try {
-<span class="nc" id="L6429">                    c = UI.runAndGet(() -&gt; uiSupplier.apply(frame));</span>
-<span class="nc" id="L6430">                } catch (Exception e) {</span>
-<span class="nc" id="L6431">                    log.error(SwingTree.get().logMarker(), &quot;Error trying to create UI component for display in new JFrame, using supplier function '{}'.&quot;, uiSupplier, e);</span>
-<span class="nc" id="L6432">                }</span>
+<span class="nc" id="L6427">                    c = UI.runAndGet(() -&gt; uiSupplier.apply(frame));</span>
+<span class="nc" id="L6428">                } catch (Exception e) {</span>
+<span class="nc" id="L6429">                    log.error(SwingTree.get().logMarker(), &quot;Error trying to create UI component for display in new JFrame, using supplier function '{}'.&quot;, uiSupplier, e);</span>
+<span class="nc" id="L6430">                }</span>
             }
             else
-<span class="nc" id="L6435">                c = uiSupplier.apply(frame);</span>
+<span class="nc" id="L6433">                c = uiSupplier.apply(frame);</span>
 
-<span class="nc bnc" id="L6437" title="All 2 branches missed.">            if ( c == null ) {</span>
-<span class="nc" id="L6438">                log.error(</span>
+<span class="nc bnc" id="L6435" title="All 2 branches missed.">            if ( c == null ) {</span>
+<span class="nc" id="L6436">                log.error(</span>
                         &quot;Failed to create a UI component for a new JFrame using supplier function '{}'.&quot;, uiSupplier,
                         new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
             }
-<span class="nc" id="L6443">            this.component = c;</span>
-<span class="nc" id="L6444">            UI.runNow(()-&gt;{</span>
-<span class="nc" id="L6445">                frame.add(component);</span>
-<span class="nc" id="L6446">                frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+<span class="nc" id="L6441">            this.component = c;</span>
+<span class="nc" id="L6442">            UI.runNow(()-&gt;{</span>
+<span class="nc" id="L6443">                frame.add(component);</span>
+<span class="nc" id="L6444">                frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
                 // Make sure that the window is centered on the screen again but with the component:
-<span class="nc" id="L6448">                frame.setLocationRelativeTo(null);</span>
+<span class="nc" id="L6446">                frame.setLocationRelativeTo(null);</span>
                 // We set the size to fit the component:
-<span class="nc" id="L6450">                _determineSize();</span>
-<span class="nc" id="L6451">                JGlassPane glassPane = new JGlassPane();</span>
-<span class="nc" id="L6452">                frame.setGlassPane(new JGlassPane());</span>
-<span class="nc" id="L6453">                glassPane.toRootPane(frame.getRootPane());</span>
-<span class="nc" id="L6454">                frame.setVisible(true);</span>
-<span class="nc" id="L6455">            });</span>
-<span class="nc" id="L6456">        }</span>
+<span class="nc" id="L6448">                _determineSize();</span>
+<span class="nc" id="L6449">                JGlassPane glassPane = new JGlassPane();</span>
+<span class="nc" id="L6450">                glassPane.toRootPane(frame.getRootPane());</span>
+<span class="nc" id="L6451">                frame.setVisible(true);</span>
+<span class="nc" id="L6452">            });</span>
+<span class="nc" id="L6453">        }</span>
         private void _determineSize() {
-<span class="nc" id="L6458">            Dimension size = frame.getSize();</span>
-<span class="nc bnc" id="L6459" title="All 2 branches missed.">            if ( component != null ) {</span>
-<span class="nc bnc" id="L6460" title="All 2 branches missed.">                if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
-<span class="nc" id="L6461">                    size = component.getPreferredSize();</span>
+<span class="nc" id="L6455">            Dimension size = frame.getSize();</span>
+<span class="nc bnc" id="L6456" title="All 2 branches missed.">            if ( component != null ) {</span>
+<span class="nc bnc" id="L6457" title="All 2 branches missed.">                if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L6458">                    size = component.getPreferredSize();</span>
 
-<span class="nc bnc" id="L6463" title="All 2 branches missed.">                if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
-<span class="nc" id="L6464">                    size = component.getMinimumSize();</span>
+<span class="nc bnc" id="L6460" title="All 2 branches missed.">                if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L6461">                    size = component.getMinimumSize();</span>
 
-<span class="nc bnc" id="L6466" title="All 2 branches missed.">                if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
-<span class="nc" id="L6467">                    size = component.getSize();</span>
+<span class="nc bnc" id="L6463" title="All 2 branches missed.">                if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L6464">                    size = component.getSize();</span>
             }
-<span class="nc" id="L6469">            frame.setSize(size);</span>
-<span class="nc" id="L6470">        }</span>
+<span class="nc" id="L6466">            frame.setSize(size);</span>
+<span class="nc" id="L6467">        }</span>
     }
 
 
@@ -6485,7 +6482,7 @@ import java.util.function.Supplier;
      * @throws NullPointerException if {@code path} is {@code null}.
      */
     public static Optional&lt;ImageIcon&gt; findIcon(String path ) {
-<span class="fc" id="L6488">        return findIcon(IconDeclaration.of(path));</span>
+<span class="fc" id="L6485">        return findIcon(IconDeclaration.of(path));</span>
     }
 
     /**
@@ -6502,104 +6499,104 @@ import java.util.function.Supplier;
      * @throws NullPointerException if {@code declaration} is {@code null}.
      */
     public static Optional&lt;ImageIcon&gt; findIcon( IconDeclaration declaration ) {
-<span class="fc" id="L6505">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
-<span class="fc" id="L6506">        Function&lt;IconDeclaration, @Nullable ImageIcon&gt; loader = _loaderFor(declaration.sourceFormat());</span>
-<span class="fc" id="L6507">        Map&lt;IconDeclaration, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
-<span class="fc" id="L6508">        ImageIcon icon = cache.get(declaration);</span>
-<span class="fc bfc" id="L6509" title="All 2 branches covered.">        if ( icon == null ) {</span>
-<span class="fc" id="L6510">            icon = loader.apply(declaration);</span>
-<span class="fc bfc" id="L6511" title="All 2 branches covered.">            if ( icon != null )</span>
-<span class="fc" id="L6512">                cache.put(declaration, icon);</span>
+<span class="fc" id="L6502">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
+<span class="fc" id="L6503">        Function&lt;IconDeclaration, @Nullable ImageIcon&gt; loader = _loaderFor(declaration.sourceFormat());</span>
+<span class="fc" id="L6504">        Map&lt;IconDeclaration, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
+<span class="fc" id="L6505">        ImageIcon icon = cache.get(declaration);</span>
+<span class="fc bfc" id="L6506" title="All 2 branches covered.">        if ( icon == null ) {</span>
+<span class="fc" id="L6507">            icon = loader.apply(declaration);</span>
+<span class="fc bfc" id="L6508" title="All 2 branches covered.">            if ( icon != null )</span>
+<span class="fc" id="L6509">                cache.put(declaration, icon);</span>
             else {
-<span class="fc" id="L6514">                IconDeclaration unscaled = IconDeclaration.of(Size.unknown(), declaration.sourceFormat(), declaration.source());</span>
-<span class="fc" id="L6515">                icon = loader.apply(unscaled);</span>
-<span class="pc bpc" id="L6516" title="1 of 2 branches missed.">                if ( icon != null )</span>
-<span class="nc" id="L6517">                    cache.put(unscaled, icon);</span>
-<span class="fc" id="L6518">                Optional&lt;Size&gt; optionalSize = declaration.size();</span>
-<span class="pc bpc" id="L6519" title="1 of 2 branches missed.">                if ( optionalSize.isPresent() )</span>
-<span class="fc" id="L6520">                    icon = (ImageIcon) scaleIconTo(optionalSize.get(), icon);</span>
-<span class="pc bpc" id="L6521" title="1 of 2 branches missed.">                if ( icon != null )</span>
-<span class="nc" id="L6522">                    cache.put(declaration, icon);</span>
+<span class="fc" id="L6511">                IconDeclaration unscaled = IconDeclaration.of(Size.unknown(), declaration.sourceFormat(), declaration.source());</span>
+<span class="fc" id="L6512">                icon = loader.apply(unscaled);</span>
+<span class="pc bpc" id="L6513" title="1 of 2 branches missed.">                if ( icon != null )</span>
+<span class="nc" id="L6514">                    cache.put(unscaled, icon);</span>
+<span class="fc" id="L6515">                Optional&lt;Size&gt; optionalSize = declaration.size();</span>
+<span class="pc bpc" id="L6516" title="1 of 2 branches missed.">                if ( optionalSize.isPresent() )</span>
+<span class="fc" id="L6517">                    icon = (ImageIcon) scaleIconTo(optionalSize.get(), icon);</span>
+<span class="pc bpc" id="L6518" title="1 of 2 branches missed.">                if ( icon != null )</span>
+<span class="nc" id="L6519">                    cache.put(declaration, icon);</span>
             }
         }
-<span class="fc" id="L6525">        return Optional.ofNullable(icon);</span>
+<span class="fc" id="L6522">        return Optional.ofNullable(icon);</span>
     }
 
     public static @Nullable Icon scaleIconTo( Size size, @Nullable Icon icon ) {
-<span class="fc bfc" id="L6529" title="All 2 branches covered.">        if ( icon == null )</span>
-<span class="fc" id="L6530">            return null;</span>
+<span class="fc bfc" id="L6526" title="All 2 branches covered.">        if ( icon == null )</span>
+<span class="fc" id="L6527">            return null;</span>
 
-<span class="pc bpc" id="L6532" title="1 of 2 branches missed.">        if ( icon instanceof SvgIcon ) {</span>
-<span class="nc" id="L6533">            SvgIcon svg = (SvgIcon) icon;</span>
-<span class="nc" id="L6534">            icon = svg.withIconSize(size);</span>
-<span class="pc bpc" id="L6535" title="1 of 2 branches missed.">        } else if ( icon instanceof ScalableImageIcon ) {</span>
-<span class="fc" id="L6536">            ScalableImageIcon imageIcon = (ScalableImageIcon) icon;</span>
-<span class="fc" id="L6537">            icon = imageIcon.withSize(size);</span>
+<span class="pc bpc" id="L6529" title="1 of 2 branches missed.">        if ( icon instanceof SvgIcon ) {</span>
+<span class="nc" id="L6530">            SvgIcon svg = (SvgIcon) icon;</span>
+<span class="nc" id="L6531">            icon = svg.withIconSize(size);</span>
+<span class="pc bpc" id="L6532" title="1 of 2 branches missed.">        } else if ( icon instanceof ScalableImageIcon ) {</span>
+<span class="fc" id="L6533">            ScalableImageIcon imageIcon = (ScalableImageIcon) icon;</span>
+<span class="fc" id="L6534">            icon = imageIcon.withSize(size);</span>
         }
 
-<span class="fc" id="L6540">        final double actualWidth  = _getBaseWidth(icon);</span>
-<span class="fc" id="L6541">        final double actualHeight = _getBaseHeight(icon);</span>
-<span class="pc bpc" id="L6542" title="2 of 4 branches missed.">        if ( actualWidth &lt;= 0 || actualHeight &lt;= 0 ){</span>
-<span class="nc" id="L6543">            log.debug(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L6537">        final double actualWidth  = _getBaseWidth(icon);</span>
+<span class="fc" id="L6538">        final double actualHeight = _getBaseHeight(icon);</span>
+<span class="pc bpc" id="L6539" title="2 of 4 branches missed.">        if ( actualWidth &lt;= 0 || actualHeight &lt;= 0 ){</span>
+<span class="nc" id="L6540">            log.debug(SwingTree.get().logMarker(),</span>
                     &quot;Encountered an invalid icon width '{}' or height '{}'.&quot;,
-<span class="nc" id="L6545">                    actualWidth, actualHeight, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+<span class="nc" id="L6542">                    actualWidth, actualHeight, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
                 );
-<span class="nc" id="L6547">            return icon;</span>
+<span class="nc" id="L6544">            return icon;</span>
         }
 
-<span class="pc bpc" id="L6550" title="1 of 2 branches missed.">        if ( size.equals(Size.of(actualWidth, actualHeight)) )</span>
-<span class="fc" id="L6551">            return icon;</span>
+<span class="pc bpc" id="L6547" title="1 of 2 branches missed.">        if ( size.equals(Size.of(actualWidth, actualHeight)) )</span>
+<span class="fc" id="L6548">            return icon;</span>
 
-<span class="nc bnc" id="L6553" title="All 4 branches missed.">        if ( !size.hasPositiveWidth() &amp;&amp; !size.hasPositiveHeight() )</span>
-<span class="nc" id="L6554">            size = Size.of(actualWidth, actualHeight);</span>
-<span class="nc bnc" id="L6555" title="All 2 branches missed.">        if  ( !size.hasPositiveWidth() )</span>
-<span class="nc" id="L6556">            size = size.withWidth((float) (size.height().orElse(1f) * actualWidth / actualHeight));</span>
-<span class="nc bnc" id="L6557" title="All 2 branches missed.">        if ( !size.hasPositiveHeight() )</span>
-<span class="nc" id="L6558">            size = size.withHeight((float) (size.width().orElse(1f) * actualHeight / actualWidth));</span>
+<span class="nc bnc" id="L6550" title="All 4 branches missed.">        if ( !size.hasPositiveWidth() &amp;&amp; !size.hasPositiveHeight() )</span>
+<span class="nc" id="L6551">            size = Size.of(actualWidth, actualHeight);</span>
+<span class="nc bnc" id="L6552" title="All 2 branches missed.">        if  ( !size.hasPositiveWidth() )</span>
+<span class="nc" id="L6553">            size = size.withWidth((float) (size.height().orElse(1f) * actualWidth / actualHeight));</span>
+<span class="nc bnc" id="L6554" title="All 2 branches missed.">        if ( !size.hasPositiveHeight() )</span>
+<span class="nc" id="L6555">            size = size.withHeight((float) (size.width().orElse(1f) * actualHeight / actualWidth));</span>
 
-<span class="nc" id="L6560">        int width  = size.width().map(Float::intValue).orElse(0);</span>
-<span class="nc" id="L6561">        int height = size.height().map(Float::intValue).orElse(0);</span>
+<span class="nc" id="L6557">        int width  = size.width().map(Float::intValue).orElse(0);</span>
+<span class="nc" id="L6558">        int height = size.height().map(Float::intValue).orElse(0);</span>
 
-<span class="nc bnc" id="L6563" title="All 4 branches missed.">        if ( width &lt; 1 || height &lt; 1 ) {</span>
-<span class="nc" id="L6564">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="nc bnc" id="L6560" title="All 4 branches missed.">        if ( width &lt; 1 || height &lt; 1 ) {</span>
+<span class="nc" id="L6561">            log.warn(SwingTree.get().logMarker(),</span>
                     &quot;Encountered an invalid icon size '{}' while &quot; +
                     &quot;scaling an icon for the '{}' component.&quot;,
-<span class="nc" id="L6567">                    size, JIcon.class.getSimpleName(), new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+<span class="nc" id="L6564">                    size, JIcon.class.getSimpleName(), new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
                 );
-<span class="nc" id="L6569">            return icon;</span>
+<span class="nc" id="L6566">            return icon;</span>
         }
 
-<span class="nc bnc" id="L6572" title="All 2 branches missed.">        if ( icon instanceof ScalableImageIcon ) {</span>
-<span class="nc" id="L6573">            ScalableImageIcon scalable = (ScalableImageIcon) icon;</span>
-<span class="nc" id="L6574">            scalable = scalable.withSize(size);</span>
-<span class="nc" id="L6575">            return scalable;</span>
+<span class="nc bnc" id="L6569" title="All 2 branches missed.">        if ( icon instanceof ScalableImageIcon ) {</span>
+<span class="nc" id="L6570">            ScalableImageIcon scalable = (ScalableImageIcon) icon;</span>
+<span class="nc" id="L6571">            scalable = scalable.withSize(size);</span>
+<span class="nc" id="L6572">            return scalable;</span>
         }
 
-<span class="nc bnc" id="L6578" title="All 2 branches missed.">        if ( icon instanceof SvgIcon ) {</span>
-<span class="nc" id="L6579">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="nc" id="L6580">            svgIcon = svgIcon.withIconSize(width, height);</span>
-<span class="nc" id="L6581">            return svgIcon;</span>
-<span class="nc bnc" id="L6582" title="All 2 branches missed.">        } else if ( icon instanceof ImageIcon ) {</span>
-<span class="nc" id="L6583">            Image scaled = ((ImageIcon)icon).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);</span>
-<span class="nc" id="L6584">            return new ImageIcon(scaled);</span>
+<span class="nc bnc" id="L6575" title="All 2 branches missed.">        if ( icon instanceof SvgIcon ) {</span>
+<span class="nc" id="L6576">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="nc" id="L6577">            svgIcon = svgIcon.withIconSize(width, height);</span>
+<span class="nc" id="L6578">            return svgIcon;</span>
+<span class="nc bnc" id="L6579" title="All 2 branches missed.">        } else if ( icon instanceof ImageIcon ) {</span>
+<span class="nc" id="L6580">            Image scaled = ((ImageIcon)icon).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);</span>
+<span class="nc" id="L6581">            return new ImageIcon(scaled);</span>
         }
-<span class="nc" id="L6586">        return icon;</span>
+<span class="nc" id="L6583">        return icon;</span>
     }
 
     private static int _getBaseWidth(Icon icon) {
-<span class="pc bpc" id="L6590" title="1 of 2 branches missed.">        if ( icon instanceof ScalableImageIcon )</span>
-<span class="fc" id="L6591">            return ((ScalableImageIcon) icon).getBaseWidth();</span>
-<span class="nc bnc" id="L6592" title="All 2 branches missed.">        if ( icon instanceof SvgIcon )</span>
-<span class="nc" id="L6593">            return ((SvgIcon) icon).getBaseWidth();</span>
-<span class="nc" id="L6594">        return icon.getIconWidth();</span>
+<span class="pc bpc" id="L6587" title="1 of 2 branches missed.">        if ( icon instanceof ScalableImageIcon )</span>
+<span class="fc" id="L6588">            return ((ScalableImageIcon) icon).getBaseWidth();</span>
+<span class="nc bnc" id="L6589" title="All 2 branches missed.">        if ( icon instanceof SvgIcon )</span>
+<span class="nc" id="L6590">            return ((SvgIcon) icon).getBaseWidth();</span>
+<span class="nc" id="L6591">        return icon.getIconWidth();</span>
     }
 
     private static int _getBaseHeight(Icon icon) {
-<span class="pc bpc" id="L6598" title="1 of 2 branches missed.">        if ( icon instanceof ScalableImageIcon )</span>
-<span class="fc" id="L6599">            return ((ScalableImageIcon) icon).getBaseHeight();</span>
-<span class="nc bnc" id="L6600" title="All 2 branches missed.">        if ( icon instanceof SvgIcon )</span>
-<span class="nc" id="L6601">            return ((SvgIcon) icon).getBaseHeight();</span>
-<span class="nc" id="L6602">        return icon.getIconHeight();</span>
+<span class="pc bpc" id="L6595" title="1 of 2 branches missed.">        if ( icon instanceof ScalableImageIcon )</span>
+<span class="fc" id="L6596">            return ((ScalableImageIcon) icon).getBaseHeight();</span>
+<span class="nc bnc" id="L6597" title="All 2 branches missed.">        if ( icon instanceof SvgIcon )</span>
+<span class="nc" id="L6598">            return ((SvgIcon) icon).getBaseHeight();</span>
+<span class="nc" id="L6599">        return icon.getIconHeight();</span>
     }
 
     /**
@@ -6614,8 +6611,8 @@ import java.util.function.Supplier;
      * @throws NullPointerException if {@code path} is {@code null}.
      */
     public static Optional&lt;SvgIcon&gt; findSvgIcon( String path ) {
-<span class="nc" id="L6617">        Objects.requireNonNull(path, &quot;path&quot;);</span>
-<span class="nc" id="L6618">        return findSvgIcon(IconDeclaration.of(path));</span>
+<span class="nc" id="L6614">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="nc" id="L6615">        return findSvgIcon(IconDeclaration.of(path));</span>
     }
 
     /**
@@ -6630,48 +6627,48 @@ import java.util.function.Supplier;
      * @throws NullPointerException if {@code declaration} is {@code null}.
      */
     public static Optional&lt;SvgIcon&gt; findSvgIcon( IconDeclaration declaration ) {
-<span class="fc" id="L6633">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
-<span class="pc bpc" id="L6634" title="2 of 4 branches missed.">        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.PATH_TO_ICON &amp;&amp; !declaration.source().endsWith(&quot;.svg&quot;) )</span>
-<span class="nc" id="L6635">            return Optional.empty();</span>
+<span class="fc" id="L6630">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
+<span class="pc bpc" id="L6631" title="1 of 4 branches missed.">        if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.PATH_TO_ICON &amp;&amp; !declaration.source().endsWith(&quot;.svg&quot;) )</span>
+<span class="nc" id="L6632">            return Optional.empty();</span>
 
-<span class="fc" id="L6637">        Function&lt;IconDeclaration, @Nullable ImageIcon&gt; loader = _loaderFor(declaration.sourceFormat());</span>
-<span class="fc" id="L6638">        Map&lt;IconDeclaration, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
-<span class="fc" id="L6639">        ImageIcon icon = cache.get(declaration);</span>
-<span class="pc bpc" id="L6640" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
-<span class="fc" id="L6641">            icon = loader.apply(declaration);</span>
-<span class="fc bfc" id="L6642" title="All 2 branches covered.">            if ( icon != null )</span>
-<span class="fc" id="L6643">                cache.put(declaration, icon);</span>
+<span class="fc" id="L6634">        Function&lt;IconDeclaration, @Nullable ImageIcon&gt; loader = _loaderFor(declaration.sourceFormat());</span>
+<span class="fc" id="L6635">        Map&lt;IconDeclaration, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
+<span class="fc" id="L6636">        ImageIcon icon = cache.get(declaration);</span>
+<span class="fc bfc" id="L6637" title="All 2 branches covered.">        if ( icon == null ) {</span>
+<span class="fc" id="L6638">            icon = loader.apply(declaration);</span>
+<span class="fc bfc" id="L6639" title="All 2 branches covered.">            if ( icon != null )</span>
+<span class="fc" id="L6640">                cache.put(declaration, icon);</span>
         }
-<span class="fc bfc" id="L6645" title="All 2 branches covered.">        if ( !(icon instanceof SvgIcon) )</span>
-<span class="fc" id="L6646">            return Optional.empty();</span>
+<span class="fc bfc" id="L6642" title="All 2 branches covered.">        if ( !(icon instanceof SvgIcon) )</span>
+<span class="fc" id="L6643">            return Optional.empty();</span>
         else
-<span class="fc" id="L6648">            return Optional.of(icon).map(SvgIcon.class::cast);</span>
+<span class="fc" id="L6645">            return Optional.of(icon).map(SvgIcon.class::cast);</span>
     }
 
     private static Function&lt;IconDeclaration, @Nullable ImageIcon&gt; _loaderFor(IconDeclaration.SourceFormat sourceFormat) {
-<span class="fc bfc" id="L6652" title="All 2 branches covered.">        if ( sourceFormat == IconDeclaration.SourceFormat.SVG_STRING ) {</span>
-<span class="fc" id="L6653">            return i -&gt; _parseSvgIcon(i).map(ImageIcon.class::cast).orElse(null);</span>
+<span class="fc bfc" id="L6649" title="All 2 branches covered.">        if ( sourceFormat == IconDeclaration.SourceFormat.SVG_STRING ) {</span>
+<span class="fc" id="L6650">            return i -&gt; _parseSvgIcon(i).map(ImageIcon.class::cast).orElse(null);</span>
         } else {
-<span class="fc" id="L6655">            return UIFactoryMethods::_tryLoadIcon;</span>
+<span class="fc" id="L6652">            return UIFactoryMethods::_tryLoadIcon;</span>
         }
     }
 
     private static Optional&lt;SvgIcon&gt; _parseSvgIcon( IconDeclaration declaration ) {
-<span class="fc" id="L6660">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
-<span class="fc" id="L6661">        SvgIcon icon = null;</span>
+<span class="fc" id="L6657">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
+<span class="fc" id="L6658">        SvgIcon icon = null;</span>
         try {
-<span class="pc bpc" id="L6663" title="1 of 2 branches missed.">            if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {</span>
-<span class="fc" id="L6664">                icon = SvgIcon.of(declaration.source());</span>
-<span class="fc" id="L6665">                Optional&lt;Size&gt; size = declaration.size();</span>
-<span class="fc bfc" id="L6666" title="All 2 branches covered.">                if ( size.isPresent() ) {</span>
-<span class="fc" id="L6667">                    icon = icon.withIconSize(size.get());</span>
+<span class="pc bpc" id="L6660" title="1 of 2 branches missed.">            if ( declaration.sourceFormat() == IconDeclaration.SourceFormat.SVG_STRING ) {</span>
+<span class="fc" id="L6661">                icon = SvgIcon.of(declaration.source());</span>
+<span class="fc" id="L6662">                Optional&lt;Size&gt; size = declaration.size();</span>
+<span class="fc bfc" id="L6663" title="All 2 branches covered.">                if ( size.isPresent() ) {</span>
+<span class="fc" id="L6664">                    icon = icon.withIconSize(size.get());</span>
                 }
-<span class="fc" id="L6669">                return Optional.of(icon);</span>
+<span class="fc" id="L6666">                return Optional.of(icon);</span>
             }
-<span class="nc" id="L6671">        } catch (Exception e) {</span>
-<span class="nc" id="L6672">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse SVG icon from declaration: {}&quot;, declaration, e);</span>
-<span class="nc" id="L6673">        }</span>
-<span class="nc" id="L6674">        return Optional.ofNullable(icon);</span>
+<span class="nc" id="L6668">        } catch (Exception e) {</span>
+<span class="nc" id="L6669">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse SVG icon from declaration: {}&quot;, declaration, e);</span>
+<span class="nc" id="L6670">        }</span>
+<span class="nc" id="L6671">        return Optional.ofNullable(icon);</span>
     }
 
     /**
@@ -6683,13 +6680,13 @@ import java.util.function.Supplier;
      */
     private static @Nullable ImageIcon _tryLoadIcon( IconDeclaration declaration )
     {
-<span class="fc" id="L6686">        ImageIcon icon = null;</span>
+<span class="fc" id="L6683">        ImageIcon icon = null;</span>
         try {
-<span class="fc" id="L6688">            icon = _loadIcon(declaration);</span>
-<span class="nc" id="L6689">        } catch (Exception e) {</span>
-<span class="nc" id="L6690">            log.error(SwingTree.get().logMarker(), &quot;Failed to load icon from declaration: {}&quot;, declaration, e);</span>
-<span class="fc" id="L6691">        }</span>
-<span class="fc" id="L6692">        return icon;</span>
+<span class="fc" id="L6685">            icon = _loadIcon(declaration);</span>
+<span class="nc" id="L6686">        } catch (Exception e) {</span>
+<span class="nc" id="L6687">            log.error(SwingTree.get().logMarker(), &quot;Failed to load icon from declaration: {}&quot;, declaration, e);</span>
+<span class="fc" id="L6688">        }</span>
+<span class="fc" id="L6689">        return icon;</span>
     }
 
     /**
@@ -6701,45 +6698,45 @@ import java.util.function.Supplier;
      */
     private static @Nullable ImageIcon _loadIcon( IconDeclaration declaration )
     {
-<span class="fc" id="L6704">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
-<span class="fc" id="L6705">        String path = declaration.source();</span>
-<span class="fc" id="L6706">        Objects.requireNonNull(path, &quot;path&quot;);</span>
-<span class="fc" id="L6707">        path = path.trim();</span>
-<span class="fc bfc" id="L6708" title="All 2 branches covered.">        if ( path.isEmpty() )</span>
-<span class="fc" id="L6709">            return null;</span>
+<span class="fc" id="L6701">        Objects.requireNonNull(declaration, &quot;declaration&quot;);</span>
+<span class="fc" id="L6702">        String path = declaration.source();</span>
+<span class="fc" id="L6703">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L6704">        path = path.trim();</span>
+<span class="fc bfc" id="L6705" title="All 2 branches covered.">        if ( path.isEmpty() )</span>
+<span class="fc" id="L6706">            return null;</span>
         // First we make the path platform independent:
-<span class="fc" id="L6711">        path = path.replace('\\', '/');</span>
+<span class="fc" id="L6708">        path = path.replace('\\', '/');</span>
         // Then we try to load the icon url from the classpath:
-<span class="fc" id="L6713">        URL url = UI.class.getResource(path);</span>
+<span class="fc" id="L6710">        URL url = UI.class.getResource(path);</span>
         // We check if the url is null:
-<span class="fc bfc" id="L6715" title="All 2 branches covered.">        if ( url == null ) {</span>
+<span class="fc bfc" id="L6712" title="All 2 branches covered.">        if ( url == null ) {</span>
             // It is, let's do some troubleshooting:
-<span class="fc bfc" id="L6717" title="All 2 branches covered.">            if ( !path.startsWith(&quot;/&quot;) )</span>
-<span class="fc" id="L6718">                url = UI.class.getResource(&quot;/&quot; + path);</span>
+<span class="fc bfc" id="L6714" title="All 2 branches covered.">            if ( !path.startsWith(&quot;/&quot;) )</span>
+<span class="fc" id="L6715">                url = UI.class.getResource(&quot;/&quot; + path);</span>
 
-<span class="fc bfc" id="L6720" title="All 2 branches covered.">            if ( url == null ) // Still null? Let's try to load it as a file:</span>
+<span class="fc bfc" id="L6717" title="All 2 branches covered.">            if ( url == null ) // Still null? Let's try to load it as a file:</span>
                 try {
-<span class="fc" id="L6722">                    url = new File(path).toURI().toURL();</span>
-<span class="nc" id="L6723">                } catch (MalformedURLException e) {</span>
-<span class="nc" id="L6724">                    throw new RuntimeException(e);</span>
-<span class="fc" id="L6725">                }</span>
+<span class="fc" id="L6719">                    url = new File(path).toURI().toURL();</span>
+<span class="nc" id="L6720">                } catch (MalformedURLException e) {</span>
+<span class="nc" id="L6721">                    throw new RuntimeException(e);</span>
+<span class="fc" id="L6722">                }</span>
         }
-<span class="fc bfc" id="L6727" title="All 2 branches covered.">        if ( path.endsWith(&quot;.svg&quot;) ) {</span>
-<span class="fc" id="L6728">            SvgIcon svgIcon = null;</span>
+<span class="fc bfc" id="L6724" title="All 2 branches covered.">        if ( path.endsWith(&quot;.svg&quot;) ) {</span>
+<span class="fc" id="L6725">            SvgIcon svgIcon = null;</span>
             try {
-<span class="fc" id="L6730">                svgIcon = SvgIcon.at(url);</span>
-<span class="nc" id="L6731">            } catch (Exception e) {</span>
-<span class="nc" id="L6732">                log.error(SwingTree.get().logMarker(), &quot;Failed to load SVG document from URL: {}&quot;, url, e);</span>
-<span class="nc" id="L6733">                return null;</span>
-<span class="fc" id="L6734">            }</span>
-<span class="fc bfc" id="L6735" title="All 2 branches covered.">            if ( svgIcon.getSvgDocument() == null ) {</span>
-<span class="fc" id="L6736">                return null;</span>
+<span class="fc" id="L6727">                svgIcon = SvgIcon.at(url);</span>
+<span class="nc" id="L6728">            } catch (Exception e) {</span>
+<span class="nc" id="L6729">                log.error(SwingTree.get().logMarker(), &quot;Failed to load SVG document from URL: {}&quot;, url, e);</span>
+<span class="nc" id="L6730">                return null;</span>
+<span class="fc" id="L6731">            }</span>
+<span class="fc bfc" id="L6732" title="All 2 branches covered.">            if ( svgIcon.getSvgDocument() == null ) {</span>
+<span class="fc" id="L6733">                return null;</span>
             }
-<span class="fc" id="L6738">            Optional&lt;Size&gt; optionalSize = declaration.size();</span>
-<span class="pc bpc" id="L6739" title="1 of 2 branches missed.">            if ( optionalSize.isPresent() )</span>
-<span class="fc" id="L6740">                return svgIcon.withIconSize(optionalSize.get());</span>
+<span class="fc" id="L6735">            Optional&lt;Size&gt; optionalSize = declaration.size();</span>
+<span class="pc bpc" id="L6736" title="1 of 2 branches missed.">            if ( optionalSize.isPresent() )</span>
+<span class="fc" id="L6737">                return svgIcon.withIconSize(optionalSize.get());</span>
             else
-<span class="nc" id="L6742">                return svgIcon;</span>
+<span class="nc" id="L6739">                return svgIcon;</span>
         } else {
             /*
                 Not that we explicitly use the &quot;createImage&quot; method of the toolkit here.
@@ -6748,8 +6745,8 @@ import java.util.function.Supplier;
                 (The internal caching of the toolkit is somewhat limited and we have no control over it,
                 which is why we use our own cache.)
             */
-<span class="fc" id="L6751">            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());</span>
-<span class="fc" id="L6752">            return ScalableImageIcon.of(declaration.size().orElse(Size.unknown()), icon);</span>
+<span class="fc" id="L6748">            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());</span>
+<span class="fc" id="L6749">            return ScalableImageIcon.of(declaration.size().orElse(Size.unknown()), icon);</span>
         }
     }
 

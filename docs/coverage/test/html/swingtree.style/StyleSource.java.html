@@ -5,8 +5,10 @@ import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.animation.LifeSpan;
 import swingtree.api.Styler;
+import swingtree.api.laf.SwingTreeStyledComponentUI;
 
 import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
 import java.util.*;
 
 /**
@@ -19,124 +21,144 @@ import java.util.*;
  */
 final class StyleSource&lt;C extends JComponent&gt;
 {
-<span class="fc" id="L22">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleSource.class);</span>
+<span class="fc" id="L24">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleSource.class);</span>
 
     static &lt;C extends JComponent&gt; StyleSource&lt;C&gt; create() {
-<span class="fc" id="L25">        return new StyleSource&lt;C&gt;(</span>
-<span class="fc" id="L26">                        Styler.none(),</span>
+<span class="fc" id="L27">        return new StyleSource&lt;C&gt;(</span>
+<span class="fc" id="L28">                        Styler.none(),</span>
                         new Expirable[0],
-<span class="fc" id="L28">                        SwingTree.get().getStyleSheet()</span>
+<span class="fc" id="L30">                        SwingTree.get().getStyleSheet()</span>
                     );
     }
 
-    private final Styler&lt;C&gt; _localStyler;
-
-    private final Expirable&lt;Styler&lt;C&gt;&gt;[] _animationStylers;
 
     private final StyleSheet _styleSheet;
+    private final Styler&lt;C&gt; _localStyler;
+    private final Expirable&lt;Styler&lt;C&gt;&gt;[] _animationStylers;
+
 
 
     private StyleSource(
         Styler&lt;C&gt;              localStyler,
         Expirable&lt;Styler&lt;C&gt;&gt;[] animationStylers,
         StyleSheet             styleSheet
-<span class="fc" id="L43">    ) {</span>
-<span class="fc" id="L44">        _localStyler      = Objects.requireNonNull(localStyler);</span>
-<span class="fc" id="L45">        _animationStylers = Objects.requireNonNull(animationStylers);</span>
-<span class="fc" id="L46">        _styleSheet       = Objects.requireNonNull(styleSheet);</span>
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L45">    ) {</span>
+<span class="fc" id="L46">        _localStyler      = Objects.requireNonNull(localStyler);</span>
+<span class="fc" id="L47">        _animationStylers = Objects.requireNonNull(animationStylers);</span>
+<span class="fc" id="L48">        _styleSheet       = Objects.requireNonNull(styleSheet);</span>
+<span class="fc" id="L49">    }</span>
 
     StyleSheet styleSheet() {
-<span class="fc" id="L50">        return _styleSheet;</span>
+<span class="fc" id="L52">        return _styleSheet;</span>
     }
 
     public boolean hasNoAnimationStylers() {
-<span class="fc bfc" id="L54" title="All 2 branches covered.">        return _animationStylers.length == 0;</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        return _animationStylers.length == 0;</span>
     }
 
     StyleSource&lt;C&gt; withLocalStyler( Styler&lt;C&gt; styler ) {
-<span class="fc" id="L58">        Styler&lt;C&gt; compositeStyler = _localStyler.andThen(styler);</span>
-<span class="fc" id="L59">        return new StyleSource&lt;&gt;(compositeStyler, _animationStylers, _styleSheet);</span>
+<span class="fc" id="L60">        Styler&lt;C&gt; compositeStyler = _localStyler.andThen(styler);</span>
+<span class="fc" id="L61">        return new StyleSource&lt;&gt;(compositeStyler, _animationStylers, _styleSheet);</span>
     }
 
     StyleSource&lt;C&gt; withAnimationStyler( LifeSpan lifeSpan, Styler&lt;C&gt; animationStyler ) {
-<span class="fc" id="L63">        List&lt;Expirable&lt;Styler&lt;C&gt;&gt;&gt; animationStylers = new ArrayList&lt;&gt;(Arrays.asList(_animationStylers));</span>
-<span class="fc" id="L64">        animationStylers.add(new Expirable&lt;&gt;(lifeSpan, animationStyler));</span>
-<span class="fc" id="L65">        return new StyleSource&lt;&gt;(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);</span>
+<span class="fc" id="L65">        List&lt;Expirable&lt;Styler&lt;C&gt;&gt;&gt; animationStylers = new ArrayList&lt;&gt;(Arrays.asList(_animationStylers));</span>
+<span class="fc" id="L66">        animationStylers.add(new Expirable&lt;&gt;(lifeSpan, animationStyler));</span>
+<span class="fc" id="L67">        return new StyleSource&lt;&gt;(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);</span>
     }
 
     StyleSource&lt;C&gt; withoutAnimationStylers() {
-<span class="fc" id="L69">        return new StyleSource&lt;&gt;(_localStyler, new Expirable[0], _styleSheet);</span>
+<span class="fc" id="L71">        return new StyleSource&lt;&gt;(_localStyler, new Expirable[0], _styleSheet);</span>
     }
 
-    StyleConf gatherStyleFor(C owner )
+    @SuppressWarnings(&quot;DoNotCall&quot;)
+    StyleConf gatherStyleFor( C owner )
     {
-<span class="fc" id="L74">        StyleConf styleConf = Optional.ofNullable(owner.getParent())</span>
-<span class="fc bfc" id="L75" title="All 2 branches covered.">                              .map( p -&gt; p instanceof JComponent ? (JComponent) p : null )</span>
-<span class="fc" id="L76">                              .map(ComponentExtension::from)</span>
-<span class="fc" id="L77">                              .map(ComponentExtension::getStyle)</span>
-<span class="fc" id="L78">                              .map(StyleConf::font)</span>
-<span class="fc bfc" id="L79" title="All 2 branches covered.">                              .filter( f -&gt; !f.equals(FontConf.none()) )</span>
-<span class="fc" id="L80">                              .map( f -&gt; StyleConf.none()._withFont(f) )</span>
-<span class="fc" id="L81">                              .orElse(StyleConf.none());</span>
+        // 0: Some things are inherited from the parent component:
+<span class="fc" id="L78">        StyleConf styleConf = Optional.ofNullable(owner.getParent())</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                              .map( p -&gt; p instanceof JComponent ? (JComponent) p : null )</span>
+<span class="fc" id="L80">                              .map(ComponentExtension::from)</span>
+<span class="fc" id="L81">                              .map(ComponentExtension::getStyle)</span>
+<span class="fc" id="L82">                              .map(StyleConf::font)</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">                              .filter( f -&gt; !f.equals(FontConf.none()) )</span>
+<span class="fc" id="L84">                              .map( f -&gt; StyleConf.none()._withFont(f) )</span>
+<span class="fc" id="L85">                              .orElse(StyleConf.none());</span>
 
+        // 1. Global StyleSheet
         try {
-<span class="fc" id="L84">            styleConf = _styleSheet.computeStyleFrom( owner, styleConf );</span>
-<span class="nc" id="L85">        } catch (Exception e) {</span>
-<span class="nc" id="L86">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while applying the style sheet for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="fc" id="L89">            StyleConf updated = _styleSheet.computeStyleFrom( owner, styleConf );</span>
+<span class="fc" id="L90">            Objects.requireNonNull(updated);</span>
+<span class="fc" id="L91">            styleConf = updated;</span>
+<span class="nc" id="L92">        } catch (Exception e) {</span>
+<span class="nc" id="L93">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while applying the style sheet for component '{}'.&quot;, owner, e);</span>
             /*
                  If any exceptions happen in a StyleSheet implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
                  which is why we catch any exceptions immediately!
             */
-<span class="fc" id="L92">        }</span>
+<span class="fc" id="L99">        }</span>
 
+        // 2. Look and Feel
         try {
-<span class="fc" id="L95">            ComponentStyleDelegate&lt;C&gt; updated = _localStyler.style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf));</span>
-<span class="fc" id="L96">            Objects.requireNonNull(updated);</span>
-<span class="fc" id="L97">            styleConf = updated.style();</span>
-<span class="nc" id="L98">        } catch (Exception e) {</span>
-<span class="nc" id="L99">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="fc" id="L103">            ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf(owner);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            if ( componentUI instanceof SwingTreeStyledComponentUI) {</span>
+<span class="fc" id="L105">                SwingTreeStyledComponentUI&lt;C&gt; swingTreeUI = (SwingTreeStyledComponentUI) componentUI;</span>
+<span class="fc" id="L106">                ComponentStyleDelegate&lt;C&gt; updated = swingTreeUI.style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf));</span>
+<span class="fc" id="L107">                Objects.requireNonNull(updated);</span>
+<span class="fc" id="L108">                styleConf = updated.style();</span>
+            }
+<span class="nc" id="L110">        } catch (Exception e) {</span>
+<span class="nc" id="L111">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while gathering the style information from the 'ComponentUI' of '{}'.&quot;, owner, e);</span>
+<span class="fc" id="L112">        }</span>
+
+        // 3. Component Local (  `withStyle(it-&gt;it.border(2, &quot;green&quot;))`  )
+        try {
+<span class="fc" id="L116">            ComponentStyleDelegate&lt;C&gt; updated = _localStyler.style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf));</span>
+<span class="fc" id="L117">            Objects.requireNonNull(updated);</span>
+<span class="fc" id="L118">            styleConf = updated.style();</span>
+<span class="nc" id="L119">        } catch (Exception e) {</span>
+<span class="nc" id="L120">            log.error(SwingTree.get().logMarker(), &quot;An exception occurred while gathering the local style for component '{}'.&quot;, owner, e);</span>
             /*
                  If any exceptions happen in a Styler implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
                  which is why we catch any exceptions immediately!
             */
-<span class="fc" id="L105">        }</span>
+<span class="fc" id="L126">        }</span>
 
-        // Animation styles are last: they override everything else:
-<span class="fc bfc" id="L108" title="All 2 branches covered.">        for ( Expirable&lt;Styler&lt;C&gt;&gt; expirableStyler : _animationStylers )</span>
+        // 4. Component Local Animations:
+        // =&gt; Animation styles are last: they override everything else:
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        for ( Expirable&lt;Styler&lt;C&gt;&gt; expirableStyler : _animationStylers )</span>
             try {
-<span class="fc" id="L110">                styleConf = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
-<span class="nc" id="L111">            } catch ( Exception e ) {</span>
-<span class="nc" id="L112">                log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while applying an animation styler!&quot;, e);</span>
+<span class="fc" id="L132">                styleConf = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
+<span class="nc" id="L133">            } catch ( Exception e ) {</span>
+<span class="nc" id="L134">                log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while gathering an animated style!&quot;, e);</span>
                 /*
                      If any exceptions happen in a Styler implementation provided by a user,
                      then we don't want to prevent the other Stylers from doing their job,
                      which is why we catch any exceptions immediately!
 
-		             We log as warning because exceptions during
-		             styling are not a big deal!
+                     We log as warning because exceptions during
+                     styling are not a big deal!
 
                      Hi there! If you are reading this, you are probably a developer using the SwingTree
                      library, thank you for using it! Good luck finding out what went wrong! :)
                 */
-<span class="fc" id="L124">            }</span>
+<span class="fc" id="L146">            }</span>
 
-<span class="fc" id="L126">        styleConf = styleConf.simplified();</span>
+<span class="fc" id="L148">        styleConf = styleConf.simplified();</span>
 
-<span class="fc" id="L128">        styleConf = _applyDPIScaling(styleConf);</span>
+<span class="fc" id="L150">        styleConf = _applyDPIScaling(styleConf);</span>
 
-<span class="fc" id="L130">        styleConf = styleConf.correctedForRounding();</span>
+<span class="fc" id="L152">        styleConf = styleConf.correctedForRounding();</span>
 
-<span class="fc" id="L132">        return styleConf;</span>
+<span class="fc" id="L154">        return styleConf;</span>
     }
 
     private static StyleConf _applyDPIScaling(StyleConf styleConf) {
-<span class="fc bfc" id="L136" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
-<span class="fc" id="L137">            return styleConf;</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
+<span class="fc" id="L159">            return styleConf;</span>
 
-<span class="fc" id="L139">        return styleConf.scale( UI.scale() );</span>
+<span class="fc" id="L161">        return styleConf.scale( UI.scale() );</span>
     }
 
 }

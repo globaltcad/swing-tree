@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how the style API can be used to style\n    individual components declaratively.\n    You may access it on any SwingTree builder by passing a `Styler` lambda\n    to the `withStyle` method.\n    A `Styler` lambda applies style rules to a component\n    by receiving a `ComponentStyleDelegate` and returning\n    an updated version with the desired style rules applied.\n\n    Here a typical example of how to style a button\n    using the style API:\n    ```java\n        UI.button(\"Click Me!\")\n        .withStyle( it -> it\n            .borderColor(Color.CYAN)\n            .borderWidthAt(Edge.BOTTOM, 3)\n            .borderRadius(10)\n        )\n    ```\n\n    Here the `it` variable is the `ComponentStyleDelegate` which exposes\n    an extensive API for configuring how a particular component\n    looks and behaves.",
   "subjects":[],
   "statistics":{
-    "runs":"124",
+    "runs":"140",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -459,7 +459,7 @@
 
         {"kind":"expect","text":"\n            Note that the insets of the border of the component now model the margins of the component.\n            This information is used by the layout manager to position the component correctly.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(0, 64 * uiScale, 0, 42 * uiScale)"]},
 
-        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
       ],
@@ -480,7 +480,7 @@
 
         {"kind":"expect","text":"\n            Note that the insets of the border of the component now model the margins of the component.\n            This information is used by the layout manager to position the component correctly.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(0, 64 * uiScale, 0, 42 * uiScale)"]},
 
-        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
       ],
@@ -501,7 +501,7 @@
 
         {"kind":"expect","text":"\n            Note that the insets of the border of the component now model the margins of the component.\n            This information is used by the layout manager to position the component correctly.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(0, 64 * uiScale, 0, 42 * uiScale)"]},
 
-        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
       ],
@@ -522,7 +522,7 @@
 
         {"kind":"expect","text":"","code":["panel.border.getBorderInsets(panel) == new Insets(11 * uiScale, 84 * uiScale, 30 * uiScale, 52 * uiScale)"]},
 
-        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
       ],
@@ -543,7 +543,7 @@
 
         {"kind":"expect","text":"","code":["panel.border.getBorderInsets(panel) == new Insets(11 * uiScale, 84 * uiScale, 30 * uiScale, 52 * uiScale)"]},
 
-        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
       ],
@@ -564,7 +564,7 @@
 
         {"kind":"expect","text":"","code":["panel.border.getBorderInsets(panel) == new Insets(11 * uiScale, 84 * uiScale, 30 * uiScale, 52 * uiScale)"]},
 
-        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
       ],
@@ -585,7 +585,7 @@
 
         {"kind":"expect","text":"\n            The insets of the border not only model the padding and margin of the component,\n            but also the border width.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(12 * uiScale, 19 * uiScale, 5 * uiScale, 7 * uiScale)"]},
 
-        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["1","2","3"]}}
       ],
@@ -606,7 +606,7 @@
 
         {"kind":"expect","text":"\n            The insets of the border not only model the padding and margin of the component,\n            but also the border width.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(12 * uiScale, 19 * uiScale, 5 * uiScale, 7 * uiScale)"]},
 
-        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["1","2","3"]}}
       ],
@@ -627,7 +627,7 @@
 
         {"kind":"expect","text":"\n            The insets of the border not only model the padding and margin of the component,\n            but also the border width.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(12 * uiScale, 19 * uiScale, 5 * uiScale, 7 * uiScale)"]},
 
-        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","panel.layout instanceof MigLayout"]},
+        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","(panel.layout instanceof MigLayout)"]},
 
         {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["1","2","3"]}}
       ],
@@ -2573,6 +2573,510 @@
         {"kind":"then","text":"The image is as expected (compared with the snapshot above).","code":["Utility.similarityBetween(image, \"components/thick-border-with-different-colors.png\", 99.6) > 99.6"]},
 
         {"kind":"where","text":"We test this using the following scaling values:","code":{"scale":["5.5f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-0.png\" alt=\"/snapshots/components/svgInStyle/variant-0.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-1.png\" alt=\"/snapshots/components/svgInStyle/variant-1.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-2_1_.png\" alt=\"/snapshots/components/svgInStyle/variant-2_1_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-3_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-3_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-5.png\" alt=\"/snapshots/components/svgInStyle/variant-5.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-6_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-6_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-6_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-6_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-6_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-6_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-7_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-7_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-7_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-7_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-8.png\" alt=\"/snapshots/components/svgInStyle/variant-8.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-9_2_.png\" alt=\"/snapshots/components/svgInStyle/variant-9_2_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-10_1_.png\" alt=\"/snapshots/components/svgInStyle/variant-10_1_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Style API can render an SVG String onto a component as expected. [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can use the Style API of SwingTree to directly render\n            SVG code onto a Swing component as part of the \"image\" sub style.\n            In this example/test we take a simple SVG document and combine\n            it with a unique style.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/svgInStyle/variant-11_1_.png\" alt=\"/snapshots/components/svgInStyle/variant-11_1_.png\" style=\"max-width: 50%;\" />\n\n            The style configuration is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(uiScale))"]},
+
+        {"kind":"and","text":"A simple SVG consisting of a rounded rectangle and a circle inside.","code":["var svg = \"<svg width=\\\"300\\\" height=\\\"150\\\" viewBox=\\\"0 0 300 150\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\">\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"0\\\" width=\\\"300\\\" height=\\\"150\\\" fill=\\\"blue\\\" />\\n\" +","            \"    <rect x=\\\"0\\\" y=\\\"50\\\" width=\\\"300\\\" height=\\\"50\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"0\\\" width=\\\"50\\\" height=\\\"150\\\" fill=\\\"orange\\\" />\\n\" +","            \"    <rect x=\\\"125\\\" y=\\\"50\\\" width=\\\"50\\\" height=\\\"50\\\" fill=\\\"green\\\" />\\n\" +","            \"</svg>\\n\""]},
+
+        {"kind":"and","text":"We pass the following style rules to a `JBox` UI:","code":["var ui =","            UI.box().withStyle( it -> it","                .margin(3)","                .padding(5) // with the default image placement boundary this padding does not affect image placement","                .border(2, \"dark cyan\")","                .size(64, 32)","                .image(","                    conf -> configurator.configure(conf.svg(svg))","                )","            )"]},
+
+        {"kind":"when","text":"We create a buffered image from the SVG based icon...","code":["var box = ui.get(JBox)","var img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now do a bit of an invariance test! So instead of giving the SVG\n            text directly to the Style Engine, we first convert it to an image,\n            and then instruct the engine to render the exact same image based on that...\n        ","code":["var svgIcon = SvgIcon.of(svg)","var svgImg = svgIcon.getImage()"]},
+
+        {"kind":"and","text":"We re-create the UI:","code":["ui = UI.box().withStyle( it -> it","         .margin(3)","         .padding(5) // with the default image placement boundary this padding does not affect image placement","         .border(2, \"dark cyan\")","         .size(64, 32)","         .image(","             conf -> configurator.configure(conf.image(svgImg))","         )","     )"]},
+
+        {"kind":"and","text":"","code":["box = ui.get(JBox)","img = Utility.renderSingleComponent(box)"]},
+
+        {"kind":"then","text":"It also matched the PNGs stored in the test snapshots folder!","code":["Utility.similarityBetween(img, \"components/svgInStyle/${imgToMatch}.png\", 99.5) > 99.5"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["4","1","2","3","3","3","3","3","2","2","2","2","2","3"],"imgToMatch":["'variant-0'","'variant-1'","'variant-2'","'variant-3'","'variant-5'","'variant-6'","'variant-6'","'variant-6'","'variant-7'","'variant-7'","'variant-8'","'variant-9'","'variant-10'","'variant-11'"],"configurator":["{it.size(54, 22)}","{it}","{it.fitMode(UI.FitComponent.MIN_DIM)}","{it.fitMode(UI.FitComponent.MAX_DIM)}","{it.width(35)}","{it.size(15, 15)}","{it.padding(5).size(25, 25)}","{it.padding(10, 5).size(25, 35)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)}","{it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}","{it.size(25, 15).opacity(0.5f)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can render a radial gradient onto a panel using the style API. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree style engine allows you to render a radial gradient\n            onto any Swing component using the \"gradient\" sub style.\n            In this example/test we configure a radial gradient which \n            transitions from dark blue in the center to transparent white at the edges,\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/radial-gradient-panel.png\" alt=\"/snapshots/components/radial-gradient-panel.png\" style=\"max-width: 50%;\" />\n\n            The rendered component is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            For more thorough testing, we initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(scale))"]},
+
+        {"kind":"and","text":"We create a panel with a radial gradient style rules:","code":["var ui =","        UI.panel(\"ins 24, fill, wrap 1\").withBackground(Color.PINK)","        .add(\"grow\",","            UI.panel(\"fill, wrap 1\").withPrefSize(100, 80)","            .withStyle( it -> it","                .gradient( g -> g","                    .type(UI.GradientType.RADIAL)","                    .colors(UI.Color.DARKBLUE, UI.Color.WHITE.withAlpha(0))","                )","            )","        )"]},
+
+        {"kind":"when","text":"We render the UI into a `BufferedImage` instance.","code":["var image = Utility.offscreenRender(ui.get(JPanel))"]},
+
+        {"kind":"then","text":"The image is as expected (compared with the snapshot above).","code":["Utility.similarityBetween(image, \"components/radial-gradient-panel.png\", 99.5) > 99.5"]},
+
+        {"kind":"where","text":"We test this using the following scaling values:","code":{"scale":["1f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can render a radial gradient onto a panel using the style API. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree style engine allows you to render a radial gradient\n            onto any Swing component using the \"gradient\" sub style.\n            In this example/test we configure a radial gradient which \n            transitions from dark blue in the center to transparent white at the edges,\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/radial-gradient-panel.png\" alt=\"/snapshots/components/radial-gradient-panel.png\" style=\"max-width: 50%;\" />\n\n            The rendered component is then matched with a previously made snapshot.\n            We expect the style engine to produce this exact same rendering!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            For more thorough testing, we initialize SwingTree with a custom UI scaling factor:\n        ","code":["SwingTree.initializeUsing(it->it.uiScaleFactor(scale))"]},
+
+        {"kind":"and","text":"We create a panel with a radial gradient style rules:","code":["var ui =","        UI.panel(\"ins 24, fill, wrap 1\").withBackground(Color.PINK)","        .add(\"grow\",","            UI.panel(\"fill, wrap 1\").withPrefSize(100, 80)","            .withStyle( it -> it","                .gradient( g -> g","                    .type(UI.GradientType.RADIAL)","                    .colors(UI.Color.DARKBLUE, UI.Color.WHITE.withAlpha(0))","                )","            )","        )"]},
+
+        {"kind":"when","text":"We render the UI into a `BufferedImage` instance.","code":["var image = Utility.offscreenRender(ui.get(JPanel))"]},
+
+        {"kind":"then","text":"The image is as expected (compared with the snapshot above).","code":["Utility.similarityBetween(image, \"components/radial-gradient-panel.png\", 99.5) > 99.5"]},
+
+        {"kind":"where","text":"We test this using the following scaling values:","code":{"scale":["1f","2f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

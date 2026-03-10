@@ -361,7 +361,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We create a property representing the font of a component.","code":["Val<UI.Font> property = Var.of(UI.Font.of(\"Ubuntu\", UI.FontStyle.PLAIN, 12))","property.get().toAwtFont()"]},
 
@@ -394,7 +394,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We create a property representing the font of a component.","code":["Val<UI.Font> property = Var.of(UI.Font.of(\"Ubuntu\", UI.FontStyle.PLAIN, 12))","property.get().toAwtFont()"]},
 
@@ -427,7 +427,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We create a property representing the font of a component.","code":["Val<UI.Font> property = Var.of(UI.Font.of(\"Ubuntu\", UI.FontStyle.PLAIN, 12))","property.get().toAwtFont()"]},
 
@@ -460,7 +460,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We create a property representing the font of a component.","code":["Val<UI.Font> property = Var.of(UI.Font.of(\"Ubuntu\", UI.FontStyle.PLAIN, 12))","property.get().toAwtFont()"]},
 
@@ -493,7 +493,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initialiseUsing(it -> it.uiScaleFactor(scalingFactor))"]},
+        {"kind":"given","text":"We first initialise SwingTree using the given scaling factor","code":["SwingTree.initializeUsing(it -> it.uiScaleFactor(scalingFactor))"]},
 
         {"kind":"and","text":"We create a property representing the font of a component.","code":["Val<UI.Font> property = Var.of(UI.Font.of(\"Ubuntu\", UI.FontStyle.PLAIN, 12))","property.get().toAwtFont()"]},
 
