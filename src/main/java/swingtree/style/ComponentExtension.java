@@ -158,7 +158,7 @@ public final class ComponentExtension<C extends JComponent>
      *
      * <b>Typical Usage:</b>
      * <pre>{@code
-     * @Override
+     * //Override
      * public void paint(Graphics g, JComponent comp) {
      *     ComponentExtension.from(comp).paintBackground(g, g2d -> {
      *         super.paint(g2d, comp); // Native look and feel painting

@@ -77,17 +77,17 @@ import java.util.function.Supplier;
  *  always return {@code true}, and then implement {@link javax.swing.plaf.ComponentUI#paint(Graphics, JComponent)}
  *  to delegate to <i>SwingTree</i> like so:
  *  <pre>{@code
- *    @Override
+ *    //Override
  *    public void paint(
  *        Graphics g,
  *        JComponent comp
  *    ) {
  *        ComponentExtension.from(comp)
- *            .paintBackground(g, g2d->{
+ *            .paintBackground(g, g2d -> {
  *                super.paint(g2d, comp);
  *            });
  *    }
- *    @Override
+ *    //Override
  *    public boolean canForwardPaintingToSwingTree() {
  *        return true;
  *    }
