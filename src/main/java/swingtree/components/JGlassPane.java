@@ -75,7 +75,10 @@ public class JGlassPane extends JPanel implements StylableComponent
     private final Map<String, Painter> activePaintJobs = new LinkedHashMap<>();
     protected @Nullable JRootPane rootPane;
 
-
+    /**
+     *  Creates a new <code>JGlassPane</code> with a default <code>MigLayout</code> instance
+     *  configured to be without insets and gaps between components.
+     */
     public JGlassPane() {
         this.setVisible(false);
         setLayout(new MigLayout("fill, ins 0"));

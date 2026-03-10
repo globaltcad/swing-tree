@@ -110,7 +110,7 @@ public final class OptionalUI<C extends Component> {
      * @param <C> The component type to fetch.
      * @param <T> A generic supertype of the component, but usually the component type itself.
      */
-    static <@Nullable C extends T, T extends Component> OptionalUI<C> of(Supplier<UIForAnything<?,C,T>> ui) {
+    static <C extends T, T extends Component> OptionalUI<C> of(Supplier<UIForAnything<?,C,T>> ui) {
         return UI.runAndGet(()-> {
             C component = (C) ui.get().get((Class) java.awt.Component.class);
             return component == null ? (OptionalUI<C>) EMPTY

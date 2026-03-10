@@ -110,6 +110,7 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Creates an {@link SvgIcon} from the supplied URL pointing to an SVG document and a custom size.
      * @param svgUrl The URL to the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
      * @return A new {@link SvgIcon} created from the SVG found at the supplied URL and with the given size.
@@ -157,6 +158,8 @@ public final class SvgIcon extends ImageIcon
      *  {@link #withIconSize(int, int)}, {@link #withFitComponent(UI.FitComponent)} and
      *  {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param stream The input stream supplying the text data of the SVG document.
+     * @return A new {@link SvgIcon} created from a new {@link SVGDocument} document parsed and
+     *         constructed from the supplied input stream (which is interpreted as SVG text).
      */
     public static SvgIcon of( InputStream stream ) {
         RawSVG args = _loadSvgDocument(stream, Size.unknown());
@@ -176,6 +179,9 @@ public final class SvgIcon extends ImageIcon
      *  {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param stream The input stream supplying the text data of the SVG document.
      * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} created from a new {@link SVGDocument} constructed from the supplied
+     *          input stream (which is interpreted as SVG text) and with a custom width and height
+     *          defined by the supplied {@link Size}.
      */
     public static SvgIcon of( InputStream stream, Size size ) {
         RawSVG args = _loadSvgDocument(stream, size);
@@ -191,6 +197,8 @@ public final class SvgIcon extends ImageIcon
      *  {@link #withIconSize(int, int)}, {@link #withFitComponent(UI.FitComponent)} and
      *  {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     * @return A new {@link SvgIcon} created from the supplied {@link SVGDocument} with an unknown size,
+     *         meaning that it will be rendered according to the size of the component
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
         RawSVG args = new RawSVG(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN);
@@ -205,6 +213,8 @@ public final class SvgIcon extends ImageIcon
      * {@link #withPreferredPlacement(UI.Placement)} methods.
      * @param svgDocument The already loaded SVG document, which will be used to render the icon.
      * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} created from the supplied {@link SVGDocument} and
+     *          with a custom width and height defined by the supplied {@link Size}.
      */
     public static SvgIcon of( SVGDocument svgDocument, Size size ) {
         RawSVG args = new RawSVG(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN);
@@ -756,7 +766,7 @@ public final class SvgIcon extends ImageIcon
      *         SVG document as reference frame.</b>
      */
     public SvgIcon withPercentageSizeResolvedAsPixels() {
-        if ( _core.svgDocument == null || _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
+        if ( _core.svgDocument == null || ( _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) ) {
             return this;
         }
         return new SvgIcon(
@@ -771,7 +781,7 @@ public final class SvgIcon extends ImageIcon
     }
 
     private Size _percentageResolvedSize() {
-        if ( _core.svgDocument == null || _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
+        if ( _core.svgDocument == null || ( _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) ) {
             return _size;
         }
         if ( _widthUnit == Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE ) {
