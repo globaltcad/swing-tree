@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DragDropComponentConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">DragDropComponentConf.java</span></div><h1>DragDropComponentConf.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Action;
+import swingtree.api.Configurator;
+
+import javax.swing.JComponent;
+import java.awt.dnd.*;
+import java.util.Objects;
+
+/**
+ *  A value based builder object for configuring drop target events for a component
+ *  using the {@link UIForAnySwing#withDropSite(Configurator)} method, where an instance of this
+ *  class is passed to the {@link Configurator} lambda defining how
+ *  the component should behave and look when something is dragged and dropped
+ *  on top of it. &lt;br&gt;
+ *  &lt;br&gt;
+ *  &lt;b&gt;For listening to drop events, the following methods are available:&lt;/b&gt;
+ *  &lt;ul&gt;
+ *      &lt;li&gt;{@link #onDragEnter(Action)} - 
+ *          Called while a drag operation is ongoing, when the mouse pointer enters
+ *          the operable part of the drop site for the &lt;code&gt;DropTarget&lt;/code&gt;
+ *          registered with this listener.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDragOver(Action)} -
+ *          Called when a drag operation is ongoing, while the mouse pointer is still
+ *          over the operable part of the drop site for the &lt;code&gt;DropTarget&lt;/code&gt;
+ *          registered with this listener.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDropActionChanged(Action)} -
+ *          Called if the user has modified
+ *          the current drop gesture.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDragExit(Action)} -
+ *          Called while a drag operation is ongoing, when the mouse pointer has
+ *          exited the operable part of the drop site for the
+ *          &lt;code&gt;DropTarget&lt;/code&gt; registered with this listener.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;{@link #onDrop(Action)} -
+ *          Called when the drag operation has terminated with a drop on
+ *          the operable part of the drop site for the &lt;code&gt;DropTarget&lt;/code&gt;
+ *          registered with this listener.
+ *          This is where the transfer of the data should take place.
+ *      &lt;/li&gt;
+ *  &lt;/ul&gt;
+ *
+ * @param &lt;C&gt; The type of the component to be dragged away.
+ */
+public final class DragDropComponentConf&lt;C extends JComponent&gt;
+{
+<span class="pc" id="L52">    private static final Action NO_ACTION = e -&gt; {};</span>
+<span class="fc" id="L53">    private static final Logger log = LoggerFactory.getLogger(DragDropComponentConf.class);</span>
+
+    public static &lt;C extends JComponent&gt; DragDropComponentConf&lt;C&gt; of(
+        C component
+    ) {
+<span class="fc" id="L58">        return new DragDropComponentConf&lt;&gt;(</span>
+                component,
+                NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION
+        );
+    }
+
+    private final C                           _component;
+    private final Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; _onDragEnter;
+    private final Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; _onDragOver;
+    private final Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; _onDropActionChanged;
+    private final Action&lt;ComponentDelegate&lt;C,DropTargetEvent&gt;&gt;     _onDragExit;
+    private final Action&lt;ComponentDelegate&lt;C,DropTargetDropEvent&gt;&gt; _onDragDropEnd;
+
+    private DragDropComponentConf(
+        C component,
+        Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; onDragEnter,
+        Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; onDragOver,
+        Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; onDropActionChanged,
+        Action&lt;ComponentDelegate&lt;C,DropTargetEvent&gt;&gt;     onDragExit,
+        Action&lt;ComponentDelegate&lt;C,DropTargetDropEvent&gt;&gt; onDragDropEnd
+<span class="fc" id="L78">    ) {</span>
+<span class="fc" id="L79">        _component           = Objects.requireNonNull(component);</span>
+<span class="fc" id="L80">        _onDragEnter         = Objects.requireNonNull(onDragEnter);</span>
+<span class="fc" id="L81">        _onDragOver          = Objects.requireNonNull(onDragOver);</span>
+<span class="fc" id="L82">        _onDropActionChanged = Objects.requireNonNull(onDropActionChanged);</span>
+<span class="fc" id="L83">        _onDragExit          = Objects.requireNonNull(onDragExit);</span>
+<span class="fc" id="L84">        _onDragDropEnd       = Objects.requireNonNull(onDragDropEnd);</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * Returns the component that this configuration is for
+     * so that it can be used in the {@link UIForAnySwing#withDropSite(Configurator)}
+     * method to configure the drop site based on the component state.
+     *
+     * @return The component that this configuration is for.
+     */
+    public C component() {
+<span class="nc" id="L95">        return _component;</span>
+    }
+
+    /**
+     * The supplied action is called while a drag operation is ongoing, 
+     * when the mouse pointer enters
+     * the operable part of the drop site for the &lt;code&gt;DropTarget&lt;/code&gt;
+     * registered with this listener.
+     *
+     * @param action An {@link Action} with a &lt;code&gt;DropTargetDragEvent&lt;/code&gt;
+     *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
+     */
+    public DragDropComponentConf&lt;C&gt; onDragEnter(Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; action) {
+<span class="nc" id="L109">        return new DragDropComponentConf&lt;&gt;(</span>
+            _component,
+            action,
+            _onDragOver,
+            _onDropActionChanged,
+            _onDragExit,
+            _onDragDropEnd
+        );
+    }
+
+    /**
+     * The supplied action is called when a drag operation is ongoing, while the mouse pointer is still
+     * over the operable part of the drop site for the &lt;code&gt;DropTarget&lt;/code&gt;
+     * registered with this listener.
+     *
+     * @param action An {@link Action} with a &lt;code&gt;DropTargetDragEvent&lt;/code&gt;
+     *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
+     */
+    public DragDropComponentConf&lt;C&gt; onDragOver(Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; action) {
+<span class="nc" id="L129">        return new DragDropComponentConf&lt;&gt;(</span>
+            _component,
+            _onDragEnter,
+            action,
+            _onDropActionChanged,
+            _onDragExit,
+            _onDragDropEnd
+        );
+    }
+
+    /**
+     * The supplied action is called if the user has modified
+     * the current drop gesture.
+     *
+     * @param action An {@link Action} with a &lt;code&gt;DropTargetDragEvent&lt;/code&gt;
+     *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
+     */
+    public DragDropComponentConf&lt;C&gt; onDropActionChanged(Action&lt;ComponentDelegate&lt;C,DropTargetDragEvent&gt;&gt; action) {
+<span class="nc" id="L148">        return new DragDropComponentConf&lt;&gt;(</span>
+            _component,
+            _onDragEnter,
+            _onDragOver,
+            action,
+            _onDragExit,
+            _onDragDropEnd
+        );
+    }
+
+    /**
+     * The supplied action is called while a drag operation is ongoing, when the mouse pointer has
+     * exited the operable part of the drop site for the
+     * {@link DropTarget} registered with this listener.
+     *
+     * @param action An {@link Action} with a &lt;code&gt;DropTargetEvent&lt;/code&gt;
+     *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
+     */
+    public DragDropComponentConf&lt;C&gt; onDragExit(Action&lt;ComponentDelegate&lt;C,DropTargetEvent&gt;&gt; action) {
+<span class="nc" id="L168">        return new DragDropComponentConf&lt;&gt;(</span>
+            _component,
+            _onDragEnter,
+            _onDragOver,
+            _onDropActionChanged,
+            action,
+            _onDragDropEnd
+        );
+    }
+
+    /**
+     * The supplied {@link Action} is called when the drag operation 
+     * has terminated with a drop on
+     * the operable part of the drop site for the &lt;code&gt;DropTarget&lt;/code&gt;
+     * registered with this listener.
+     * &lt;p&gt;
+     * This method is responsible for undertaking
+     * the transfer of the data associated with the
+     * gesture. The {@link DropTargetDropEvent}
+     * provides a means to obtain a {@link java.awt.datatransfer.Transferable}
+     * object that represents the data object(s) to
+     * be transfered.&lt;P&gt;
+     * From this method, the &lt;code&gt;DropTargetListener&lt;/code&gt;
+     * shall accept or reject the drop via the
+     * acceptDrop(int dropAction) or rejectDrop() methods of the
+     * {@link DropTargetDropEvent} parameter.
+     * &lt;P&gt;
+     * After acceptDrop(), but not before,
+     * {@link DropTargetDropEvent}'s getTransferable()
+     * method may be invoked, and data transfer may be
+     * performed via the returned {@link java.awt.datatransfer.Transferable}'s
+     * getTransferData() method.
+     * &lt;P&gt;
+     * At the completion of a drop, an implementation
+     * of this method is required to signal the success/failure
+     * of the drop by passing an appropriate
+     * &lt;code&gt;boolean&lt;/code&gt; to the {@link DropTargetDropEvent}'s
+     * dropComplete(boolean success) method.
+     * &lt;P&gt;
+     * Note: The data transfer should be completed before the call  to the
+     * {@link DropTargetDropEvent}'s dropComplete(boolean success) method.
+     * After that, a call to the getTransferData() method of the
+     * {@link java.awt.datatransfer.Transferable} returned by
+     * &lt;code&gt;DropTargetDropEvent.getTransferable()&lt;/code&gt; is guaranteed to
+     * succeed only if the data transfer is local; that is, only if
+     * {@link DropTargetDropEvent#isLocalTransfer} returns
+     * &lt;code&gt;true&lt;/code&gt;. Otherwise, the behavior of the call is
+     * implementation-dependent.
+     *
+     * @param action An {@link Action} with a {@link DropTargetDropEvent}
+     *               wrapped in a {@link ComponentDelegate} passed to it.
+     * @return A new {@link DragDropComponentConf} updated with the supplied action.
+     */
+    public DragDropComponentConf&lt;C&gt; onDrop( Action&lt;ComponentDelegate&lt;C,DropTargetDropEvent&gt;&gt; action ) {
+<span class="fc" id="L222">        return new DragDropComponentConf&lt;&gt;(</span>
+            _component,
+            _onDragEnter,
+            _onDragOver,
+            _onDropActionChanged,
+            _onDragExit,
+            action
+        );
+    }
+
+
+    DropTarget toNewDropTarget() {
+<span class="fc" id="L234">        return new DropTarget(</span>
+            _component,
+<span class="fc" id="L236">            new DropTargetListener() {</span>
+                @Override
+                public void dragEnter(DropTargetDragEvent event) {
+                    try {
+<span class="nc" id="L240">                        _onDragEnter.accept(new ComponentDelegate&lt;&gt;(_component, event));</span>
+<span class="nc" id="L241">                    } catch (Exception e) {</span>
+<span class="nc" id="L242">                        log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing drag enter event.&quot;, e);</span>
+<span class="nc" id="L243">                    }</span>
+<span class="nc" id="L244">                }</span>
+
+                @Override
+                public void dragOver(DropTargetDragEvent event) {
+                    try {
+<span class="nc" id="L249">                        _onDragOver.accept(new ComponentDelegate&lt;&gt;(_component, event));</span>
+<span class="nc" id="L250">                    } catch (Exception e) {</span>
+<span class="nc" id="L251">                        log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing drag over event.&quot;, e);</span>
+<span class="nc" id="L252">                    }</span>
+<span class="nc" id="L253">                }</span>
+
+                @Override
+                public void dropActionChanged(DropTargetDragEvent event) {
+                    try {
+<span class="nc" id="L258">                        _onDropActionChanged.accept(new ComponentDelegate&lt;&gt;(_component, event));</span>
+<span class="nc" id="L259">                    } catch (Exception e) {</span>
+<span class="nc" id="L260">                        log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing drop action changed event.&quot;, e);</span>
+<span class="nc" id="L261">                    }</span>
+<span class="nc" id="L262">                }</span>
+
+                @Override
+                public void dragExit(DropTargetEvent event) {
+                    try {
+<span class="nc" id="L267">                        _onDragExit.accept(new ComponentDelegate&lt;&gt;(_component, event));</span>
+<span class="nc" id="L268">                    } catch (Exception e) {</span>
+<span class="nc" id="L269">                        log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing drag exit event.&quot;, e);</span>
+<span class="nc" id="L270">                    }</span>
+<span class="nc" id="L271">                }</span>
+
+                @Override
+                public void drop(DropTargetDropEvent event) {
+                    try {
+<span class="nc" id="L276">                        _onDragDropEnd.accept(new ComponentDelegate&lt;&gt;(_component, event));</span>
+<span class="nc" id="L277">                    } catch (Exception e) {</span>
+<span class="nc" id="L278">                        log.error(SwingTree.get().logMarker(), &quot;Error occurred while processing drop event.&quot;, e);</span>
+<span class="nc" id="L279">                    }</span>
+<span class="nc" id="L280">                }</span>
+            }
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

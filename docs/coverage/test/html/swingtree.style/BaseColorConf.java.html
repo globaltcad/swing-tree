@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseColorConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">BaseColorConf.java</span></div><h1>BaseColorConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+
+import java.awt.Color;
+import java.util.Objects;
+import java.util.Optional;
+
+@Immutable
+final class BaseColorConf
+{
+<span class="fc" id="L13">    private static final BaseColorConf _NONE = new BaseColorConf(null, null, BorderColorsConf.none());</span>
+
+<span class="fc" id="L15">    static BaseColorConf none() { return _NONE; }</span>
+
+    private final @Nullable Color  _foundationColor;
+    private final @Nullable Color  _backgroundColor;
+    private final BorderColorsConf _borderColors;
+
+    static BaseColorConf of(
+        @Nullable Color  foundationColor,
+        @Nullable Color  backgroundColor,
+        BorderColorsConf borderColors
+    ) {
+<span class="fc bfc" id="L26" title="All 4 branches covered.">        if (</span>
+            foundationColor == null &amp;&amp;
+            backgroundColor == null &amp;&amp;
+<span class="fc bfc" id="L29" title="All 2 branches covered.">            borderColors.equals(BorderColorsConf.none())</span>
+        )
+<span class="fc" id="L31">            return _NONE;</span>
+        else
+<span class="fc" id="L33">            return new BaseColorConf(foundationColor, backgroundColor, borderColors);</span>
+    }
+
+    BaseColorConf(
+        @Nullable Color  foundationColor,
+        @Nullable Color  backgroundColor,
+        BorderColorsConf borderColors
+<span class="fc" id="L40">    ) {</span>
+<span class="fc" id="L41">        _foundationColor = foundationColor;</span>
+<span class="fc" id="L42">        _backgroundColor = backgroundColor;</span>
+<span class="fc" id="L43">        _borderColors    = Objects.requireNonNull(borderColors);</span>
+<span class="fc" id="L44">    }</span>
+
+    Optional&lt;Color&gt; foundationColor() {
+<span class="fc" id="L47">        return Optional.ofNullable(_foundationColor);</span>
+    }
+
+    Optional&lt;Color&gt; backgroundColor() {
+<span class="fc" id="L51">        return Optional.ofNullable(_backgroundColor);</span>
+    }
+
+    BorderColorsConf borderColor() {
+<span class="fc" id="L55">        return _borderColors;</span>
+    }
+
+
+    @Override
+<span class="fc" id="L60">    public int hashCode() { return Objects.hash(_foundationColor, _backgroundColor, _borderColors); }</span>
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L67">        BaseColorConf rhs = (BaseColorConf) obj;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        return Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">               Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">               Objects.equals(_borderColors,    rhs._borderColors);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L75">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+                &quot;foundationColor=&quot; + _foundationColor + &quot;, &quot; +
+                &quot;backgroundColor=&quot; + _backgroundColor + &quot;, &quot; +
+                &quot;borderColor=&quot;     + _borderColors    +
+            &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

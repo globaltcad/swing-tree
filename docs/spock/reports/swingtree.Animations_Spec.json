@@ -1,0 +1,251 @@
+{
+  "className":"swingtree.Animations_Spec",
+  "title":"Animations",
+  "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations\n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a `Timer` that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
+  "subjects":["swingtree.animation.AnimationDispatcher","swingtree.UI","swingtree.animation.LifeTime"],
+  "statistics":{
+    "runs":"9",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Use `Animatable<M>` to define animations for immutable view models.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A very well proven design pattern is the MVI/MVL pattern,\n            which stands for Model-View-Intent/Lenses. This pattern\n            is based on the idea that the view is immutable and can only change \n            through an intent or a property lens.\n\n            But then how do you animate the view if it is immutable?\n            More specifically, how can you make the animation logic and\n            code part of the view model?\n\n            The answer is the `Animatable<M>` object, a wrapper for\n            a `LifeTime` and a lambda function which maps the animation\n            status and a custom model `M` to a new model `M`.\n\n            Your immutable view model can then return an `Animatable<M>`\n            object which will be used by the views lenses to animate the view model\n            as well and indirectly through other property lenses also the view.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple pseudo \"immutable\" view model and a mutable property for holding the model.","code":["var model = [text:\"Hello World!\", color:Color.BLACK]","var state = Var.of(model)"]},
+
+        {"kind":"and","text":"A simple list used as a trace for the animation runs.","code":["var trace = []"]},
+
+        {"kind":"and","text":"An `Animatable<M>` object that will animate the color of the view model.","code":["var animatable = Animatable.of(LifeTime.of(1, TimeUnit.SECONDS), model, (status, m) -> {","    trace << status.progress()","    float highlight = (float) (1f - (float) status.progress())","    return [text:m.text, color:new Color(highlight, 1, highlight)]","})"]},
+
+        {"kind":"when","text":"We animate the view model with the `Animatable<M>` object.","code":["UI.animate(state, animatable)"]},
+
+        {"kind":"then","text":"The view model has been animated.","code":["Wait.until({ trace.contains(1d) },3_500)"]},
+
+        {"kind":"and","text":"The view model has the correct color.","code":["state.get().color.getRed() < 10","state.get().color.getGreen() == 255","state.get().color.getBlue() < 10"]},
+
+        {"kind":"and","text":"We can savely assume that the initial model still has the same state.","code":["model.text == \"Hello World!\"","model.color == Color.BLACK"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the API exposed by `UI.animateFor(..)` to schedule animations",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing-Tree has a built in animation scheduler that can be used to schedule \n            implementations of the \"Animation\" interface. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which we will use to store the animation states.","code":["var progressValues = [0:[],1:[],2:[]]"]},
+
+        {"kind":"when","text":"We schedule an animation that will run 3 times and has a duration of 0.1 seconds.","code":["UI.animateFor(0.2, TimeUnit.SECONDS)","    .asLongAs({ it.repeats() < 3 })","    .go({","        progressValues[(int)it.repeats()] << it.progress()","    })"]},
+
+        {"kind":"then","text":"We wait for each animation to finish with a full progress:","code":["Wait.until({progressValues[2].contains(1d)},2_500)"]},
+
+        {"kind":"and","text":"\n            We confirm that the animation has been executed fully!\n            The animation scheduler always ensures that the last animation run is\n            executed with a progress value of 1.0. \n            This is to ensure that the animation is always finished predictably.\n        ","code":["progressValues[2].last() == 1"]},
+
+        {"kind":"and","text":"The progress values are always between 0 and 1","code":["progressValues[0].every { it >= 0 && it <= 1 }","progressValues[1].every { it >= 0 && it <= 1 }","progressValues[2].every { it >= 0 && it <= 1 }"]},
+
+        {"kind":"and","text":"The progress values are always increasing","code":["progressValues[0] == new ArrayList(progressValues[0]).sort()","progressValues[1] == new ArrayList(progressValues[1]).sort()","progressValues[2] == new ArrayList(progressValues[2]).sort()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing-Tree has a built in animation scheduler that can be used to schedule \n            implementations of the \"Animation\" interface. This scheduler can also\n            be used to schedule animations that go from 1 to 0.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which we will use to store the animation states.","code":["var progressValues = [0:[],1:[],2:[]]"]},
+
+        {"kind":"when","text":"We schedule an animation that will run 3 times and has a duration of 0.1 seconds.","code":["UI.animateFor(0.1, TimeUnit.SECONDS, Stride.REGRESSIVE )","    .asLongAs({ it.repeats() < 3 })","    .go({","        progressValues[(int)it.repeats()] << it.progress()","    })"]},
+
+        {"kind":"then","text":"We wait for each animation to finish with a full regress:","code":["Wait.until({progressValues[2].contains(0d)},2_500)"]},
+
+        {"kind":"and","text":"\n            We confirm that the animation has been executed fully!\n            The animation scheduler always ensures that in case of a regressive animation,\n            the last animation run is always executed with a progress value of 0.0. \n            This is to ensure that the animation is always terminated predictably.\n        ","code":["progressValues[2].last() == 0"]},
+
+        {"kind":"and","text":"The progress values are always between 0 and 1","code":["progressValues[0].every { it >= 0 && it <= 1 }","progressValues[1].every { it >= 0 && it <= 1 }","progressValues[2].every { it >= 0 && it <= 1 }"]},
+
+        {"kind":"and","text":"The progress values are always decreasing","code":["progressValues[0] == new ArrayList(progressValues[0]).sort().reverse()","progressValues[1] == new ArrayList(progressValues[1]).sort().reverse()","progressValues[2] == new ArrayList(progressValues[2]).sort().reverse()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The event delegation object of a user event can be used to register animations.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is useful if you want to animate a component when it is clicked,\n            or when the mouse enters or leaves it.\n            This specification shows you how to register an animation inside\n            of an action listener and also shows you what kind of information\n            you can get from the \"AnimationState\" object\n            inside of your \"Animation\" implementation.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var iterations = [] // An iteration is when the progress goes from 0 to 1","var progresses = [] // The progress of an animation iteration is always between 0 and 1","var cycles = []     // The cycle value reaches 1 when the progress reaches 0.5 and then decreases to 0","var cyclesPlus42 = [] // The cycle value can be offset by any value","var cyclesMinus42 = [] // ..."]},
+
+        {"kind":"when","text":"","code":["var button =","        UI.button(\"Click me! Or don't.\")","        .onClick({","            it.animateFor(0.3, TimeUnit.SECONDS)","                .asLongAs({ it.repeats() < 4 })","                .go(status -> {","                    if ( !iterations.contains(status.repeats()) )","                        iterations << status.repeats()","                    progresses    << status.progress()","                    cycles        << status.cycle()","                    cyclesPlus42  << status.cyclePlus(0.42)","                    cyclesMinus42 << status.cycleMinus(0.42)","                })","        })","        .get(JButton)"]},
+
+        {"kind":"then","text":"Initially the animation has not been executed yet.","code":["iterations == []"]},
+
+        {"kind":"when","text":"We simulate a click on the button","code":["UI.runNow( () -> button.doClick() )"]},
+
+        {"kind":"and","text":"We wait for the animation to finish","code":["Wait.until({ iterations.size() == 4 && progresses.last() == 1 },3_500)","Thread.sleep(100)","UI.sync()"]},
+
+        {"kind":"then","text":"The animation has been completed 4 times.","code":["iterations == [0, 1, 2, 3]"]},
+
+        {"kind":"and","text":"The progress and cycle values are always between 0 and 1","code":["progresses.every { it >= 0 && it <= 1 }","cycles.every { it >= 0 && it <= 1 }","cyclesPlus42.every { it >= 0 && it <= 1 }","cyclesMinus42.every { it >= 0 && it <= 1 }"]},
+
+        {"kind":"and","text":"The cycles are calculated based on the progress like so:","code":["cycles == progresses.collect({ 1 - Math.abs(2 * it - 1) })","cyclesPlus42 == progresses.collect({ 1 - Math.abs(2 * ((it+0.42d)%1) - 1) })","cyclesMinus42 == progresses.collect({","                        double progress = ( it - 0.42 ) % 1","                        if ( progress < 0 ) progress += 1","                        return 1 - Math.abs(2 * progress - 1)","                    })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing-Tree has a built in animation scheduler, which is essentially a\n            \"Timer\" that can be used to schedule implementations of the \"Animation\" interface.\n            However this timer has a fixed resolution of 16 milliseconds so that\n            the animation is not executed too often but often enough to be smooth (60 fps).\n\n            This means that if you schedule an animation that has a duration of 1 millisecond\n            there is a chance that the animation will not be executed at all if it \n            is scheduled in between two timer ticks.\n\n            If you want to ensure that your animation is executed at least once you can\n            implement the \"finish\" method in your animation. This method will \n            always be called before the animation is removed from the scheduler.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["int wasFinished = 0"]},
+
+        {"kind":"when","text":"","code":["UI.animateFor(1, TimeUnit.MILLISECONDS)","  .asLongAs({ it.repeats() < 4 })","  .go(new Animation() {","      @Override void run(AnimationStatus status) {}","      @Override void finish(AnimationStatus status) { wasFinished++ }","  })"]},
+
+        {"kind":"and","text":"","code":["Wait.until({ wasFinished > 0 },2_500)"]},
+
+        {"kind":"then","text":"","code":["wasFinished == 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Animate the color of a label when it is clicked.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple list used as a trace for the animation runs.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A JLabel that will animate its color when it is clicked.","code":["var label =","        UI.label(\"Some text! :)\")","        .onMouseClick(it -> {","            it.animateFor(1, TimeUnit.SECONDS, status ->{","                float highlight = (float) (1f - (float) status.progress())","                it.component.setForeground(new Color(highlight, 1, highlight))","                trace << status.progress()","              })","        })","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label text is (almost) black.","code":["label.getForeground().getRed() < 60","label.getForeground().getGreen() < 60","label.getForeground().getBlue() < 60"]},
+
+        {"kind":"when","text":"","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))"]},
+
+        {"kind":"and","text":"","code":["Wait.until({ trace.contains(1d) },2_500)"]},
+
+        {"kind":"then","text":"","code":["label.getForeground().getGreen() == 255","label.getForeground().getRed() < 10","label.getForeground().getBlue() < 10"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Animate the height of a panel based on a Var<Boolean>. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple list used as a trace for the animation runs.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A Var<Boolean> indicating whether the panel should be expanded or not.","code":["var isExpanded = Var.of(true)"]},
+
+        {"kind":"and","text":"A JPanel that will expand animated.","code":["var panel =","        UI.panel()","        .withBackground(Color.orange)","        .withTransitionalStyle(isExpanded, LifeTime.of(0.1, TimeUnit.SECONDS), (status, delegate) -> {","            int h = (int) Math.round(200 * status.fadeIn())","            trace << status.progress()","            return delegate.minSize(50, h).size(90, h).prefSize(100, h).maxSize(200, h)","        })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The JPanel is initially expanded.","code":["panel.getPreferredSize() == new Dimension((100 * uiScale) as int, (200 * uiScale) as int)","panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, (200 * uiScale) as int)","panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, (200 * uiScale) as int)","panel.getSize()          == new Dimension((90  * uiScale) as int, (200 * uiScale) as int)"]},
+
+        {"kind":"when","text":"We set the panel to not expanded.","code":["trace.clear()","isExpanded.set(false)"]},
+
+        {"kind":"and","text":"We wait for the animation to complete.","code":["Wait.until({ trace.contains(0d) },2_500)"]},
+
+        {"kind":"then","text":"The JPanel is not expanded.","code":["panel.getPreferredSize() == new Dimension((100 * uiScale) as int, 0)","panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, 0)","panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, 0)","panel.getSize()          == new Dimension((90  * uiScale) as int, 0)"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Animate the height of a panel based on a Var<Boolean>. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple list used as a trace for the animation runs.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A Var<Boolean> indicating whether the panel should be expanded or not.","code":["var isExpanded = Var.of(true)"]},
+
+        {"kind":"and","text":"A JPanel that will expand animated.","code":["var panel =","        UI.panel()","        .withBackground(Color.orange)","        .withTransitionalStyle(isExpanded, LifeTime.of(0.1, TimeUnit.SECONDS), (status, delegate) -> {","            int h = (int) Math.round(200 * status.fadeIn())","            trace << status.progress()","            return delegate.minSize(50, h).size(90, h).prefSize(100, h).maxSize(200, h)","        })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The JPanel is initially expanded.","code":["panel.getPreferredSize() == new Dimension((100 * uiScale) as int, (200 * uiScale) as int)","panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, (200 * uiScale) as int)","panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, (200 * uiScale) as int)","panel.getSize()          == new Dimension((90  * uiScale) as int, (200 * uiScale) as int)"]},
+
+        {"kind":"when","text":"We set the panel to not expanded.","code":["trace.clear()","isExpanded.set(false)"]},
+
+        {"kind":"and","text":"We wait for the animation to complete.","code":["Wait.until({ trace.contains(0d) },2_500)"]},
+
+        {"kind":"then","text":"The JPanel is not expanded.","code":["panel.getPreferredSize() == new Dimension((100 * uiScale) as int, 0)","panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, 0)","panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, 0)","panel.getSize()          == new Dimension((90  * uiScale) as int, 0)"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Animate the height of a panel based on a Var<Boolean>. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the SVG is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple list used as a trace for the animation runs.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A Var<Boolean> indicating whether the panel should be expanded or not.","code":["var isExpanded = Var.of(true)"]},
+
+        {"kind":"and","text":"A JPanel that will expand animated.","code":["var panel =","        UI.panel()","        .withBackground(Color.orange)","        .withTransitionalStyle(isExpanded, LifeTime.of(0.1, TimeUnit.SECONDS), (status, delegate) -> {","            int h = (int) Math.round(200 * status.fadeIn())","            trace << status.progress()","            return delegate.minSize(50, h).size(90, h).prefSize(100, h).maxSize(200, h)","        })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The JPanel is initially expanded.","code":["panel.getPreferredSize() == new Dimension((100 * uiScale) as int, (200 * uiScale) as int)","panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, (200 * uiScale) as int)","panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, (200 * uiScale) as int)","panel.getSize()          == new Dimension((90  * uiScale) as int, (200 * uiScale) as int)"]},
+
+        {"kind":"when","text":"We set the panel to not expanded.","code":["trace.clear()","isExpanded.set(false)"]},
+
+        {"kind":"and","text":"We wait for the animation to complete.","code":["Wait.until({ trace.contains(0d) },2_500)"]},
+
+        {"kind":"then","text":"The JPanel is not expanded.","code":["panel.getPreferredSize() == new Dimension((100 * uiScale) as int, 0)","panel.getMinimumSize()   == new Dimension((50  * uiScale) as int, 0)","panel.getMaximumSize()   == new Dimension((200 * uiScale) as int, 0)","panel.getSize()          == new Dimension((90  * uiScale) as int, 0)"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
