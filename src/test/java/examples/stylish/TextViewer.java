@@ -21,6 +21,7 @@ public class TextViewer extends Panel
                 );
         Var<Placement> placement = Var.of(Placement.CENTER);
         Var<UI.ComponentBoundary> componentBoundary = Var.of(ComponentBoundary.INTERIOR_TO_CONTENT);
+        Var<Boolean> wrapLines = Var.of(true);
         UI.of(this).withLayout("fill, wrap 1")
         .withStyle( conf -> conf
             .prefSize(720,650)
@@ -49,19 +50,21 @@ public class TextViewer extends Panel
             .add("pushx, growx", comboBox(placement))
             .add("shrinkx", label("Boundary:"))
             .add("pushx, growx", comboBox(componentBoundary))
+            .add("pushx, growx", checkBox("Wrap lines", wrapLines))
         )
         .add("push, grow",
             panel("fill")
             .withBackground(Color.LIGHTSTEELBLUE.brighter())
             .add("center, grow, push",
                 UI.box().withMinSize(230, 200)
-                .withRepaintOn(someText, placement, componentBoundary)
+                .withRepaintOn(someText, placement, componentBoundary, wrapLines)
                 .withStyle( conf -> conf
                     .padding(24)
                     .text( t -> t
                         .content(someText.get())
                         .placement(placement.get())
                         .placementBoundary(componentBoundary.get())
+                        .wrapLines(wrapLines.get())
                     )
                     .border(12, Color.LIGHTSTEELBLUE)
                     .shadowColor(Color.BLACK)

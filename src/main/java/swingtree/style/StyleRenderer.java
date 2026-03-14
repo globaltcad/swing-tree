@@ -1306,17 +1306,18 @@ final class StyleRenderer
         final UI.Placement         placement         = findDesiredPlacementFrom(text);
         final Offset               offset            = text.offset();
         final Outline              insets            = _insetsFrom(placementBoundary, boxModel);
+        final boolean              wrapLines         = text.wrapLines();
         // Computing the area available for text rendering after applying the offset and insets:
         final float leftX = offset.x() + insets.left().orElse(0f);
         final float topY  = offset.y() + insets.top().orElse(0f);
-        final float localWidth = boxModel.size().width().orElse(0f) - (leftX + insets.right().orElse(0f));
-        final float localHeight = boxModel.size().height().orElse(0f) - (topY + insets.bottom().orElse(0f));
+        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (leftX + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (topY + insets.bottom().orElse(0f)));
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
             g2d.setClip(conf.areas().get(clipArea));
-            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement);
+            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
@@ -1383,7 +1384,8 @@ final class StyleRenderer
         final float boundsY,
         final float boundsWidth,
         final float boundsHeight,
-        final UI.Placement placement
+        final UI.Placement placement,
+        final boolean wrapLines
     ) {
         if (text.isEmpty())
             return;
@@ -1406,11 +1408,16 @@ final class StyleRenderer
             final AttributedString attrStr = new AttributedString(paragraph);
             attrStr.addAttribute(TextAttribute.FONT, font);
             final AttributedCharacterIterator it = attrStr.getIterator();
-            final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
-            final int end = it.getEndIndex();
-            while (measurer.getPosition() < end) {
-                TextLayout layout = measurer.nextLayout(boundsWidth);
-                layouts.add(layout);
+
+            if (wrapLines) {// Word wrapping using LineBreakMeasurer
+                final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
+                final int end = it.getEndIndex();
+                while (measurer.getPosition() < end) {
+                    TextLayout layout = measurer.nextLayout(boundsWidth);
+                    layouts.add(layout);
+                }
+            } else {// No wrapping — render full line even if wider than bounds
+                layouts.add(new TextLayout(it, frc));
             }
         }
 

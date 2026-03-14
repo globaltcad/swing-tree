@@ -86,6 +86,13 @@ import java.util.Objects;
  *          {@link TextConf#placement(UI.Placement)} and {@link TextConf#placementBoundary(UI.ComponentBoundary)}
  *          properties as a first choice.
  *      </li>
+ *      <li><b>Wrap Lines</b>
+ *          This property defines whether the text should be wrapped into multiple lines
+ *          if the text content exceeds the width of the available space inside the component. <br>
+ *          You can configure it through {@link TextConf#wrapLines(boolean)}.<br>
+ *          The default value is {@code false}, which means that the text will be rendered in a single line
+ *          and may overflow the component if the text content is too long.
+ *      </li>
  *  </ul>
  *  Use {@link TextConf#none()} to access the <i>null object</i> of the {@link TextConf} type.
  *  It is a convenient way to represent a <i>no-op</i> configuration object which will not have any effect
@@ -102,7 +109,8 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 UI.ComponentArea.INTERIOR,
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
                                                 UI.Placement.UNDEFINED,
-                                                Offset.none()
+                                                Offset.none(),
+                                                false
                                             );
 
     static final TextConf none() {
@@ -115,6 +123,7 @@ public final class TextConf implements Simplifiable<TextConf>
     private final UI.ComponentBoundary _placementBoundary;
     private final UI.Placement         _placement;
     private final Offset               _offset;
+    private final boolean              _wrapLines;
 
     private TextConf(
         String               content,
@@ -122,7 +131,8 @@ public final class TextConf implements Simplifiable<TextConf>
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
-        Offset               offset
+        Offset               offset,
+        boolean              wrapLines
     )
     {
         _content            = Objects.requireNonNull(content);
@@ -131,6 +141,7 @@ public final class TextConf implements Simplifiable<TextConf>
         _placementBoundary  = Objects.requireNonNull(placementBoundary);
         _placement          = Objects.requireNonNull(placement);
         _offset             = Objects.requireNonNull(offset);
+        _wrapLines          = wrapLines;
     }
 
     private static TextConf of(
@@ -139,7 +150,8 @@ public final class TextConf implements Simplifiable<TextConf>
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
-        Offset               offset
+        Offset               offset,
+        boolean              wrapLines
     )
     {
         if (
@@ -148,11 +160,12 @@ public final class TextConf implements Simplifiable<TextConf>
             clipArea.equals(_NONE._clipArea) &&
             placementBoundary.equals(_NONE._placementBoundary) &&
             placement.equals(_NONE._placement) &&
-            offset.equals(_NONE._offset)
+            offset.equals(_NONE._offset) &&
+            wrapLines == _NONE._wrapLines
         ) {
             return _NONE;
         }
-        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset);
+        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines);
     }
 
     String content() {
@@ -179,17 +192,21 @@ public final class TextConf implements Simplifiable<TextConf>
         return _offset;
     }
 
+    boolean wrapLines() {
+        return _wrapLines;
+    }
+
     /**
      * Returns a new {@link TextConf} object with the given text content.
      * @param textString The text content to be rendered onto the component.
      * @return A new {@link TextConf} object with the given text content.
      */
     public TextConf content( String textString ) {
-        return of(textString, _fontConf, _clipArea, _placementBoundary, _placement, _offset);
+        return of(textString, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
     }
 
     private TextConf _fontConf(FontConf fontConf) {
-        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset);
+        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
     }
 
     /**
@@ -227,7 +244,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given clip area.
      */
     public TextConf clipTo( UI.ComponentArea clipArea ) {
-        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset);
+        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines);
     }
 
     /**
@@ -261,7 +278,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given placement boundary.
      */
     public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
-        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset);
+        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines);
     }
 
     /**
@@ -287,7 +304,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the desired placement.
      */
     public TextConf placement(UI.Placement placement) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines);
     }
 
     /**
@@ -302,7 +319,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines);
     }
 
     /**
@@ -318,6 +335,18 @@ public final class TextConf implements Simplifiable<TextConf>
      */
     public TextConf offset(int x, int y) {
         return offset(Offset.of(x, y));
+    }
+
+    /**
+     * Configures whether the text should be wrapped into multiple lines if the text
+     * content exceeds the width of the available space inside the component.
+     * The default value is {@code false}, which means that the text will be rendered in a single line
+     * and may overflow the component if the text content is too long.
+     * @param wrapLines A boolean value which defines whether the text should be wrapped into multiple lines.
+     * @return An updated {@link TextConf} object with the given wrap lines property.
+     */
+    public TextConf wrapLines(boolean wrapLines) {
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines);
     }
 
     @Override
@@ -339,7 +368,8 @@ public final class TextConf implements Simplifiable<TextConf>
             _clipArea,
             _placementBoundary,
             _placement,
-            _offset.scale(scale)
+            _offset.scale(scale),
+            _wrapLines
         );
     }
 
@@ -358,12 +388,13 @@ public final class TextConf implements Simplifiable<TextConf>
             _clipArea.equals(other._clipArea) &&
             _placementBoundary.equals(other._placementBoundary) &&
             _placement.equals(other._placement) &&
-            _offset.equals(other._offset);
+            _offset.equals(other._offset) &&
+            _wrapLines == other._wrapLines;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset);
+        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
     }
 
     @Override
@@ -376,7 +407,8 @@ public final class TextConf implements Simplifiable<TextConf>
             "clipArea=" + _clipArea + ", " +
             "placementBoundary=" + _placementBoundary + ", " +
             "placement=" + _placement + ", " +
-            "offset=" + _offset +
+            "offset=" + _offset + ", " +
+            "wrapLines=" + _wrapLines +
         "]";
     }
 
