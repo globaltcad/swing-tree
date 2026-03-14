@@ -110,7 +110,7 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
                                                 UI.Placement.UNDEFINED,
                                                 Offset.none(),
-                                                false
+                                                true
                                             );
 
     static final TextConf none() {
