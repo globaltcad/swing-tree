@@ -101,7 +101,7 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 FontConf.none(),
                                                 UI.ComponentArea.INTERIOR,
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
-                                                UI.Placement.CENTER,
+                                                UI.Placement.UNDEFINED,
                                                 Offset.none()
                                             );
 
