@@ -1406,7 +1406,8 @@ final class StyleRenderer
                 continue;
             }
             final AttributedString attrStr = new AttributedString(paragraph);
-            attrStr.addAttribute(TextAttribute.FONT, font);
+            attrStr.addAttribute(TextAttribute.FONT, font, 0, paragraph.length());
+            attrStr.addAttributes(font.getAttributes(), 0, paragraph.length());
             final AttributedCharacterIterator it = attrStr.getIterator();
 
             if (wrapLines) {// Word wrapping using LineBreakMeasurer
