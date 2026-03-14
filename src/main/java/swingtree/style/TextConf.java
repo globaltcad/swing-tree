@@ -74,7 +74,8 @@ import java.util.Objects;
  *          The placement is an enum which defines where the text should be placed
  *          according to the {@link TextConf#placementBoundary(UI.ComponentBoundary)}.
  *          You can configure it through {@link TextConf#placement(UI.Placement)}.<br>
- *          The default placement is {@link UI.Placement#CENTER}.
+ *          The default placement is {@link UI.Placement#UNDEFINED}, which effectively
+ *          behaves like {@link swingtree.UI.Placement#CENTER} if not overridden elsewhere.
  *      </li>
  *      <li><b>Offset</b>
  *          The offset holds the x and y placement offset of the text.
