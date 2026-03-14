@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Painter;
@@ -1300,7 +1301,7 @@ final class StyleRenderer
         final Font initialFont = g2d.getFont();
         final Shape oldClip = g2d.getClip();
 
-        final String               textToRender      = text.content();
+        final Tuple<StyledString>  textToRender      = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final UI.Placement         placement         = findDesiredPlacementFrom(text);
@@ -1317,7 +1318,7 @@ final class StyleRenderer
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
             g2d.setClip(conf.areas().get(clipArea));
-            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines);
+            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines, conf.boxModel());
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
@@ -1379,13 +1380,14 @@ final class StyleRenderer
     
     private static void _renderTextInternal(
         final Graphics2D g2d,
-        final String text,
+        final Tuple<StyledString> text,
         final float boundsX,
         final float boundsY,
         final float boundsWidth,
         final float boundsHeight,
         final UI.Placement placement,
-        final boolean wrapLines
+        final boolean wrapLines,
+        final BoxModelConf boxModelConf
     ) {
         if (text.isEmpty())
             return;
@@ -1399,15 +1401,21 @@ final class StyleRenderer
             Phase 1 : Build layouts using LineBreakMeasurer
             ------------------------------------------------
         */
-        final String[] paragraphs = text.split("\n", -1);
-        for (String paragraph : paragraphs) {
-            if (paragraph.isEmpty()) {
+        final List<StyledString> paragraphs = _splitStyledTextIntoParagraphs(text);
+        for (StyledString paragraph : paragraphs) {
+            if (paragraph.string().isEmpty()) {
                 layouts.add(null); // represent empty line
                 continue;
             }
-            final AttributedString attrStr = new AttributedString(paragraph);
-            attrStr.addAttribute(TextAttribute.FONT, font, 0, paragraph.length());
-            attrStr.addAttributes(font.getAttributes(), 0, paragraph.length());
+            final AttributedString attrStr = new AttributedString(paragraph.string());
+            if (paragraph.fontConf().isPresent()) {
+                java.awt.Font localFont = paragraph.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
+                attrStr.addAttribute(TextAttribute.FONT, localFont, 0, paragraph.string().length());
+                attrStr.addAttributes(localFont.getAttributes(), 0, paragraph.string().length());
+            } else {
+                attrStr.addAttribute(TextAttribute.FONT, font, 0, paragraph.string().length());
+                attrStr.addAttributes(font.getAttributes(), 0, paragraph.string().length());
+            }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
             if (wrapLines) {// Word wrapping using LineBreakMeasurer
@@ -1575,6 +1583,21 @@ final class StyleRenderer
             layout.draw(g2d, x, y);
             y += ( layout.getDescent() + layout.getLeading() );
         }
+    }
+
+    private static List<StyledString> _splitStyledTextIntoParagraphs(Tuple<StyledString> text) {
+        List<StyledString> paragraphs = new ArrayList<>();
+        for (StyledString styledString : text) {
+            String[] parts = styledString.string().split("\n", -1);
+            if (parts.length <= 1) {
+                paragraphs.add(styledString);
+            } else {
+                for (String part : parts) {
+                    paragraphs.add(styledString.withString(part));
+                }
+            }
+        }
+        return paragraphs;
     }
 
     private static void _executeUserPainters(
