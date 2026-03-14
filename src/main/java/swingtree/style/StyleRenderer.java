@@ -9,11 +9,18 @@ import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
 import java.awt.geom.*;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
+import java.text.BreakIterator;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -1296,79 +1303,276 @@ final class StyleRenderer
         final String               textToRender      = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
-        final UI.Placement         placement         = text.placement();
+        final UI.Placement         placement         = findDesiredPlacementFrom(text);
         final Offset               offset            = text.offset();
-
-        Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
-        font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
-        g2d.setFont(font);
-        final FontMetrics fm = g2d.getFontMetrics(font);
-        final Rectangle2D rect = fm.getStringBounds(textToRender, g2d);
-
-        Outline insets = _insetsFrom(placementBoundary, boxModel);
-        float x = insets.left().orElse(0f); // Top left is always the starting point
-        float y = insets.top().orElse(0f) ;
-        {
-            float leftX = insets.left().orElse(0f);
-            float topY = insets.top().orElse(0f);
-            float localWidth = boxModel.size().width().orElse(0f) - (leftX + insets.right().orElse(0f));
-            float localHeight = boxModel.size().height().orElse(0f) - (topY + insets.bottom().orElse(0f));
-            float rightX = leftX + localWidth;
-            float bottomY = topY + localHeight;
-
-            switch (placement) {
-                case CENTER:
-                    float centerX = leftX + localWidth / 2f;
-                    float centerY = topY + localHeight / 2f;
-                    x = centerX - (float) rect.getWidth() / 2f;
-                    y = centerY - (float) rect.getHeight() / 2f;
-                break;
-                case TOP:
-                    x = leftX + (localWidth - (float) rect.getWidth()) / 2f;
-                    y = topY;
-                break;
-                case LEFT:
-                    x = leftX;
-                    y = topY + (localHeight - (float) rect.getHeight()) / 2f;
-                break;
-                case BOTTOM:
-                    x = leftX + (localWidth - (float) rect.getWidth()) / 2f;
-                    y = bottomY - (float) rect.getHeight();
-                break;
-                case RIGHT:
-                    x = rightX - (float) rect.getWidth();
-                    y = topY + (localHeight - (float) rect.getHeight()) / 2f;
-                break;
-                case TOP_LEFT:
-                    x = leftX;
-                    y = topY;
-                break;
-                case TOP_RIGHT:
-                    x = rightX - (float) rect.getWidth();
-                    y = topY;
-                break;
-                case BOTTOM_LEFT:
-                    x = leftX;
-                    y = bottomY - (float) rect.getHeight();
-                break;
-                case BOTTOM_RIGHT:
-                    x = rightX - (float) rect.getWidth();
-                    y = bottomY - (float) rect.getHeight();
-                break;
-                case UNDEFINED:
-                break;
-            }
-        }
-
+        final Outline              insets            = _insetsFrom(placementBoundary, boxModel);
+        final boolean              wrapLines         = text.wrapLines();
+        // Computing the area available for text rendering after applying the offset and insets:
+        final float leftX = offset.x() + insets.left().orElse(0f);
+        final float topY  = offset.y() + insets.top().orElse(0f);
+        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (leftX + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (topY + insets.bottom().orElse(0f)));
         try {
-            x += (offset.x() - (float) rect.getX());
-            y += (offset.y() - (float) rect.getY());
+            Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
+            font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
+            g2d.setFont(font);
             g2d.setClip(conf.areas().get(clipArea));
-            // Render the text:
-            g2d.drawString(textToRender, x, y);
+            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines);
+        } catch (Exception e) {
+            log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
             g2d.setFont(initialFont);
             g2d.setClip(oldClip);
+        }
+    }
+
+    private static UI.Placement findDesiredPlacementFrom(TextConf text) {
+        UI.Placement chosenPlacement = text.placement();
+        if ( chosenPlacement == UI.Placement.UNDEFINED ) {
+            // We determine the placement of the text from the font configuration if not explicitly set:
+            UI.HorizontalAlignment horizontalAlignment = text.fontConf().horizontalAlignment();
+            UI.VerticalAlignment verticalAlignment = text.fontConf().verticalAlignment();
+            chosenPlacement = placementOf(horizontalAlignment, verticalAlignment);
+        }
+        return chosenPlacement;
+    }
+
+    static UI.Placement placementOf(
+        UI.HorizontalAlignment horizontalAlignment, 
+        UI.VerticalAlignment verticalAlignment
+    ) {
+        UI.Placement currentPlacement = UI.Placement.UNDEFINED;
+        switch (horizontalAlignment) {
+            case LEFT: currentPlacement = UI.Placement.LEFT;break;
+            case CENTER: currentPlacement = UI.Placement.CENTER;break;
+            case RIGHT: currentPlacement = UI.Placement.RIGHT;break;
+            case LEADING: currentPlacement = UI.Placement.LEFT;break; // leading means: "align with the reading direction of the text". In most cases, this is equivalent to LEFT, but it can be different for right-to-left languages. For simplicity, we treat it as LEFT here.
+            case TRAILING: currentPlacement = UI.Placement.RIGHT;break;// trailing means: "align with the opposite of the reading direction of the text". In most cases, this is equivalent to RIGHT, but it can be different for right-to-left languages. For simplicity, we treat it as RIGHT here.
+            default: break;
+        }
+        switch (verticalAlignment) {
+            case TOP:
+                switch (currentPlacement) {
+                    case LEFT: return UI.Placement.TOP_LEFT;
+                    case CENTER: return UI.Placement.TOP;
+                    case RIGHT: return UI.Placement.TOP_RIGHT;
+                    default: return UI.Placement.TOP;
+                }
+            case CENTER:
+                switch (currentPlacement) {
+                    case LEFT: return UI.Placement.LEFT;
+                    case CENTER: return UI.Placement.CENTER;
+                    case RIGHT: return UI.Placement.RIGHT;
+                    default: return UI.Placement.CENTER;
+                }
+            case BOTTOM:
+                switch (currentPlacement) {
+                    case LEFT: return UI.Placement.BOTTOM_LEFT;
+                    case CENTER: return UI.Placement.BOTTOM;
+                    case RIGHT: return UI.Placement.BOTTOM_RIGHT;
+                    default: return UI.Placement.BOTTOM;
+                }
+            default:
+                return currentPlacement;
+        }
+    }
+    
+    private static void _renderTextInternal(
+        final Graphics2D g2d,
+        final String text,
+        final float boundsX,
+        final float boundsY,
+        final float boundsWidth,
+        final float boundsHeight,
+        final UI.Placement placement,
+        final boolean wrapLines
+    ) {
+        if (text.isEmpty())
+            return;
+
+        final Font font = g2d.getFont();
+        final FontRenderContext frc = g2d.getFontRenderContext();
+        final List<@Nullable TextLayout> layouts = new ArrayList<>();
+
+        /*
+            ------------------------------------------------
+            Phase 1 : Build layouts using LineBreakMeasurer
+            ------------------------------------------------
+        */
+        final String[] paragraphs = text.split("\n", -1);
+        for (String paragraph : paragraphs) {
+            if (paragraph.isEmpty()) {
+                layouts.add(null); // represent empty line
+                continue;
+            }
+            final AttributedString attrStr = new AttributedString(paragraph);
+            attrStr.addAttribute(TextAttribute.FONT, font);
+            final AttributedCharacterIterator it = attrStr.getIterator();
+
+            if (wrapLines) {// Word wrapping using LineBreakMeasurer
+                final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
+                final int end = it.getEndIndex();
+                while (measurer.getPosition() < end) {
+                    TextLayout layout = measurer.nextLayout(boundsWidth);
+                    layouts.add(layout);
+                }
+            } else {// No wrapping — render full line even if wider than bounds
+                layouts.add(new TextLayout(it, frc));
+            }
+        }
+
+        /*
+            remove trailing newline marker
+         */
+        if (!layouts.isEmpty() && layouts.get(layouts.size()-1) == null)
+            layouts.remove(layouts.size()-1);
+
+        /*
+            ------------------------------------------------
+            Phase 2 : Measure total text height
+            ------------------------------------------------
+         */
+
+        float totalHeight = 0;
+
+        for (TextLayout layout : layouts) {
+            if (layout == null) {
+                totalHeight += font.getSize2D();
+                continue;
+            }
+            totalHeight += (layout.getAscent() + layout.getDescent() + layout.getLeading());
+        }
+
+        /*
+            ------------------------------------------------
+            Phase 3 : Determine visible slice (overflow policy)
+            ------------------------------------------------
+         */
+        final List<@Nullable TextLayout> visible = new ArrayList<>();
+        float accumulated = 0;
+        if (
+            placement == UI.Placement.TOP ||
+            placement == UI.Placement.TOP_LEFT ||
+            placement == UI.Placement.TOP_RIGHT
+        ) {
+            for (TextLayout l : layouts) {
+                float h = (l == null)
+                            ? font.getSize2D()
+                            : l.getAscent() + l.getDescent() + l.getLeading();
+
+                if (accumulated + h > boundsHeight)
+                    break;
+
+                visible.add(l);
+                accumulated += h;
+            }
+
+        } else if (
+            placement == UI.Placement.BOTTOM ||
+            placement == UI.Placement.BOTTOM_LEFT ||
+            placement == UI.Placement.BOTTOM_RIGHT
+        ) {
+            final ListIterator<@Nullable TextLayout> it = layouts.listIterator(layouts.size());
+
+            while (it.hasPrevious()) {
+                TextLayout l = it.previous();
+
+                float h = (l == null)
+                        ? font.getSize2D()
+                        : l.getAscent() + l.getDescent() + l.getLeading();
+
+                if (accumulated + h > boundsHeight)
+                    break;
+
+                visible.add(0, l);
+
+                accumulated += h;
+            }
+        } else {
+            /*
+                CENTER / LEFT / RIGHT
+
+                overflow both directions
+             */
+            final float centerHeight = Math.min(totalHeight, boundsHeight);
+            final float targetTop = (totalHeight - centerHeight) / 2f;
+            float cursor = 0;
+
+            for (TextLayout l : layouts) {
+                float h = (l == null)
+                        ? font.getSize2D()
+                        : l.getAscent() + l.getDescent() + l.getLeading();
+
+                if (cursor + h < targetTop) {
+                    cursor += h;
+                    continue;
+                }
+
+                if (accumulated + h > boundsHeight)
+                    break;
+
+                visible.add(l);
+
+                accumulated += h;
+                cursor += h;
+            }
+        }
+
+        /*
+            ------------------------------------------------
+            Phase 4 : Vertical anchor
+            ------------------------------------------------
+         */
+        final float visibleHeight = accumulated;
+        float y;
+        if (
+            placement == UI.Placement.TOP ||
+            placement == UI.Placement.TOP_LEFT ||
+            placement == UI.Placement.TOP_RIGHT
+        ) {
+            y = boundsY;
+        } else if (
+            placement == UI.Placement.BOTTOM ||
+            placement == UI.Placement.BOTTOM_LEFT ||
+            placement == UI.Placement.BOTTOM_RIGHT
+        ) {
+            y = boundsY + boundsHeight - visibleHeight;
+        } else {
+            y = boundsY + (boundsHeight - visibleHeight) / 2f;
+        }
+
+        /*
+            ------------------------------------------------
+            Phase 5 : Render lines
+            ------------------------------------------------
+         */
+        for (TextLayout layout : visible) {
+            if (layout == null) {
+                y += font.getSize2D();
+                continue;
+            }
+
+            y += layout.getAscent();
+
+            final float advance = layout.getAdvance();
+            float x;
+
+            switch (placement) {
+                case LEFT:
+                case TOP_LEFT:
+                case BOTTOM_LEFT:
+                    x = boundsX;
+                    break;
+                case RIGHT:
+                case TOP_RIGHT:
+                case BOTTOM_RIGHT:
+                    x = boundsX + boundsWidth - advance;
+                    break;
+                default:// UNDEFINED / CENTER / TOP / BOTTOM
+                    x = boundsX + (boundsWidth - advance) / 2f;
+            }
+            layout.draw(g2d, x, y);
+            y += ( layout.getDescent() + layout.getLeading() );
         }
     }
 
