@@ -91,7 +91,9 @@ import java.util.Objects;
  *          This property defines whether the text should be wrapped into multiple lines
  *          if the text content exceeds the width of the available space inside the component. <br>
  *          You can configure it through {@link TextConf#wrapLines(boolean)}.<br>
- *          The default value is {@code false}, which means that the text will be rendered in a single line
+ *          The default value is {@code true}, which means that the text will wrap into multiple
+ *          lines if it exceeds the width of the available space inside the component. <br>
+ *          If set to {@code false}, the text will be rendered in a single line
  *          and may overflow the component if the text content is too long.
  *      </li>
  *  </ul>
@@ -341,8 +343,8 @@ public final class TextConf implements Simplifiable<TextConf>
     /**
      * Configures whether the text should be wrapped into multiple lines if the text
      * content exceeds the width of the available space inside the component.
-     * The default value is {@code false}, which means that the text will be rendered in a single line
-     * and may overflow the component if the text content is too long.
+     * The default value is {@code true}, which means that the text will wrap into multiple
+     * lines if it exceeds the width of the available space inside the component.
      * @param wrapLines A boolean value which defines whether the text should be wrapped into multiple lines.
      * @return An updated {@link TextConf} object with the given wrap lines property.
      */
