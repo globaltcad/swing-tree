@@ -1310,8 +1310,8 @@ final class StyleRenderer
         // Computing the area available for text rendering after applying the offset and insets:
         final float leftX = offset.x() + insets.left().orElse(0f);
         final float topY  = offset.y() + insets.top().orElse(0f);
-        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (leftX + insets.right().orElse(0f)));
-        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (topY + insets.bottom().orElse(0f)));
+        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (insets.left().orElse(0f) + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (insets.top().orElse(0f) + insets.bottom().orElse(0f)));
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
