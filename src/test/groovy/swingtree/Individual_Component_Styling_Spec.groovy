@@ -3765,6 +3765,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Center").placement(UI.Placement.CENTER)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3780,6 +3781,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Top").placement(UI.Placement.TOP)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3795,6 +3797,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Bottom").placement(UI.Placement.BOTTOM)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3810,6 +3813,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Left").placement(UI.Placement.LEFT)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3825,6 +3829,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Right").placement(UI.Placement.RIGHT)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3840,6 +3845,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Top Left").placement(UI.Placement.TOP_LEFT)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3855,6 +3861,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Top Right").placement(UI.Placement.TOP_RIGHT)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3870,6 +3877,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3885,6 +3893,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontBold(true)
                             .text( conf -> conf
                                  .content("Bottom Right").placement(UI.Placement.BOTTOM_RIGHT)
+                                 .wrapLines(false)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
