@@ -1631,7 +1631,7 @@ final class StyleRenderer
                 }
             }
         }
-        if ( currentParagraph != null && !currentParagraph.isEmpty() ) {
+        if ( currentParagraph != null ) {
             paragraphs.add(currentParagraph);
         }
         return paragraphs;
