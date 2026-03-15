@@ -1620,9 +1620,13 @@ final class StyleRenderer
                             paragraphs.add(currentParagraph);
                             currentParagraph = null;
                         }
-                    } else {
+                    } else if ( i < parts.length - 1 ) {
                         // an empty paragraph is perfectly fine:
-                        paragraphs.add(new ArrayList<>());
+                        if (currentParagraph == null) {
+                            currentParagraph = new ArrayList<>();
+                        }
+                        paragraphs.add(currentParagraph);
+                        currentParagraph = null;
                     }
                 }
             }
