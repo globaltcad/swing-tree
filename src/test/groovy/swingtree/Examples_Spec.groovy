@@ -5,29 +5,27 @@ import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
 import examples.animated.FoldableExample
 import examples.animated.TransitionalAnimation
+import examples.calculator.mvi.CalculatorView
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
-import examples.games.notepicker.mvvm.NoteGuesserView
-import examples.games.notepicker.mvvm.NoteGuesserViewModel
 import examples.games.kanapicker.mvvm.KanaPickerView
 import examples.games.kanapicker.mvvm.KanaPickerViewModel
+import examples.games.notepicker.mvvm.NoteGuesserView
+import examples.games.notepicker.mvvm.NoteGuesserViewModel
 import examples.hover.BorderHoverExample
 import examples.hover.HoverExample
 import examples.lists.ListTestExample
-import examples.calculator.mvi.CalculatorView
-import examples.scrollpanes.ScrollConfigExample
-import examples.tabs.mvvm.TabSelectionExample1
-import examples.team.mvi.TeamView
 import examples.mvvm.*
+import examples.scrollpanes.ScrollConfigExample
 import examples.simple.Form
 import examples.simple.ListRendering
 import examples.simple.NamedFieldsView
 import examples.simple.TodoApp
 import examples.stylepicker.mvvm.BoxShadowPickerView
 import examples.stylepicker.mvvm.BoxShadowPickerViewModel
-import examples.stylish.GlassUIView
-import examples.stylish.SoftUIView
-import examples.stylish.WellRoundedView
+import examples.stylish.*
+import examples.tabs.mvvm.TabSelectionExample1
+import examples.team.mvi.TeamView
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -320,6 +318,16 @@ class Examples_Spec extends Specification
     def 'The transitional style animation example view can be created.'()
     {
         expect : new TransitionalAnimation()
+    }
+
+    def 'The SVG viewer example view can be created.'()
+    {
+        expect : new SvgViewer()
+    }
+
+    def 'The markdown text viewer example view can be created.'()
+    {
+        expect : new TextViewer()
     }
 
     def 'The settings example UI defined in the examples looks as expected.'()
