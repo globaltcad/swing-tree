@@ -177,7 +177,7 @@ public final class FontConf
 
     private static final FontConf _NONE = new FontConf(
                                                         "",    // Font name (family)
-                                                        0,     // size
+                                                        -1,     // size
                                                         -1,    // posture
                                                         -1,    // weight
                                                         0,     // spacing
@@ -1152,7 +1152,7 @@ public final class FontConf
         Map<TextAttribute, Object> currentAttributes = (Map<TextAttribute, Object>) existingFont.getAttributes();
         Map<TextAttribute, Object> attributes = new HashMap<>();
 
-        if ( _size > 0 ) {
+        if ( _size >= 0 ) {
             isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));
             attributes.put(TextAttribute.SIZE, _size);
         }
@@ -1314,7 +1314,7 @@ public final class FontConf
         String verticalAlign   = ( _verticalAlignment   == UI.VerticalAlignment.UNDEFINED ? "?" : _verticalAlignment.toString()   );
         return this.getClass().getSimpleName() + "[" +
                     "family="              + _familyName + ", " +
-                    "size="                + _size                                   + ", " +
+                    "size="                + (_size < 0 ? "?" : _size)               + ", " +
                     "posture="             + (_posture < 0 ? "?" : _posture)         + ", " +
                     "weight="              + (_weight < 0 ? "?" : _weight)           + ", " +
                     "spacing="             + _spacing                                + ", " +

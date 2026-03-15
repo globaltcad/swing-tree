@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
@@ -104,12 +105,13 @@ import java.util.Objects;
  *  when applied to a component.
  */
 @Immutable
+@SuppressWarnings("Immutable")
 public final class TextConf implements Simplifiable<TextConf>
 {
     private static final Logger log = LoggerFactory.getLogger(TextConf.class);
     public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
     private static final TextConf _NONE = new TextConf(
-                                                "",
+                                                Tuple.of(StyledString.class),
                                                 FontConf.none(),
                                                 UI.ComponentArea.INTERIOR,
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
@@ -122,7 +124,7 @@ public final class TextConf implements Simplifiable<TextConf>
         return _NONE;
     }
 
-    private final String               _content;
+    private final Tuple<StyledString>  _content;
     private final FontConf             _fontConf;
     private final UI.ComponentArea     _clipArea;
     private final UI.ComponentBoundary _placementBoundary;
@@ -131,7 +133,7 @@ public final class TextConf implements Simplifiable<TextConf>
     private final boolean              _wrapLines;
 
     private TextConf(
-        String               content,
+        Tuple<StyledString>  content,
         FontConf             fontConf,
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
@@ -150,7 +152,7 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     private static TextConf of(
-        String               content,
+        Tuple<StyledString>  content,
         FontConf             fontConf,
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
@@ -173,7 +175,7 @@ public final class TextConf implements Simplifiable<TextConf>
         return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines);
     }
 
-    String content() {
+    Tuple<StyledString> content() {
         return _content;
     }
 
@@ -207,7 +209,21 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given text content.
      */
     public TextConf content( String textString ) {
-        return of(textString, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        Objects.requireNonNull(textString);
+        if ( textString.isEmpty() )
+            return content(Tuple.of(StyledString.class));
+        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+    }
+
+    public TextConf content( StyledString... styledStrings ) {
+        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+    }
+
+    public TextConf content( Tuple<StyledString> styledStrings ) {
+        if ( _content.equals(styledStrings) ) {
+            return this;
+        }
+        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
     }
 
     private TextConf _fontConf(FontConf fontConf) {
@@ -358,7 +374,16 @@ public final class TextConf implements Simplifiable<TextConf>
     public TextConf simplified() {
         if ( _content.isEmpty() )
             return _NONE;
-        return this;
+        Tuple<StyledString> simplifiedContent = _content.removeIf( it -> it.string().isEmpty() )
+                                                        .map( it -> it.resolveUsing(_fontConf))
+                                                        .removeIf( it -> it
+                                                                .fontConf()
+                                                                .map( fontConf -> fontConf.size() == 0 )
+                                                                .orElse( false )
+                                                            );
+        if ( simplifiedContent.isEmpty() )
+             return _NONE;
+        return content(simplifiedContent);
     }
 
     @Override
@@ -368,7 +393,7 @@ public final class TextConf implements Simplifiable<TextConf>
 
     TextConf _scale(double scale) {
         return of(
-            _content,
+            _content.map( it -> it.mapStyle( s -> s._scale(scale) ) ),
             _fontConf._scale(scale),
             _clipArea,
             _placementBoundary,

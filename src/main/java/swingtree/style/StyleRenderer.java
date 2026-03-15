@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Painter;
@@ -1300,7 +1301,7 @@ final class StyleRenderer
         final Font initialFont = g2d.getFont();
         final Shape oldClip = g2d.getClip();
 
-        final String               textToRender      = text.content();
+        final Tuple<StyledString>  textToRender      = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final UI.Placement         placement         = findDesiredPlacementFrom(text);
@@ -1316,8 +1317,12 @@ final class StyleRenderer
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
-            g2d.setClip(conf.areas().get(clipArea));
-            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines);
+            Shape newClip = conf.areas().get(clipArea);
+            // We merge the new clip with the old one:
+            if ( oldClip != null )
+                newClip = StyleUtil.intersect( newClip, oldClip );
+            g2d.setClip(newClip);
+            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines, conf.boxModel());
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
@@ -1379,13 +1384,14 @@ final class StyleRenderer
     
     private static void _renderTextInternal(
         final Graphics2D g2d,
-        final String text,
+        final Tuple<StyledString> text,
         final float boundsX,
         final float boundsY,
         final float boundsWidth,
         final float boundsHeight,
         final UI.Placement placement,
-        final boolean wrapLines
+        final boolean wrapLines,
+        final BoxModelConf boxModelConf
     ) {
         if (text.isEmpty())
             return;
@@ -1399,15 +1405,36 @@ final class StyleRenderer
             Phase 1 : Build layouts using LineBreakMeasurer
             ------------------------------------------------
         */
-        final String[] paragraphs = text.split("\n", -1);
-        for (String paragraph : paragraphs) {
-            if (paragraph.isEmpty()) {
+        final List<List<StyledString>> paragraphs = _splitStyledTextIntoParagraphs(text);
+        for (List<StyledString> paragraph : paragraphs) {
+            int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
+            if (length <= 0) {
                 layouts.add(null); // represent empty line
                 continue;
             }
-            final AttributedString attrStr = new AttributedString(paragraph);
-            attrStr.addAttribute(TextAttribute.FONT, font, 0, paragraph.length());
-            attrStr.addAttributes(font.getAttributes(), 0, paragraph.length());
+            final StringBuilder sb = new StringBuilder();
+            for (StyledString s : paragraph) {
+                sb.append(s.string());
+            }
+            final AttributedString attrStr = new AttributedString(sb.toString());
+            int index = 0;
+            for (StyledString styledString : paragraph) {
+                int styledStringLength = styledString.string().length();
+                if (styledStringLength <= 0) {
+                    // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges
+                    continue;
+                }
+                int endIndex = index + styledStringLength;
+                if (styledString.fontConf().isPresent()) {
+                    java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
+                    attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);
+                    attrStr.addAttributes(localFont.getAttributes(), index, endIndex);
+                } else {
+                    attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);
+                    attrStr.addAttributes(font.getAttributes(), index, endIndex);
+                }
+                index += styledStringLength;
+            }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
             if (wrapLines) {// Word wrapping using LineBreakMeasurer
@@ -1575,6 +1602,39 @@ final class StyleRenderer
             layout.draw(g2d, x, y);
             y += ( layout.getDescent() + layout.getLeading() );
         }
+    }
+
+    private static List<List<StyledString>> _splitStyledTextIntoParagraphs(Tuple<StyledString> text) {
+        List<List<StyledString>> paragraphs = new ArrayList<>();
+        List<StyledString> currentParagraph = null;
+        for (StyledString styledString : text) {
+            String[] parts = styledString.string().split("\n", -1);
+            if (parts.length <= 1) {
+                if (currentParagraph == null) {
+                    currentParagraph = new ArrayList<>();
+                }
+                currentParagraph.add(styledString);
+            } else {
+                for ( int i = 0; i < parts.length; i++ ) {
+                    String part = parts[i];
+                    if (currentParagraph == null) {
+                        currentParagraph = new ArrayList<>();
+                    }
+                    if ( !part.isEmpty() ) {
+                        currentParagraph.add(styledString.withString(part));
+                    }
+                    // if it is not the last part, we start a new line/paragraph:
+                    if ( i < parts.length - 1 ) {
+                        paragraphs.add(currentParagraph);
+                        currentParagraph = null;
+                    }
+                }
+            }
+        }
+        if ( currentParagraph != null ) {
+            paragraphs.add(currentParagraph);
+        }
+        return paragraphs;
     }
 
     private static void _executeUserPainters(

@@ -269,7 +269,7 @@ class Styles_Spec extends Specification
                                         "BaseConf[NONE], " +
                                         "FontConf[" +
                                             "family=, " +
-                                            "size=0, " +
+                                            "size=?, " +
                                             "posture=?, " +
                                             "weight=?, " +
                                             "spacing=0.0, " +
