@@ -374,10 +374,11 @@ public final class TextConf implements Simplifiable<TextConf>
     public TextConf simplified() {
         if ( _content.isEmpty() )
             return _NONE;
-        return content(
-                _content.removeIf( it -> it.string().isEmpty() )
-                        .map( it -> it.resolveUsing(_fontConf))
-            );
+        Tuple<StyledString> simplifiedContent = _content.removeIf( it -> it.string().isEmpty() )
+                                                        .map( it -> it.resolveUsing(_fontConf));
+        if ( simplifiedContent.isEmpty() )
+             return _NONE;
+        return content(simplifiedContent);
     }
 
     @Override
