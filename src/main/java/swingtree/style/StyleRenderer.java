@@ -1609,22 +1609,14 @@ final class StyleRenderer
             } else {
                 for ( int i = 0; i < parts.length; i++ ) {
                     String part = parts[i];
+                    if (currentParagraph == null) {
+                        currentParagraph = new ArrayList<>();
+                    }
                     if ( !part.isEmpty() ) {
-                        if (currentParagraph == null) {
-                            currentParagraph = new ArrayList<>();
-                        }
                         currentParagraph.add(styledString.withString(part));
-
-                        // if it is not the last part, we start a new paragraph:
-                        if (i < parts.length - 1) {
-                            paragraphs.add(currentParagraph);
-                            currentParagraph = null;
-                        }
-                    } else if ( i < parts.length - 1 ) {
-                        // an empty paragraph is perfectly fine:
-                        if (currentParagraph == null) {
-                            currentParagraph = new ArrayList<>();
-                        }
+                    }
+                    // if it is not the last part, we start a new line/paragraph:
+                    if ( i < parts.length - 1 ) {
                         paragraphs.add(currentParagraph);
                         currentParagraph = null;
                     }
