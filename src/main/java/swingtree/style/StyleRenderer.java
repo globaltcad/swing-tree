@@ -1317,7 +1317,11 @@ final class StyleRenderer
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
-            g2d.setClip(conf.areas().get(clipArea));
+            Shape newClip = conf.areas().get(clipArea);
+            // We merge the new clip with the old one:
+            if ( oldClip != null )
+                newClip = StyleUtil.intersect( newClip, oldClip );
+            g2d.setClip(newClip);
             _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines, conf.boxModel());
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
