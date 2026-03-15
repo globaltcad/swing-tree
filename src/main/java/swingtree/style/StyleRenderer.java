@@ -1420,6 +1420,10 @@ final class StyleRenderer
             int index = 0;
             for (StyledString styledString : paragraph) {
                 int styledStringLength = styledString.string().length();
+                if (styledStringLength <= 0) {
+                    // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges
+                    continue;
+                }
                 int endIndex = index + styledStringLength;
                 if (styledString.fontConf().isPresent()) {
                     java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
