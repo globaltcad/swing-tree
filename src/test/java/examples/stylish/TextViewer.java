@@ -1,24 +1,39 @@
 package examples.stylish;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import sprouts.Tuple;
 import sprouts.Var;
 import swingtree.UI;
+import swingtree.style.StyledString;
 
 import static swingtree.UI.*;
 
 public class TextViewer extends Panel
 {
     public TextViewer() {
-        Var<String> someText = Var.of(
-                    "P1 (Conditional Premise): If your view affirms that a given human is trait-equalizable to " +
-                     "a given nonhuman animal while retaining moral value, then your view can only deny the nonhuman " +
+        Var<Tuple<StyledString>> someText = Var.of(Tuple.of(StyledString.class,
+                StyledString.of(
+                     f -> f.color("blue").size(18).weight(2),
+                    "P1 (Conditional Premise): "
+                ),
+                StyledString.of(
+                    "If your view affirms that a given human is trait-equalizable to " +
+                     "a given nonhuman animal while retaining moral value, \nthen your view can only deny the nonhuman " +
                      "animal has moral value on pain of contradiction (P ∧ ¬P)." +
-                     "\n" +
-                     "P2 (Factual Premise): Your view affirms that a given human is trait-equalizable to a " +
+                     "\n"
+                ),
+                StyledString.of(
+                     f -> f.color("orange").size(18).weight(2),
+                    "\nP2 (Factual Premise): "
+                ),
+                StyledString.of(
+                     f -> f.color("green"),
+                     "Your view affirms that a given human is trait-equalizable to a " +
                      "given nonhuman animal while retaining moral value." +
-                     "\n" +
+                     "\n\n" +
                      "C (Conclusion): Therefore, your view can only deny the nonhuman animal has moral value on pain of contradiction."
-                );
+                )
+        ));
         Var<Placement> placement = Var.of(Placement.CENTER);
         Var<UI.ComponentBoundary> componentBoundary = Var.of(ComponentBoundary.INTERIOR_TO_CONTENT);
         Var<Boolean> wrapLines = Var.of(true);
@@ -39,7 +54,7 @@ public class TextViewer extends Panel
             .withBackground(Color.LIGHTSTEELBLUE.brighter())
             .add("push, grow",
                 scrollPane().add(
-                    textArea(someText)
+                    textArea(someText.get().mapTo(String.class, StyledString::string).join(""))
                 )
             )
         )
@@ -61,6 +76,7 @@ public class TextViewer extends Panel
                 .withStyle( conf -> conf
                     .padding(24)
                     .text( t -> t
+                        .font(f->f.color("gray"))
                         .content(someText.get())
                         .placement(placement.get())
                         .placementBoundary(componentBoundary.get())
