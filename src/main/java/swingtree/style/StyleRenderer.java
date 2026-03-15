@@ -1401,20 +1401,31 @@ final class StyleRenderer
             Phase 1 : Build layouts using LineBreakMeasurer
             ------------------------------------------------
         */
-        final List<StyledString> paragraphs = _splitStyledTextIntoParagraphs(text);
-        for (StyledString paragraph : paragraphs) {
-            if (paragraph.string().isEmpty()) {
+        final List<List<StyledString>> paragraphs = _splitStyledTextIntoParagraphs(text);
+        for (List<StyledString> paragraph : paragraphs) {
+            int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
+            if (length <= 0) {
                 layouts.add(null); // represent empty line
                 continue;
             }
-            final AttributedString attrStr = new AttributedString(paragraph.string());
-            if (paragraph.fontConf().isPresent()) {
-                java.awt.Font localFont = paragraph.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
-                attrStr.addAttribute(TextAttribute.FONT, localFont, 0, paragraph.string().length());
-                attrStr.addAttributes(localFont.getAttributes(), 0, paragraph.string().length());
-            } else {
-                attrStr.addAttribute(TextAttribute.FONT, font, 0, paragraph.string().length());
-                attrStr.addAttributes(font.getAttributes(), 0, paragraph.string().length());
+            final StringBuilder sb = new StringBuilder();
+            for (StyledString s : paragraph) {
+                sb.append(s.string());
+            }
+            final AttributedString attrStr = new AttributedString(sb.toString());
+            int index = 0;
+            for (StyledString styledString : paragraph) {
+                int styledStringLength = styledString.string().length();
+                int endIndex = index + styledStringLength;
+                if (styledString.fontConf().isPresent()) {
+                    java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
+                    attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);
+                    attrStr.addAttributes(localFont.getAttributes(), index, endIndex);
+                } else {
+                    attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);
+                    attrStr.addAttributes(font.getAttributes(), index, endIndex);
+                }
+                index += styledStringLength;
             }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
@@ -1585,17 +1596,39 @@ final class StyleRenderer
         }
     }
 
-    private static List<StyledString> _splitStyledTextIntoParagraphs(Tuple<StyledString> text) {
-        List<StyledString> paragraphs = new ArrayList<>();
+    private static List<List<StyledString>> _splitStyledTextIntoParagraphs(Tuple<StyledString> text) {
+        List<List<StyledString>> paragraphs = new ArrayList<>();
+        List<StyledString> currentParagraph = null;
         for (StyledString styledString : text) {
             String[] parts = styledString.string().split("\n", -1);
             if (parts.length <= 1) {
-                paragraphs.add(styledString);
+                if (currentParagraph == null) {
+                    currentParagraph = new ArrayList<>();
+                }
+                currentParagraph.add(styledString);
             } else {
-                for (String part : parts) {
-                    paragraphs.add(styledString.withString(part));
+                for ( int i = 0; i < parts.length; i++ ) {
+                    String part = parts[i];
+                    if ( !part.isEmpty() ) {
+                        if (currentParagraph == null) {
+                            currentParagraph = new ArrayList<>();
+                        }
+                        currentParagraph.add(styledString.withString(part));
+
+                        // if it is not the last part, we start a new paragraph:
+                        if (i < parts.length - 1) {
+                            paragraphs.add(currentParagraph);
+                            currentParagraph = null;
+                        }
+                    } else {
+                        // an empty paragraph is perfectly fine:
+                        paragraphs.add(new ArrayList<>());
+                    }
                 }
             }
+        }
+        if ( currentParagraph != null && !currentParagraph.isEmpty() ) {
+            paragraphs.add(currentParagraph);
         }
         return paragraphs;
     }
