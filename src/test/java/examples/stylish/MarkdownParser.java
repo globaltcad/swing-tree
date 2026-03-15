@@ -1,18 +1,17 @@
 package examples.stylish;
 
 import sprouts.Tuple;
+import swingtree.api.Configurator;
 import swingtree.style.FontConf;
 import swingtree.style.StyledString;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 /**
  * A pure-function Markdown parser that converts a raw markdown {@link String}
- * into a {@link Tuple} of {@link StyledString} instances, ready to be fed into
- * SwingTree's style engine via
- * {@code TextConf#content(Tuple)}.
+ * into a {@link Tuple}{@code <}{@link StyledString}{@code >}, ready to be fed
+ * into SwingTree's style engine via {@code TextConf#content(Tuple)}.
  *
  * <p>Supported syntax:
  * <ul>
@@ -46,6 +45,14 @@ public final class MarkdownParser {
     private static final String COLOR_CODE_BG   = "#fff0f0";
     private static final String COLOR_LINK      = "#3182ce";
 
+    // ── Reusable inline-style configurators ───────────────────────────────────
+    private static final Configurator<FontConf> BOLD        = f -> f.weight(2);
+    private static final Configurator<FontConf> ITALIC      = f -> f.posture(0.2f);
+    private static final Configurator<FontConf> BOLD_ITALIC = BOLD.andThen(ITALIC);
+    private static final Configurator<FontConf> STRIKE      = f -> f.strikeThrough(true).color(COLOR_STRIKE);
+    private static final Configurator<FontConf> CODE        = f -> f.family("Monospaced").color(COLOR_CODE_FG).backgroundColor(COLOR_CODE_BG);
+    private static final Configurator<FontConf> LINK        = f -> f.color(COLOR_LINK).underlined(true);
+
     private MarkdownParser() {}
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -62,53 +69,47 @@ public final class MarkdownParser {
         String[] lines = markdown.split("\n", -1);
         for (int i = 0; i < lines.length; i++) {
             parseLine(lines[i], segments);
-            // Preserve newlines between lines; avoid a spurious trailing newline.
-            if (i < lines.length - 1) {
+            if (i < lines.length - 1)
                 segments.add(StyledString.of("\n"));
-            }
         }
-        return Tuple.of(StyledString.class, segments.toArray(new StyledString[0]));
+        return Tuple.of(StyledString.class, segments);
     }
 
     // ── Block-level parsing ───────────────────────────────────────────────────
 
     private static void parseLine(String line, List<StyledString> out) {
 
-        // H3 must be checked before H2, H2 before H1, so that "###" isn't mis-read as H1.
+        // H3 must be checked before H2, H2 before H1 to avoid prefix ambiguity.
         if (line.startsWith("### ")) {
             parseInline(line.substring(4), out,
-                    f -> f.size(16).weight(2).color(COLOR_H3));
+                f -> f.size(16).weight(2).color(COLOR_H3));
 
         } else if (line.startsWith("## ")) {
             parseInline(line.substring(3), out,
-                    f -> f.size(20).weight(2).color(COLOR_H2));
+                f -> f.size(20).weight(2).color(COLOR_H2));
 
         } else if (line.startsWith("# ")) {
             parseInline(line.substring(2), out,
-                    f -> f.size(26).weight(2).color(COLOR_H1));
+                f -> f.size(26).weight(2).color(COLOR_H1));
 
         } else if (line.matches("^[-*_]{3,}\\s*$")) {
-            // Horizontal rule ─ rendered as a Unicode line since SwingTree
-            // cannot draw actual HR elements inside a styled-string flow.
-            out.add(StyledString.of(f -> f.color(COLOR_RULE),
-                    "────────────────────────────────────────"));
+            out.add(StyledString.of(
+                f -> f.color(COLOR_RULE),
+                "────────────────────────────────────────"));
 
         } else if (line.startsWith("> ")) {
-            // Blockquote: a coloured bar glyph followed by the quoted text.
-            out.add(StyledString.of(f -> f.color(COLOR_QUOTE_BAR).size(14), " ▎ "));
+            out.add(StyledString.of(
+                f -> f.color(COLOR_QUOTE_BAR).size(14), " ▎ "));
             parseInline(line.substring(2), out,
-                    f -> f.color(COLOR_QUOTE_TXT).posture(0.2f));
+                f -> f.color(COLOR_QUOTE_TXT).posture(0.2f));
 
         } else if (line.matches("^[\\-*+] .*")) {
-            // Unordered list item.
             out.add(StyledString.of("  • "));
             parseInline(line.substring(2), out, f -> f);
 
         } else if (line.matches("^\\d+\\.\\s.*")) {
-            // Ordered list item — "1. text".
             int dot = line.indexOf('.');
-            String prefix = "  " + line.substring(0, dot + 1) + " ";
-            out.add(StyledString.of(f -> f.weight(1.5f), prefix));
+            out.add(StyledString.of(f -> f.weight(1.5f), "  " + line.substring(0, dot + 1) + " "));
             parseInline(line.substring(dot + 2), out, f -> f);
 
         } else {
@@ -120,21 +121,26 @@ public final class MarkdownParser {
     // ── Inline-level parsing ──────────────────────────────────────────────────
 
     /**
-     * Tokenises a single line of text for inline markdown constructs and appends the
-     * resulting {@link StyledString} segments to {@code out}.
+     * Tokenises a single line for inline markdown constructs, appending
+     * {@link StyledString} segments to {@code out}.
      *
-     * <p>The {@code base} operator represents the block-level style currently in effect
-     * (e.g. heading size/color).  Every inline segment composes on top of it via
-     * {@code f -> base.apply(f).weight(2)} and similar lambdas.
+     * <p>Each inline style is expressed as a {@link Configurator}{@code <FontConf>}
+     * composed on top of the {@code base} block-level configurator via
+     * {@link Configurator#andThen}.  This means heading color/size is preserved
+     * automatically on any bold, italic, or link span found inside a heading line.
      *
-     * @param text  Inline text to tokenise (no leading block markers).
+     * <p>Inline code is intentionally <em>not</em> composed with {@code base}: a
+     * monospaced code token should look the same regardless of whether it appears
+     * in body text or a heading.
+     *
+     * @param text  Inline text to tokenise (block prefix already stripped).
      * @param out   Accumulator list that receives the produced segments.
-     * @param base  Block-level {@link FontConf} transformer applied to every segment.
+     * @param base  Block-level {@link FontConf} configurator in effect for this line.
      */
     private static void parseInline(
             String text,
             List<StyledString> out,
-            UnaryOperator<FontConf> base
+            Configurator<FontConf> base
     ) {
         int i = 0;
         StringBuilder plain = new StringBuilder();
@@ -142,101 +148,91 @@ public final class MarkdownParser {
         while (i < text.length()) {
             char c = text.charAt(i);
 
-            // ── Bold-italic  ***…***  (must be checked before ** and *)
+            // Bold-italic  ***…***  — must be checked before ** and *
             if (text.startsWith("***", i)) {
                 int end = text.indexOf("***", i + 3);
                 if (end != -1) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 3, end);
-                    out.add(StyledString.of(
-                            f -> base.apply(f).weight(2).posture(0.2f), content));
+                    out.add(StyledString.of(base.andThen(BOLD_ITALIC), content));
                     i = end + 3;
                     continue;
                 }
             }
 
-            // ── Bold  **…**
+            // Bold  **…**
             if (text.startsWith("**", i)) {
                 int end = text.indexOf("**", i + 2);
                 if (end != -1) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 2, end);
-                    out.add(StyledString.of(
-                            f -> base.apply(f).weight(2), content));
+                    out.add(StyledString.of(base.andThen(BOLD), content));
                     i = end + 2;
                     continue;
                 }
             }
 
-            // ── Italic  *…*  (not **)
+            // Italic  *…*  (not **)
             if (c == '*' && !text.startsWith("**", i)) {
-                int end = indexOfChar(text, '*', i + 1);
+                int end = text.indexOf('*', i + 1);
                 if (end != -1 && !text.startsWith("**", end)) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 1, end);
-                    out.add(StyledString.of(
-                            f -> base.apply(f).posture(0.2f), content));
+                    out.add(StyledString.of(base.andThen(ITALIC), content));
                     i = end + 1;
                     continue;
                 }
             }
 
-            // ── Bold  __…__
+            // Bold  __…__
             if (text.startsWith("__", i)) {
                 int end = text.indexOf("__", i + 2);
                 if (end != -1) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 2, end);
-                    out.add(StyledString.of(
-                            f -> base.apply(f).weight(2), content));
+                    out.add(StyledString.of(base.andThen(BOLD), content));
                     i = end + 2;
                     continue;
                 }
             }
 
-            // ── Italic  _…_  (not __)
+            // Italic  _…_  (not __)
             if (c == '_' && !text.startsWith("__", i)) {
-                int end = indexOfChar(text, '_', i + 1);
+                int end = text.indexOf('_', i + 1);
                 if (end != -1 && !text.startsWith("__", end)) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 1, end);
-                    out.add(StyledString.of(
-                            f -> base.apply(f).posture(0.2f), content));
+                    out.add(StyledString.of(base.andThen(ITALIC), content));
                     i = end + 1;
                     continue;
                 }
             }
 
-            // ── Strikethrough  ~~…~~
+            // Strikethrough  ~~…~~
             if (text.startsWith("~~", i)) {
                 int end = text.indexOf("~~", i + 2);
                 if (end != -1) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 2, end);
-                    out.add(StyledString.of(
-                            f -> base.apply(f).strikeThrough(true).color(COLOR_STRIKE), content));
+                    out.add(StyledString.of(base.andThen(STRIKE), content));
                     i = end + 2;
                     continue;
                 }
             }
 
-            // ── Inline code  `…`
+            // Inline code  `…`  — intentionally ignores base to keep a consistent look
             if (c == '`') {
-                int end = indexOfChar(text, '`', i + 1);
+                int end = text.indexOf('`', i + 1);
                 if (end != -1) {
                     flushPlain(plain, out, base);
                     String content = text.substring(i + 1, end);
-                    // Code segments intentionally ignore the block-level base style
-                    // so that monospace + tint always apply regardless of heading level.
-                    out.add(StyledString.of(
-                            f -> f.family("Monospaced").color(COLOR_CODE_FG).backgroundColor(COLOR_CODE_BG),
-                            content));
+                    out.add(StyledString.of(CODE, content));
                     i = end + 1;
                     continue;
                 }
             }
 
-            // ── Link  [label](url)  — only the label is rendered (URL discarded)
+            // Link  [label](url)  — label rendered, URL discarded
             if (c == '[') {
                 int closeBracket = text.indexOf(']', i + 1);
                 if (closeBracket != -1
@@ -246,15 +242,13 @@ public final class MarkdownParser {
                     if (closeParen != -1) {
                         flushPlain(plain, out, base);
                         String label = text.substring(i + 1, closeBracket);
-                        out.add(StyledString.of(
-                                f -> base.apply(f).color(COLOR_LINK).underlined(true), label));
+                        out.add(StyledString.of(base.andThen(LINK), label));
                         i = closeParen + 1;
                         continue;
                     }
                 }
             }
 
-            // ── Accumulate plain text
             plain.append(c);
             i++;
         }
@@ -262,26 +256,16 @@ public final class MarkdownParser {
         flushPlain(plain, out, base);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Helper ────────────────────────────────────────────────────────────────
 
-    /**
-     * Emits the accumulated plain-text buffer as a single {@link StyledString}
-     * styled with {@code base}, then clears the buffer.
-     * Does nothing if the buffer is empty.
-     */
     private static void flushPlain(
             StringBuilder buffer,
             List<StyledString> out,
-            UnaryOperator<FontConf> base
+            Configurator<FontConf> base
     ) {
         if (buffer.length() == 0) return;
         String text = buffer.toString();
         buffer.setLength(0);
-        out.add(StyledString.of(f -> base.apply(f), text));
-    }
-
-    /** Finds the first occurrence of {@code ch} in {@code text} at or after {@code from}. */
-    private static int indexOfChar(String text, char ch, int from) {
-        return text.indexOf(ch, from);
+        out.add(StyledString.of(base, text));
     }
 }
