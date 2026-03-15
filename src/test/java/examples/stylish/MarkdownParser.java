@@ -7,6 +7,7 @@ import swingtree.style.StyledString;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A pure-function Markdown parser that converts a raw markdown {@link String}
@@ -77,6 +78,10 @@ public final class MarkdownParser {
 
     // ── Block-level parsing ───────────────────────────────────────────────────
 
+    private static final Pattern HRULE_PATTERN          = Pattern.compile("^[-*_]{3,}\\s*$");
+    private static final Pattern UNORDERED_LIST_PATTERN = Pattern.compile("^[\\-*+] .*");
+    private static final Pattern ORDERED_LIST_PATTERN   = Pattern.compile("^\\d+\\.\\s.*");
+
     private static void parseLine(String line, List<StyledString> out) {
 
         // H3 must be checked before H2, H2 before H1 to avoid prefix ambiguity.
@@ -92,7 +97,7 @@ public final class MarkdownParser {
             parseInline(line.substring(2), out,
                 f -> f.size(26).weight(2).color(COLOR_H1));
 
-        } else if (line.matches("^[-*_]{3,}\\s*$")) {
+        } else if (HRULE_PATTERN.matcher(line).matches()) {
             out.add(StyledString.of(
                 f -> f.color(COLOR_RULE),
                 "────────────────────────────────────────"));
@@ -103,11 +108,11 @@ public final class MarkdownParser {
             parseInline(line.substring(2), out,
                 f -> f.color(COLOR_QUOTE_TXT).posture(0.2f));
 
-        } else if (line.matches("^[\\-*+] .*")) {
+        } else if (UNORDERED_LIST_PATTERN.matcher(line).matches()) {
             out.add(StyledString.of("  • "));
             parseInline(line.substring(2), out, f -> f);
 
-        } else if (line.matches("^\\d+\\.\\s.*")) {
+        } else if (ORDERED_LIST_PATTERN.matcher(line).matches()) {
             int dot = line.indexOf('.');
             out.add(StyledString.of(f -> f.weight(1.5f), "  " + line.substring(0, dot + 1) + " "));
             parseInline(line.substring(dot + 2), out, f -> f);
