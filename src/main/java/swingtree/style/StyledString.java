@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- *  A {@link StyledString} is a uniformly styled snipped of text which is typically part of a sequence
+ *  A {@link StyledString} is a uniformly styled snippet of text which is typically part of a sequence
  *  of styled strings that together make up a visually rich text in the <i>SwingTree</i> style API.
  *  More specifically, you can pass instances of this to {@link TextConf#content(StyledString...)}
  *  as part of a {@link ComponentStyleDelegate#text(Configurator)} sub-style configuration.<br>
