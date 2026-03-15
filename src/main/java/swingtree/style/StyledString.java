@@ -126,7 +126,10 @@ public final class StyledString {
 
     @Override
     public String toString() {
-        return "StyledString[string='" + _string + "', style=" + _configuratorOrFontConf + "]";
+        return "StyledString[" +
+                    "string='" + _string + "', " +
+                    "style=" + (_configuratorOrFontConf == null ? "?" : String.valueOf(_configuratorOrFontConf)) +
+                "]";
     }
 
     @Override
