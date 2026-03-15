@@ -375,7 +375,8 @@ public final class TextConf implements Simplifiable<TextConf>
         if ( _content.isEmpty() )
             return _NONE;
         return content(
-                _content.map( it -> it.resolveUsing(_fontConf))
+                _content.removeIf( it -> it.string().isEmpty() )
+                        .map( it -> it.resolveUsing(_fontConf))
             );
     }
 
