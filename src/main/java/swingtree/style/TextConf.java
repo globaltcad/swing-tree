@@ -209,6 +209,9 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given text content.
      */
     public TextConf content( String textString ) {
+        Objects.requireNonNull(textString);
+        if ( textString.isEmpty() )
+            return content(Tuple.of(StyledString.class));
         return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
     }
 
