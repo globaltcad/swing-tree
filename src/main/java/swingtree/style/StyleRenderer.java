@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Pair;
 import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
@@ -1398,78 +1399,10 @@ final class StyleRenderer
 
         final Font font = g2d.getFont();
         final FontRenderContext frc = g2d.getFontRenderContext();
-        final List<@Nullable TextLayout> layouts = new ArrayList<>();
 
-        /*
-            ------------------------------------------------
-            Phase 1 : Build layouts using LineBreakMeasurer
-            ------------------------------------------------
-        */
-        final List<List<StyledString>> paragraphs = _splitStyledTextIntoParagraphs(text);
-        for (List<StyledString> paragraph : paragraphs) {
-            int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
-            if (length <= 0) {
-                layouts.add(null); // represent empty line
-                continue;
-            }
-            final StringBuilder sb = new StringBuilder();
-            for (StyledString s : paragraph) {
-                sb.append(s.string());
-            }
-            final AttributedString attrStr = new AttributedString(sb.toString());
-            int index = 0;
-            for (StyledString styledString : paragraph) {
-                int styledStringLength = styledString.string().length();
-                if (styledStringLength <= 0) {
-                    // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges
-                    continue;
-                }
-                int endIndex = index + styledStringLength;
-                if (styledString.fontConf().isPresent()) {
-                    java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
-                    attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);
-                    attrStr.addAttributes(localFont.getAttributes(), index, endIndex);
-                } else {
-                    attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);
-                    attrStr.addAttributes(font.getAttributes(), index, endIndex);
-                }
-                index += styledStringLength;
-            }
-            final AttributedCharacterIterator it = attrStr.getIterator();
-
-            if (wrapLines) {// Word wrapping using LineBreakMeasurer
-                final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
-                final int end = it.getEndIndex();
-                while (measurer.getPosition() < end) {
-                    TextLayout layout = measurer.nextLayout(boundsWidth);
-                    layouts.add(layout);
-                }
-            } else {// No wrapping — render full line even if wider than bounds
-                layouts.add(new TextLayout(it, frc));
-            }
-        }
-
-        /*
-            remove trailing newline marker
-         */
-        if (!layouts.isEmpty() && layouts.get(layouts.size()-1) == null)
-            layouts.remove(layouts.size()-1);
-
-        /*
-            ------------------------------------------------
-            Phase 2 : Measure total text height
-            ------------------------------------------------
-         */
-
-        float totalHeight = 0;
-
-        for (TextLayout layout : layouts) {
-            if (layout == null) {
-                totalHeight += font.getSize2D();
-                continue;
-            }
-            totalHeight += (layout.getAscent() + layout.getDescent() + layout.getLeading());
-        }
+        final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, text, boundsWidth, wrapLines, boxModelConf);
+        final List<@Nullable TextLayout> layouts = layoutResult.second();
+        final float totalHeight              = layoutResult.first();
 
         /*
             ------------------------------------------------
@@ -1602,6 +1535,104 @@ final class StyleRenderer
             layout.draw(g2d, x, y);
             y += ( layout.getDescent() + layout.getLeading() );
         }
+    }
+
+    /**
+     *  Builds the list of {@link TextLayout} objects for the given styled text and measures
+     *  the total rendered height of all lines (Phase 1 + Phase 2 of the text rendering pipeline).
+     *
+     * @param font         The base font to use for unstyled segments.
+     * @param frc          The {@link FontRenderContext} used by the measurer.
+     * @param text         The styled text to lay out.
+     * @param boundsWidth  The available width, used for line-breaking when {@code wrapLines} is {@code true}.
+     * @param wrapLines    Whether long lines should be wrapped at word boundaries.
+     * @param boxModelConf The box-model configuration forwarded to per-segment font derivation.
+     * @return A {@link Pair} whose {@link Pair#first()} is the total pixel height of all lines
+     *         and whose {@link Pair#second()} is the ordered layout list
+     *         ({@code null} entries represent empty/blank lines).
+     */
+    private static Pair<Float, List<@Nullable TextLayout>> _buildTextLayoutsAndPreferredHeight(
+        final Font                font,
+        final FontRenderContext   frc,
+        final Tuple<StyledString> text,
+        final float               boundsWidth,
+        final boolean             wrapLines,
+        final BoxModelConf        boxModelConf
+    ) {
+        final List<@Nullable TextLayout> layouts = new ArrayList<>();
+
+        /*
+            ------------------------------------------------
+            Phase 1 : Build layouts using LineBreakMeasurer
+            ------------------------------------------------
+        */
+        final List<List<StyledString>> paragraphs = _splitStyledTextIntoParagraphs(text);
+        for (List<StyledString> paragraph : paragraphs) {
+            int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
+            if (length <= 0) {
+                layouts.add(null); // represent empty line
+                continue;
+            }
+            final StringBuilder sb = new StringBuilder();
+            for (StyledString s : paragraph) {
+                sb.append(s.string());
+            }
+            final AttributedString attrStr = new AttributedString(sb.toString());
+            int index = 0;
+            for (StyledString styledString : paragraph) {
+                int styledStringLength = styledString.string().length();
+                if (styledStringLength <= 0) {
+                    // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges
+                    continue;
+                }
+                int endIndex = index + styledStringLength;
+                if (styledString.fontConf().isPresent()) {
+                    java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
+                    attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);
+                    attrStr.addAttributes(localFont.getAttributes(), index, endIndex);
+                } else {
+                    attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);
+                    attrStr.addAttributes(font.getAttributes(), index, endIndex);
+                }
+                index += styledStringLength;
+            }
+            final AttributedCharacterIterator it = attrStr.getIterator();
+
+            if (wrapLines) {// Word wrapping using LineBreakMeasurer
+                final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
+                final int end = it.getEndIndex();
+                while (measurer.getPosition() < end) {
+                    TextLayout layout = measurer.nextLayout(boundsWidth);
+                    layouts.add(layout);
+                }
+            } else {// No wrapping — render full line even if wider than bounds
+                layouts.add(new TextLayout(it, frc));
+            }
+        }
+
+        /*
+            remove trailing newline marker
+         */
+        if (!layouts.isEmpty() && layouts.get(layouts.size()-1) == null)
+            layouts.remove(layouts.size()-1);
+
+        /*
+            ------------------------------------------------
+            Phase 2 : Measure total text height
+            ------------------------------------------------
+         */
+
+        float totalHeight = 0;
+
+        for (TextLayout layout : layouts) {
+            if (layout == null) {
+                totalHeight += font.getSize2D();
+                continue;
+            }
+            totalHeight += (layout.getAscent() + layout.getDescent() + layout.getLeading());
+        }
+
+        return Pair.of(totalHeight, layouts);
     }
 
     private static List<List<StyledString>> _splitStyledTextIntoParagraphs(Tuple<StyledString> text) {
