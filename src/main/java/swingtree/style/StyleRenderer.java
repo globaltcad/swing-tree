@@ -1323,7 +1323,16 @@ final class StyleRenderer
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
             g2d.setClip(newClip);
-            _renderTextInternal(g2d, textToRender, leftX, topY, localWidth, localHeight, placement, wrapLines, conf.boxModel());
+
+            if (!textToRender.isEmpty()) {
+                // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
+                final FontRenderContext frc = g2d.getFontRenderContext();
+                final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, localWidth, wrapLines, conf.boxModel());
+                final List<@Nullable TextLayout> layouts = layoutResult.second();
+                final float totalHeight                  = layoutResult.first();
+                // Phase 3 - 5:
+                _renderTextInternal(g2d, font, leftX, topY, localWidth, localHeight, placement, layouts, totalHeight);
+            }
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
@@ -1385,25 +1394,15 @@ final class StyleRenderer
     
     private static void _renderTextInternal(
         final Graphics2D g2d,
-        final Tuple<StyledString> text,
+        final Font font,
         final float boundsX,
         final float boundsY,
         final float boundsWidth,
         final float boundsHeight,
         final UI.Placement placement,
-        final boolean wrapLines,
-        final BoxModelConf boxModelConf
+        final List<@Nullable TextLayout> layouts,
+        final float totalHeight
     ) {
-        if (text.isEmpty())
-            return;
-
-        final Font font = g2d.getFont();
-        final FontRenderContext frc = g2d.getFontRenderContext();
-
-        final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, text, boundsWidth, wrapLines, boxModelConf);
-        final List<@Nullable TextLayout> layouts = layoutResult.second();
-        final float totalHeight              = layoutResult.first();
-
         /*
             ------------------------------------------------
             Phase 3 : Determine visible slice (overflow policy)
@@ -1560,7 +1559,6 @@ final class StyleRenderer
         final BoxModelConf        boxModelConf
     ) {
         final List<@Nullable TextLayout> layouts = new ArrayList<>();
-
         /*
             ------------------------------------------------
             Phase 1 : Build layouts using LineBreakMeasurer
