@@ -1304,23 +1304,18 @@ final class StyleRenderer
 
         final Tuple<StyledString>  textToRender      = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
-        final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final UI.Placement         placement         = findDesiredPlacementFrom(text);
-        final Offset               offset            = text.offset();
-        final Outline              insets            = _insetsFrom(placementBoundary, boxModel);
         final boolean              wrapLines         = text.wrapLines();
         // Computing the area available for text rendering after applying the offset and insets:
-        final float leftX = offset.x() + insets.left().orElse(0f);
-        final float topY  = offset.y() + insets.top().orElse(0f);
-        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (insets.left().orElse(0f) + insets.right().orElse(0f)));
-        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (insets.top().orElse(0f) + insets.bottom().orElse(0f)));
+        final Bounds textBounds = _computeTextBounds(text, boxModel);
+        final float availableWidth = textBounds.size().width().orElse(0f);
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
             // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
             final FontRenderContext frc = g2d.getFontRenderContext();
-            final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, localWidth, wrapLines, conf.boxModel());
+            final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, availableWidth, wrapLines, conf.boxModel());
             final List<@Nullable TextLayout> layouts = layoutResult.second();
             final float totalHeight                  = layoutResult.first();
             // Phase 3 - 5: Rendering
@@ -1329,13 +1324,25 @@ final class StyleRenderer
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
             g2d.setClip(newClip);
-            _renderTextInternal(g2d, font, leftX, topY, localWidth, localHeight, placement, layouts, totalHeight);
+            _renderTextInternal(g2d, font, textBounds, placement, layouts, totalHeight);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
             g2d.setFont(initialFont);
             g2d.setClip(oldClip);
         }
+    }
+
+    static Bounds _computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
+        final UI.ComponentBoundary placementBoundary = text.placementBoundary();
+        final Offset               offset            = text.offset();
+        final Outline              insets            = _insetsFrom(placementBoundary, boxModel);
+        // Computing the area available for text rendering after applying the offset and insets:
+        final float leftX = offset.x() + insets.left().orElse(0f);
+        final float topY  = offset.y() + insets.top().orElse(0f);
+        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (insets.left().orElse(0f) + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (insets.top().orElse(0f) + insets.bottom().orElse(0f)));
+        return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
     private static UI.Placement findDesiredPlacementFrom(TextConf text) {
@@ -1392,14 +1399,15 @@ final class StyleRenderer
     private static void _renderTextInternal(
         final Graphics2D g2d,
         final Font font,
-        final float boundsX,
-        final float boundsY,
-        final float boundsWidth,
-        final float boundsHeight,
+        final Bounds textBounds,
         final UI.Placement placement,
         final List<@Nullable TextLayout> layouts,
         final float totalHeight
     ) {
+        final float boundsX = textBounds.location().x();
+        final float boundsY  = textBounds.location().y();
+        final float boundsWidth = textBounds.size().width().orElse(0f);
+        final float boundsHeight = textBounds.size().height().orElse(0f);
         /*
             ------------------------------------------------
             Phase 3 : Determine visible slice (overflow policy)
@@ -1547,7 +1555,7 @@ final class StyleRenderer
      *         and whose {@link Pair#second()} is the ordered layout list
      *         ({@code null} entries represent empty/blank lines).
      */
-    private static Pair<Float, List<@Nullable TextLayout>> _buildTextLayoutsAndPreferredHeight(
+    static Pair<Float, List<@Nullable TextLayout>> _buildTextLayoutsAndPreferredHeight(
         final Font                font,
         final FontRenderContext   frc,
         final Tuple<StyledString> text,
