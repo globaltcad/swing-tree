@@ -1318,21 +1318,18 @@ final class StyleRenderer
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
+            // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
+            final FontRenderContext frc = g2d.getFontRenderContext();
+            final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, localWidth, wrapLines, conf.boxModel());
+            final List<@Nullable TextLayout> layouts = layoutResult.second();
+            final float totalHeight                  = layoutResult.first();
+            // Phase 3 - 5: Rendering
             Shape newClip = conf.areas().get(clipArea);
             // We merge the new clip with the old one:
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
             g2d.setClip(newClip);
-
-            if (!textToRender.isEmpty()) {
-                // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
-                final FontRenderContext frc = g2d.getFontRenderContext();
-                final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, localWidth, wrapLines, conf.boxModel());
-                final List<@Nullable TextLayout> layouts = layoutResult.second();
-                final float totalHeight                  = layoutResult.first();
-                // Phase 3 - 5:
-                _renderTextInternal(g2d, font, leftX, topY, localWidth, localHeight, placement, layouts, totalHeight);
-            }
+            _renderTextInternal(g2d, font, leftX, topY, localWidth, localHeight, placement, layouts, totalHeight);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
