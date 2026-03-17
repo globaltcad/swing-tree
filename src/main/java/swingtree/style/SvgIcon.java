@@ -1270,25 +1270,25 @@ public final class SvgIcon extends ImageIcon
         final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);
         switch ( preferredPlacement ) {
             case TOP_LEFT:
-                viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );
                 break;
             case TOP_RIGHT:
-                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );
                 break;
             case BOTTOM_LEFT:
-                viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
                 break;
             case BOTTOM_RIGHT:
                 viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
                 break;
             case TOP:
-                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );
                 break;
             case BOTTOM:
                 viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );
                 break;
             case LEFT:
-                viewBox = new ViewBox( scaledAreaX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
                 break;
             case RIGHT:
                 viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
