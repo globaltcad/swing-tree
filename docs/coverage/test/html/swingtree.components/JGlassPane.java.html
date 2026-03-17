@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JGlassPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.components</a> &gt; <span class="el_source">JGlassPane.java</span></div><h1>JGlassPane.java</h1><pre class="source lang-java linenums">package swingtree.components;
+
+
+import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.From;
+import swingtree.ComponentDelegate;
+import swingtree.DragAwayComponentConf;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.api.Painter;
+import swingtree.layout.Bounds;
+import swingtree.layout.Position;
+import swingtree.layout.Size;
+import swingtree.style.ComponentExtension;
+import swingtree.style.StylableComponent;
+
+import javax.swing.*;
+import javax.swing.event.EventListenerList;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.util.*;
+
+import static java.awt.AWTEvent.*;
+import static java.awt.event.MouseEvent.*;
+import static javax.swing.SwingUtilities.*;
+
+/**
+ *  A more advanced glass pane implementation than the default Swing
+ *  glass pane of a {@link JRootPane} object (A regular {@link JPanel}.
+ *  In contrast to the default glass pane ({@link JPanel}) of a {@link JRootPane},
+ *  this pane &lt;b&gt;handles any mouse events, without interrupting the controls underneath
+ *  the glass pane (in the content pane of the root pane)&lt;/b&gt;.
+ *  Also, cursors are handled as if the glass pane was invisible
+ *  (if no cursor gets explicitly set to the glass pane).&lt;br&gt;
+ *  &lt;p&gt;
+ *      This glass pane is also the backbone of how SwingTree renders its
+ *      drag and drop operations. It renders an illustration of what is being dragged
+ *      on top of the entire component hierarchy of the root pane.&lt;br&gt;
+ *      Through this class SwingTree also draws the overlays for the GUI debug dev tool.
+ *      The debug dev tool can be enabled by calling {@link SwingTree#setDevToolEnabled(boolean)} or more commonly
+ *      by pressing the shortcut Ctrl+Shift+I (similar to the shortcut for the dev tools in web browsers).
+ *  &lt;/p&gt;&lt;br&gt;
+ *  &lt;p&gt;
+ *      The {@link #isVisible()} flag of this glass pane is self-managed based on
+ *      the existence of active named paint jobs registered through the {@link #setPaintJobWithId(String, Painter)} method.
+ *      So if there is at least one named paint job registered, then the glass pane will be visible,
+ *      and if there are no active named paint jobs, then the glass pane will be invisible.
+ *      Paint jobs can be removed by their id through the {@link #removePaintJobWithId(String)} method.&lt;br&gt;
+ *      Both the drag and drop visualization and the GUI debug dev tool overlays are implemented as named paint
+ *      jobs on this glass pane, so they will automatically show and hide the glass pane when they are active or inactive. &lt;br&gt;
+ *  &lt;/p&gt;
+ *  &lt;p&gt;
+ *      Note that both {@link #paintComponent(Graphics)} and {@link #paintChildren(Graphics)} methods are final
+ *      and cannot be overridden by subclasses of this glass pane. To do custom painting on this glass pane,
+ *      you must do so through the {@link #setPaintJobWithId(String, Painter)} method.&lt;br&gt;
+ *      This is important to ensure that existing functionality can not break!
+ *  &lt;/p&gt;
+ */
+public class JGlassPane extends JPanel implements StylableComponent
+{
+    private static final long serialVersionUID = 1L;
+<span class="fc" id="L71">    private static final Logger log = LoggerFactory.getLogger(JGlassPane.class);</span>
+<span class="fc" id="L72">    private static final Map&lt;JGlassPane, ActiveDrag&gt; activeDrags = new WeakHashMap&lt;&gt;();</span>
+
+<span class="fc" id="L74">    private final EventListenerList listeners = new EventListenerList();</span>
+<span class="fc" id="L75">    private final Map&lt;String, Painter&gt; activePaintJobs = new LinkedHashMap&lt;&gt;();</span>
+    protected @Nullable JRootPane rootPane;
+
+    /**
+     *  Creates a new &lt;code&gt;JGlassPane&lt;/code&gt; with a default &lt;code&gt;MigLayout&lt;/code&gt; instance
+     *  configured to be without insets and gaps between components.
+     */
+<span class="fc" id="L82">    public JGlassPane() {</span>
+<span class="fc" id="L83">        this.setVisible(false);</span>
+<span class="fc" id="L84">        setLayout(new MigLayout(&quot;fill, ins 0&quot;));</span>
+        // Binding:
+<span class="fc" id="L86">        putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!</span>
+<span class="fc" id="L87">            SwingTree.get().getAwtEventView(</span>
+                    MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
+                )
+<span class="fc" id="L90">                .onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L91">                    it.currentValue().ifPresent(this::eventDispatched);</span>
+<span class="fc" id="L92">                })</span>
+        );
+<span class="fc" id="L94">        putClientProperty(UUID.randomUUID(), // IMPORTANT: We need to keep a reference to prevent the binding from being garbage collected!</span>
+<span class="fc" id="L95">            SwingTree.get().isDevToolEnabledView()</span>
+<span class="fc" id="L96">                .onChange(From.ALL, it -&gt; {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">                    if ( rootPane != null ) {</span>
+<span class="nc" id="L98">                        toggleDevTool(it.currentValue().is(true));</span>
+<span class="nc" id="L99">                        rootPane.repaint();</span>
+                    }
+<span class="nc" id="L101">                })</span>
+        );
+
+<span class="fc" id="L104">        final DragSource dragSource = DragSource.getDefaultDragSource();</span>
+<span class="fc" id="L105">        DragGestureRecognizer[] gestureRecognizer = {null};</span>
+<span class="fc" id="L106">        gestureRecognizer[0] = dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, (dragTrigger) -&gt; {</span>
+<span class="nc" id="L107">            ActiveDrag activeDrag = getActiveDrag();</span>
+<span class="nc" id="L108">            Point dragStart = dragTrigger.getDragOrigin();</span>
+<span class="nc" id="L109">            activeDrag = activeDrag.begin(dragStart, rootPane);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if ( activeDrag.equals(ActiveDrag.none()) )</span>
+<span class="nc" id="L111">                return;</span>
+            else
+<span class="nc" id="L113">                setActiveDrag(activeDrag);</span>
+<span class="nc" id="L114">            BufferedImage bufferedImage = activeDrag.currentDragImage();</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            if ( !DragSource.isDragImageSupported() )</span>
+<span class="nc" id="L116">                bufferedImage = null;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            int offsetX = bufferedImage == null ? 0 : -bufferedImage.getWidth(null) / 2;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            int offsetY = bufferedImage == null ? 0 : -bufferedImage.getHeight(null) / 2;</span>
+
+<span class="nc" id="L120">            UI.DragAction dragAction = activeDrag.dragConf().map(DragAwayComponentConf::dragAction).orElse(UI.DragAction.NONE);</span>
+
+<span class="nc" id="L122">            gestureRecognizer[0].setSourceActions(dragAction.toIntCode());</span>
+<span class="nc" id="L123">            Component draggedComponent = activeDrag.draggedComponent();</span>
+<span class="nc" id="L124">            dragTrigger.startDrag(</span>
+<span class="nc" id="L125">                    activeDrag.dragConf().map(DragAwayComponentConf::cursor).map(UI.Cursor::toAWTCursor).orElse(Cursor.getDefaultCursor()),</span>
+                    bufferedImage,
+                    new Point(offsetX, offsetY),
+<span class="nc" id="L128">                    activeDrag.dragConf().flatMap(DragAwayComponentConf::payload).orElseGet(() -&gt; _findRelevantDataFor(draggedComponent)),</span>
+                    new GlassPaneDragSourceListener()
+            );
+<span class="nc" id="L131">            activeDrag.dragConf().ifPresent(conf -&gt; {</span>
+                try {
+<span class="nc" id="L133">                    conf.onDragStart().accept(new ComponentDelegate(conf.component(), dragTrigger));</span>
+<span class="nc" id="L134">                } catch (Exception ex) {</span>
+<span class="nc" id="L135">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Error while executing drag start event handlers.&quot;,
+                            ex
+                    );
+<span class="nc" id="L139">                }</span>
+<span class="nc" id="L140">            });</span>
+<span class="nc" id="L141">        });</span>
+<span class="fc" id="L142">        dragSource.addDragSourceMotionListener(event -&gt; {</span>
+<span class="nc" id="L143">            ActiveDrag activeDrag = getActiveDrag();</span>
+
+<span class="nc bnc" id="L145" title="All 4 branches missed.">            if ( !activeDrag.equals(ActiveDrag.none()) &amp;&amp; rootPane != null ) {</span>
+<span class="nc" id="L146">                Point dragStartPoint = determineCurrentDragDropLocationInWindow(event.getLocation(), rootPane);</span>
+<span class="nc" id="L147">                MouseEvent e = new MouseEvent(JGlassPane.this, MOUSE_DRAGGED, System.currentTimeMillis(), 0, dragStartPoint.x, dragStartPoint.y, 1, false);</span>
+<span class="nc" id="L148">                activeDrag.dragConf().ifPresent(conf -&gt; {</span>
+                    try {
+<span class="nc" id="L150">                        conf.onDragMove().accept(new ComponentDelegate(conf.component(), event));</span>
+<span class="nc" id="L151">                    } catch (Exception ex) {</span>
+<span class="nc" id="L152">                        log.error(SwingTree.get().logMarker(),</span>
+                                &quot;Error while executing drag movement event handlers.&quot;,
+                                ex
+                            );
+<span class="nc" id="L156">                    }</span>
+<span class="nc" id="L157">                });</span>
+<span class="nc" id="L158">                ActiveDrag previousActiveDrag = activeDrag;</span>
+<span class="nc" id="L159">                activeDrag = activeDrag.dragged(e);</span>
+<span class="nc" id="L160">                setActiveDrag(activeDrag);</span>
+                /*
+                    Note that if the drag image is not supported by the platform, we
+                    do the image rendering ourselves directly on the Graphics object
+                    of the glass pane of the root pane.
+                    But for this to work we need to repaint the area where the drag image was
+                    previously rendered and the area where it will be rendered next.
+                */
+<span class="nc" id="L168">                repaintRootPaneFor(previousActiveDrag, activeDrag);</span>
+            }
+<span class="nc" id="L170">        });</span>
+<span class="fc" id="L171">        setActiveDrag(ActiveDrag.none());</span>
+<span class="fc" id="L172">        this.addMouseMotionListener(new MouseAdapter() {</span>
+            @Override public void mouseMoved(MouseEvent e) {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                if (rootPane != null )</span>
+<span class="nc" id="L175">                    GuiDebugDevToolUtility.processMouseMovementForLiveDebugging(JGlassPane.this, rootPane, e);</span>
+<span class="nc" id="L176">            }</span>
+        });
+<span class="fc" id="L178">        this.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L180" title="All 2 branches missed.">                if (rootPane != null ) {</span>
+<span class="nc" id="L181">                    GuiDebugDevToolUtility.findAndSelectComponentForDebug(rootPane, e);</span>
+                }
+<span class="nc" id="L183">            }</span>
+        });
+<span class="fc" id="L185">    }</span>
+
+    public JGlassPane(JRootPane rootPane) {
+<span class="nc" id="L188">        this();</span>
+<span class="nc" id="L189">        Objects.requireNonNull(rootPane);</span>
+<span class="nc" id="L190">        attachToRootPane(rootPane);</span>
+<span class="nc" id="L191">    }</span>
+
+    /**
+     *  Schedules a permanent paint job on this glass pane with the given name/id and painter,
+     *  which will be active until the {@link #removePaintJobWithId(String)} method is called with the same id.
+     *  If there is already an active paint job with the same id, then this method does nothing.
+     *  Note that paint jobs are executed in the order they were added...
+     *  @param id The id of the paint job. It must be unique, otherwise the paint job will not be added.
+     *  @param painter The painter that will be executed from this glass pane's {@code paintChildren} method while the paint job is active.
+     */
+    protected final void setPaintJobWithId( String id, Painter painter ) {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if ( !activePaintJobs.containsKey(id) ) {</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if ( activePaintJobs.isEmpty() )</span>
+<span class="nc" id="L204">                setVisible(true);</span>
+<span class="nc" id="L205">            activePaintJobs.put(id, painter);</span>
+<span class="nc" id="L206">            repaint();</span>
+        }
+<span class="nc" id="L208">    }</span>
+
+    /**
+     *  Removes the active paint job with the given id from this glass pane, if it exists.
+     *  If there is no active paint job with the given id, then this method does nothing.
+     *  Note that paint jobs are executed in the order they were added...
+     *  @param id The id of the paint job to be removed.
+     */
+    protected final void removePaintJobWithId(String id ) {
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        if ( activePaintJobs.containsKey(id) ) {</span>
+<span class="nc" id="L218">            activePaintJobs.remove(id);</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            if ( activePaintJobs.isEmpty() )</span>
+<span class="nc" id="L220">                setVisible(false);</span>
+<span class="nc" id="L221">            repaint();</span>
+        }
+<span class="fc" id="L223">    }</span>
+
+    private ActiveDrag getActiveDrag() {
+<span class="nc" id="L226">        return Optional.ofNullable(activeDrags.get(this)).orElse(ActiveDrag.none());</span>
+    }
+
+    private void setActiveDrag(ActiveDrag activeDrag) {
+        // Update the drag state for this glass pane.
+<span class="fc" id="L231">        activeDrags.put(this, activeDrag);</span>
+
+        // Determine if there is at least one active drag across all glass panes.
+<span class="fc" id="L234">        boolean anyActiveDrag = activeDrags.values().stream()</span>
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">                .anyMatch(drag -&gt; !drag.equals(ActiveDrag.none()));</span>
+
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if ( anyActiveDrag ) {</span>
+            // Ensure that all relevant glass panes have the drag-visualization paint job
+            // so that foreign drags are rendered across windows.
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            for ( JGlassPane pane : activeDrags.keySet() ) {</span>
+<span class="nc" id="L241">                pane.setPaintJobWithId(&quot;activeDragVisualization&quot;, pane::paintActiveDrag);</span>
+<span class="nc" id="L242">            }</span>
+        } else {
+            // No active drags anywhere: remove the visualization paint job from all panes.
+<span class="fc bfc" id="L245" title="All 2 branches covered.">            for ( JGlassPane pane : activeDrags.keySet() ) {</span>
+<span class="fc" id="L246">                pane.removePaintJobWithId(&quot;activeDragVisualization&quot;);</span>
+<span class="fc" id="L247">            }</span>
+        }
+<span class="fc" id="L249">    }</span>
+
+    private void repaintRootPaneFor(ActiveDrag previousActiveDrag, ActiveDrag currentActiveDrag) {
+<span class="nc bnc" id="L252" title="All 2 branches missed.">        if ( rootPane == null )</span>
+<span class="nc" id="L253">            return;</span>
+
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if ( !currentActiveDrag.hasDraggedComponent() )</span>
+<span class="nc" id="L256">            return;</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if ( !DragSource.isDragImageSupported() ) {</span>
+            /*
+                If the drag image is not supported by the platform, we
+                do the image rendering ourselves directly on the Graphics object
+                of the glass pane of the root pane.
+                But for this to work we need to repaint the area where the drag image was
+                previously rendered and the area where it will be rendered next.
+            */
+<span class="nc" id="L266">            Position previousWhereToRender = previousActiveDrag.getRenderPosition();</span>
+<span class="nc" id="L267">            Position whereToRenderNext = currentActiveDrag.getRenderPosition();</span>
+<span class="nc" id="L268">            Size size = currentActiveDrag.draggedComponentSize();</span>
+<span class="nc" id="L269">            Bounds previousArea = Bounds.of(previousWhereToRender, size);</span>
+<span class="nc" id="L270">            Bounds nextArea     = Bounds.of(whereToRenderNext, size);</span>
+<span class="nc" id="L271">            Bounds mergedArea   = previousArea.merge(nextArea);</span>
+<span class="nc" id="L272">            rootPane.repaint(mergedArea.toRectangle());</span>
+            /*
+                Maybe the local drag operation is currently hovering over another window.
+                Let's check that and then repaint the other window's glass pane.
+            */
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            for (JGlassPane otherWindowGlassPane : activeDrags.keySet()) {</span>
+<span class="nc bnc" id="L278" title="All 4 branches missed.">                if ( otherWindowGlassPane != this &amp;&amp; otherWindowGlassPane.rootPane != this.rootPane ) {</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">                    if ( otherWindowGlassPane.rootPane == null )</span>
+<span class="nc" id="L280">                        continue;</span>
+
+<span class="nc" id="L282">                    ActiveDrag convertedPreviousActiveDrag = convertActiveDragToOtherGlassPane(this, previousActiveDrag, otherWindowGlassPane);</span>
+<span class="nc" id="L283">                    ActiveDrag convertedCurrentActiveDrag = convertActiveDragToOtherGlassPane(this, currentActiveDrag, otherWindowGlassPane);</span>
+<span class="nc" id="L284">                    Bounds otherPreviousArea = convertedPreviousActiveDrag.getBounds();</span>
+<span class="nc" id="L285">                    Bounds otherNextArea = convertedCurrentActiveDrag.getBounds();</span>
+<span class="nc" id="L286">                    Bounds otherMergedArea = otherPreviousArea.merge(otherNextArea);</span>
+                    // Let's check if the drag image is in the bounds of this glass pane
+<span class="nc bnc" id="L288" title="All 2 branches missed.">                    if ( otherWindowGlassPane.getBounds().intersects(otherMergedArea.toRectangle()) ) {</span>
+<span class="nc" id="L289">                        otherWindowGlassPane.rootPane.repaint(otherMergedArea.toRectangle());</span>
+                    }
+                }
+<span class="nc" id="L292">            }</span>
+        }
+<span class="nc" id="L294">    }</span>
+
+    private Point determineCurrentDragDropLocationInWindow( Point locationOnDesktop, JRootPane rootPane ) {
+<span class="nc" id="L297">        int relativeX = 0;</span>
+<span class="nc" id="L298">        int relativeY = 0;</span>
+        // First we try something reliable:
+<span class="nc" id="L300">        Point mousePositionInFrame = getMousePosition();</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">        if ( mousePositionInFrame != null ) {</span>
+<span class="nc" id="L302">            relativeX = mousePositionInFrame.x;</span>
+<span class="nc" id="L303">            relativeY = mousePositionInFrame.y;</span>
+        } else {
+            // We calculate the mouse position in the frame using the drag event
+            try {
+<span class="nc" id="L307">                Point rootPaneLocationOnDesktop = rootPane.getLocationOnScreen();</span>
+<span class="nc" id="L308">                relativeX = locationOnDesktop.x - rootPaneLocationOnDesktop.x;</span>
+<span class="nc" id="L309">                relativeY = locationOnDesktop.y - rootPaneLocationOnDesktop.y;</span>
+<span class="nc" id="L310">            } catch (Exception e) {</span>
+<span class="nc" id="L311">                log.debug(SwingTree.get().logMarker(), &quot;Error while calculating the relative position of a drag.&quot;, e);</span>
+<span class="nc" id="L312">            }</span>
+        }
+<span class="nc" id="L314">        return new Point(relativeX, relativeY);</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override public final void paintComponent(Graphics g){
+<span class="nc" id="L319">        paintBackground(g, super::paintComponent);</span>
+<span class="nc" id="L320">    }</span>
+
+    /** {@inheritDoc} */
+    @Override public final void paintChildren(Graphics g) {
+<span class="nc" id="L324">        paintForeground(g, super::paintChildren);</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        for (Map.Entry&lt;String, Painter&gt; paintJob : activePaintJobs.entrySet()) {</span>
+<span class="nc" id="L326">            Graphics2D g2d = null;</span>
+            try {
+<span class="nc" id="L328">                g2d = (Graphics2D) g.create();</span>
+<span class="nc" id="L329">                paintJob.getValue().paint(g2d);</span>
+<span class="nc" id="L330">            } catch (Exception ex) {</span>
+<span class="nc" id="L331">                log.error(SwingTree.get().logMarker(),</span>
+                    &quot;Error while executing paint job with id '{}' on glass pane of root pane '{}'.&quot;,
+<span class="nc" id="L333">                    paintJob.getKey(), rootPane, ex</span>
+                );
+            } finally {
+<span class="nc bnc" id="L336" title="All 2 branches missed.">                if (g2d != null) {</span>
+<span class="nc" id="L337">                    g2d.dispose();</span>
+                }
+            }
+<span class="nc" id="L340">        }</span>
+<span class="nc" id="L341">    }</span>
+
+    private void paintActiveDrag(Graphics g) {
+<span class="nc" id="L344">        getActiveDrag().paint(g);</span>
+        /*
+            Maybe another window has a glass pane with an ongoing drag operation
+            which is currently hovering over our window.
+            Let's check that and then paint this other drag image
+            on our glass pane.
+        */
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        for (JGlassPane otherWindowGlassPane : activeDrags.keySet()) {</span>
+<span class="nc bnc" id="L352" title="All 4 branches missed.">            if ( otherWindowGlassPane != this &amp;&amp; otherWindowGlassPane.rootPane != this.rootPane ) {</span>
+<span class="nc" id="L353">                ActiveDrag foreignDrag = otherWindowGlassPane.getActiveDrag();</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">                if ( foreignDrag.equals(ActiveDrag.none()) )</span>
+<span class="nc" id="L355">                    continue;</span>
+<span class="nc" id="L356">                ActiveDrag foreignDragInLocalCoordinates = convertActiveDragToOtherGlassPane(otherWindowGlassPane, foreignDrag, this);</span>
+<span class="nc" id="L357">                Bounds otherBounds = foreignDragInLocalCoordinates.getBounds();</span>
+                // Let's check if the drag image is in the bounds of this glass pane
+<span class="nc bnc" id="L359" title="All 2 branches missed.">                if ( this.getBounds().intersects(otherBounds.toRectangle()) ) {</span>
+<span class="nc" id="L360">                    foreignDragInLocalCoordinates.paint(g);</span>
+                }
+            }
+<span class="nc" id="L363">        }</span>
+<span class="nc" id="L364">    }</span>
+
+    private ActiveDrag convertActiveDragToOtherGlassPane(
+        JGlassPane sourceGlassPane,
+        ActiveDrag sourceDrag,
+        JGlassPane targetGlassPane
+    ) {
+        /*
+            We want to convert the other active drag position,
+            which is relative to the glass pane, to a position
+            relative to this glass pane.
+        */
+<span class="nc" id="L376">        Point sourcePositionOnDesktop = sourceGlassPane.getLocationOnScreen();</span>
+<span class="nc" id="L377">        Point targetPositionOnDesktop = targetGlassPane.getLocationOnScreen();</span>
+<span class="nc" id="L378">        Point sourceActiveDragRelativePosition = sourceDrag.getStart().toPoint();</span>
+<span class="nc" id="L379">        Point targetActiveDragRelativePosition = new Point(</span>
+                sourceActiveDragRelativePosition.x - (targetPositionOnDesktop.x - sourcePositionOnDesktop.x),
+                sourceActiveDragRelativePosition.y - (targetPositionOnDesktop.y - sourcePositionOnDesktop.y)
+        );
+        // Is the other active drag image currently hovering over this glass pane?
+<span class="nc" id="L384">        return sourceDrag.withStart(</span>
+<span class="nc" id="L385">                        Position.of(</span>
+                                targetActiveDragRelativePosition.x,
+                                targetActiveDragRelativePosition.y
+                        )
+                    );
+    }
+
+    @Override public void setUISilently( ComponentUI ui ) {
+<span class="nc" id="L393">        this.ui = ui;</span>
+<span class="nc" id="L394">    }</span>
+
+    /**
+     * Resets the UI property with a value from the current look and feel.
+     *
+     * @see JComponent#updateUI
+     */
+    @Override
+    public void updateUI() {
+<span class="fc" id="L403">        ComponentExtension.from(this).installCustomUIIfPossible();</span>
+        /*
+            The JGlassPane is a SwingTree native type, so it also
+            enjoys the perks of having a SwingTree based look and feel!
+        */
+<span class="fc" id="L408">    }</span>
+
+    /**
+     *  Marries this glass pane to the supplied {@link JRootPane} object
+     *  and detaches it from the previous root pane using the {@link #detachFromRootPane(JRootPane)} method,
+     *  if a previous root pane was attached.
+     *
+     * @param rootPane The {@link JRootPane} object to which this glass
+     *                 pane should be attached.
+     */
+    protected void attachToRootPane(JRootPane rootPane) {
+<span class="fc" id="L419">        Objects.requireNonNull(rootPane);</span>
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">        if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);</span>
+<span class="fc" id="L421">        this.setOpaque(false);</span>
+<span class="fc" id="L422">        ( this.rootPane = rootPane ).setGlassPane(this);</span>
+<span class="fc" id="L423">        GuiDebugDevToolUtility.setupGlobalDevToolsShortcutFor(rootPane);</span>
+<span class="pc bpc" id="L424" title="1 of 2 branches missed.">        if ( SwingTree.get().isDevToolEnabled() ) {</span>
+<span class="nc" id="L425">            toggleDevTool(true);</span>
+<span class="nc" id="L426">            this.setVisible(true);</span>
+        } else {
+<span class="fc" id="L428">            toggleDevTool(false);</span>
+<span class="fc" id="L429">            this.setVisible(false);</span>
+        }
+<span class="fc" id="L431">    }</span>
+
+    private void toggleDevTool(boolean enabled) {
+<span class="pc bpc" id="L434" title="1 of 2 branches missed.">        if (enabled) {</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">            if ( rootPane != null )</span>
+<span class="nc" id="L436">                GuiDebugDevToolUtility.initializeDebugToolFor(rootPane);</span>
+<span class="nc" id="L437">            setPaintJobWithId(&quot;devToolOverlay&quot;, g2d -&gt; {</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                if (rootPane != null)</span>
+<span class="nc" id="L439">                    GuiDebugDevToolUtility.paintDebugOverlay(g2d, this);</span>
+<span class="nc" id="L440">            });</span>
+        } else {
+<span class="fc" id="L442">            removePaintJobWithId(&quot;devToolOverlay&quot;);</span>
+        }
+<span class="fc" id="L444">    }</span>
+
+    /**
+     *  Detaches this glass pane from the supplied {@link JRootPane} object,
+     *  if the {@link JRootPane#getGlassPane()} method returns this glass pane.
+     *
+     * @param rootPane The {@link JRootPane} object from which this glass pane should be detached.
+     */
+    protected void detachFromRootPane( @Nullable JRootPane rootPane ) {
+<span class="nc" id="L453">        Objects.requireNonNull(rootPane);</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">        if ( rootPane.getGlassPane() == this ) {</span>
+<span class="nc" id="L455">            rootPane.setGlassPane(null);</span>
+<span class="nc" id="L456">            setVisible(false);</span>
+<span class="nc" id="L457">            GuiDebugDevToolUtility.teardownGlobalDevToolsShortcutFor(rootPane);</span>
+        }
+<span class="nc" id="L459">    }</span>
+
+    /**
+     *  Marries this glass pane to a {@link JRootPane} object.
+     *  Note that it is expected that the supplied {@link JRootPane}
+     *  is the same root pane that this current glass pane is attached to.
+     *  If the supplied {@link JRootPane} is {@code null}, then this glass pane
+     *  is detached from the current root pane.
+     *
+     * @param pane The {@link JRootPane} object to which this glass pane should be attached.
+     */
+    public void toRootPane(@Nullable JRootPane pane) {
+<span class="pc bpc" id="L471" title="1 of 2 branches missed.">        if( pane != null )</span>
+<span class="fc" id="L472">            attachToRootPane(pane);</span>
+        else
+<span class="nc" id="L474">            detachFromRootPane(rootPane);</span>
+<span class="fc" id="L475">    }</span>
+
+    @Override public final synchronized MouseListener[] getMouseListeners() {
+<span class="nc" id="L478">        return listeners.getListeners(MouseListener.class);</span>
+    }
+    @Override public final synchronized void addMouseListener(MouseListener listener) {
+<span class="fc" id="L481">        listeners.add(MouseListener.class,listener);</span>
+<span class="fc" id="L482">    }</span>
+    @Override public final synchronized void removeMouseListener(MouseListener listener) {
+<span class="nc" id="L484">        listeners.remove(MouseListener.class,listener);</span>
+<span class="nc" id="L485">    }</span>
+
+    @Override public final synchronized MouseMotionListener[] getMouseMotionListeners() {
+<span class="nc" id="L488">        return listeners.getListeners(MouseMotionListener.class);</span>
+    }
+    @Override public final synchronized void addMouseMotionListener(MouseMotionListener listener) {
+<span class="fc" id="L491">        listeners.add(MouseMotionListener.class,listener);</span>
+<span class="fc" id="L492">    }</span>
+    @Override public final synchronized void removeMouseMotionListener(MouseMotionListener listener) {
+<span class="nc" id="L494">        listeners.remove(MouseMotionListener.class,listener);</span>
+<span class="nc" id="L495">    }</span>
+
+    @Override public final synchronized MouseWheelListener[] getMouseWheelListeners() {
+<span class="nc" id="L498">        return listeners.getListeners(MouseWheelListener.class);</span>
+    }
+    @Override public final synchronized void addMouseWheelListener(MouseWheelListener listener) {
+<span class="nc" id="L501">        listeners.add(MouseWheelListener.class,listener);</span>
+<span class="nc" id="L502">    }</span>
+    @Override public final synchronized void removeMouseWheelListener(MouseWheelListener listener) {
+<span class="nc" id="L504">        listeners.remove(MouseWheelListener.class,listener);</span>
+<span class="nc" id="L505">    }</span>
+
+    private void eventDispatched( AWTEvent event ) {
+<span class="pc bpc" id="L508" title="2 of 4 branches missed.">        if ( rootPane != null &amp;&amp; event instanceof MouseEvent ) {</span>
+<span class="fc" id="L509">            MouseEvent mouseEvent = (MouseEvent)event, newMouseEvent;</span>
+
+<span class="fc" id="L511">            Object source = event.getSource();</span>
+<span class="pc bpc" id="L512" title="1 of 2 branches missed.">            if ( source instanceof Component ) {</span>
+<span class="fc" id="L513">                Component sourceComponent = (Component) source;</span>
+<span class="pc bpc" id="L514" title="1 of 2 branches missed.">                if ( SwingUtilities.getRootPane(sourceComponent) != rootPane )</span>
+<span class="fc" id="L515">                    return; //it's not our root pane (e.g. different window)</span>
+
+                /* change source and coordinate system of event to glass pane, DON'T use setSource on AWTEvent's! */
+<span class="nc" id="L518">                newMouseEvent = convertMouseEvent(sourceComponent, mouseEvent, this);</span>
+<span class="nc" id="L519">            } else newMouseEvent = convertMouseEvent(null, mouseEvent, this);</span>
+
+<span class="nc bnc" id="L521" title="All 9 branches missed.">            switch( event.getID() ) {</span>
+                case MOUSE_CLICKED:
+<span class="nc bnc" id="L523" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L524">                        listener.mouseClicked(newMouseEvent);</span>
+<span class="nc" id="L525">                    break;</span>
+                case MOUSE_PRESSED:
+<span class="nc bnc" id="L527" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L528">                        listener.mousePressed(newMouseEvent);</span>
+<span class="nc" id="L529">                    break;</span>
+                case MOUSE_RELEASED:
+<span class="nc bnc" id="L531" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L532">                        listener.mouseReleased(newMouseEvent);</span>
+<span class="nc" id="L533">                    break;</span>
+                case MOUSE_MOVED:
+<span class="nc bnc" id="L535" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
+<span class="nc" id="L536">                        listener.mouseMoved(newMouseEvent);</span>
+<span class="nc" id="L537">                    break;</span>
+                case MOUSE_ENTERED:
+<span class="nc bnc" id="L539" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L540">                        listener.mouseEntered(newMouseEvent);</span>
+<span class="nc" id="L541">                    break;</span>
+                case MOUSE_EXITED:
+<span class="nc bnc" id="L543" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L544">                        listener.mouseExited(newMouseEvent);</span>
+<span class="nc" id="L545">                    break;</span>
+                case MOUSE_DRAGGED:
+<span class="nc bnc" id="L547" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
+<span class="nc" id="L548">                        listener.mouseDragged(newMouseEvent);</span>
+<span class="nc" id="L549">                    break;</span>
+                case MOUSE_WHEEL:
+<span class="nc bnc" id="L551" title="All 2 branches missed.">                    for(MouseWheelListener listener:listeners.getListeners(MouseWheelListener.class))</span>
+<span class="nc" id="L552">                        listener.mouseWheelMoved((MouseWheelEvent)newMouseEvent);</span>
+                    break;
+            }
+
+            /* consume the original mouse event, if the new mouse event was consumed */
+<span class="nc bnc" id="L557" title="All 2 branches missed.">            if ( newMouseEvent.isConsumed() )</span>
+<span class="nc" id="L558">                mouseEvent.consume();</span>
+        }
+<span class="nc" id="L560">    }</span>
+
+
+    /**
+     * If someone sets a new cursor to the GlassPane
+     * we expect that they know what they are doing
+     * and return the super.contains(x,y)
+     * otherwise we return false to respect the cursors
+     * for the underneath components
+     */
+    @Override
+    public boolean contains(int x, int y) {
+<span class="nc bnc" id="L572" title="All 2 branches missed.">        if ( rootPane == null )</span>
+<span class="nc" id="L573">            return false;</span>
+<span class="nc" id="L574">        Container container = rootPane.getContentPane();</span>
+<span class="nc" id="L575">        Point containerPoint = convertPoint(this, x, y, container);</span>
+<span class="nc bnc" id="L576" title="All 2 branches missed.">        if ( containerPoint.y &gt; 0 ) {</span>
+<span class="nc" id="L577">            Component component = getDeepestComponentAt(</span>
+                                        container,
+                                        containerPoint.x,
+                                        containerPoint.y
+                                    );
+
+<span class="nc bnc" id="L583" title="All 4 branches missed.">            return component == null || component.getCursor() == Cursor.getDefaultCursor();</span>
+        }
+<span class="nc" id="L585">        else return true;</span>
+    }
+
+<span class="nc" id="L588">    class GlassPaneDragSourceListener implements DragSourceListener {</span>
+        @Override
+        public void dragEnter(DragSourceDragEvent event) {
+<span class="nc" id="L591">            getActiveDrag().dragConf().ifPresent(conf -&gt; {</span>
+                try {
+<span class="nc" id="L593">                    conf.onDragEnter().accept(new ComponentDelegate(conf.component(), event));</span>
+<span class="nc" id="L594">                } catch (Exception ex) {</span>
+<span class="nc" id="L595">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Error while executing drag enter event handlers.&quot;,
+                            ex
+                        );
+<span class="nc" id="L599">                }</span>
+<span class="nc" id="L600">            });</span>
+<span class="nc" id="L601">        }</span>
+        @Override
+        public void dragOver(DragSourceDragEvent event) {
+<span class="nc" id="L604">            getActiveDrag().dragConf().ifPresent(conf -&gt; {</span>
+                try {
+<span class="nc" id="L606">                    conf.onDragOver().accept(new ComponentDelegate(conf.component(), event));</span>
+<span class="nc" id="L607">                } catch (Exception ex) {</span>
+<span class="nc" id="L608">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Error while executing drag over event handlers.&quot;,
+                            ex
+                        );
+<span class="nc" id="L612">                }</span>
+<span class="nc" id="L613">            });</span>
+<span class="nc" id="L614">        }</span>
+        @Override
+        public void dropActionChanged(DragSourceDragEvent event) {
+<span class="nc" id="L617">            getActiveDrag().dragConf().ifPresent(conf -&gt; {</span>
+                try {
+<span class="nc" id="L619">                    conf.onDropActionChanged().accept(new ComponentDelegate(conf.component(), event));</span>
+<span class="nc" id="L620">                } catch (Exception ex) {</span>
+<span class="nc" id="L621">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Error while executing drop action changed event handlers.&quot;,
+                            ex
+                        );
+<span class="nc" id="L625">                }</span>
+<span class="nc" id="L626">            });</span>
+<span class="nc" id="L627">        }</span>
+        @Override
+        public void dragExit(DragSourceEvent event) {
+<span class="nc" id="L630">            getActiveDrag().dragConf().ifPresent(conf -&gt; {</span>
+                try {
+<span class="nc" id="L632">                    conf.onDragExit().accept(new ComponentDelegate(conf.component(), event));</span>
+<span class="nc" id="L633">                } catch (Exception ex) {</span>
+<span class="nc" id="L634">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Error while executing drag exit event handlers.&quot;,
+                            ex
+                        );
+<span class="nc" id="L638">                }</span>
+<span class="nc" id="L639">            });</span>
+<span class="nc" id="L640">        }</span>
+
+        @Override
+        public void dragDropEnd(DragSourceDropEvent event) {
+<span class="nc" id="L644">            ActiveDrag activeDrag = getActiveDrag();</span>
+<span class="nc bnc" id="L645" title="All 2 branches missed.">            if ( activeDrag.equals(ActiveDrag.none()) )</span>
+<span class="nc" id="L646">                return;</span>
+
+<span class="nc" id="L648">            activeDrag.dragConf().ifPresent(conf -&gt; {</span>
+                try {
+<span class="nc" id="L650">                    conf.onDragDropEnd().accept(new ComponentDelegate(conf.component(), event));</span>
+<span class="nc" id="L651">                } catch (Exception ex) {</span>
+<span class="nc" id="L652">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Error while executing drag drop end event handlers.&quot;,
+                            ex
+                    );
+<span class="nc" id="L656">                }</span>
+<span class="nc" id="L657">            });</span>
+<span class="nc" id="L658">            repaintRootPaneFor(activeDrag, activeDrag);</span>
+<span class="nc" id="L659">            setActiveDrag(ActiveDrag.none());</span>
+<span class="nc" id="L660">        }</span>
+    }
+
+    private static Transferable _findRelevantDataFor(@Nullable Component component) {
+        try {
+<span class="nc bnc" id="L665" title="All 2 branches missed.">            if (component == null)</span>
+<span class="nc" id="L666">                return new StringSelection(&quot;&quot;);</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">            if (component instanceof TextComponent) {</span>
+<span class="nc" id="L668">                String text = ((TextComponent) component).getText();</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">                if (text == null)</span>
+<span class="nc" id="L670">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L671">                return new StringSelection(text);</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">            } else if (component instanceof JTextComponent) {</span>
+<span class="nc" id="L673">                String text = ((JTextComponent) component).getText();</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                if (text == null)</span>
+<span class="nc" id="L675">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L676">                return new StringSelection(text);</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">            } else if (component instanceof AbstractButton) {</span>
+<span class="nc" id="L678">                String text = ((AbstractButton) component).getText();</span>
+<span class="nc bnc" id="L679" title="All 2 branches missed.">                if (text == null)</span>
+<span class="nc" id="L680">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc bnc" id="L681" title="All 2 branches missed.">            } else if (component instanceof JLabel) {</span>
+<span class="nc" id="L682">                String text = ((JLabel) component).getText();</span>
+<span class="nc bnc" id="L683" title="All 2 branches missed.">                if (text == null)</span>
+<span class="nc" id="L684">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L685">                return new StringSelection(text);</span>
+<span class="nc bnc" id="L686" title="All 2 branches missed.">            } else if (component instanceof JList) {</span>
+<span class="nc" id="L687">                Object selectedValue = ((JList&lt;?&gt;) component).getSelectedValue();</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">                if (selectedValue == null)</span>
+<span class="nc" id="L689">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc bnc" id="L690" title="All 2 branches missed.">            } else if (component instanceof JTable) {</span>
+<span class="nc" id="L691">                JTable table = (JTable) component;</span>
+<span class="nc" id="L692">                int row = table.getSelectedRow();</span>
+<span class="nc" id="L693">                int column = table.getSelectedColumn();</span>
+<span class="nc" id="L694">                Object value = table.getValueAt(row, column);</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">                if (value == null)</span>
+<span class="nc" id="L696">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L697">                return new StringSelection(value.toString());</span>
+<span class="nc bnc" id="L698" title="All 2 branches missed.">            } else if (component instanceof JTree) {</span>
+<span class="nc" id="L699">                JTree tree = (JTree) component;</span>
+<span class="nc" id="L700">                Object lastSelectedPathComponent = tree.getLastSelectedPathComponent();</span>
+<span class="nc bnc" id="L701" title="All 2 branches missed.">                if (lastSelectedPathComponent == null)</span>
+<span class="nc" id="L702">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L703">                return new StringSelection(lastSelectedPathComponent.toString());</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">            } else if (component instanceof JTabbedPane) {</span>
+<span class="nc" id="L705">                JTabbedPane tabbedPane = (JTabbedPane) component;</span>
+<span class="nc" id="L706">                int selectedIndex = tabbedPane.getSelectedIndex();</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">                if (selectedIndex == -1)</span>
+<span class="nc" id="L708">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L709">                String titleAt = tabbedPane.getTitleAt(selectedIndex);</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">                if (titleAt == null)</span>
+<span class="nc" id="L711">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L712">                return new StringSelection(titleAt);</span>
+<span class="nc bnc" id="L713" title="All 2 branches missed.">            } else if (component instanceof JSpinner) {</span>
+<span class="nc" id="L714">                Object value = ((JSpinner) component).getValue();</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">                if (value == null)</span>
+<span class="nc" id="L716">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L717">                return new StringSelection(value.toString());</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">            } else if (component instanceof JSlider) {</span>
+<span class="nc" id="L719">                int value = ((JSlider) component).getValue();</span>
+<span class="nc" id="L720">                return new StringSelection(String.valueOf(value));</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">            } else if (component instanceof JProgressBar) {</span>
+<span class="nc" id="L722">                int value = ((JProgressBar) component).getValue();</span>
+<span class="nc" id="L723">                return new StringSelection(String.valueOf(value));</span>
+<span class="nc bnc" id="L724" title="All 2 branches missed.">            } else if (component instanceof JComboBox) {</span>
+<span class="nc" id="L725">                Object selectedItem = ((JComboBox&lt;?&gt;) component).getSelectedItem();</span>
+<span class="nc bnc" id="L726" title="All 2 branches missed.">                if (selectedItem == null)</span>
+<span class="nc" id="L727">                    return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L728">                return new StringSelection(selectedItem.toString());</span>
+            }
+<span class="nc" id="L730">        } catch (Exception ignored) {</span>
+<span class="nc" id="L731">            return new StringSelection(&quot;&quot;);</span>
+<span class="nc" id="L732">        }</span>
+<span class="nc" id="L733">        return new StringSelection(&quot;&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
