@@ -223,10 +223,10 @@ import java.util.function.Supplier;
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Val&lt;?&gt; first, Val&lt;?&gt; second, Val&lt;?&gt;... rest ) {
-<span class="nc" id="L226">        return withRepaintOn(</span>
-<span class="nc" id="L227">                    first.view(),</span>
-<span class="nc" id="L228">                    second.view(),</span>
-<span class="nc" id="L229">                    Arrays.stream(rest).map(Val::view).toArray(Viewable[]::new)</span>
+<span class="fc" id="L226">        return withRepaintOn(</span>
+<span class="fc" id="L227">                    first.view(),</span>
+<span class="fc" id="L228">                    second.view(),</span>
+<span class="fc" id="L229">                    Arrays.stream(rest).map(Val::view).toArray(Viewable[]::new)</span>
                 );
     }
 
@@ -269,13 +269,13 @@ import java.util.function.Supplier;
      * @return This declarative builder instance, which enables builder-style method chaining.
      */
     public final I withRepaintOn( Viewable&lt;?&gt; first, Viewable&lt;?&gt; second, Viewable&lt;?&gt;... rest ) {
-<span class="nc" id="L272">        return _with( c -&gt; {</span>
-<span class="nc" id="L273">                    _bindRepaintOn(c, first);</span>
-<span class="nc" id="L274">                    _bindRepaintOn(c, second);</span>
-<span class="nc bnc" id="L275" title="All 2 branches missed.">                    for ( Viewable&lt;?&gt; o : rest ) {</span>
-<span class="nc" id="L276">                        _bindRepaintOn(c, o);</span>
+<span class="fc" id="L272">        return _with( c -&gt; {</span>
+<span class="fc" id="L273">                    _bindRepaintOn(c, first);</span>
+<span class="fc" id="L274">                    _bindRepaintOn(c, second);</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">                    for ( Viewable&lt;?&gt; o : rest ) {</span>
+<span class="fc" id="L276">                        _bindRepaintOn(c, o);</span>
                     }
-<span class="nc" id="L278">                })._this();</span>
+<span class="fc" id="L278">                })._this();</span>
     }
 
     /**
@@ -4933,8 +4933,8 @@ import java.util.function.Supplier;
 <span class="fc" id="L4933">                   Timer timer = new Timer(delay, e -&gt; {</span>
                        try {
 <span class="fc" id="L4935">                           onUpdate.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="fc" id="L4936">                       } catch ( Exception ex ) {</span>
-<span class="fc" id="L4937">                           log.error(SwingTree.get().logMarker(), &quot;Error in update action handler!&quot;, ex);</span>
+<span class="nc" id="L4936">                       } catch ( Exception ex ) {</span>
+<span class="nc" id="L4937">                           log.error(SwingTree.get().logMarker(), &quot;Error in update action handler!&quot;, ex);</span>
 <span class="fc" id="L4938">                       }</span>
 <span class="fc" id="L4939">                   });</span>
                    {

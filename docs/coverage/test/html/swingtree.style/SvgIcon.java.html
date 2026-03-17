@@ -1270,25 +1270,25 @@ public final class SvgIcon extends ImageIcon
 <span class="fc" id="L1270">        final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);</span>
 <span class="pc bpc" id="L1271" title="1 of 10 branches missed.">        switch ( preferredPlacement ) {</span>
             case TOP_LEFT:
-<span class="fc" id="L1273">                viewBox = new ViewBox( scaledAreaX, scaledAreaY, viewBox.width, viewBox.height );</span>
+<span class="fc" id="L1273">                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1274">                break;</span>
             case TOP_RIGHT:
-<span class="fc" id="L1276">                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY, viewBox.width, viewBox.height );</span>
+<span class="fc" id="L1276">                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1277">                break;</span>
             case BOTTOM_LEFT:
-<span class="fc" id="L1279">                viewBox = new ViewBox( scaledAreaX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );</span>
+<span class="fc" id="L1279">                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1280">                break;</span>
             case BOTTOM_RIGHT:
 <span class="fc" id="L1282">                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1283">                break;</span>
             case TOP:
-<span class="fc" id="L1285">                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY, viewBox.width, viewBox.height );</span>
+<span class="fc" id="L1285">                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1286">                break;</span>
             case BOTTOM:
 <span class="fc" id="L1288">                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1289">                break;</span>
             case LEFT:
-<span class="fc" id="L1291">                viewBox = new ViewBox( scaledAreaX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );</span>
+<span class="fc" id="L1291">                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );</span>
 <span class="fc" id="L1292">                break;</span>
             case RIGHT:
 <span class="fc" id="L1294">                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );</span>
@@ -1374,7 +1374,7 @@ public final class SvgIcon extends ImageIcon
 <span class="fc bfc" id="L1374" title="All 2 branches covered.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="fc" id="L1375">        SvgIcon rhs = (SvgIcon) obj;</span>
 <span class="pc bpc" id="L1376" title="1 of 2 branches missed.">        return Objects.equals(_size,               rhs._size)        &amp;&amp;</span>
-<span class="pc bpc" id="L1377" title="1 of 2 branches missed.">               Objects.equals(_core.svgDocument,   rhs._core.svgDocument)  &amp;&amp;</span>
+<span class="fc bfc" id="L1377" title="All 2 branches covered.">               Objects.equals(_core.svgDocument,   rhs._core.svgDocument)  &amp;&amp;</span>
 <span class="pc bpc" id="L1378" title="1 of 2 branches missed.">               Objects.equals(_widthUnit,          rhs._heightUnit)  &amp;&amp;</span>
 <span class="pc bpc" id="L1379" title="1 of 2 branches missed.">               Objects.equals(_heightUnit,         rhs._widthUnit)  &amp;&amp;</span>
 <span class="fc bfc" id="L1380" title="All 2 branches covered.">               Objects.equals(_fitComponent,       rhs._fitComponent) &amp;&amp;</span>

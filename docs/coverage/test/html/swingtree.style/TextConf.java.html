@@ -3,6 +3,7 @@
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
@@ -74,7 +75,10 @@ import java.util.Objects;
  *          The placement is an enum which defines where the text should be placed
  *          according to the {@link TextConf#placementBoundary(UI.ComponentBoundary)}.
  *          You can configure it through {@link TextConf#placement(UI.Placement)}.&lt;br&gt;
- *          The default placement is {@link UI.Placement#CENTER}.
+ *          The default placement is {@link UI.Placement#UNDEFINED}. At render time this is
+ *          first resolved using the horizontal and vertical alignment from the {@code FontConf};
+ *          only when those alignments are also {@link UI.Placement#UNDEFINED} does it behave
+ *          like {@link swingtree.UI.Placement#CENTER}.
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;b&gt;Offset&lt;/b&gt;
  *          The offset holds the x and y placement offset of the text.
@@ -86,97 +90,117 @@ import java.util.Objects;
  *          {@link TextConf#placement(UI.Placement)} and {@link TextConf#placementBoundary(UI.ComponentBoundary)}
  *          properties as a first choice.
  *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Wrap Lines&lt;/b&gt;
+ *          This property defines whether the text should be wrapped into multiple lines
+ *          if the text content exceeds the width of the available space inside the component. &lt;br&gt;
+ *          You can configure it through {@link TextConf#wrapLines(boolean)}.&lt;br&gt;
+ *          The default value is {@code true}, which means that the text will wrap into multiple
+ *          lines if it exceeds the width of the available space inside the component. &lt;br&gt;
+ *          If set to {@code false}, the text will be rendered in a single line
+ *          and may overflow the component if the text content is too long.
+ *      &lt;/li&gt;
  *  &lt;/ul&gt;
  *  Use {@link TextConf#none()} to access the &lt;i&gt;null object&lt;/i&gt; of the {@link TextConf} type.
  *  It is a convenient way to represent a &lt;i&gt;no-op&lt;/i&gt; configuration object which will not have any effect
  *  when applied to a component.
  */
 @Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
 public final class TextConf implements Simplifiable&lt;TextConf&gt;
 {
-<span class="fc" id="L97">    private static final Logger log = LoggerFactory.getLogger(TextConf.class);</span>
-<span class="fc" id="L98">    public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;</span>
-<span class="fc" id="L99">    private static final TextConf _NONE = new TextConf(</span>
-                                                &quot;&quot;,
-<span class="fc" id="L101">                                                FontConf.none(),</span>
+<span class="fc" id="L111">    private static final Logger log = LoggerFactory.getLogger(TextConf.class);</span>
+<span class="fc" id="L112">    public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;</span>
+<span class="fc" id="L113">    private static final TextConf _NONE = new TextConf(</span>
+<span class="fc" id="L114">                                                Tuple.of(StyledString.class),</span>
+<span class="fc" id="L115">                                                FontConf.none(),</span>
                                                 UI.ComponentArea.INTERIOR,
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
-                                                UI.Placement.CENTER,
-<span class="fc" id="L105">                                                Offset.none()</span>
+                                                UI.Placement.UNDEFINED,
+<span class="fc" id="L119">                                                Offset.none(),</span>
+                                                true
                                             );
 
     static final TextConf none() {
-<span class="fc" id="L109">        return _NONE;</span>
+<span class="fc" id="L124">        return _NONE;</span>
     }
 
-    private final String               _content;
+    private final Tuple&lt;StyledString&gt;  _content;
     private final FontConf             _fontConf;
     private final UI.ComponentArea     _clipArea;
     private final UI.ComponentBoundary _placementBoundary;
     private final UI.Placement         _placement;
     private final Offset               _offset;
+    private final boolean              _wrapLines;
 
     private TextConf(
-        String               content,
+        Tuple&lt;StyledString&gt;  content,
         FontConf             fontConf,
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
-        Offset               offset
+        Offset               offset,
+        boolean              wrapLines
     )
-<span class="fc" id="L127">    {</span>
-<span class="fc" id="L128">        _content            = Objects.requireNonNull(content);</span>
-<span class="fc" id="L129">        _fontConf           = Objects.requireNonNull(fontConf);</span>
-<span class="fc" id="L130">        _clipArea           = Objects.requireNonNull(clipArea);</span>
-<span class="fc" id="L131">        _placementBoundary  = Objects.requireNonNull(placementBoundary);</span>
-<span class="fc" id="L132">        _placement          = Objects.requireNonNull(placement);</span>
-<span class="fc" id="L133">        _offset             = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L134">    }</span>
+<span class="fc" id="L144">    {</span>
+<span class="fc" id="L145">        _content            = Objects.requireNonNull(content);</span>
+<span class="fc" id="L146">        _fontConf           = Objects.requireNonNull(fontConf);</span>
+<span class="fc" id="L147">        _clipArea           = Objects.requireNonNull(clipArea);</span>
+<span class="fc" id="L148">        _placementBoundary  = Objects.requireNonNull(placementBoundary);</span>
+<span class="fc" id="L149">        _placement          = Objects.requireNonNull(placement);</span>
+<span class="fc" id="L150">        _offset             = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L151">        _wrapLines          = wrapLines;</span>
+<span class="fc" id="L152">    }</span>
 
     private static TextConf of(
-        String               content,
+        Tuple&lt;StyledString&gt;  content,
         FontConf             fontConf,
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
-        Offset               offset
+        Offset               offset,
+        boolean              wrapLines
     )
     {
-<span class="fc" id="L145">        if (</span>
-<span class="fc bfc" id="L146" title="All 2 branches covered.">            content.isEmpty() &amp;&amp;</span>
-<span class="fc bfc" id="L147" title="All 2 branches covered.">            fontConf.equals(_NONE._fontConf) &amp;&amp;</span>
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">            clipArea.equals(_NONE._clipArea) &amp;&amp;</span>
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">            placementBoundary.equals(_NONE._placementBoundary) &amp;&amp;</span>
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">            placement.equals(_NONE._placement) &amp;&amp;</span>
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            offset.equals(_NONE._offset)</span>
+<span class="fc" id="L164">        if (</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">            content.isEmpty() &amp;&amp;</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            fontConf.equals(_NONE._fontConf) &amp;&amp;</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">            clipArea.equals(_NONE._clipArea) &amp;&amp;</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">            placementBoundary.equals(_NONE._placementBoundary) &amp;&amp;</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">            placement.equals(_NONE._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L170" title="2 of 4 branches missed.">            offset.equals(_NONE._offset) &amp;&amp;</span>
+            wrapLines == _NONE._wrapLines
         ) {
-<span class="fc" id="L153">            return _NONE;</span>
+<span class="fc" id="L173">            return _NONE;</span>
         }
-<span class="fc" id="L155">        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset);</span>
+<span class="fc" id="L175">        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines);</span>
     }
 
-    String content() {
-<span class="fc" id="L159">        return _content;</span>
+    Tuple&lt;StyledString&gt; content() {
+<span class="fc" id="L179">        return _content;</span>
     }
 
     FontConf fontConf() {
-<span class="fc" id="L163">        return _fontConf;</span>
+<span class="fc" id="L183">        return _fontConf;</span>
     }
 
     UI.ComponentArea clipArea() {
-<span class="fc" id="L167">        return _clipArea;</span>
+<span class="fc" id="L187">        return _clipArea;</span>
     }
 
     UI.ComponentBoundary placementBoundary() {
-<span class="fc" id="L171">        return _placementBoundary;</span>
+<span class="fc" id="L191">        return _placementBoundary;</span>
     }
 
     UI.Placement placement() {
-<span class="fc" id="L175">        return _placement;</span>
+<span class="fc" id="L195">        return _placement;</span>
     }
 
     Offset offset() {
-<span class="fc" id="L179">        return _offset;</span>
+<span class="fc" id="L199">        return _offset;</span>
+    }
+
+    boolean wrapLines() {
+<span class="fc" id="L203">        return _wrapLines;</span>
     }
 
     /**
@@ -185,11 +209,25 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given text content.
      */
     public TextConf content( String textString ) {
-<span class="fc" id="L188">        return of(textString, _fontConf, _clipArea, _placementBoundary, _placement, _offset);</span>
+<span class="fc" id="L212">        Objects.requireNonNull(textString);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        if ( textString.isEmpty() )</span>
+<span class="nc" id="L214">            return content(Tuple.of(StyledString.class));</span>
+<span class="fc" id="L215">        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);</span>
+    }
+
+    public TextConf content( StyledString... styledStrings ) {
+<span class="nc" id="L219">        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);</span>
+    }
+
+    public TextConf content( Tuple&lt;StyledString&gt; styledStrings ) {
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        if ( _content.equals(styledStrings) ) {</span>
+<span class="fc" id="L224">            return this;</span>
+        }
+<span class="fc" id="L226">        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);</span>
     }
 
     private TextConf _fontConf(FontConf fontConf) {
-<span class="fc" id="L192">        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset);</span>
+<span class="fc" id="L230">        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);</span>
     }
 
     /**
@@ -203,10 +241,10 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      */
     public TextConf font( Configurator&lt;FontConf&gt; fontConfFunction ) {
         try {
-<span class="fc" id="L206">            return _fontConf(fontConfFunction.configure(_fontConf));</span>
-<span class="nc" id="L207">        } catch ( Exception e ) {</span>
-<span class="nc" id="L208">            log.error(SwingTree.get().logMarker(), &quot;Error configuring font style.&quot;, e);</span>
-<span class="nc" id="L209">            return this;</span>
+<span class="fc" id="L244">            return _fontConf(fontConfFunction.configure(_fontConf));</span>
+<span class="nc" id="L245">        } catch ( Exception e ) {</span>
+<span class="nc" id="L246">            log.error(SwingTree.get().logMarker(), &quot;Error configuring font style.&quot;, e);</span>
+<span class="nc" id="L247">            return this;</span>
         }
     }
 
@@ -216,7 +254,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given font.
      */
     public TextConf font( Font font ) {
-<span class="nc" id="L219">        return _fontConf(_fontConf.withPropertiesFromFont(font));</span>
+<span class="nc" id="L257">        return _fontConf(_fontConf.withPropertiesFromFont(font));</span>
     }
 
     /**
@@ -227,7 +265,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given clip area.
      */
     public TextConf clipTo( UI.ComponentArea clipArea ) {
-<span class="nc" id="L230">        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset);</span>
+<span class="nc" id="L268">        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines);</span>
     }
 
     /**
@@ -261,7 +299,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given placement boundary.
      */
     public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
-<span class="fc" id="L264">        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset);</span>
+<span class="fc" id="L302">        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines);</span>
     }
 
     /**
@@ -287,7 +325,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the desired placement.
      */
     public TextConf placement(UI.Placement placement) {
-<span class="fc" id="L290">        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset);</span>
+<span class="fc" id="L328">        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines);</span>
     }
 
     /**
@@ -302,7 +340,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {
-<span class="nc" id="L305">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset);</span>
+<span class="nc" id="L343">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines);</span>
     }
 
     /**
@@ -317,66 +355,90 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the given offset.
      */
     public TextConf offset(int x, int y) {
-<span class="nc" id="L320">        return offset(Offset.of(x, y));</span>
+<span class="nc" id="L358">        return offset(Offset.of(x, y));</span>
+    }
+
+    /**
+     * Configures whether the text should be wrapped into multiple lines if the text
+     * content exceeds the width of the available space inside the component.
+     * The default value is {@code true}, which means that the text will wrap into multiple
+     * lines if it exceeds the width of the available space inside the component.
+     * @param wrapLines A boolean value which defines whether the text should be wrapped into multiple lines.
+     * @return An updated {@link TextConf} object with the given wrap lines property.
+     */
+    public TextConf wrapLines(boolean wrapLines) {
+<span class="fc" id="L370">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines);</span>
     }
 
     @Override
     public TextConf simplified() {
-<span class="fc bfc" id="L325" title="All 2 branches covered.">        if ( _content.isEmpty() )</span>
-<span class="fc" id="L326">            return _NONE;</span>
-<span class="fc" id="L327">        return this;</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">        if ( _content.isEmpty() )</span>
+<span class="fc" id="L376">            return _NONE;</span>
+<span class="fc" id="L377">        Tuple&lt;StyledString&gt; simplifiedContent = _content.removeIf( it -&gt; it.string().isEmpty() )</span>
+<span class="fc" id="L378">                                                        .map( it -&gt; it.resolveUsing(_fontConf))</span>
+<span class="fc" id="L379">                                                        .removeIf( it -&gt; it</span>
+<span class="fc" id="L380">                                                                .fontConf()</span>
+<span class="fc bfc" id="L381" title="All 2 branches covered.">                                                                .map( fontConf -&gt; fontConf.size() == 0 )</span>
+<span class="fc" id="L382">                                                                .orElse( false )</span>
+                                                            );
+<span class="pc bpc" id="L384" title="1 of 2 branches missed.">        if ( simplifiedContent.isEmpty() )</span>
+<span class="nc" id="L385">             return _NONE;</span>
+<span class="fc" id="L386">        return content(simplifiedContent);</span>
     }
 
     @Override
     public boolean isNone() {
-<span class="fc" id="L332">        return this.equals(_NONE);</span>
+<span class="fc" id="L391">        return this.equals(_NONE);</span>
     }
 
     TextConf _scale(double scale) {
-<span class="fc" id="L336">        return of(</span>
-            _content,
-<span class="fc" id="L338">            _fontConf._scale(scale),</span>
+<span class="fc" id="L395">        return of(</span>
+<span class="pc" id="L396">            _content.map( it -&gt; it.mapStyle( s -&gt; s._scale(scale) ) ),</span>
+<span class="fc" id="L397">            _fontConf._scale(scale),</span>
             _clipArea,
             _placementBoundary,
             _placement,
-<span class="fc" id="L342">            _offset.scale(scale)</span>
+<span class="fc" id="L401">            _offset.scale(scale),</span>
+            _wrapLines
         );
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="fc bfc" id="L348" title="All 2 branches covered.">        if ( this == obj )</span>
-<span class="fc" id="L349">            return true;</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">        if ( this == obj )</span>
+<span class="fc" id="L409">            return true;</span>
 
-<span class="pc bpc" id="L351" title="1 of 2 branches missed.">        if ( !(obj instanceof TextConf) )</span>
-<span class="nc" id="L352">            return false;</span>
+<span class="pc bpc" id="L411" title="1 of 2 branches missed.">        if ( !(obj instanceof TextConf) )</span>
+<span class="nc" id="L412">            return false;</span>
 
-<span class="fc" id="L354">        TextConf other = (TextConf) obj;</span>
-<span class="fc" id="L355">        return</span>
-<span class="fc bfc" id="L356" title="All 2 branches covered.">            _content.equals(other._content) &amp;&amp;</span>
-<span class="fc bfc" id="L357" title="All 2 branches covered.">            _fontConf.equals(other._fontConf) &amp;&amp;</span>
-<span class="pc bpc" id="L358" title="1 of 2 branches missed.">            _clipArea.equals(other._clipArea) &amp;&amp;</span>
-<span class="pc bpc" id="L359" title="1 of 2 branches missed.">            _placementBoundary.equals(other._placementBoundary) &amp;&amp;</span>
-<span class="pc bpc" id="L360" title="1 of 2 branches missed.">            _placement.equals(other._placement) &amp;&amp;</span>
-<span class="pc bpc" id="L361" title="1 of 2 branches missed.">            _offset.equals(other._offset);</span>
+<span class="fc" id="L414">        TextConf other = (TextConf) obj;</span>
+<span class="fc" id="L415">        return</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">            _content.equals(other._content) &amp;&amp;</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">            _fontConf.equals(other._fontConf) &amp;&amp;</span>
+<span class="pc bpc" id="L418" title="1 of 2 branches missed.">            _clipArea.equals(other._clipArea) &amp;&amp;</span>
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">            _placementBoundary.equals(other._placementBoundary) &amp;&amp;</span>
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">            _placement.equals(other._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L421" title="2 of 4 branches missed.">            _offset.equals(other._offset) &amp;&amp;</span>
+            _wrapLines == other._wrapLines;
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L366">        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset);</span>
+<span class="fc" id="L427">        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);</span>
     }
 
     @Override
     public String toString() {
-<span class="pc bpc" id="L371" title="1 of 2 branches missed.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L372">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="nc" id="L373">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L432" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L433">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L434">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
             &quot;content=&quot; + _content + &quot;, &quot; +
             &quot;fontConf=&quot; + _fontConf + &quot;, &quot; +
             &quot;clipArea=&quot; + _clipArea + &quot;, &quot; +
             &quot;placementBoundary=&quot; + _placementBoundary + &quot;, &quot; +
             &quot;placement=&quot; + _placement + &quot;, &quot; +
-            &quot;offset=&quot; + _offset +
+            &quot;offset=&quot; + _offset + &quot;, &quot; +
+            &quot;wrapLines=&quot; + _wrapLines +
         &quot;]&quot;;
     }
 

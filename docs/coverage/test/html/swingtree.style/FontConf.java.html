@@ -177,7 +177,7 @@ public final class FontConf
 
 <span class="fc" id="L178">    private static final FontConf _NONE = new FontConf(</span>
                                                         &quot;&quot;,    // Font name (family)
-                                                        0,     // size
+                                                        -1,     // size
                                                         -1,    // posture
                                                         -1,    // weight
                                                         0,     // spacing
@@ -1152,7 +1152,7 @@ public final class FontConf
 <span class="fc" id="L1152">        Map&lt;TextAttribute, Object&gt; currentAttributes = (Map&lt;TextAttribute, Object&gt;) existingFont.getAttributes();</span>
 <span class="fc" id="L1153">        Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;();</span>
 
-<span class="fc bfc" id="L1155" title="All 2 branches covered.">        if ( _size &gt; 0 ) {</span>
+<span class="fc bfc" id="L1155" title="All 2 branches covered.">        if ( _size &gt;= 0 ) {</span>
 <span class="pc bpc" id="L1156" title="2 of 4 branches missed.">            isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));</span>
 <span class="fc" id="L1157">            attributes.put(TextAttribute.SIZE, _size);</span>
         }
@@ -1271,8 +1271,8 @@ public final class FontConf
     {
 <span class="pc bpc" id="L1272" title="1 of 2 branches missed.">        if ( obj == null )</span>
 <span class="nc" id="L1273">            return false;</span>
-<span class="pc bpc" id="L1274" title="1 of 2 branches missed.">        if ( getClass() != obj.getClass() )</span>
-<span class="nc" id="L1275">            return false;</span>
+<span class="fc bfc" id="L1274" title="All 2 branches covered.">        if ( getClass() != obj.getClass() )</span>
+<span class="fc" id="L1275">            return false;</span>
 <span class="fc" id="L1276">        final FontConf other = (FontConf)obj;</span>
 <span class="fc bfc" id="L1277" title="All 2 branches covered.">        if ( !Objects.equals(_familyName, other._familyName) )</span>
 <span class="fc" id="L1278">            return false;</span>
@@ -1314,7 +1314,7 @@ public final class FontConf
 <span class="fc bfc" id="L1314" title="All 2 branches covered.">        String verticalAlign   = ( _verticalAlignment   == UI.VerticalAlignment.UNDEFINED ? &quot;?&quot; : _verticalAlignment.toString()   );</span>
 <span class="fc" id="L1315">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;family=&quot;              + _familyName + &quot;, &quot; +
-                    &quot;size=&quot;                + _size                                   + &quot;, &quot; +
+<span class="fc bfc" id="L1317" title="All 2 branches covered.">                    &quot;size=&quot;                + (_size &lt; 0 ? &quot;?&quot; : _size)               + &quot;, &quot; +</span>
 <span class="fc bfc" id="L1318" title="All 2 branches covered.">                    &quot;posture=&quot;             + (_posture &lt; 0 ? &quot;?&quot; : _posture)         + &quot;, &quot; +</span>
 <span class="fc bfc" id="L1319" title="All 2 branches covered.">                    &quot;weight=&quot;              + (_weight &lt; 0 ? &quot;?&quot; : _weight)           + &quot;, &quot; +</span>
                     &quot;spacing=&quot;             + _spacing                                + &quot;, &quot; +

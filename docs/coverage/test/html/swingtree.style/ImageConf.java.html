@@ -700,7 +700,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int top, int right, int bottom, int left ) {
-<span class="nc" id="L703">        return padding(Outline.of(top, right, bottom, left));</span>
+<span class="fc" id="L703">        return padding(Outline.of(top, right, bottom, left));</span>
     }
 
     /**
@@ -870,7 +870,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
 <span class="pc bpc" id="L870" title="1 of 2 branches missed.">               Objects.equals(_fitMode, rhs._fitMode)   &amp;&amp;</span>
 <span class="pc bpc" id="L871" title="1 of 4 branches missed.">               Objects.equals(_size,    rhs._size)      &amp;&amp;</span>
                _opacity == rhs._opacity   &amp;&amp;
-<span class="pc bpc" id="L873" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding)   &amp;&amp;</span>
+<span class="fc bfc" id="L873" title="All 2 branches covered.">               Objects.equals(_padding,   rhs._padding)   &amp;&amp;</span>
 <span class="pc bpc" id="L874" title="1 of 2 branches missed.">               Objects.equals(_offset,    rhs._offset)    &amp;&amp;</span>
 <span class="pc bpc" id="L875" title="1 of 2 branches missed.">               Objects.equals(_clipArea,  rhs._clipArea);</span>
     }

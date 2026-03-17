@@ -62,7 +62,7 @@ public interface Configurator&lt;T&gt;
      *         and then configures the result of this configuration.
      */
     default Configurator&lt;T&gt; andThen( Configurator&lt;T&gt; after ) {
-<span class="nc" id="L65">        return config -&gt; after.configure( configure( config ) );</span>
+<span class="fc" id="L65">        return config -&gt; after.configure( configure( config ) );</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
