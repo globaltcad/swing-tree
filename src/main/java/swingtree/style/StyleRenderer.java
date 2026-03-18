@@ -1402,7 +1402,7 @@ final class StyleRenderer
                             ? font.getSize2D()
                             : l.getAscent() + l.getDescent() + l.getLeading();
 
-                if (accumulated + h > boundsHeight)
+                if (Math.floor(accumulated + h) > boundsHeight)
                     break;
 
                 visible.add(l);
@@ -1423,7 +1423,7 @@ final class StyleRenderer
                         ? font.getSize2D()
                         : l.getAscent() + l.getDescent() + l.getLeading();
 
-                if (accumulated + h > boundsHeight)
+                if (Math.floor(accumulated + h) > boundsHeight)
                     break;
 
                 visible.add(0, l);
@@ -1450,7 +1450,7 @@ final class StyleRenderer
                     continue;
                 }
 
-                if (accumulated + h > boundsHeight)
+                if (Math.floor(accumulated + h) > boundsHeight)
                     break;
 
                 visible.add(l);
