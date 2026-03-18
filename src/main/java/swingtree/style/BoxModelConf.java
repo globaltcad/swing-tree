@@ -245,9 +245,9 @@ final class BoxModelConf
                    .withArcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    BoxModelConf withWidthAt(UI.Edge edge, float borderWidth ) {
+    BoxModelConf withBorderWidthAt( UI.Edge edge, float borderWidth ) {
         if ( edge == UI.Edge.EVERY )
-            return this.withWidth(borderWidth);
+            return this.withBorderWidth(borderWidth);
         switch (edge) {
             case TOP:    return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _baseOutline, _size);
             case RIGHT:  return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _baseOutline, _size);
@@ -258,11 +258,11 @@ final class BoxModelConf
         }
     }
 
-    BoxModelConf withWidth(double borderWidth ) {
-        return this.withWidthAt(UI.Edge.TOP,    (float) borderWidth)
-                   .withWidthAt(UI.Edge.RIGHT,  (float) borderWidth)
-                   .withWidthAt(UI.Edge.BOTTOM, (float) borderWidth)
-                   .withWidthAt(UI.Edge.LEFT,   (float) borderWidth);
+    BoxModelConf withBorderWidth( double borderWidth ) {
+        return this.withBorderWidthAt(UI.Edge.TOP,    (float) borderWidth)
+                   .withBorderWidthAt(UI.Edge.RIGHT,  (float) borderWidth)
+                   .withBorderWidthAt(UI.Edge.BOTTOM, (float) borderWidth)
+                   .withBorderWidthAt(UI.Edge.LEFT,   (float) borderWidth);
     }
 
     boolean allCornersShareTheSameArc() {
