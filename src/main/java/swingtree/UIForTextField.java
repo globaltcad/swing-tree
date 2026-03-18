@@ -270,6 +270,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
                              .placement( UI.Placement.LEFT )
                              .font( f -> f.color(_nicePlaceholderColorFor(conf.component())) )
                              .wrapLines(false)
+                             .autoPreferredHeight(false)
                         )
                     );
     }

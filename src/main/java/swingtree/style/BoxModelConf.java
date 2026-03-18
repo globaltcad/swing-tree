@@ -265,6 +265,10 @@ final class BoxModelConf
                    .withBorderWidthAt(UI.Edge.LEFT,   (float) borderWidth);
     }
 
+    BoxModelConf withSize(Size size) {
+        return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, size);
+    }
+
     boolean allCornersShareTheSameArc() {
         return Objects.equals(_topLeftArc, _topRightArc) &&
                Objects.equals(_topLeftArc, _bottomLeftArc) &&

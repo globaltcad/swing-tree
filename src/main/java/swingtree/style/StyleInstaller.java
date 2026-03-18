@@ -677,8 +677,12 @@ final class StyleInstaller<C extends JComponent>
 
             Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
 
-            if ( !newPrefSize.equals(prefSize) )
+            if ( !newPrefSize.equals(prefSize) ) {
                 owner.setPreferredSize(newPrefSize);
+                // Trigger a re-layout of the parent container, because preferred size changes can affect the layout:
+                if ( owner.getParent() != null )
+                    owner.getParent().revalidate();
+            }
         }
 
         if ( dimensionalityConf.width().isPresent() || dimensionalityConf.height().isPresent() ) {

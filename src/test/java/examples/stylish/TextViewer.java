@@ -165,7 +165,7 @@ public class TextViewer extends Panel
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())
                     .add("center, grow, push",
                         scrollPanels().add(
-                            UI.box().withMinSize(230, 1700)
+                            UI.box()
                             .withRepaintOn(someText, placement, componentBoundary, wrapLines)
                             .withStyle( conf -> conf
                                 .padding(24)
@@ -175,6 +175,7 @@ public class TextViewer extends Panel
                                     .placement(placement.get())
                                     .placementBoundary(componentBoundary.get())
                                     .wrapLines(wrapLines.get())
+                                    .autoPreferredHeight(true)
                                 )
                                 .border(12, Color.LIGHTSTEELBLUE)
                                 .shadowColor(Color.BLACK)
