@@ -1578,7 +1578,7 @@ final class StyleRenderer
             }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
-            if (wrapLines) {// Word wrapping using LineBreakMeasurer
+            if (wrapLines && boundsWidth >= 0) {// Word wrapping using LineBreakMeasurer
                 final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
                 final int end = it.getEndIndex();
                 while (measurer.getPosition() < end) {
