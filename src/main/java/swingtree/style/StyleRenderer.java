@@ -577,29 +577,6 @@ final class StyleRenderer
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
     }
 
-    private static Outline _insetsFrom(UI.ComponentBoundary boundary, BoxModelConf boxModel) {
-        Outline insets = Outline.none();
-        switch ( boundary ) {
-            case OUTER_TO_EXTERIOR:
-                insets = Outline.none(); break;
-            case EXTERIOR_TO_BORDER:
-                insets = boxModel.margin(); break;
-            case BORDER_TO_INTERIOR:
-                insets = boxModel.margin().plus(boxModel.widths()); break;
-            case INTERIOR_TO_CONTENT:
-                insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding()); break;
-            case CENTER_TO_CONTENT:
-                insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());
-                float deltaWidth = boxModel.size().width().orElse(0f) - boxModel.margin().left().orElse(0f) - boxModel.margin().right().orElse(0f);
-                float deltaHeight = boxModel.size().height().orElse(0f) - boxModel.margin().top().orElse(0f) - boxModel.margin().bottom().orElse(0f);
-                float halfWidth = deltaWidth / 2f;
-                float halfHeight = deltaHeight / 2f;
-                insets = insets.plus(Outline.of(halfHeight, halfWidth, halfHeight, halfWidth));
-            break;
-        }
-        return insets;
-    }
-
     private static void _renderGradient(
         final GradientConf    gradient,
         final LayerRenderConf conf,
@@ -626,7 +603,7 @@ final class StyleRenderer
         final Size dimensions = boxModel.size();
         Outline insets;
         if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
-            final Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, boxModel);
+            final Outline contentIns = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
             final float verticalInset = dimensions.height().orElse(0f) / 2f;
             final float horizontalInset = dimensions.width().orElse(0f) / 2f;
             insets = Outline.of(verticalInset, horizontalInset);
@@ -663,7 +640,7 @@ final class StyleRenderer
                     break;
             }
         } else {
-            insets = _insetsFrom(gradient.boundary(), boxModel);
+            insets = boxModel.insetsFor(gradient.boundary());
         }
 
         final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
@@ -1141,7 +1118,7 @@ final class StyleRenderer
             final UI.FitComponent      fit               = style.fitMode();
             final UI.Placement         placement         = style.placement();
             final UI.ComponentBoundary placementBoundary = style.placementBoundary();
-            final Outline              insets            = _insetsFrom(placementBoundary, conf.boxModel());
+            final Outline              insets            = conf.boxModel().insetsFor(placementBoundary);
             final Outline      padding         = style.padding();
             final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());
             final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());
@@ -1336,7 +1313,7 @@ final class StyleRenderer
     static Bounds _computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final Offset               offset            = text.offset();
-        final Outline              insets            = _insetsFrom(placementBoundary, boxModel);
+        final Outline              insets            = boxModel.insetsFor(placementBoundary);
         // Computing the area available for text rendering after applying the offset and insets:
         final float leftX = offset.x() + insets.left().orElse(0f);
         final float topY  = offset.y() + insets.top().orElse(0f);

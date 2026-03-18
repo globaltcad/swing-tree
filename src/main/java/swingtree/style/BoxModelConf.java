@@ -95,6 +95,8 @@ final class BoxModelConf
 
     private final Size    _size;
 
+    private final LazyRef<Outline[]> _boundaryInsets;
+
 
     private BoxModelConf(
         Arc     topLeftArc,
@@ -116,6 +118,14 @@ final class BoxModelConf
         _padding         = Objects.requireNonNull(padding);
         _baseOutline     = Objects.requireNonNull(baseOutline);
         _size            = Objects.requireNonNull(size);
+        _boundaryInsets  = new LazyRef<>(this, boxModel->{
+            UI.ComponentBoundary[] allBoundaries = UI.ComponentBoundary.values();
+            Outline[] boundaryLookup = new Outline[allBoundaries.length];
+            for ( UI.ComponentBoundary currentBoundary : allBoundaries ) {
+                boundaryLookup[currentBoundary.ordinal()] = _insetsFor(boxModel, currentBoundary);
+            }
+            return boundaryLookup;
+        });
     }
 
     public Optional<Arc> topLeftArc() { return _topLeftArc.equals(Arc.none()) ? Optional.empty() : Optional.of(_topLeftArc); }
@@ -150,6 +160,32 @@ final class BoxModelConf
     public Outline baseOutline() { return _baseOutline; }
     
     public Size size() { return _size; }
+
+    Outline insetsFor(UI.ComponentBoundary boundary) {
+        return Objects.requireNonNull(_boundaryInsets.get()[boundary.ordinal()]);
+    }
+
+    private static Outline _insetsFor(BoxModelConf boxModel, UI.ComponentBoundary boundary) {
+        Outline insets = Outline.none();
+        switch ( boundary ) {
+            case OUTER_TO_EXTERIOR:
+                return Outline.none();
+            case EXTERIOR_TO_BORDER:
+                return boxModel.margin();
+            case BORDER_TO_INTERIOR:
+                return boxModel.margin().plus(boxModel.widths());
+            case INTERIOR_TO_CONTENT:
+                return boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());
+            case CENTER_TO_CONTENT:
+                insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());
+                float deltaWidth = boxModel.size().width().orElse(0f) - boxModel.margin().left().orElse(0f) - boxModel.margin().right().orElse(0f);
+                float deltaHeight = boxModel.size().height().orElse(0f) - boxModel.margin().top().orElse(0f) - boxModel.margin().bottom().orElse(0f);
+                float halfWidth = deltaWidth / 2f;
+                float halfHeight = deltaHeight / 2f;
+                return insets.plus(Outline.of(halfHeight, halfWidth, halfHeight, halfWidth));
+        }
+        return insets;
+    }
 
     BoxModelConf withArcWidthAt(UI.Corner corner, double borderArcWidth ) {
         if ( corner == UI.Corner.EVERY )
