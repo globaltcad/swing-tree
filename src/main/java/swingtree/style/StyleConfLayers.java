@@ -224,12 +224,20 @@ final class StyleConfLayers
                             font = textConf.fontConf().createDerivedFrom(font, boxModel).orElse(font);
                             BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
                             final Graphics2D g2d = img.createGraphics();
-                            final FontRenderContext frc = g2d.getFontRenderContext();
-                            final Pair<Float, List<@Nullable TextLayout>> layoutResult = StyleRenderer._buildTextLayoutsAndPreferredHeight(font, frc, textConf.content(), availableWidth, wrapLines, boxModel);
-                            double totalHeight = layoutResult.first().doubleValue();
-                            totalHeight += textBounds.location().y();
-                            totalHeight += insets.bottom().orElse(0f);
-                            return totalHeight;
+                            try {
+                                final FontRenderContext frc = g2d.getFontRenderContext();
+                                final Pair<Float, List<@Nullable TextLayout>> layoutResult =
+                                        StyleRenderer._buildTextLayoutsAndPreferredHeight(
+                                                font, frc, textConf.content(), availableWidth, wrapLines, boxModel
+                                        );
+                                double totalHeight = layoutResult.first().doubleValue();
+                                totalHeight += textBounds.location().y();
+                                totalHeight += insets.bottom().orElse(0f);
+                                return totalHeight;
+                            }
+                            finally {
+                                g2d.dispose();
+                            }
                         })
                     .max()
                     .orElse(-1);
