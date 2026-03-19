@@ -270,23 +270,24 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
 <span class="fc" id="L270">                             .placement( UI.Placement.LEFT )</span>
 <span class="fc" id="L271">                             .font( f -&gt; f.color(_nicePlaceholderColorFor(conf.component())) )</span>
 <span class="fc" id="L272">                             .wrapLines(false)</span>
+<span class="fc" id="L273">                             .autoPreferredHeight(false)</span>
                         )
                     );
     }
 
     private static Color _nicePlaceholderColorFor( JTextField textField ) {
-<span class="fc" id="L278">        Color currentBackground = Optional.ofNullable(textField.getBackground()).orElse(Color.WHITE);</span>
-<span class="fc" id="L279">        Color currentForeground = Optional.ofNullable(textField.getForeground()).orElse(Color.BLACK);</span>
+<span class="fc" id="L279">        Color currentBackground = Optional.ofNullable(textField.getBackground()).orElse(Color.WHITE);</span>
+<span class="fc" id="L280">        Color currentForeground = Optional.ofNullable(textField.getForeground()).orElse(Color.BLACK);</span>
         /*
             We assume that &quot;the color between&quot; the background and the foreground is the color
             that would be the most readable as a placeholder color.
             So we interpolate the background and the foreground color to find the &quot;in-between&quot; color.
          */
-<span class="fc" id="L285">        return new Color(</span>
-<span class="fc" id="L286">            (currentBackground.getRed() + currentForeground.getRed()) / 2,</span>
-<span class="fc" id="L287">            (currentBackground.getGreen() + currentForeground.getGreen()) / 2,</span>
-<span class="fc" id="L288">            (currentBackground.getBlue() + currentForeground.getBlue()) / 2,</span>
-<span class="fc" id="L289">            (currentBackground.getAlpha() + currentForeground.getAlpha()) / 2</span>
+<span class="fc" id="L286">        return new Color(</span>
+<span class="fc" id="L287">            (currentBackground.getRed() + currentForeground.getRed()) / 2,</span>
+<span class="fc" id="L288">            (currentBackground.getGreen() + currentForeground.getGreen()) / 2,</span>
+<span class="fc" id="L289">            (currentBackground.getBlue() + currentForeground.getBlue()) / 2,</span>
+<span class="fc" id="L290">            (currentBackground.getAlpha() + currentForeground.getAlpha()) / 2</span>
         );
     }
 

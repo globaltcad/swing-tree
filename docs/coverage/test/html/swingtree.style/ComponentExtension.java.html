@@ -740,13 +740,13 @@ public final class ComponentExtension&lt;C extends JComponent&gt;
 <span class="fc" id="L740">            Shape baseClip = internalGraphics.getClip();</span>
 <span class="fc" id="L741">            _outerBaseClip = baseClip;</span>
 
-<span class="pc bpc" id="L743" title="3 of 4 branches missed.">            if ( _outerBaseClip == null &amp;&amp; _owner.getParent() == null ) {</span>
+<span class="pc bpc" id="L743" title="1 of 4 branches missed.">            if ( _outerBaseClip == null &amp;&amp; _owner.getParent() == null ) {</span>
                 // Happens when rendering individual components (usually unit tests)!
-<span class="nc" id="L745">                int x = (int) internalGraphics.getTransform().getTranslateX();</span>
-<span class="nc" id="L746">                int y = (int) internalGraphics.getTransform().getTranslateY();</span>
-<span class="nc" id="L747">                int w = _owner.getWidth();</span>
-<span class="nc" id="L748">                int h = _owner.getHeight();</span>
-<span class="nc" id="L749">                _outerBaseClip = new Rectangle(x,y,w,h);</span>
+<span class="fc" id="L745">                int x = (int) internalGraphics.getTransform().getTranslateX();</span>
+<span class="fc" id="L746">                int y = (int) internalGraphics.getTransform().getTranslateY();</span>
+<span class="fc" id="L747">                int w = _owner.getWidth();</span>
+<span class="fc" id="L748">                int h = _owner.getHeight();</span>
+<span class="fc" id="L749">                _outerBaseClip = new Rectangle(x,y,w,h);</span>
             }
 
 <span class="fc" id="L752">            Font componentFont = _owner.getFont();</span>
