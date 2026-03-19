@@ -439,7 +439,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * width and the displayed text.<br>
      * <b>It will also take full ownership of the preferred height of the component,
      * which means that a preferred height specified elsewhere in the style configuration
-     * of the component will be ignored.</b><
+     * of the component will be ignored.</b><br>
      *
      * @param autoPreferredHeight If true, then the style engine will compute and set a preferred height
      *                            for the styled component which is based on the text layout produced by this text configuration.
