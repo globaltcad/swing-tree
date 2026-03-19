@@ -196,7 +196,7 @@ class Styled_Text_Spec extends Specification
                 "]"
     }
 
-    def 'The styled text of a component can affect its preferred if desired.'(
+    def 'The styled text of a component can affect its preferred height if desired.'(
         UI.Placement placement
     ) {
         reportInfo """
@@ -361,5 +361,545 @@ class Styled_Text_Spec extends Specification
                     UI.Placement.BOTTOM_RIGHT,
                     UI.Placement.UNDEFINED
             ]
+    }
+
+    def 'The preferred height of styled text varies with `UI.ComponentBoundary` when margins, borders, and paddings are present.'()
+    {
+        reportInfo """
+            The `placementBoundary` property on `TextConf` determines which rectangular
+            region of the box model the text is laid out within.  When a component has
+            non-zero margins, border widths, or paddings, the four available boundaries
+            each carve out a progressively smaller area:
+
+                OUTER_TO_EXTERIOR   — the full component allocation (margin included)
+                EXTERIOR_TO_BORDER  — after the margin, before the border
+                BORDER_TO_INTERIOR  — after the border, before the padding
+                INTERIOR_TO_CONTENT — after the padding (the default)
+
+            Because the available width shrinks as the boundary moves inward,
+            line-wrapping kicks in sooner, which increases the preferred height.
+            This test sets up a component with generous horizontal margin, border, and
+            padding and confirms that the preferred height increases monotonically
+            as the boundary moves from outer to inner.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale to keep font metrics deterministic:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A reasonably long text that will wrap at moderate widths:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "The quick brown fox jumps over the lazy dog, and then it does it again just to be sure."
+                        )
+            var content = Tuple.of(text)
+
+        and : 'A helper closure that builds a box with a given boundary, paints it, and returns the preferred height:'
+            def preferredHeightFor = { UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .margin(0, 40, 0, 40)
+                                    .borderWidth(20)
+                                    .padding(0, 30, 0, 30)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(boundary)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(400, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We compute the preferred height for every boundary type:'
+            int heightOuter    = preferredHeightFor(UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+            int heightExterior = preferredHeightFor(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+            int heightBorder   = preferredHeightFor(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+            int heightInterior = preferredHeightFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+
+        then : 'Every height is positive (the text is non-empty and wraps):'
+            heightOuter    > 0
+            heightExterior > 0
+            heightBorder   > 0
+            heightInterior > 0
+
+        and : 'The heights increase as the boundary narrows the available width:'
+            heightOuter    <= heightExterior
+            heightExterior <= heightBorder
+            heightBorder   <= heightInterior
+
+        and : """
+            The outermost boundary gives the most horizontal space, so
+            its height must be strictly less than the innermost one, where
+            the margin + border + padding eat into the width from both sides:
+        """
+            heightOuter < heightInterior
+    }
+
+    def 'Only horizontal padding affects the preferred height — and only when line-wrapping is enabled.'()
+    {
+        reportInfo """
+            When a component has padding only on the left and right (no top or
+            bottom padding), the text's available width is reduced, which can
+            cause additional line-wrapping and therefore a taller preferred height.
+
+            However, this effect is *only* observable when `wrapLines` is true!
+            With wrapping turned off the text stays on a single line regardless
+            of how narrow the available width becomes, so the horizontal padding
+            cannot change the preferred height.
+
+            This test demonstrates both sides of that coin.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text that will wrap when horizontal space is tight:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "Horizontal padding narrows the text area, which triggers more wrapping and a taller layout."
+                        )
+            var content = Tuple.of(text)
+
+        and : 'A helper that builds a box with configurable padding and wrapLines, then returns the preferred height:'
+            def heightWith = { int leftRight, boolean wrap ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .padding(0, leftRight, 0, leftRight)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                        .wrapLines(wrap)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(350, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We compute heights with no padding and with 60px left+right padding, wrapping ON:'
+            int wrapNoPad    = heightWith(0,  true)
+            int wrapWithPad  = heightWith(60, true)
+
+        then : 'The padded version is taller because the available width is 120px narrower:'
+            wrapWithPad > wrapNoPad
+
+        when : 'We do the same comparison but with wrapping OFF:'
+            int noWrapNoPad   = heightWith(0,  false)
+            int noWrapWithPad = heightWith(60, false)
+
+        then : 'Without wrapping, the padding does not change the preferred height — the text is a single line either way:'
+            noWrapNoPad == noWrapWithPad
+    }
+
+    def 'Vertical padding adds to the preferred height regardless of whether line-wrapping is on or off.'()
+    {
+        reportInfo """
+            Top and bottom padding contribute directly to the vertical extent
+            of the text placement area.  Unlike horizontal padding — whose
+            effect on height is indirect (through wrapping) — vertical padding
+            simply shifts the text downward and extends the required height
+            by the sum of top and bottom insets.
+
+            This is true whether `wrapLines` is enabled or not, because the
+            additional height comes from the insets themselves, not from extra
+            line-breaks.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A short text that fits on one line at the test width:'
+            var text = StyledString.of(f -> f.size(14), "Short text.")
+            var content = Tuple.of(text)
+
+        and : 'A helper that builds a box with configurable top/bottom padding and wrapping:'
+            def heightWith = { int topBottom, boolean wrap ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .padding(topBottom, 0, topBottom, 0)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                        .wrapLines(wrap)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(350, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        expect : 'With wrapping ON, adding vertical padding increases the preferred height:'
+            heightWith(20, true) > heightWith(0, true)
+        and : 'With wrapping OFF, adding vertical padding still increases the preferred height:'
+            heightWith(20, false) > heightWith(0, false)
+        and : 'The vertical-padding increase is roughly the same whether wrapping is on or off:'
+            Math.abs(
+                (heightWith(20, true) - heightWith(0, true)) -
+                (heightWith(20, false) - heightWith(0, false))
+            ) <= 2 // rounding tolerance
+    }
+
+    def 'Border width affects the preferred height only for boundaries that include the border area.'()
+    {
+        reportInfo """
+            A non-zero border width consumes space only **after**
+            the `BORDER_TO_INTERIOR` boundaries but not **before**, like 
+            `EXTERIOR_TO_BORDER` or `OUTER_TO_EXTERIOR`.  This means:
+
+            * If the text uses `INTERIOR_TO_CONTENT` or `BORDER_TO_INTERIOR`, the
+              border width reduces the available text width and therefore
+              can increase the preferred height when line-wrapping is enabled.
+            * If the text uses `EXTERIOR_TO_BORDER` or `OUTER_TO_EXTERIOR`, the
+              border width *does NOT* reduce the available text width because the text
+              must not share any horizontal space with the border.
+
+            With line-wrapping enabled, the reduced width leads to more wrapping
+            and a larger preferred height.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text and a helper closure:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "A moderately long sentence that will wrap at different widths depending on how much border eats into the area."
+                        )
+            var content = Tuple.of(text)
+
+            def heightWith = { int borderWidth, UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .borderWidth(borderWidth)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(boundary)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(350, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        expect : """
+            For INTERIOR_TO_CONTENT, the border sits around the text area,
+            so changing the border width DOES affect the preferred height:
+        """
+            heightWith(0, UI.ComponentBoundary.INTERIOR_TO_CONTENT) < heightWith(30, UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+
+        and : """
+            For BORDER_TO_INTERIOR, the text area also starts right after the border,
+            so the border width still an effect:
+        """
+            heightWith(0, UI.ComponentBoundary.BORDER_TO_INTERIOR) < heightWith(30, UI.ComponentBoundary.BORDER_TO_INTERIOR)
+
+        and : """
+            For EXTERIOR_TO_BORDER, the text area we finally no longer
+            place the text after the border, so the border width has NO effect on the available width or preferred height:
+        """
+            heightWith(30, UI.ComponentBoundary.EXTERIOR_TO_BORDER) == heightWith(0, UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+
+        and : """
+            Finally, OUTER_TO_EXTERIOR, here the text is placed on the very edge of the component, 
+            so the border is also outside the text area and has no effect on the preferred height:
+        """
+            heightWith(30, UI.ComponentBoundary.OUTER_TO_EXTERIOR) == heightWith(0, UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+    }
+
+    def 'Margins only affect the preferred height when the placement boundary reaches the outer edge.'()
+    {
+        reportInfo """
+            Margins live at the outermost rim of the box model. Therefore, only the
+            `OUTER_TO_EXTERIOR` boundary is not affected by the margin area.
+            All other boundaries sit after the margin, so adding a margin
+            has effects on the text's available width for those boundaries.
+
+            With `wrapLines(true)`, a margin on the left and right reduces
+            the available width for all boundaries except `OUTER_TO_EXTERIOR` 
+            and thus triggers more wrapping and a taller preferred height for them.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text and a helper closure:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "Margins are on the outside, so only the outermost boundary is affected by them in terms of text width."
+                        )
+            var content = Tuple.of(text)
+
+            def heightWith = { int leftRightMargin, UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .margin(0, leftRightMargin, 0, leftRightMargin)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(boundary)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(400, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        expect : 'With OUTER_TO_EXTERIOR, adding a left+right margin has no effect the preferred height:'
+            heightWith(50, UI.ComponentBoundary.OUTER_TO_EXTERIOR) == heightWith(0,  UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+
+        and : 'With EXTERIOR_TO_BORDER, the margin increases the height:'
+            heightWith(50, UI.ComponentBoundary.EXTERIOR_TO_BORDER) > heightWith(0,  UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+
+        and : 'With BORDER_TO_INTERIOR, the margin also increases the height:'
+            heightWith(50, UI.ComponentBoundary.BORDER_TO_INTERIOR) > heightWith(0,  UI.ComponentBoundary.BORDER_TO_INTERIOR)
+
+        and : 'With INTERIOR_TO_CONTENT — same thing:'
+            heightWith(50, UI.ComponentBoundary.INTERIOR_TO_CONTENT) > heightWith(0,  UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+    }
+
+    def 'Combining margin, border, and padding produces a cumulative effect on text preferred height.'()
+    {
+        reportInfo """
+            When margin, border, and padding are all non-zero, the combined
+            horizontal insets reduce the available text width more and more
+            as we move to the outermost boundary.  This test builds several
+            boxes that all share the same box-model dimensions but differ in
+            their `placementBoundary`, confirming that the cumulative effect
+            of all three inset types is correctly reflected in the preferred
+            height.
+
+            Specifically, we expect:
+              height(INTERIOR_TO_CONTENT) >= height(BORDER_TO_INTERIOR)
+              >= height(EXTERIOR_TO_BORDER) >= height(OUTER_TO_EXTERIOR)
+            …because each step outward adds more available width.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text to ensure wrapping, and a helper closure:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "All three inset types combine to squeeze the available width from both sides, forcing the text to wrap into more and more lines."
+                        )
+            var content = Tuple.of(text)
+
+            def heightFor = { UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .margin(5, 25, 5, 25)
+                                    .borderWidth(15)
+                                    .padding(5, 20, 5, 20)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(boundary)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(450, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We measure the preferred height for each boundary:'
+            int hOuter    = heightFor(UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+            int hExterior = heightFor(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+            int hBorder   = heightFor(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+            int hInterior = heightFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+
+        then : 'Moving the boundary inward never decreases the height (it can only grow in this scenario):'
+            hOuter    < hExterior
+            hExterior < hBorder
+            hBorder   < hInterior
+
+        and : 'The overall span from outermost to innermost is strictly greater (all insets contribute):'
+            hOuter < hInterior
+    }
+
+    def 'Without line wrapping, horizontal insets have no effect on preferred height regardless of boundary.'()
+    {
+        reportInfo """
+            When `wrapLines` is false the text is rendered on a single line
+            no matter how narrow the available width becomes.  Consequently,
+            neither margin, border width, nor padding can cause additional
+            lines, and the preferred height stays constant across all
+            `UI.ComponentBoundary` types — provided there is no vertical
+            inset difference (this test uses zero vertical insets).
+
+            This is an important edge case: users who disable wrapping
+            should not see the preferred height jump around when they adjust
+            horizontal spacing or switch boundary types.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A text and a helper closure that disables wrapping:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "This entire sentence stays on a single line even when the available width is very small."
+                        )
+            var content = Tuple.of(text)
+
+            def heightFor = { UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .margin(0, 30, 0, 30)
+                                    .borderWidthAt(UI.Edge.LEFT, 15)
+                                    .borderWidthAt(UI.Edge.RIGHT, 15)
+                                    .padding(0, 25, 0, 25)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(boundary)
+                                        .wrapLines(false)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(400, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        expect : 'All four boundaries produce the exact same preferred height:'
+            heightFor(UI.ComponentBoundary.OUTER_TO_EXTERIOR)  == heightFor(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+            heightFor(UI.ComponentBoundary.EXTERIOR_TO_BORDER) == heightFor(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+            heightFor(UI.ComponentBoundary.BORDER_TO_INTERIOR) == heightFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+    }
+
+    def 'Mixed vertical and horizontal insets interact correctly with the placement boundary and wrapping.'()
+    {
+        reportInfo """
+            This test exercises a nuanced combination: the component has
+            both vertical *and* horizontal padding.  With wrapping turned on
+            the horizontal padding reduces the available width and increases
+            wrapping, while the vertical padding adds a fixed offset to the
+            total height.
+
+            With wrapping turned off only the vertical portion of the padding
+            contributes to the preferred height, because horizontal padding
+            cannot cause additional line-breaks on a single-line layout.
+
+            We compare INTERIOR_TO_CONTENT (which honours padding) against
+            BORDER_TO_INTERIOR (which ignores padding) to isolate the effect.
+        """
+        given : 'We initialize SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A moderately long text:'
+            var text = StyledString.of(
+                            f -> f.size(14),
+                            "Mixed insets combine vertical offsets with horizontal width constraints to shape the layout."
+                        )
+            var content = Tuple.of(text)
+
+            def heightWith = { UI.ComponentBoundary boundary, boolean wrap ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .padding(15, 50, 15, 50)
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placementBoundary(boundary)
+                                        .wrapLines(wrap)
+                                        .autoPreferredHeight(true)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(350, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We compare the two boundaries with wrapping ON:'
+            int wrapInner = heightWith(UI.ComponentBoundary.INTERIOR_TO_CONTENT, true)
+            int wrapOuter = heightWith(UI.ComponentBoundary.BORDER_TO_INTERIOR, true)
+
+        then : """
+            INTERIOR_TO_CONTENT accounts for both the vertical and horizontal padding,
+            leading to more wrapping and additional vertical space — it must be taller:
+        """
+            wrapInner > wrapOuter
+
+        when : 'We compare the two boundaries with wrapping OFF:'
+            int noWrapInner = heightWith(UI.ComponentBoundary.INTERIOR_TO_CONTENT, false)
+            int noWrapOuter = heightWith(UI.ComponentBoundary.BORDER_TO_INTERIOR, false)
+
+        then : """
+            Without wrapping the horizontal padding cannot add lines.
+            Only the vertical padding adds height, so the inner boundary is
+            still taller — but the difference comes purely from the top+bottom insets:
+        """
+            noWrapInner > noWrapOuter
     }
 }
