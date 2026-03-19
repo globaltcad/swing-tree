@@ -150,7 +150,8 @@ class Styled_Text_Spec extends Specification
                         "placementBoundary=INTERIOR_TO_CONTENT, " +
                         "placement=TOP_LEFT, " +
                         "offset=Offset[x=0, y=0], " +
-                        "wrapLines=true" +
+                        "wrapLines=true, " +
+                        "autoPreferredHeight=false" +
                     "]")
     }
 
@@ -334,7 +335,7 @@ class Styled_Text_Spec extends Specification
                                 "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
                             "], " +
                             "clipArea=INTERIOR, placementBoundary=INTERIOR_TO_CONTENT, placement=${placement}, " +
-                            "offset=Offset[x=0, y=0], wrapLines=true, autoPreferredHeight=true]" +
+                            "offset=Offset[x=0, y=0], wrapLines=true, autoPreferredHeight=true" +
                         "]"
             )
 
