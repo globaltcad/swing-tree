@@ -451,7 +451,9 @@ public final class TextConf implements Simplifiable<TextConf>
 
     @Override
     public TextConf simplified() {
-        // Note: With "autoPreferredHeight" we cannot simplify entirely since an empty content must still produce a preferred height greater than 0.
+        // Note: When "autoPreferredHeight" is enabled we must not simplify entirely to _NONE,
+        //       because this configuration still participates in preferred height computation
+        //       for the component, even when the content is empty (the resulting height may be 0).
         if ( _content.isEmpty() && !_autoPreferredHeight )
             return _NONE;
         Tuple<StyledString> simplifiedContent = _content.removeIf( it -> it.string().isEmpty() )
