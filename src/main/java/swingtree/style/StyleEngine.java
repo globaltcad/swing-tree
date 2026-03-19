@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Pair;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.layout.Bounds;
@@ -74,6 +75,23 @@ final class StyleEngine
     ) {
         final StyleEngine engine = this;
         final ComponentConf currentConf = engine.getComponentConf();
+        final Pair<BoxModelConf, ComponentConf> boxModelAndComponentConfs = _calculateBoxModelAndComponentConfs(newBounds, newStyle, marginCorrection, currentConf);
+        final BoxModelConf newBoxModelConf = boxModelAndComponentConfs.first();
+        final ComponentConf newConf = boxModelAndComponentConfs.second();
+
+        final LayerCache[] layerCaches = engine.getLayerCaches();
+        for ( LayerCache layerCache : layerCaches )
+            layerCache.validate(currentConf, newConf);
+
+        return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
+    }
+
+    static sprouts.Pair<BoxModelConf, ComponentConf> _calculateBoxModelAndComponentConfs(
+            final Bounds      newBounds,
+            final StyleConf   newStyle,
+            final Outline     marginCorrection,
+            final ComponentConf currentConf
+    ) {
         final boolean sameStyle      = currentConf.style().equals(newStyle);
         final boolean sameBounds     = currentConf.currentBounds().equals(newBounds);
         final boolean sameCorrection = currentConf.areaMarginCorrection().equals(marginCorrection);
@@ -84,12 +102,8 @@ final class StyleEngine
         else
             newConf = new ComponentConf(newStyle, newBounds, marginCorrection);
 
-        LayerCache[] layerCaches = engine.getLayerCaches();
-        for ( LayerCache layerCache : layerCaches )
-            layerCache.validate(currentConf, newConf);
-
         BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.areaMarginCorrection(), newConf.currentBounds().size());
-        return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
+        return Pair.of(newBoxModelConf, newConf);
     }
 
     void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y ) {

@@ -195,7 +195,7 @@ final class StyleConfLayers
         return of(filter, background, content, border, foreground, any);
     }
 
-    OptionalDouble computePreferredHeightFromTextConfigs( JComponent owner ) {
+    OptionalDouble computePreferredHeightFromTextConfigs( JComponent owner, BoxModelConf predictedBoxModel ) {
         // We look for text configs with non-empty content and compute the preferred size from those:
         Double maxHeight = null;
         for ( UI.Layer layer : UI.Layer.values() ) {
@@ -206,8 +206,6 @@ final class StyleConfLayers
                     .stylesStream()
                     .filter(TextConf::autoPreferredHeight)
                     .mapToDouble( textConf -> {
-                        final BoxModelConf boxModel = ComponentExtension.from(owner).getBoxModelConf();
-                        final BoxModelConf predictedBoxModel = boxModel.withSize(Size.of(owner.getWidth(), owner.getHeight()));
                         final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());
                             if ( textConf.content().isEmpty() ) {
                                 double totalHeight = 0;
