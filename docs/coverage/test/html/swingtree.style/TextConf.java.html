@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">TextConf.java</span></div><h1>TextConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Tuple;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.api.Configurator;
+import swingtree.api.Styler;
+
+import java.awt.Font;
+import java.util.Collection;
+import java.util.Objects;
+
+/**
+ *  An immutable configuration type which holds custom
+ *  text as well as placement and font properties used for
+ *  rendering text onto a Swing component. &lt;br&gt;
+ *  This objects is exposed inside the {@link ComponentStyleDelegate#text(Configurator)}
+ *  as a way to configure custom text properties of a component
+ *  as part of the style API exposed by {@link swingtree.UIForAnySwing#withStyle(Styler)}.
+ *  &lt;p&gt;
+ *  Here a simple usage example which
+ *  demonstrates how to render text onto the top edge of a
+ *  {@link javax.swing.JPanel}:
+ *  &lt;pre&gt;{@code
+ *      UI.panel()
+ *      .withStyle(conf -&gt; conf
+ *          .prefSize(180, 100)
+ *          .background(Color.CYAN)
+ *          .text(textConf -&gt; textConf
+ *              .content(&quot;Hello World!&quot;)
+ *              .placement(UI.Placement.TOP)
+ *              .font( fontConf -&gt; fontConf.color(Color.DARK_GRAY).size(20) )
+ *          )
+ *      )
+ *  }&lt;/pre&gt;
+ *  In this small example you can see the usage of {@link TextConf#content(String)},
+ *  {@link TextConf#placement(UI.Placement)} and {@link TextConf#font(Configurator)}.
+ *  But there are much more properties available to configure the text rendering
+ *  as part of the style API. &lt;br&gt;
+ *  &lt;p&gt;
+ *  Here a full list of all available properties with their respective
+ *  meaning and default values:
+ *  &lt;ul&gt;
+ *      &lt;li&gt;&lt;b&gt;Content&lt;/b&gt;
+ *          You can set this property through {@link TextConf#content(String)}.
+ *          This is the actual text content that should be rendered onto the component.
+ *          For richer text display with multiple styles for different parts of the text,
+ *          you can also pass a sequence of {@link StyledString}s to define the text content.
+ *          Each {@link StyledString} can have its own font properties which will be resolved
+ *          using the {@link FontConf} of this {@link TextConf} to be derived from.&lt;br&gt;
+ *          See {@link TextConf#content(StyledString...)} and {@link TextConf#content(Tuple)} for more details
+ *          on how to configure the content with multiple styled strings.&lt;br&gt;
+ *          The default content is an empty {@link Tuple} of {@link StyledString}s
+ *          in which the text configuration is effectively disabled!
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Font&lt;/b&gt;
+ *          The {@link FontConf} object is its own rich configuration object
+ *          which holds all font properties like size, style, color, etc.
+ *          You can configure it through {@link TextConf#font(Configurator)}.&lt;br&gt;
+ *          The default font configuration is {@link FontConf#none()}.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Clip Area&lt;/b&gt;
+ *          The clip area is an enum the area of the component where the text should be
+ *          rendered. So the text will only be visible within this area.&lt;br&gt;
+ *          You can configure it through {@link TextConf#clipTo(UI.ComponentArea)}.&lt;br&gt;
+ *          The default clip area is {@link UI.ComponentArea#INTERIOR}.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Placement Boundary&lt;/b&gt;
+ *          The placement boundary refers to one of many rectangular bounding boxes that capture
+ *          &lt;b&gt;the transitional bounding lines between different {@link UI.ComponentArea}s in the
+ *          box model (margin|border|padding) of a styled component.&lt;/b&gt;&lt;br&gt;
+ *          You can configure it through {@link TextConf#placementBoundary(UI.ComponentBoundary)}.&lt;br&gt;
+ *          The default placement boundary is {@link UI.ComponentBoundary#INTERIOR_TO_CONTENT},
+ *          which honors the padding of the component.
+ *          If you want to ignore the padding and place the text directly after the border
+ *          of the component, you can set it to {@link UI.ComponentBoundary#BORDER_TO_INTERIOR}.
+ *      &lt;/li&gt;
+ *          &lt;li&gt;&lt;b&gt;Placement&lt;/b&gt;
+ *          The placement is an enum which defines where the text should be placed
+ *          according to the {@link TextConf#placementBoundary(UI.ComponentBoundary)}.
+ *          You can configure it through {@link TextConf#placement(UI.Placement)}.&lt;br&gt;
+ *          The default placement is {@link UI.Placement#UNDEFINED}. At render time this is
+ *          first resolved using the horizontal and vertical alignment from the {@code FontConf};
+ *          only when those alignments are also {@link UI.Placement#UNDEFINED} does it behave
+ *          like {@link swingtree.UI.Placement#CENTER}.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Offset&lt;/b&gt;
+ *          The offset holds the x and y placement offset of the text.
+ *          You can configure it through {@link TextConf#offset(Offset)} or {@link TextConf#offset(int, int)}.
+ *          &lt;br&gt;
+ *          The default offset is {@link Offset#none()} (0, 0).
+ *          This property is great for making fine adjustments to the text placement. &lt;br&gt;
+ *          However, for a more robust alignment of the text, it is recommended to use the
+ *          {@link TextConf#placement(UI.Placement)} and {@link TextConf#placementBoundary(UI.ComponentBoundary)}
+ *          properties as a first choice.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Wrap Lines&lt;/b&gt;
+ *          This is a boolean property, and it defines whether the text should be wrapped into multiple lines
+ *          if the text content exceeds the width of the available space inside the component. &lt;br&gt;
+ *          You can configure it through {@link TextConf#wrapLines(boolean)}.&lt;br&gt;
+ *          The default value is {@code true}, which means that the text will wrap into multiple
+ *          lines if it exceeds the width of the available space inside the component. &lt;br&gt;
+ *          If set to {@code false}, the text will be rendered in a single line
+ *          and may overflow the component if the text content is too long.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Auto Preferred Height&lt;/b&gt;
+ *          Is a boolean property which configures whether the preferred height of the styled component should be computed
+ *          from the text you render onto it through this {@link TextConf} and then set as the preferred height of the component. &lt;br&gt;
+ *          This will effectively turn the preferred height of the component to a function of the component's
+ *          width and the displayed text.&lt;br&gt;
+ *          &lt;b&gt;It will also take full ownership of the preferred height of the component,
+ *          which means that a preferred height specified elsewhere in the style configuration
+ *          of the component will be ignored.&lt;/b&gt;&lt;br&gt;
+ *          You can configure it through {@link TextConf#autoPreferredHeight(boolean)}.&lt;br&gt;
+ *      &lt;/li&gt;
+ *  &lt;/ul&gt;
+ *  Use {@link TextConf#none()} to access the &lt;i&gt;null object&lt;/i&gt; of the {@link TextConf} type.
+ *  It is a convenient way to represent a &lt;i&gt;no-op&lt;/i&gt; configuration object which will not have any effect
+ *  when applied to a component.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+public final class TextConf implements Simplifiable&lt;TextConf&gt;
+{
+<span class="fc" id="L128">    private static final Logger log = LoggerFactory.getLogger(TextConf.class);</span>
+<span class="fc" id="L129">    public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;</span>
+<span class="fc" id="L130">    private static final TextConf _NONE = new TextConf(</span>
+<span class="fc" id="L131">                                                Tuple.of(StyledString.class),</span>
+<span class="fc" id="L132">                                                FontConf.none(),</span>
+                                                UI.ComponentArea.INTERIOR,
+                                                UI.ComponentBoundary.INTERIOR_TO_CONTENT,
+                                                UI.Placement.UNDEFINED,
+<span class="fc" id="L136">                                                Offset.none(),</span>
+                                                true,
+                                                false
+                                            );
+
+    static final TextConf none() {
+<span class="fc" id="L142">        return _NONE;</span>
+    }
+
+    private final Tuple&lt;StyledString&gt;  _content;
+    private final FontConf             _fontConf;
+    private final UI.ComponentArea     _clipArea;
+    private final UI.ComponentBoundary _placementBoundary;
+    private final UI.Placement         _placement;
+    private final Offset               _offset;
+    private final boolean              _wrapLines;
+    private final boolean              _autoPreferredHeight;
+
+    private TextConf(
+        Tuple&lt;StyledString&gt;  content,
+        FontConf             fontConf,
+        UI.ComponentArea     clipArea,
+        UI.ComponentBoundary placementBoundary,
+        UI.Placement         placement,
+        Offset               offset,
+        boolean              wrapLines,
+        boolean              autoPreferredHeight
+    )
+<span class="fc" id="L164">    {</span>
+<span class="fc" id="L165">        _content             = Objects.requireNonNull(content);</span>
+<span class="fc" id="L166">        _fontConf            = Objects.requireNonNull(fontConf);</span>
+<span class="fc" id="L167">        _clipArea            = Objects.requireNonNull(clipArea);</span>
+<span class="fc" id="L168">        _placementBoundary   = Objects.requireNonNull(placementBoundary);</span>
+<span class="fc" id="L169">        _placement           = Objects.requireNonNull(placement);</span>
+<span class="fc" id="L170">        _offset              = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L171">        _wrapLines           = wrapLines;</span>
+<span class="fc" id="L172">        _autoPreferredHeight = autoPreferredHeight;</span>
+<span class="fc" id="L173">    }</span>
+
+    private static TextConf of(
+        Tuple&lt;StyledString&gt;  content,
+        FontConf             fontConf,
+        UI.ComponentArea     clipArea,
+        UI.ComponentBoundary placementBoundary,
+        UI.Placement         placement,
+        Offset               offset,
+        boolean              wrapLines,
+        boolean              autoPreferredHeight
+    ) {
+<span class="fc" id="L185">        if (</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">            content.isEmpty() &amp;&amp;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            fontConf.equals(_NONE._fontConf) &amp;&amp;</span>
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            clipArea.equals(_NONE._clipArea) &amp;&amp;</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">            placementBoundary.equals(_NONE._placementBoundary) &amp;&amp;</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">            placement.equals(_NONE._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L191" title="3 of 6 branches missed.">            offset.equals(_NONE._offset) &amp;&amp;</span>
+            wrapLines == _NONE._wrapLines &amp;&amp;
+            autoPreferredHeight == _NONE._autoPreferredHeight
+        ) {
+<span class="fc" id="L195">            return _NONE;</span>
+        }
+<span class="fc" id="L197">        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight);</span>
+    }
+
+    Tuple&lt;StyledString&gt; content() {
+<span class="fc" id="L201">        return _content;</span>
+    }
+
+    FontConf fontConf() {
+<span class="fc" id="L205">        return _fontConf;</span>
+    }
+
+    UI.ComponentArea clipArea() {
+<span class="fc" id="L209">        return _clipArea;</span>
+    }
+
+    UI.ComponentBoundary placementBoundary() {
+<span class="fc" id="L213">        return _placementBoundary;</span>
+    }
+
+    UI.Placement placement() {
+<span class="fc" id="L217">        return _placement;</span>
+    }
+
+    Offset offset() {
+<span class="fc" id="L221">        return _offset;</span>
+    }
+
+    boolean wrapLines() {
+<span class="fc" id="L225">        return _wrapLines;</span>
+    }
+
+    boolean autoPreferredHeight() {
+<span class="fc" id="L229">        return _autoPreferredHeight;</span>
+    }
+
+    /**
+     * Returns a new {@link TextConf} object with the given text content.
+     * @param textString The text content to be rendered onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     */
+    public TextConf content( String textString ) {
+<span class="fc" id="L238">        Objects.requireNonNull(textString);</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if ( textString.isEmpty() )</span>
+<span class="nc" id="L240">            return content(Tuple.of(StyledString.class));</span>
+<span class="fc" id="L241">        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Configures this {@link TextConf} object to render the supplied sequence
+     * of {@link StyledString}s as the text content onto the component.&lt;br&gt;
+     * Each {@link StyledString} in the sequence can have its own font properties.
+     * This allows you to render visually rich and expressive text.
+     * @param styledStrings A vararg sequence of {@link StyledString}s which should be
+     *                      rendered as the text content onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     * @throws NullPointerException if the supplied styledStrings is null.
+     */
+    public TextConf content( StyledString... styledStrings ) {
+<span class="nc" id="L255">        Objects.requireNonNull(styledStrings);</span>
+<span class="nc" id="L256">        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Configures this {@link TextConf} object to render the supplied {@link Tuple}
+     * of {@link StyledString}s as the text content onto the component.
+     * Each {@link StyledString} in the sequence can have its own font properties.
+     * This allows you to render visually rich and expressive text.
+     * @param styledStrings A {@link Tuple} of {@link StyledString}s which should be
+     *                      rendered as the text content onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     * @throws NullPointerException if the supplied styledStrings is null.
+     */
+    public TextConf content( Tuple&lt;StyledString&gt; styledStrings ) {
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if ( _content.equals(styledStrings) ) {</span>
+<span class="fc" id="L271">            return this;</span>
+        }
+<span class="fc" id="L273">        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Configures this {@link TextConf} object to render the supplied collection
+     * of {@link StyledString}s as the text content onto the component.&lt;br&gt;
+     * Each {@link StyledString} in the sequence can have its own font properties.
+     * This allows you to render visually rich and expressive text.
+     * @param styledStrings A collection of {@link StyledString}s which should be
+     *                      rendered as the text content onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     * @throws NullPointerException if the supplied styledStrings is null.
+     */
+    public TextConf content( Collection&lt;StyledString&gt; styledStrings ) {
+<span class="nc" id="L287">        Objects.requireNonNull(styledStrings);</span>
+<span class="nc" id="L288">        return content(Tuple.of(StyledString.class, styledStrings));</span>
+    }
+
+    private TextConf _fontConf(FontConf fontConf) {
+<span class="fc" id="L292">        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Returns a new {@link TextConf} object with the given font configuration
+     * defined by a configurator function which takes a {@link FontConf} object
+     * and returns an updated {@link FontConf} object with the desired font properties.
+     *
+     * @param fontConfFunction A function which takes the current font configuration
+     *                         and returns a new font configuration with the desired properties.
+     * @return A new {@link TextConf} object with the given font configuration.
+     */
+    public TextConf font( Configurator&lt;FontConf&gt; fontConfFunction ) {
+        try {
+<span class="fc" id="L306">            return _fontConf(fontConfFunction.configure(_fontConf));</span>
+<span class="nc" id="L307">        } catch ( Exception e ) {</span>
+<span class="nc" id="L308">            log.error(SwingTree.get().logMarker(), &quot;Error configuring font style.&quot;, e);</span>
+<span class="nc" id="L309">            return this;</span>
+        }
+    }
+
+    /**
+     * Returns a new {@link TextConf} object with the given font.
+     * @param font The font to be used for rendering the text onto the component.
+     * @return A new {@link TextConf} object with the given font.
+     */
+    public TextConf font( Font font ) {
+<span class="nc" id="L319">        return _fontConf(_fontConf.withPropertiesFromFont(font));</span>
+    }
+
+    /**
+     * Returns a new {@link TextConf} object with the given clip area
+     * defined by a {@link UI.ComponentArea} enum.
+     * Text positioned outside the clip area will not be visible.
+     * @param clipArea The clip area where the text should be rendered onto the component.
+     * @return A new {@link TextConf} object with the given clip area.
+     */
+    public TextConf clipTo( UI.ComponentArea clipArea ) {
+<span class="nc" id="L330">        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Allows you to narrow down the rectangular placement area of the text in the box
+     * model of the underlying component using a {@link UI.ComponentBoundary} enum constant.
+     * The component boundaries can be thought of as rectangular bounding boxes that capture
+     * the transitional edges between different {@link UI.ComponentArea}s.&lt;br&gt;
+     * This property ensures that the text is placed inside the transitional bounding box.
+     * &lt;p&gt;
+     * The following placement boundaries are available:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link UI.ComponentArea#BODY}.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     typically the sub-components of the component.
+     *     &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param placementBoundary The placement boundary of the component.
+     * @return A new {@link TextConf} object with the given placement boundary.
+     */
+    public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
+<span class="fc" id="L364">        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Returns an updated {@link TextConf} object with the given placement,
+     * defined by a {@link UI.Placement} enum.
+     * The placement defines where the text should be placed according to the
+     * {@link TextConf#placementBoundary(UI.ComponentBoundary)}.
+     * &lt;p&gt;
+     * The following placements are available:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.Placement#TOP} - Placed centered at the top edge of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#BOTTOM} - Placed centered at the bottom edge of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#LEFT} - At the left center edge of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#RIGHT} - The right center edge of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#CENTER} - Placed on the center of the edges defined by the {@link UI.ComponentBoundary}.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#TOP_LEFT} - Placed at the top left corner of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#TOP_RIGHT} - Placed at the top right corner of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#BOTTOM_LEFT} - Placed at the bottom left corner of the component.&lt;/li&gt;
+     *     &lt;li&gt;{@link UI.Placement#BOTTOM_RIGHT} - Placed at the bottom right corner of the component.&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param placement The placement of the text, defined by a {@link UI.Placement} enum.
+     * @return An updated {@link TextConf} object with the desired placement.
+     */
+    public TextConf placement(UI.Placement placement) {
+<span class="fc" id="L390">        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Returns a new {@link TextConf} object with the given offset.
+     * The offset holds the x and y placement offset of the text.
+     * This property is great for making fine adjustments to the text placement.
+     * However, for a more robust alignment of the text, it is recommended to use the
+     * {@link TextConf#placement(UI.Placement)} and {@link TextConf#placementBoundary(UI.ComponentBoundary)}
+     * properties as a first choice.
+     * @param offset The offset of the text, defined by an {@link Offset} object.
+     *               You may create an {@link Offset} object with {@link Offset#of(float, float)}.
+     * @return An updated {@link TextConf} object with the given offset.
+     */
+    TextConf offset(Offset offset) {
+<span class="nc" id="L405">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Returns a {@link TextConf} object updated with an x and y placement offset.
+     * The offset holds the x and y placement offset of the text.
+     * This property is great for making fine adjustments to the text placement.
+     * However, for a more robust alignment of the text, it is recommended to use the
+     * {@link TextConf#placement(UI.Placement)} and {@link TextConf#placementBoundary(UI.ComponentBoundary)}
+     * properties as a first choice.
+     * @param x The x placement offset of the text.
+     * @param y The y placement offset of the text.
+     * @return An updated {@link TextConf} object with the given offset.
+     */
+    public TextConf offset(int x, int y) {
+<span class="nc" id="L420">        return offset(Offset.of(x, y));</span>
+    }
+
+    /**
+     * Configures whether the text should be wrapped into multiple lines if the text
+     * content exceeds the width of the available space inside the component.
+     * The default value is {@code true}, which means that the text will wrap into multiple
+     * lines if it exceeds the width of the available space inside the component.
+     * @param wrapLines A boolean value which defines whether the text should be wrapped into multiple lines.
+     * @return An updated {@link TextConf} object with the given wrap lines property.
+     */
+    public TextConf wrapLines(boolean wrapLines) {
+<span class="fc" id="L432">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight);</span>
+    }
+
+    /**
+     * Configures whether the preferred height of the styled component should be computed
+     * from the text you render onto it through this {@link TextConf} and then set as the preferred height of the component. &lt;br&gt;
+     * This will effectively turn the preferred height of the component to a function of the component's
+     * width and the displayed text.&lt;br&gt;
+     * &lt;b&gt;It will also take full ownership of the preferred height of the component,
+     * which means that a preferred height specified elsewhere in the style configuration
+     * of the component will be ignored.&lt;/b&gt;&lt;br&gt;
+     *
+     * @param autoPreferredHeight If true, then the style engine will compute and set a preferred height
+     *                            for the styled component which is based on the text layout produced by this text configuration.
+     * @return A new text configuration with the desired auto height behavior.
+     */
+    public TextConf autoPreferredHeight(boolean autoPreferredHeight) {
+<span class="fc" id="L449">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight);</span>
+    }
+
+    @Override
+    public TextConf simplified() {
+        // Note: When &quot;autoPreferredHeight&quot; is enabled we must not simplify entirely to _NONE,
+        //       because this configuration still participates in preferred height computation
+        //       for the component, even when the content is empty (the resulting height may be 0).
+<span class="fc bfc" id="L457" title="All 4 branches covered.">        if ( _content.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
+<span class="fc" id="L458">            return _NONE;</span>
+<span class="fc" id="L459">        Tuple&lt;StyledString&gt; simplifiedContent = _content.removeIf( it -&gt; it.string().isEmpty() )</span>
+<span class="fc" id="L460">                                                        .map( it -&gt; it.resolveUsing(_fontConf))</span>
+<span class="fc" id="L461">                                                        .removeIf( it -&gt; it</span>
+<span class="fc" id="L462">                                                                .fontConf()</span>
+<span class="fc bfc" id="L463" title="All 2 branches covered.">                                                                .map( fontConf -&gt; fontConf.size() == 0 )</span>
+<span class="fc" id="L464">                                                                .orElse( false )</span>
+                                                            );
+<span class="pc bpc" id="L466" title="1 of 4 branches missed.">        if ( simplifiedContent.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
+<span class="nc" id="L467">             return _NONE;</span>
+<span class="fc" id="L468">        return content(simplifiedContent);</span>
+    }
+
+    @Override
+    public boolean isNone() {
+<span class="fc" id="L473">        return this.equals(_NONE);</span>
+    }
+
+    TextConf _scale(double scale) {
+<span class="fc" id="L477">        return of(</span>
+<span class="pc" id="L478">            _content.map( it -&gt; it.mapStyle( s -&gt; s._scale(scale) ) ),</span>
+<span class="fc" id="L479">            _fontConf._scale(scale),</span>
+            _clipArea,
+            _placementBoundary,
+            _placement,
+<span class="fc" id="L483">            _offset.scale(scale),</span>
+            _wrapLines,
+            _autoPreferredHeight
+        );
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="fc bfc" id="L491" title="All 2 branches covered.">        if ( this == obj )</span>
+<span class="fc" id="L492">            return true;</span>
+
+<span class="pc bpc" id="L494" title="1 of 2 branches missed.">        if ( !(obj instanceof TextConf) )</span>
+<span class="nc" id="L495">            return false;</span>
+
+<span class="fc" id="L497">        TextConf other = (TextConf) obj;</span>
+<span class="fc" id="L498">        return</span>
+<span class="fc bfc" id="L499" title="All 2 branches covered.">            _content.equals(other._content) &amp;&amp;</span>
+<span class="fc bfc" id="L500" title="All 2 branches covered.">            _fontConf.equals(other._fontConf) &amp;&amp;</span>
+<span class="pc bpc" id="L501" title="1 of 2 branches missed.">            _clipArea.equals(other._clipArea) &amp;&amp;</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">            _placementBoundary.equals(other._placementBoundary) &amp;&amp;</span>
+<span class="pc bpc" id="L503" title="1 of 2 branches missed.">            _placement.equals(other._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L504" title="3 of 6 branches missed.">            _offset.equals(other._offset) &amp;&amp;</span>
+            _wrapLines == other._wrapLines &amp;&amp;
+            _autoPreferredHeight == other._autoPreferredHeight;
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L511">        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L516" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L517">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L518">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+            &quot;content=&quot; + _content + &quot;, &quot; +
+            &quot;fontConf=&quot; + _fontConf + &quot;, &quot; +
+            &quot;clipArea=&quot; + _clipArea + &quot;, &quot; +
+            &quot;placementBoundary=&quot; + _placementBoundary + &quot;, &quot; +
+            &quot;placement=&quot; + _placement + &quot;, &quot; +
+            &quot;offset=&quot; + _offset + &quot;, &quot; +
+            &quot;wrapLines=&quot; + _wrapLines + &quot;, &quot; +
+            &quot;autoPreferredHeight=&quot; + _autoPreferredHeight +
+        &quot;]&quot;;
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

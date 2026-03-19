@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextRemoveDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TextRemoveDelegate.java</span></div><h1>TextRemoveDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.slf4j.Logger;
+import sprouts.Action;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.JTextComponent;
+
+/**
+ *  A delegate object for the {@link Action} lambda passed
+ *  to the {@link UIForAnyTextComponent#onTextRemove(Action)}  method,
+ *  which is used to register a listener for text removal events.
+ *  &lt;br&gt;
+ *  This delegate provides useful context information to the action listener,
+ *  such as the text component itself, the {@link DocumentFilter.FilterBypass}
+ *  object that can be used to remove text from the document, the offset at which
+ *  the text is to be removed and the length of the text to be removed.
+ */
+public final class TextRemoveDelegate extends AbstractTextComponentDelegate
+{
+<span class="fc" id="L22">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(TextRemoveDelegate.class);</span>
+
+
+    TextRemoveDelegate(
+        JTextComponent              textComponent,
+        DocumentFilter.FilterBypass filterBypass,
+        int                         offset,
+        int                         length
+    ) {
+<span class="fc" id="L31">        super(textComponent, filterBypass, offset, length);</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     *  This method exposes the actual text that is being removed from the document
+     *  as part of the current text removal event.
+     *  If nothing is removed from the document, an empty {@link String} is returned.
+     *
+     * @return The text to be removed or an empty {@link String} if no text is to be removed.
+     *         Null is never returned.
+     *
+     */
+    public String getTextToBeRemoved() {
+        try {
+<span class="fc" id="L45">            return getComponent().getDocument().getText(getOffset(), getLength());</span>
+<span class="nc" id="L46">        } catch (BadLocationException e) {</span>
+<span class="nc" id="L47">            log.error(SwingTree.get().logMarker(),</span>
+                    &quot;Failed to read the text to be removed from the document at offset {} and using length {}!&quot;,
+<span class="nc" id="L49">                    getOffset(), getLength(), e</span>
+                );
+<span class="nc" id="L51">            return &quot;&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

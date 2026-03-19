@@ -1,0 +1,689 @@
+{
+  "className":"swingtree.style.Styled_Text_Spec",
+  "title":"The Text Style API",
+  "narrative":"SwingTree's rich-text rendering API centres on two concepts:\n\n    1. `StyledString` — an immutable, uniformly styled snippet of text.\n       A sequence of them, combined into a `Tuple<StyledString>`, is the\n       content model for a single rendered text region.\n\n    2. `TextConf` — a sub-configuration of the component style that describes\n       *how* that sequence is laid out and painted: placement, line-wrapping,\n       and a base font from which individual segment fonts can inherit.\n\n    The font configuration of each segment is stored as a *lazy*\n    `Configurator<FontConf>` — a pure function that takes an inherited\n    base `FontConf` and returns a derived one.  Resolution happens exactly\n    once, at the moment the `StyledString` is \"resolved\" for its concrete `FontConf`\n    via `resolveUsing(baseConf)`.  This separation of \"recipe\" from \"result\"\n    is what allows the same styled-string tuple to be re-evaluated cheaply\n    whenever the surrounding context changes.\n\n    This specification verifies:\n    - The value-semantics and immutability guarantees of `StyledString`.\n    - That font properties are absent before resolution and faithfully produced\n      after it, including inheritance from the base `FontConf`.\n    - That the style engine reflects a non-trivial text configuration correctly\n      in the component's style string representation.\n    - That a text configuration which carries no visible content is simplified\n      away to the canonical `TextConf[NONE]` null-object.",
+  "subjects":["swingtree.style.StyledString","swingtree.style.TextConf","swingtree.style.FontConf"],
+  "statistics":{
+    "runs":"13",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A `StyledString` without a font configurator has value semantics based solely on its text content",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `StyledString.of(String)` produces a segment that carries *no* font style\n            information.  Its appearance will be entirely inherited from the base font\n            of the surrounding `TextConf` at render time.\n\n            Because the segment holds nothing beyond its text, two instances that wrap\n            the same string are structurally identical and therefore equal — they\n            represent the same value.  This makes them safe to use in immutable tuples,\n            cache keys, and reactive state variables without defensive copying.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Two plain StyledStrings wrapping the same text are equal:","code":[]},
+
+        {"kind":"and","text":"Their hash codes agree, as required by the equals/hashCode contract:","code":[]},
+
+        {"kind":"and","text":"Strings that differ in content are not equal, even if they look similar:","code":[]},
+
+        {"kind":"and","text":"An empty string is a perfectly valid — and deduplicated — styled string:","code":[]},
+
+        {"kind":"and","text":"A plain StyledString is never equal to a styled one, even if the text matches:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A sequence of `StyledString` stored as text content on a component appears in the style toString",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When `StyledString` instances are assembled into a `Tuple<StyledString>` and\n            passed to `TextConf#content(...)` via the component style API, the style engine\n            stores them verbatim inside the `TextConf`.  The resulting style configuration\n            is then observable through `ComponentExtension.from(component).getStyle()`.\n\n            This unit test verifies the round-trip: a sequence of three styled segments\n            — a blue bold header, a plain body paragraph, and a green italic conclusion —\n            is correctly reflected in the component's style string representation, confirming\n            that the content, placement, and line-wrapping hints all reach the style engine.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three StyledString segments that together form a mini logical argument:","code":[]},
+
+        {"kind":"and","text":"We also create styled strings which will be simplified away, since they are effectively no-ops:","code":[]},
+
+        {"kind":"and","text":"We pack them into a Tuple and apply them as text content on a UI box:","code":[]},
+
+        {"kind":"when","text":"We extract the full style configuration of the box:","code":[]},
+
+        {"kind":"then","text":"The style string confirms that a non-trivial TextConf is present in the content layer:","code":[]},
+
+        {"kind":"and","text":"All three segment strings survive the round-trip intact:","code":[]},
+
+        {"kind":"and","text":"The full sequence is present as follows:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A text configuration that carries only an empty content tuple simplifies to \"TextConf[NONE]\"",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Like every other sub-configuration in SwingTree's style engine, `TextConf` can\n            be simplified to its canonical null-object representation `TextConf[NONE]` when\n            all of its properties are at their default, no-op values.\n\n            An empty content tuple combined with a no-op base font is the most common\n            \"effectively invisible\" case: no text is specified, so nothing would ever be\n            rendered.  Simplifying it away keeps the style object lean, improves cache hit\n            rates (the style is used as a cache key for rendering buffers), and prevents\n            spurious repaints when the style is otherwise identical.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI box whose text style has an explicitly empty content tuple:","code":[]},
+
+        {"kind":"expect","text":"The style string shows that the empty text configuration was simplified to NONE:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["TOP_LEFT"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["TOP"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["TOP_RIGHT"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["LEFT"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["CENTER"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["RIGHT"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["BOTTOM_LEFT"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["BOTTOM"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["BOTTOM_RIGHT"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled text of a component can affect its preferred if desired. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An important requirement when displaying text on a GUI component\n            is for it to be resized within a layout accordingly.\n            Resizing of components dynamically to fit content happens through\n            the 'preferred size', which the layout manager uses to make a\n            fair and balanced layout.\n\n            When you configure styled text through the SwingTree style API,\n            then you can use the \"autoPreferredHeight\" property to tell\n            SwingTree to automatically compute and set the preferred height\n            of a component based on the current width of the component and\n            the styled text it displays.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:","code":[]},
+
+        {"kind":"and","text":"We create variables for the \"autoPreferredHeight\", \"wrapLines\" and some styled string snippets:","code":[]},
+
+        {"kind":"and","text":"A tuple that contains the styled string snippets:","code":[]},
+
+        {"kind":"and","text":"Finally we create a box with the styled text and the `autoPreferredHeight` property:","code":[]},
+
+        {"kind":"expect","text":"Initially, the preferred height cannot be known, since the component does not have a width yet:","code":[]},
+
+        {"kind":"when","text":"We set the width of the box to a fixed value and then simulate a paint event.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now computed based on the styled text content and the width:","code":[]},
+
+        {"kind":"when","text":"We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased line-wrapping:","code":[]},
+
+        {"kind":"when","text":"We turn off line-wrapping, which should get us back to the previous preferred height!","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since line-wrapping is turned off:","code":[]},
+
+        {"kind":"when","text":"We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.","code":[]},
+
+        {"kind":"then","text":"The preferred height is still at the original value since `autoPreferredHeight` is turned off:","code":[]},
+
+        {"kind":"when","text":"We turn `autoPreferredHeight` back on...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the larger value wrapping takes more vertical space:","code":[]},
+
+        {"kind":"when","text":"We now go back to the original width, which should reduce the preferred height again.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to the original value since the width allows for less line-wrapping:","code":[]},
+
+        {"kind":"when","text":"Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much larger due to the increased font size:","code":[]},
+
+        {"kind":"when","text":"We now reduce the content to only contain the last string...","code":[]},
+
+        {"kind":"then","text":"The preferred height is now much smaller since there is much less content to render:","code":[]},
+
+        {"kind":"and","text":"We verify that the string representation of the style conf is as expected:","code":[]},
+
+        {"kind":"when","text":"We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.","code":[]},
+
+        {"kind":"then","text":"The preferred height is now back to 0 since there is no content to render:","code":[]},
+
+        {"kind":"where","text":"We use different placements, these should not affect the preferred height since the text content and wrapping is the same:","code":{"placement":["UNDEFINED"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

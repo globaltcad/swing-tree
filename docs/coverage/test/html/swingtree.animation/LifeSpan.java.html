@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LifeSpan.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">LifeSpan.java</span></div><h1>LifeSpan.java</h1><pre class="source lang-java linenums">package swingtree.animation;
+
+import com.google.errorprone.annotations.Immutable;
+
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+/**
+ *  The lifespan defines when an {@link Animation} starts and for how long it should run.
+ *  It consists of a start time and {@link LifeTime}, which defines a delay, interval and duration.
+ *  &lt;br&gt;
+ *  This object is intended to be accessed as part of an {@link AnimationStatus} within
+ *  an {@link Animation} and is typically used to decide how an animation should behave.
+ */
+@Immutable
+public final class LifeSpan
+{
+    /**
+     * Creates a lifespan that starts now and has the specified lifetime.
+     *
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that starts now and has the specified lifetime.
+     */
+    public static LifeSpan startingNowWith( LifeTime lifeTime ) {
+<span class="fc" id="L25">        return new LifeSpan(lifeTime, System.currentTimeMillis() + lifeTime.getDelayIn(TimeUnit.MILLISECONDS));</span>
+    }
+
+    /**
+     * Creates a lifespan that starts after the specified offset starting from now and has the specified lifetime.
+     *
+     * @param offset The offset from now when the animation should start.
+     * @param unit The time unit of the offset.
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that starts after the specified offset from now, with the specified lifetime.
+     */
+    public static LifeSpan startingNowWithOffset( long offset, TimeUnit unit, LifeTime lifeTime ) {
+<span class="fc" id="L37">        long inMillis = unit.toMillis(offset);</span>
+<span class="fc" id="L38">        return new LifeSpan(lifeTime, System.currentTimeMillis() + inMillis);</span>
+    }
+
+    /**
+     * Creates a lifespan that ends now and has the specified lifetime.
+     *
+     * @param lifeTime The lifetime of the animation.
+     * @return A lifespan that ends now and has the specified lifetime.
+     */
+    public static LifeSpan endingNowWith( LifeTime lifeTime ) {
+<span class="nc" id="L48">        return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));</span>
+    }
+
+    private final LifeTime _lifeTime;
+    private final long _startTime;
+
+
+<span class="fc" id="L55">    LifeSpan( LifeTime lifeTime, long startTime ) {</span>
+<span class="fc" id="L56">        _lifeTime = Objects.requireNonNull(lifeTime);</span>
+<span class="fc" id="L57">        _startTime = startTime;</span>
+<span class="fc" id="L58">    }</span>
+
+    public LifeTime lifeTime() {
+<span class="fc" id="L61">        return _lifeTime;</span>
+    }
+
+    public long startTime() {
+<span class="nc" id="L65">        return _startTime;</span>
+    }
+
+    /**
+     *  Returns the time when the animation should start in the given time unit.
+     * @param unit The time unit in which the start time should be returned.
+     * @return The time when the animation should start.
+     */
+    public long getStartTimeIn( TimeUnit unit ) {
+<span class="fc" id="L74">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L75">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
+    }
+
+
+    /**
+     *   Returns the end time of the specified iteration in the given time unit.
+     *   The end time is the time when the animation is scheduled to be finished.
+     *   This is essentially the start time plus the duration of the
+     *   animation times the provided iteration number.
+     *
+     * @param unit The time unit in which the end time should be returned.
+     * @param iteration The iteration for which the end time should be determined and returned.
+     * @return The end time of the specified iteration in the given time unit.
+     */
+    public long getEndTimeIn( TimeUnit unit, long iteration ) {
+<span class="fc" id="L90">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L91">        return unit.convert(_startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS) * iteration, TimeUnit.MILLISECONDS);</span>
+    }
+
+    /**
+     *  Allows you to check whether the animation is expired or not.
+     *  An animation is considered expired if the current time is greater than
+     *  the start time plus the duration of the animation.
+     *
+     * @return {@code true} if the animation is expired, {@code false} otherwise.
+     */
+    public boolean isExpired() {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS);</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if ( !(o instanceof LifeSpan) ) return false;</span>
+<span class="nc" id="L109">        LifeSpan lifeSpan = (LifeSpan) o;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        return _startTime == lifeSpan._startTime &amp;&amp;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">               Objects.equals(_lifeTime, lifeSpan._lifeTime);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L116">        return Objects.hash(_lifeTime, _startTime);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L121">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+                    &quot;startTime=&quot; + _startTime + &quot;, &quot; +
+                    &quot;lifeTime=&quot;  + _lifeTime  +
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
