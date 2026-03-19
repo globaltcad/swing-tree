@@ -523,12 +523,12 @@ public final class StyleConf
         if ( !hasStyledText )
             return this;
         // We look for text configs with non-empty contents and compute the preferred height from those:
-        final ComponentConf currentComponentConf = ComponentExtension.from(owner).getConf();
+        final ComponentConf previousComponentConf = ComponentExtension.from(owner).getConf();
         final Pair<BoxModelConf, ComponentConf> boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(
                 Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
                 this,
                 StyleInstaller._formerBorderMarginCorrection(owner),
-                currentComponentConf
+                previousComponentConf
         );
         OptionalDouble preferredHeight = _layers.computePreferredHeightFromTextConfigs(owner, boxAndCompConf.first());
         if ( preferredHeight.isPresent() )

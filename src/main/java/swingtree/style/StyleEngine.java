@@ -87,18 +87,18 @@ final class StyleEngine
     }
 
     static sprouts.Pair<BoxModelConf, ComponentConf> _calculateBoxModelAndComponentConfs(
-            final Bounds      newBounds,
-            final StyleConf   newStyle,
-            final Outline     marginCorrection,
-            final ComponentConf currentConf
+            final Bounds        newBounds,
+            final StyleConf     newStyle,
+            final Outline       marginCorrection,
+            final ComponentConf previousConf
     ) {
-        final boolean sameStyle      = currentConf.style().equals(newStyle);
-        final boolean sameBounds     = currentConf.currentBounds().equals(newBounds);
-        final boolean sameCorrection = currentConf.areaMarginCorrection().equals(marginCorrection);
+        final boolean sameStyle      = previousConf.style().equals(newStyle);
+        final boolean sameBounds     = previousConf.currentBounds().equals(newBounds);
+        final boolean sameCorrection = previousConf.areaMarginCorrection().equals(marginCorrection);
 
         ComponentConf newConf;
         if ( sameStyle && sameBounds && sameCorrection )
-            newConf = currentConf;
+            newConf = previousConf;
         else
             newConf = new ComponentConf(newStyle, newBounds, marginCorrection);
 
