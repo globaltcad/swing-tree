@@ -208,7 +208,7 @@ final class StyleConfLayers
                     .mapToDouble( textConf -> {
                         final BoxModelConf boxModel = ComponentExtension.from(owner).getBoxModelConf();
                         final BoxModelConf predictedBoxModel = boxModel.withSize(Size.of(owner.getWidth(), owner.getHeight()));
-                        final Outline insets = boxModel.insetsFor(textConf.placementBoundary());
+                        final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());
                             if ( textConf.content().isEmpty() ) {
                                 double totalHeight = 0;
                                 totalHeight += insets.top().orElse(0f);
