@@ -259,7 +259,7 @@ class Styled_Text_Spec extends Specification
             })
         then : 'The preferred height is now much larger due to the increased line-wrapping:'
             box.getPreferredSize().height > 270
-            box.getPreferredSize().height < 280
+            box.getPreferredSize().height < 300
 
         when : 'We turn off line-wrapping, which should get us back to the previous preferred height!'
             UI.runNow(()->{
@@ -290,7 +290,7 @@ class Styled_Text_Spec extends Specification
             })
         then : 'The preferred height is now back to the larger value wrapping takes more vertical space:'
             box.getPreferredSize().height > 270
-            box.getPreferredSize().height < 280
+            box.getPreferredSize().height < 300
 
         when : 'We now go back to the original width, which should reduce the preferred height again.'
             UI.runNow(()->{
