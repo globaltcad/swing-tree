@@ -318,7 +318,6 @@ class Styled_Text_Spec extends Specification
                 var dummyBuffer = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
                 box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
             })
-        println ComponentExtension.from(box).getStyle().toString()
         then : 'The preferred height is now much smaller since there is much less content to render:'
             box.getPreferredSize().height > 50
             box.getPreferredSize().height < 60
