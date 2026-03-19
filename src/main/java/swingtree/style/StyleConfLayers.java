@@ -221,14 +221,14 @@ final class StyleConfLayers
                                 return -1;
                             final boolean wrapLines = textConf.wrapLines();
                             Font font = Optional.ofNullable(owner.getFont()).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
-                            font = textConf.fontConf().createDerivedFrom(font, boxModel).orElse(font);
+                            font = textConf.fontConf().createDerivedFrom(font, predictedBoxModel).orElse(font);
                             BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
                             final Graphics2D g2d = img.createGraphics();
                             try {
                                 final FontRenderContext frc = g2d.getFontRenderContext();
                                 final Pair<Float, List<@Nullable TextLayout>> layoutResult =
                                         StyleRenderer._buildTextLayoutsAndPreferredHeight(
-                                                font, frc, textConf.content(), availableWidth, wrapLines, boxModel
+                                                font, frc, textConf.content(), availableWidth, wrapLines, predictedBoxModel
                                         );
                                 double totalHeight = layoutResult.first().doubleValue();
                                 totalHeight += textBounds.location().y();
