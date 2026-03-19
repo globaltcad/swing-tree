@@ -10,6 +10,7 @@ import swingtree.api.Configurator;
 import swingtree.api.Styler;
 
 import java.awt.Font;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -46,8 +47,14 @@ import java.util.Objects;
  *      <li><b>Content</b>
  *          You can set this property through {@link TextConf#content(String)}.
  *          This is the actual text content that should be rendered onto the component.
- *          It's default value is an empty string, in which case this
- *          configuration object will not have any effect.
+ *          For richer text display with multiple styles for different parts of the text,
+ *          you can also pass a sequence of {@link StyledString}s to define the text content.
+ *          Each {@link StyledString} can have its own font properties which will be resolved
+ *          using the {@link FontConf} of this {@link TextConf} to be derived from.<br>
+ *          See {@link TextConf#content(StyledString...)} and {@link TextConf#content(Tuple)} for more details
+ *          on how to configure the content with multiple styled strings.<br>
+ *          The default content is an empty {@link Tuple} of {@link StyledString}s
+ *          in which the text configuration is effectively disabled!
  *      </li>
  *      <li><b>Font</b>
  *          The {@link FontConf} object is its own rich configuration object
@@ -91,13 +98,23 @@ import java.util.Objects;
  *          properties as a first choice.
  *      </li>
  *      <li><b>Wrap Lines</b>
- *          This property defines whether the text should be wrapped into multiple lines
+ *          This is a boolean property, and it defines whether the text should be wrapped into multiple lines
  *          if the text content exceeds the width of the available space inside the component. <br>
  *          You can configure it through {@link TextConf#wrapLines(boolean)}.<br>
  *          The default value is {@code true}, which means that the text will wrap into multiple
  *          lines if it exceeds the width of the available space inside the component. <br>
  *          If set to {@code false}, the text will be rendered in a single line
  *          and may overflow the component if the text content is too long.
+ *      </li>
+ *      <li><b>Auto Preferred Height</b>
+ *          Is a boolean property which configures whether the preferred height of the styled component should be computed
+ *          from the text you render onto it through this {@link TextConf} and then set as the preferred height of the component. <br>
+ *          This will effectively turn the preferred height of the component to a function of the component's
+ *          width and the displayed text.<br>
+ *          <b>It will also take full ownership of the preferred height of the component,
+ *          which means that a preferred height specified elsewhere in the style configuration
+ *          of the component will be ignored.</b><br>
+ *          You can configure it through {@link TextConf#autoPreferredHeight(boolean)}.<br>
  *      </li>
  *  </ul>
  *  Use {@link TextConf#none()} to access the <i>null object</i> of the {@link TextConf} type.
@@ -117,7 +134,8 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
                                                 UI.Placement.UNDEFINED,
                                                 Offset.none(),
-                                                true
+                                                true,
+                                                false
                                             );
 
     static final TextConf none() {
@@ -131,6 +149,7 @@ public final class TextConf implements Simplifiable<TextConf>
     private final UI.Placement         _placement;
     private final Offset               _offset;
     private final boolean              _wrapLines;
+    private final boolean              _autoPreferredHeight;
 
     private TextConf(
         Tuple<StyledString>  content,
@@ -139,16 +158,18 @@ public final class TextConf implements Simplifiable<TextConf>
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
         Offset               offset,
-        boolean              wrapLines
+        boolean              wrapLines,
+        boolean              autoPreferredHeight
     )
     {
-        _content            = Objects.requireNonNull(content);
-        _fontConf           = Objects.requireNonNull(fontConf);
-        _clipArea           = Objects.requireNonNull(clipArea);
-        _placementBoundary  = Objects.requireNonNull(placementBoundary);
-        _placement          = Objects.requireNonNull(placement);
-        _offset             = Objects.requireNonNull(offset);
-        _wrapLines          = wrapLines;
+        _content             = Objects.requireNonNull(content);
+        _fontConf            = Objects.requireNonNull(fontConf);
+        _clipArea            = Objects.requireNonNull(clipArea);
+        _placementBoundary   = Objects.requireNonNull(placementBoundary);
+        _placement           = Objects.requireNonNull(placement);
+        _offset              = Objects.requireNonNull(offset);
+        _wrapLines           = wrapLines;
+        _autoPreferredHeight = autoPreferredHeight;
     }
 
     private static TextConf of(
@@ -158,9 +179,9 @@ public final class TextConf implements Simplifiable<TextConf>
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
         Offset               offset,
-        boolean              wrapLines
-    )
-    {
+        boolean              wrapLines,
+        boolean              autoPreferredHeight
+    ) {
         if (
             content.isEmpty() &&
             fontConf.equals(_NONE._fontConf) &&
@@ -168,11 +189,12 @@ public final class TextConf implements Simplifiable<TextConf>
             placementBoundary.equals(_NONE._placementBoundary) &&
             placement.equals(_NONE._placement) &&
             offset.equals(_NONE._offset) &&
-            wrapLines == _NONE._wrapLines
+            wrapLines == _NONE._wrapLines &&
+            autoPreferredHeight == _NONE._autoPreferredHeight
         ) {
             return _NONE;
         }
-        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines);
+        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight);
     }
 
     Tuple<StyledString> content() {
@@ -203,6 +225,10 @@ public final class TextConf implements Simplifiable<TextConf>
         return _wrapLines;
     }
 
+    boolean autoPreferredHeight() {
+        return _autoPreferredHeight;
+    }
+
     /**
      * Returns a new {@link TextConf} object with the given text content.
      * @param textString The text content to be rendered onto the component.
@@ -212,22 +238,58 @@ public final class TextConf implements Simplifiable<TextConf>
         Objects.requireNonNull(textString);
         if ( textString.isEmpty() )
             return content(Tuple.of(StyledString.class));
-        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
+    /**
+     * Configures this {@link TextConf} object to render the supplied sequence
+     * of {@link StyledString}s as the text content onto the component.<br>
+     * Each {@link StyledString} in the sequence can have its own font properties.
+     * This allows you to render visually rich and expressive text.
+     * @param styledStrings A vararg sequence of {@link StyledString}s which should be
+     *                      rendered as the text content onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     * @throws NullPointerException if the supplied styledStrings is null.
+     */
     public TextConf content( StyledString... styledStrings ) {
-        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        Objects.requireNonNull(styledStrings);
+        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
+    /**
+     * Configures this {@link TextConf} object to render the supplied {@link Tuple}
+     * of {@link StyledString}s as the text content onto the component.
+     * Each {@link StyledString} in the sequence can have its own font properties.
+     * This allows you to render visually rich and expressive text.
+     * @param styledStrings A {@link Tuple} of {@link StyledString}s which should be
+     *                      rendered as the text content onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     * @throws NullPointerException if the supplied styledStrings is null.
+     */
     public TextConf content( Tuple<StyledString> styledStrings ) {
         if ( _content.equals(styledStrings) ) {
             return this;
         }
-        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+    }
+
+    /**
+     * Configures this {@link TextConf} object to render the supplied collection
+     * of {@link StyledString}s as the text content onto the component.<br>
+     * Each {@link StyledString} in the sequence can have its own font properties.
+     * This allows you to render visually rich and expressive text.
+     * @param styledStrings A collection of {@link StyledString}s which should be
+     *                      rendered as the text content onto the component.
+     * @return A new {@link TextConf} object with the given text content.
+     * @throws NullPointerException if the supplied styledStrings is null.
+     */
+    public TextConf content( Collection<StyledString> styledStrings ) {
+        Objects.requireNonNull(styledStrings);
+        return content(Tuple.of(StyledString.class, styledStrings));
     }
 
     private TextConf _fontConf(FontConf fontConf) {
-        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
     /**
@@ -265,7 +327,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given clip area.
      */
     public TextConf clipTo( UI.ComponentArea clipArea ) {
-        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
     /**
@@ -299,7 +361,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given placement boundary.
      */
     public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
-        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines);
+        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
     /**
@@ -325,7 +387,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the desired placement.
      */
     public TextConf placement(UI.Placement placement) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
     /**
@@ -340,7 +402,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight);
     }
 
     /**
@@ -367,12 +429,32 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given wrap lines property.
      */
     public TextConf wrapLines(boolean wrapLines) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight);
+    }
+
+    /**
+     * Configures whether the preferred height of the styled component should be computed
+     * from the text you render onto it through this {@link TextConf} and then set as the preferred height of the component. <br>
+     * This will effectively turn the preferred height of the component to a function of the component's
+     * width and the displayed text.<br>
+     * <b>It will also take full ownership of the preferred height of the component,
+     * which means that a preferred height specified elsewhere in the style configuration
+     * of the component will be ignored.</b><br>
+     *
+     * @param autoPreferredHeight If true, then the style engine will compute and set a preferred height
+     *                            for the styled component which is based on the text layout produced by this text configuration.
+     * @return A new text configuration with the desired auto height behavior.
+     */
+    public TextConf autoPreferredHeight(boolean autoPreferredHeight) {
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight);
     }
 
     @Override
     public TextConf simplified() {
-        if ( _content.isEmpty() )
+        // Note: When "autoPreferredHeight" is enabled we must not simplify entirely to _NONE,
+        //       because this configuration still participates in preferred height computation
+        //       for the component, even when the content is empty (the resulting height may be 0).
+        if ( _content.isEmpty() && !_autoPreferredHeight )
             return _NONE;
         Tuple<StyledString> simplifiedContent = _content.removeIf( it -> it.string().isEmpty() )
                                                         .map( it -> it.resolveUsing(_fontConf))
@@ -381,7 +463,7 @@ public final class TextConf implements Simplifiable<TextConf>
                                                                 .map( fontConf -> fontConf.size() == 0 )
                                                                 .orElse( false )
                                                             );
-        if ( simplifiedContent.isEmpty() )
+        if ( simplifiedContent.isEmpty() && !_autoPreferredHeight )
              return _NONE;
         return content(simplifiedContent);
     }
@@ -399,7 +481,8 @@ public final class TextConf implements Simplifiable<TextConf>
             _placementBoundary,
             _placement,
             _offset.scale(scale),
-            _wrapLines
+            _wrapLines,
+            _autoPreferredHeight
         );
     }
 
@@ -419,12 +502,13 @@ public final class TextConf implements Simplifiable<TextConf>
             _placementBoundary.equals(other._placementBoundary) &&
             _placement.equals(other._placement) &&
             _offset.equals(other._offset) &&
-            _wrapLines == other._wrapLines;
+            _wrapLines == other._wrapLines &&
+            _autoPreferredHeight == other._autoPreferredHeight;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines);
+        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
     }
 
     @Override
@@ -438,7 +522,8 @@ public final class TextConf implements Simplifiable<TextConf>
             "placementBoundary=" + _placementBoundary + ", " +
             "placement=" + _placement + ", " +
             "offset=" + _offset + ", " +
-            "wrapLines=" + _wrapLines +
+            "wrapLines=" + _wrapLines + ", " +
+            "autoPreferredHeight=" + _autoPreferredHeight +
         "]";
     }
 

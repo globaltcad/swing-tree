@@ -3,11 +3,23 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import sprouts.Pair;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
+import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
+import javax.swing.JComponent;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.BiPredicate;
 
 @Immutable
@@ -181,6 +193,62 @@ final class StyleConfLayers
             return this;
 
         return of(filter, background, content, border, foreground, any);
+    }
+
+    OptionalDouble computePreferredHeightFromTextConfigs( JComponent owner ) {
+        // We look for text configs with non-empty content and compute the preferred size from those:
+        Double maxHeight = null;
+        for ( UI.Layer layer : UI.Layer.values() ) {
+            StyleConfLayer styleConfLayer = get(layer);
+            double localMax =
+                    styleConfLayer
+                    .texts()
+                    .stylesStream()
+                    .filter(TextConf::autoPreferredHeight)
+                    .mapToDouble( textConf -> {
+                        final BoxModelConf boxModel = ComponentExtension.from(owner).getBoxModelConf();
+                        final BoxModelConf predictedBoxModel = boxModel.withSize(Size.of(owner.getWidth(), owner.getHeight()));
+                        final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());
+                            if ( textConf.content().isEmpty() ) {
+                                double totalHeight = 0;
+                                totalHeight += insets.top().orElse(0f);
+                                totalHeight += insets.bottom().orElse(0f);
+                                return totalHeight;
+                            }
+                            final Bounds textBounds = StyleRenderer._computeTextBounds(textConf, predictedBoxModel);
+                            final float availableWidth = textBounds.size().width().orElse(0f);
+                            if ( availableWidth <= 0 )
+                                return -1;
+                            final boolean wrapLines = textConf.wrapLines();
+                            Font font = Optional.ofNullable(owner.getFont()).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
+                            font = textConf.fontConf().createDerivedFrom(font, predictedBoxModel).orElse(font);
+                            BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+                            final Graphics2D g2d = img.createGraphics();
+                            try {
+                                final FontRenderContext frc = g2d.getFontRenderContext();
+                                final Pair<Float, List<@Nullable TextLayout>> layoutResult =
+                                        StyleRenderer._buildTextLayoutsAndPreferredHeight(
+                                                font, frc, textConf.content(), availableWidth, wrapLines, predictedBoxModel
+                                        );
+                                double totalHeight = layoutResult.first().doubleValue();
+                                totalHeight += textBounds.location().y();
+                                totalHeight += insets.bottom().orElse(0f);
+                                return totalHeight;
+                            }
+                            finally {
+                                g2d.dispose();
+                            }
+                        })
+                    .max()
+                    .orElse(-1);
+
+            if ( localMax >= 0 && ( maxHeight == null || localMax > maxHeight ) )
+                maxHeight = localMax;
+        }
+        if ( maxHeight == null )
+            return OptionalDouble.empty();
+        else
+            return OptionalDouble.of(Math.round(maxHeight));
     }
 
     @Override

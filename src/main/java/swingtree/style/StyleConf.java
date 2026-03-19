@@ -8,6 +8,7 @@ import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
 
+import javax.swing.JComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -513,6 +514,15 @@ public final class StyleConf
 
     StyleConf correctedForRounding() {
         return _withBorder(_border.correctedForRounding());
+    }
+
+    StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
+        // We look for text configs with non-empty contents and compute the preferred height from those:
+        OptionalDouble preferredHeight = _layers.computePreferredHeightFromTextConfigs(owner);
+        if ( preferredHeight.isPresent() )
+            return _withDimensionality(_dimensionality._withPreferredHeight(preferredHeight.getAsDouble()));
+        else
+            return this;
     }
 
     boolean hasEqualLayoutAs( StyleConf otherStyle ) {

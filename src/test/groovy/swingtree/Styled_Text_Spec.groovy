@@ -12,6 +12,7 @@ import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.*
+import java.awt.image.BufferedImage
 
 @Title("The Text Style API")
 @Narrative('''
@@ -149,7 +150,8 @@ class Styled_Text_Spec extends Specification
                         "placementBoundary=INTERIOR_TO_CONTENT, " +
                         "placement=TOP_LEFT, " +
                         "offset=Offset[x=0, y=0], " +
-                        "wrapLines=true" +
+                        "wrapLines=true, " +
+                        "autoPreferredHeight=false" +
                     "]")
     }
 
@@ -192,5 +194,172 @@ class Styled_Text_Spec extends Specification
                     "], " +
                     "properties=[]" +
                 "]"
+    }
+
+    def 'The styled text of a component can affect its preferred if desired.'(
+        UI.Placement placement
+    ) {
+        reportInfo """
+            An important requirement when displaying text on a GUI component
+            is for it to be resized within a layout accordingly.
+            Resizing of components dynamically to fit content happens through
+            the 'preferred size', which the layout manager uses to make a
+            fair and balanced layout.
+            
+            When you configure styled text through the SwingTree style API,
+            then you can use the "autoPreferredHeight" property to tell
+            SwingTree to automatically compute and set the preferred height
+            of a component based on the current width of the component and
+            the styled text it displays.
+        """
+        given : 'First, we initialize SwingTree with a default UI scale of 1.0 to ensure consistent font size calculations:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it) // Loads default fonts!
+            })
+        and : 'We create variables for the "autoPreferredHeight", "wrapLines" and some styled string snippets:'
+            var autoPrefHeight = true
+            var wrapLines = true
+            var fontSizeMultiplier = 1
+            var string1 = StyledString.of(f -> f.size(18 * fontSizeMultiplier), "Hello world! ")
+            var string2 = StyledString.of("\n")
+            var string3 = StyledString.of(f -> f.size(12 * fontSizeMultiplier), "This is a test of the autoPreferredHeight property.")
+        and : 'A tuple that contains the styled string snippets:'
+            var content = Tuple.of(string1, string2, string3)
+        and : 'Finally we create a box with the styled text and the `autoPreferredHeight` property:'
+            var box = UI.box()
+                        .withStyle(conf -> conf
+                            .text(t -> t
+                                .font( f -> f.family("Ubuntu") )
+                                .content(content)
+                                .autoPreferredHeight(autoPrefHeight)
+                                .wrapLines(wrapLines)
+                                .placement(placement)
+                            )
+                        )
+                        .get(JBox)
+
+        expect : 'Initially, the preferred height cannot be known, since the component does not have a width yet:'
+            box.getSize() == new java.awt.Dimension(0,0)
+            box.getPreferredSize().height == 0
+        when : 'We set the width of the box to a fixed value and then simulate a paint event.'
+            UI.runNow(()->{
+                box.setSize(350, 0)  // set an arbitrary height
+                var dummyBuffer = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now computed based on the styled text content and the width:'
+            box.getPreferredSize().height > 30
+            box.getPreferredSize().height < 40
+
+        when : 'We now make the width much much smaller to trigger more line-wrapping and therefore a larger preferred height.'
+            UI.runNow(()->{
+                box.setSize(25, 0)  // set an arbitrary height
+                var dummyBuffer = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now much larger due to the increased line-wrapping:'
+            box.getPreferredSize().height > 270
+            box.getPreferredSize().height < 300
+
+        when : 'We turn off line-wrapping, which should get us back to the previous preferred height!'
+            UI.runNow(()->{
+                wrapLines = false
+                var dummyBuffer = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now back to the original value since line-wrapping is turned off:'
+            box.getPreferredSize().height > 30
+            box.getPreferredSize().height < 40
+
+        when : 'We now turn line-wrapping on again but at the same time turn off the `autoPreferredHeight`.'
+            UI.runNow(()->{
+                wrapLines = true
+                autoPrefHeight = false
+                var dummyBuffer = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is still at the original value since `autoPreferredHeight` is turned off:'
+            box.getPreferredSize().height > 30
+            box.getPreferredSize().height < 40
+
+        when : 'We turn `autoPreferredHeight` back on...'
+            UI.runNow(()->{
+                autoPrefHeight = true
+                var dummyBuffer = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now back to the larger value wrapping takes more vertical space:'
+            box.getPreferredSize().height > 270
+            box.getPreferredSize().height < 300
+
+        when : 'We now go back to the original width, which should reduce the preferred height again.'
+            UI.runNow(()->{
+                box.setSize(350, 0)  // set an arbitrary height
+                var dummyBuffer = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now back to the original value since the width allows for less line-wrapping:'
+            box.getPreferredSize().height > 30
+            box.getPreferredSize().height < 40
+
+        when : 'Finally, we change the font size multiplier to make the text larger, which should also increase the preferred height.'
+            UI.runNow(()->{
+                fontSizeMultiplier = 2
+                var dummyBuffer = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now much larger due to the increased font size:'
+            box.getPreferredSize().height > 90
+            box.getPreferredSize().height < 100
+
+        when : 'We now reduce the content to only contain the last string...'
+            UI.runNow(()->{
+                content = Tuple.of(string3)  // only the last string remains
+                var dummyBuffer = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now much smaller since there is much less content to render:'
+            box.getPreferredSize().height > 50
+            box.getPreferredSize().height < 60
+        and : 'We verify that the string representation of the style conf is as expected:'
+            ComponentExtension.from(box).getStyle().toString().contains("DimensionalityConf[minWidth=?, minHeight=?, maxWidth=?, maxHeight=?, preferredWidth=?, preferredHeight=${box.getPreferredSize().height as int}, width=?, height=?]")
+            ComponentExtension.from(box).getStyle().toString().contains(
+                    "texts=TextConf[" +
+                            "content=Tuple<StyledString>[" +
+                                "StyledString[string='This is a test of the autoPreferredHeight property.', style=FontConf[family=Ubuntu, size=24, posture=?, weight=?, spacing=0.0, underlined=?, strikeThrough=?, selectionColor=?, transform=?, paint=FontPaintConf[NONE], backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?]]" +
+                            "], " +
+                            "fontConf=FontConf[" +
+                                "family=Ubuntu, size=?, posture=?, weight=?, spacing=0.0, underlined=?, " +
+                                "strikeThrough=?, selectionColor=?, transform=?, paint=FontPaintConf[NONE], " +
+                                "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
+                            "], " +
+                            "clipArea=INTERIOR, placementBoundary=INTERIOR_TO_CONTENT, placement=${placement}, " +
+                            "offset=Offset[x=0, y=0], wrapLines=true, autoPreferredHeight=true" +
+                        "]"
+            )
+
+        when : 'We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.'
+            UI.runNow(()->{
+                content = Tuple.of(StyledString.class)  // empty tuple
+                var dummyBuffer = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(dummyBuffer.createGraphics())  // trigger the paint event to compute the preferred height
+            })
+        then : 'The preferred height is now back to 0 since there is no content to render:'
+            box.getPreferredSize().height == 0
+
+        where : 'We use different placements, these should not affect the preferred height since the text content and wrapping is the same:'
+            placement << [
+                    UI.Placement.TOP_LEFT,
+                    UI.Placement.TOP,
+                    UI.Placement.TOP_RIGHT,
+                    UI.Placement.LEFT,
+                    UI.Placement.CENTER,
+                    UI.Placement.RIGHT,
+                    UI.Placement.BOTTOM_LEFT,
+                    UI.Placement.BOTTOM,
+                    UI.Placement.BOTTOM_RIGHT,
+                    UI.Placement.UNDEFINED
+            ]
     }
 }
