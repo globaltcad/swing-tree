@@ -8,7 +8,6 @@ import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.layout.Bounds;
-import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import java.awt.Font;
@@ -26,6 +25,7 @@ import java.util.function.BiPredicate;
 final class StyleConfLayers
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleConfLayers.class);
+    private static final UI.Layer[] ALL_LAYERS = UI.Layer.values();
 
     private static final StyleConfLayers _EMPTY = new StyleConfLayers(
                                                     FilterConf.none(),
@@ -198,12 +198,13 @@ final class StyleConfLayers
     OptionalDouble computePreferredHeightFromTextConfigs( JComponent owner, BoxModelConf predictedBoxModel ) {
         // We look for text configs with non-empty content and compute the preferred size from those:
         Double maxHeight = null;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             StyleConfLayer styleConfLayer = get(layer);
             double localMax =
                     styleConfLayer
                     .texts()
-                    .stylesStream()
+                    .namedStylesStream()
+                    .map(NamedConf::style)
                     .filter(TextConf::autoPreferredHeight)
                     .mapToDouble( textConf -> {
                         final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());

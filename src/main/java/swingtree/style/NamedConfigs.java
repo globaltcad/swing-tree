@@ -57,13 +57,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
     public int size() { return _styles.length; }
 
-    public List<NamedConf<S>> namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
-
-    public Stream<S> stylesStream() {
-        return namedStyles()
-                .stream()
-                .map(NamedConf::style);
-    }
+    public Stream<NamedConf<S>> namedStylesStream() { return Arrays.stream(_styles); }
 
     public NamedConfigs<S> withNamedStyle(String name, S style ) {
         Objects.requireNonNull(name);
@@ -155,9 +149,13 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
     }
 
     public List<S> sortedByNames() {
+        if ( _styles.length == 0 )
+            return Collections.emptyList();
+        if ( _styles.length == 1 ) {
+            return Collections.singletonList(_styles[0].style());
+        }
         return Collections.unmodifiableList(
-                    namedStyles()
-                    .stream()
+                    namedStylesStream()
                     .sorted(Comparator.comparing(NamedConf::name))
                     .map(NamedConf::style)
                     .collect(Collectors.toList())
@@ -172,7 +170,10 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
      * @return True if at least one of the named styles in this instance passes the test.
      */
     public boolean any( Predicate<NamedConf<S>> namedStyleTester ) {
-        return Arrays.stream(_styles).anyMatch(namedStyleTester);
+        for ( NamedConf<S> style : _styles )
+            if ( namedStyleTester.test(style) )
+                return true;
+        return false;
     }
 
     public String toString( String defaultName, String styleType ) {
@@ -183,8 +184,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         if ( this.size() == 1 )
             return stringOf(this.get(defaultName));
         else
-            return this.namedStyles()
-                    .stream()
+            return this.namedStylesStream()
                     .map(e -> e.name() + "=" + stringOf(e.style()))
                     .collect(Collectors.joining(", ", styleType+"[", "]"));
     }

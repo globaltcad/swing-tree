@@ -19,9 +19,9 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  *  This contains all the logic needed for installing the SwingTree style
@@ -273,17 +273,17 @@ final class StyleInstaller<C extends JComponent>
         if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
             _initialContentAreaFilled = initialIsContentAreaFilled;
 
-        final List<UI.ComponentArea> opaqueGradAreas = newStyle.noiseAndGradientCoveredAreas();
-        final boolean hasBackgroundGradients         = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundNoise             = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundPainters          = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundImages            = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundShadows           = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
-        final boolean hasBorderRadius                = newStyle.border().hasAnyNonZeroArcs();
-        final boolean hasBackground                  = newStyle.base().backgroundColor().isPresent();
-        final boolean hasMargin                      = newStyle.margin().isPositive();
-        final boolean hasOpaqueBorder                = newStyle.border().colors().isFullyOpaque();
-        final boolean isNaturallyTransparent         = ( _initialIsOpaque == false ); // We categorize based on the initial state of the flag.
+        final Predicate<UI.ComponentArea> hasGradOrNoise = newStyle::hasOpaqueGradientsOrNoisesOn;
+        final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundNoise                 = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundPainters              = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundImages                = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundShadows               = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
+        final boolean hasBorderRadius                    = newStyle.border().hasAnyNonZeroArcs();
+        final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
+        final boolean hasMargin                          = newStyle.margin().isPositive();
+        final boolean hasOpaqueBorder                    = newStyle.border().colors().isFullyOpaque();
+        final boolean isNaturallyTransparent             = ( _initialIsOpaque == false ); // We categorize based on the initial state of the flag.
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret the tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background
@@ -340,25 +340,25 @@ final class StyleInstaller<C extends JComponent>
         if ( _isTransparentConstant(owner.getBackground()) )
             canBeOpaque = false;
 
-        if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
+        if ( !hasGradOrNoise.test(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
             boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _outSideBackgroundColor).map(java.awt.Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
-            if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
+            if ( !hasOpaqueFoundation && !hasGradOrNoise.test(UI.ComponentArea.EXTERIOR) ) {
                 if ( hasBorderRadius )
                     canBeOpaque = false;
                 else if ( hasMargin )
                     canBeOpaque = false;
             }
 
-            if ( hasBorder && (!hasOpaqueBorder && !opaqueGradAreas.contains(UI.ComponentArea.BORDER)) )
+            if ( hasBorder && (!hasOpaqueBorder && !hasGradOrNoise.test(UI.ComponentArea.BORDER)) )
                 canBeOpaque = false;
 
             if (
                 !hasOpaqueBackground &&
-                !opaqueGradAreas.contains(UI.ComponentArea.INTERIOR) &&
-                !opaqueGradAreas.contains(UI.ComponentArea.BODY)
+                !hasGradOrNoise.test(UI.ComponentArea.INTERIOR) &&
+                !hasGradOrNoise.test(UI.ComponentArea.BODY)
             )
                 canBeOpaque = false;
         }

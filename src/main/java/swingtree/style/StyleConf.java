@@ -56,6 +56,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings("ReferenceEquality")
 public final class StyleConf
 {
+    private static final UI.Layer[] ALL_LAYERS = UI.Layer.values();
+
     private static final StyleConf _NONE = new StyleConf(
                                             LayoutConf.none(),
                                             BorderConf.none(),
@@ -185,8 +187,7 @@ public final class StyleConf
         return Collections.unmodifiableList(
                         _layers.get(layer)
                         .shadows()
-                        .namedStyles()
-                        .stream()
+                        .namedStylesStream()
                         .sorted(Comparator.comparing(NamedConf::name))
                         .map(NamedConf::style)
                         .collect(Collectors.toList())
@@ -200,8 +201,10 @@ public final class StyleConf
     boolean hasVisibleShadows(UI.Layer layer) {
         return _layers.get(layer)
                 .shadows()
-                .stylesStream()
-                .anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
+                .any( named -> {
+                    ShadowConf s = named.style();
+                    return s.color().isPresent() && s.color().get().getAlpha() > 0;
+                });
     }
 
     public FontConf font() { return _font; }
@@ -232,21 +235,23 @@ public final class StyleConf
         return _withPainters(layer, newPainters);
     }
 
-    boolean hasPaintersOnLayer(UI.Layer layer ) {
-        return _layers.get(layer).painters().stylesStream().anyMatch(p -> !Painter.none().equals(p.painter()));
+    boolean hasPaintersOnLayer( UI.Layer layer ) {
+        return _layers.get(layer)
+                .painters()
+                .any( named -> !Painter.none().equals(named.style().painter()) );
     }
 
-    boolean hasImagesOnLayer(UI.Layer layer ) {
-        return _layers.get(layer).images().stylesStream().anyMatch(i -> i.image().isPresent() || i.primer().isPresent());
-    }
-
-    List<GradientConf> gradients( UI.Layer layer ) {
-        return _layers.get(layer).gradients().sortedByNames();
+    boolean hasImagesOnLayer( UI.Layer layer ) {
+        return _layers.get(layer).images()
+                .any( named -> {
+                    ImageConf i = named.style();
+                    return i.image().isPresent() || i.primer().isPresent();
+                });
     }
 
     boolean hasCustomGradients() {
         boolean hasCustomGradients = false;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( hasCustomGradients(layer) ) {
                 hasCustomGradients = true;
                 break;
@@ -261,59 +266,40 @@ public final class StyleConf
     }
 
     boolean hasVisibleGradientsOnLayer( UI.Layer layer ) {
-        List<GradientConf> gradients = gradients(layer);
-        if ( gradients.isEmpty() ) return false;
-        return gradients.stream().anyMatch( s -> s.colors().length > 0 );
-    }
-
-    List<NoiseConf> noises( UI.Layer layer ) {
-        return _layers.get(layer).noises().sortedByNames().stream().map(Pooled::get).collect(Collectors.toList());
+        return _layers.get(layer)
+                .gradients()
+                .any( named -> {
+                    GradientConf g = named.style();
+                    return g.colors().length > 0;
+                });
     }
 
     boolean hasVisibleNoisesOnLayer( UI.Layer layer ) {
-        List<NoiseConf> noises = noises(layer);
-        if ( noises.isEmpty() ) return false;
-        return noises.stream().anyMatch( s -> !s.equals(NoiseConf.none()) );
+        return _layers.get(layer)
+                .noises()
+                .any( named -> {
+                    NoiseConf n = named.style().get();
+                    return !n.equals(NoiseConf.none());
+                });
     }
 
-    List<UI.ComponentArea> gradientCoveredAreas() {
-        return gradientCoveredAreas(UI.Layer.values());
-    }
-
-    List<UI.ComponentArea> gradientCoveredAreas( UI.Layer... layers ) {
-        return Arrays.stream(layers)
-                .map(_layers::get)
-                .map(StyleConfLayer::gradients)
-                .flatMap( g -> g
-                    .stylesStream()
-                    .map( grad -> grad.isOpaque() ? grad.area() : null )
-                    .filter(Objects::nonNull)
-                )
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
-    List<UI.ComponentArea> noiseCoveredAreas() {
-        return noiseCoveredAreas(UI.Layer.values());
-    }
-
-    List<UI.ComponentArea> noiseCoveredAreas( UI.Layer... layers ) {
-        return Arrays.stream(layers)
-                .map(_layers::get)
-                .map(StyleConfLayer::noises)
-                .flatMap( n -> n
-                    .stylesStream()
-                    .map( noise -> noise.get().isOpaque() ? noise.get().area() : null )
-                    .filter(Objects::nonNull)
-                )
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
-    List<UI.ComponentArea> noiseAndGradientCoveredAreas() {
-        List<UI.ComponentArea> areas = new ArrayList<>(gradientCoveredAreas());
-        areas.addAll(noiseCoveredAreas());
-        return areas;
+    boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
+            StyleConfLayer layerConf = _layers.get(layer);
+            boolean hasOpaqueGradient = layerConf.gradients().any( named -> {
+                GradientConf g = named.style();
+                return g.isOpaque() && g.area() == area;
+            } );
+            if ( hasOpaqueGradient )
+                return true;
+            boolean hasOpaqueNoise = layerConf.noises().any( named -> {
+                NoiseConf n = named.style().get();
+                return n.isOpaque() && n.area() == area;
+            } );
+            if ( hasOpaqueNoise )
+                return true;
+        }
+        return false;
     }
 
     public StyleConf foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
@@ -413,8 +399,7 @@ public final class StyleConf
     }
 
     List<NamedConf<String>> properties() {
-        return _properties.namedStyles()
-                            .stream()
+        return _properties.namedStylesStream()
                             .sorted(Comparator.comparing(NamedConf::name))
                             .collect(Collectors.toList());
     }
@@ -568,7 +553,7 @@ public final class StyleConf
 
     boolean hasEqualShadowsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualShadowsAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -589,7 +574,7 @@ public final class StyleConf
 
     boolean hasEqualPaintersAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualPaintersAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -610,7 +595,7 @@ public final class StyleConf
 
     boolean hasEqualGradientsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualGradientsAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -631,7 +616,7 @@ public final class StyleConf
 
     boolean hasEqualNoisesAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualNoisesAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -652,7 +637,7 @@ public final class StyleConf
 
     boolean hasEqualImagesAs(StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualImagesAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -673,7 +658,7 @@ public final class StyleConf
 
     boolean hasEqualTextsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualTextsAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;

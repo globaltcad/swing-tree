@@ -19,7 +19,8 @@ import java.util.function.Consumer;
  */
 final class StyleEngine
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
+    private static final Logger    log        = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
+    private static final UI.Layer[] ALL_LAYERS = UI.Layer.values();
 
     static StyleEngine create() {
         return new StyleEngine(new Pooled<>(BoxModelConf.none()), new Pooled<>(ComponentConf.none()), null);
@@ -42,9 +43,9 @@ final class StyleEngine
         _boxModelConf  = Objects.requireNonNull(boxModelConf).intern();
         _componentConf = Objects.requireNonNull(componentConf).intern();
         if ( layerCaches == null ) {
-            layerCaches = new LayerCache[UI.Layer.values().length];
+            layerCaches = new LayerCache[ALL_LAYERS.length];
             for ( int i = 0; i < layerCaches.length; i++ )
-                layerCaches[i] = new LayerCache(UI.Layer.values()[i]);
+                layerCaches[i] = new LayerCache(ALL_LAYERS[i]);
         }
         _layerCaches = Objects.requireNonNull(layerCaches);
     }
@@ -143,12 +144,16 @@ final class StyleEngine
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
 
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+        final boolean antialiasingEnabled = IS_ANTIALIASING_ENABLED();
 
-        // We enable antialiasing:
-        if ( IS_ANTIALIASING_ENABLED() )
+        // We remember if antialiasing was enabled before we render (only when we will touch the hint):
+        final boolean antialiasingWasEnabled;
+        if ( antialiasingEnabled ) {
+            antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        } else {
+            antialiasingWasEnabled = false;
+        }
 
         LayerCache cache = null;
         switch ( layer ) {
@@ -167,13 +172,13 @@ final class StyleEngine
                     layer, new Throwable("Stack trace for debugging purposes.")
                 );
 
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
-                antialiasingWasEnabled
-                        ? RenderingHints.VALUE_ANTIALIAS_ON
-                        : RenderingHints.VALUE_ANTIALIAS_OFF
-        );
+        // Reset antialiasing to its previous state (only when we changed it):
+        if ( antialiasingEnabled )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
+                    antialiasingWasEnabled
+                            ? RenderingHints.VALUE_ANTIALIAS_ON
+                            : RenderingHints.VALUE_ANTIALIAS_OFF
+            );
     }
 
 }

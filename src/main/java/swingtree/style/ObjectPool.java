@@ -1,17 +1,13 @@
 package swingtree.style;
 
-import org.jspecify.annotations.Nullable;
-
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 final class ObjectPool {
-    private static @Nullable ObjectPool INSTANCE = null;
+    private static final ObjectPool INSTANCE = new ObjectPool();
 
     static ObjectPool get() {
-        if ( INSTANCE == null )
-            INSTANCE = new ObjectPool();
         return INSTANCE;
     }
 

@@ -38,15 +38,25 @@ final class LayerCache
 
     static int CACHE_AGGRESSIVENESS_OVERRIDE = -1;
 
+    // Pre-computed once at class load time (expensive Runtime call avoided on every use)
+    private static final int _COMPUTED_CACHE_AGGRESSIVENESS;
+    private static final int _COMPUTED_CACHE_CAP;
+    static {
+        double availableGiB = ( ( Runtime.getRuntime().maxMemory() * 1000 ) >> 30 ) / 1e3;
+        _COMPUTED_CACHE_AGGRESSIVENESS = (int) Math.round( 4 * Math.log(Math.max(1, availableGiB-1)) );
+        _COMPUTED_CACHE_CAP = Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * _COMPUTED_CACHE_AGGRESSIVENESS);
+    }
+
     // Higher means more memory usage but better performance
     private static int DYNAMIC_CACHE_AGGRESSIVENESS() {
         if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
             return CACHE_AGGRESSIVENESS_OVERRIDE;
-        double availableGiB = ( ( Runtime.getRuntime().maxMemory() * 1000 ) >> 30 ) / 1e3;
-        return (int) Math.round( 4 * Math.log(Math.max(1, availableGiB-1)) );
+        return _COMPUTED_CACHE_AGGRESSIVENESS;
     }
     private static int DYNAMIC_CACHE_CAP() {
-        return Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * DYNAMIC_CACHE_AGGRESSIVENESS());
+        if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
+            return Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * CACHE_AGGRESSIVENESS_OVERRIDE);
+        return _COMPUTED_CACHE_CAP;
     }
 
     private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
@@ -128,7 +138,7 @@ final class LayerCache
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             _freeLocalCache();
-            _layerRenderData = new Pooled<>(newState).intern();
+            _layerRenderData = new Pooled<>(newState);
             return;
         }
 
@@ -148,7 +158,7 @@ final class LayerCache
         }
 
         if ( cacheIsFull ) {
-            _layerRenderData = new Pooled<>(newState).intern();
+            _layerRenderData = new Pooled<>(newState);
             return;
         }
 
@@ -156,7 +166,7 @@ final class LayerCache
             _allocateOrGetCachedBuffer(new Pooled<>(newState));
     }
 
-    public final void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
+    public void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
         Size size = _layerRenderData.get().boxModel().size();
 

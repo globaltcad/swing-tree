@@ -152,9 +152,7 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
     }
 
     public boolean hasPaintersWhichCannotBeCached() {
-        return _painters.stylesStream()
-                .map(PainterConf::painter)
-                .anyMatch( p -> !p.canBeCached() );
+        return _painters.any( p -> !p.style().painter().canBeCached() );
     }
 
     @Override
