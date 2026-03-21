@@ -249,10 +249,6 @@ public final class StyleConf
                 });
     }
 
-    List<GradientConf> gradients( UI.Layer layer ) {
-        return _layers.get(layer).gradients().sortedByNames();
-    }
-
     boolean hasCustomGradients() {
         boolean hasCustomGradients = false;
         for ( UI.Layer layer : ALL_LAYERS ) {
@@ -270,19 +266,21 @@ public final class StyleConf
     }
 
     boolean hasVisibleGradientsOnLayer( UI.Layer layer ) {
-        List<GradientConf> gradients = gradients(layer);
-        if ( gradients.isEmpty() ) return false;
-        return gradients.stream().anyMatch( s -> s.colors().length > 0 );
-    }
-
-    List<NoiseConf> noises( UI.Layer layer ) {
-        return _layers.get(layer).noises().sortedByNames().stream().map(Pooled::get).collect(Collectors.toList());
+        return _layers.get(layer)
+                .gradients()
+                .any( named -> {
+                    GradientConf g = named.style();
+                    return g.colors().length > 0;
+                });
     }
 
     boolean hasVisibleNoisesOnLayer( UI.Layer layer ) {
-        List<NoiseConf> noises = noises(layer);
-        if ( noises.isEmpty() ) return false;
-        return noises.stream().anyMatch( s -> !s.equals(NoiseConf.none()) );
+        return _layers.get(layer)
+                .noises()
+                .any( named -> {
+                    NoiseConf n = named.style().get();
+                    return !n.equals(NoiseConf.none());
+                });
     }
 
     public boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
