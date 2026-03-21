@@ -627,7 +627,7 @@ class Styled_Text_Spec extends Specification
 
         and : """
             For BORDER_TO_INTERIOR, the text area also starts right after the border,
-            so the border width still an effect:
+            so the border width still has an effect:
         """
             heightWith(0, UI.ComponentBoundary.BORDER_TO_INTERIOR) < heightWith(30, UI.ComponentBoundary.BORDER_TO_INTERIOR)
 
