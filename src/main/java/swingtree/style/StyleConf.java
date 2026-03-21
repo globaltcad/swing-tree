@@ -3,10 +3,12 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Pair;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
+import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
 import java.awt.*;
@@ -517,8 +519,18 @@ public final class StyleConf
     }
 
     StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
+        boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
+        if ( !hasStyledText )
+            return this;
         // We look for text configs with non-empty contents and compute the preferred height from those:
-        OptionalDouble preferredHeight = _layers.computePreferredHeightFromTextConfigs(owner);
+        final ComponentConf previousComponentConf = ComponentExtension.from(owner).getConf();
+        final Pair<BoxModelConf, ComponentConf> boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(
+                Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
+                this,
+                StyleInstaller._formerBorderMarginCorrection(owner),
+                previousComponentConf
+        );
+        OptionalDouble preferredHeight = _layers.computePreferredHeightFromTextConfigs(owner, boxAndCompConf.first());
         if ( preferredHeight.isPresent() )
             return _withDimensionality(_dimensionality._withPreferredHeight(preferredHeight.getAsDouble()));
         else

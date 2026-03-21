@@ -109,7 +109,7 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled(owner) || _dynamicLaF.currentLookAndFeelSupportsSwingTree(owner);
     }
 
-    Outline _formerBorderMarginCorrection( C owner ) {
+    static Outline _formerBorderMarginCorrection(JComponent owner) {
         Border border = owner.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
             return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection();
@@ -129,8 +129,7 @@ final class StyleInstaller<C extends JComponent>
     StyleEngine _updateEngine(
         final C           owner,
         final StyleEngine engine,
-        final StyleConf   newStyle,
-        final Outline     marginCorrection
+        final StyleConf   newStyle
     ) {
         StyleConf adjustedStyle = newStyle;
         if ( StyleUtil.isUndefinedColor(owner.getBackground()) ) {
@@ -141,7 +140,7 @@ final class StyleInstaller<C extends JComponent>
         return engine.update(
                 Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
                 adjustedStyle,
-                marginCorrection
+                _formerBorderMarginCorrection(owner)
             );
     }
 
@@ -186,7 +185,6 @@ final class StyleInstaller<C extends JComponent>
                 doInstallation = false;
         }
 
-        final Outline marginCorrection = _formerBorderMarginCorrection(owner);
         if ( !doInstallation ) {
             final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);
             final Outline adjustedPadding   = newStyle.border().padding().or(paddingCorrection);
@@ -197,7 +195,7 @@ final class StyleInstaller<C extends JComponent>
                 border.recalculateInsets(newStyle);
             }
 
-            return _updateEngine(owner, engine, newStyle, marginCorrection);
+            return _updateEngine(owner, engine, newStyle);
         }
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
@@ -265,7 +263,7 @@ final class StyleInstaller<C extends JComponent>
                     owner.setFont(_initialFont);
                     _initialFont = null;
                 }
-                return _updateEngine(owner, engine, newStyle, marginCorrection);
+                return _updateEngine(owner, engine, newStyle);
             }
         }
 
@@ -486,7 +484,7 @@ final class StyleInstaller<C extends JComponent>
 
         backgroundSetter.run();
 
-        StyleEngine newEngine = _updateEngine(owner, engine, newStyle, marginCorrection);
+        StyleEngine newEngine = _updateEngine(owner, engine, newStyle);
 
         _applyFontStyleTo(owner, newStyle);
 
