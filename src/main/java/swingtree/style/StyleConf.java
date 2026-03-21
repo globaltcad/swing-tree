@@ -281,10 +281,16 @@ public final class StyleConf
     public boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
         for ( UI.Layer layer : ALL_LAYERS ) {
             StyleConfLayer layerConf = _layers.get(layer);
-            boolean hasOpaqueGradient = layerConf.gradients().stylesStream().anyMatch( g -> g.isOpaque() && g.area() == area );
+            boolean hasOpaqueGradient = layerConf.gradients().any( named -> {
+                GradientConf g = named.style();
+                return g.isOpaque() && g.area() == area;
+            } );
             if ( hasOpaqueGradient )
                 return true;
-            boolean hasOpaqueNoise = layerConf.noises().stylesStream().anyMatch( n -> n.get().isOpaque() && n.get().area() == area );
+            boolean hasOpaqueNoise = layerConf.noises().any( named -> {
+                NoiseConf n = named.style().get();
+                return n.isOpaque() && n.area() == area;
+            } );
             if ( hasOpaqueNoise )
                 return true;
         }
