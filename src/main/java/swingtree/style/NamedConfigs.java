@@ -149,9 +149,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
     }
 
     public List<S> sortedByNames() {
-        if ( _styles.length <= 1 ) {
-            if ( _styles.length == 0 )
-                return Collections.emptyList();
+        if ( _styles.length == 0 )
+            return Collections.emptyList();
+        if ( _styles.length == 1 ) {
             return Collections.singletonList(_styles[0].style());
         }
         return Collections.unmodifiableList(
