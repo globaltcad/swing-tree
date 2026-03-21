@@ -204,7 +204,9 @@ final class StyleConfLayers
             double localMax =
                     styleConfLayer
                     .texts()
-                    .stylesStream()
+                    .namedStyles()
+                    .stream()
+                    .map(NamedConf::style)
                     .filter(TextConf::autoPreferredHeight)
                     .mapToDouble( textConf -> {
                         final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());

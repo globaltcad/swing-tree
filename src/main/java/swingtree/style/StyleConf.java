@@ -202,8 +202,10 @@ public final class StyleConf
     boolean hasVisibleShadows(UI.Layer layer) {
         return _layers.get(layer)
                 .shadows()
-                .stylesStream()
-                .anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
+                .any( named -> {
+                    ShadowConf s = named.style();
+                    return s.color().isPresent() && s.color().get().getAlpha() > 0;
+                });
     }
 
     public FontConf font() { return _font; }
@@ -234,12 +236,18 @@ public final class StyleConf
         return _withPainters(layer, newPainters);
     }
 
-    boolean hasPaintersOnLayer(UI.Layer layer ) {
-        return _layers.get(layer).painters().stylesStream().anyMatch(p -> !Painter.none().equals(p.painter()));
+    boolean hasPaintersOnLayer( UI.Layer layer ) {
+        return _layers.get(layer)
+                .painters()
+                .any( named -> !Painter.none().equals(named.style().painter()) );
     }
 
-    boolean hasImagesOnLayer(UI.Layer layer ) {
-        return _layers.get(layer).images().stylesStream().anyMatch(i -> i.image().isPresent() || i.primer().isPresent());
+    boolean hasImagesOnLayer( UI.Layer layer ) {
+        return _layers.get(layer).images()
+                .any( named -> {
+                    ImageConf i = named.style();
+                    return i.image().isPresent() || i.primer().isPresent();
+                });
     }
 
     List<GradientConf> gradients( UI.Layer layer ) {

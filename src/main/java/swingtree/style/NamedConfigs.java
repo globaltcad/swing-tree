@@ -59,12 +59,6 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
     public List<NamedConf<S>> namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
 
-    public Stream<S> stylesStream() {
-        return namedStyles()
-                .stream()
-                .map(NamedConf::style);
-    }
-
     public NamedConfigs<S> withNamedStyle(String name, S style ) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(style);
