@@ -644,13 +644,14 @@ class Styled_Text_Spec extends Specification
             heightWith(30, UI.ComponentBoundary.OUTER_TO_EXTERIOR) == heightWith(0, UI.ComponentBoundary.OUTER_TO_EXTERIOR)
     }
 
-    def 'Margins only affect the preferred height when the placement boundary reaches the outer edge.'()
+    def 'Margins affect the preferred height only when the placement boundary is inside the margin.'()
     {
         reportInfo """
-            Margins live at the outermost rim of the box model. Therefore, only the
-            `OUTER_TO_EXTERIOR` boundary is not affected by the margin area.
-            All other boundaries sit after the margin, so adding a margin
-            has effects on the text's available width for those boundaries.
+            Margins live at the outermost rim of the box model. As a result, the
+            `OUTER_TO_EXTERIOR` boundary is the only one whose preferred height
+            is not affected by the margin area.
+            All other boundaries sit inside the margin, so adding a margin
+            affects the text's available width for those boundaries.
 
             With `wrapLines(true)`, a margin on the left and right reduces
             the available width for all boundaries except `OUTER_TO_EXTERIOR` 
