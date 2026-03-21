@@ -128,7 +128,7 @@ final class LayerCache
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             _freeLocalCache();
-            _layerRenderData = new Pooled<>(newState).intern();
+            _layerRenderData = new Pooled<>(newState);
             return;
         }
 
@@ -148,7 +148,7 @@ final class LayerCache
         }
 
         if ( cacheIsFull ) {
-            _layerRenderData = new Pooled<>(newState).intern();
+            _layerRenderData = new Pooled<>(newState);
             return;
         }
 
