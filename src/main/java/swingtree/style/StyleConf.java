@@ -276,44 +276,17 @@ public final class StyleConf
         return noises.stream().anyMatch( s -> !s.equals(NoiseConf.none()) );
     }
 
-    List<UI.ComponentArea> gradientCoveredAreas() {
-        return gradientCoveredAreas(UI.Layer.values());
-    }
-
-    List<UI.ComponentArea> gradientCoveredAreas( UI.Layer... layers ) {
-        return Arrays.stream(layers)
-                .map(_layers::get)
-                .map(StyleConfLayer::gradients)
-                .flatMap( g -> g
-                    .stylesStream()
-                    .map( grad -> grad.isOpaque() ? grad.area() : null )
-                    .filter(Objects::nonNull)
-                )
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
-    List<UI.ComponentArea> noiseCoveredAreas() {
-        return noiseCoveredAreas(UI.Layer.values());
-    }
-
-    List<UI.ComponentArea> noiseCoveredAreas( UI.Layer... layers ) {
-        return Arrays.stream(layers)
-                .map(_layers::get)
-                .map(StyleConfLayer::noises)
-                .flatMap( n -> n
-                    .stylesStream()
-                    .map( noise -> noise.get().isOpaque() ? noise.get().area() : null )
-                    .filter(Objects::nonNull)
-                )
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
-    List<UI.ComponentArea> noiseAndGradientCoveredAreas() {
-        List<UI.ComponentArea> areas = new ArrayList<>(gradientCoveredAreas());
-        areas.addAll(noiseCoveredAreas());
-        return areas;
+    public boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
+        for ( UI.Layer layer : UI.Layer.values() ) {
+            StyleConfLayer layerConf = _layers.get(layer);
+            boolean hasOpaqueGradient = layerConf.gradients().stylesStream().anyMatch( g -> g.isOpaque() && g.area() == area );
+            if ( hasOpaqueGradient )
+                return true;
+            boolean hasOpaqueNoise = layerConf.noises().stylesStream().anyMatch( n -> n.get().isOpaque() && n.get().area() == area );
+            if ( hasOpaqueNoise )
+                return true;
+        }
+        return false;
     }
 
     public StyleConf foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
