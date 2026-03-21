@@ -283,7 +283,7 @@ public final class StyleConf
                 });
     }
 
-    public boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
+    boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
         for ( UI.Layer layer : ALL_LAYERS ) {
             StyleConfLayer layerConf = _layers.get(layer);
             boolean hasOpaqueGradient = layerConf.gradients().any( named -> {
