@@ -519,7 +519,7 @@ public final class StyleConf
     }
 
     StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
-        boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any( t -> !t.isNone()));
+        boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
         if ( !hasStyledText )
             return this;
         // We look for text configs with non-empty contents and compute the preferred height from those:
