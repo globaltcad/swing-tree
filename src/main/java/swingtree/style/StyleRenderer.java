@@ -25,7 +25,6 @@ import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.*;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  *  A stateless un-instantiable utility class that renders the style of a component
@@ -208,12 +207,10 @@ final class StyleRenderer
                                         h + blurRadius * 2 - spreadRadius * 2
                                     );
 
-        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
-
         final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;
         final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);
         final int shadowCornerRadius  = (int) Math.max( 0, averageCornerRadius + (shadow.isOutset() ? -spreadRadius-blurRadius*2 : -Math.max(averageBorderWidth,spreadRadius)) );
-        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
+        final int gradientStartOffset = 1 + (int)((shadowCornerRadius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
 
         Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(
                                         x + blurRadius + gradientStartOffset + spreadRadius,
@@ -239,17 +236,20 @@ final class StyleRenderer
         else
             shadowArea.intersect(baseArea);
 
+        // Compute the transparent shadow background color once so that sub-methods don't repeat the allocation
+        final Color transparentShadowBg = _transparentShadowBackground(shadow);
+
         // Draw the corner shadows
-        _renderCornerShadow(shadow, UI.Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderCornerShadow(shadow, UI.Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderCornerShadow(shadow, UI.Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderCornerShadow(shadow, UI.Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(shadow, UI.Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
+        _renderCornerShadow(shadow, UI.Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
+        _renderCornerShadow(shadow, UI.Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
+        _renderCornerShadow(shadow, UI.Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
 
         // Draw the edge shadows
-        _renderEdgeShadow(shadow, UI.Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(shadow, UI.Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, transparentShadowBg, g2d);
 
         final Area outerMostArea = new Area(outerShadowRect);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
@@ -278,12 +278,13 @@ final class StyleRenderer
     }
 
     private static void _renderCornerShadow(
-        final ShadowConf shadowConf,
+        final ShadowConf        shadowConf,
         final UI.Corner         corner,
         final Area              areaWhereShadowIsAllowed,
         final Rectangle2D.Float innerShadowRect,
         final Rectangle2D.Float outerShadowRect,
         final int               gradientStartOffset,
+        final Color             shadowBackgroundColor,
         final Graphics2D        g2d
     ) {
         // We define a clipping box so that corners don't overlap
@@ -368,7 +369,6 @@ final class StyleRenderer
 
         final Color innerColor;
         final Color outerColor;
-        final Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
         if ( shadowConf.isOutset() ) {
             innerColor = shadowConf.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
@@ -427,6 +427,7 @@ final class StyleRenderer
         final Rectangle2D.Float innerShadowRect,
         final Rectangle2D.Float outerShadowRect,
         final int               gradientStartOffset,
+        final Color             shadowBackgroundColor,
         final Graphics2D        g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
@@ -518,8 +519,7 @@ final class StyleRenderer
 
         final Color innerColor;
         final Color outerColor;
-        // Same as shadow color but without alpha:
-        final Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
+        // Same as shadow color but without alpha (pre-computed by the caller):
         if (shadowConf.isOutset()) {
             innerColor = shadowConf.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
