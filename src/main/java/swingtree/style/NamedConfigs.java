@@ -57,7 +57,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
     public int size() { return _styles.length; }
 
-    public List<NamedConf<S>> namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
+    public Stream<NamedConf<S>> namedStylesStream() { return Arrays.stream(_styles); }
 
     public NamedConfigs<S> withNamedStyle(String name, S style ) {
         Objects.requireNonNull(name);
@@ -155,8 +155,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
             return Collections.singletonList(_styles[0].style());
         }
         return Collections.unmodifiableList(
-                    namedStyles()
-                    .stream()
+                    namedStylesStream()
                     .sorted(Comparator.comparing(NamedConf::name))
                     .map(NamedConf::style)
                     .collect(Collectors.toList())
@@ -185,8 +184,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         if ( this.size() == 1 )
             return stringOf(this.get(defaultName));
         else
-            return this.namedStyles()
-                    .stream()
+            return this.namedStylesStream()
                     .map(e -> e.name() + "=" + stringOf(e.style()))
                     .collect(Collectors.joining(", ", styleType+"[", "]"));
     }

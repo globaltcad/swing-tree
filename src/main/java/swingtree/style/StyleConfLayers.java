@@ -8,7 +8,6 @@ import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Configurator;
 import swingtree.layout.Bounds;
-import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import java.awt.Font;
@@ -204,8 +203,7 @@ final class StyleConfLayers
             double localMax =
                     styleConfLayer
                     .texts()
-                    .namedStyles()
-                    .stream()
+                    .namedStylesStream()
                     .map(NamedConf::style)
                     .filter(TextConf::autoPreferredHeight)
                     .mapToDouble( textConf -> {

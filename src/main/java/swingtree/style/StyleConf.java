@@ -187,8 +187,7 @@ public final class StyleConf
         return Collections.unmodifiableList(
                         _layers.get(layer)
                         .shadows()
-                        .namedStyles()
-                        .stream()
+                        .namedStylesStream()
                         .sorted(Comparator.comparing(NamedConf::name))
                         .map(NamedConf::style)
                         .collect(Collectors.toList())
@@ -402,8 +401,7 @@ public final class StyleConf
     }
 
     List<NamedConf<String>> properties() {
-        return _properties.namedStyles()
-                            .stream()
+        return _properties.namedStylesStream()
                             .sorted(Comparator.comparing(NamedConf::name))
                             .collect(Collectors.toList());
     }
