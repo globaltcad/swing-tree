@@ -56,6 +56,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings("ReferenceEquality")
 public final class StyleConf
 {
+    private static final UI.Layer[] ALL_LAYERS = UI.Layer.values();
+
     private static final StyleConf _NONE = new StyleConf(
                                             LayoutConf.none(),
                                             BorderConf.none(),
@@ -246,7 +248,7 @@ public final class StyleConf
 
     boolean hasCustomGradients() {
         boolean hasCustomGradients = false;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( hasCustomGradients(layer) ) {
                 hasCustomGradients = true;
                 break;
@@ -277,7 +279,7 @@ public final class StyleConf
     }
 
     public boolean hasOpaqueGradientsOrNoisesOn( UI.ComponentArea area ) {
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             StyleConfLayer layerConf = _layers.get(layer);
             boolean hasOpaqueGradient = layerConf.gradients().stylesStream().anyMatch( g -> g.isOpaque() && g.area() == area );
             if ( hasOpaqueGradient )
@@ -541,7 +543,7 @@ public final class StyleConf
 
     boolean hasEqualShadowsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualShadowsAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -562,7 +564,7 @@ public final class StyleConf
 
     boolean hasEqualPaintersAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualPaintersAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -583,7 +585,7 @@ public final class StyleConf
 
     boolean hasEqualGradientsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualGradientsAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -604,7 +606,7 @@ public final class StyleConf
 
     boolean hasEqualNoisesAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualNoisesAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -625,7 +627,7 @@ public final class StyleConf
 
     boolean hasEqualImagesAs(StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualImagesAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
@@ -646,7 +648,7 @@ public final class StyleConf
 
     boolean hasEqualTextsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             if ( !hasEqualTextsAs(layer, otherStyle) ) {
                 allLayersAreEqual = false;
                 break;
