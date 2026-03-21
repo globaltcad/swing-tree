@@ -26,6 +26,7 @@ import java.util.function.BiPredicate;
 final class StyleConfLayers
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleConfLayers.class);
+    private static final UI.Layer[] ALL_LAYERS = UI.Layer.values();
 
     private static final StyleConfLayers _EMPTY = new StyleConfLayers(
                                                     FilterConf.none(),
@@ -198,7 +199,7 @@ final class StyleConfLayers
     OptionalDouble computePreferredHeightFromTextConfigs( JComponent owner, BoxModelConf predictedBoxModel ) {
         // We look for text configs with non-empty content and compute the preferred size from those:
         Double maxHeight = null;
-        for ( UI.Layer layer : UI.Layer.values() ) {
+        for ( UI.Layer layer : ALL_LAYERS ) {
             StyleConfLayer styleConfLayer = get(layer);
             double localMax =
                     styleConfLayer
