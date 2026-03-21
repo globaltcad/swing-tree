@@ -155,6 +155,11 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
     }
 
     public List<S> sortedByNames() {
+        if ( _styles.length <= 1 ) {
+            if ( _styles.length == 0 )
+                return Collections.emptyList();
+            return Collections.singletonList(_styles[0].style());
+        }
         return Collections.unmodifiableList(
                     namedStyles()
                     .stream()
@@ -172,7 +177,10 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
      * @return True if at least one of the named styles in this instance passes the test.
      */
     public boolean any( Predicate<NamedConf<S>> namedStyleTester ) {
-        return Arrays.stream(_styles).anyMatch(namedStyleTester);
+        for ( NamedConf<S> style : _styles )
+            if ( namedStyleTester.test(style) )
+                return true;
+        return false;
     }
 
     public String toString( String defaultName, String styleType ) {
