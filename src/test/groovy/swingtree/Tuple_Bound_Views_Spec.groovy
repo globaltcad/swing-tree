@@ -548,7 +548,7 @@ class Tuple_Bound_Views_Spec extends Specification
                 return UI.label(p.viewAsString({ it.name() }))
             }
             var panels = UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)
-            var internalWrapper = panels.getComponent(0).getComponent(0)
+            var internalWrapper = panels.getContentPanel()
             var comp0 = internalWrapper.getComponent(0).getComponent(0) // JScrollPanels have a wrapper panel for each item!
             var comp1 = internalWrapper.getComponent(1).getComponent(0)
             var comp2 = internalWrapper.getComponent(2).getComponent(0)
