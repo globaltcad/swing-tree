@@ -5566,20 +5566,20 @@ import java.util.function.Supplier;
      * @throws NullPointerException If either the layout {@code attr}, the {@code models} or the {@code viewSupplier} is null.
      */
     public final &lt;M extends HasId&lt;?&gt;&gt; I addAll( String attr, Var&lt;Tuple&lt;M&gt;&gt; models, BoundViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="nc" id="L5569">        Objects.requireNonNull(attr, &quot;attr&quot;);</span>
-<span class="nc" id="L5570">        Objects.requireNonNull(models, &quot;models&quot;);</span>
-<span class="nc" id="L5571">        Objects.requireNonNull(viewSupplier, &quot;viewSupplier&quot;);</span>
-<span class="nc" id="L5572">        return _with( thisComponent -&gt; {</span>
-<span class="nc bnc" id="L5573" title="All 2 branches missed.">                    if ( thisComponent instanceof JComboBox ) {</span>
+<span class="fc" id="L5569">        Objects.requireNonNull(attr, &quot;attr&quot;);</span>
+<span class="fc" id="L5570">        Objects.requireNonNull(models, &quot;models&quot;);</span>
+<span class="fc" id="L5571">        Objects.requireNonNull(viewSupplier, &quot;viewSupplier&quot;);</span>
+<span class="fc" id="L5572">        return _with( thisComponent -&gt; {</span>
+<span class="pc bpc" id="L5573" title="1 of 2 branches missed.">                    if ( thisComponent instanceof JComboBox ) {</span>
 <span class="nc" id="L5574">                        log.error(SwingTree.get().logMarker(),</span>
                                 &quot;Binding 'JComboBox' to a tuple property not supported.&quot;,
                                 new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                             );
                     } else {
-<span class="nc" id="L5579">                        _bindTo(models, () -&gt; attr, viewSupplier, thisComponent);</span>
+<span class="fc" id="L5579">                        _bindTo(models, () -&gt; attr, viewSupplier, thisComponent);</span>
                     }
-<span class="nc" id="L5581">                })</span>
-<span class="nc" id="L5582">                ._this();</span>
+<span class="fc" id="L5581">                })</span>
+<span class="fc" id="L5582">                ._this();</span>
     }
 
     /**
@@ -5986,7 +5986,7 @@ import java.util.function.Supplier;
     }
 
     // Overridden in UIForScrollPanels
-    protected &lt;M&gt; void _addViewableProps(
+    protected &lt;M extends HasId&lt;?&gt;&gt; void _addViewableProps(
         Var&lt;Tuple&lt;M&gt;&gt; models,
         @Nullable AddConstraint attr,
         ModelToViewConverter&lt;ViewHandle&lt;M&gt;&gt; viewSupplier,
@@ -6104,7 +6104,7 @@ import java.util.function.Supplier;
         }
 <span class="fc" id="L6105">    }</span>
 
-    private &lt;M&gt; void _updateSubViews(
+    private &lt;M extends HasId&lt;?&gt;&gt; void _updateSubViews(
         C innerComponent,
         ValDelegate&lt;Tuple&lt;M&gt;&gt; changeDelegate,
         Var&lt;Tuple&lt;M&gt;&gt; tupleOfModels,
@@ -6120,181 +6120,188 @@ import java.util.function.Supplier;
 <span class="fc" id="L6120">                int index = diff.index().orElse(-1);</span>
 <span class="fc" id="L6121">                int count = diff.size();</span>
 <span class="fc" id="L6122">                SequenceChange change = diff.change();</span>
-<span class="fc" id="L6123">                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);</span>
-<span class="nc" id="L6124">            } catch (Exception e) {</span>
-<span class="nc" id="L6125">                log.error(</span>
+<span class="fc" id="L6123">                Tuple&lt;M&gt; oldTuple = changeDelegate.oldValue().orElseThrowUnchecked();</span>
+<span class="fc" id="L6124">                Tuple&lt;M&gt; newTuple = changeDelegate.currentValue().orElseThrowUnchecked();</span>
+<span class="fc" id="L6125">                _doInformedSubViewUpdate(index, count, oldTuple, newTuple, change, innerComponent, tupleOfModels, attr, viewSupplier);</span>
+<span class="nc" id="L6126">            } catch (Exception e) {</span>
+<span class="nc" id="L6127">                log.error(</span>
                     &quot;Failed to perform an informed tuple bound view update, \n&quot; +
                     &quot;using sequence diff '{}' and models '{}'.&quot;,
                     diff, tupleOfModels, e
                 );
-<span class="nc" id="L6130">                success = false;</span>
-<span class="fc" id="L6131">            }</span>
+<span class="nc" id="L6132">                success = false;</span>
+<span class="fc" id="L6133">            }</span>
         }
-<span class="fc bfc" id="L6133" title="All 2 branches covered.">        if ( !success ) {</span>
-<span class="fc" id="L6134">            _clearComponentsOf(innerComponent);</span>
-<span class="fc" id="L6135">            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);</span>
+<span class="fc bfc" id="L6135" title="All 2 branches covered.">        if ( !success ) {</span>
+<span class="fc" id="L6136">            _clearComponentsOf(innerComponent);</span>
+<span class="fc" id="L6137">            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);</span>
         }
-<span class="fc" id="L6137">        _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);</span>
-<span class="fc" id="L6138">    }</span>
+<span class="fc" id="L6139">        _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);</span>
+<span class="fc" id="L6140">    }</span>
 
     private static &lt;T&gt; @Nullable SequenceDiff _diffFrom(ValDelegate&lt;Tuple&lt;T&gt;&gt; delegate, AtomicReference&lt;@Nullable SequenceDiff&gt; lastDiffRef) {
-<span class="fc" id="L6141">        @Nullable Tuple&lt;T&gt; oldValue = delegate.oldValue().orElseNull();</span>
-<span class="fc" id="L6142">        Tuple&lt;T&gt; currentValue = delegate.currentValue().orElseThrowUnchecked();</span>
-<span class="fc" id="L6143">        SequenceDiff diff = null;</span>
-<span class="fc" id="L6144">        SequenceDiff lastDiff = lastDiffRef.get();</span>
-<span class="pc bpc" id="L6145" title="1 of 2 branches missed.">        if (currentValue instanceof SequenceDiffOwner)</span>
-<span class="fc" id="L6146">            diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);</span>
-<span class="pc bpc" id="L6147" title="2 of 6 branches missed.">        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) )</span>
-<span class="fc" id="L6148">            diff = _tryCalculatingDiffBetween(oldValue, currentValue);</span>
-<span class="fc" id="L6149">        lastDiffRef.set(diff);</span>
-<span class="fc" id="L6150">        return diff;</span>
+<span class="fc" id="L6143">        @Nullable Tuple&lt;T&gt; oldValue = delegate.oldValue().orElseNull();</span>
+<span class="fc" id="L6144">        Tuple&lt;T&gt; currentValue = delegate.currentValue().orElseThrowUnchecked();</span>
+<span class="fc" id="L6145">        SequenceDiff diff = null;</span>
+<span class="fc" id="L6146">        SequenceDiff lastDiff = lastDiffRef.get();</span>
+<span class="pc bpc" id="L6147" title="1 of 2 branches missed.">        if (currentValue instanceof SequenceDiffOwner)</span>
+<span class="fc" id="L6148">            diff = ((SequenceDiffOwner)currentValue).differenceFromPrevious().orElse(null);</span>
+<span class="pc bpc" id="L6149" title="2 of 6 branches missed.">        if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) )</span>
+<span class="fc" id="L6150">            diff = _tryCalculatingDiffBetween(oldValue, currentValue);</span>
+<span class="fc" id="L6151">        lastDiffRef.set(diff);</span>
+<span class="fc" id="L6152">        return diff;</span>
     }
 
-    private &lt;M&gt; void _doInformedSubViewUpdate(
+    private &lt;M extends HasId&lt;?&gt;&gt; void _doInformedSubViewUpdate(
         int index,
         int count,
+        Tuple&lt;M&gt; oldTuple,
+        Tuple&lt;M&gt; newTuple,
         SequenceChange change,
         C c,
         Var&lt;Tuple&lt;M&gt;&gt; tupleOfModels,
         @Nullable AddConstraint attr,
         ModelToViewConverter&lt;ViewHandle&lt;M&gt;&gt; viewSupplier
     ) {
-<span class="pc bpc" id="L6162" title="2 of 8 branches missed.">        switch (change) {</span>
+<span class="pc bpc" id="L6166" title="2 of 8 branches missed.">        switch (change) {</span>
             case SET:
-<span class="pc bpc" id="L6164" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
-<span class="nc" id="L6165">                    _clearComponentsOf(c); // We do a simple re-build</span>
-<span class="nc" id="L6166">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
+<span class="pc bpc" id="L6168" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
+<span class="nc" id="L6169">                    _clearComponentsOf(c); // We do a simple re-build</span>
+<span class="nc" id="L6170">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
                 } else {
-<span class="fc" id="L6168">                    Tuple&lt;Component&gt; componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));</span>
-<span class="fc" id="L6169">                    List&lt;Integer&gt; alreadyRemoved = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L6170" title="All 2 branches covered.">                    for ( int i = index; i &lt; (index + count); i++ )</span>
-<span class="fc" id="L6171">                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);</span>
+<span class="fc" id="L6172">                    Tuple&lt;Component&gt; componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));</span>
+<span class="fc" id="L6173">                    List&lt;Integer&gt; alreadyRemoved = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L6174" title="All 2 branches covered.">                    for ( int i = index; i &lt; (index + count); i++ ) {</span>
+<span class="fc bfc" id="L6175" title="All 2 branches covered.">                        boolean hasDifferentIds = !Objects.equals(oldTuple.get(i).id(), newTuple.get(i).id());</span>
+<span class="fc bfc" id="L6176" title="All 2 branches covered.">                        if ( hasDifferentIds )</span>
+<span class="fc" id="L6177">                            _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);</span>
+                    }
                 }
-<span class="fc" id="L6173">                break;</span>
+<span class="fc" id="L6180">                break;</span>
             case ADD:
-<span class="pc bpc" id="L6175" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
-<span class="nc" id="L6176">                    _clearComponentsOf(c); // We do a simple re-build</span>
-<span class="nc" id="L6177">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
+<span class="pc bpc" id="L6182" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
+<span class="nc" id="L6183">                    _clearComponentsOf(c); // We do a simple re-build</span>
+<span class="nc" id="L6184">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
                 } else {
-<span class="fc bfc" id="L6179" title="All 2 branches covered.">                    for ( int i = index; i &lt; (index + count); i++ )</span>
-<span class="fc" id="L6180">                        _addComponentAt(i, tupleOfModels, viewSupplier, attr, c);</span>
+<span class="fc bfc" id="L6186" title="All 2 branches covered.">                    for ( int i = index; i &lt; (index + count); i++ )</span>
+<span class="fc" id="L6187">                        _addComponentAt(i, tupleOfModels, viewSupplier, attr, c);</span>
                 }
-<span class="fc" id="L6182">                break;</span>
+<span class="fc" id="L6189">                break;</span>
             case REMOVE:
-<span class="pc bpc" id="L6184" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
-<span class="nc" id="L6185">                    _clearComponentsOf(c); // We do a simple re-build</span>
-<span class="nc" id="L6186">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
+<span class="pc bpc" id="L6191" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
+<span class="nc" id="L6192">                    _clearComponentsOf(c); // We do a simple re-build</span>
+<span class="nc" id="L6193">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
                 } else {
-<span class="fc bfc" id="L6188" title="All 2 branches covered.">                    for ( int i = (index + count - 1); i &gt;= index; i-- )</span>
-<span class="fc" id="L6189">                        _removeComponentAt(i, c);</span>
+<span class="fc bfc" id="L6195" title="All 2 branches covered.">                    for ( int i = (index + count - 1); i &gt;= index; i-- )</span>
+<span class="fc" id="L6196">                        _removeComponentAt(i, c);</span>
                 }
-<span class="fc" id="L6191">                break;</span>
+<span class="fc" id="L6198">                break;</span>
             case RETAIN: // Only keep the elements in the range.
-<span class="pc bpc" id="L6193" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
-<span class="nc" id="L6194">                    _clearComponentsOf(c); // We do a simple re-build</span>
-<span class="nc" id="L6195">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
+<span class="pc bpc" id="L6200" title="1 of 2 branches missed.">                if ( index &lt; 0 ) {</span>
+<span class="nc" id="L6201">                    _clearComponentsOf(c); // We do a simple re-build</span>
+<span class="nc" id="L6202">                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
                 } else {
                     // Remove trailing components:
-<span class="fc" id="L6198">                    int componentCount = InternalUtil._actualComponentCountFrom(c);</span>
-<span class="fc bfc" id="L6199" title="All 2 branches covered.">                    for ( int i = (componentCount - 1); i &gt;= (index + count); i-- )</span>
-<span class="fc" id="L6200">                        _removeComponentAt(i, c);</span>
+<span class="fc" id="L6205">                    int componentCount = InternalUtil._actualComponentCountFrom(c);</span>
+<span class="fc bfc" id="L6206" title="All 2 branches covered.">                    for ( int i = (componentCount - 1); i &gt;= (index + count); i-- )</span>
+<span class="fc" id="L6207">                        _removeComponentAt(i, c);</span>
                     // Remove leading components:
-<span class="fc bfc" id="L6202" title="All 2 branches covered.">                    for ( int i = (index - 1); i &gt;= 0; i-- )</span>
-<span class="fc" id="L6203">                        _removeComponentAt(i, c);</span>
+<span class="fc bfc" id="L6209" title="All 2 branches covered.">                    for ( int i = (index - 1); i &gt;= 0; i-- )</span>
+<span class="fc" id="L6210">                        _removeComponentAt(i, c);</span>
                 }
-<span class="fc" id="L6205">                break;</span>
-<span class="fc" id="L6206">            case CLEAR: _clearComponentsOf(c); break;</span>
-<span class="fc" id="L6207">            case REVERSE: _reverseComponentsOf(c); break;</span>
+<span class="fc" id="L6212">                break;</span>
+<span class="fc" id="L6213">            case CLEAR: _clearComponentsOf(c); break;</span>
+<span class="fc" id="L6214">            case REVERSE: _reverseComponentsOf(c); break;</span>
             case NONE:
-<span class="nc" id="L6209">                break;</span>
+<span class="nc" id="L6216">                break;</span>
             default:
-<span class="nc" id="L6211">                log.error(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L6218">                log.error(SwingTree.get().logMarker(),</span>
                         &quot;Unknown change type: {}&quot;,
                         change, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
                 // We do a simple rebuild:
-<span class="nc" id="L6216">                _clearComponentsOf(c);</span>
-<span class="nc" id="L6217">                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
+<span class="nc" id="L6223">                _clearComponentsOf(c);</span>
+<span class="nc" id="L6224">                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);</span>
         }
-<span class="fc" id="L6219">    }</span>
+<span class="fc" id="L6226">    }</span>
 
     private &lt;M&gt; void _addAllFromTuple( Tuple&lt;M&gt; tupleOfModels, @Nullable AddConstraint attr, ViewSupplier&lt;M&gt; viewSupplier, C thisComponent ) {
-<span class="fc bfc" id="L6222" title="All 2 branches covered.">        for ( int i = 0; i &lt; tupleOfModels.size(); i++ ) {</span>
-<span class="fc" id="L6223">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc bfc" id="L6229" title="All 2 branches covered.">        for ( int i = 0; i &lt; tupleOfModels.size(); i++ ) {</span>
+<span class="fc" id="L6230">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
             try {
-<span class="fc" id="L6225">                view = viewSupplier.createViewFor(tupleOfModels.get(i));</span>
-<span class="nc" id="L6226">            } catch ( Exception e ) {</span>
-<span class="nc" id="L6227">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+tupleOfModels.get(i)+&quot;'.&quot;, e);</span>
-<span class="fc" id="L6228">            }</span>
-<span class="pc bpc" id="L6229" title="1 of 2 branches missed.">            if ( view == null )</span>
-<span class="nc" id="L6230">                view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6232">                view = viewSupplier.createViewFor(tupleOfModels.get(i));</span>
+<span class="nc" id="L6233">            } catch ( Exception e ) {</span>
+<span class="nc" id="L6234">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+tupleOfModels.get(i)+&quot;'.&quot;, e);</span>
+<span class="fc" id="L6235">            }</span>
+<span class="pc bpc" id="L6236" title="1 of 2 branches missed.">            if ( view == null )</span>
+<span class="nc" id="L6237">                view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc bfc" id="L6232" title="All 2 branches covered.">            if ( attr == null )</span>
-<span class="fc" id="L6233">                _addBuildersTo( thisComponent, view );</span>
+<span class="fc bfc" id="L6239" title="All 2 branches covered.">            if ( attr == null )</span>
+<span class="fc" id="L6240">                _addBuildersTo( thisComponent, view );</span>
             else
-<span class="fc" id="L6235">                _addBuildersTo( thisComponent, attr, view );</span>
+<span class="fc" id="L6242">                _addBuildersTo( thisComponent, attr, view );</span>
         }
-<span class="fc" id="L6237">    }</span>
+<span class="fc" id="L6244">    }</span>
 
     private &lt;M&gt; void _addAllFromTuple( Var&lt;Tuple&lt;M&gt;&gt; tupleOfModels, @Nullable AddConstraint attr, ViewSupplier&lt;ViewHandle&lt;M&gt;&gt; viewSupplier, C thisComponent ) {
-<span class="fc bfc" id="L6240" title="All 2 branches covered.">        for ( int i = 0; i &lt; tupleOfModels.get().size(); i++ ) {</span>
-<span class="fc" id="L6241">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc bfc" id="L6247" title="All 2 branches covered.">        for ( int i = 0; i &lt; tupleOfModels.get().size(); i++ ) {</span>
+<span class="fc" id="L6248">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
             try {
-<span class="fc" id="L6243">                view = viewSupplier.createViewFor(ViewHandle.of(tupleOfModels, i, thisComponent));</span>
-<span class="nc" id="L6244">            } catch ( Exception e ) {</span>
-<span class="nc" id="L6245">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+tupleOfModels.get().get(i)+&quot;'.&quot;, e);</span>
-<span class="fc" id="L6246">            }</span>
-<span class="pc bpc" id="L6247" title="1 of 2 branches missed.">            if ( view == null )</span>
-<span class="nc" id="L6248">                view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6250">                view = viewSupplier.createViewFor(ViewHandle.of(tupleOfModels, i, thisComponent));</span>
+<span class="nc" id="L6251">            } catch ( Exception e ) {</span>
+<span class="nc" id="L6252">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+tupleOfModels.get().get(i)+&quot;'.&quot;, e);</span>
+<span class="fc" id="L6253">            }</span>
+<span class="pc bpc" id="L6254" title="1 of 2 branches missed.">            if ( view == null )</span>
+<span class="nc" id="L6255">                view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc bfc" id="L6250" title="All 2 branches covered.">            if ( attr == null )</span>
-<span class="fc" id="L6251">                _addBuildersTo( thisComponent, view );</span>
+<span class="fc bfc" id="L6257" title="All 2 branches covered.">            if ( attr == null )</span>
+<span class="fc" id="L6258">                _addBuildersTo( thisComponent, view );</span>
             else
-<span class="fc" id="L6253">                _addBuildersTo( thisComponent, attr, view );</span>
+<span class="fc" id="L6260">                _addBuildersTo( thisComponent, attr, view );</span>
         }
-<span class="fc" id="L6255">    }</span>
+<span class="fc" id="L6262">    }</span>
 
     private &lt;M&gt; void _addViewablePropTo(
         C thisComponent, Val&lt;M&gt; viewable, @Nullable AddConstraint attr, ViewSupplier&lt;M&gt; viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-<span class="fc" id="L6261">        final int index = InternalUtil._actualComponentCountFrom(thisComponent);</span>
+<span class="fc" id="L6268">        final int index = InternalUtil._actualComponentCountFrom(thisComponent);</span>
         // Then we add the component provided by the viewable to the list of children.
-<span class="fc bfc" id="L6263" title="All 2 branches covered.">        if ( attr == null ) {</span>
-<span class="fc bfc" id="L6264" title="All 2 branches covered.">            if ( viewable.isPresent() ) {</span>
-<span class="fc" id="L6265">                UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc bfc" id="L6270" title="All 2 branches covered.">        if ( attr == null ) {</span>
+<span class="fc bfc" id="L6271" title="All 2 branches covered.">            if ( viewable.isPresent() ) {</span>
+<span class="fc" id="L6272">                UIForAnySwing&lt;?, ?&gt; view = null;</span>
                 try {
-<span class="fc" id="L6267">                    view = viewSupplier.createViewFor(viewable.get());</span>
-<span class="nc" id="L6268">                } catch ( Exception e ) {</span>
-<span class="nc" id="L6269">                    log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '{}'.&quot;, viewable.orElseNull(), e);</span>
-<span class="fc" id="L6270">                }</span>
-<span class="pc bpc" id="L6271" title="1 of 2 branches missed.">                if ( view == null )</span>
-<span class="nc" id="L6272">                    view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6274">                    view = viewSupplier.createViewFor(viewable.get());</span>
+<span class="nc" id="L6275">                } catch ( Exception e ) {</span>
+<span class="nc" id="L6276">                    log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '{}'.&quot;, viewable.orElseNull(), e);</span>
+<span class="fc" id="L6277">                }</span>
+<span class="pc bpc" id="L6278" title="1 of 2 branches missed.">                if ( view == null )</span>
+<span class="nc" id="L6279">                    view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc" id="L6274">                _addBuildersTo(thisComponent, view);</span>
-<span class="fc" id="L6275">            } else</span>
-<span class="fc" id="L6276">                _addComponentsTo(thisComponent, new JPanel()); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6281">                _addBuildersTo(thisComponent, view);</span>
+<span class="fc" id="L6282">            } else</span>
+<span class="fc" id="L6283">                _addComponentsTo(thisComponent, new JPanel()); // We add a dummy component to the list of children.</span>
         } else {
-<span class="pc bpc" id="L6278" title="1 of 2 branches missed.">            if ( viewable.isPresent() ) {</span>
-<span class="fc" id="L6279">                UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="pc bpc" id="L6285" title="1 of 2 branches missed.">            if ( viewable.isPresent() ) {</span>
+<span class="fc" id="L6286">                UIForAnySwing&lt;?, ?&gt; view = null;</span>
                 try {
-<span class="fc" id="L6281">                    view = viewSupplier.createViewFor(viewable.get());</span>
-<span class="nc" id="L6282">                } catch ( Exception e ) {</span>
-<span class="nc" id="L6283">                    log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '{}'.&quot;, viewable.orElseNull(), e);</span>
-<span class="fc" id="L6284">                }</span>
-<span class="pc bpc" id="L6285" title="1 of 2 branches missed.">                if ( view == null )</span>
-<span class="nc" id="L6286">                    view = UI.box(); // We add a dummy component to the list of children.</span>
-<span class="fc" id="L6287">                _addBuildersTo(thisComponent, attr, view);</span>
-<span class="fc" id="L6288">            } else</span>
-<span class="nc" id="L6289">                _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6288">                    view = viewSupplier.createViewFor(viewable.get());</span>
+<span class="nc" id="L6289">                } catch ( Exception e ) {</span>
+<span class="nc" id="L6290">                    log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '{}'.&quot;, viewable.orElseNull(), e);</span>
+<span class="fc" id="L6291">                }</span>
+<span class="pc bpc" id="L6292" title="1 of 2 branches missed.">                if ( view == null )</span>
+<span class="nc" id="L6293">                    view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6294">                _addBuildersTo(thisComponent, attr, view);</span>
+<span class="fc" id="L6295">            } else</span>
+<span class="nc" id="L6296">                _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.</span>
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-<span class="fc" id="L6292">        _onShow( viewable, thisComponent, (c,v) -&gt; {</span>
-<span class="fc" id="L6293">            Tuple&lt;Component&gt; componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));</span>
-<span class="fc" id="L6294">            List&lt;Integer&gt; alreadyRemoved = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L6295">            _updateComponentAt(index, v, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);</span>
-<span class="fc" id="L6296">        });</span>
-<span class="fc" id="L6297">    }</span>
+<span class="fc" id="L6299">        _onShow( viewable, thisComponent, (c,v) -&gt; {</span>
+<span class="fc" id="L6300">            Tuple&lt;Component&gt; componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));</span>
+<span class="fc" id="L6301">            List&lt;Integer&gt; alreadyRemoved = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L6302">            _updateComponentAt(index, v, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);</span>
+<span class="fc" id="L6303">        });</span>
+<span class="fc" id="L6304">    }</span>
 
     private &lt;M&gt; void _updateComponentAt(
         int index,
@@ -6305,42 +6312,42 @@ import java.util.function.Supplier;
         List&lt;Integer&gt; alreadyRemoved
     ) {
         JComponent newComponent;
-<span class="pc bpc" id="L6308" title="1 of 2 branches missed.">        if ( v == null ) {</span>
-<span class="nc" id="L6309">            newComponent = new JBox();</span>
+<span class="pc bpc" id="L6315" title="1 of 2 branches missed.">        if ( v == null ) {</span>
+<span class="nc" id="L6316">            newComponent = new JBox();</span>
         } else {
-<span class="fc" id="L6311">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc" id="L6318">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
             try {
-<span class="fc" id="L6313">                view = viewSupplier.createViewFor(v);</span>
-<span class="nc" id="L6314">            } catch ( Exception e ) {</span>
-<span class="nc" id="L6315">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
-<span class="fc" id="L6316">            }</span>
-<span class="pc bpc" id="L6317" title="1 of 2 branches missed.">            if ( view == null )</span>
-<span class="nc" id="L6318">                view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6320">                view = viewSupplier.createViewFor(v);</span>
+<span class="nc" id="L6321">            } catch ( Exception e ) {</span>
+<span class="nc" id="L6322">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
+<span class="fc" id="L6323">            }</span>
+<span class="pc bpc" id="L6324" title="1 of 2 branches missed.">            if ( view == null )</span>
+<span class="nc" id="L6325">                view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc" id="L6320">            newComponent = view.get((Class)view.getType());</span>
+<span class="fc" id="L6327">            newComponent = view.get((Class)view.getType());</span>
         }
-<span class="fc" id="L6322">        Component currentComponentAtIndex = componentSnapshot.get(index);</span>
-<span class="fc bfc" id="L6323" title="All 2 branches covered.">        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes</span>
-<span class="fc" id="L6324">            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);</span>
-<span class="fc bfc" id="L6325" title="All 2 branches covered.">            if ( indexOfNewComponent &gt;= 0 ) {</span>
+<span class="fc" id="L6329">        Component currentComponentAtIndex = componentSnapshot.get(index);</span>
+<span class="fc bfc" id="L6330" title="All 2 branches covered.">        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes</span>
+<span class="fc" id="L6331">            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);</span>
+<span class="fc bfc" id="L6332" title="All 2 branches covered.">            if ( indexOfNewComponent &gt;= 0 ) {</span>
                 // The component already exists! We remove it
-<span class="fc" id="L6327">                c.remove(newComponent);</span>
-<span class="fc" id="L6328">                alreadyRemoved.add(indexOfNewComponent);</span>
+<span class="fc" id="L6334">                c.remove(newComponent);</span>
+<span class="fc" id="L6335">                alreadyRemoved.add(indexOfNewComponent);</span>
             }
-<span class="fc bfc" id="L6330" title="All 2 branches covered.">            if ( !alreadyRemoved.contains(index) ) {</span>
+<span class="fc bfc" id="L6337" title="All 2 branches covered.">            if ( !alreadyRemoved.contains(index) ) {</span>
                 // We remove the old component.
-<span class="fc" id="L6332">                c.remove(currentComponentAtIndex);</span>
+<span class="fc" id="L6339">                c.remove(currentComponentAtIndex);</span>
             }
             // We add the new component:
-<span class="pc bpc" id="L6335" title="1 of 2 branches missed.">            if ( attr == null )</span>
-<span class="fc" id="L6336">                c.add(newComponent, index);</span>
+<span class="pc bpc" id="L6342" title="1 of 2 branches missed.">            if ( attr == null )</span>
+<span class="fc" id="L6343">                c.add(newComponent, index);</span>
             else
-<span class="nc" id="L6338">                c.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
+<span class="nc" id="L6345">                c.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
             // We update the layout.
-<span class="fc" id="L6340">            c.revalidate();</span>
-<span class="fc" id="L6341">            c.repaint();</span>
+<span class="fc" id="L6347">            c.revalidate();</span>
+<span class="fc" id="L6348">            c.repaint();</span>
         }
-<span class="fc" id="L6343">    }</span>
+<span class="fc" id="L6350">    }</span>
 
     private &lt;M&gt; void _updateComponentAt(
         int index,
@@ -6352,284 +6359,284 @@ import java.util.function.Supplier;
         List&lt;Integer&gt; alreadyRemoved
     ) {
         JComponent newComponent;
-<span class="pc bpc" id="L6355" title="1 of 2 branches missed.">        if ( v == null ) {</span>
-<span class="nc" id="L6356">            newComponent = new JBox();</span>
+<span class="pc bpc" id="L6362" title="1 of 2 branches missed.">        if ( v == null ) {</span>
+<span class="nc" id="L6363">            newComponent = new JBox();</span>
         } else {
-<span class="fc" id="L6358">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc" id="L6365">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
             try {
-<span class="fc" id="L6360">                view = viewSupplier.createViewFor(ViewHandle.of(v, index, c));</span>
-<span class="nc" id="L6361">            } catch ( Exception e ) {</span>
-<span class="nc" id="L6362">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
-<span class="fc" id="L6363">            }</span>
-<span class="pc bpc" id="L6364" title="1 of 2 branches missed.">            if ( view == null )</span>
-<span class="nc" id="L6365">                view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6367">                view = viewSupplier.createViewFor(ViewHandle.of(v, index, c));</span>
+<span class="nc" id="L6368">            } catch ( Exception e ) {</span>
+<span class="nc" id="L6369">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
+<span class="fc" id="L6370">            }</span>
+<span class="pc bpc" id="L6371" title="1 of 2 branches missed.">            if ( view == null )</span>
+<span class="nc" id="L6372">                view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc" id="L6367">            newComponent = view.get((Class)view.getType());</span>
+<span class="fc" id="L6374">            newComponent = view.get((Class)view.getType());</span>
         }
-<span class="fc" id="L6369">        Component currentComponentAtIndex = componentSnapshot.get(index);</span>
-<span class="fc bfc" id="L6370" title="All 2 branches covered.">        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes</span>
-<span class="fc" id="L6371">            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);</span>
-<span class="fc bfc" id="L6372" title="All 2 branches covered.">            if ( indexOfNewComponent &gt;= 0 ) {</span>
+<span class="fc" id="L6376">        Component currentComponentAtIndex = componentSnapshot.get(index);</span>
+<span class="pc bpc" id="L6377" title="1 of 2 branches missed.">        if ( currentComponentAtIndex != newComponent ) { // Avoid unnecessary changes</span>
+<span class="fc" id="L6378">            int indexOfNewComponent = componentSnapshot.firstIndexOf(newComponent);</span>
+<span class="fc bfc" id="L6379" title="All 2 branches covered.">            if ( indexOfNewComponent &gt;= 0 ) {</span>
                 // The component already exists! We remove it
-<span class="fc" id="L6374">                c.remove(newComponent);</span>
-<span class="fc" id="L6375">                alreadyRemoved.add(indexOfNewComponent);</span>
+<span class="fc" id="L6381">                c.remove(newComponent);</span>
+<span class="fc" id="L6382">                alreadyRemoved.add(indexOfNewComponent);</span>
             }
-<span class="fc bfc" id="L6377" title="All 2 branches covered.">            if ( !alreadyRemoved.contains(index) ) {</span>
+<span class="fc bfc" id="L6384" title="All 2 branches covered.">            if ( !alreadyRemoved.contains(index) ) {</span>
                 // We remove the old component.
-<span class="fc" id="L6379">                c.remove(currentComponentAtIndex);</span>
+<span class="fc" id="L6386">                c.remove(currentComponentAtIndex);</span>
             }
             // We add the new component:
-<span class="fc bfc" id="L6382" title="All 2 branches covered.">            if ( attr == null )</span>
-<span class="fc" id="L6383">                c.add(newComponent, index);</span>
+<span class="fc bfc" id="L6389" title="All 2 branches covered.">            if ( attr == null )</span>
+<span class="fc" id="L6390">                c.add(newComponent, index);</span>
             else
-<span class="fc" id="L6385">                c.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
+<span class="fc" id="L6392">                c.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
             // We update the layout.
-<span class="fc" id="L6387">            c.revalidate();</span>
-<span class="fc" id="L6388">            c.repaint();</span>
+<span class="fc" id="L6394">            c.revalidate();</span>
+<span class="fc" id="L6395">            c.repaint();</span>
         }
-<span class="fc" id="L6390">    }</span>
+<span class="fc" id="L6397">    }</span>
 
     private &lt;M&gt; void _addComponentAt(
         int index, @Nullable M v, ViewSupplier&lt;M&gt; viewSupplier, @Nullable AddConstraint attr, C thisComponent
     ) {
         JComponent newComponent;
-<span class="pc bpc" id="L6396" title="1 of 2 branches missed.">        if ( v == null ) {</span>
-<span class="nc" id="L6397">            newComponent = new JBox();</span>
+<span class="pc bpc" id="L6403" title="1 of 2 branches missed.">        if ( v == null ) {</span>
+<span class="nc" id="L6404">            newComponent = new JBox();</span>
         } else {
-<span class="fc" id="L6399">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc" id="L6406">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
             try {
-<span class="fc" id="L6401">                view = viewSupplier.createViewFor(v);</span>
-<span class="nc" id="L6402">            } catch ( Exception e ) {</span>
-<span class="nc" id="L6403">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
-<span class="fc" id="L6404">            }</span>
-<span class="pc bpc" id="L6405" title="1 of 2 branches missed.">            if ( view == null )</span>
-<span class="nc" id="L6406">                view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6408">                view = viewSupplier.createViewFor(v);</span>
+<span class="nc" id="L6409">            } catch ( Exception e ) {</span>
+<span class="nc" id="L6410">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
+<span class="fc" id="L6411">            }</span>
+<span class="pc bpc" id="L6412" title="1 of 2 branches missed.">            if ( view == null )</span>
+<span class="nc" id="L6413">                view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc" id="L6408">            newComponent = view.get((Class)view.getType());</span>
+<span class="fc" id="L6415">            newComponent = view.get((Class)view.getType());</span>
         }
         // We add the new component.
-<span class="fc bfc" id="L6411" title="All 2 branches covered.">        if ( attr == null )</span>
-<span class="fc" id="L6412">            thisComponent.add(newComponent, index);</span>
+<span class="fc bfc" id="L6418" title="All 2 branches covered.">        if ( attr == null )</span>
+<span class="fc" id="L6419">            thisComponent.add(newComponent, index);</span>
         else
-<span class="fc" id="L6414">            thisComponent.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
+<span class="fc" id="L6421">            thisComponent.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
         // We update the layout.
-<span class="fc" id="L6416">        thisComponent.revalidate();</span>
-<span class="fc" id="L6417">        thisComponent.repaint();</span>
-<span class="fc" id="L6418">    }</span>
+<span class="fc" id="L6423">        thisComponent.revalidate();</span>
+<span class="fc" id="L6424">        thisComponent.repaint();</span>
+<span class="fc" id="L6425">    }</span>
 
     private &lt;M&gt; void _addComponentAt(
         int index, Var&lt;Tuple&lt;M&gt;&gt; v, ViewSupplier&lt;ViewHandle&lt;M&gt;&gt; viewSupplier, @Nullable AddConstraint attr, C thisComponent
     ) {
         JComponent newComponent;
-<span class="pc bpc" id="L6424" title="2 of 4 branches missed.">        if ( v.isEmpty() || v.get().isEmpty() ) {</span>
-<span class="nc" id="L6425">            newComponent = new JBox();</span>
+<span class="pc bpc" id="L6431" title="2 of 4 branches missed.">        if ( v.isEmpty() || v.get().isEmpty() ) {</span>
+<span class="nc" id="L6432">            newComponent = new JBox();</span>
         } else {
-<span class="fc" id="L6427">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
+<span class="fc" id="L6434">            UIForAnySwing&lt;?, ?&gt; view = null;</span>
             try {
-<span class="fc" id="L6429">                view = viewSupplier.createViewFor(ViewHandle.of(v, index, thisComponent));</span>
-<span class="nc" id="L6430">            } catch ( Exception e ) {</span>
-<span class="nc" id="L6431">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
-<span class="fc" id="L6432">            }</span>
-<span class="pc bpc" id="L6433" title="1 of 2 branches missed.">            if ( view == null )</span>
-<span class="nc" id="L6434">                view = UI.box(); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L6436">                view = viewSupplier.createViewFor(ViewHandle.of(v, index, thisComponent));</span>
+<span class="nc" id="L6437">            } catch ( Exception e ) {</span>
+<span class="nc" id="L6438">                log.error(SwingTree.get().logMarker(), &quot;Error while creating view for '&quot;+v+&quot;'.&quot;, e);</span>
+<span class="fc" id="L6439">            }</span>
+<span class="pc bpc" id="L6440" title="1 of 2 branches missed.">            if ( view == null )</span>
+<span class="nc" id="L6441">                view = UI.box(); // We add a dummy component to the list of children.</span>
 
-<span class="fc" id="L6436">            newComponent = view.get((Class)view.getType());</span>
+<span class="fc" id="L6443">            newComponent = view.get((Class)view.getType());</span>
         }
         // We add the new component.
-<span class="pc bpc" id="L6439" title="1 of 2 branches missed.">        if ( attr == null )</span>
-<span class="fc" id="L6440">            thisComponent.add(newComponent, index);</span>
+<span class="fc bfc" id="L6446" title="All 2 branches covered.">        if ( attr == null )</span>
+<span class="fc" id="L6447">            thisComponent.add(newComponent, index);</span>
         else
-<span class="nc" id="L6442">            thisComponent.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
+<span class="fc" id="L6449">            thisComponent.add(newComponent, attr.toConstraintForLayoutManager(), index);</span>
         // We update the layout.
-<span class="fc" id="L6444">        thisComponent.revalidate();</span>
-<span class="fc" id="L6445">        thisComponent.repaint();</span>
-<span class="fc" id="L6446">    }</span>
+<span class="fc" id="L6451">        thisComponent.revalidate();</span>
+<span class="fc" id="L6452">        thisComponent.repaint();</span>
+<span class="fc" id="L6453">    }</span>
 
     private void _removeComponentAt( int index, C thisComponent )
     {
-<span class="pc bpc" id="L6450" title="1 of 2 branches missed.">        if ( index &lt; 0 ) {</span>
-<span class="nc" id="L6451">            log.error(</span>
+<span class="pc bpc" id="L6457" title="1 of 2 branches missed.">        if ( index &lt; 0 ) {</span>
+<span class="nc" id="L6458">            log.error(</span>
                     &quot;Cannot remove sub-component of '{}' \n&quot; +
                     &quot;at index '{}' because the index is negative.&quot;,
-<span class="nc" id="L6454">                    thisComponent, index, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+<span class="nc" id="L6461">                    thisComponent, index, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
                 );
         } else {
-<span class="fc" id="L6457">            int numberOfExistingComponents = InternalUtil._actualComponentCountFrom(thisComponent);</span>
-<span class="pc bpc" id="L6458" title="1 of 2 branches missed.">            if (index &gt;= numberOfExistingComponents) {</span>
-<span class="nc" id="L6459">                log.error(</span>
+<span class="fc" id="L6464">            int numberOfExistingComponents = InternalUtil._actualComponentCountFrom(thisComponent);</span>
+<span class="pc bpc" id="L6465" title="1 of 2 branches missed.">            if (index &gt;= numberOfExistingComponents) {</span>
+<span class="nc" id="L6466">                log.error(</span>
                         &quot;Cannot remove sub-component of '{}' \n&quot; +
                         &quot;at index '{}' because there it currently only has '{}' sub-components &quot; +
                         &quot;instead of at least '{}' sub-components.&quot;,
-<span class="nc" id="L6463">                        thisComponent, index, numberOfExistingComponents, index + 1,</span>
+<span class="nc" id="L6470">                        thisComponent, index, numberOfExistingComponents, index + 1,</span>
                         new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
             } else {
                 // We get the component at the specified index.
-<span class="fc" id="L6468">                Component component = InternalUtil._actualGetComponentAt(index, thisComponent);</span>
-<span class="pc bpc" id="L6469" title="1 of 2 branches missed.">                if ( component == null ) {</span>
-<span class="nc" id="L6470">                    log.error(</span>
+<span class="fc" id="L6475">                Component component = InternalUtil._actualGetComponentAt(index, thisComponent);</span>
+<span class="pc bpc" id="L6476" title="1 of 2 branches missed.">                if ( component == null ) {</span>
+<span class="nc" id="L6477">                    log.error(</span>
                             &quot;Cannot remove sub-component of '{}' \n&quot; +
                             &quot;at index '{}' because there is no component at that index.&quot;,
-<span class="nc" id="L6473">                            thisComponent, index, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+<span class="nc" id="L6480">                            thisComponent, index, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
                         );
                 } else {
                     // We remove the component.
-<span class="fc" id="L6477">                    thisComponent.remove(component);</span>
+<span class="fc" id="L6484">                    thisComponent.remove(component);</span>
                     // We update the layout.
-<span class="fc" id="L6479">                    thisComponent.revalidate();</span>
-<span class="fc" id="L6480">                    thisComponent.repaint();</span>
+<span class="fc" id="L6486">                    thisComponent.revalidate();</span>
+<span class="fc" id="L6487">                    thisComponent.repaint();</span>
                 }
             }
         }
-<span class="fc" id="L6484">    }</span>
+<span class="fc" id="L6491">    }</span>
 
     private void _checkComponentStateBeforeBinding(C thisComponent) {
-<span class="fc bfc" id="L6487" title="All 2 branches covered.">        JComponent contentComponent = (thisComponent instanceof JScrollPanels</span>
-<span class="fc" id="L6488">                                        ? ((JScrollPanels)thisComponent).getContentPanel()</span>
-<span class="fc" id="L6489">                                        : thisComponent);</span>
-<span class="fc" id="L6490">        int componentCount = InternalUtil._actualComponentCountFrom(contentComponent);</span>
-<span class="fc bfc" id="L6491" title="All 2 branches covered.">        if ( componentCount &gt; 0 ) {</span>
-<span class="fc" id="L6492">            log.error(</span>
+<span class="fc bfc" id="L6494" title="All 2 branches covered.">        JComponent contentComponent = (thisComponent instanceof JScrollPanels</span>
+<span class="fc" id="L6495">                                        ? ((JScrollPanels)thisComponent).getContentPanel()</span>
+<span class="fc" id="L6496">                                        : thisComponent);</span>
+<span class="fc" id="L6497">        int componentCount = InternalUtil._actualComponentCountFrom(contentComponent);</span>
+<span class="fc bfc" id="L6498" title="All 2 branches covered.">        if ( componentCount &gt; 0 ) {</span>
+<span class="fc" id="L6499">            log.error(</span>
                 &quot;Trying to bind multiple sub-views to component '{}' despite it already being \n&quot; +
                 &quot;the owner of '{}' sub-components added before the 'addAll' binding call! \n&quot; +
                 &quot;If you use any of the bi-directionally binding 'addAll' methods, you may not \n&quot; +
                 &quot;add sub-views through a regular 'add' or any other way. Clearing component now...&quot;,
-<span class="fc" id="L6497">                contentComponent, componentCount, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+<span class="fc" id="L6504">                contentComponent, componentCount, new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
             );
-<span class="fc" id="L6499">            _clearComponentsOf(contentComponent);</span>
+<span class="fc" id="L6506">            _clearComponentsOf(contentComponent);</span>
         }
-<span class="fc" id="L6501">    }</span>
+<span class="fc" id="L6508">    }</span>
 
     private static &lt;T&gt; boolean _checkForTupleBindingConsistencyBeforeUpdate(
         JComponent innerComponent, ValDelegate&lt;Tuple&lt;T&gt;&gt; changeDelegate
     ) {
-<span class="fc" id="L6506">        boolean isCurrentStateValid = true;</span>
-<span class="fc" id="L6507">        int currentComponentCount = InternalUtil._actualComponentCountFrom(innerComponent);</span>
-<span class="fc" id="L6508">        int expectedComponentCount = changeDelegate.oldValue().mapTo(Integer.class, Tuple::size).orElse(currentComponentCount);</span>
-<span class="pc bpc" id="L6509" title="1 of 2 branches missed.">        if ( currentComponentCount != expectedComponentCount ) {</span>
-<span class="nc" id="L6510">            log.error(</span>
+<span class="fc" id="L6513">        boolean isCurrentStateValid = true;</span>
+<span class="fc" id="L6514">        int currentComponentCount = InternalUtil._actualComponentCountFrom(innerComponent);</span>
+<span class="fc" id="L6515">        int expectedComponentCount = changeDelegate.oldValue().mapTo(Integer.class, Tuple::size).orElse(currentComponentCount);</span>
+<span class="pc bpc" id="L6516" title="1 of 2 branches missed.">        if ( currentComponentCount != expectedComponentCount ) {</span>
+<span class="nc" id="L6517">            log.error(</span>
                 &quot;Trying to update 'addAll' tuple property based binding to component '{}' \n&quot; +
                 &quot;with an unexpected number of '{}' sub-components despite the previous tuple \n&quot; +
                 &quot;implying a number of '{}' components instead!\n&quot; +
                 &quot;If you use any of the bi-directionally binding 'addAll' methods, you may not \n&quot; +
                 &quot;add sub-views through a regular 'add' or any other way. Clearing component now...&quot;,
-<span class="nc" id="L6516">                innerComponent, currentComponentCount, expectedComponentCount,</span>
+<span class="nc" id="L6523">                innerComponent, currentComponentCount, expectedComponentCount,</span>
                 new Throwable(&quot;Stack trace for debugging purposes.&quot;)
             );
-<span class="nc" id="L6519">            isCurrentStateValid = false;</span>
+<span class="nc" id="L6526">            isCurrentStateValid = false;</span>
         }
-<span class="fc" id="L6521">        return isCurrentStateValid;</span>
+<span class="fc" id="L6528">        return isCurrentStateValid;</span>
     }
 
     private static &lt;T&gt; void _checkForTupleBindingConsistencyAfterUpdate(
         JComponent innerComponent, ValDelegate&lt;Tuple&lt;T&gt;&gt; changeDelegate
     ) {
-<span class="fc" id="L6527">        Tuple&lt;T&gt; tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();</span>
-<span class="fc" id="L6528">        int currentComponentCount = InternalUtil._actualComponentCountFrom(innerComponent);</span>
-<span class="pc bpc" id="L6529" title="1 of 2 branches missed.">        if ( currentComponentCount != tupleOfModels.size() )</span>
-<span class="nc" id="L6530">            log.warn(</span>
+<span class="fc" id="L6534">        Tuple&lt;T&gt; tupleOfModels = changeDelegate.currentValue().orElseThrowUnchecked();</span>
+<span class="fc" id="L6535">        int currentComponentCount = InternalUtil._actualComponentCountFrom(innerComponent);</span>
+<span class="pc bpc" id="L6536" title="1 of 2 branches missed.">        if ( currentComponentCount != tupleOfModels.size() )</span>
+<span class="nc" id="L6537">            log.warn(</span>
                     &quot;Broken binding to view model tuple detected! \n&quot; +
                     &quot;UI sub-component count '{}' does not match the bound tuple of size '{}'. \n&quot; +
                     &quot;A possible cause for this is that components were {} this '{}' \n&quot; +
                     &quot;directly, instead of through the property tuple binding. \n&quot; +
                     &quot;However, this could also be a bug in the UI framework.&quot;,
-<span class="nc" id="L6536">                    currentComponentCount, tupleOfModels.size(),</span>
-<span class="nc bnc" id="L6537" title="All 2 branches missed.">                    currentComponentCount &gt; tupleOfModels.size() ? &quot;added to&quot; : &quot;removed from&quot;,</span>
+<span class="nc" id="L6543">                    currentComponentCount, tupleOfModels.size(),</span>
+<span class="nc bnc" id="L6544" title="All 2 branches missed.">                    currentComponentCount &gt; tupleOfModels.size() ? &quot;added to&quot; : &quot;removed from&quot;,</span>
                     innerComponent,
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
-<span class="fc" id="L6541">    }</span>
+<span class="fc" id="L6548">    }</span>
 
     private void _clearComponentsOf( JComponent thisComponent ) {
         // We remove all components.
-<span class="fc" id="L6545">        thisComponent.removeAll();</span>
+<span class="fc" id="L6552">        thisComponent.removeAll();</span>
         // We update the layout.
-<span class="fc" id="L6547">        thisComponent.revalidate();</span>
-<span class="fc" id="L6548">        thisComponent.repaint();</span>
-<span class="fc" id="L6549">    }</span>
+<span class="fc" id="L6554">        thisComponent.revalidate();</span>
+<span class="fc" id="L6555">        thisComponent.repaint();</span>
+<span class="fc" id="L6556">    }</span>
 
     private void _reverseComponentsOf(C thisComponent ) {
         // save to a list
-<span class="fc" id="L6553">        List&lt;Component&gt; components = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L6554">        Collections.addAll(components, InternalUtil._actualComponentsFrom(thisComponent));</span>
+<span class="fc" id="L6560">        List&lt;Component&gt; components = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L6561">        Collections.addAll(components, InternalUtil._actualComponentsFrom(thisComponent));</span>
         // We remove all components.
-<span class="fc" id="L6556">        thisComponent.removeAll();</span>
+<span class="fc" id="L6563">        thisComponent.removeAll();</span>
         // Reverse the list
-<span class="fc" id="L6558">        Collections.reverse(components);</span>
+<span class="fc" id="L6565">        Collections.reverse(components);</span>
         // Add the components back in reverse order
-<span class="fc" id="L6560">        components.forEach(thisComponent::add);</span>
-<span class="fc" id="L6561">    }</span>
+<span class="fc" id="L6567">        components.forEach(thisComponent::add);</span>
+<span class="fc" id="L6568">    }</span>
 
     private static boolean _isBorderLayout( Object o ) {
-<span class="fc bfc" id="L6564" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o)     ||</span>
-<span class="fc bfc" id="L6565" title="All 2 branches covered.">               BorderLayout.PAGE_START.equals(o) ||</span>
-<span class="fc bfc" id="L6566" title="All 2 branches covered.">               BorderLayout.PAGE_END.equals(o)   ||</span>
-<span class="fc bfc" id="L6567" title="All 2 branches covered.">               BorderLayout.LINE_END.equals(o)   ||</span>
-<span class="fc bfc" id="L6568" title="All 2 branches covered.">               BorderLayout.LINE_START.equals(o) ||</span>
-<span class="pc bpc" id="L6569" title="1 of 2 branches missed.">               BorderLayout.EAST.equals(o)       ||</span>
-<span class="pc bpc" id="L6570" title="1 of 2 branches missed.">               BorderLayout.WEST.equals(o)       ||</span>
-<span class="pc bpc" id="L6571" title="1 of 2 branches missed.">               BorderLayout.NORTH.equals(o)      ||</span>
-<span class="pc bpc" id="L6572" title="1 of 2 branches missed.">               BorderLayout.SOUTH.equals(o);</span>
+<span class="fc bfc" id="L6571" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o)     ||</span>
+<span class="fc bfc" id="L6572" title="All 2 branches covered.">               BorderLayout.PAGE_START.equals(o) ||</span>
+<span class="fc bfc" id="L6573" title="All 2 branches covered.">               BorderLayout.PAGE_END.equals(o)   ||</span>
+<span class="fc bfc" id="L6574" title="All 2 branches covered.">               BorderLayout.LINE_END.equals(o)   ||</span>
+<span class="fc bfc" id="L6575" title="All 2 branches covered.">               BorderLayout.LINE_START.equals(o) ||</span>
+<span class="pc bpc" id="L6576" title="1 of 2 branches missed.">               BorderLayout.EAST.equals(o)       ||</span>
+<span class="pc bpc" id="L6577" title="1 of 2 branches missed.">               BorderLayout.WEST.equals(o)       ||</span>
+<span class="pc bpc" id="L6578" title="1 of 2 branches missed.">               BorderLayout.NORTH.equals(o)      ||</span>
+<span class="pc bpc" id="L6579" title="1 of 2 branches missed.">               BorderLayout.SOUTH.equals(o);</span>
     }
 
 
     protected static @Nullable SequenceDiff _tryCalculatingDiffBetween(@Nullable Tuple&lt;?&gt; previous, @Nullable Tuple&lt;?&gt; current) {
-<span class="pc bpc" id="L6577" title="2 of 4 branches missed.">        if ( previous == null || current == null )</span>
-<span class="nc" id="L6578">            return null;</span>
+<span class="pc bpc" id="L6584" title="2 of 4 branches missed.">        if ( previous == null || current == null )</span>
+<span class="nc" id="L6585">            return null;</span>
 
-<span class="fc" id="L6580">        final int MAX_SIZE = 256;</span>
-<span class="pc bpc" id="L6581" title="2 of 4 branches missed.">        if (previous.size() &gt; MAX_SIZE || current.size() &gt; MAX_SIZE) {</span>
-<span class="nc bnc" id="L6582" title="All 2 branches missed.">            if (previous.size() == current.size()) {</span>
+<span class="fc" id="L6587">        final int MAX_SIZE = 256;</span>
+<span class="pc bpc" id="L6588" title="2 of 4 branches missed.">        if (previous.size() &gt; MAX_SIZE || current.size() &gt; MAX_SIZE) {</span>
+<span class="nc bnc" id="L6589" title="All 2 branches missed.">            if (previous.size() == current.size()) {</span>
                 // We do a basic set across the entire range:
-<span class="nc" id="L6584">                return SequenceDiff.of(previous, SequenceChange.SET, 0, current.size());</span>
+<span class="nc" id="L6591">                return SequenceDiff.of(previous, SequenceChange.SET, 0, current.size());</span>
             }
-<span class="nc" id="L6586">            return null;</span>
+<span class="nc" id="L6593">            return null;</span>
         }
 
-<span class="pc bpc" id="L6589" title="1 of 2 branches missed.">        if (previous.equals(current)) {</span>
-<span class="nc" id="L6590">            return SequenceDiff.of(previous, SequenceChange.NONE, 0, 0);</span>
+<span class="pc bpc" id="L6596" title="1 of 2 branches missed.">        if (previous.equals(current)) {</span>
+<span class="nc" id="L6597">            return SequenceDiff.of(previous, SequenceChange.NONE, 0, 0);</span>
         }
 
-<span class="pc bpc" id="L6593" title="1 of 2 branches missed.">        if (current.isEmpty()) {</span>
-<span class="nc" id="L6594">            return SequenceDiff.of(previous, SequenceChange.CLEAR, 0, previous.size());</span>
+<span class="pc bpc" id="L6600" title="1 of 2 branches missed.">        if (current.isEmpty()) {</span>
+<span class="nc" id="L6601">            return SequenceDiff.of(previous, SequenceChange.CLEAR, 0, previous.size());</span>
         }
 
-<span class="pc bpc" id="L6597" title="1 of 2 branches missed.">        if (previous.isEmpty()) {</span>
-<span class="nc" id="L6598">            return SequenceDiff.of(previous, SequenceChange.ADD, 0, current.size());</span>
+<span class="fc bfc" id="L6604" title="All 2 branches covered.">        if (previous.isEmpty()) {</span>
+<span class="fc" id="L6605">            return SequenceDiff.of(previous, SequenceChange.ADD, 0, current.size());</span>
         }
 
         // Check for set sequence:
-<span class="fc" id="L6602">        boolean foundAllLeading = false;</span>
-<span class="fc" id="L6603">        int numberOfLeadingEqual = 0;</span>
-<span class="fc" id="L6604">        boolean foundAllTrailing = false;</span>
-<span class="fc" id="L6605">        int numberOfTrailingEqual = 0;</span>
-<span class="fc" id="L6606">        int commonSize = Math.min(previous.size(), current.size());</span>
-<span class="fc bfc" id="L6607" title="All 2 branches covered.">        for ( int i = 0; i &lt; commonSize; i++ ) {</span>
-<span class="fc bfc" id="L6608" title="All 2 branches covered.">            if ( !foundAllLeading ) {</span>
-<span class="fc" id="L6609">                Object leadingPrevious = previous.get(i);</span>
-<span class="fc" id="L6610">                Object leadingCurrent = current.get(i);</span>
-<span class="pc bpc" id="L6611" title="1 of 2 branches missed.">                if ( Objects.equals(leadingPrevious, leadingCurrent) )</span>
-<span class="nc" id="L6612">                    numberOfLeadingEqual++;</span>
+<span class="fc" id="L6609">        boolean foundAllLeading = false;</span>
+<span class="fc" id="L6610">        int numberOfLeadingEqual = 0;</span>
+<span class="fc" id="L6611">        boolean foundAllTrailing = false;</span>
+<span class="fc" id="L6612">        int numberOfTrailingEqual = 0;</span>
+<span class="fc" id="L6613">        int commonSize = Math.min(previous.size(), current.size());</span>
+<span class="fc bfc" id="L6614" title="All 2 branches covered.">        for ( int i = 0; i &lt; commonSize; i++ ) {</span>
+<span class="fc bfc" id="L6615" title="All 2 branches covered.">            if ( !foundAllLeading ) {</span>
+<span class="fc" id="L6616">                Object leadingPrevious = previous.get(i);</span>
+<span class="fc" id="L6617">                Object leadingCurrent = current.get(i);</span>
+<span class="pc bpc" id="L6618" title="1 of 2 branches missed.">                if ( Objects.equals(leadingPrevious, leadingCurrent) )</span>
+<span class="nc" id="L6619">                    numberOfLeadingEqual++;</span>
                 else
-<span class="fc" id="L6614">                    foundAllLeading = true;</span>
+<span class="fc" id="L6621">                    foundAllLeading = true;</span>
             }
-<span class="fc bfc" id="L6616" title="All 2 branches covered.">            if ( !foundAllTrailing ) {</span>
-<span class="fc" id="L6617">                Object trailingPrevious = previous.get(previous.size() - 1 - i);</span>
-<span class="fc" id="L6618">                Object trailingCurrent = current.get(current.size() - 1 - i);</span>
-<span class="pc bpc" id="L6619" title="1 of 2 branches missed.">                if ( Objects.equals(trailingPrevious, trailingCurrent) )</span>
-<span class="nc" id="L6620">                    numberOfTrailingEqual++;</span>
+<span class="fc bfc" id="L6623" title="All 2 branches covered.">            if ( !foundAllTrailing ) {</span>
+<span class="fc" id="L6624">                Object trailingPrevious = previous.get(previous.size() - 1 - i);</span>
+<span class="fc" id="L6625">                Object trailingCurrent = current.get(current.size() - 1 - i);</span>
+<span class="pc bpc" id="L6626" title="1 of 2 branches missed.">                if ( Objects.equals(trailingPrevious, trailingCurrent) )</span>
+<span class="nc" id="L6627">                    numberOfTrailingEqual++;</span>
                 else
-<span class="fc" id="L6622">                    foundAllTrailing = true;</span>
+<span class="fc" id="L6629">                    foundAllTrailing = true;</span>
             }
         }
 
-<span class="fc bfc" id="L6626" title="All 2 branches covered.">        if (previous.size() == current.size()) {</span>
+<span class="fc bfc" id="L6633" title="All 2 branches covered.">        if (previous.size() == current.size()) {</span>
             // We swap out changes in the middle!
-<span class="fc" id="L6628">            int changesInTheMiddle = (commonSize - numberOfLeadingEqual - numberOfTrailingEqual);</span>
-<span class="fc" id="L6629">            return SequenceDiff.of(previous, SequenceChange.SET, numberOfLeadingEqual, changesInTheMiddle);</span>
+<span class="fc" id="L6635">            int changesInTheMiddle = (commonSize - numberOfLeadingEqual - numberOfTrailingEqual);</span>
+<span class="fc" id="L6636">            return SequenceDiff.of(previous, SequenceChange.SET, numberOfLeadingEqual, changesInTheMiddle);</span>
         }
 
-<span class="fc" id="L6632">        return null;</span>
+<span class="fc" id="L6639">        return null;</span>
     }
 
 }

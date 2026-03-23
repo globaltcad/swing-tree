@@ -152,44 +152,42 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
     }
 
     public boolean hasPaintersWhichCannotBeCached() {
-<span class="fc" id="L155">        return _painters.stylesStream()</span>
-<span class="fc" id="L156">                .map(PainterConf::painter)</span>
-<span class="fc bfc" id="L157" title="All 2 branches covered.">                .anyMatch( p -&gt; !p.canBeCached() );</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        return _painters.any( p -&gt; !p.style().painter().canBeCached() );</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L162">        return Objects.hash(_shadows, _painters, _gradients, _noises, _images, _texts);</span>
+<span class="fc" id="L160">        return Objects.hash(_shadows, _painters, _gradients, _noises, _images, _texts);</span>
     }
 
     @Override
     public boolean equals( Object other ) {
-<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if ( other == null )</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if ( other == null )</span>
+<span class="nc" id="L166">            return false;</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if ( other.getClass() != this.getClass() )</span>
 <span class="nc" id="L168">            return false;</span>
-<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if ( other.getClass() != this.getClass() )</span>
-<span class="nc" id="L170">            return false;</span>
 
-<span class="fc" id="L172">        StyleConfLayer otherLayer = (StyleConfLayer) other;</span>
-<span class="fc" id="L173">        return</span>
-<span class="fc bfc" id="L174" title="All 2 branches covered.">            Objects.equals(this._shadows,   otherLayer._shadows)   &amp;&amp;</span>
-<span class="fc bfc" id="L175" title="All 2 branches covered.">            Objects.equals(this._painters,  otherLayer._painters)  &amp;&amp;</span>
-<span class="fc bfc" id="L176" title="All 2 branches covered.">            Objects.equals(this._gradients, otherLayer._gradients) &amp;&amp;</span>
-<span class="fc bfc" id="L177" title="All 2 branches covered.">            Objects.equals(this._noises,    otherLayer._noises)    &amp;&amp;</span>
-<span class="fc bfc" id="L178" title="All 2 branches covered.">            Objects.equals(this._images,    otherLayer._images)    &amp;&amp;</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">            Objects.equals(this._texts,     otherLayer._texts);</span>
+<span class="fc" id="L170">        StyleConfLayer otherLayer = (StyleConfLayer) other;</span>
+<span class="fc" id="L171">        return</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            Objects.equals(this._shadows,   otherLayer._shadows)   &amp;&amp;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            Objects.equals(this._painters,  otherLayer._painters)  &amp;&amp;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">            Objects.equals(this._gradients, otherLayer._gradients) &amp;&amp;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">            Objects.equals(this._noises,    otherLayer._noises)    &amp;&amp;</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">            Objects.equals(this._images,    otherLayer._images)    &amp;&amp;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">            Objects.equals(this._texts,     otherLayer._texts);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L184" title="All 2 branches covered.">        if ( this.equals(_EMPTY) )</span>
-<span class="fc" id="L185">            return this.getClass().getSimpleName() + &quot;[EMPTY]&quot;;</span>
-<span class="fc" id="L186">        String shadowString     = _shadows.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
-<span class="fc" id="L187">        String painterString    = _painters.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
-<span class="fc" id="L188">        String gradientString   = _gradients.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
-<span class="fc" id="L189">        String noiseString      = _noises.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
-<span class="fc" id="L190">        String imagesString     = _images.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
-<span class="fc" id="L191">        String textString       = _texts.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
-<span class="fc" id="L192">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        if ( this.equals(_EMPTY) )</span>
+<span class="fc" id="L183">            return this.getClass().getSimpleName() + &quot;[EMPTY]&quot;;</span>
+<span class="fc" id="L184">        String shadowString     = _shadows.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
+<span class="fc" id="L185">        String painterString    = _painters.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
+<span class="fc" id="L186">        String gradientString   = _gradients.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
+<span class="fc" id="L187">        String noiseString      = _noises.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
+<span class="fc" id="L188">        String imagesString     = _images.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
+<span class="fc" id="L189">        String textString       = _texts.toString(StyleUtil.DEFAULT_KEY, &quot;&quot;);</span>
+<span class="fc" id="L190">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;shadows=&quot;   + shadowString   + &quot;, &quot; +
                     &quot;painters=&quot;  + painterString  + &quot;, &quot; +
                     &quot;gradients=&quot; + gradientString + &quot;, &quot; +
@@ -201,44 +199,44 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
 
     @Override
     public StyleConfLayer simplified() {
-<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( this.equals(_EMPTY) )</span>
-<span class="fc" id="L205">            return this;</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        if ( this.equals(_EMPTY) )</span>
+<span class="fc" id="L203">            return this;</span>
 
-<span class="fc" id="L207">        NamedConfigs&lt;ShadowConf&gt;        simplifiedShadows   = _shadows.simplified();</span>
-<span class="fc" id="L208">        NamedConfigs&lt;PainterConf&gt;       simplifiedPainters  = _painters.simplified();</span>
-<span class="fc" id="L209">        NamedConfigs&lt;GradientConf&gt;      simplifiedGradients = _gradients.simplified();</span>
-<span class="fc" id="L210">        NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; simplifiedNoises    = _noises.simplified();</span>
-<span class="fc" id="L211">        NamedConfigs&lt;ImageConf&gt;         simplifiedImages    = _images.simplified();</span>
-<span class="fc" id="L212">        NamedConfigs&lt;TextConf&gt;          simplifiedTexts     = _texts.simplified();</span>
+<span class="fc" id="L205">        NamedConfigs&lt;ShadowConf&gt;        simplifiedShadows   = _shadows.simplified();</span>
+<span class="fc" id="L206">        NamedConfigs&lt;PainterConf&gt;       simplifiedPainters  = _painters.simplified();</span>
+<span class="fc" id="L207">        NamedConfigs&lt;GradientConf&gt;      simplifiedGradients = _gradients.simplified();</span>
+<span class="fc" id="L208">        NamedConfigs&lt;Pooled&lt;NoiseConf&gt;&gt; simplifiedNoises    = _noises.simplified();</span>
+<span class="fc" id="L209">        NamedConfigs&lt;ImageConf&gt;         simplifiedImages    = _images.simplified();</span>
+<span class="fc" id="L210">        NamedConfigs&lt;TextConf&gt;          simplifiedTexts     = _texts.simplified();</span>
 
-<span class="fc" id="L214">        if (</span>
-<span class="fc bfc" id="L215" title="All 2 branches covered.">            simplifiedShadows   .equals( _shadows   ) &amp;&amp;</span>
-<span class="pc bpc" id="L216" title="1 of 2 branches missed.">            simplifiedPainters  .equals( _painters  ) &amp;&amp;</span>
-<span class="fc bfc" id="L217" title="All 2 branches covered.">            simplifiedGradients .equals( _gradients ) &amp;&amp;</span>
-<span class="fc bfc" id="L218" title="All 2 branches covered.">            simplifiedNoises    .equals( _noises    ) &amp;&amp;</span>
-<span class="fc bfc" id="L219" title="All 2 branches covered.">            simplifiedImages    .equals( _images    ) &amp;&amp;</span>
-<span class="fc bfc" id="L220" title="All 2 branches covered.">            simplifiedTexts     .equals( _texts     )</span>
+<span class="fc" id="L212">        if (</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            simplifiedShadows   .equals( _shadows   ) &amp;&amp;</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">            simplifiedPainters  .equals( _painters  ) &amp;&amp;</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            simplifiedGradients .equals( _gradients ) &amp;&amp;</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">            simplifiedNoises    .equals( _noises    ) &amp;&amp;</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">            simplifiedImages    .equals( _images    ) &amp;&amp;</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            simplifiedTexts     .equals( _texts     )</span>
         )
-<span class="fc" id="L222">            return this;</span>
+<span class="fc" id="L220">            return this;</span>
 
-<span class="fc bfc" id="L224" title="All 2 branches covered.">        simplifiedShadows   = ( simplifiedShadows.equals(_NO_SHADOWS)     ? _NO_SHADOWS   : simplifiedShadows   );</span>
-<span class="fc bfc" id="L225" title="All 2 branches covered.">        simplifiedPainters  = ( simplifiedPainters.equals(_NO_PAINTERS)   ? _NO_PAINTERS  : simplifiedPainters  );</span>
-<span class="fc bfc" id="L226" title="All 2 branches covered.">        simplifiedGradients = ( simplifiedGradients.equals(_NO_GRADIENTS) ? _NO_GRADIENTS : simplifiedGradients );</span>
-<span class="fc bfc" id="L227" title="All 2 branches covered.">        simplifiedNoises    = ( simplifiedNoises.equals(_NO_NOISES)       ? _NO_NOISES    : simplifiedNoises    );</span>
-<span class="fc bfc" id="L228" title="All 2 branches covered.">        simplifiedImages    = ( simplifiedImages.equals(_NO_IMAGES)       ? _NO_IMAGES    : simplifiedImages    );</span>
-<span class="fc bfc" id="L229" title="All 2 branches covered.">        simplifiedTexts     = ( simplifiedTexts.equals(_NO_TEXTS)         ? _NO_TEXTS     : simplifiedTexts     );</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        simplifiedShadows   = ( simplifiedShadows.equals(_NO_SHADOWS)     ? _NO_SHADOWS   : simplifiedShadows   );</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        simplifiedPainters  = ( simplifiedPainters.equals(_NO_PAINTERS)   ? _NO_PAINTERS  : simplifiedPainters  );</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">        simplifiedGradients = ( simplifiedGradients.equals(_NO_GRADIENTS) ? _NO_GRADIENTS : simplifiedGradients );</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        simplifiedNoises    = ( simplifiedNoises.equals(_NO_NOISES)       ? _NO_NOISES    : simplifiedNoises    );</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        simplifiedImages    = ( simplifiedImages.equals(_NO_IMAGES)       ? _NO_IMAGES    : simplifiedImages    );</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        simplifiedTexts     = ( simplifiedTexts.equals(_NO_TEXTS)         ? _NO_TEXTS     : simplifiedTexts     );</span>
 
-<span class="fc" id="L231">        if (</span>
-<span class="fc bfc" id="L232" title="All 2 branches covered.">            simplifiedShadows   .equals( _NO_SHADOWS   ) &amp;&amp;</span>
-<span class="fc bfc" id="L233" title="All 2 branches covered.">            simplifiedPainters  .equals( _NO_PAINTERS  ) &amp;&amp;</span>
-<span class="fc bfc" id="L234" title="All 2 branches covered.">            simplifiedGradients .equals( _NO_GRADIENTS ) &amp;&amp;</span>
-<span class="fc bfc" id="L235" title="All 2 branches covered.">            simplifiedNoises    .equals( _NO_NOISES    ) &amp;&amp;</span>
-<span class="fc bfc" id="L236" title="All 2 branches covered.">            simplifiedImages    .equals( _NO_IMAGES    ) &amp;&amp;</span>
-<span class="fc bfc" id="L237" title="All 2 branches covered.">            simplifiedTexts     .equals( _NO_TEXTS     )</span>
+<span class="fc" id="L229">        if (</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">            simplifiedShadows   .equals( _NO_SHADOWS   ) &amp;&amp;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">            simplifiedPainters  .equals( _NO_PAINTERS  ) &amp;&amp;</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">            simplifiedGradients .equals( _NO_GRADIENTS ) &amp;&amp;</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">            simplifiedNoises    .equals( _NO_NOISES    ) &amp;&amp;</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">            simplifiedImages    .equals( _NO_IMAGES    ) &amp;&amp;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">            simplifiedTexts     .equals( _NO_TEXTS     )</span>
         )
-<span class="fc" id="L239">            return _EMPTY;</span>
+<span class="fc" id="L237">            return _EMPTY;</span>
 
-<span class="fc" id="L241">        return of(</span>
+<span class="fc" id="L239">        return of(</span>
                     simplifiedShadows,
                     simplifiedPainters,
                     simplifiedGradients,
@@ -250,7 +248,7 @@ final class StyleConfLayer implements Simplifiable&lt;StyleConfLayer&gt;
 
     @Override
     public boolean isNone() {
-<span class="nc" id="L253">        return this.equals(_EMPTY);</span>
+<span class="nc" id="L251">        return this.equals(_EMPTY);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

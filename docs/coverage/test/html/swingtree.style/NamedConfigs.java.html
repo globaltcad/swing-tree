@@ -57,110 +57,108 @@ final class NamedConfigs&lt;S&gt; implements Simplifiable&lt;NamedConfigs&lt;S&g
 
 <span class="fc" id="L58">    public int size() { return _styles.length; }</span>
 
-<span class="fc" id="L60">    public List&lt;NamedConf&lt;S&gt;&gt; namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }</span>
-
-    public Stream&lt;S&gt; stylesStream() {
-<span class="fc" id="L63">        return namedStyles()</span>
-<span class="fc" id="L64">                .stream()</span>
-<span class="fc" id="L65">                .map(NamedConf::style);</span>
-    }
+<span class="fc" id="L60">    public Stream&lt;NamedConf&lt;S&gt;&gt; namedStylesStream() { return Arrays.stream(_styles); }</span>
 
     public NamedConfigs&lt;S&gt; withNamedStyle(String name, S style ) {
-<span class="fc" id="L69">        Objects.requireNonNull(name);</span>
-<span class="fc" id="L70">        Objects.requireNonNull(style);</span>
+<span class="fc" id="L63">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L64">        Objects.requireNonNull(style);</span>
 
-<span class="fc" id="L72">        int foundIndex = _findNamedStyle(name);</span>
+<span class="fc" id="L66">        int foundIndex = _findNamedStyle(name);</span>
 
-<span class="fc bfc" id="L74" title="All 2 branches covered.">        if ( foundIndex == -1 ) {</span>
-<span class="fc" id="L75">            NamedConf&lt;S&gt;[] styles = Arrays.copyOf(_styles, _styles.length + 1);</span>
-<span class="fc" id="L76">            styles[styles.length - 1] = NamedConf.of(name, style);</span>
-<span class="fc" id="L77">            return new NamedConfigs&lt;&gt;(styles);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if ( foundIndex == -1 ) {</span>
+<span class="fc" id="L69">            NamedConf&lt;S&gt;[] styles = Arrays.copyOf(_styles, _styles.length + 1);</span>
+<span class="fc" id="L70">            styles[styles.length - 1] = NamedConf.of(name, style);</span>
+<span class="fc" id="L71">            return new NamedConfigs&lt;&gt;(styles);</span>
         }
 
-<span class="fc" id="L80">        NamedConf&lt;S&gt;[] styles = Arrays.copyOf(_styles, _styles.length);</span>
-<span class="fc" id="L81">        styles[foundIndex] = NamedConf.of(name, style);</span>
-<span class="fc" id="L82">        return new NamedConfigs&lt;&gt;(styles);</span>
+<span class="fc" id="L74">        NamedConf&lt;S&gt;[] styles = Arrays.copyOf(_styles, _styles.length);</span>
+<span class="fc" id="L75">        styles[foundIndex] = NamedConf.of(name, style);</span>
+<span class="fc" id="L76">        return new NamedConfigs&lt;&gt;(styles);</span>
     }
 
     public NamedConfigs&lt;S&gt; mapStyles( Configurator&lt;S&gt; f ) {
-<span class="fc" id="L86">        Objects.requireNonNull(f);</span>
-<span class="fc" id="L87">        return mapNamedStyles( ns -&gt; NamedConf.of(ns.name(), f.configure(ns.style())) );</span>
+<span class="fc" id="L80">        Objects.requireNonNull(f);</span>
+<span class="fc" id="L81">        return mapNamedStyles( ns -&gt; NamedConf.of(ns.name(), f.configure(ns.style())) );</span>
     }
 
 
     public NamedConfigs&lt;S&gt; mapNamedStyles( Configurator&lt;NamedConf&lt;S&gt;&gt; f ) {
-<span class="fc" id="L92">        Objects.requireNonNull(f);</span>
+<span class="fc" id="L86">        Objects.requireNonNull(f);</span>
 
-<span class="fc" id="L94">        NamedConf&lt;S&gt;[] newStyles = null;</span>
-<span class="fc bfc" id="L95" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
-<span class="fc" id="L96">            NamedConf&lt;S&gt; mapped = _styles[i];</span>
+<span class="fc" id="L88">        NamedConf&lt;S&gt;[] newStyles = null;</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="fc" id="L90">            NamedConf&lt;S&gt; mapped = _styles[i];</span>
             try {
-<span class="fc" id="L98">                mapped = f.configure(_styles[i]);</span>
-<span class="nc" id="L99">            } catch ( Exception e ) {</span>
-<span class="nc" id="L100">                log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L92">                mapped = f.configure(_styles[i]);</span>
+<span class="nc" id="L93">            } catch ( Exception e ) {</span>
+<span class="nc" id="L94">                log.error(SwingTree.get().logMarker(),</span>
                         &quot;Failed to map named style '{}' &quot; +
                         &quot;using the provided function '{}'.&quot;,
                         _styles[i], f, e
                     );
-<span class="fc" id="L105">            }</span>
-<span class="fc bfc" id="L106" title="All 4 branches covered.">            if ( newStyles == null &amp;&amp; !mapped.equals(_styles[i]) ) {</span>
-<span class="fc" id="L107">                newStyles = Arrays.copyOf(_styles, _styles.length);</span>
+<span class="fc" id="L99">            }</span>
+<span class="fc bfc" id="L100" title="All 4 branches covered.">            if ( newStyles == null &amp;&amp; !mapped.equals(_styles[i]) ) {</span>
+<span class="fc" id="L101">                newStyles = Arrays.copyOf(_styles, _styles.length);</span>
                 // We avoid heap allocation if possible!
             }
-<span class="fc bfc" id="L110" title="All 2 branches covered.">            if ( newStyles != null )</span>
-<span class="fc" id="L111">                newStyles[i] = mapped;</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            if ( newStyles != null )</span>
+<span class="fc" id="L105">                newStyles[i] = mapped;</span>
         }
-<span class="fc bfc" id="L113" title="All 2 branches covered.">        if ( newStyles == null )</span>
-<span class="fc" id="L114">            return this;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if ( newStyles == null )</span>
+<span class="fc" id="L108">            return this;</span>
 
-<span class="fc" id="L116">        List&lt;NamedConf&lt;S&gt;&gt; filtered = null;</span>
-<span class="fc bfc" id="L117" title="All 2 branches covered.">        for (int i = 0; i &lt; newStyles.length; i++) {</span>
-<span class="fc" id="L118">            NamedConf&lt;S&gt; namedConf = newStyles[i];</span>
-<span class="fc" id="L119">            boolean isNone = namedConf.isNone();</span>
-<span class="fc bfc" id="L120" title="All 4 branches covered.">            if ( isNone &amp;&amp; filtered == null ) {</span>
-<span class="fc" id="L121">                filtered = new ArrayList&lt;&gt;(Arrays.asList(newStyles).subList(0, i));</span>
+<span class="fc" id="L110">        List&lt;NamedConf&lt;S&gt;&gt; filtered = null;</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (int i = 0; i &lt; newStyles.length; i++) {</span>
+<span class="fc" id="L112">            NamedConf&lt;S&gt; namedConf = newStyles[i];</span>
+<span class="fc" id="L113">            boolean isNone = namedConf.isNone();</span>
+<span class="fc bfc" id="L114" title="All 4 branches covered.">            if ( isNone &amp;&amp; filtered == null ) {</span>
+<span class="fc" id="L115">                filtered = new ArrayList&lt;&gt;(Arrays.asList(newStyles).subList(0, i));</span>
             }
-<span class="fc bfc" id="L123" title="All 4 branches covered.">            if ( !isNone &amp;&amp; filtered != null ) {</span>
-<span class="fc" id="L124">                filtered.add(namedConf);</span>
+<span class="fc bfc" id="L117" title="All 4 branches covered.">            if ( !isNone &amp;&amp; filtered != null ) {</span>
+<span class="fc" id="L118">                filtered.add(namedConf);</span>
             }
         }
-<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (filtered != null)</span>
-<span class="fc" id="L128">            return new NamedConfigs&lt;&gt;(filtered.toArray(new NamedConf[0]));</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if (filtered != null)</span>
+<span class="fc" id="L122">            return new NamedConfigs&lt;&gt;(filtered.toArray(new NamedConf[0]));</span>
         else
-<span class="fc" id="L130">            return new NamedConfigs&lt;&gt;(newStyles);</span>
+<span class="fc" id="L124">            return new NamedConfigs&lt;&gt;(newStyles);</span>
     }
 
     private int _findNamedStyle( String name ) {
-<span class="fc bfc" id="L134" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
-<span class="fc bfc" id="L135" title="All 2 branches covered.">            if ( _styles[i].name().equals(name) )</span>
-<span class="fc" id="L136">                return i;</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            if ( _styles[i].name().equals(name) )</span>
+<span class="fc" id="L130">                return i;</span>
         }
-<span class="fc" id="L138">        return -1;</span>
+<span class="fc" id="L132">        return -1;</span>
     }
 
     public @Nullable S get(String name ) {
-<span class="fc" id="L142">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L136">        Objects.requireNonNull(name);</span>
 
-<span class="fc" id="L144">        int foundIndex = _findNamedStyle(name);</span>
+<span class="fc" id="L138">        int foundIndex = _findNamedStyle(name);</span>
 
-<span class="fc bfc" id="L146" title="All 2 branches covered.">        if ( foundIndex == -1 )</span>
-<span class="fc" id="L147">            return null;</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if ( foundIndex == -1 )</span>
+<span class="fc" id="L141">            return null;</span>
 
-<span class="fc" id="L149">        return _styles[foundIndex].style();</span>
+<span class="fc" id="L143">        return _styles[foundIndex].style();</span>
     }
 
     public Optional&lt;S&gt; find( String name ) {
-<span class="fc" id="L153">        Objects.requireNonNull(name);</span>
-<span class="fc" id="L154">        return Optional.ofNullable(get(name));</span>
+<span class="fc" id="L147">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L148">        return Optional.ofNullable(get(name));</span>
     }
 
     public List&lt;S&gt; sortedByNames() {
-<span class="fc" id="L158">        return Collections.unmodifiableList(</span>
-<span class="fc" id="L159">                    namedStyles()</span>
-<span class="fc" id="L160">                    .stream()</span>
-<span class="fc" id="L161">                    .sorted(Comparator.comparing(NamedConf::name))</span>
-<span class="fc" id="L162">                    .map(NamedConf::style)</span>
-<span class="fc" id="L163">                    .collect(Collectors.toList())</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if ( _styles.length == 0 )</span>
+<span class="nc" id="L153">            return Collections.emptyList();</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if ( _styles.length == 1 ) {</span>
+<span class="fc" id="L155">            return Collections.singletonList(_styles[0].style());</span>
+        }
+<span class="fc" id="L157">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L158">                    namedStylesStream()</span>
+<span class="fc" id="L159">                    .sorted(Comparator.comparing(NamedConf::name))</span>
+<span class="fc" id="L160">                    .map(NamedConf::style)</span>
+<span class="fc" id="L161">                    .collect(Collectors.toList())</span>
                 );
     }
 
@@ -172,19 +170,21 @@ final class NamedConfigs&lt;S&gt; implements Simplifiable&lt;NamedConfigs&lt;S&g
      * @return True if at least one of the named styles in this instance passes the test.
      */
     public boolean any( Predicate&lt;NamedConf&lt;S&gt;&gt; namedStyleTester ) {
-<span class="fc" id="L175">        return Arrays.stream(_styles).anyMatch(namedStyleTester);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        for ( NamedConf&lt;S&gt; style : _styles )</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">            if ( namedStyleTester.test(style) )</span>
+<span class="fc" id="L175">                return true;</span>
+<span class="fc" id="L176">        return false;</span>
     }
 
     public String toString( String defaultName, String styleType ) {
-<span class="fc bfc" id="L179" title="All 2 branches covered.">        if ( styleType.isEmpty() )</span>
-<span class="fc" id="L180">            styleType = this.getClass().getSimpleName();</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if ( styleType.isEmpty() )</span>
+<span class="fc" id="L181">            styleType = this.getClass().getSimpleName();</span>
         else
-<span class="fc" id="L182">            styleType += &quot;=&quot;;</span>
-<span class="fc bfc" id="L183" title="All 2 branches covered.">        if ( this.size() == 1 )</span>
-<span class="fc" id="L184">            return stringOf(this.get(defaultName));</span>
+<span class="fc" id="L183">            styleType += &quot;=&quot;;</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if ( this.size() == 1 )</span>
+<span class="fc" id="L185">            return stringOf(this.get(defaultName));</span>
         else
-<span class="fc" id="L186">            return this.namedStyles()</span>
-<span class="fc" id="L187">                    .stream()</span>
+<span class="fc" id="L187">            return this.namedStylesStream()</span>
 <span class="fc" id="L188">                    .map(e -&gt; e.name() + &quot;=&quot; + stringOf(e.style()))</span>
 <span class="fc" id="L189">                    .collect(Collectors.joining(&quot;, &quot;, styleType+&quot;[&quot;, &quot;]&quot;));</span>
     }

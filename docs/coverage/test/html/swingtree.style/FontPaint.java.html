@@ -74,11 +74,11 @@ final class FontPaint implements Paint
 <span class="fc" id="L74">        JComponent thatComponent = _componentRef.get();</span>
 <span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if ( thisComponent != thatComponent )</span>
 <span class="nc" id="L76">            return false;</span>
-<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        else if ( thisComponent != null )</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        else if ( thisComponent != null )</span>
 <span class="fc" id="L78">            return this._fontPaintConf.equals(that._fontPaintConf);</span>
         else
-<span class="nc bnc" id="L80" title="All 2 branches missed.">            return this._fontPaintConf.equals(that._fontPaintConf) &amp;&amp;</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">                   this._boxModelConf.equals(that._boxModelConf);</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            return this._fontPaintConf.equals(that._fontPaintConf) &amp;&amp;</span>
+<span class="pc bnc" id="L81" title="All 2 branches missed.">                   this._boxModelConf.equals(that._boxModelConf);</span>
     }
 
     @Override

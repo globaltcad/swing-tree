@@ -65,9 +65,9 @@ final class BaseColorConf
 <span class="fc bfc" id="L65" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
 <span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="fc" id="L67">        BaseColorConf rhs = (BaseColorConf) obj;</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        return Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
-<span class="fc bfc" id="L69" title="All 2 branches covered.">               Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
-<span class="fc bfc" id="L70" title="All 2 branches covered.">               Objects.equals(_borderColors,    rhs._borderColors);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        return Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">               Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
+<span class="pc bnc" id="L70" title="All 2 branches missed.">               Objects.equals(_borderColors,    rhs._borderColors);</span>
     }
 
     @Override
