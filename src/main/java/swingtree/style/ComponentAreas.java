@@ -146,11 +146,14 @@ final class ComponentAreas
         if ( BoxModelConf.none().equals(border) ) {
             Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));
             // If there is no style, we just return the component's bounds:
+            float left   = insets.left().orElse(0f);
+            float top    = insets.top().orElse(0f);
+            float right  = insets.right().orElse(0f);
+            float bottom = insets.bottom().orElse(0f);
             return new Area(new Rectangle2D.Float(
-                            insets.left().orElse(0f),
-                            insets.top().orElse(0f),
-                            size.width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),
-                            size.height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)
+                            left, top,
+                            size.width().orElse(0f) - left - right,
+                            size.height().orElse(0f) - top - bottom
                         ));
         }
 
