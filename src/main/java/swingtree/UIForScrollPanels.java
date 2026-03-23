@@ -199,21 +199,28 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         }
     }
 
-    private <M> void _setAllEntriesAt(
+    private <M extends HasId<?>> void _setAllEntriesAt(
             @Nullable AddConstraint attr,
             JScrollPanels thisComponent,
             int index,
             int size,
+            Tuple<M> oldModels,
+            Tuple<M> newModels,
             Function<Integer, ViewHandle<M>> lensSupplier,
             ViewSupplier<ViewHandle<M>> viewSupplier
     ) {
         for (int i = 0; i < size; i++) {
-            ViewHandle<M> viewable = lensSupplier.apply(index+i);
-            thisComponent.setEntryAt(
-                    i + index, attr,
-                    _entryModel(),
-                    m -> viewSupplier.createViewFor(viewable)
-            );
+            M oldModel = oldModels.get(index + i);
+            M newModel = newModels.get(index + i);
+            // Only do the update if the ids changed:
+            if ( !Objects.equals(oldModel.id(), newModel.id()) ) {
+                ViewHandle<M> viewable = lensSupplier.apply(index + i);
+                thisComponent.setEntryAt(
+                        i + index, attr,
+                        _entryModel(),
+                        m -> viewSupplier.createViewFor(viewable)
+                );
+            }
         }
     }
 
@@ -252,7 +259,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
     }
 
     @Override
-    protected <M> void _addViewableProps(
+    protected <M extends HasId<?>> void _addViewableProps(
             Var<Tuple<M>> propertyOfModels,
             @Nullable AddConstraint attr,
             ModelToViewConverter<ViewHandle<M>> viewSupplier,
@@ -279,7 +286,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             } else {
                 int index = diff.index().orElse(-1);
                 int count = diff.size();
-                _update(thisComponent, attr, diff.change(), index, count, newModels, lensSupplier, viewSupplier);
+                _update(thisComponent, attr, diff.change(), index, count, oldModels, newModels, lensSupplier, viewSupplier);
             }
             viewSupplier.clearCurrentViews();
         });
@@ -337,12 +344,13 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         }
     }
 
-    private <M> void _update(
+    private <M extends HasId<?>> void _update(
             P c,
             @Nullable AddConstraint attr,
             SequenceChange change,
             int index,
             int count,
+            Tuple<M> oldModels,
             Tuple<M> newModels,
             Function<Integer, ViewHandle<M>> lensSupplier,
             ModelToViewConverter<ViewHandle<M>> viewSupplier
@@ -354,7 +362,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         } else {
             switch (change) {
                 case SET:
-                    _setAllEntriesAt(attr, c, index, count, lensSupplier, viewSupplier);
+                    _setAllEntriesAt(attr, c, index, count, oldModels, newModels, lensSupplier, viewSupplier);
                     break;
                 case ADD:
                     _addAllEntriesAt(attr, c, index, newModels.sliceAt(index, count), lensSupplier, viewSupplier);
