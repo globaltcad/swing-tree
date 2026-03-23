@@ -5986,7 +5986,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     // Overridden in UIForScrollPanels
-    protected <M> void _addViewableProps(
+    protected <M extends HasId<?>> void _addViewableProps(
         Var<Tuple<M>> models,
         @Nullable AddConstraint attr,
         ModelToViewConverter<ViewHandle<M>> viewSupplier,
@@ -6104,7 +6104,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }
     }
 
-    private <M> void _updateSubViews(
+    private <M extends HasId<?>> void _updateSubViews(
         C innerComponent,
         ValDelegate<Tuple<M>> changeDelegate,
         Var<Tuple<M>> tupleOfModels,
@@ -6120,7 +6120,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 int index = diff.index().orElse(-1);
                 int count = diff.size();
                 SequenceChange change = diff.change();
-                _doInformedSubViewUpdate(index, count, change, innerComponent, tupleOfModels, attr, viewSupplier);
+                Tuple<M> oldTuple = changeDelegate.oldValue().orElseThrowUnchecked();
+                Tuple<M> newTuple = changeDelegate.currentValue().orElseThrowUnchecked();
+                _doInformedSubViewUpdate(index, count, oldTuple, newTuple, change, innerComponent, tupleOfModels, attr, viewSupplier);
             } catch (Exception e) {
                 log.error(
                     "Failed to perform an informed tuple bound view update, \n" +
@@ -6150,9 +6152,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return diff;
     }
 
-    private <M> void _doInformedSubViewUpdate(
+    private <M extends HasId<?>> void _doInformedSubViewUpdate(
         int index,
         int count,
+        Tuple<M> oldTuple,
+        Tuple<M> newTuple,
         SequenceChange change,
         C c,
         Var<Tuple<M>> tupleOfModels,
@@ -6167,8 +6171,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 } else {
                     Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
                     List<Integer> alreadyRemoved = new ArrayList<>();
-                    for ( int i = index; i < (index + count); i++ )
-                        _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
+                    for ( int i = index; i < (index + count); i++ ) {
+                        boolean hasDifferentIds = !Objects.equals(oldTuple.get(i).id(), newTuple.get(i).id());
+                        if ( hasDifferentIds )
+                            _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
+                    }
                 }
                 break;
             case ADD:
