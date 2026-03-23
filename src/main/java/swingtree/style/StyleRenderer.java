@@ -768,11 +768,7 @@ final class StyleRenderer
         final Point2D.Float  center,
         final Pooled<NoiseConf> noise
     ) {
-        Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.get(noise);
-        if ( cachedPaints == null ) {
-            cachedPaints = new HashMap<>();
-        }
-        _NOISE_PAINT_CACHE.put(noise, cachedPaints); // Ensure the cache has a reference to a used noise conf...
+        Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new HashMap<>());
         NoiseGradientPaint paint = cachedPaints.get(center);
         if ( paint != null ) {
             return paint;
