@@ -192,7 +192,7 @@ class Tuple_Bound_Views_Spec extends Specification
     }
 
 
-    def 'Changing an item`s data but keeping its id does NOT rebuild the sub-view.'()
+    def "Changing an item's data but keeping its id does NOT rebuild the sub-view."()
     {
         reportInfo """
             This is the key efficiency optimization of the `BoundViewSupplier` based `addAll`:
