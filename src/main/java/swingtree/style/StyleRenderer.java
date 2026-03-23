@@ -738,23 +738,7 @@ final class StyleRenderer
         if ( noise.get().colors().length == 1 ) {
             return noise.get().colors()[0];
         } else {
-            Size dimensions = boxModel.size();
-            Outline insets = Outline.none();
-            switch ( noise.get().boundary() ) {
-                case OUTER_TO_EXTERIOR:
-                    insets = Outline.none(); break;
-                case EXTERIOR_TO_BORDER:
-                    insets = boxModel.margin(); break;
-                case BORDER_TO_INTERIOR:
-                    insets = boxModel.margin().plus(boxModel.widths()); break;
-                case INTERIOR_TO_CONTENT:
-                    insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding()); break;
-                case CENTER_TO_CONTENT:
-                    float verticalInset   = dimensions.height().orElse(0f) / 2f;
-                    float horizontalInset = dimensions.width().orElse(0f) / 2f;
-                    insets = Outline.of(verticalInset, horizontalInset);
-            }
-
+            Outline insets = boxModel.insetsFor(noise.get().boundary());
             Point2D.Float corner1 = new Point2D.Float(
                                         insets.left().orElse(0f) + noise.get().offset().x(),
                                         insets.top().orElse(0f) + noise.get().offset().y()
