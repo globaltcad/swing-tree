@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyledString.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyledString.java</span></div><h1>StyledString.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
+import swingtree.api.Configurator;
+import swingtree.api.Styler;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+/**
+ *  A {@link StyledString} is a uniformly styled snippet of text which is typically part of a sequence
+ *  of styled strings that together make up a visually rich text in the &lt;i&gt;SwingTree&lt;/i&gt; style API.
+ *  More specifically, you can pass instances of this to {@link TextConf#content(StyledString...)}
+ *  as part of a {@link ComponentStyleDelegate#text(Configurator)} sub-style configuration.&lt;br&gt;
+ *  This class has value semantics and is immutable, so any potential {@link Configurator} referenced
+ *  by an instance of this class is expected to be a pure function that produces the same output
+ *  given the same input and has no side effects. &lt;br&gt;
+ *
+ * @see swingtree.UIForAnySwing#withStyle(Styler)
+ * @see ComponentStyleDelegate#text(Configurator)
+ * @see TextConf#content(StyledString...)
+ * @see FontConf
+ */
+public final class StyledString {
+
+<span class="fc" id="L30">    private static final Logger log = LoggerFactory.getLogger(StyledString.class);</span>
+
+    /**
+     *  Creates a styled string with the given string but no style information.&lt;br&gt;
+     *  The style of the string will be inherited from the context in which it is used within the style engine. &lt;br&gt;
+     * @param string The string content of the styled string. It must not be null.
+     * @return A new styled string with the given string and no style information.
+     * @throws NullPointerException if the given string is null.
+     */
+    public static StyledString of( String string ) {
+<span class="fc" id="L40">        return new StyledString(string, (Object) null);</span>
+    }
+
+    /**
+     *  Creates a styled string with the given string and style information provided by the given font {@link Configurator}.&lt;br&gt;
+     *  The font configurator takes in an inherited {@link FontConf} and produces a new {@link FontConf}
+     *  derived to hold the desired style information for the string.
+     *  @param fontConfigurator A configurator that takes in an inherited {@link FontConf} and produces a new {@link FontConf}
+     *                          derived to hold the desired style information for the string. It must not be null and
+     *                          &lt;b&gt;must be a pure function&lt;/b&gt; that produces the same output given the same input and has no side effects.
+     *  @param string The string content of the styled string. It must not be null.
+     *  @return A new styled string with the given string and style information provided by the given font configurator.
+     *  @throws NullPointerException if the given string or font configurator is null.
+     */
+    public static StyledString of( Configurator&lt;FontConf&gt; fontConfigurator, String string ) {
+<span class="fc" id="L55">        return new StyledString(string, fontConfigurator);</span>
+    }
+
+    private final String _string;
+    private final @Nullable Object _configuratorOrFontConf;
+
+    private StyledString(String string, Configurator&lt;FontConf&gt; fontConfigurator) {
+<span class="fc" id="L62">        this(Objects.requireNonNull(string), (Object) Objects.requireNonNull(fontConfigurator));</span>
+<span class="fc" id="L63">    }</span>
+
+    private StyledString(String string, FontConf fontConf) {
+<span class="fc" id="L66">        this(Objects.requireNonNull(string), (Object) Objects.requireNonNull(fontConf));</span>
+<span class="fc" id="L67">    }</span>
+
+<span class="fc" id="L69">    private StyledString(String string, @Nullable Object fontConfigurator) {</span>
+<span class="fc" id="L70">        _string = Objects.requireNonNull(string);</span>
+<span class="fc" id="L71">        _configuratorOrFontConf = fontConfigurator;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     *  Returns the string content of this styled string.
+     *  This is the actual text that will be rendered when this styled string is used in a style configuration. &lt;br&gt;
+     * @return The string content of this styled string. It is guaranteed to be non-null.
+     */
+    public String string() {
+<span class="fc" id="L80">        return _string;</span>
+    }
+
+    /**
+     *  Returns a new styled string with the same style information as this styled string but with a new string content. &lt;br&gt;
+     *  This is useful for when you want to reuse the same style information for different string content. &lt;br&gt;
+     * @param string The new string content for the styled string. It must not be null.
+     * @return A new styled string with the same style information as this styled string but with the given string content.
+     * @throws NullPointerException if the given string is null.
+     */
+    public StyledString withString(String string) {
+<span class="nc" id="L91">        return new StyledString(string, _configuratorOrFontConf);</span>
+    }
+
+    StyledString mapStyle( Function&lt;FontConf, FontConf&gt; mapper ) {
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if ( _configuratorOrFontConf instanceof FontConf ) {</span>
+            try {
+<span class="nc" id="L97">                FontConf newConf = mapper.apply((FontConf) _configuratorOrFontConf);</span>
+<span class="nc" id="L98">                return new StyledString(_string, newConf);</span>
+<span class="nc" id="L99">            } catch (Exception e) {</span>
+<span class="nc" id="L100">                log.error(SwingTree.get().logMarker(), &quot;Error mapping font conf for string '{}'&quot;, _string, e);</span>
+            }
+        }
+<span class="fc" id="L103">        return this;</span>
+    }
+
+    Optional&lt;FontConf&gt; fontConf() {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if ( _configuratorOrFontConf instanceof FontConf ) {</span>
+<span class="fc" id="L108">            return Optional.of( (FontConf) _configuratorOrFontConf );</span>
+        }
+<span class="fc" id="L110">        return Optional.empty();</span>
+    }
+
+    StyledString resolveUsing(FontConf startConf) {
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if ( _configuratorOrFontConf instanceof Configurator ) {</span>
+            // We run the start conf through the configurator to get the new conf:
+<span class="fc" id="L116">            Configurator&lt;FontConf&gt; configurator = (Configurator&lt;FontConf&gt;) _configuratorOrFontConf;</span>
+            try {
+<span class="fc" id="L118">                FontConf newConf = configurator.configure(startConf);</span>
+<span class="fc" id="L119">                return new StyledString(_string, newConf);</span>
+<span class="nc" id="L120">            } catch (Exception e) {</span>
+<span class="nc" id="L121">                log.error(SwingTree.get().logMarker(), &quot;Error configuring font conf for string '{}'&quot;, _string, e);</span>
+            }
+        }
+<span class="fc" id="L124">        return this;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L129">        return &quot;StyledString[&quot; +</span>
+                    &quot;string='&quot; + _string + &quot;', &quot; +
+<span class="fc bfc" id="L131" title="All 2 branches covered.">                    &quot;style=&quot; + (_configuratorOrFontConf == null ? &quot;?&quot; : String.valueOf(_configuratorOrFontConf)) +</span>
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if ( this == o )</span>
+<span class="nc" id="L138">            return true;</span>
+<span class="pc bpc" id="L139" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() )</span>
+<span class="nc" id="L140">            return false;</span>
+<span class="fc" id="L141">        StyledString that = (StyledString) o;</span>
+<span class="fc bfc" id="L142" title="All 4 branches covered.">        return _string.equals(that._string) &amp;&amp; Objects.equals(_configuratorOrFontConf, that._configuratorOrFontConf);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L147">        return Objects.hash(_string, _configuratorOrFontConf);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
