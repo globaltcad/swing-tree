@@ -846,11 +846,9 @@ final class StyleRenderer
         }
 
         if ( gradient.rotation() % 360f != 0 ) {
-            Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-            Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
-            p2 = _rotatePoint(p1, p2, gradient.rotation());
-            corner2X = p2.x;
-            corner2Y = p2.y;
+            Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());
+            corner2X = p.x;
+            corner2Y = p.y;
         }
 
         if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
@@ -907,11 +905,9 @@ final class StyleRenderer
             float[] fractions = _fractionsFrom(gradient);
 
             if ( gradient.rotation() % 360f != 0 ) {
-                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
-                p2 = _rotatePoint(p1, p2, gradient.rotation());
-                corner2X = p2.x;
-                corner2Y = p2.y;
+                Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());
+                corner2X = p.x;
+                corner2Y = p.y;
             }
 
             return new LinearGradientPaint(
@@ -984,11 +980,9 @@ final class StyleRenderer
             float focusY = corner1Y + gradient.focus().y();
 
             if ( gradient.rotation() % 360f != 0 ) {
-                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                Point2D.Float p2 = new Point2D.Float(focusX, focusY);
-                p2 = _rotatePoint(p1, p2, gradient.rotation());
-                focusX = p2.x;
-                focusY = p2.y;
+                Point2D.Float p = _rotatePoint(corner1X, corner1Y, focusX, focusY, gradient.rotation());
+                focusX = p.x;
+                focusY = p.y;
             }
 
             return new RadialGradientPaint(
@@ -1060,26 +1054,26 @@ final class StyleRenderer
      *  the point {@code p2} rotated around {@code p1} by {@code rotation} degrees.
      */
     private static Point2D.Float _rotatePoint(
-        final Point2D.Float p1,
-        final Point2D.Float p2,
+        final float p1X, final float p1Y,
+        final float p2X, final float p2Y,
         final float rotation
     ) {
         if ( rotation == 0f )
-            return p2;
+            return new Point2D.Float(p2X, p2Y);
         else if ( rotation % 360f == 0f )
-            return p2;
+            return new Point2D.Float(p2X, p2Y);
 
         final double angle = Math.toRadians(rotation);
         final double sin   = Math.sin(angle);
         final double cos   = Math.cos(angle);
 
-        final double x = p2.x - p1.x;
-        final double y = p2.y - p1.y;
+        final double x = p2X - p1X;
+        final double y = p2Y - p1Y;
 
         final double newX = x * cos - y * sin;
         final double newY = x * sin + y * cos;
 
-        return new Point2D.Float((float) (p1.x + newX), (float) (p1.y + newY));
+        return new Point2D.Float((float) (p1X + newX), (float) (p1Y + newY));
     }
 
     /**
