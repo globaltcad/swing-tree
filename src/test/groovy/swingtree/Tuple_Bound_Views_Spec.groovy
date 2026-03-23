@@ -524,7 +524,7 @@ class Tuple_Bound_Views_Spec extends Specification
     }
 
 
-    def 'When an item`s id stays the same during a SET operation, the sub-view of a `JScrollPanel` is NOT rebuilt.'()
+    def 'When an item`s id stays the same during a SET operation, the sub-view of a `JScrollPanels` is NOT rebuilt.'()
     {
         reportInfo """
             This test specifically isolates the `HasId` based optimization in the SET path,
