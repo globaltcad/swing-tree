@@ -1,9 +1,10 @@
 package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
+import sprouts.Tuple;
 import swingtree.api.Styler;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.util.Objects;
 
 /**
@@ -20,43 +21,45 @@ import java.util.Objects;
  *
  * @param <C> The type of {@link JComponent} this {@link StyleTrait} is for.
  */
+@Immutable
+@SuppressWarnings("Immutable")
 public final class StyleTrait<C extends JComponent>
 {
-    private final String   _group;
-    private final String   _id;
-    private final String[] _toInherit;
-    private final Class<C> _type;
+    private final String        _group;
+    private final String        _id;
+    private final Tuple<String> _toInherit;
+    private final Class<C>      _type;
 
-    private StyleTrait( String id, String groupTag, String[] inherits, Class<C> type ) {
+    private StyleTrait( String id, String groupTag, Tuple<String> inherits, Class<C> type ) {
         _id        = Objects.requireNonNull(id);
         _group     = Objects.requireNonNull(groupTag);
-        _toInherit = Objects.requireNonNull(inherits).clone();
+        _toInherit = Objects.requireNonNull(inherits);
         _type      = Objects.requireNonNull(type);
         // And we check for duplicates and throw an exception if we find any.
-        for ( int i = 0; i < _toInherit.length - 1; i++ )
-            if ( _toInherit[ i ].equals( _toInherit[ i + 1 ] ) )
+        for ( int i = 0; i < _toInherit.size() - 1; i++ )
+            if ( _toInherit.get(i).equals( _toInherit.get( i + 1 ) ) )
                 throw new IllegalArgumentException(
                             "Duplicate inheritance found in " + this + "!"
                         );
     }
 
-    StyleTrait() { this( "", "", new String[0], (Class<C>) JComponent.class ); }
+    StyleTrait() { this( "", "", Tuple.of(String.class), (Class<C>) JComponent.class ); }
 
 
-    String group()       { return _group;     }
+    String group() { return _group; }
 
-    String id()          { return _id;        }
+    String id() { return _id; }
 
-    String[] toInherit() { return _toInherit; }
+    Tuple<String> toInherit() { return _toInherit; }
 
-    Class<?> type()      { return _type;      }
+    Class<?> type() { return _type; }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
      *  but with the given group name. <br>
      *  <b>
      *      Note that this method defines the group in terms of a {@link String}
-     *      which can be problematic with respect to compile-time safety. <br>
+     *      which can be problematic with respect to compile-time type safety. <br>
      *      Please consider using {@link #group(Enum)} instead.
      *  </b>
      *
@@ -116,7 +119,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given groups to inherit from.
      */
-    public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_id, _group, superGroups, _type ); }
+    public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_id, _group, Tuple.of(String.class, superGroups), _type ); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -185,7 +188,7 @@ public final class StyleTrait<C extends JComponent>
 
     @Override
     public String toString() {
-        String inherits = java.util.Arrays.toString(_toInherit);
+        String inherits = "[" + _toInherit.join(", ") + "]";
         return "StyleTrait[" +
                     "id='"      + _id      + "', " +
                     "group='"   + _group   + "', " +
@@ -196,11 +199,7 @@ public final class StyleTrait<C extends JComponent>
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        for ( String inherit : _toInherit )
-            hash = 31 * hash + inherit.hashCode();
-
-        return Objects.hash( _id, _group, hash, _type );
+        return Objects.hash( _id, _group, _toInherit, _type );
     }
 
     @Override
@@ -212,7 +211,7 @@ public final class StyleTrait<C extends JComponent>
         return _id    .equals( that._id    ) &&
                _group .equals( that._group ) &&
                _type  .equals( that._type  ) &&
-                java.util.Arrays.equals(_toInherit, that._toInherit);
+               Objects.equals(_toInherit, that._toInherit);
     }
 
 }
