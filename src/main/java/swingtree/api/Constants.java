@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 
 import java.awt.*;
 
-class Constants
+final class Constants
 {
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger("swingtree");
     static final Styler<?> STYLER_NONE = delegate -> delegate;
