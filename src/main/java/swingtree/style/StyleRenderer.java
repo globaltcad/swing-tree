@@ -163,10 +163,9 @@ final class StyleRenderer
         final ShadowConf    shadow,
         final Graphics2D    g2d
     ) {
-        if ( !shadow.color().isPresent() )
+        final Color shadowColor = shadow.color().orElse(null);
+        if ( shadowColor == null )
             return;
-
-        final Color shadowColor = shadow.color().orElse(Color.BLACK);
         final Size  size        = conf.boxModel().size();
 
         // First let's check if we need to render any shadows at all
@@ -643,10 +642,14 @@ final class StyleRenderer
             insets = boxModel.insetsFor(gradient.boundary());
         }
 
-        final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
-        final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
-        final float realX  = insets.left().orElse(0f) + gradient.offset().x();
-        final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
+        final float insLeft   = insets.left().orElse(0f);
+        final float insTop    = insets.top().orElse(0f);
+        final float insRight  = insets.right().orElse(0f);
+        final float insBottom = insets.bottom().orElse(0f);
+        final float width  = dimensions.width().orElse(0f)  - ( insRight  + insLeft );
+        final float height = dimensions.height().orElse(0f) - ( insBottom + insTop );
+        final float realX  = insLeft + gradient.offset().x();
+        final float realY  = insTop  + gradient.offset().y();
 
         final Point2D.Float corner1;
         final Point2D.Float corner2;
@@ -943,22 +946,13 @@ final class StyleRenderer
             radius = size;
 
         if ( gradient.focus().equals(Offset.none()) ) {
-            if ( colors.length == 2 )
-                return new RadialGradientPaint(
-                        new Point2D.Float(corner1X, corner1Y),
-                        radius,
-                        fractions,
-                        colors,
-                        _cycleMethodFrom(cycle)
-                    );
-            else
-                return new RadialGradientPaint(
-                        new Point2D.Float(corner1X, corner1Y),
-                        radius,
-                        fractions,
-                        colors,
-                        _cycleMethodFrom(cycle)
-                     );
+            return new RadialGradientPaint(
+                    new Point2D.Float(corner1X, corner1Y),
+                    radius,
+                    fractions,
+                    colors,
+                    _cycleMethodFrom(cycle)
+                );
         } else {
             float focusX = corner1X + gradient.focus().x();
             float focusY = corner1Y + gradient.focus().y();
@@ -1020,7 +1014,7 @@ final class StyleRenderer
                 float[] newFractions = new float[colors.length];
                 System.arraycopy(fractions, 0, newFractions, 0, fractions.length);
                 /*
-                    Now simply complete th missing fractions by linear interpolation
+                    Now simply complete the missing fractions by linear interpolation
                     between the last fraction and 1f
                 */
                 float lastFraction = fractions[fractions.length - 1];
@@ -1289,10 +1283,12 @@ final class StyleRenderer
         final Offset               offset            = text.offset();
         final Outline              insets            = boxModel.insetsFor(placementBoundary);
         // Computing the area available for text rendering after applying the offset and insets:
-        final float leftX = offset.x() + insets.left().orElse(0f);
-        final float topY  = offset.y() + insets.top().orElse(0f);
-        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (insets.left().orElse(0f) + insets.right().orElse(0f)));
-        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (insets.top().orElse(0f) + insets.bottom().orElse(0f)));
+        final float insLeft   = insets.left().orElse(0f);
+        final float insTop    = insets.top().orElse(0f);
+        final float leftX = offset.x() + insLeft;
+        final float topY  = offset.y() + insTop;
+        final float localWidth  = Math.max(0, boxModel.size().width().orElse(0f)  - (insLeft + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0, boxModel.size().height().orElse(0f) - (insTop  + insets.bottom().orElse(0f)));
         return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
@@ -1567,8 +1563,11 @@ final class StyleRenderer
         /*
             remove trailing newline marker
          */
-        if (!layouts.isEmpty() && layouts.get(layouts.size()-1) == null)
-            layouts.remove(layouts.size()-1);
+        if (!layouts.isEmpty()) {
+            int last = layouts.size() - 1;
+            if (layouts.get(last) == null)
+                layouts.remove(last);
+        }
 
         /*
             ------------------------------------------------
