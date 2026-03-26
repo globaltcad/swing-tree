@@ -37,7 +37,7 @@ class UI_Query_Spec extends Specification
             var root =
             UI.panel("fill, insets 3", "[grow][shrink]")
             .add("grow",
-                UI.splitPane(UI.Align.VERTICAL)
+                UI.splitPane(UI.Align.HORIZONTAL)
                 .withDividerAt(50)
                 .add(
                     UI.scrollPane()

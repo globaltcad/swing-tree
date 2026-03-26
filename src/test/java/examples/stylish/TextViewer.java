@@ -139,7 +139,7 @@ public class TextViewer extends Panel
             .shadowSpreadRadius(-1)
         )
         .add("grow",
-            splitPane(Align.HORIZONTAL)
+            splitPane(Align.VERTICAL)
             .add(
                 panel("fill").withMinSize(80, 20)
                 .withBackground(Color.LIGHTSTEELBLUE.brighter())

@@ -11,7 +11,7 @@ class AdvancedUI {
         UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme())
         UI.panel("fill, ins 5")
         .add("grow",
-            UI.splitPane(UI.Align.VERTICAL).withDividerAt(565)
+            UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(565)
             .add(
                 UI.panel("fill, ins 0")
                 .add("push, grow, span, wrap",

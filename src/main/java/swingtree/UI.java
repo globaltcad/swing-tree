@@ -199,8 +199,8 @@ public final class UI extends UIFactoryMethods
         }
         int forSplitPane() {
             switch ( this ) {
-                case HORIZONTAL: return JSplitPane.VERTICAL_SPLIT;
-                case VERTICAL:   return JSplitPane.HORIZONTAL_SPLIT;
+                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;
+                case VERTICAL:   return JSplitPane.VERTICAL_SPLIT;
             }
             throw new RuntimeException();
         }

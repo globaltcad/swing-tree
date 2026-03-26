@@ -41,13 +41,18 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     }
 
     /**
-     * Sets the alignment of the split bar in the split pane.
+     * Sets the layout of the two components in the split pane to either be
+     * placed left to right (horizontal split) or on top of each other (vertical split).
+     * If you want to control this property dynamically through a bound property,
+     * then consider using the {@link #withLayout(Val)} method.<br>
+     * You can also directly construct a split pane with the desired layout through the
+     * {@link UI#splitPane(UI.Align)} and {@link UI#splitPane(Val)} factory methods.
      *
-     * @param align The alignment of the split bar in the split pane.
+     * @param align The alignment of the components in the split pane, which determines the layout of the split pane.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided alignment is null.
      */
-    public final UIForSplitPane<P> withOrientation( UI.Align align ) {
+    public final UIForSplitPane<P> withLayout( UI.Align align ) {
         NullUtil.nullArgCheck( align, "split", UI.Align.class );
         return _with( thisComponent -> {
                     thisComponent.setOrientation( align.forSplitPane() );
@@ -56,15 +61,19 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     }
 
     /**
-     * Sets the alignment of the split bar in the split pane dynamically
-     * based on the provided {@link Val} property which will be observed
-     * by the split pane.
+     * Dynamically sets the layout of the two components in the split pane to either be
+     * placed left to right (horizontal split) or on top of each other (vertical split).
+     * This method binds the supplied layout property to the split pane, which means that when
+     * the property changes its {@link swingtree.UI.Align}, then the layout of the split pane will be updated accordingly.
+     * If you want to set a fixed layout that does not change dynamically, then consider using the {@link #withLayout(UI.Align)} method.<br>
+     * You can also directly construct a split pane with the desired layout through the
+     * {@link UI#splitPane(UI.Align)} and {@link UI#splitPane(Val)} factory methods.
      *
-     * @param align The alignment property of the split bar in the split pane.
+     * @param align A property dynamically determining the alignment of the components in the split pane, which determines the layout of the split pane.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if the provided alignment is null or the property is allowed to wrap a null value.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public final UIForSplitPane<P> withOrientation( Val<UI.Align> align ) {
+    public final UIForSplitPane<P> withLayout( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
         return _withOnShow( align, (thisComponent,it) -> {
