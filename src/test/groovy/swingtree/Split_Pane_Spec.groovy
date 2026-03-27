@@ -135,7 +135,7 @@ class Split_Pane_Spec extends Specification
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned, meaning it components are left to right.'
+        and : 'The split pane is horizontally aligned, meaning its components are placed left to right.'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider location is 10.'
             splitPane.dividerLocation == 10
