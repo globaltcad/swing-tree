@@ -153,7 +153,7 @@ class Split_Pane_Spec extends Specification
             var dividerLocation = Var.of(10)
         and : 'We create a split pane UI node bound to the property.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
-                                                .withDividerAt(dividerLocation)
+                     .withDividerAt(dividerLocation)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane exists and it is indeed horizontally aligned.'
