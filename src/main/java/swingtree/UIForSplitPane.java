@@ -53,7 +53,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * @throws IllegalArgumentException if the provided alignment is null.
      */
     public final UIForSplitPane<P> withLayout( UI.Align align ) {
-        NullUtil.nullArgCheck( align, "split", UI.Align.class );
+        NullUtil.nullArgCheck( align, "align", UI.Align.class );
         return _with( thisComponent -> {
                     thisComponent.setOrientation( align.forSplitPane() );
                 })
