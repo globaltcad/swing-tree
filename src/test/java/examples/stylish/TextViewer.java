@@ -68,7 +68,7 @@ public class TextViewer extends Panel
     private static final String INITIAL_MARKDOWN =
             "# Markdown Preview\n" +
             "\n" +
-            "Edit the text on the left to see it rendered here in **real time**.\n" +
+            "Edit the text at the top to see it rendered below in **real time**.\n" +
             "\n" +
             "## Text Formatting\n" +
             "\n" +
