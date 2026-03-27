@@ -250,7 +250,7 @@ class Split_Pane_Spec extends Specification
 
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
-        expect : 'The split pane exists and it is indeed a vertically aligned.'
+        expect : 'The split pane exists and it is indeed a vertically aligned split pane.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
             splitPane.dividerLocation == (int)(50 * uiScale)
