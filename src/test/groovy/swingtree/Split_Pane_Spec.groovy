@@ -156,7 +156,7 @@ class Split_Pane_Spec extends Specification
                                                 .withDividerAt(dividerLocation)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
-        expect : 'The split pane exists and it is indeed a horizontally aligned..'
+        expect : 'The split pane exists and it is indeed horizontally aligned.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider location is 10.'
