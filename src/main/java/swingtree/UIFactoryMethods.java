@@ -2611,44 +2611,51 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JSplitPane} instance
-     *  based on the provided alignment enum determining how
-     *  the split itself should be aligned. <br>
+     *  based on the provided {@link swingtree.UI.Align} enum constant.
+     *  The constant can either be {@code UI.Align.HORIZONTAL} or {@code UI.Align.VERTICAL}, and it <br>
+     *  refers to the layout of the two components in the split pane to either be
+     *  placed left to right (horizontal split) or on top of each other (vertical split).
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
-     *      UI.splitPane(UI.Align.HORIZONTAL) // The split bar will be horizontal
+     *      UI.splitPane(UI.Align.HORIZONTAL) // The split bar is along the vertical axis!
      *      .withDividerAt(50)
-     *      .add(UI.panel().add(...)) // top
-     *      .add(UI.scrollPane().add(...)) // bottom
+     *      .add(UI.panel().add(...)) // left
+     *      .add(UI.scrollPane().add(...)) // right
      *  }</pre>
      *
-     * @param align The alignment determining if the {@link JSplitPane} split bar is aligned vertically or horizontally.
+     * @param align The layout alignment determining if the {@link JSplitPane} components are placed left to right (horizontal split) or on top of each other (vertical split).
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
     public static UIForSplitPane<JSplitPane> splitPane( UI.Align align ) {
         NullUtil.nullArgCheck(align, "align", UI.Align.class);
         return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(align)))
-                .withOrientation(align);
+                .withLayoutOrientation(align);
     }
 
     /**
      *  Use this to create a builder for a new {@link JSplitPane} instance
-     *  based on the provided alignment property determining how
-     *  the split itself should be aligned. <br>
+     *  based on the provided {@link Val} property containing a {@link swingtree.UI.Align} enum constant.
+     *  The constant can either be {@code UI.Align.HORIZONTAL} or {@code UI.Align.VERTICAL}, and it <br>
+     *  refers to the layout of the two components in the split pane to either be
+     *  placed left to right (horizontal split) or on top of each other (vertical split).
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
      *    UI.splitPane(viewModel.getAlignment())
      *    .withDividerAt(50)
-     *    .add(UI.panel().add(...)) // top
-     *    .add(UI.scrollPane().add(...)) // bottom
+     *    .add(UI.panel().add(...)) // left or top
+     *    .add(UI.scrollPane().add(...)) // right or bottom
      *  }</pre>
      *  <br>
      *  The split pane will be updated whenever the provided property changes.
+     *  This allows you to dynamically change the layout of the split pane at runtime by changing
+     *  the value of the supplied property. For example, you could have a simple toggle button that switches
+     *  the value of the property between the two alignments.
      *  <br>
-     *  <b>Note:</b> The provided property must not be {@code null}!
+     *  <b>Note:</b> The supplied property must not be {@code null} and it must never contain any {@code null} values!
      *  Otherwise, an {@link IllegalArgumentException} will be thrown.
      *  <br>
-     * @param align The alignment determining if the {@link JSplitPane} split bar is aligned vertically or horizontally.
+     * @param align The layout alignment property determining if the {@link JSplitPane} components are placed left to right (horizontal split) or on top of each other (vertical split).
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
@@ -2656,7 +2663,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(align, "align", Val.class);
         NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
         return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(align.get())))
-                .withOrientation(align);
+                .withLayoutOrientation(align);
     }
 
     /**
