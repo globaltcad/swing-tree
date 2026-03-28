@@ -77,7 +77,7 @@ class Split_Pane_Spec extends Specification
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
     }
 
-    def 'An alignment property can be used to dynamically model the alignment of your split pane using `withLayout(..)`.'()
+    def 'An alignment property can be used to dynamically model the alignment of your split pane using `withLayoutOrientation(..)`.'()
     {
         reportInfo """
             Note that the property shown in this example would be part of your view model.
@@ -87,7 +87,7 @@ class Split_Pane_Spec extends Specification
         given : 'We create a simple view model property holding the alignment of our split pane.'
             var alignment = Var.of(UI.Align.HORIZONTAL)
         and : 'We create a split pane UI node bound to the property.'
-            var ui = UI.splitPane(UI.Align.HORIZONTAL).withLayout(alignment)
+            var ui = UI.splitPane(UI.Align.HORIZONTAL).withLayoutOrientation(alignment)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'

@@ -2630,7 +2630,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForSplitPane<JSplitPane> splitPane( UI.Align align ) {
         NullUtil.nullArgCheck(align, "align", UI.Align.class);
         return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(align)))
-                .withLayout(align);
+                .withLayoutOrientation(align);
     }
 
     /**
@@ -2663,7 +2663,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(align, "align", Val.class);
         NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
         return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(align.get())))
-                .withLayout(align);
+                .withLayoutOrientation(align);
     }
 
     /**

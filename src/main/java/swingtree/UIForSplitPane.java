@@ -44,7 +44,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * Sets the layout of the two components in the split pane to either be
      * placed left to right (horizontal split) or on top of each other (vertical split).
      * If you want to control this property dynamically through a bound property,
-     * then consider using the {@link #withLayout(Val)} method.<br>
+     * then consider using the {@link #withLayoutOrientation(Val)} method.<br>
      * You can also directly construct a split pane with the desired layout through the
      * {@link UI#splitPane(UI.Align)} and {@link UI#splitPane(Val)} factory methods.
      *
@@ -52,7 +52,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided alignment is null.
      */
-    public final UIForSplitPane<P> withLayout( UI.Align align ) {
+    public final UIForSplitPane<P> withLayoutOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", UI.Align.class );
         return _with( thisComponent -> {
                     thisComponent.setOrientation( align.forSplitPane() );
@@ -65,7 +65,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * placed left to right (horizontal split) or on top of each other (vertical split).
      * This method binds the supplied layout property to the split pane, which means that when
      * the property changes its {@link swingtree.UI.Align}, then the layout of the split pane will be updated accordingly.
-     * If you want to set a fixed layout that does not change dynamically, then consider using the {@link #withLayout(UI.Align)} method.<br>
+     * If you want to set a fixed layout that does not change dynamically, then consider using the {@link #withLayoutOrientation(UI.Align)} method.<br>
      * You can also directly construct a split pane with the desired layout through the
      * {@link UI#splitPane(UI.Align)} and {@link UI#splitPane(Val)} factory methods.
      *
@@ -73,7 +73,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public final UIForSplitPane<P> withLayout( Val<UI.Align> align ) {
+    public final UIForSplitPane<P> withLayoutOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
         return _withOnShow( align, (thisComponent,it) -> {
