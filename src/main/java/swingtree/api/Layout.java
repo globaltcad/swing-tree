@@ -5,14 +5,18 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.layout.LayoutConstraint;
+import swingtree.layout.MigAddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
 
+import sprouts.Tuple;
+
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
@@ -96,6 +100,10 @@ public interface Layout
      *  makes constraint composition explicit and refactor-friendly.
      *  See <a href="http://www.miglayout.com/whitepaper.html">the MigLayout whitepaper</a>
      *  for full constraint documentation.
+     *  <p>
+     *  The returned {@link ForMigLayout} instance supports fluent chaining to specify
+     *  per-child component constraints via the various
+     *  {@link ForMigLayout#withChildConstraints(MigAddConstraint...)} overloads.
      *
      * @param constr The general layout constraints for the {@link MigLayout}
      *               (e.g. {@code FILL.and(WRAP(2))}).
@@ -105,7 +113,7 @@ public interface Layout
      *                  (e.g. {@code LayoutConstraint.of("[]8[]")}).
      * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig(
+    static ForMigLayout mig(
         LayoutConstraint constr,
         LayoutConstraint colConstr,
         LayoutConstraint rowConstr
@@ -119,13 +127,13 @@ public interface Layout
      *  This is the preferred approach over the plain-{@link String} overloads.
      *  <p>
      *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for
-     *  full details on the {@link LayoutConstraint} API.
+     *  full details on the {@link LayoutConstraint} API and chaining child constraints.
      *
      * @param constr The general layout constraints for the {@link MigLayout}.
      * @param rowConstr The row constraints for the {@link MigLayout}.
      * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig(
+    static ForMigLayout mig(
         LayoutConstraint constr,
         LayoutConstraint rowConstr
     ) {
@@ -138,13 +146,40 @@ public interface Layout
      *  This is the preferred approach over the plain-{@link String} overload.
      *  <p>
      *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for
-     *  full details on the {@link LayoutConstraint} API.
+     *  full details on the {@link LayoutConstraint} API and chaining child constraints.
      *
      * @param constr The general layout constraints for the {@link MigLayout}.
      * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig( LayoutConstraint constr ) {
+    static ForMigLayout mig( LayoutConstraint constr ) {
         return new ForMigLayout( constr, LayoutConstraint.of(""), LayoutConstraint.of("") );
+    }
+
+    /**
+     *  A convenience factory method that creates a {@link MigLayout}-based layout configuration
+     *  from a single type-safe {@link LayoutConstraint} together with per-child
+     *  {@link MigAddConstraint}s for the component's direct children.
+     *  <p>
+     *  The {@code childConstraints} are mapped positionally: the first entry is applied to the
+     *  first child, the second to the second child, and so on.
+     *  Excess entries (more constraints than children) are silently ignored;
+     *  children without a matching entry keep whatever constraint the parent
+     *  {@link MigLayout} already has for them.
+     *  <p>
+     *  This is a shorthand for:
+     *  <pre>{@code
+     *      Layout.mig(constr).withChildConstraints(childConstraints)
+     *  }</pre>
+     *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for full details
+     *  on the {@link LayoutConstraint} API.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}.
+     * @param childConstraints The {@link MigAddConstraint}s to apply to the component's children,
+     *                         in child-index order.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig( LayoutConstraint constr, MigAddConstraint... childConstraints ) {
+        return mig(constr).withChildConstraints(childConstraints);
     }
 
     /**
@@ -161,7 +196,7 @@ public interface Layout
      * @param rowConstr The row constraints string for the {@link MigLayout}.
      * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig(
+    static ForMigLayout mig(
         String constr,
         String colConstr,
         String rowConstr
@@ -182,7 +217,7 @@ public interface Layout
      * @param rowConstr The row constraints string for the {@link MigLayout}.
      * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig(
+    static ForMigLayout mig(
         String constr,
         String rowConstr
     ) {
@@ -202,8 +237,31 @@ public interface Layout
      * @param constr The general layout constraints string for the {@link MigLayout}.
      * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig( String constr ) {
+    static ForMigLayout mig( String constr ) {
         return mig( LayoutConstraint.of(constr) );
+    }
+
+    /**
+     *  A convenience factory method that creates a {@link MigLayout}-based layout configuration
+     *  from a plain constraint string together with per-child {@link MigAddConstraint}s
+     *  for the component's direct children.
+     *  <p>
+     *  The {@code childConstraints} are mapped positionally: the first entry is applied to the
+     *  first child, the second to the second child, and so on.
+     *  This is a shorthand for:
+     *  <pre>{@code
+     *      Layout.mig(constr).withChildConstraints(childConstraints)
+     *  }</pre>
+     *  Prefer the {@link LayoutConstraint}-based overload
+     *  {@link #mig(LayoutConstraint, MigAddConstraint...)} for new code.
+     *
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @param childConstraints The {@link MigAddConstraint}s to apply to the component's children,
+     *                         in child-index order.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig( String constr, MigAddConstraint... childConstraints ) {
+        return mig( LayoutConstraint.of(constr) ).withChildConstraints(childConstraints);
     }
 
     /**
@@ -411,40 +469,79 @@ public interface Layout
     }
 
     /**
-     *  The {@link ForMigLayout} layout is a layout that represents
-     *  a {@link MigLayout} layout configuration for a component. <br>
-     *  Whenever this layout configuration changes,
-     *  it will create and re-install a new {@link MigLayout} onto the component
-     *  based on the new configuration,
-     *  which are the constraints, column constraints and row constraints.
+     *  An immutable {@link Layout} implementation that configures and installs a
+     *  {@link MigLayout} onto a component. It holds three kinds of constraints:
+     *  <ul>
+     *    <li><b>General layout constraints</b> ({@code constr}) — control global layout
+     *        behaviour such as wrapping, filling, gaps and hiding mode.</li>
+     *    <li><b>Column constraints</b> ({@code colConstr}) — define the sizing and
+     *        alignment rules for each column in the grid.</li>
+     *    <li><b>Row constraints</b> ({@code rowConstr}) — define the sizing and
+     *        alignment rules for each row in the grid.</li>
+     *    <li><b>Per-child component constraints</b> ({@code childConstraints}) — a
+     *        positional {@link Tuple} of {@link MigAddConstraint}s that are applied to
+     *        the component's direct children: the first entry goes to the first child,
+     *        the second to the second child, and so on.
+     *        Children without a matching entry keep whatever constraint the
+     *        {@link MigLayout} already has for them.</li>
+     *  </ul>
+     *  <p>
+     *  Instances are created via the {@link Layout#mig(LayoutConstraint)} family of
+     *  factory methods and are further configured through the fluent {@code with*} wither
+     *  methods, which all return a new immutable instance:
+     *  <pre>{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Layout.mig( FILL.and(WRAP(2)), "[shrink][grow]", "[]8[]" )
+     *            .withChildConstraints( RIGHT, GROW_X, RIGHT, GROW_X )
+     *  }</pre>
+     *  Whenever any property of this configuration changes (detected by the style engine
+     *  via {@link #equals}/{@link #hashCode}), the {@link #installFor(JComponent)} method
+     *  is called, which surgically updates only the properties that have changed and
+     *  calls {@link JComponent#revalidate()} to trigger a layout refresh.
      */
     @Immutable
     final class ForMigLayout implements Layout
     {
-        private final LayoutConstraint _constr;
-        private final LayoutConstraint _colConstr;
-        private final LayoutConstraint _rowConstr;
+        private final LayoutConstraint          _constr;
+        private final LayoutConstraint          _colConstr;
+        private final LayoutConstraint          _rowConstr;
+        private final Tuple<MigAddConstraint>   _childConstraints;
 
         ForMigLayout( LayoutConstraint constr, LayoutConstraint colConstr, LayoutConstraint rowConstr ) {
-            _constr    = Objects.requireNonNull(constr);
-            _colConstr = Objects.requireNonNull(colConstr);
-            _rowConstr = Objects.requireNonNull(rowConstr);
+            this( constr, colConstr, rowConstr, Tuple.of(MigAddConstraint.class) );
         }
+
+        ForMigLayout(
+            LayoutConstraint        constr,
+            LayoutConstraint        colConstr,
+            LayoutConstraint        rowConstr,
+            Tuple<MigAddConstraint> childConstraints
+        ) {
+            _constr           = Objects.requireNonNull(constr);
+            _colConstr        = Objects.requireNonNull(colConstr);
+            _rowConstr        = Objects.requireNonNull(rowConstr);
+            _childConstraints = Objects.requireNonNull(childConstraints);
+        }
+
+        // -- General layout constraint withers --
 
         /**
          *  Returns a new {@link ForMigLayout} instance with the supplied general layout constraints
-         *  and the same column and row constraints as this instance.
+         *  and all other properties copied from this instance.
          *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
          *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
          *
          * @param constr The new general layout constraints for the {@link MigLayout}.
          * @return A new {@link ForMigLayout} instance with the updated layout constraints.
          */
-        public ForMigLayout withConstraint( LayoutConstraint constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }
+        public ForMigLayout withConstraint( LayoutConstraint constr ) {
+            return new ForMigLayout( constr, _colConstr, _rowConstr, _childConstraints );
+        }
 
         /**
          *  Returns a new {@link ForMigLayout} instance with the supplied general layout constraints
-         *  and the same column and row constraints as this instance.
+         *  and all other properties copied from this instance.
          *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
          *  to {@link #withConstraint(LayoutConstraint)}.
          *  Prefer {@link #withConstraint(LayoutConstraint)} for new code.
@@ -454,20 +551,24 @@ public interface Layout
          */
         public ForMigLayout withConstraint( String constr ) { return withConstraint( LayoutConstraint.of(constr) ); }
 
+        // -- Row constraint withers --
+
         /**
          *  Returns a new {@link ForMigLayout} instance with the supplied row constraints
-         *  and the same general layout and column constraints as this instance.
+         *  and all other properties copied from this instance.
          *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
          *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
          *
          * @param rowConstr The new row constraints for the {@link MigLayout}.
          * @return A new {@link ForMigLayout} instance with the updated row constraints.
          */
-        public ForMigLayout withRowConstraint( LayoutConstraint rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }
+        public ForMigLayout withRowConstraint( LayoutConstraint rowConstr ) {
+            return new ForMigLayout( _constr, _colConstr, rowConstr, _childConstraints );
+        }
 
         /**
          *  Returns a new {@link ForMigLayout} instance with the supplied row constraints
-         *  and the same general layout and column constraints as this instance.
+         *  and all other properties copied from this instance.
          *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
          *  to {@link #withRowConstraint(LayoutConstraint)}.
          *  Prefer {@link #withRowConstraint(LayoutConstraint)} for new code.
@@ -477,20 +578,24 @@ public interface Layout
          */
         public ForMigLayout withRowConstraint( String rowConstr ) { return withRowConstraint( LayoutConstraint.of(rowConstr) ); }
 
+        // -- Column constraint withers --
+
         /**
          *  Returns a new {@link ForMigLayout} instance with the supplied column constraints
-         *  and the same general layout and row constraints as this instance.
+         *  and all other properties copied from this instance.
          *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
          *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
          *
          * @param colConstr The new column constraints for the {@link MigLayout}.
          * @return A new {@link ForMigLayout} instance with the updated column constraints.
          */
-        public ForMigLayout withColumnConstraint( LayoutConstraint colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }
+        public ForMigLayout withColumnConstraint( LayoutConstraint colConstr ) {
+            return new ForMigLayout( _constr, colConstr, _rowConstr, _childConstraints );
+        }
 
         /**
          *  Returns a new {@link ForMigLayout} instance with the supplied column constraints
-         *  and the same general layout and row constraints as this instance.
+         *  and all other properties copied from this instance.
          *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
          *  to {@link #withColumnConstraint(LayoutConstraint)}.
          *  Prefer {@link #withColumnConstraint(LayoutConstraint)} for new code.
@@ -500,7 +605,130 @@ public interface Layout
          */
         public ForMigLayout withColumnConstraint( String colConstr ) { return withColumnConstraint( LayoutConstraint.of(colConstr) ); }
 
-        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }
+        // -- Per-child component constraint withers --
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance whose per-child component constraints
+         *  are replaced by the supplied {@link Tuple}.
+         *  <p>
+         *  The {@code childConstraints} tuple maps positionally to the component's children:
+         *  index&nbsp;0 maps to the first child, index&nbsp;1 to the second, and so on.
+         *  Children at indices beyond the tuple size are left untouched.
+         *  An empty tuple clears all previously stored per-child constraints.
+         *
+         * @param childConstraints The positional {@link MigAddConstraint}s for the children.
+         * @return A new {@link ForMigLayout} with the updated child constraints.
+         */
+        public ForMigLayout withChildConstraints( Tuple<MigAddConstraint> childConstraints ) {
+            return new ForMigLayout( _constr, _colConstr, _rowConstr, Objects.requireNonNull(childConstraints) );
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance whose per-child component constraints
+         *  are replaced by the supplied varargs array of {@link MigAddConstraint}s.
+         *  <p>
+         *  The constraints are mapped positionally to the component's children:
+         *  the first argument applies to the first child, the second to the second, and so on.
+         *  Children at indices beyond the supplied array length are left untouched.
+         *  Passing an empty array clears all previously stored per-child constraints.
+         *  <p>
+         *  This is the most concise way to specify per-child constraints for common cases:
+         *  <pre>{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.mig( FILL.and(WRAP(2)) )
+         *            .withChildConstraints( RIGHT, GROW_X, RIGHT, GROW_X )
+         *  }</pre>
+         *
+         * @param childConstraints The {@link MigAddConstraint}s to apply to the component's
+         *                         children, in child-index order.
+         * @return A new {@link ForMigLayout} with the updated child constraints.
+         */
+        public ForMigLayout withChildConstraints( MigAddConstraint... childConstraints ) {
+            return withChildConstraints( Tuple.of(MigAddConstraint.class, childConstraints) );
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the {@link MigAddConstraint} at the
+         *  given child index replaced by the supplied value.
+         *  All other child constraints and all other properties are copied unchanged.
+         *  <p>
+         *  If the supplied {@code index} is beyond the current size of the child-constraint
+         *  tuple, the tuple is padded with empty {@link MigAddConstraint}s
+         *  ({@code MigAddConstraint.of()}) up to and including that index.
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         *              The first child has index&nbsp;0.
+         * @param childConstraint The new {@link MigAddConstraint} for the child at {@code index}.
+         * @return A new {@link ForMigLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForMigLayout withChildConstraint( int index, MigAddConstraint childConstraint ) {
+            Objects.requireNonNull(childConstraint);
+            Tuple<MigAddConstraint> padded = _childConstraints;
+            // Pad with empty constraints if needed so we can set at 'index':
+            while ( padded.size() <= index )
+                padded = padded.add( MigAddConstraint.of() );
+            return withChildConstraints( padded.setAt(index, childConstraint) );
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the {@link MigAddConstraint} at the
+         *  given child index replaced by a constraint wrapping the supplied string.
+         *  The string is converted via {@link MigAddConstraint#of(String...)} and then forwarded
+         *  to {@link #withChildConstraint(int, MigAddConstraint)}.
+         *  <p>
+         *  If the supplied {@code index} is beyond the current size of the child-constraint
+         *  tuple, the tuple is padded with empty {@link MigAddConstraint}s up to that index.
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         * @param childConstraint The MigLayout component-constraint string for the child.
+         * @return A new {@link ForMigLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForMigLayout withChildConstraint( int index, String childConstraint ) {
+            return withChildConstraint( index, MigAddConstraint.of(childConstraint) );
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied {@link MigAddConstraint}
+         *  appended to the end of the existing child-constraint tuple.
+         *  This is a convenient alternative to {@link #withChildConstraints(MigAddConstraint...)}
+         *  when building up constraints one at a time:
+         *  <pre>{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.mig( FILL.and(WRAP(2)) )
+         *            .withAddedChildConstraint( RIGHT )
+         *            .withAddedChildConstraint( GROW_X )
+         *            .withAddedChildConstraint( RIGHT )
+         *            .withAddedChildConstraint( GROW_X )
+         *  }</pre>
+         *
+         * @param childConstraint The {@link MigAddConstraint} to append as the next child
+         *                        component constraint.
+         * @return A new {@link ForMigLayout} with the constraint appended.
+         */
+        public ForMigLayout withAddedChildConstraint( MigAddConstraint childConstraint ) {
+            return withChildConstraints( _childConstraints.add(Objects.requireNonNull(childConstraint)) );
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with a {@link MigAddConstraint} wrapping
+         *  the supplied string appended to the end of the existing child-constraint tuple.
+         *  The string is converted via {@link MigAddConstraint#of(String...)} and then forwarded
+         *  to {@link #withAddedChildConstraint(MigAddConstraint)}.
+         *
+         * @param childConstraint The MigLayout component-constraint string to append.
+         * @return A new {@link ForMigLayout} with the constraint appended.
+         */
+        public ForMigLayout withAddedChildConstraint( String childConstraint ) {
+            return withAddedChildConstraint( MigAddConstraint.of(childConstraint) );
+        }
+
+        // -- Object contract --
+
+        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr, _childConstraints); }
 
         @Override
         public boolean equals( Object o ) {
@@ -508,19 +736,34 @@ public interface Layout
             if ( o == this ) return true;
             if ( o.getClass() != getClass() ) return false;
             ForMigLayout other = (ForMigLayout) o;
-            return _constr.equals( other._constr) &&
-                   _rowConstr.equals( other._rowConstr) &&
-                   _colConstr.equals( other._colConstr);
+            return _constr.equals(other._constr)           &&
+                   _rowConstr.equals(other._rowConstr)     &&
+                   _colConstr.equals(other._colConstr)     &&
+                   _childConstraints.equals(other._childConstraints);
         }
 
+        // -- Layout installation --
+
         /**
-         *  Installs a {@link MigLayout} onto the supplied component using the constraints
-         *  stored in this configuration. If the component already has a {@link MigLayout}
-         *  installed, only the constraints that have changed are updated and
-         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
-         *  If the parent container also uses a {@link MigLayout},
-         *  the component-level layout constraints (cell/component constraints)
-         *  are applied to the parent layout as well.
+         *  Installs a {@link MigLayout} onto the supplied component and applies all constraints
+         *  stored in this configuration.
+         *  <p>
+         *  The installation proceeds in three phases:
+         *  <ol>
+         *    <li><b>Self constraint</b> — if this component's own style holds a
+         *        {@link StyleConf#layoutConstraint() layout constraint} and its parent uses a
+         *        {@link MigLayout}, that constraint is pushed into the parent layout so the
+         *        component is correctly positioned within the parent grid.</li>
+         *    <li><b>Layout manager</b> — if none of the three constraint strings is empty, a
+         *        {@link MigLayout} is installed (or updated in-place if one is already present)
+         *        using the stored general, column, and row constraints.</li>
+         *    <li><b>Child constraints</b> — if the child-constraint tuple is non-empty, each
+         *        stored {@link MigAddConstraint} is applied to the corresponding direct child of
+         *        {@code component} (by position).  Only entries that differ from what the
+         *        {@link MigLayout} already has are written, and
+         *        {@link JComponent#revalidate()} is called exactly once at the end if anything
+         *        changed.</li>
+         *  </ol>
          *
          * @param component The component to install the {@link MigLayout} for.
          */
@@ -529,56 +772,68 @@ public interface Layout
             ComponentExtension<?> extension = ComponentExtension.from(component);
             StyleConf styleConf = extension.getStyle();
             if ( styleConf.layoutConstraint().isPresent() ) {
-                // We ensure that the parent layout has the correct component constraints for the component:
+                // Phase 1: push this component's own layout constraint into its parent MigLayout:
                 LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );
                 if ( parentLayout instanceof MigLayout) {
                     MigLayout migLayout = (MigLayout) parentLayout;
                     Object componentConstraints = styleConf.layoutConstraint().get();
                     Object currentComponentConstraints = migLayout.getComponentConstraints(component);
-                    //     ^ can be a String or a CC object, we want to compare it to the new constraints:
+                    //     ^ can be a String or a CC object, we compare it to the desired constraint:
                     if ( !componentConstraints.equals(currentComponentConstraints) ) {
                         migLayout.setComponentConstraints(component, componentConstraints);
                         component.getParent().revalidate();
                     }
                 }
             }
+            // Phase 2: install / update the MigLayout on the component itself:
             final String layoutConstraints = _constr.toString();
             final String columnConstraints = _colConstr.toString();
             final String rowConstraints    = _rowConstr.toString();
             if ( !layoutConstraints.isEmpty() || !columnConstraints.isEmpty() || !rowConstraints.isEmpty() ) {
-                // We ensure that the parent layout has the correct layout constraints for the component:
                 LayoutManager currentLayout = component.getLayout();
                 if ( !( currentLayout instanceof MigLayout ) ) {
-                    // We need to replace the current layout with a MigLayout:
-                    MigLayout newLayout = new MigLayout( layoutConstraints, columnConstraints, rowConstraints );
-                    component.setLayout(newLayout);
-                    return;
+                    component.setLayout(new MigLayout( layoutConstraints, columnConstraints, rowConstraints ));
+                } else {
+                    MigLayout migLayout = (MigLayout) currentLayout;
+                    boolean layoutConstraintsChanged = !layoutConstraints.equals(migLayout.getLayoutConstraints());
+                    boolean columnConstraintsChanged = !columnConstraints.equals(migLayout.getColumnConstraints());
+                    boolean rowConstraintsChanged    = !rowConstraints.equals(migLayout.getRowConstraints());
+                    if ( layoutConstraintsChanged || columnConstraintsChanged || rowConstraintsChanged ) {
+                        migLayout.setLayoutConstraints(layoutConstraints);
+                        migLayout.setColumnConstraints(columnConstraints);
+                        migLayout.setRowConstraints(rowConstraints);
+                        component.revalidate();
+                    }
                 }
-                MigLayout migLayout = (MigLayout) currentLayout;
-
-                Object currentLayoutConstraints = migLayout.getLayoutConstraints();
-                Object currentColumnConstraints = migLayout.getColumnConstraints();
-                Object currentRowConstraints    = migLayout.getRowConstraints();
-
-                boolean layoutConstraintsChanged = !layoutConstraints.equals(currentLayoutConstraints);
-                boolean columnConstraintsChanged = !columnConstraints.equals(currentColumnConstraints);
-                boolean rowConstraintsChanged    = !rowConstraints.equals(currentRowConstraints);
-
-                if ( layoutConstraintsChanged || columnConstraintsChanged || rowConstraintsChanged ) {
-                    migLayout.setLayoutConstraints(layoutConstraints);
-                    migLayout.setColumnConstraints(columnConstraints);
-                    migLayout.setRowConstraints(rowConstraints);
-                    component.revalidate();
+            }
+            // Phase 3: apply per-child component constraints:
+            if ( _childConstraints.isNotEmpty() ) {
+                LayoutManager currentLayout = component.getLayout();
+                if ( currentLayout instanceof MigLayout ) {
+                    MigLayout migLayout     = (MigLayout) currentLayout;
+                    Component[] children    = component.getComponents();
+                    int count               = Math.min(children.length, _childConstraints.size());
+                    boolean childrenChanged = false;
+                    for ( int i = 0; i < count; i++ ) {
+                        Object desired  = _childConstraints.get(i).toConstraintForLayoutManager();
+                        Object existing = migLayout.getComponentConstraints(children[i]);
+                        if ( !desired.equals(existing) ) {
+                            migLayout.setComponentConstraints(children[i], desired);
+                            childrenChanged = true;
+                        }
+                    }
+                    if ( childrenChanged )
+                        component.revalidate();
                 }
             }
         }
 
-
         @Override public String toString() {
             return getClass().getSimpleName() + "[" +
-                        "constr=" + _constr + ", " +
-                        "colConstr=" + _colConstr + ", " +
-                        "rowConstr=" + _rowConstr +
+                        "constr="           + _constr           + ", " +
+                        "colConstr="        + _colConstr        + ", " +
+                        "rowConstr="        + _rowConstr        + ", " +
+                        "childConstraints=" + _childConstraints +
                     "]";
         }
     }
