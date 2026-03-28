@@ -4,6 +4,9 @@ import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
+import swingtree.layout.AddConstraint;
+import swingtree.layout.FlowCell;
+import swingtree.layout.FlowCellConf;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.MigAddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
@@ -17,7 +20,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.util.Objects;
@@ -267,8 +269,14 @@ public interface Layout
     }
 
     /**
-     * A factory method for creating a layout that installs the {@link FlowLayout}
-     * onto a component based on the supplied parameters.
+     *  A factory method for creating a {@link ForFlowLayout} configuration that installs
+     *  a {@link ResponsiveGridFlowLayout} onto a component with the given alignment and gaps.
+     *  <p>
+     *  The returned {@link ForFlowLayout} supports fluent chaining to specify per-child
+     *  {@link FlowCell} constraints via the various
+     *  {@link ForFlowLayout#withChildConstraints(FlowCell...)} overloads, enabling fully
+     *  reactive responsive layouts when used together with
+     *  {@link swingtree.UIForAnySwing#withLayout(sprouts.Val)}.
      *
      * @param align The alignment for the layout, which has to be one of <ul>
      *               <li>{@link UI.HorizontalAlignment#LEFT}</li>
@@ -277,42 +285,90 @@ public interface Layout
      *               <li>{@link UI.HorizontalAlignment#LEADING}</li>
      *               <li>{@link UI.HorizontalAlignment#TRAILING}</li>
      *              </ul>
-     *
-     * @param hgap The horizontal gap for the layout.
-     * @param vgap The vertical gap for the layout.
-     * @return A layout that installs the {@link FlowLayout} onto a component.
+     * @param hgap The horizontal gap between components, in pixels.
+     * @param vgap The vertical gap between component rows, in pixels.
+     * @return A {@link ForFlowLayout} configured with the supplied alignment and gaps.
      */
-    static Layout flow( UI.HorizontalAlignment align, int hgap, int vgap ) {
+    static ForFlowLayout flow( UI.HorizontalAlignment align, int hgap, int vgap ) {
         return new ForFlowLayout( align, hgap, vgap );
     }
 
     /**
-     * A factory method for creating a layout that installs the {@link FlowLayout}
-     * onto a component based on the supplied parameters.
+     *  A factory method for creating a {@link ForFlowLayout} configuration that installs
+     *  a {@link ResponsiveGridFlowLayout} with the given alignment and default gaps of 5 pixels.
+     *  <p>
+     *  The returned {@link ForFlowLayout} supports fluent chaining to specify per-child
+     *  {@link FlowCell} constraints.
+     *  See {@link #flow(UI.HorizontalAlignment, int, int)} for full details.
      *
-     * @param align The alignment for the layout, which has to be one of <ul>
-     *               <li>{@link UI.HorizontalAlignment#LEFT}</li>
-     *               <li>{@link UI.HorizontalAlignment#CENTER}</li>
-     *               <li>{@link UI.HorizontalAlignment#RIGHT}</li>
-     *               <li>{@link UI.HorizontalAlignment#LEADING}</li>
-     *               <li>{@link UI.HorizontalAlignment#TRAILING}</li>
-     *              </ul>
-     *
-     * @return A layout that installs the {@link FlowLayout} onto a component.
+     * @param align The horizontal alignment for the flow of components.
+     * @return A {@link ForFlowLayout} configured with the supplied alignment.
      */
-    static Layout flow( UI.HorizontalAlignment align ) {
+    static ForFlowLayout flow( UI.HorizontalAlignment align ) {
         return new ForFlowLayout( align, 5, 5 );
     }
 
     /**
-     *  Creates a layout that installs the {@link FlowLayout}
-     *  with a default alignment of {@link UI.HorizontalAlignment#CENTER}
-     *  and a default gap of 5 pixels.
+     *  A factory method for creating a {@link ForFlowLayout} configuration that installs
+     *  a {@link ResponsiveGridFlowLayout} with centered alignment and default gaps of 5 pixels.
+     *  <p>
+     *  The returned {@link ForFlowLayout} supports fluent chaining to specify per-child
+     *  {@link FlowCell} constraints.
+     *  See {@link #flow(UI.HorizontalAlignment, int, int)} for full details.
      *
-     * @return A layout that installs the {@link FlowLayout} onto a component.
+     * @return A {@link ForFlowLayout} with centered alignment and 5-pixel gaps.
      */
-    static Layout flow() {
+    static ForFlowLayout flow() {
         return new ForFlowLayout( UI.HorizontalAlignment.CENTER, 5, 5 );
+    }
+
+    /**
+     *  A convenience factory method that creates a centered {@link ForFlowLayout} pre-loaded
+     *  with per-child {@link FlowCell} constraints.  This is a shorthand for:
+     *  <pre>{@code
+     *      Layout.flow().withChildConstraints(childConstraints)
+     *  }</pre>
+     *  Each {@link FlowCell} is typically created via {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+     *  <pre>{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Var<Layout> layout = Var.of(
+     *          Layout.flow(
+     *              AUTO_SPAN( it -> it.small(12).medium(6) ),
+     *              AUTO_SPAN( it -> it.small(12).medium(6) )
+     *          )
+     *      );
+     *      UI.panel()
+     *        .withLayout(layout)
+     *        .add( label("Left") )
+     *        .add( label("Right") );
+     *  }</pre>
+     *  Changing the {@code layout} property at runtime will reinstall the layout and re-push
+     *  all child {@link FlowCell} constraints, making the span behaviour fully reactive.
+     *
+     * @param childConstraints The {@link FlowCell} constraints to apply to the component's
+     *                         children in child-index order.
+     * @return A {@link ForFlowLayout} with centered alignment and the given child constraints.
+     */
+    static ForFlowLayout flow( FlowCell... childConstraints ) {
+        return flow().withChildConstraints(childConstraints);
+    }
+
+    /**
+     *  A convenience factory method that creates a {@link ForFlowLayout} with the given
+     *  alignment and per-child {@link FlowCell} constraints pre-loaded.  This is a shorthand for:
+     *  <pre>{@code
+     *      Layout.flow(align).withChildConstraints(childConstraints)
+     *  }</pre>
+     *  See {@link #flow(FlowCell...)} for a usage example and reactive design notes.
+     *
+     * @param align The horizontal alignment for the flow of components.
+     * @param childConstraints The {@link FlowCell} constraints to apply to the component's
+     *                         children in child-index order.
+     * @return A {@link ForFlowLayout} with the given alignment and child constraints.
+     */
+    static ForFlowLayout flow( UI.HorizontalAlignment align, FlowCell... childConstraints ) {
+        return flow(align).withChildConstraints(childConstraints);
     }
 
     /**
@@ -841,12 +897,52 @@ public interface Layout
     }
 
     /**
-     *  The {@link ForFlowLayout} layout is a layout that represents
-     *  a {@link FlowLayout} layout configuration for a component. <br>
-     *  Whenever this layout configuration changes,
-     *  it will create and re-install a new {@link ResponsiveGridFlowLayout}
-     *  onto the component based on the new configuration,
-     *  which are the alignment, horizontal gap and vertical gap.
+     *  An immutable {@link Layout} implementation that configures and installs a
+     *  {@link ResponsiveGridFlowLayout} onto a component. It holds:
+     *  <ul>
+     *    <li><b>Alignment</b> ({@code align}) — the horizontal alignment of components
+     *        within each row of the flow (left, center, right, leading, or trailing).</li>
+     *    <li><b>Horizontal gap</b> ({@code hgap}) — the pixel spacing between components
+     *        in the same row.</li>
+     *    <li><b>Vertical gap</b> ({@code vgap}) — the pixel spacing between rows.</li>
+     *    <li><b>Per-child {@link FlowCell} constraints</b> ({@code childConstraints}) — a
+     *        positional {@link Tuple} of {@link FlowCell}s that are pushed onto the
+     *        component's direct children: the first entry goes to the first child, the
+     *        second to the second child, and so on.
+     *        Each {@link FlowCell} carries a responsive span policy (see
+     *        {@link swingtree.UI#AUTO_SPAN(Configurator)}) that the
+     *        {@link ResponsiveGridFlowLayout} queries on every layout pass to determine
+     *        how many grid columns a child should occupy for the current parent size.</li>
+     *  </ul>
+     *  <p>
+     *  The child-constraint tuple is the key to building <em>fully reactive</em> responsive
+     *  layouts.  With the static {@code UI.AUTO_SPAN()} approach every child's span policy
+     *  is fixed at the time the component is added.  When child constraints need to change
+     *  at runtime (e.g. the number of columns depends on application state), wrap a
+     *  {@link ForFlowLayout} in a {@link sprouts.Var} and pass it to
+     *  {@link swingtree.UIForAnySwing#withLayout(sprouts.Val)}:
+     *  <pre>{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Var<Layout> layout = Var.of(
+     *          Layout.flow( AUTO_SPAN(it -> it.small(12).medium(6)),
+     *                       AUTO_SPAN(it -> it.small(12).medium(6)) )
+     *      );
+     *
+     *      UI.panel()
+     *        .withLayout(layout)
+     *        .add( label("A") )
+     *        .add( label("B") );
+     *
+     *      // Later: swap to a single full-width column for both children:
+     *      layout.set( Layout.flow( AUTO_SPAN(12), AUTO_SPAN(12) ) );
+     *  }</pre>
+     *  Changing the {@code layout} property triggers a style re-evaluation, which calls
+     *  {@link #installFor(JComponent)}, which re-pushes the updated {@link FlowCell}s as
+     *  client properties onto the children so that the next layout pass picks them up.
+     *  <p>
+     *  Instances are created via the {@link Layout#flow()} family of factory methods and
+     *  are further configured through the fluent {@code with*} wither methods.
      */
     @Immutable
     final class ForFlowLayout implements Layout
@@ -854,14 +950,193 @@ public interface Layout
         private final UI.HorizontalAlignment _align;
         private final int                    _horizontalGapSize;
         private final int                    _verticalGapSize;
+        private final Tuple<FlowCell>        _childConstraints;
 
         ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {
+            this( align, hgap, vgap, Tuple.of(FlowCell.class) );
+        }
+
+        ForFlowLayout(
+            UI.HorizontalAlignment align,
+            int                    hgap,
+            int                    vgap,
+            Tuple<FlowCell>        childConstraints
+        ) {
             _align             = Objects.requireNonNull(align);
             _horizontalGapSize = hgap;
             _verticalGapSize   = vgap;
+            _childConstraints  = Objects.requireNonNull(childConstraints);
         }
 
-        @Override public int hashCode() { return Objects.hash( _align, _horizontalGapSize, _verticalGapSize); }
+        // -- Alignment / gap withers --
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the given horizontal alignment and
+         *  all other properties copied unchanged.
+         *
+         * @param align The new horizontal alignment for the flow.
+         * @return A new {@link ForFlowLayout} with the updated alignment.
+         */
+        public ForFlowLayout withAlignment( UI.HorizontalAlignment align ) {
+            return new ForFlowLayout( align, _horizontalGapSize, _verticalGapSize, _childConstraints );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the given horizontal gap size and
+         *  all other properties copied unchanged.
+         *
+         * @param hgap The new horizontal gap between components, in pixels.
+         * @return A new {@link ForFlowLayout} with the updated horizontal gap.
+         */
+        public ForFlowLayout withHorizontalGap( int hgap ) {
+            return new ForFlowLayout( _align, hgap, _verticalGapSize, _childConstraints );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the given vertical gap size and
+         *  all other properties copied unchanged.
+         *
+         * @param vgap The new vertical gap between component rows, in pixels.
+         * @return A new {@link ForFlowLayout} with the updated vertical gap.
+         */
+        public ForFlowLayout withVerticalGap( int vgap ) {
+            return new ForFlowLayout( _align, _horizontalGapSize, vgap, _childConstraints );
+        }
+
+        // -- Per-child FlowCell constraint withers --
+
+        /**
+         *  Returns a new {@link ForFlowLayout} whose per-child {@link FlowCell} constraints
+         *  are replaced by the supplied {@link Tuple}.
+         *  <p>
+         *  The tuple maps positionally to the component's children: index&nbsp;0 maps to the
+         *  first child, index&nbsp;1 to the second, and so on.
+         *  Children at indices beyond the tuple size keep whatever {@link FlowCell} they
+         *  already have.  An empty tuple clears all previously stored child constraints.
+         *
+         * @param childConstraints The positional {@link FlowCell} constraints for the children.
+         * @return A new {@link ForFlowLayout} with the updated child constraints.
+         */
+        public ForFlowLayout withChildConstraints( Tuple<FlowCell> childConstraints ) {
+            return new ForFlowLayout( _align, _horizontalGapSize, _verticalGapSize,
+                                      Objects.requireNonNull(childConstraints) );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} whose per-child {@link FlowCell} constraints
+         *  are replaced by the supplied varargs array.
+         *  <p>
+         *  The constraints are mapped positionally to the component's children:
+         *  the first argument applies to the first child, the second to the second, and so on.
+         *  Passing an empty array clears all previously stored child constraints.
+         *  <p>
+         *  {@link FlowCell} instances are most conveniently created via
+         *  {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+         *  <pre>{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.flow()
+         *            .withChildConstraints(
+         *                AUTO_SPAN( it -> it.small(12).medium(6) ),
+         *                AUTO_SPAN( it -> it.small(12).medium(6) )
+         *            )
+         *  }</pre>
+         *
+         * @param childConstraints The {@link FlowCell} constraints to apply to the component's
+         *                         children in child-index order.
+         * @return A new {@link ForFlowLayout} with the updated child constraints.
+         */
+        public ForFlowLayout withChildConstraints( FlowCell... childConstraints ) {
+            return withChildConstraints( Tuple.of(FlowCell.class, childConstraints) );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the {@link FlowCell} at the given child
+         *  index replaced by the supplied value.  All other child constraints and all other
+         *  properties are copied unchanged.
+         *  <p>
+         *  If {@code index} is beyond the current tuple size, the tuple is padded with
+         *  fixed full-width cells ({@code UI.AUTO_SPAN(12)}) up to and including that index.
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         * @param childConstraint The new {@link FlowCell} for the child at {@code index}.
+         * @return A new {@link ForFlowLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForFlowLayout withChildConstraint( int index, FlowCell childConstraint ) {
+            Objects.requireNonNull(childConstraint);
+            Tuple<FlowCell> padded = _childConstraints;
+            while ( padded.size() <= index )
+                padded = padded.add( new FlowCell(it -> it) );
+            return withChildConstraints( padded.setAt(index, childConstraint) );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the {@link FlowCell} at the given child
+         *  index replaced by one built from the supplied {@link Configurator} lambda.
+         *  The lambda receives a {@link FlowCellConf} and returns the configured version,
+         *  matching exactly the API of {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+         *  <pre>{@code
+         *      Layout.flow()
+         *            .withChildConstraint(0, it -> it.small(12).medium(6).large(4))
+         *            .withChildConstraint(1, it -> it.small(12).medium(6).large(8))
+         *  }</pre>
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         * @param cellConfig A {@link Configurator} that configures the {@link FlowCellConf}
+         *                   for the child's responsive span policy.
+         * @return A new {@link ForFlowLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForFlowLayout withChildConstraint( int index, Configurator<FlowCellConf> cellConfig ) {
+            return withChildConstraint( index, new FlowCell(Objects.requireNonNull(cellConfig)) );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the supplied {@link FlowCell} appended
+         *  to the end of the existing child-constraint tuple.
+         *  This is a convenient alternative to {@link #withChildConstraints(FlowCell...)}
+         *  when building up constraints one at a time:
+         *  <pre>{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.flow()
+         *            .withAddedChildConstraint( AUTO_SPAN(it -> it.small(12).medium(6)) )
+         *            .withAddedChildConstraint( AUTO_SPAN(it -> it.small(12).medium(6)) )
+         *  }</pre>
+         *
+         * @param childConstraint The {@link FlowCell} to append as the next child constraint.
+         * @return A new {@link ForFlowLayout} with the constraint appended.
+         */
+        public ForFlowLayout withAddedChildConstraint( FlowCell childConstraint ) {
+            return withChildConstraints( _childConstraints.add(Objects.requireNonNull(childConstraint)) );
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with a {@link FlowCell} built from the
+         *  supplied {@link Configurator} lambda appended to the end of the existing
+         *  child-constraint tuple.
+         *  The lambda receives a {@link FlowCellConf} and returns the configured version,
+         *  matching exactly the API of {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+         *  <pre>{@code
+         *      Layout.flow()
+         *            .withAddedChildConstraint( it -> it.small(12).medium(6) )
+         *            .withAddedChildConstraint( it -> it.small(12).medium(6) )
+         *  }</pre>
+         *
+         * @param cellConfig A {@link Configurator} that configures the {@link FlowCellConf}
+         *                   for the appended child's responsive span policy.
+         * @return A new {@link ForFlowLayout} with the constraint appended.
+         */
+        public ForFlowLayout withAddedChildConstraint( Configurator<FlowCellConf> cellConfig ) {
+            return withAddedChildConstraint( new FlowCell(Objects.requireNonNull(cellConfig)) );
+        }
+
+        // -- Object contract --
+
+        @Override public int hashCode() {
+            return Objects.hash( _align, _horizontalGapSize, _verticalGapSize, _childConstraints );
+        }
 
         @Override
         public boolean equals( @Nullable Object o ) {
@@ -869,52 +1144,84 @@ public interface Layout
             if ( o == this ) return true;
             if ( o.getClass() != getClass() ) return false;
             ForFlowLayout other = (ForFlowLayout) o;
-            return _align == other._align && _horizontalGapSize == other._horizontalGapSize && _verticalGapSize == other._verticalGapSize;
+            return _align              == other._align              &&
+                   _horizontalGapSize  == other._horizontalGapSize  &&
+                   _verticalGapSize    == other._verticalGapSize    &&
+                   _childConstraints.equals(other._childConstraints);
         }
 
+        // -- Layout installation --
+
         /**
-         *  Installs a {@link FlowLayout} (backed by {@link ResponsiveGridFlowLayout})
-         *  onto the supplied component using the alignment and gap settings
-         *  stored in this configuration. If a compatible layout is already installed,
-         *  only the properties that have changed are updated and
-         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *  Installs a {@link ResponsiveGridFlowLayout} onto the supplied component and
+         *  applies all constraints stored in this configuration.
+         *  <p>
+         *  The installation proceeds in two phases:
+         *  <ol>
+         *    <li><b>Layout manager</b> — if no {@link ResponsiveGridFlowLayout} is currently
+         *        installed, a new one is created with the stored alignment and gap settings.
+         *        If one is already installed, only the properties that have changed are
+         *        updated in-place and {@link JComponent#revalidate()} is called.</li>
+         *    <li><b>Child constraints</b> — if the child-constraint tuple is non-empty,
+         *        each stored {@link FlowCell} is written as a
+         *        {@link AddConstraint} client property onto the corresponding direct child
+         *        (using the same key that {@link ResponsiveGridFlowLayout#addLayoutComponent}
+         *        uses, so the layout manager picks them up on the next layout pass).
+         *        Only entries that differ from the currently stored value are written, and
+         *        {@link JComponent#revalidate()} is called exactly once at the end if
+         *        anything changed.</li>
+         *  </ol>
          *
-         * @param component The component to install the {@link FlowLayout} for.
+         * @param component The component to install the {@link ResponsiveGridFlowLayout} for.
          */
         @Override
         public void installFor( JComponent component ) {
+            // Phase 1: install / update the ResponsiveGridFlowLayout:
             LayoutManager currentLayout = component.getLayout();
-            if ( !( currentLayout instanceof ResponsiveGridFlowLayout) ) {
-                // We need to replace the current layout with a FlowLayout:
-                ResponsiveGridFlowLayout newLayout = new ResponsiveGridFlowLayout(_align, _horizontalGapSize, _verticalGapSize);
-                component.setLayout(newLayout);
-                return;
+            if ( !( currentLayout instanceof ResponsiveGridFlowLayout ) ) {
+                component.setLayout(new ResponsiveGridFlowLayout(_align, _horizontalGapSize, _verticalGapSize));
+            } else {
+                ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;
+                boolean alignmentChanged     = _align             != flowLayout.getAlignment();
+                boolean horizontalGapChanged = _horizontalGapSize != flowLayout.horizontalGapSize();
+                boolean verticalGapChanged   = _verticalGapSize   != flowLayout.verticalGapSize();
+                if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {
+                    flowLayout.setAlignment(_align);
+                    flowLayout.setHorizontalGapSize(_horizontalGapSize);
+                    flowLayout.setVerticalGapSize(_verticalGapSize);
+                    component.revalidate();
+                }
             }
-            ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;
-            UI.HorizontalAlignment alignment = _align;
-            int horizontalGap                = _horizontalGapSize;
-            int verticalGap                  = _verticalGapSize;
-
-            boolean alignmentChanged     = alignment != flowLayout.getAlignment();
-            boolean horizontalGapChanged = horizontalGap != flowLayout.horizontalGapSize();
-            boolean verticalGapChanged   = verticalGap   != flowLayout.verticalGapSize();
-
-            if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {
-                flowLayout.setAlignment(alignment);
-                flowLayout.setHorizontalGapSize(horizontalGap);
-                flowLayout.setVerticalGapSize(verticalGap);
-                component.revalidate();
+            // Phase 2: push per-child FlowCell constraints as client properties:
+            if ( _childConstraints.isNotEmpty() ) {
+                Component[] children  = component.getComponents();
+                int count             = Math.min(children.length, _childConstraints.size());
+                boolean changed       = false;
+                for ( int i = 0; i < count; i++ ) {
+                    if ( !( children[i] instanceof JComponent ) )
+                        continue;
+                    JComponent child  = (JComponent) children[i];
+                    FlowCell desired  = _childConstraints.get(i);
+                    Object existing   = child.getClientProperty(AddConstraint.class);
+                    if ( !desired.equals(existing) ) {
+                        child.putClientProperty(AddConstraint.class, desired);
+                        changed = true;
+                    }
+                }
+                if ( changed )
+                    component.revalidate();
             }
         }
 
         @Override public String toString() {
             return getClass().getSimpleName() + "[" +
-                        "align=" + _align + ", " +
-                        "hgap=" + _horizontalGapSize + ", " +
-                        "vgap=" + _verticalGapSize +
+                        "align="            + _align             + ", " +
+                        "hgap="             + _horizontalGapSize + ", " +
+                        "vgap="             + _verticalGapSize   + ", " +
+                        "childConstraints=" + _childConstraints  +
                     "]";
-            }
         }
+    }
 
     /**
      *  The {@link BorderLayoutInstaller} layout is a layout that represents
