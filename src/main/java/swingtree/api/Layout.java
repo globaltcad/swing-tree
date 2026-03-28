@@ -41,6 +41,8 @@ import java.util.Objects;
  *    <p>
  *    This interface also contains various implementations
  *    for supporting the most common types of {@link LayoutManager}s.
+ *
+ * @see swingtree.UIForAnySwing#withLayout(sprouts.Val) For a common practical usecase, see this method.
  */
 @Immutable
 public interface Layout
@@ -842,8 +844,8 @@ public interface Layout
      *  The {@link ForFlowLayout} layout is a layout that represents
      *  a {@link FlowLayout} layout configuration for a component. <br>
      *  Whenever this layout configuration changes,
-     *  it will create and re-install a new {@link FlowLayout} onto the component
-     *  based on the new configuration,
+     *  it will create and re-install a new {@link ResponsiveGridFlowLayout}
+     *  onto the component based on the new configuration,
      *  which are the alignment, horizontal gap and vertical gap.
      */
     @Immutable
