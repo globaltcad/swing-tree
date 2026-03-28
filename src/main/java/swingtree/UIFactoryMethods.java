@@ -10,6 +10,7 @@ import sprouts.Event;
 import swingtree.animation.*;
 import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
+import swingtree.api.Layout;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
@@ -509,7 +510,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForPanel<JPanel> panel( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return panel(attr.get().toString()).withLayout(attr);
+        return panel(attr.get().toString()).withLayout(attr.viewAs(Layout.class, Layout::mig));
     }
 
     /**
@@ -883,7 +884,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static UIForBox<JBox> box( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return box().withLayout(attr.view( it -> it.and("ins 0")));
+        return box().withLayout(attr.viewAs(Layout.class, it -> Layout.mig(it.and("ins 0"))));
     }
 
     /**

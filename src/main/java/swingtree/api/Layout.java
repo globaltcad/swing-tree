@@ -559,6 +559,7 @@ public interface Layout
      *  calls {@link JComponent#revalidate()} to trigger a layout refresh.
      */
     @Immutable
+    @SuppressWarnings("Immutable")
     final class ForMigLayout implements Layout
     {
         private final LayoutConstraint          _constr;
@@ -945,6 +946,7 @@ public interface Layout
      *  are further configured through the fluent {@code with*} wither methods.
      */
     @Immutable
+    @SuppressWarnings("Immutable")
     final class ForFlowLayout implements Layout
     {
         private final UI.HorizontalAlignment _align;

@@ -1,11 +1,6 @@
 package swingtree;
 
-import net.miginfocom.swing.MigLayout;
-import sprouts.Val;
-import swingtree.layout.LayoutConstraint;
-
 import javax.swing.JPanel;
-import java.awt.LayoutManager;
 import java.util.Objects;
 
 /**
@@ -30,33 +25,6 @@ public final class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel
     @Override
     protected UIForPanel<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForPanel<>(newState);
-    }
-
-    /**
-     *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JPanel}.
-     *
-     * @param attr The layout attributes property which will be dynamically passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public final UIForPanel<P> withLayout( Val<LayoutConstraint> attr ) {
-        NullUtil.nullArgCheck(attr, "attr", Val.class);
-        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return _withOnShow( attr, (thisComponent,it) -> {
-                    // Every time the value changes, we need to re-layout the panel.
-                    // Note that this is for mig layout:
-                    LayoutManager lm = thisComponent.getLayout();
-                    if (lm instanceof MigLayout) {
-                        ((MigLayout)lm).setLayoutConstraints(it.toString());
-                        thisComponent.revalidate();
-                        thisComponent.repaint();
-                    }
-                    else
-                        throw new IllegalStateException(
-                                "Cannot set layout mig-layout specific constraints on a panel with a non-mig layout."
-                            );
-                })
-                ._this();
     }
 
     @Override protected void _setEnabled( P thisComponent, boolean isEnabled ) {
