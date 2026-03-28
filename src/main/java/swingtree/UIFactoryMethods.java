@@ -498,19 +498,27 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a builder for the {@link JPanel} UI component with a
-     *  dynamically updated set of {@link MigLayout} constraints/attributes.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
+     *  Use this to create a builder for a new {@link JPanel} UI component whose
+     *  layout manager is driven by the supplied reactive {@link Layout} property.
+     *  Whenever the property emits a change event the new {@link Layout} value is
+     *  installed on the panel automatically — no manual re-wiring required.
+     *  <p>
+     *  This is in essence a convenience method for {@code UI.panel().withLayout(layout)},
+     *  and it gives full control over which layout manager is active at any point in time:
+     *  {@link Layout#mig(LayoutConstraint)}, {@link Layout#flow()}, {@link Layout#border()},
+     *  {@link Layout#none()}, and so on.
      *
-     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param layout A {@link Val} property whose current value is installed as the panel's layout
+     *               manager at build time and again whenever the property changes.
+     *               Must not be {@code null} and must never hold {@code null} —
+     *               use {@link Layout#none()} to explicitly remove the layout manager.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
+     * @throws IllegalArgumentException if {@code layout} is {@code null} or holds a {@code null} item.
      */
-    public static UIForPanel<JPanel> panel( Val<LayoutConstraint> attr ) {
-        NullUtil.nullArgCheck(attr, "attr", Val.class);
-        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return panel(attr.get().toString()).withLayout(attr.viewAs(Layout.class, Layout::mig));
+    public static UIForPanel<JPanel> panel( Val<Layout> layout ) {
+        NullUtil.nullArgCheck(layout, "layout", Val.class);
+        NullUtil.nullPropertyCheck(layout, "layout", "Null is not a valid layout. Use Layout.none() to remove a layout.");
+        return _panel().withLayout(layout);
     }
 
     /**
@@ -863,28 +871,30 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This is conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This method allows you to dynamically determine the {@link LayoutConstraint} constants
-     *  of the {@link MigLayout} instance, by passing a {@link Val} property which
-     *  will be observed and its value passed to the {@link MigLayout} constructor
-     *  whenever it changes.
-     *  This is in essence a convenience method for:
-     *  {@code UI.box().withLayout(attr.viewAsString( it -> it+", ins 0"))}.
+     *  Use this to create a builder for a new {@link JBox} whose layout manager is driven
+     *  by the supplied reactive {@link Layout} property.
+     *  Whenever the property emits a change event the new {@link Layout} value is installed
+     *  on the box automatically — no manual re-wiring required.
+     *  <p>
+     *  This is in essence a convenience method for {@code UI.box().withLayout(layout)},
+     *  and it gives full control over which layout manager is active at any point in time:
+     *  {@link Layout#mig(LayoutConstraint)}, {@link Layout#flow()}, {@link Layout#border()},
+     *  {@link Layout#none()}, and so on.
+     *  <p>
+     *  Note that the supplied {@link Layout} value is used verbatim —
+     *  no implicit {@code "ins 0"} is appended.
      *
-     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param layout A {@link Val} property whose current value is installed as the box's layout
+     *               manager at build time and again whenever the property changes.
+     *               Must not be {@code null} and must never hold {@code null} —
+     *               use {@link Layout#none()} to explicitly remove the layout manager.
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
+     * @throws IllegalArgumentException if {@code layout} is {@code null} or holds a {@code null} item.
      */
-    public static UIForBox<JBox> box( Val<LayoutConstraint> attr ) {
-        NullUtil.nullArgCheck(attr, "attr", Val.class);
-        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return box().withLayout(attr.viewAs(Layout.class, it -> Layout.mig(it.and("ins 0"))));
+    public static UIForBox<JBox> box( Val<Layout> layout ) {
+        NullUtil.nullArgCheck(layout, "layout", Val.class);
+        NullUtil.nullPropertyCheck(layout, "layout", "Null is not a valid layout. Use Layout.none() to remove a layout.");
+        return box().withLayout(layout);
     }
 
     /**

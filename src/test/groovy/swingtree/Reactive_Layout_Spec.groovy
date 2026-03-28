@@ -10,8 +10,11 @@ import swingtree.api.Layout
 import swingtree.layout.AddConstraint
 import swingtree.layout.MigAddConstraint
 import swingtree.layout.ResponsiveGridFlowLayout
+import swingtree.components.JBox
+import swingtree.layout.LayoutConstraint
 import swingtree.threading.EventProcessor
 
+import java.awt.BorderLayout
 import javax.swing.JPanel
 
 @Title("Reactive Layouts")
@@ -50,6 +53,10 @@ import javax.swing.JPanel
       - Positional per-child MigLayout add-constraints applied reactively
       - Per-child `FlowCell` constraints pushed as client properties for responsive layouts
       - End-to-end reactive responsive layout: changing span policies changes actual bounds
+      - `UI.panel(Val<Layout>)` factory giving full layout control from the start
+      - `UI.box(Val<Layout>)` factory giving full layout control from the start
+      - `UI.panel(Val<Layout>)` MigLayout in-place update via the factory entry-point
+      - `UI.box(Val<Layout>)` verbatim layout installation without implicit inset injection
 
 """)
 @Subject([Layout, UIForAnySwing])
@@ -474,5 +481,184 @@ class Reactive_Layout_Spec extends Specification
             panel.doLayout()
         then: 'The second child is back on its own row below the first:'
             panel.getComponent(1).y > panel.getComponent(0).y
+    }
+
+    def '`UI.panel(Val<Layout>)` applies any Layout type reactively, not just MigLayout.'()
+    {
+        reportInfo """
+            The `UI.panel(Val<Layout>)` factory is the most flexible reactive panel factory:
+            it accepts any `Layout` implementation — MigLayout, responsive flow, border,
+            grid, box axis — and installs it reactively whenever the property changes.
+
+            The property value is used verbatim — the caller can supply any `Layout`
+            implementation, enabling switches between entirely different layout families
+            by just calling `Var.set(...)` with the desired `Layout` instance.
+
+            This test verifies:
+              - The initial `Layout` held by the property is installed at build time.
+              - A switch to a completely different layout type (flow) replaces the manager.
+              - A switch back to a MigLayout with different constraints updates it in-place.
+              - A switch to `Layout.border()` installs a `BorderLayout`.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property starting with a MigLayout with column and row constraints:'
+            def layout = Var.of(Layout.class, Layout.mig("fill", "[grow][]", "[shrink]"))
+        and: 'A panel created via the Val<Layout> factory overload:'
+            def panel = UI.panel(layout).get(JPanel)
+
+        expect: 'The panel immediately has a MigLayout with the specified constraints:'
+            (panel.getLayout() instanceof MigLayout)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints()  == "fill"
+            ((MigLayout) panel.getLayout()).getColumnConstraints()  == "[grow][]"
+            ((MigLayout) panel.getLayout()).getRowConstraints()     == "[shrink]"
+
+        when: 'We switch to a responsive flow layout:'
+            layout.set(Layout.flow())
+        then: 'The MigLayout is replaced by a ResponsiveGridFlowLayout:'
+            (panel.getLayout() instanceof ResponsiveGridFlowLayout)
+
+        when: 'We switch back to MigLayout with different constraints:'
+            layout.set(Layout.mig("flowy, wrap 2"))
+        then: 'A MigLayout is (re-)installed with the new constraints:'
+            (panel.getLayout() instanceof MigLayout)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "flowy, wrap 2"
+
+        when: 'We switch to a border layout:'
+            layout.set(Layout.border())
+        then: 'A BorderLayout is installed:'
+            panel.getLayout() instanceof BorderLayout
+    }
+
+    def '`UI.box(Val<Layout>)` applies any Layout type reactively without appending "ins 0".'()
+    {
+        reportInfo """
+            `UI.box(Val<Layout>)` is the full-control reactive variant of the box factory.
+            It installs whatever `Layout` the property holds at build time and updates it
+            whenever the property changes — identical to calling `UI.box().withLayout(layout)`.
+
+            The caller owns the layout object entirely and can choose a non-MigLayout type,
+            supply explicit inset constraints, or leave insets at their default values.
+            No implicit `"ins 0"` suffix is ever appended.
+
+            This test verifies:
+              - The initial Layout is installed verbatim (no "ins 0" appended).
+              - Switching to a flow layout replaces the manager.
+              - Switching to `Layout.none()` removes the layout manager.
+              - Switching back to a MigLayout reinstalls it correctly.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property holding an explicit MigLayout with custom insets:'
+            def layout = Var.of(Layout.class, Layout.mig(LayoutConstraint.of("fill", "ins 4")))
+        and: 'A JBox created via the Val<Layout> factory overload:'
+            def box = UI.box(layout).get(JBox)
+
+        expect: 'The box has a MigLayout installed, containing both provided constraint tokens:'
+            (box.getLayout() instanceof MigLayout)
+            ((MigLayout) box.getLayout()).getLayoutConstraints().contains("fill")
+            ((MigLayout) box.getLayout()).getLayoutConstraints().contains("ins 4")
+
+        when: 'We switch to a responsive flow layout:'
+            layout.set(Layout.flow())
+        then: 'The MigLayout is replaced by a ResponsiveGridFlowLayout:'
+            (box.getLayout() instanceof ResponsiveGridFlowLayout)
+
+        when: 'We switch to Layout.none() to remove the layout manager entirely:'
+            layout.set(Layout.none())
+        then: 'The layout manager is null, enabling absolute positioning:'
+            box.getLayout() == null
+
+        when: 'We restore a MigLayout:'
+            layout.set(Layout.mig("wrap 1"))
+        then: 'The MigLayout is reinstalled:'
+            (box.getLayout() instanceof MigLayout)
+            ((MigLayout) box.getLayout()).getLayoutConstraints() == "wrap 1"
+    }
+
+    def '`UI.panel(Val<Layout>)` updates MigLayout constraints in-place across successive property changes.'()
+    {
+        reportInfo """
+            When the `Var<Layout>` property held by `UI.panel(Val<Layout>)` is updated
+            with successive `ForMigLayout` values, SwingTree updates the existing MigLayout
+            instance's constraints in-place rather than replacing the manager object.
+
+            This means the MigLayout object identity is preserved across constraint-only
+            changes, avoiding unnecessary component-tree invalidation while still reflecting
+            the new constraint strings immediately.
+
+            The test pins all three constraint axes (layout, column, row) across multiple
+            successive updates to ensure no regression in the in-place update path when
+            the panel is built via the factory overload rather than via
+            `UI.panel().withLayout(...)` directly.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property starting with a full three-axes MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill", "[grow][]", "[shrink]"))
+        and: 'A panel created via the Val<Layout> factory overload:'
+            def panel = UI.panel(layout).get(JPanel)
+        and: 'We capture the MigLayout instance for identity checks later:'
+            def originalMig = panel.getLayout()
+
+        expect: 'All three constraint axes match the initial property value:'
+            originalMig instanceof MigLayout
+            ((MigLayout) originalMig).getLayoutConstraints()  == "fill"
+            ((MigLayout) originalMig).getColumnConstraints()  == "[grow][]"
+            ((MigLayout) originalMig).getRowConstraints()     == "[shrink]"
+
+        when: 'We update to a new MigLayout value with different constraints:'
+            layout.set(Layout.mig("flowy, wrap 3", "[fill]", "[grow]"))
+        then: 'The same MigLayout instance is used and all three axes are updated:'
+            panel.getLayout().is(originalMig)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints()  == "flowy, wrap 3"
+            ((MigLayout) panel.getLayout()).getColumnConstraints()  == "[fill]"
+            ((MigLayout) panel.getLayout()).getRowConstraints()     == "[grow]"
+
+        when: 'We update again, changing only the layout constraint axis:'
+            layout.set(Layout.mig("fill, wrap 2"))
+        then: 'The in-place update applies and the panel still uses the original manager instance:'
+            panel.getLayout().is(originalMig)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints()  == "fill, wrap 2"
+    }
+
+    def '`UI.box(Val<Layout>)` uses the full layout verbatim and does not append implicit insets.'()
+    {
+        reportInfo """
+            `UI.box(Val<Layout>)` installs the `Layout` held by the property exactly as
+            provided — no implicit constraint suffix (such as `"ins 0"`) is ever appended.
+
+            With the full-control `Val<Layout>` API the caller is responsible for choosing
+            the desired inset behaviour by constructing the `Layout` appropriately:
+              - `Layout.mig(LayoutConstraint.of("fill", "ins 0"))` for explicit zero insets.
+              - `Layout.mig("fill")` when default insets are acceptable.
+              - Any other `Layout` family (flow, border, …) for non-MigLayout managers.
+
+            This test verifies that no implicit `"ins 0"` is injected and that the constraint
+            string roundtrips exactly through the MigLayout manager across multiple updates.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property with a plain MigLayout constraint (no "ins 0"):'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A JBox created via the Val<Layout> factory overload:'
+            def box = UI.box(layout).get(JBox)
+
+        expect: 'The MigLayout has exactly the constraint provided — no "ins 0" is appended:'
+            box.getLayout() instanceof MigLayout
+            ((MigLayout) box.getLayout()).getLayoutConstraints() == "fill"
+
+        when: 'We switch to a constraint that explicitly sets custom insets:'
+            layout.set(Layout.mig(LayoutConstraint.of("fill", "ins 8")))
+        then: 'Both constraint tokens are present in the installed layout constraints:'
+            box.getLayout() instanceof MigLayout
+            ((MigLayout) box.getLayout()).getLayoutConstraints().contains("fill")
+            ((MigLayout) box.getLayout()).getLayoutConstraints().contains("ins 8")
+
+        when: 'We switch to a plain constraint with no insets at all:'
+            layout.set(Layout.mig("wrap 2"))
+        then: 'The constraint is installed as-is — still no implicit "ins 0" suffix:'
+            box.getLayout() instanceof MigLayout
+            ((MigLayout) box.getLayout()).getLayoutConstraints() == "wrap 2"
     }
 }
