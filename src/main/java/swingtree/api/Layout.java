@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
+import swingtree.layout.LayoutConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
@@ -79,53 +80,130 @@ public interface Layout
     static Layout none() { return Constants.NONE_LAYOUT_CONSTANT; }
 
     /**
-     *  This leads to the installation of the {@link MigLayout} layout manager,
-     *  which is a powerful general purpose layout manager for Swing.
-     *  Click <a href="http://www.miglayout.com/">here</a> for more information.
+     *  The preferred factory method for creating a {@link MigLayout}-based layout configuration
+     *  from type-safe {@link LayoutConstraint} objects.
+     *  <p>
+     *  {@link LayoutConstraint} is a composable, type-safe wrapper around MigLayout constraint
+     *  strings. The recommended way to use it is through the constants and factory methods
+     *  available via {@code import static swingtree.UI.*}, which can then be combined
+     *  with {@link LayoutConstraint#and(LayoutConstraint)}:
+     *  <pre>{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Layout.mig( FILL.and(WRAP(2)), "[shrink][grow]", "[]8[]" )
+     *  }</pre>
+     *  Using {@link LayoutConstraint} instead of raw strings catches typos at call-site and
+     *  makes constraint composition explicit and refactor-friendly.
+     *  See <a href="http://www.miglayout.com/whitepaper.html">the MigLayout whitepaper</a>
+     *  for full constraint documentation.
      *
-     * @param constr The layout constraints for the layout.
-     * @param rowConstr The row constraints for the layout.
-     * @param colConstr The column constraints for the layout.
-     * @return A layout that uses the MigLayout.
+     * @param constr The general layout constraints for the {@link MigLayout}
+     *               (e.g. {@code FILL.and(WRAP(2))}).
+     * @param colConstr The column constraints for the {@link MigLayout}
+     *                  (e.g. {@code LayoutConstraint.of("[shrink][grow]")}).
+     * @param rowConstr The row constraints for the {@link MigLayout}
+     *                  (e.g. {@code LayoutConstraint.of("[]8[]")}).
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static Layout mig(
+        LayoutConstraint constr,
+        LayoutConstraint colConstr,
+        LayoutConstraint rowConstr
+    ) {
+        return new ForMigLayout( constr, colConstr, rowConstr );
+    }
+
+    /**
+     *  A factory method for creating a {@link MigLayout}-based layout configuration
+     *  from type-safe {@link LayoutConstraint} objects, without column constraints.
+     *  This is the preferred approach over the plain-{@link String} overloads.
+     *  <p>
+     *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for
+     *  full details on the {@link LayoutConstraint} API.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}.
+     * @param rowConstr The row constraints for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static Layout mig(
+        LayoutConstraint constr,
+        LayoutConstraint rowConstr
+    ) {
+        return new ForMigLayout( constr, LayoutConstraint.of(""), rowConstr );
+    }
+
+    /**
+     *  A factory method for creating a {@link MigLayout}-based layout configuration
+     *  from a single type-safe {@link LayoutConstraint}, with no column or row constraints.
+     *  This is the preferred approach over the plain-{@link String} overload.
+     *  <p>
+     *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for
+     *  full details on the {@link LayoutConstraint} API.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static Layout mig( LayoutConstraint constr ) {
+        return new ForMigLayout( constr, LayoutConstraint.of(""), LayoutConstraint.of("") );
+    }
+
+    /**
+     *  A convenience overload of {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)}
+     *  that accepts plain constraint strings instead of {@link LayoutConstraint} objects.
+     *  Each string is wrapped via {@link LayoutConstraint#of(String...)} before being forwarded.
+     *  <p>
+     *  Prefer the {@link LayoutConstraint}-based overloads for new code, as they are
+     *  composable and less error-prone than raw strings.
+     *  Click <a href="http://www.miglayout.com/">here</a> for more information about MigLayout.
+     *
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @param colConstr The column constraints string for the {@link MigLayout}.
+     * @param rowConstr The row constraints string for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
     static Layout mig(
         String constr,
         String colConstr,
         String rowConstr
     ) {
-        return new ForMigLayout( constr, colConstr, rowConstr );
+        return mig( LayoutConstraint.of(constr), LayoutConstraint.of(colConstr), LayoutConstraint.of(rowConstr) );
     }
 
     /**
-     *  A factory method for creating a layout that installs the {@link MigLayout}
-     *  manager onto a component based on the supplied parameters.
-     *  The MigLayout layout manager is a powerful general purpose layout manager for Swing.
-     *  Click <a href="http://www.miglayout.com/">here</a> for more information.
+     *  A convenience overload of {@link #mig(LayoutConstraint, LayoutConstraint)}
+     *  that accepts plain constraint strings instead of {@link LayoutConstraint} objects.
+     *  Each string is wrapped via {@link LayoutConstraint#of(String...)} before being forwarded.
+     *  <p>
+     *  Prefer the {@link LayoutConstraint}-based overloads for new code, as they are
+     *  composable and less error-prone than raw strings.
+     *  Click <a href="http://www.miglayout.com/">here</a> for more information about MigLayout.
      *
-     * @param constr The layout constraints for the layout.
-     * @param rowConstr The row constraints for the layout.
-     * @return A layout that uses the MigLayout.
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @param rowConstr The row constraints string for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
     static Layout mig(
         String constr,
         String rowConstr
     ) {
-        return new ForMigLayout( constr, "", rowConstr );
+        return mig( LayoutConstraint.of(constr), LayoutConstraint.of(rowConstr) );
     }
 
     /**
-     *  A factory method for creating a layout that installs the {@link MigLayout}
-     *  manager onto a component based on the supplied parameters.
-     *  This will effectively translate to a call to the {@link MigLayout#MigLayout(String)}
-     *  constructor with the supplied constraints.
+     *  A convenience overload of {@link #mig(LayoutConstraint)}
+     *  that accepts a plain constraint string instead of a {@link LayoutConstraint} object.
+     *  The string is wrapped via {@link LayoutConstraint#of(String...)} before being forwarded.
+     *  <p>
+     *  Prefer the {@link LayoutConstraint}-based overloads for new code, as they are
+     *  composable and less error-prone than raw strings.
      *  In case you are not familiar with the MigLayout constraints, you can find more information
      *  about them <a href="http://www.miglayout.com/whitepaper.html">here</a>.
      *
-     * @param constr The layout constraints for the layout.
-     * @return A layout that uses the MigLayout.
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
     static Layout mig( String constr ) {
-        return new ForMigLayout( constr, "", "" );
+        return mig( LayoutConstraint.of(constr) );
     }
 
     /**
@@ -317,6 +395,13 @@ public interface Layout
 
         @Override public String toString() { return getClass().getSimpleName() + "[]"; }
 
+        /**
+         *  Removes any existing {@link LayoutManager} from the supplied component
+         *  by setting it to {@code null}, effectively leaving the component without
+         *  a layout manager.
+         *
+         * @param component The component whose layout manager will be removed.
+         */
         @Override
         public void installFor( JComponent component ) {
             // Contrary to the 'Unspecific' layout, this layout
@@ -336,24 +421,84 @@ public interface Layout
     @Immutable
     final class ForMigLayout implements Layout
     {
-        private final String _constr;
-        private final String _colConstr;
-        private final String _rowConstr;
+        private final LayoutConstraint _constr;
+        private final LayoutConstraint _colConstr;
+        private final LayoutConstraint _rowConstr;
 
-
-        ForMigLayout( String constr, String colConstr, String rowConstr ) {
+        ForMigLayout( LayoutConstraint constr, LayoutConstraint colConstr, LayoutConstraint rowConstr ) {
             _constr    = Objects.requireNonNull(constr);
             _colConstr = Objects.requireNonNull(colConstr);
             _rowConstr = Objects.requireNonNull(rowConstr);
         }
 
-        public ForMigLayout withConstraint( String constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied general layout constraints
+         *  and the same column and row constraints as this instance.
+         *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
+         *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
+         *
+         * @param constr The new general layout constraints for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated layout constraints.
+         */
+        public ForMigLayout withConstraint( LayoutConstraint constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }
 
-        public ForMigLayout withRowConstraint( String rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied general layout constraints
+         *  and the same column and row constraints as this instance.
+         *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
+         *  to {@link #withConstraint(LayoutConstraint)}.
+         *  Prefer {@link #withConstraint(LayoutConstraint)} for new code.
+         *
+         * @param constr The new general layout constraints string for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated layout constraints.
+         */
+        public ForMigLayout withConstraint( String constr ) { return withConstraint( LayoutConstraint.of(constr) ); }
 
-        public ForMigLayout withColumnConstraint( String colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied row constraints
+         *  and the same general layout and column constraints as this instance.
+         *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
+         *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
+         *
+         * @param rowConstr The new row constraints for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated row constraints.
+         */
+        public ForMigLayout withRowConstraint( LayoutConstraint rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }
 
-        public ForMigLayout withComponentConstraint( String componentConstr ) { return new ForMigLayout( _constr, _colConstr, _rowConstr ); }
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied row constraints
+         *  and the same general layout and column constraints as this instance.
+         *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
+         *  to {@link #withRowConstraint(LayoutConstraint)}.
+         *  Prefer {@link #withRowConstraint(LayoutConstraint)} for new code.
+         *
+         * @param rowConstr The new row constraints string for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated row constraints.
+         */
+        public ForMigLayout withRowConstraint( String rowConstr ) { return withRowConstraint( LayoutConstraint.of(rowConstr) ); }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied column constraints
+         *  and the same general layout and row constraints as this instance.
+         *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
+         *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
+         *
+         * @param colConstr The new column constraints for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated column constraints.
+         */
+        public ForMigLayout withColumnConstraint( LayoutConstraint colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied column constraints
+         *  and the same general layout and row constraints as this instance.
+         *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
+         *  to {@link #withColumnConstraint(LayoutConstraint)}.
+         *  Prefer {@link #withColumnConstraint(LayoutConstraint)} for new code.
+         *
+         * @param colConstr The new column constraints string for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated column constraints.
+         */
+        public ForMigLayout withColumnConstraint( String colConstr ) { return withColumnConstraint( LayoutConstraint.of(colConstr) ); }
 
         @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }
 
@@ -368,6 +513,17 @@ public interface Layout
                    _colConstr.equals( other._colConstr);
         }
 
+        /**
+         *  Installs a {@link MigLayout} onto the supplied component using the constraints
+         *  stored in this configuration. If the component already has a {@link MigLayout}
+         *  installed, only the constraints that have changed are updated and
+         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *  If the parent container also uses a {@link MigLayout},
+         *  the component-level layout constraints (cell/component constraints)
+         *  are applied to the parent layout as well.
+         *
+         * @param component The component to install the {@link MigLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
             ComponentExtension<?> extension = ComponentExtension.from(component);
@@ -386,19 +542,19 @@ public interface Layout
                     }
                 }
             }
-            if ( !_constr.isEmpty() || !_colConstr.isEmpty() || !_rowConstr.isEmpty() ) {
+            final String layoutConstraints = _constr.toString();
+            final String columnConstraints = _colConstr.toString();
+            final String rowConstraints    = _rowConstr.toString();
+            if ( !layoutConstraints.isEmpty() || !columnConstraints.isEmpty() || !rowConstraints.isEmpty() ) {
                 // We ensure that the parent layout has the correct layout constraints for the component:
                 LayoutManager currentLayout = component.getLayout();
                 if ( !( currentLayout instanceof MigLayout ) ) {
                     // We need to replace the current layout with a MigLayout:
-                    MigLayout newLayout = new MigLayout( _constr, _colConstr, _rowConstr );
+                    MigLayout newLayout = new MigLayout( layoutConstraints, columnConstraints, rowConstraints );
                     component.setLayout(newLayout);
                     return;
                 }
                 MigLayout migLayout = (MigLayout) currentLayout;
-                String layoutConstraints = _constr;
-                String columnConstraints = _colConstr;
-                String rowConstraints    = _rowConstr;
 
                 Object currentLayoutConstraints = migLayout.getLayoutConstraints();
                 Object currentColumnConstraints = migLayout.getColumnConstraints();
@@ -459,6 +615,15 @@ public interface Layout
             return _align == other._align && _horizontalGapSize == other._horizontalGapSize && _verticalGapSize == other._verticalGapSize;
         }
 
+        /**
+         *  Installs a {@link FlowLayout} (backed by {@link ResponsiveGridFlowLayout})
+         *  onto the supplied component using the alignment and gap settings
+         *  stored in this configuration. If a compatible layout is already installed,
+         *  only the properties that have changed are updated and
+         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link FlowLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
@@ -524,6 +689,14 @@ public interface Layout
             return _hgap == other._hgap && _vgap == other._vgap;
         }
 
+        /**
+         *  Installs a {@link BorderLayout} onto the supplied component using the horizontal
+         *  and vertical gap sizes stored in this configuration. If a {@link BorderLayout}
+         *  is already installed, only the gap values that have changed are updated and
+         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link BorderLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
@@ -589,6 +762,14 @@ public interface Layout
             return _rows == other._rows && _cols == other._cols && _hgap == other._hgap && _vgap == other._vgap;
         }
 
+        /**
+         *  Installs a {@link GridLayout} onto the supplied component using the row count,
+         *  column count, and gap sizes stored in this configuration. If a {@link GridLayout}
+         *  is already installed, only the properties that have changed are updated and
+         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link GridLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
@@ -656,6 +837,15 @@ public interface Layout
             return _axis == other._axis;
         }
 
+        /**
+         *  Installs a {@link BoxLayout} onto the supplied component using the axis
+         *  stored in this configuration. If a {@link BoxLayout} with a different axis
+         *  is already installed, a new {@link BoxLayout} is created and installed
+         *  (since {@link BoxLayout} does not support changing the axis after construction)
+         *  and {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link BoxLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
