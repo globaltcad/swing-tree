@@ -904,7 +904,9 @@ public abstract class UILayoutConstants
      *  <p>
      *  The {@link Configurator} passed to this method is called every time the {@link ResponsiveGridFlowLayout}
      *  updates the layout of the parent container.
-     *  This allows it to determine the number of cells a component should span dynamically.<br>
+     *  This allows it to determine the number of cells a component should span dynamically at a given size.<br>
+     *  <b>If you do not perform any configuration in the supplied configurator,
+     *  then the component will span 12 cells at all parent sizes.</b><br>
      *  <p>
      *  The {@link swingtree.UIForAnySwing#withFlowLayout()} creates the necessary {@link ResponsiveGridFlowLayout}
      *  and attaches it to the panel.<br>

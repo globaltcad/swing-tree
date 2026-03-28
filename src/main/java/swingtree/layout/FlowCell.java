@@ -2,7 +2,9 @@ package swingtree.layout;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Val;
 import swingtree.UI;
+import swingtree.UIForAnySwing;
 import swingtree.api.Configurator;
 
 import java.util.Objects;
@@ -45,7 +47,14 @@ import java.util.Objects;
  *  <p><b>
  *      Note that the {@link FlowCell} configuration may only take effect if the parent
  *      container has a {@link ResponsiveGridFlowLayout} as a {@link java.awt.LayoutManager} installed.
+ *  </b><br>
+ *  Also note: <b>
+ *      If a {@link FlowCell} is passed to the responsive flow layout without
+ *      any span policies defined, it will always default to spanning 12 cells at all parent size categories!
  *  </b>
+ * @see swingtree.api.Layout.ForFlowLayout
+ * @see swingtree.UIForAnySwing#withLayout(Val)
+ * @see UIForAnySwing#withFlowLayout()
  */
 public final class FlowCell implements AddConstraint
 {
@@ -72,7 +81,9 @@ public final class FlowCell implements AddConstraint
                                     UI.VerticalAlignment.CENTER
                             );
         try {
-            return _configurator.configure(conf);
+            conf = _configurator.configure(conf);
+            if ( conf.autoSpans().length == 0 )
+                conf = conf.medium(12);
         } catch (Exception e) {
             log.error(
                 "Error configuring '"+ FlowCellConf.class.getSimpleName()+"' instance " +

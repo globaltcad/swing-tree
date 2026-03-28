@@ -1014,7 +1014,13 @@ public interface Layout
          *  The tuple maps positionally to the component's children: index&nbsp;0 maps to the
          *  first child, index&nbsp;1 to the second, and so on.
          *  Children at indices beyond the tuple size keep whatever {@link FlowCell} they
-         *  already have.  An empty tuple clears all previously stored child constraints.
+         *  already have. An empty tuple clears all previously stored child constraints.<br>
+         *  The intended way of creating {@link FlowCell}s is by using {@link UI#AUTO_SPAN(Configurator)}!<br>
+         *  An important edge case to consider when writing a responsive flow layout:<br>
+         *  <b>
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  </b>
          *
          * @param childConstraints The positional {@link FlowCell} constraints for the children.
          * @return A new {@link ForFlowLayout} with the updated child constraints.
@@ -1043,6 +1049,12 @@ public interface Layout
          *                AUTO_SPAN( it -> it.small(12).medium(6) )
          *            )
          *  }</pre>
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!<br>
+         *  An important edge case to consider when writing a responsive flow layout:<br>
+         *  <b>
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  </b>
          *
          * @param childConstraints The {@link FlowCell} constraints to apply to the component's
          *                         children in child-index order.
@@ -1056,9 +1068,15 @@ public interface Layout
          *  Returns a new {@link ForFlowLayout} with the {@link FlowCell} at the given child
          *  index replaced by the supplied value.  All other child constraints and all other
          *  properties are copied unchanged.
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!<br>
          *  <p>
          *  If {@code index} is beyond the current tuple size, the tuple is padded with
-         *  fixed full-width cells ({@code UI.AUTO_SPAN(12)}) up to and including that index.
+         *  fixed full-width cells ({@code UI.AUTO_SPAN(12)}) up to and including that index.<br>
+         *  Another important edge case to consider when writing a responsive flow layout:<br>
+         *  <b>
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  </b>
          *
          * @param index The zero-based index of the child whose constraint to update.
          * @param childConstraint The new {@link FlowCell} for the child at {@code index}.
@@ -1083,6 +1101,12 @@ public interface Layout
          *            .withChildConstraint(0, it -> it.small(12).medium(6).large(4))
          *            .withChildConstraint(1, it -> it.small(12).medium(6).large(8))
          *  }</pre>
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!<br>
+         *  An important edge case to consider when writing a responsive flow layout:<br>
+         *  <b>
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  </b>
          *
          * @param index The zero-based index of the child whose constraint to update.
          * @param cellConfig A {@link Configurator} that configures the {@link FlowCellConf}
@@ -1106,6 +1130,12 @@ public interface Layout
          *            .withAddedChildConstraint( AUTO_SPAN(it -> it.small(12).medium(6)) )
          *            .withAddedChildConstraint( AUTO_SPAN(it -> it.small(12).medium(6)) )
          *  }</pre>
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!<br>
+         *  An important edge case to consider when writing a responsive flow layout:<br>
+         *  <b>
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  </b>
          *
          * @param childConstraint The {@link FlowCell} to append as the next child constraint.
          * @return A new {@link ForFlowLayout} with the constraint appended.
@@ -1125,6 +1155,12 @@ public interface Layout
          *            .withAddedChildConstraint( it -> it.small(12).medium(6) )
          *            .withAddedChildConstraint( it -> it.small(12).medium(6) )
          *  }</pre>
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!<br>
+         *  An important edge case to consider when writing a responsive flow layout:<br>
+         *  <b>
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  </b>
          *
          * @param cellConfig A {@link Configurator} that configures the {@link FlowCellConf}
          *                   for the appended child's responsive span policy.
