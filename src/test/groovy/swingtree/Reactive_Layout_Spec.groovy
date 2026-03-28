@@ -57,6 +57,7 @@ import javax.swing.JPanel
       - `UI.box(Val<Layout>)` factory giving full layout control from the start
       - `UI.panel(Val<Layout>)` MigLayout in-place update via the factory entry-point
       - `UI.box(Val<Layout>)` verbatim layout installation without implicit inset injection
+      - A `FlowCell` with no span policies always spans all 12 columns at every parent size category
 
 """)
 @Subject([Layout, UIForAnySwing])
@@ -660,5 +661,83 @@ class Reactive_Layout_Spec extends Specification
         then: 'The constraint is installed as-is — still no implicit "ins 0" suffix:'
             box.getLayout() instanceof MigLayout
             ((MigLayout) box.getLayout()).getLayoutConstraints() == "wrap 2"
+    }
+
+    def 'A `FlowCell` with no span policies always spans all 12 columns at every parent size category.'()
+    {
+        reportInfo """
+            When a `FlowCell` is constructed with an empty configurator — one that defines
+            no span policies at all — the layout falls back to a default of 12 columns for
+            every parent size category. This is the documented safety net specified in both
+            `FlowCell` and `Layout.ForFlowLayout`: a cell without any explicit policies must
+            always occupy a full row regardless of how wide or narrow the container is.
+
+            Internally, `FlowCell.fetchConfig(...)` detects the empty `autoSpans` array after
+            invoking the configurator and injects a `medium(12)` policy as the sole entry.
+            The `ResponsiveGridFlowLayout` then resolves any other size category (very small,
+            small, large, very large, oversize) via `_findNextBestAutoSpan`, which searches
+            outward from the requested category and lands on that `MEDIUM` entry — yielding
+            12 cells in every case.
+
+            The observable consequence is straightforward: if two children both carry a
+            no-policy `FlowCell`, they always stack vertically no matter what width the
+            container is given, because a 12/12 span fills the entire row.
+
+            This test exercises six distinct size categories to confirm the invariant holds
+            across the full spectrum of parent widths:
+              - very small  : < 1/5 of preferred width (< 24 px for a 120 px pref)
+              - small       : 1/5 – 2/5                (24 – 48 px)
+              - medium      : 2/5 – 3/5                (48 – 72 px)
+              - large       : 3/5 – 4/5                (72 – 96 px)
+              - very large  : 4/5 – 5/5                (96 – 120 px)
+              - oversize    : > preferred width         (> 120 px)
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A no-policy FlowCell — the configurator returns the conf unchanged, defining no spans:'
+            def noPolicyCell = UI.AUTO_SPAN({ it })
+        and: 'A panel with two fixed-height children, each carrying the no-policy FlowCell:'
+            def panel =
+                UI.panel().withPrefSize(120, 100)
+                .withFlowLayout()
+                .add(noPolicyCell, UI.box().withPrefHeight(20))
+                .add(noPolicyCell, UI.box().withPrefHeight(20))
+                .get(JPanel)
+
+        when: 'We lay out at a VERY SMALL width (12 px — less than 1/5 of the 120 px preferred width):'
+            panel.setSize(12, 200)
+            panel.doLayout()
+        then: 'The second child is placed below the first — 12/12 span forces a new row:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+
+        when: 'We lay out at a SMALL width (36 px — between 1/5 and 2/5 of preferred width):'
+            panel.setSize(36, 200)
+            panel.doLayout()
+        then: 'Still stacked vertically — 12/12 default span is applied:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+
+        when: 'We lay out at a MEDIUM width (60 px — between 2/5 and 3/5 of preferred width):'
+            panel.setSize(60, 200)
+            panel.doLayout()
+        then: 'Still stacked vertically — this is the size category of the injected default policy:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+
+        when: 'We lay out at a LARGE width (84 px — between 3/5 and 4/5 of preferred width):'
+            panel.setSize(84, 200)
+            panel.doLayout()
+        then: 'Still stacked vertically — the MEDIUM fallback is found and returns 12 columns:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+
+        when: 'We lay out at a VERY LARGE width (108 px — between 4/5 and 5/5 of preferred width):'
+            panel.setSize(108, 200)
+            panel.doLayout()
+        then: 'Still stacked vertically — 12/12 default span holds:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+
+        when: 'We lay out at an OVERSIZE width (150 px — greater than the 120 px preferred width):'
+            panel.setSize(150, 200)
+            panel.doLayout()
+        then: 'Still stacked vertically — the invariant holds even when the panel is wider than preferred:'
+            panel.getComponent(1).y > panel.getComponent(0).y
     }
 }
