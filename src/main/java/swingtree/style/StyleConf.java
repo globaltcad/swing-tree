@@ -210,16 +210,10 @@ public final class StyleConf
     public FontConf font() { return _font; }
 
     /**
-     *  Returns a new {@link StyleConf} instance with the given layout constraint.
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
     List<PainterConf> painters( UI.Layer layer ) {
-        return Collections.unmodifiableList(
-                            new ArrayList<>(_layers.get(layer)
-                                .painters()
-                                .sortedByNames()
-                            )
-                        );
+        return _layers.get(layer).painters().sortedByNames();
     }
 
     StyleConf painter(UI.Layer layer, UI.ComponentArea area, String painterName, Painter painter ) {

@@ -47,7 +47,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
      *  Determines if the border is painted or not.
      *
      * @param borderPainted True if the border is painted, false otherwise
-     * @return This builder node, to qllow for method chaining.
+     * @return This builder node, to allow for method chaining.
      */
     public final UIForPopup<P> borderIsPaintedIf( boolean borderPainted ) {
         return _with( thisComponent -> {
@@ -62,7 +62,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
      *  If the value of the {@link Val} changes, the border will be painted or not.
      *
      * @param isPainted A {@link Val} which will be used to determine if the border is painted or not.
-     * @return This builder node, to qllow for method chaining.
+     * @return This builder node, to allow for method chaining.
      */
     public final UIForPopup<P> borderIsPaintedIf( Val<Boolean> isPainted ) {
         return _withOnShow( isPainted, (thisComponent,it) -> {

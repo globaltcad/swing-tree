@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  * and {@link Styler} functions, which is to say that it takes both an {@link AnimationStatus} and a
  * {@link ComponentStyleDelegate} to produce a new {@link ComponentStyleDelegate}
  * with some style properties applied to it (usually based on the {@link AnimationStatus}). <br>
- * Note that both paramters are immutable value oriented objects, so the function is pure and
+ * Note that both parameters are immutable value oriented objects, so the function is pure and
  * does not modify the original {@link ComponentStyleDelegate} or {@link AnimationStatus} objects. <br>
  * This design makes the underlying style engine of SwingTree very flexible and scalable
  * because it allows for the composition of styles and reuse of style logic across many components

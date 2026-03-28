@@ -95,7 +95,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 	 *  causing this thread to join its event queue
 	 *  so that it can continuously process events produced by the UI.
 	 *  <p>
-	 *  This method wither be called by the main thread of the application
+	 *  This method should either be called by the main thread of the application
 	 *  after the UI has been built and shown to the user, or alternatively
 	 *  a new thread dedicated to processing events. (things like button clicks, etc.)
 	 *  @throws IllegalStateException If this method is called from the UI thread.

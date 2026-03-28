@@ -163,10 +163,9 @@ final class StyleRenderer
         final ShadowConf    shadow,
         final Graphics2D    g2d
     ) {
-        if ( !shadow.color().isPresent() )
+        final Color shadowColor = shadow.color().orElse(null);
+        if ( shadowColor == null )
             return;
-
-        final Color shadowColor = shadow.color().orElse(Color.BLACK);
         final Size  size        = conf.boxModel().size();
 
         // First let's check if we need to render any shadows at all
@@ -643,10 +642,14 @@ final class StyleRenderer
             insets = boxModel.insetsFor(gradient.boundary());
         }
 
-        final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
-        final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
-        final float realX  = insets.left().orElse(0f) + gradient.offset().x();
-        final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
+        final float insLeft   = insets.left().orElse(0f);
+        final float insTop    = insets.top().orElse(0f);
+        final float insRight  = insets.right().orElse(0f);
+        final float insBottom = insets.bottom().orElse(0f);
+        final float width  = dimensions.width().orElse(0f)  - ( insRight  + insLeft );
+        final float height = dimensions.height().orElse(0f) - ( insBottom + insTop );
+        final float realX  = insLeft + gradient.offset().x();
+        final float realY  = insTop  + gradient.offset().y();
 
         final Point2D.Float corner1;
         final Point2D.Float corner2;
@@ -738,23 +741,7 @@ final class StyleRenderer
         if ( noise.get().colors().length == 1 ) {
             return noise.get().colors()[0];
         } else {
-            Size dimensions = boxModel.size();
-            Outline insets = Outline.none();
-            switch ( noise.get().boundary() ) {
-                case OUTER_TO_EXTERIOR:
-                    insets = Outline.none(); break;
-                case EXTERIOR_TO_BORDER:
-                    insets = boxModel.margin(); break;
-                case BORDER_TO_INTERIOR:
-                    insets = boxModel.margin().plus(boxModel.widths()); break;
-                case INTERIOR_TO_CONTENT:
-                    insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding()); break;
-                case CENTER_TO_CONTENT:
-                    float verticalInset   = dimensions.height().orElse(0f) / 2f;
-                    float horizontalInset = dimensions.width().orElse(0f) / 2f;
-                    insets = Outline.of(verticalInset, horizontalInset);
-            }
-
+            Outline insets = boxModel.insetsFor(noise.get().boundary());
             Point2D.Float corner1 = new Point2D.Float(
                                         insets.left().orElse(0f) + noise.get().offset().x(),
                                         insets.top().orElse(0f) + noise.get().offset().y()
@@ -768,11 +755,7 @@ final class StyleRenderer
         final Point2D.Float  center,
         final Pooled<NoiseConf> noise
     ) {
-        Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.get(noise);
-        if ( cachedPaints == null ) {
-            cachedPaints = new HashMap<>();
-        }
-        _NOISE_PAINT_CACHE.put(noise, cachedPaints); // Ensure the cache has a reference to a used noise conf...
+        Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new HashMap<>());
         NoiseGradientPaint paint = cachedPaints.get(center);
         if ( paint != null ) {
             return paint;
@@ -850,11 +833,9 @@ final class StyleRenderer
         }
 
         if ( gradient.rotation() % 360f != 0 ) {
-            Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-            Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
-            p2 = _rotatePoint(p1, p2, gradient.rotation());
-            corner2X = p2.x;
-            corner2Y = p2.y;
+            Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());
+            corner2X = p.x;
+            corner2Y = p.y;
         }
 
         if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
@@ -911,11 +892,9 @@ final class StyleRenderer
             float[] fractions = _fractionsFrom(gradient);
 
             if ( gradient.rotation() % 360f != 0 ) {
-                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
-                p2 = _rotatePoint(p1, p2, gradient.rotation());
-                corner2X = p2.x;
-                corner2Y = p2.y;
+                Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());
+                corner2X = p.x;
+                corner2Y = p.y;
             }
 
             return new LinearGradientPaint(
@@ -967,32 +946,21 @@ final class StyleRenderer
             radius = size;
 
         if ( gradient.focus().equals(Offset.none()) ) {
-            if ( colors.length == 2 )
-                return new RadialGradientPaint(
-                        new Point2D.Float(corner1X, corner1Y),
-                        radius,
-                        fractions,
-                        colors,
-                        _cycleMethodFrom(cycle)
-                    );
-            else
-                return new RadialGradientPaint(
-                        new Point2D.Float(corner1X, corner1Y),
-                        radius,
-                        fractions,
-                        colors,
-                        _cycleMethodFrom(cycle)
-                     );
+            return new RadialGradientPaint(
+                    new Point2D.Float(corner1X, corner1Y),
+                    radius,
+                    fractions,
+                    colors,
+                    _cycleMethodFrom(cycle)
+                );
         } else {
             float focusX = corner1X + gradient.focus().x();
             float focusY = corner1Y + gradient.focus().y();
 
             if ( gradient.rotation() % 360f != 0 ) {
-                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                Point2D.Float p2 = new Point2D.Float(focusX, focusY);
-                p2 = _rotatePoint(p1, p2, gradient.rotation());
-                focusX = p2.x;
-                focusY = p2.y;
+                Point2D.Float p = _rotatePoint(corner1X, corner1Y, focusX, focusY, gradient.rotation());
+                focusX = p.x;
+                focusY = p.y;
             }
 
             return new RadialGradientPaint(
@@ -1046,7 +1014,7 @@ final class StyleRenderer
                 float[] newFractions = new float[colors.length];
                 System.arraycopy(fractions, 0, newFractions, 0, fractions.length);
                 /*
-                    Now simply complete th missing fractions by linear interpolation
+                    Now simply complete the missing fractions by linear interpolation
                     between the last fraction and 1f
                 */
                 float lastFraction = fractions[fractions.length - 1];
@@ -1064,26 +1032,26 @@ final class StyleRenderer
      *  the point {@code p2} rotated around {@code p1} by {@code rotation} degrees.
      */
     private static Point2D.Float _rotatePoint(
-        final Point2D.Float p1,
-        final Point2D.Float p2,
+        final float p1X, final float p1Y,
+        final float p2X, final float p2Y,
         final float rotation
     ) {
         if ( rotation == 0f )
-            return p2;
+            return new Point2D.Float(p2X, p2Y);
         else if ( rotation % 360f == 0f )
-            return p2;
+            return new Point2D.Float(p2X, p2Y);
 
         final double angle = Math.toRadians(rotation);
         final double sin   = Math.sin(angle);
         final double cos   = Math.cos(angle);
 
-        final double x = p2.x - p1.x;
-        final double y = p2.y - p1.y;
+        final double x = p2X - p1X;
+        final double y = p2Y - p1Y;
 
         final double newX = x * cos - y * sin;
         final double newY = x * sin + y * cos;
 
-        return new Point2D.Float((float) (p1.x + newX), (float) (p1.y + newY));
+        return new Point2D.Float((float) (p1X + newX), (float) (p1Y + newY));
     }
 
     /**
@@ -1315,10 +1283,12 @@ final class StyleRenderer
         final Offset               offset            = text.offset();
         final Outline              insets            = boxModel.insetsFor(placementBoundary);
         // Computing the area available for text rendering after applying the offset and insets:
-        final float leftX = offset.x() + insets.left().orElse(0f);
-        final float topY  = offset.y() + insets.top().orElse(0f);
-        final float localWidth = Math.max(0,boxModel.size().width().orElse(0f) - (insets.left().orElse(0f) + insets.right().orElse(0f)));
-        final float localHeight = Math.max(0,boxModel.size().height().orElse(0f) - (insets.top().orElse(0f) + insets.bottom().orElse(0f)));
+        final float insLeft   = insets.left().orElse(0f);
+        final float insTop    = insets.top().orElse(0f);
+        final float leftX = offset.x() + insLeft;
+        final float topY  = offset.y() + insTop;
+        final float localWidth  = Math.max(0, boxModel.size().width().orElse(0f)  - (insLeft + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0, boxModel.size().height().orElse(0f) - (insTop  + insets.bottom().orElse(0f)));
         return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
@@ -1593,8 +1563,11 @@ final class StyleRenderer
         /*
             remove trailing newline marker
          */
-        if (!layouts.isEmpty() && layouts.get(layouts.size()-1) == null)
-            layouts.remove(layouts.size()-1);
+        if (!layouts.isEmpty()) {
+            int last = layouts.size() - 1;
+            if (layouts.get(last) == null)
+                layouts.remove(last);
+        }
 
         /*
             ------------------------------------------------

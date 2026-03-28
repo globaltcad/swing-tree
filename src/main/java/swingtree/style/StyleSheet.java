@@ -467,7 +467,7 @@ public abstract class StyleSheet
             lastAdded = currentTrait;
         }
         inheritedTraits.remove(currentTrait.group());
-        inheritedTraits.addAll(Arrays.asList(currentTrait.toInherit()));
+        inheritedTraits.addAll(currentTrait.toInherit().toList());
         return lastAdded;
     }
 

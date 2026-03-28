@@ -8,6 +8,7 @@ import javax.swing.JComponent;
 import javax.swing.Timer;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -113,9 +114,10 @@ final class AnimationRunner
             */
         }
 
-        Component component = runningAnimation.compRef() == null ? null : runningAnimation.compRef().get();
+        WeakReference<Component> compRef = runningAnimation.compRef();
+        Component component = compRef == null ? null : compRef.get();
 
-        if ( runningAnimation.compRef() != null && component == null )
+        if ( compRef != null && component == null )
             return false; // There was a component, but it has been garbage collected.
 
         Runnable requestComponentRepaint = () -> {
