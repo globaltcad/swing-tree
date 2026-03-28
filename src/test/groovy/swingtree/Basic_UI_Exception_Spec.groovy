@@ -8,6 +8,7 @@ import swingtree.api.MenuBuilder
 import swingtree.api.SwingBuilder
 import sprouts.Val
 import sprouts.Var
+import swingtree.api.Layout
 import swingtree.layout.LayoutConstraint
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -130,7 +131,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.panel((String)null, (String)null)},
                     {UI.panel((String)null, (String)null, (String)null)},
                     {UI.panel((LayoutConstraint)null)},
-                    {UI.panel((Val<LayoutConstraint>)null)},
+                    {UI.panel((Val<Layout>)null)},
                     {UI.spinner((Var<?>)null)},
                     {UI.spinner((SpinnerModel)null)},
                     {UI.toolBar((UI.Align)null)},
@@ -158,7 +159,7 @@ class Basic_UI_Exception_Spec extends Specification
                     { UI.textArea(Val.ofNullable(String, null)) },
                     { UI.textField(UI.HorizontalAlignment.RIGHT, Val.ofNullable(String, "")) },
                     { UI.textField(UI.HorizontalAlignment.LEFT, Var.ofNullable(String, "")) },
-                    { UI.panel(Val.ofNullable(LayoutConstraint,UI.FILL)) },
+                    { UI.panel(Val.ofNullable(Layout, Layout.mig(UI.FILL))) },
                     { UI.spinner(Var.ofNullable(Byte,null)) },
                     { UI.radioButton(Val.ofNullable(String,"")) },
                     { UI.radioButton("Hi!",Var.ofNullable(Boolean,true)) },

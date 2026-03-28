@@ -2087,6 +2087,77 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
+     *  Binds the {@link Layout} of the component to the supplied {@link Val} property,
+     *  so that whenever the property value changes, the component's layout manager
+     *  is updated automatically and the component is repainted.
+     *  <p>
+     *  This is the reactive counterpart to the various static {@code withLayout(...)}
+     *  overloads: instead of fixing the layout at build time, you supply an observable
+     *  property whose current value is read on every style pass, allowing the layout
+     *  to change dynamically at runtime without any manual wiring.
+     *  <p>
+     *  Internally this method is equivalent to:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withRepaintOn(layoutVar)
+     *      .withStyle( it -> it
+     *          layout(layoutVar.get())
+     *      )
+     *  }</pre>
+     *  The call to {@link #withRepaintOn(Observable)} ensures the component is
+     *  repainted (and its style — including the layout — re-evaluated) each time
+     *  {@code layout} emits a change event.  The {@link #withStyle(Styler)} call
+     *  registers a styler that reads the <em>current</em> value of the property
+     *  and passes it to {@link swingtree.style.ComponentStyleDelegate#layout(Layout)},
+     *  which in turn delegates to {@link Layout#installFor(javax.swing.JComponent)}
+     *  whenever the layout object differs from the previously installed one.
+     *  <p>
+     *  A usage pattern may look something like this:
+     *  <pre>{@code
+     *    // In your view model:
+     *    Var<Layout> currentLayout = Var.of(Layout.flow());
+     *
+     *    // In your view
+     *    UI.panel()
+     *    .withLayout(currentLayout)
+     *    .add( UI.button("Switch to grid").onClick( e -> currentLayout.set(Layout.grid(2, 3)) ) )
+     *    .add( UI.button("Switch to flow").onClick( e -> currentLayout.set(Layout.flow()) ) )
+     *  }</pre>
+     *  Clicking either button will change {@code currentLayout}, which automatically
+     *  triggers a repaint and layout reinstallation on the panel.
+     *  <p>
+     *  <b>Edge cases to be aware of:</b>
+     *  <ul>
+     *    <li>The property must never hold {@code null} — use {@link Layout#unspecific()} or
+     *        {@link Layout#none()} as neutral sentinels instead.<br> Passing a property whose
+     *        value is or could be {@code null} will throw a {@link IllegalArgumentException} at call time.</li>
+     *    <li>If you pass {@link Layout#unspecific()}, the currently installed layout manager
+     *        is left completely untouched (no-op), which is useful when you want to opt out
+     *        of reactive layout management for a particular state.</li>
+     *    <li>If you pass {@link Layout#none()}, the layout manager is explicitly set to
+     *        {@code null} on the component, meaning children will have to be positioned
+     *        manually via absolute bounds.</li>
+     *    <li>The property is observed for its entire lifetime — there is no need to manage
+     *        a subscription manually, since SwingTree ties the listener to the component's
+     *        lifecycle.</li>
+     *  </ul>
+     *
+     * @param layout A non-null {@link Val} property whose value determines the
+     *               {@link Layout} installed on the wrapped component.
+     *               The property itself must not be {@code null}, and its value
+     *               must also never be {@code null}.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws NullPointerException If {@code layout} is {@code null}.
+     * @throws IllegalArgumentException If the supplied property allows holding {@code null} values.
+     */
+    public final I withLayout( Val<Layout> layout ) {
+        Objects.requireNonNull(layout);
+        NullUtil.nullPropertyCheck(layout, "layout", "Null is not allowed to model a layout!");
+        UIForAnySwing<I,C> withAutoRepaint = (UIForAnySwing) this.withRepaintOn(layout);
+        return withAutoRepaint.withStyle( it -> it.layout(layout.get()) );
+    }
+
+    /**
      *  Use this to set a helpful tool tip text for this UI component.
      *  The tool tip text will be displayed when the mouse hovers on the
      *  UI component for some time. <br>
