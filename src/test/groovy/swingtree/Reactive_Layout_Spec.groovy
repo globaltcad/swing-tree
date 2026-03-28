@@ -1,0 +1,478 @@
+package swingtree
+
+import net.miginfocom.swing.MigLayout
+import spock.lang.Narrative
+import spock.lang.Specification
+import spock.lang.Subject
+import spock.lang.Title
+import sprouts.Var
+import swingtree.api.Layout
+import swingtree.layout.AddConstraint
+import swingtree.layout.MigAddConstraint
+import swingtree.layout.ResponsiveGridFlowLayout
+import swingtree.threading.EventProcessor
+
+import javax.swing.JPanel
+
+@Title("Reactive Layouts")
+@Narrative("""
+
+    Layouts in SwingTree are not just static configurations attached to a component
+    at construction time — they can be made fully reactive. This means that a layout
+    can be driven by a mutable property (`Var<Layout>`), so that whenever the property
+    changes, the component's layout manager is updated automatically, without recreating
+    the component from scratch.
+
+    This is especially powerful for responsive UIs, where the layout of a panel
+    may need to adapt to user interaction, viewport size, application state, or
+    data changes at runtime.
+
+    The entry point for this feature is `UIForAnySwing::withLayout(Val<Layout>)`.
+    Internally, it combines `withRepaintOn(layout)` with `withStyle(it -> it.layout(layout.get()))`,
+    which means:
+
+      - Whenever the `layout` property fires a change event, the style is re-evaluated.
+      - The re-evaluation calls `layout.get()` to pick up the latest `Layout` object.
+      - That object's `installFor(component)` method is called, which installs or
+        updates the layout manager on the panel in-place.
+
+    The `Layout` implementations are deliberately immutable and designed with efficient
+    in-place update semantics: if the same type of layout manager is already installed
+    on the component, `installFor` updates its constraints directly rather than replacing
+    the manager instance, avoiding unnecessary component tree invalidation.
+
+    The tests below cover:
+      - Initial property value being applied at build time
+      - Swapping the layout manager type via a property change
+      - `Layout.unspecific()` acting as a no-op
+      - `Layout.none()` removing the layout manager
+      - In-place constraint updates for `ForMigLayout`
+      - Positional per-child MigLayout add-constraints applied reactively
+      - Per-child `FlowCell` constraints pushed as client properties for responsive layouts
+      - End-to-end reactive responsive layout: changing span policies changes actual bounds
+
+""")
+@Subject([Layout, UIForAnySwing])
+class Reactive_Layout_Spec extends Specification
+{
+    def setup() {
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
+    }
+
+    def cleanup() {
+        SwingTree.clear()
+    }
+
+    def 'The initial value of a `Var<Layout>` property is applied at component build time.'()
+    {
+        reportInfo """
+            When `withLayout(Val<Layout>)` is called with a property that already holds a
+            layout value, that layout is installed on the component immediately during
+            construction — just as if `withLayout(Layout)` had been called with the same value.
+
+            This means the initial state of the component is always predictable:
+            whatever layout the property holds when `.get(JPanel)` is called is the
+            layout the panel starts with. There is no "pending" or "deferred" installation.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property initially configured as a MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel whose layout is bound to the property:'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .get(JPanel)
+
+        expect: 'The panel immediately has a MigLayout installed, matching the initial property value:'
+            (panel.getLayout() instanceof MigLayout)
+        and: 'The layout constraints on the MigLayout are exactly what was specified:'
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "fill"
+    }
+
+    def 'Updating a `Var<Layout>` property replaces the panel`s layout manager type on the fly.'()
+    {
+        reportInfo """
+            The primary power of `withLayout(Val<Layout>)` is that the entire layout manager
+            can be swapped at runtime by simply changing the property value — no UI rebuild needed.
+
+            This enables features like toggling between a grid and a flow layout, or switching
+            to a compact layout in a narrow viewport. From the application code's perspective,
+            only the `Var.set(...)` call is needed; SwingTree handles all the plumbing.
+
+            Internally, the style engine's repaint subscription fires when the property changes.
+            This re-evaluates the style function `it -> it.layout(layout.get())`, producing a
+            new `StyleConf`. The `StyleInstaller` then calls `installFor(panel)` on the new
+            `Layout` object, which checks the currently installed layout manager type and
+            replaces it if it no longer matches.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property starting with a MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel bound to the property:'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .get(JPanel)
+
+        expect: 'The panel starts with a MigLayout, as specified by the initial property value:'
+            (panel.getLayout() instanceof MigLayout)
+
+        when: 'We change the property to a responsive flow layout:'
+            layout.set(Layout.flow())
+        then: 'The panel now has a ResponsiveGridFlowLayout — the MigLayout was replaced:'
+            (panel.getLayout() instanceof ResponsiveGridFlowLayout)
+
+        when: 'We switch back to a MigLayout with different constraints:'
+            layout.set(Layout.mig("flowy, wrap 2"))
+        then: 'The MigLayout is reinstalled with the updated constraints:'
+            (panel.getLayout() instanceof MigLayout)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "flowy, wrap 2"
+    }
+
+    def '`Layout.unspecific()` is a deliberate no-op that leaves any existing layout manager untouched.'()
+    {
+        reportInfo """
+            Not every property state needs to result in a layout manager update.
+            Sometimes a reactive layout property may transition through a "no preference"
+            phase while other model state is being resolved. For such cases,
+            `Layout.unspecific()` acts as a deliberate no-op: when `installFor` is called
+            on it, it does nothing at all, leaving whatever layout manager is already present
+            on the component completely unchanged.
+
+            This is particularly useful in reactive scenarios where the layout property
+            is temporarily `unspecific()` as a neutral starting value, without disturbing
+            any layout manager that was applied before the binding was established.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A panel that starts with a MigLayout via the reactive layout property:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .get(JPanel)
+
+        expect: 'The panel has a MigLayout installed as expected:'
+            (panel.getLayout() instanceof MigLayout)
+
+        when: 'We switch the layout property to `Layout.unspecific()`, the no-op sentinel:'
+            layout.set(Layout.unspecific())
+        then: 'The MigLayout is still present — `unspecific()` did not touch it:'
+            (panel.getLayout() instanceof MigLayout)
+        and: 'The layout constraints are still the same as before the property change:'
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "fill"
+    }
+
+    def '`Layout.none()` removes any existing layout manager by setting it to null.'()
+    {
+        reportInfo """
+            For components that should be laid out manually (i.e. with absolute positioning),
+            `Layout.none()` removes the layout manager entirely by calling `setLayout(null)`.
+
+            This is useful in reactive scenarios where a panel might start with a layout
+            manager for its normal operating state, then switch to `Layout.none()` to enter
+            a "canvas mode" where child components are positioned programmatically.
+
+            Switching back from `Layout.none()` to a concrete layout type is equally easy:
+            just set the property to the desired layout, and the new manager will be installed.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A panel that starts with a MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .get(JPanel)
+
+        expect: 'The panel starts with a MigLayout:'
+            (panel.getLayout() instanceof MigLayout)
+
+        when: 'We switch to `Layout.none()`, which removes the layout manager:'
+            layout.set(Layout.none())
+        then: 'The layout manager is now null, enabling absolute positioning:'
+            panel.getLayout() == null
+
+        when: 'We install a new layout by switching the property back to a concrete layout:'
+            layout.set(Layout.flow())
+        then: 'The new layout manager is installed as expected:'
+            panel.getLayout() instanceof ResponsiveGridFlowLayout
+    }
+
+    def 'Changing MigLayout constraints via a property updates them in-place on the existing manager instance.'()
+    {
+        reportInfo """
+            When the `ForMigLayout` configuration changes (e.g. different layout, column, or
+            row constraint strings), SwingTree does not create a brand-new `MigLayout` instance.
+            Instead, it calls the setters on the existing manager to update its constraints
+            in-place. The manager instance itself stays the same.
+
+            This in-place update strategy matters for two reasons:
+
+              1. **Performance**: replacing the layout manager would invalidate the entire
+                 component subtree unnecessarily. In-place updates avoid that churn.
+
+              2. **State preservation**: any per-component constraint state cached inside the
+                 layout manager (such as `CC` objects for individual children) is retained
+                 across minor constraint changes, instead of being silently wiped.
+
+            The in-place update only triggers a `revalidate()` call when the constraints
+            actually changed, so unchanged re-applications are also cheap.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A panel with an initial "fill" MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .get(JPanel)
+        and: 'We capture the MigLayout instance identity for comparison:'
+            def originalMigLayout = panel.getLayout()
+
+        expect: 'The layout constraints match the initial property value:'
+            ((MigLayout) originalMigLayout).getLayoutConstraints() == "fill"
+
+        when: 'We update the property with a new set of layout constraints:'
+            layout.set(Layout.mig("flowy, wrap 3"))
+        then: 'The constraints are updated — but on the SAME manager instance, not a new one:'
+            panel.getLayout().is(originalMigLayout)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "flowy, wrap 3"
+
+        when: 'We update all three constraint types at once (layout, column, row):'
+            layout.set(Layout.mig("fill", "[grow][]", "[shrink]"))
+        then: 'All three constraint types are updated in-place on the same MigLayout instance:'
+            panel.getLayout().is(originalMigLayout)
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "fill"
+            ((MigLayout) panel.getLayout()).getColumnConstraints() == "[grow][]"
+            ((MigLayout) panel.getLayout()).getRowConstraints() == "[shrink]"
+    }
+
+    def 'A `ForMigLayout` with child constraints applies them reactively to child components.'()
+    {
+        reportInfo """
+            Beyond controlling the MigLayout's own constraints (layout, column, row), a
+            `ForMigLayout` configuration can also specify per-child *add-constraints* — the
+            constraint strings that determine how each individual child component is placed
+            within the MigLayout grid (e.g. "grow", "span 2", "wrap").
+
+            These are stored as a positional `Tuple<MigAddConstraint>` inside the
+            `ForMigLayout` object. The first entry applies to the first child, the second
+            to the second, and so on. When `ForMigLayout.installFor(panel)` runs, it iterates
+            over the panel's children and pushes the corresponding constraint to the
+            `MigLayout` via `setComponentConstraints(child, constraint)`.
+
+            Since `ForMigLayout` is immutable, changing the per-child constraints requires
+            creating a new instance (typically via `withChildConstraints(...)` or the
+            `Layout.mig(constr, childConstraints...)` factory). Storing that new instance in
+            the `Var<Layout>` triggers the reactive update and applies the constraints.
+
+            This makes the entire MigLayout configuration — parent constraints AND per-child
+            add-constraints — fully reactive and bindable to a single `Var<Layout>` property.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout with no initial per-child constraints:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel with three buttons bound to the reactive layout:'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .add(UI.button("A"))
+                .add(UI.button("B"))
+                .add(UI.button("C"))
+                .get(JPanel)
+        and: 'A direct reference to the underlying MigLayout for constraint inspection:'
+            def migLayout = (MigLayout) panel.getLayout()
+
+        expect: 'Before any child constraints are set, none of the children have custom add-constraints:'
+            migLayout.getComponentConstraints(panel.getComponent(0)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(1)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(2)) in ([null, ""] as List<Object>)
+
+        when: 'We update the layout property to carry per-child constraints for all three buttons:'
+            layout.set(
+                Layout.mig("fill").withChildConstraints(
+                    MigAddConstraint.of("grow"),
+                    MigAddConstraint.of("shrink"),
+                    MigAddConstraint.of("wrap")
+                )
+            )
+        then: 'Each child component now has its designated constraint applied inside the MigLayout:'
+            migLayout.getComponentConstraints(panel.getComponent(0)) == "grow"
+            migLayout.getComponentConstraints(panel.getComponent(1)) == "shrink"
+            migLayout.getComponentConstraints(panel.getComponent(2)) == "wrap"
+
+        when: 'We change the constraints again — for example, to reverse the role of the first two buttons:'
+            layout.set(
+                Layout.mig("fill").withChildConstraints(
+                    MigAddConstraint.of("shrink"),
+                    MigAddConstraint.of("grow"),
+                    MigAddConstraint.of("wrap")
+                )
+            )
+        then: 'The updated constraints are reflected immediately on the same children:'
+            migLayout.getComponentConstraints(panel.getComponent(0)) == "shrink"
+            migLayout.getComponentConstraints(panel.getComponent(1)) == "grow"
+            migLayout.getComponentConstraints(panel.getComponent(2)) == "wrap"
+    }
+
+    def 'A `ForFlowLayout` with child `FlowCell` constraints pushes them as client properties onto children.'()
+    {
+        reportInfo """
+            The `ForFlowLayout` layout configuration (backed by `ResponsiveGridFlowLayout`)
+            supports per-child `FlowCell` constraints that define how many 12-column grid
+            cells each child component should span at different parent container size categories.
+
+            When `ForFlowLayout.installFor(panel)` runs, it iterates over the panel's children
+            and writes each child's `FlowCell` to that child's client property keyed by
+            `AddConstraint.class`. The `ResponsiveGridFlowLayout` reads these client properties
+            during its next layout pass to determine the actual width of each child.
+
+            Because `installFor` is called whenever the `Var<Layout>` property changes,
+            the responsive span policies for ALL children can be updated atomically in a
+            single property assignment. The `ResponsiveGridFlowLayout` picks up the new
+            policies on the very next `doLayout()` call.
+
+            This is the recommended approach for highly dynamic responsive layouts:
+            use `Var<Layout>` with a `ForFlowLayout` carrying explicit `FlowCell` child
+            constraints, rather than managing `AUTO_SPAN` constraints through individual
+            component add-calls.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'Two FlowCell instances representing distinct responsive span policies:'
+            def cellA = UI.AUTO_SPAN({ it.verySmall(12).small(6).medium(4).large(3) })
+            def cellB = UI.AUTO_SPAN({ it.verySmall(12).small(6).medium(8).large(9) })
+        and: 'A reactive layout property with no initial per-child constraints:'
+            def layout = Var.of(Layout.class, Layout.flow())
+        and: 'A panel with two child components bound to the reactive flow layout:'
+            def panel =
+                UI.panel().withPrefSize(120, 100)
+                .withLayout(layout)
+                .add(UI.box().withPrefHeight(20))
+                .add(UI.box().withPrefHeight(20))
+                .get(JPanel)
+
+        expect: 'Initially the children have no FlowCell client properties (no span policy set):'
+            panel.getComponent(0).getClientProperty(AddConstraint.class) == null
+            panel.getComponent(1).getClientProperty(AddConstraint.class) == null
+
+        when: 'We update the layout property with explicit FlowCell constraints for each child:'
+            layout.set(Layout.flow().withChildConstraints(cellA, cellB))
+        then: 'Each child component now carries its designated FlowCell as a client property:'
+            panel.getComponent(0).getClientProperty(AddConstraint.class) == cellA
+            panel.getComponent(1).getClientProperty(AddConstraint.class) == cellB
+
+        when: 'We swap the FlowCell assignments between the two children:'
+            layout.set(Layout.flow().withChildConstraints(cellB, cellA))
+        then: 'The client properties are updated to reflect the new assignment:'
+            panel.getComponent(0).getClientProperty(AddConstraint.class) == cellB
+            panel.getComponent(1).getClientProperty(AddConstraint.class) == cellA
+
+        when: 'We revert to a layout with no child constraints:'
+            layout.set(Layout.flow())
+        then: """
+            The client properties from the previous layout are no longer being pushed.
+            Note that unlike removing them, they remain on the children from the last
+            `installFor` call — the client property API does not support a "remove" operation.
+            However, a freshly added child that was not present when the constrained layout
+            was installed will have no client property set.
+        """
+            panel.getComponent(0).getClientProperty(AddConstraint.class) == cellB
+            panel.getComponent(1).getClientProperty(AddConstraint.class) == cellA
+    }
+
+    def 'Changing child `FlowCell` constraints reactively changes how children are laid out.'()
+    {
+        reportInfo """
+            This test demonstrates the complete end-to-end reactive responsive layout
+            scenario: a panel contains children whose responsive span policies are
+            controlled entirely by a `Var<Layout>` property. When the property changes,
+            the new span policies are pushed to the children as client properties, and
+            the very next `doLayout()` call produces a different visual arrangement.
+
+            We use two children and test at a "medium" panel width. At this width:
+
+              - If each child spans 12/12 cells (full width), both children each occupy a
+                full row — so the second child is positioned BELOW the first.
+              - If each child spans 6/12 cells (half width), both children fit on the same
+                row — so the second child is positioned BESIDE the first (same Y coordinate).
+
+            One important subtlety worth knowing: when `withLayout(Val<Layout>)` is called,
+            the style engine applies the layout immediately at that point in the builder chain.
+            Since children are added AFTER `withLayout(...)` in a builder expression, Phase 2
+            of `ForFlowLayout.installFor` (which pushes `FlowCell` constraints to children)
+            runs before any children exist. This means the initial `FlowCell` constraints
+            from the `Var`'s starting value have no effect — the children aren't there yet
+            to receive them.
+
+            The correct pattern is therefore to call `Var.set(...)` explicitly after the
+            component is fully built. This triggers a re-evaluation when the children ARE
+            present, and the `FlowCell` constraints are pushed correctly.
+
+            Changing the `Var<Layout>` property atomically updates both children's span
+            policies and takes effect on the next layout pass. No other imperative calls
+            are needed beyond `doLayout()`.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property, initially with no child constraints:'
+            def layout = Var.of(Layout.class, Layout.flow())
+        and: 'A panel with two fixed-height child boxes and a known preferred size:'
+            def panel =
+                UI.panel().withPrefSize(120, 100)
+                .withLayout(layout)
+                .add(UI.box().withPrefHeight(20))
+                .add(UI.box().withPrefHeight(20))
+                .get(JPanel)
+        and: """
+            Now that the panel is fully built (children are present), we set the layout
+            property to use full-width (12/12) spans for the medium size category.
+            At this point, `installFor` runs with children in the panel, so Phase 2
+            successfully pushes the `FlowCell` constraints to both child components.
+        """
+            layout.set(
+                Layout.flow(
+                    UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12) }),
+                    UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12) })
+                )
+            )
+
+        when: """
+            We trigger a layout at a "medium" panel width — 60px, which is between
+            2/5 (48px) and 3/5 (72px) of the panel's preferred width of 120px.
+            At this size, the `medium` span policy is active.
+        """
+            panel.setSize(60, 200)
+            panel.doLayout()
+        then: 'With full-width (12/12) spans, the second child is placed on a separate row BELOW the first:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+
+        when: 'We change the layout so each child spans only half the width (6/12 cells at medium size):'
+            layout.set(
+                Layout.flow(
+                    UI.AUTO_SPAN({ it.verySmall(6).small(6).medium(6).large(6) }),
+                    UI.AUTO_SPAN({ it.verySmall(6).small(6).medium(6).large(6) })
+                )
+            )
+        and: 'We trigger another layout pass:'
+            panel.doLayout()
+        then: 'With half-width (6/12) spans, both children now share the same row (identical Y coordinate):'
+            panel.getComponent(0).y == panel.getComponent(1).y
+
+        when: 'We revert to full-width spans:'
+            layout.set(
+                Layout.flow(
+                    UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12) }),
+                    UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12) })
+                )
+            )
+        and: 'We trigger another layout pass:'
+            panel.doLayout()
+        then: 'The second child is back on its own row below the first:'
+            panel.getComponent(1).y > panel.getComponent(0).y
+    }
+}
