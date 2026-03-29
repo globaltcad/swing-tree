@@ -522,7 +522,11 @@ public interface Layout
         public void installFor( JComponent component ) {
             // Contrary to the 'Unspecific' layout, this layout
             // will remove any existing layout from the component:
-            component.setLayout(null);
+            LayoutManager oldManager = component.getLayout();
+            if ( oldManager != null ) {
+                component.setLayout(null);
+                component.revalidate();
+            }
         }
     }
 
@@ -852,6 +856,7 @@ public interface Layout
                 LayoutManager currentLayout = component.getLayout();
                 if ( !( currentLayout instanceof MigLayout ) ) {
                     component.setLayout(new MigLayout( layoutConstraints, columnConstraints, rowConstraints ));
+                    component.revalidate();
                 } else {
                     MigLayout migLayout = (MigLayout) currentLayout;
                     boolean layoutConstraintsChanged = !layoutConstraints.equals(migLayout.getLayoutConstraints());
@@ -1218,6 +1223,7 @@ public interface Layout
             LayoutManager currentLayout = component.getLayout();
             if ( !( currentLayout instanceof ResponsiveGridFlowLayout ) ) {
                 component.setLayout(new ResponsiveGridFlowLayout(_align, _horizontalGapSize, _verticalGapSize));
+                component.revalidate();
             } else {
                 ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;
                 boolean alignmentChanged     = _align             != flowLayout.getAlignment();
@@ -1306,6 +1312,7 @@ public interface Layout
                 // We need to replace the current layout with a BorderLayout:
                 BorderLayout newLayout = new BorderLayout(_hgap, _vgap);
                 component.setLayout(newLayout);
+                component.revalidate();
                 return;
             }
             BorderLayout borderLayout = (BorderLayout) currentLayout;
@@ -1379,6 +1386,7 @@ public interface Layout
                 // We need to replace the current layout with a GridLayout:
                 GridLayout newLayout = new GridLayout(_rows, _cols, _hgap, _vgap);
                 component.setLayout(newLayout);
+                component.revalidate();
                 return;
             }
             GridLayout gridLayout = (GridLayout) currentLayout;
@@ -1455,6 +1463,7 @@ public interface Layout
                 // We need to replace the current layout with a BoxLayout:
                 BoxLayout newLayout = new BoxLayout( component, _axis);
                 component.setLayout(newLayout);
+                component.revalidate();
                 return;
             }
             BoxLayout boxLayout = (BoxLayout) currentLayout;
