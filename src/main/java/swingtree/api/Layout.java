@@ -620,6 +620,8 @@ public interface Layout
          */
         public None withChildBound( int index, Bounds childBound ) {
             Objects.requireNonNull(childBound);
+            if ( index < 0 )
+                throw new IndexOutOfBoundsException("Child index must not be negative, but was: " + index);
             return withChildBounds( _childBounds.put(index, childBound) );
         }
 
@@ -690,7 +692,7 @@ public interface Layout
                 boolean changed = false;
                 for ( Pair<Integer, Bounds> entry : _childBounds ) {
                     int i = entry.first();
-                    if ( i >= children.length ) continue;
+                    if ( i < 0 || i >= children.length ) continue;
                     java.awt.Rectangle desired  = entry.second().toRectangle();
                     java.awt.Rectangle existing = children[i].getBounds();
                     if ( !desired.equals(existing) ) {
@@ -853,7 +855,9 @@ public interface Layout
          *  the association is sparse, so you only need to include entries for children
          *  you actually want to configure.
          *  Children whose index has no entry in the association are left untouched.
-         *  An empty association clears all previously stored per-child constraints.
+         *  An empty association means no constraints are stored in this layout object;
+         *  any constraints previously applied to children by an earlier {@code installFor}
+         *  call remain in the {@link MigLayout} until explicitly overwritten.
          *
          * @param childConstraints A sorted {@link Association} mapping child indices to
          *                         the {@link MigAddConstraint} to apply.
@@ -870,7 +874,9 @@ public interface Layout
          *  The constraints are mapped positionally to the component's children:
          *  the first argument applies to the first child, the second to the second, and so on.
          *  Children at indices beyond the supplied array length are left untouched.
-         *  Passing an empty array clears all previously stored per-child constraints.
+         *  Passing an empty array stores no constraints in this layout object;
+         *  any constraints previously applied to children by an earlier {@code installFor}
+         *  call remain in the {@link MigLayout} until explicitly overwritten.
          *  <p>
          *  This is the most concise way to specify per-child constraints for common cases:
          *  <pre>{@code
@@ -908,6 +914,8 @@ public interface Layout
          */
         public ForMigLayout withChildConstraint( int index, MigAddConstraint childConstraint ) {
             Objects.requireNonNull(childConstraint);
+            if ( index < 0 )
+                throw new IndexOutOfBoundsException("Child index must not be negative, but was: " + index);
             return withChildConstraints( _childConstraints.put(index, childConstraint) );
         }
 
@@ -917,8 +925,9 @@ public interface Layout
          *  The string is converted via {@link MigAddConstraint#of(String...)} and then forwarded
          *  to {@link #withChildConstraint(int, MigAddConstraint)}.
          *  <p>
-         *  If the supplied {@code index} is beyond the current size of the child-constraint
-         *  tuple, the tuple is padded with empty {@link MigAddConstraint}s up to that index.
+         *  Because the underlying storage is a sparse {@link Association}, no padding is
+         *  needed: the constraint is stored at exactly {@code index}, regardless of whether
+         *  lower indices have entries.
          *
          * @param index The zero-based index of the child whose constraint to update.
          * @param childConstraint The MigLayout component-constraint string for the child.
@@ -1059,7 +1068,7 @@ public interface Layout
                     boolean childrenChanged = false;
                     for ( Pair<Integer, MigAddConstraint> entry : _childConstraints ) {
                         int i = entry.first();
-                        if ( i >= children.length ) continue;
+                        if ( i < 0 || i >= children.length ) continue;
                         Object desired  = entry.second().toConstraintForLayoutManager();
                         Object existing = migLayout.getComponentConstraints(children[i]);
                         if ( !desired.equals(existing) ) {
@@ -1202,7 +1211,10 @@ public interface Layout
          *  the association is sparse, so you only need to include entries for children
          *  you actually want to configure.
          *  Children whose index has no entry keep whatever {@link FlowCell} they already have.
-         *  An empty association clears all previously stored child constraints.<br>
+         *  An empty association means no constraints are stored in this layout object;
+         *  any {@link AddConstraint} client properties previously pushed to children
+         *  by an earlier {@code installFor} call remain on those children until explicitly
+         *  overwritten.<br>
          *  The intended way of creating {@link FlowCell}s is by using {@link UI#AUTO_SPAN(Configurator)}!<br>
          *  An important edge case to consider when writing a responsive flow layout:<br>
          *  <b>
@@ -1224,7 +1236,10 @@ public interface Layout
          *  <p>
          *  The constraints are mapped positionally to the component's children:
          *  the first argument applies to the first child, the second to the second, and so on.
-         *  Passing an empty array clears all previously stored child constraints.
+         *  Passing an empty array stores no constraints in this layout object;
+         *  any {@link AddConstraint} client properties previously pushed to children
+         *  by an earlier {@code installFor} call remain on those children until explicitly
+         *  overwritten.
          *  <p>
          *  {@link FlowCell} instances are most conveniently created via
          *  {@link swingtree.UI#AUTO_SPAN(Configurator)}:
@@ -1277,6 +1292,8 @@ public interface Layout
          */
         public ForFlowLayout withChildConstraint( int index, FlowCell childConstraint ) {
             Objects.requireNonNull(childConstraint);
+            if ( index < 0 )
+                throw new IndexOutOfBoundsException("Child index must not be negative, but was: " + index);
             return withChildConstraints( _childConstraints.put(index, childConstraint) );
         }
 
@@ -1430,7 +1447,7 @@ public interface Layout
                 boolean changed       = false;
                 for ( Pair<Integer, FlowCell> entry : _childConstraints ) {
                     int i = entry.first();
-                    if ( i >= children.length ) continue;
+                    if ( i < 0 || i >= children.length ) continue;
                     if ( !( children[i] instanceof JComponent ) )
                         continue;
                     JComponent child  = (JComponent) children[i];
