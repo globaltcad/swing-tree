@@ -15,7 +15,10 @@ import swingtree.layout.LayoutConstraint
 import swingtree.threading.EventProcessor
 
 import java.awt.BorderLayout
+import java.awt.GridLayout
+import javax.swing.BoxLayout
 import javax.swing.JPanel
+import swingtree.layout.Bounds
 
 @Title("Reactive Layouts")
 @Narrative("""
@@ -49,14 +52,18 @@ import javax.swing.JPanel
       - Swapping the layout manager type via a property change
       - `Layout.unspecific()` acting as a no-op
       - `Layout.none()` removing the layout manager
+      - `Layout.none()` with child bounds enabling declarative absolute positioning
+      - Sparse per-child bound targeting via `withChildBound(int, Bounds)` without placeholder entries
       - In-place constraint updates for `ForMigLayout`
       - Positional per-child MigLayout add-constraints applied reactively
+      - Sparse per-child MigLayout constraint via `withChildConstraint(int, MigAddConstraint)`
       - Per-child `FlowCell` constraints pushed as client properties for responsive layouts
       - End-to-end reactive responsive layout: changing span policies changes actual bounds
       - `UI.panel(Val<Layout>)` factory giving full layout control from the start
       - `UI.box(Val<Layout>)` factory giving full layout control from the start
       - `UI.panel(Val<Layout>)` MigLayout in-place update via the factory entry-point
       - `UI.box(Val<Layout>)` verbatim layout installation without implicit inset injection
+      - `Layout.grid(rows, cols)` and `Layout.box(axis)` installed and updated reactively
       - A `FlowCell` with no span policies always spans all 12 columns at every parent size category
 
 """)
@@ -266,11 +273,11 @@ class Reactive_Layout_Spec extends Specification
             constraint strings that determine how each individual child component is placed
             within the MigLayout grid (e.g. "grow", "span 2", "wrap").
 
-            These are stored as a positional `Tuple<MigAddConstraint>` inside the
-            `ForMigLayout` object. The first entry applies to the first child, the second
-            to the second, and so on. When `ForMigLayout.installFor(panel)` runs, it iterates
-            over the panel's children and pushes the corresponding constraint to the
-            `MigLayout` via `setComponentConstraints(child, constraint)`.
+            These are stored in a sparse `Association<Integer, MigAddConstraint>` inside the
+            `ForMigLayout` object, keyed by child index. When `ForMigLayout.installFor(panel)`
+            runs, it iterates over the association entries and pushes each constraint to the
+            `MigLayout` via `setComponentConstraints(child, constraint)` for the child at
+            the corresponding index.
 
             Since `ForMigLayout` is immutable, changing the per-child constraints requires
             creating a new instance (typically via `withChildConstraints(...)` or the
@@ -661,6 +668,251 @@ class Reactive_Layout_Spec extends Specification
         then: 'The constraint is installed as-is — still no implicit "ins 0" suffix:'
             box.getLayout() instanceof MigLayout
             ((MigLayout) box.getLayout()).getLayoutConstraints() == "wrap 2"
+    }
+
+    def '`Layout.none()` with child bounds removes the layout manager and positions children at the specified coordinates.'()
+    {
+        reportInfo """
+            When a `None` layout carries per-child `Bounds`, its `installFor` performs
+            two actions in sequence:
+
+              1. Any existing layout manager is removed (`setLayout(null)`), leaving the
+                 component in "canvas" mode where children are positioned manually.
+              2. For each entry in the sparse `Association<Integer, Bounds>`, the child at
+                 that index has its absolute position and size applied via
+                 `Component.setBounds(...)`.
+
+            Because the reactive layout system calls `installFor` on every `Var.set(...)`
+            call, the absolute positions of child components can be changed at runtime by
+            supplying a new `Layout.none(Bounds...)` value to the property —
+            exactly like any other layout family in SwingTree.
+
+            Switching back to a concrete layout (e.g. `Layout.mig(...)`) reinstalls the
+            layout manager and restores managed positioning.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property starting with a MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel with three child components:'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .add(UI.box())
+                .add(UI.box())
+                .add(UI.box())
+                .get(JPanel)
+
+        expect: 'The panel starts with a MigLayout:'
+            (panel.getLayout() instanceof MigLayout)
+
+        when: 'We switch to `Layout.none()` with explicit bounds declared for each child:'
+            layout.set(
+                Layout.none(
+                    Bounds.of(  0,   0, 120, 40),
+                    Bounds.of(  0,  50, 120, 40),
+                    Bounds.of(  0, 100, 120, 40)
+                )
+            )
+        then: 'The layout manager is removed — the panel is now in canvas/absolute mode:'
+            panel.getLayout() == null
+        and: 'Each child now occupies exactly the bounds that were declared in the layout object:'
+            panel.getComponent(0).getBounds() == Bounds.of(  0,   0, 120, 40).toRectangle()
+            panel.getComponent(1).getBounds() == Bounds.of(  0,  50, 120, 40).toRectangle()
+            panel.getComponent(2).getBounds() == Bounds.of(  0, 100, 120, 40).toRectangle()
+
+        when: 'We update the bounds reactively — repositioning all three children:'
+            layout.set(
+                Layout.none(
+                    Bounds.of( 10,  10,  80, 30),
+                    Bounds.of( 10,  50,  80, 30),
+                    Bounds.of( 10,  90, 160, 60)
+                )
+            )
+        then: 'The layout manager remains null and the new bounds are applied to each child:'
+            panel.getLayout() == null
+            panel.getComponent(0).getBounds() == Bounds.of( 10,  10,  80, 30).toRectangle()
+            panel.getComponent(1).getBounds() == Bounds.of( 10,  50,  80, 30).toRectangle()
+            panel.getComponent(2).getBounds() == Bounds.of( 10,  90, 160, 60).toRectangle()
+
+        when: 'We switch back to a MigLayout to restore managed positioning:'
+            layout.set(Layout.mig("fill"))
+        then: 'The MigLayout is reinstalled — the panel is managed again:'
+            panel.getLayout() instanceof MigLayout
+    }
+
+    def '`withChildBound(int, Bounds)` targets only the specified child, leaving all others untouched.'()
+    {
+        reportInfo """
+            The per-child bounds inside a `None` layout are stored in a sparse
+            `Association<Integer, Bounds>` keyed by child index.  This means a bound
+            can be applied to a specific child by index without supplying any entries
+            for the other children.  When `installFor` runs, only the children whose
+            index appears in the association are repositioned; all others keep whatever
+            bounds they already have.
+
+            This is the key advantage over a positional collection: with a sparse
+            association there is no need to supply placeholder entries for every
+            preceding child just to reach the one you actually want to move.
+
+            Because `Component.setBounds(...)` is a persistent operation on the component,
+            a bound set by one `installFor` call survives subsequent calls that target
+            different children — the association controls which children are updated,
+            not which children retain their current state.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout starting with `Layout.none()` so there is no layout manager:'
+            def layout = Var.of(Layout.class, Layout.none())
+        and: 'A panel with three children, all starting at default bounds (0, 0, 0, 0):'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .add(UI.box())
+                .add(UI.box())
+                .add(UI.box())
+                .get(JPanel)
+
+        expect: 'The panel has no layout manager and all children are at their default bounds:'
+            panel.getLayout() == null
+            panel.getComponent(0).getBounds() == new java.awt.Rectangle(0, 0, 0, 0)
+            panel.getComponent(1).getBounds() == new java.awt.Rectangle(0, 0, 0, 0)
+            panel.getComponent(2).getBounds() == new java.awt.Rectangle(0, 0, 0, 0)
+
+        when: 'We set bounds only for child at index 1 — without specifying indices 0 or 2:'
+            layout.set(Layout.none().withChildBound(1, Bounds.of(10, 30, 100, 50)))
+        then: 'Only child 1 is repositioned; children 0 and 2 keep their original bounds:'
+            panel.getComponent(0).getBounds() == new java.awt.Rectangle(0, 0, 0, 0)
+            panel.getComponent(1).getBounds() == Bounds.of(10, 30, 100, 50).toRectangle()
+            panel.getComponent(2).getBounds() == new java.awt.Rectangle(0, 0, 0, 0)
+
+        when: 'We now target only child at index 2 — the sparse association does not revisit index 1:'
+            layout.set(Layout.none().withChildBound(2, Bounds.of(0, 90, 200, 60)))
+        then: 'Child 2 receives its new bounds; child 1 still has the bounds set by the previous call; child 0 remains at origin:'
+            panel.getComponent(0).getBounds() == new java.awt.Rectangle(0, 0, 0, 0)
+            panel.getComponent(1).getBounds() == Bounds.of(10, 30, 100, 50).toRectangle()
+            panel.getComponent(2).getBounds() == Bounds.of(0, 90, 200, 60).toRectangle()
+    }
+
+    def '`withChildConstraint(int, MigAddConstraint)` targets a single child without needing to fill in preceding entries.'()
+    {
+        reportInfo """
+            The per-child add-constraints inside a `ForMigLayout` are backed by a sparse
+            `Association<Integer, MigAddConstraint>` keyed by child index.  A constraint can
+            be applied to any child by index without supplying entries for all preceding
+            children.
+
+            When `installFor` iterates the association, it only calls
+            `MigLayout.setComponentConstraints(child, constraint)` for the children that
+            have an explicit entry.  Children at other indices are left with whatever
+            constraint the `MigLayout` already stores for them.
+
+            Because the `MigLayout` instance is updated in-place across reactive property
+            changes, a constraint set in one `installFor` call persists until a subsequent
+            call explicitly overwrites it for that same index.  This means sparse updates
+            accumulate naturally: applying a constraint for index 0, then separately for
+            index 2, leaves both constraints in effect simultaneously.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout with no initial per-child constraints:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel with three buttons bound to the reactive layout:'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .add(UI.button("A"))
+                .add(UI.button("B"))
+                .add(UI.button("C"))
+                .get(JPanel)
+        and: 'A direct reference to the MigLayout instance for constraint inspection:'
+            def migLayout = (MigLayout) panel.getLayout()
+
+        expect: 'No child has a custom add-constraint initially:'
+            migLayout.getComponentConstraints(panel.getComponent(0)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(1)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(2)) in ([null, ""] as List<Object>)
+
+        when: 'We set a constraint only for child 2 — the sparse API requires no placeholder entries for 0 or 1:'
+            layout.set(Layout.mig("fill").withChildConstraint(2, MigAddConstraint.of("span 2")))
+        then: 'Only child 2 receives the constraint; children 0 and 1 are untouched:'
+            migLayout.getComponentConstraints(panel.getComponent(0)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(1)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(2)) == "span 2"
+
+        when: 'We separately configure only child 0 — without re-specifying child 2:'
+            layout.set(Layout.mig("fill").withChildConstraint(0, MigAddConstraint.of("growx")))
+        then: """
+            Child 0 now has its constraint applied. Because the MigLayout is updated in-place
+            and the new layout only touched index 0, child 2 still retains the constraint
+            that was applied by the earlier `installFor` call.
+        """
+            migLayout.getComponentConstraints(panel.getComponent(0)) == "growx"
+            migLayout.getComponentConstraints(panel.getComponent(1)) in ([null, ""] as List<Object>)
+            migLayout.getComponentConstraints(panel.getComponent(2)) == "span 2"
+    }
+
+    def '`Layout.grid()` and `Layout.box()` can be installed and updated reactively.'()
+    {
+        reportInfo """
+            SwingTree's reactive layout system is not limited to MigLayout and
+            `ResponsiveGridFlowLayout`. `Layout.grid(rows, cols)` installs a
+            `java.awt.GridLayout`, and `Layout.box(UI.Axis)` installs a
+            `javax.swing.BoxLayout`. Both are installed or replaced exactly like
+            any other `Layout` implementation — just call `Var.set(...)` with the
+            desired value.
+
+            `GridLayout` exposes setters for all of its properties (rows, columns, and
+            both gap sizes), so SwingTree can update an existing `GridLayout` instance
+            in-place when the layout type hasn't changed. The identity of the manager
+            object is preserved across such constraint-only updates.
+
+            `BoxLayout` does not expose a setter for its axis after construction, so
+            switching the axis requires a fresh manager instance. This is handled
+            automatically by `ForBoxLayout.installFor`.
+        """
+        given: 'We set the UI scale factor to 1 for consistent test behavior:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive layout property starting with a plain MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel bound to the property:'
+            def panel = UI.panel().withLayout(layout).get(JPanel)
+
+        expect: 'The panel starts with a MigLayout:'
+            (panel.getLayout() instanceof MigLayout)
+
+        when: 'We switch to a 2-row, 3-column GridLayout:'
+            layout.set(Layout.grid(2, 3))
+        then: 'A GridLayout is installed with exactly those dimensions:'
+            panel.getLayout() instanceof GridLayout
+            ((GridLayout) panel.getLayout()).getRows() == 2
+            ((GridLayout) panel.getLayout()).getColumns() == 3
+
+        when: 'We update the GridLayout to different dimensions — the type stays the same:'
+            def firstGridLayout = panel.getLayout()
+            layout.set(Layout.grid(3, 2))
+        then: 'The row/column counts are updated in-place on the existing GridLayout instance:'
+            panel.getLayout().is(firstGridLayout)
+            ((GridLayout) panel.getLayout()).getRows() == 3
+            ((GridLayout) panel.getLayout()).getColumns() == 2
+
+        when: 'We switch to a horizontal BoxLayout:'
+            layout.set(Layout.box(UI.Axis.X))
+        then: 'A BoxLayout is installed along the X axis:'
+            panel.getLayout() instanceof BoxLayout
+            ((BoxLayout) panel.getLayout()).getAxis() == BoxLayout.X_AXIS
+
+        when: 'We switch to a vertical BoxLayout — a new instance is created since the axis changed:'
+            layout.set(Layout.box(UI.Axis.Y))
+        then: 'A BoxLayout is installed along the Y axis:'
+            panel.getLayout() instanceof BoxLayout
+            ((BoxLayout) panel.getLayout()).getAxis() == BoxLayout.Y_AXIS
+
+        when: 'We switch back to MigLayout:'
+            layout.set(Layout.mig("flowy"))
+        then: 'The MigLayout is reinstalled correctly:'
+            panel.getLayout() instanceof MigLayout
+            ((MigLayout) panel.getLayout()).getLayoutConstraints() == "flowy"
     }
 
     def 'A `FlowCell` with no span policies always spans all 12 columns at every parent size category.'()
