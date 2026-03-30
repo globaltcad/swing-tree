@@ -16,6 +16,7 @@ import swingtree.style.StyleConf;
 
 import sprouts.Association;
 import sprouts.Pair;
+import swingtree.layout.Bounds;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
@@ -80,13 +81,40 @@ public interface Layout
     static Layout unspecific() { return Constants.UNSPECIFIC_LAYOUT_CONSTANT; }
 
     /**
-     *  If you don't want to assign any layout to a component style, but you also
-     *  don't want to pass null to the {@link ComponentStyleDelegate#layout(Layout)}
-     *  method, you can use the no-op instance returned by this method.
+     *  Returns a {@link None} layout that removes any existing {@link LayoutManager}
+     *  from a component (sets it to {@code null}), enabling manual positioning of
+     *  child components via their {@link Component#setBounds(int, int, int, int)} method.
+     *  <p>
+     *  To also specify the initial bounds of child components declaratively,
+     *  chain {@link None#withChildBounds(Bounds...)} on the returned instance, or
+     *  use the {@link #none(Bounds...)} shorthand factory.
      *
-     * @return A layout that removes any existing layout from a component.
+     * @return A {@link None} layout that removes any existing layout manager from a component.
      */
-    static Layout none() { return Constants.NONE_LAYOUT_CONSTANT; }
+    static None none() { return (None) Constants.NONE_LAYOUT_CONSTANT; }
+
+    /**
+     *  A convenience factory that creates a {@link None} layout pre-loaded with
+     *  per-child {@link Bounds}.  This is a shorthand for:
+     *  <pre>{@code
+     *      Layout.none().withChildBounds(childBounds)
+     *  }</pre>
+     *  When {@code installFor} is called, the layout manager is first removed from
+     *  the component (enabling absolute positioning), and then each supplied
+     *  {@link Bounds} entry is applied to the corresponding child by index via
+     *  {@link Component#setBounds(int, int, int, int)}.
+     *  Because the underlying storage is a sparse {@link Association}, you only
+     *  need to supply bounds for the children you actually want to position;
+     *  children without an entry are left untouched.
+     *
+     * @param childBounds The {@link Bounds} to apply to the component's children,
+     *                    in child-index order.
+     * @return A {@link None} layout that removes any layout manager and applies
+     *         the given bounds to the corresponding children.
+     */
+    static None none( Bounds... childBounds ) {
+        return ((None) Constants.NONE_LAYOUT_CONSTANT).withChildBounds(childBounds);
+    }
 
     /**
      *  The preferred factory method for creating a {@link MigLayout}-based layout configuration
@@ -487,46 +515,191 @@ public interface Layout
     }
 
     /**
-     *  The {@link None} layout is a layout that represents the absence
-     *  of a {@link LayoutManager} for a component.
-     *  This means that whatever layout is currently installed for a component
-     *  will be removed, and {@code null} will be set as the layout for the component.
+     *  The {@link None} layout removes any existing {@link LayoutManager} from a component
+     *  (sets it to {@code null}), enabling fully manual positioning of child components
+     *  via {@link Component#setBounds(int, int, int, int)}.
      *  <p>
-     *  Note that this is different from the {@link Unspecific} layout,
-     *  which does not represent the absence of a {@link LayoutManager}
-     *  for a component, but rather the absence of it being specified.
+     *  Beyond simply clearing the layout manager, a {@link None} instance can carry a sparse
+     *  {@link Association} of per-child {@link Bounds} that are applied to the component's
+     *  direct children during {@link #installFor(JComponent)}.  This lets you declare the
+     *  absolute position and size of each child you care about right inside the
+     *  {@link Layout} object, keeping the layout specification co-located with the
+     *  component tree rather than scattered across imperative setup code:
+     *  <pre>{@code
+     *      import static swingtree.UI.*;
+     *      import swingtree.layout.Bounds;
+     *      // ...
+     *      Var<Layout> layout = Var.of(
+     *          Layout.none(
+     *              Bounds.of(  0,   0, 120, 40),  // child 0
+     *              Bounds.of(130,   0, 120, 40),  // child 1
+     *              Bounds.of(  0,  50, 250, 80)   // child 2
+     *          )
+     *      );
+     *
+     *      UI.panel().withLayout(layout)
+     *        .add( button("A") )
+     *        .add( button("B") )
+     *        .add( label("C")  );
+     *  }</pre>
+     *  Because the association is sparse you can also target a single child by index
+     *  without touching the others:
+     *  <pre>{@code
+     *      layout.set( Layout.none().withChildBound(2, Bounds.of(0, 50, 250, 80)) );
+     *  }</pre>
+     *  <p>
+     *  Note that this is different from the {@link Unspecific} layout, which does nothing
+     *  at all — {@link None} actively removes the layout manager.
      */
     @Immutable
+    @SuppressWarnings("Immutable")
     final class None implements Layout
     {
-        None(){}
+        private final Association<Integer, Bounds> _childBounds;
 
-        @Override public int hashCode() { return 0; }
-
-        @Override
-        public boolean equals(Object o) {
-            if ( o == null ) return false;
-            if ( o == this ) return true;
-            return o.getClass() == getClass();
+        None() {
+            this( Association.betweenSorted(Integer.class, Bounds.class) );
         }
 
-        @Override public String toString() { return getClass().getSimpleName() + "[]"; }
+        None( Association<Integer, Bounds> childBounds ) {
+            _childBounds = Objects.requireNonNull(childBounds);
+        }
+
+        // -- Per-child bounds withers --
 
         /**
-         *  Removes any existing {@link LayoutManager} from the supplied component
-         *  by setting it to {@code null}, effectively leaving the component without
-         *  a layout manager.
+         *  Returns a new {@link None} layout whose per-child {@link Bounds} are replaced
+         *  by the supplied sorted {@link Association}.
+         *  <p>
+         *  Keys are child indices ({@code 0} = first child, {@code 1} = second, etc.);
+         *  the association is sparse, so you only need to include entries for the children
+         *  you actually want to position.  Children whose index has no entry are left
+         *  untouched.  An empty association produces the plain "remove layout only" behaviour.
          *
-         * @param component The component whose layout manager will be removed.
+         * @param childBounds A sorted {@link Association} mapping child indices to
+         *                    the {@link Bounds} to apply.
+         * @return A new {@link None} layout with the updated child bounds,
+         *         or the shared {@link Layout#none()} constant when the association is empty.
+         */
+        public None withChildBounds( Association<Integer, Bounds> childBounds ) {
+            Objects.requireNonNull(childBounds);
+            if ( childBounds.isEmpty() )
+                return (None) Constants.NONE_LAYOUT_CONSTANT;
+            return new None(childBounds);
+        }
+
+        /**
+         *  Returns a new {@link None} layout with per-child {@link Bounds} built from
+         *  the supplied varargs array.  Entries are mapped positionally: index&nbsp;0
+         *  applies to the first child, index&nbsp;1 to the second, and so on.
+         *  Passing an empty array returns the shared {@link Layout#none()} constant.
+         *
+         * @param childBounds The {@link Bounds} to apply to the component's children,
+         *                    in child-index order.
+         * @return A new {@link None} layout with the updated child bounds.
+         */
+        public None withChildBounds( Bounds... childBounds ) {
+            Association<Integer, Bounds> assoc = Association.betweenSorted(Integer.class, Bounds.class);
+            for ( int i = 0; i < childBounds.length; i++ )
+                assoc = assoc.put(i, childBounds[i]);
+            return withChildBounds(assoc);
+        }
+
+        /**
+         *  Returns a new {@link None} layout with the {@link Bounds} at the given child
+         *  index replaced by the supplied value.  All other child bounds are copied unchanged.
+         *  <p>
+         *  Because the underlying storage is a sparse {@link Association}, no padding is
+         *  needed: the bound is stored at exactly {@code index}, regardless of whether
+         *  lower indices have entries.
+         *
+         * @param index The zero-based index of the child whose bounds to update.
+         * @param childBound The new {@link Bounds} for the child at {@code index}.
+         * @return A new {@link None} layout with the updated child bound at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public None withChildBound( int index, Bounds childBound ) {
+            Objects.requireNonNull(childBound);
+            return withChildBounds( _childBounds.put(index, childBound) );
+        }
+
+        /**
+         *  Returns a new {@link None} layout with the supplied {@link Bounds} appended
+         *  as the constraint for the next child in sequence (i.e. at index = max existing
+         *  key + 1, or 0 if no bounds have been set yet).
+         *
+         * @param childBound The {@link Bounds} to append for the next child.
+         * @return A new {@link None} layout with the bound appended.
+         */
+        public None withAddedChildBound( Bounds childBound ) {
+            Objects.requireNonNull(childBound);
+            int nextIndex = 0;
+            for ( Integer key : _childBounds.keySet() )
+                nextIndex = key + 1;
+            return withChildBounds( _childBounds.put(nextIndex, childBound) );
+        }
+
+        // -- Object contract --
+
+        @Override public int hashCode() { return _childBounds.hashCode(); }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( o == null ) return false;
+            if ( o == this ) return true;
+            if ( o.getClass() != getClass() ) return false;
+            None other = (None) o;
+            return _childBounds.equals(other._childBounds);
+        }
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + "[childBounds=" + _childBounds + "]";
+        }
+
+        // -- Layout installation --
+
+        /**
+         *  Installs this layout for the supplied component in two phases:
+         *  <ol>
+         *    <li><b>Layout removal</b> — the existing {@link LayoutManager} (if any) is
+         *        replaced with {@code null}, enabling absolute positioning of child
+         *        components.</li>
+         *    <li><b>Child bounds</b> — if any per-child {@link Bounds} were specified,
+         *        each stored entry is applied to the corresponding direct child of
+         *        {@code component} (by index) via
+         *        {@link Component#setBounds(int, int, int, int)}.
+         *        Only entries that differ from the child's current bounds are written,
+         *        and {@link JComponent#repaint()} is called exactly once at the end if
+         *        anything changed.</li>
+         *  </ol>
+         *
+         * @param component The component to remove the layout manager from and
+         *                  optionally apply child bounds to.
          */
         @Override
         public void installFor( JComponent component ) {
-            // Contrary to the 'Unspecific' layout, this layout
-            // will remove any existing layout from the component:
+            // Phase 1: remove the layout manager:
             LayoutManager oldManager = component.getLayout();
             if ( oldManager != null ) {
                 component.setLayout(null);
                 component.revalidate();
+            }
+            // Phase 2: apply per-child bounds if specified:
+            if ( _childBounds.isNotEmpty() ) {
+                Component[] children = component.getComponents();
+                boolean changed = false;
+                for ( Pair<Integer, Bounds> entry : _childBounds ) {
+                    int i = entry.first();
+                    if ( i >= children.length ) continue;
+                    java.awt.Rectangle desired  = entry.second().toRectangle();
+                    java.awt.Rectangle existing = children[i].getBounds();
+                    if ( !desired.equals(existing) ) {
+                        children[i].setBounds(desired);
+                        changed = true;
+                    }
+                }
+                if ( changed )
+                    component.repaint();
             }
         }
     }
