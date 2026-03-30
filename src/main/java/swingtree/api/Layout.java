@@ -14,7 +14,8 @@ import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
 
-import sprouts.Tuple;
+import sprouts.Association;
+import sprouts.Pair;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
@@ -541,10 +542,11 @@ public interface Layout
      *    <li><b>Row constraints</b> ({@code rowConstr}) — define the sizing and
      *        alignment rules for each row in the grid.</li>
      *    <li><b>Per-child component constraints</b> ({@code childConstraints}) — a
-     *        positional {@link Tuple} of {@link MigAddConstraint}s that are applied to
-     *        the component's direct children: the first entry goes to the first child,
-     *        the second to the second child, and so on.
-     *        Children without a matching entry keep whatever constraint the
+     *        sorted {@link Association} mapping child indices ({@link Integer}) to
+     *        {@link MigAddConstraint}s applied to the component's direct children.
+     *        Unlike a positional tuple, the association is sparse: you only need to
+     *        include entries for the children you actually want to configure; children
+     *        whose index has no entry keep whatever constraint the
      *        {@link MigLayout} already has for them.</li>
      *  </ul>
      *  <p>
@@ -566,20 +568,20 @@ public interface Layout
     @SuppressWarnings("Immutable")
     final class ForMigLayout implements Layout
     {
-        private final LayoutConstraint          _constr;
-        private final LayoutConstraint          _colConstr;
-        private final LayoutConstraint          _rowConstr;
-        private final Tuple<MigAddConstraint>   _childConstraints;
+        private final LayoutConstraint                        _constr;
+        private final LayoutConstraint                        _colConstr;
+        private final LayoutConstraint                        _rowConstr;
+        private final Association<Integer, MigAddConstraint>  _childConstraints;
 
         ForMigLayout( LayoutConstraint constr, LayoutConstraint colConstr, LayoutConstraint rowConstr ) {
-            this( constr, colConstr, rowConstr, Tuple.of(MigAddConstraint.class) );
+            this( constr, colConstr, rowConstr, Association.betweenSorted(Integer.class, MigAddConstraint.class) );
         }
 
         ForMigLayout(
-            LayoutConstraint        constr,
-            LayoutConstraint        colConstr,
-            LayoutConstraint        rowConstr,
-            Tuple<MigAddConstraint> childConstraints
+            LayoutConstraint                       constr,
+            LayoutConstraint                       colConstr,
+            LayoutConstraint                       rowConstr,
+            Association<Integer, MigAddConstraint> childConstraints
         ) {
             _constr           = Objects.requireNonNull(constr);
             _colConstr        = Objects.requireNonNull(colConstr);
@@ -672,17 +674,19 @@ public interface Layout
 
         /**
          *  Returns a new {@link ForMigLayout} instance whose per-child component constraints
-         *  are replaced by the supplied {@link Tuple}.
+         *  are replaced by the supplied sorted {@link Association}.
          *  <p>
-         *  The {@code childConstraints} tuple maps positionally to the component's children:
-         *  index&nbsp;0 maps to the first child, index&nbsp;1 to the second, and so on.
-         *  Children at indices beyond the tuple size are left untouched.
-         *  An empty tuple clears all previously stored per-child constraints.
+         *  Keys are child indices ({@code 0} = first child, {@code 1} = second, etc.);
+         *  the association is sparse, so you only need to include entries for children
+         *  you actually want to configure.
+         *  Children whose index has no entry in the association are left untouched.
+         *  An empty association clears all previously stored per-child constraints.
          *
-         * @param childConstraints The positional {@link MigAddConstraint}s for the children.
+         * @param childConstraints A sorted {@link Association} mapping child indices to
+         *                         the {@link MigAddConstraint} to apply.
          * @return A new {@link ForMigLayout} with the updated child constraints.
          */
-        public ForMigLayout withChildConstraints( Tuple<MigAddConstraint> childConstraints ) {
+        public ForMigLayout withChildConstraints( Association<Integer, MigAddConstraint> childConstraints ) {
             return new ForMigLayout( _constr, _colConstr, _rowConstr, Objects.requireNonNull(childConstraints) );
         }
 
@@ -708,7 +712,10 @@ public interface Layout
          * @return A new {@link ForMigLayout} with the updated child constraints.
          */
         public ForMigLayout withChildConstraints( MigAddConstraint... childConstraints ) {
-            return withChildConstraints( Tuple.of(MigAddConstraint.class, childConstraints) );
+            Association<Integer, MigAddConstraint> assoc = Association.betweenSorted(Integer.class, MigAddConstraint.class);
+            for ( int i = 0; i < childConstraints.length; i++ )
+                assoc = assoc.put(i, childConstraints[i]);
+            return withChildConstraints(assoc);
         }
 
         /**
@@ -716,9 +723,9 @@ public interface Layout
          *  given child index replaced by the supplied value.
          *  All other child constraints and all other properties are copied unchanged.
          *  <p>
-         *  If the supplied {@code index} is beyond the current size of the child-constraint
-         *  tuple, the tuple is padded with empty {@link MigAddConstraint}s
-         *  ({@code MigAddConstraint.of()}) up to and including that index.
+         *  Because the underlying storage is a sparse {@link Association}, no padding
+         *  is needed: the constraint is stored at exactly {@code index}, regardless of
+         *  whether lower indices have entries.
          *
          * @param index The zero-based index of the child whose constraint to update.
          *              The first child has index&nbsp;0.
@@ -728,11 +735,7 @@ public interface Layout
          */
         public ForMigLayout withChildConstraint( int index, MigAddConstraint childConstraint ) {
             Objects.requireNonNull(childConstraint);
-            Tuple<MigAddConstraint> padded = _childConstraints;
-            // Pad with empty constraints if needed so we can set at 'index':
-            while ( padded.size() <= index )
-                padded = padded.add( MigAddConstraint.of() );
-            return withChildConstraints( padded.setAt(index, childConstraint) );
+            return withChildConstraints( _childConstraints.put(index, childConstraint) );
         }
 
         /**
@@ -773,7 +776,11 @@ public interface Layout
          * @return A new {@link ForMigLayout} with the constraint appended.
          */
         public ForMigLayout withAddedChildConstraint( MigAddConstraint childConstraint ) {
-            return withChildConstraints( _childConstraints.add(Objects.requireNonNull(childConstraint)) );
+            Objects.requireNonNull(childConstraint);
+            int nextIndex = 0;
+            for ( Integer key : _childConstraints.keySet() )
+                nextIndex = key + 1;
+            return withChildConstraints( _childConstraints.put(nextIndex, childConstraint) );
         }
 
         /**
@@ -876,10 +883,11 @@ public interface Layout
                 if ( currentLayout instanceof MigLayout ) {
                     MigLayout migLayout     = (MigLayout) currentLayout;
                     Component[] children    = component.getComponents();
-                    int count               = Math.min(children.length, _childConstraints.size());
                     boolean childrenChanged = false;
-                    for ( int i = 0; i < count; i++ ) {
-                        Object desired  = _childConstraints.get(i).toConstraintForLayoutManager();
+                    for ( Pair<Integer, MigAddConstraint> entry : _childConstraints ) {
+                        int i = entry.first();
+                        if ( i >= children.length ) continue;
+                        Object desired  = entry.second().toConstraintForLayoutManager();
                         Object existing = migLayout.getComponentConstraints(children[i]);
                         if ( !desired.equals(existing) ) {
                             migLayout.setComponentConstraints(children[i], desired);
@@ -912,9 +920,10 @@ public interface Layout
      *        in the same row.</li>
      *    <li><b>Vertical gap</b> ({@code vgap}) — the pixel spacing between rows.</li>
      *    <li><b>Per-child {@link FlowCell} constraints</b> ({@code childConstraints}) — a
-     *        positional {@link Tuple} of {@link FlowCell}s that are pushed onto the
-     *        component's direct children: the first entry goes to the first child, the
-     *        second to the second child, and so on.
+     *        sorted {@link Association} mapping child indices ({@link Integer}) to
+     *        {@link FlowCell}s that are pushed onto the component's direct children.
+     *        Unlike a positional tuple, the association is sparse: you only need to include
+     *        entries for the children you actually want to configure.
      *        Each {@link FlowCell} carries a responsive span policy (see
      *        {@link swingtree.UI#AUTO_SPAN(Configurator)}) that the
      *        {@link ResponsiveGridFlowLayout} queries on every layout pass to determine
@@ -954,20 +963,20 @@ public interface Layout
     @SuppressWarnings("Immutable")
     final class ForFlowLayout implements Layout
     {
-        private final UI.HorizontalAlignment _align;
-        private final int                    _horizontalGapSize;
-        private final int                    _verticalGapSize;
-        private final Tuple<FlowCell>        _childConstraints;
+        private final UI.HorizontalAlignment          _align;
+        private final int                             _horizontalGapSize;
+        private final int                             _verticalGapSize;
+        private final Association<Integer, FlowCell>  _childConstraints;
 
         ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {
-            this( align, hgap, vgap, Tuple.of(FlowCell.class) );
+            this( align, hgap, vgap, Association.betweenSorted(Integer.class, FlowCell.class) );
         }
 
         ForFlowLayout(
-            UI.HorizontalAlignment align,
-            int                    hgap,
-            int                    vgap,
-            Tuple<FlowCell>        childConstraints
+            UI.HorizontalAlignment              align,
+            int                                 hgap,
+            int                                 vgap,
+            Association<Integer, FlowCell>      childConstraints
         ) {
             _align             = Objects.requireNonNull(align);
             _horizontalGapSize = hgap;
@@ -1014,12 +1023,13 @@ public interface Layout
 
         /**
          *  Returns a new {@link ForFlowLayout} whose per-child {@link FlowCell} constraints
-         *  are replaced by the supplied {@link Tuple}.
+         *  are replaced by the supplied sorted {@link Association}.
          *  <p>
-         *  The tuple maps positionally to the component's children: index&nbsp;0 maps to the
-         *  first child, index&nbsp;1 to the second, and so on.
-         *  Children at indices beyond the tuple size keep whatever {@link FlowCell} they
-         *  already have. An empty tuple clears all previously stored child constraints.<br>
+         *  Keys are child indices ({@code 0} = first child, {@code 1} = second, etc.);
+         *  the association is sparse, so you only need to include entries for children
+         *  you actually want to configure.
+         *  Children whose index has no entry keep whatever {@link FlowCell} they already have.
+         *  An empty association clears all previously stored child constraints.<br>
          *  The intended way of creating {@link FlowCell}s is by using {@link UI#AUTO_SPAN(Configurator)}!<br>
          *  An important edge case to consider when writing a responsive flow layout:<br>
          *  <b>
@@ -1030,7 +1040,7 @@ public interface Layout
          * @param childConstraints The positional {@link FlowCell} constraints for the children.
          * @return A new {@link ForFlowLayout} with the updated child constraints.
          */
-        public ForFlowLayout withChildConstraints( Tuple<FlowCell> childConstraints ) {
+        public ForFlowLayout withChildConstraints( Association<Integer, FlowCell> childConstraints ) {
             return new ForFlowLayout( _align, _horizontalGapSize, _verticalGapSize,
                                       Objects.requireNonNull(childConstraints) );
         }
@@ -1066,7 +1076,10 @@ public interface Layout
          * @return A new {@link ForFlowLayout} with the updated child constraints.
          */
         public ForFlowLayout withChildConstraints( FlowCell... childConstraints ) {
-            return withChildConstraints( Tuple.of(FlowCell.class, childConstraints) );
+            Association<Integer, FlowCell> assoc = Association.betweenSorted(Integer.class, FlowCell.class);
+            for ( int i = 0; i < childConstraints.length; i++ )
+                assoc = assoc.put(i, childConstraints[i]);
+            return withChildConstraints(assoc);
         }
 
         /**
@@ -1075,8 +1088,9 @@ public interface Layout
          *  properties are copied unchanged.
          *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!<br>
          *  <p>
-         *  If {@code index} is beyond the current tuple size, the tuple is padded with
-         *  fixed full-width cells ({@code UI.AUTO_SPAN(12)}) up to and including that index.<br>
+         *  Because the underlying storage is a sparse {@link Association}, no padding
+         *  is needed: the constraint is stored at exactly {@code index}, regardless of
+         *  whether lower indices have entries.<br>
          *  Another important edge case to consider when writing a responsive flow layout:<br>
          *  <b>
          *      If a {@link FlowCell} is passed to the responsive flow layout without
@@ -1090,10 +1104,7 @@ public interface Layout
          */
         public ForFlowLayout withChildConstraint( int index, FlowCell childConstraint ) {
             Objects.requireNonNull(childConstraint);
-            Tuple<FlowCell> padded = _childConstraints;
-            while ( padded.size() <= index )
-                padded = padded.add( new FlowCell(it -> it) );
-            return withChildConstraints( padded.setAt(index, childConstraint) );
+            return withChildConstraints( _childConstraints.put(index, childConstraint) );
         }
 
         /**
@@ -1146,7 +1157,11 @@ public interface Layout
          * @return A new {@link ForFlowLayout} with the constraint appended.
          */
         public ForFlowLayout withAddedChildConstraint( FlowCell childConstraint ) {
-            return withChildConstraints( _childConstraints.add(Objects.requireNonNull(childConstraint)) );
+            Objects.requireNonNull(childConstraint);
+            int nextIndex = 0;
+            for ( Integer key : _childConstraints.keySet() )
+                nextIndex = key + 1;
+            return withChildConstraints( _childConstraints.put(nextIndex, childConstraint) );
         }
 
         /**
@@ -1239,13 +1254,14 @@ public interface Layout
             // Phase 2: push per-child FlowCell constraints as client properties:
             if ( _childConstraints.isNotEmpty() ) {
                 Component[] children  = component.getComponents();
-                int count             = Math.min(children.length, _childConstraints.size());
                 boolean changed       = false;
-                for ( int i = 0; i < count; i++ ) {
+                for ( Pair<Integer, FlowCell> entry : _childConstraints ) {
+                    int i = entry.first();
+                    if ( i >= children.length ) continue;
                     if ( !( children[i] instanceof JComponent ) )
                         continue;
                     JComponent child  = (JComponent) children[i];
-                    FlowCell desired  = _childConstraints.get(i);
+                    FlowCell desired  = entry.second();
                     Object existing   = child.getClientProperty(AddConstraint.class);
                     if ( !desired.equals(existing) ) {
                         child.putClientProperty(AddConstraint.class, desired);
