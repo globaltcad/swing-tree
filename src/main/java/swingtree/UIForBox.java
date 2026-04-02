@@ -1,9 +1,6 @@
 package swingtree;
 
-import net.miginfocom.swing.MigLayout;
-import sprouts.Val;
 import swingtree.components.JBox;
-import swingtree.layout.LayoutConstraint;
 
 import java.awt.*;
 import java.util.Objects;
@@ -36,34 +33,6 @@ public final class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B
     @Override
     protected UIForBox<B> _newBuilderWithState(BuilderState<B> newState ) {
         return new UIForBox<>(newState);
-    }
-
-    /**
-     *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JBox}.
-     *
-     * @param attr The layout attributes property which will be dynamically passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public final UIForBox<B> withLayout( Val<LayoutConstraint> attr ) {
-        NullUtil.nullArgCheck(attr, "attr", Val.class);
-        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return _withOnShow( attr, (thisComponent, it) -> {
-                    // Every time the value changes, we need to re-layout the panel.
-                    // Note that this is for mig layout:
-                    LayoutManager lm = thisComponent.getLayout();
-                    if ( lm instanceof MigLayout ) {
-                        ((MigLayout)lm).setLayoutConstraints(it.toString());
-                        thisComponent.revalidate();
-                        thisComponent.repaint();
-                    }
-                    else
-                        throw new IllegalStateException(
-                            "Cannot set layout mig-layout specific " +
-                            "constraints on a panel with a non-mig layout."
-                        );
-                })
-                ._this();
     }
 
     @Override protected void _setEnabled( B thisComponent, boolean isEnabled ) {

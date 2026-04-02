@@ -215,6 +215,11 @@ the `withLayout` method.
 You may also want to [check out this guide](./Responsive-Layouts.md)
 if you are interested in building responsive layouts with Swing-Tree.
 
+And if you want those responsive (or any other) layouts to change dynamically at runtime —
+driven by a button click, a model property, or application state — take a look at the
+[Reactive Layouts](./Reactive-Layouts.md) guide, which shows you how to bind a panel's
+entire layout configuration to a `Var<Layout>` property.
+
 ## Growing Sprouts ##
 
 Now that we have learned how to build Swing UIs with Swing-Tree
@@ -623,6 +628,8 @@ Here some more reading material to get you started:
 
 - [Simple Dialogs](./Simple-Dialogs.md)
 - [Writing Tables](./Writing-Tables.md)
+- [Responsive Layouts](./Responsive-Layouts.md)
+- [Reactive Layouts](./Reactive-Layouts.md)
 - [Advanced MVVM](./Advanced-MVVM.md)
 
 If you want to learn more about Swing-Tree
