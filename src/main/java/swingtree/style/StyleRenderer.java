@@ -1516,35 +1516,11 @@ final class StyleRenderer
             Phase 1 : Build layouts using LineBreakMeasurer
             ------------------------------------------------
         */
-        final List<List<StyledString>> paragraphs = _splitStyledTextIntoParagraphs(text);
-        for (List<StyledString> paragraph : paragraphs) {
-            int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
-            if (length <= 0) {
+        final List<@Nullable AttributedString> paragraphs = _splitStyledTextIntoParagraphs(text, font, boxModelConf);
+        for ( @Nullable AttributedString attrStr : paragraphs ) {
+            if ( attrStr == null ) {
                 layouts.add(null); // represent empty line
                 continue;
-            }
-            final StringBuilder sb = new StringBuilder();
-            for (StyledString s : paragraph) {
-                sb.append(s.string());
-            }
-            final AttributedString attrStr = new AttributedString(sb.toString());
-            int index = 0;
-            for (StyledString styledString : paragraph) {
-                int styledStringLength = styledString.string().length();
-                if (styledStringLength <= 0) {
-                    // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges
-                    continue;
-                }
-                int endIndex = index + styledStringLength;
-                if (styledString.fontConf().isPresent()) {
-                    java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
-                    attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);
-                    attrStr.addAttributes(localFont.getAttributes(), index, endIndex);
-                } else {
-                    attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);
-                    attrStr.addAttributes(font.getAttributes(), index, endIndex);
-                }
-                index += styledStringLength;
             }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
@@ -1588,37 +1564,68 @@ final class StyleRenderer
         return Pair.of(totalHeight, layouts);
     }
 
-    private static List<List<StyledString>> _splitStyledTextIntoParagraphs(Tuple<StyledString> text) {
-        List<List<StyledString>> paragraphs = new ArrayList<>();
+    private static List<@Nullable AttributedString> _splitStyledTextIntoParagraphs(
+        final Tuple<StyledString> text,
+        final Font                font,
+        final BoxModelConf        boxModelConf
+    ) {
+        List<@Nullable AttributedString> paragraphs = new ArrayList<>();
         List<StyledString> currentParagraph = null;
-        for (StyledString styledString : text) {
+        for ( StyledString styledString : text ) {
             String[] parts = styledString.string().split("\n", -1);
-            if (parts.length <= 1) {
-                if (currentParagraph == null) {
+            if ( parts.length <= 1 ) {
+                if ( currentParagraph == null )
                     currentParagraph = new ArrayList<>();
-                }
                 currentParagraph.add(styledString);
             } else {
                 for ( int i = 0; i < parts.length; i++ ) {
                     String part = parts[i];
-                    if (currentParagraph == null) {
+                    if ( currentParagraph == null )
                         currentParagraph = new ArrayList<>();
-                    }
-                    if ( !part.isEmpty() ) {
+                    if ( !part.isEmpty() )
                         currentParagraph.add(styledString.withString(part));
-                    }
                     // if it is not the last part, we start a new line/paragraph:
                     if ( i < parts.length - 1 ) {
-                        paragraphs.add(currentParagraph);
+                        paragraphs.add(_paragraphToAttributedString(currentParagraph, font, boxModelConf));
                         currentParagraph = null;
                     }
                 }
             }
         }
-        if ( currentParagraph != null ) {
-            paragraphs.add(currentParagraph);
-        }
+        if ( currentParagraph != null )
+            paragraphs.add(_paragraphToAttributedString(currentParagraph, font, boxModelConf));
         return paragraphs;
+    }
+
+    private static @Nullable AttributedString _paragraphToAttributedString(
+        final List<StyledString> paragraph,
+        final Font               font,
+        final BoxModelConf       boxModelConf
+    ) {
+        int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
+        if ( length <= 0 )
+            return null;
+        final StringBuilder sb = new StringBuilder();
+        for ( StyledString s : paragraph )
+            sb.append(s.string());
+        final AttributedString attrStr = new AttributedString(sb.toString());
+        int index = 0;
+        for ( StyledString styledString : paragraph ) {
+            int styledStringLength = styledString.string().length();
+            if ( styledStringLength <= 0 )
+                continue; // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges
+            int endIndex = index + styledStringLength;
+            if ( styledString.fontConf().isPresent() ) {
+                java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);
+                attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);
+                attrStr.addAttributes(localFont.getAttributes(), index, endIndex);
+            } else {
+                attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);
+                attrStr.addAttributes(font.getAttributes(), index, endIndex);
+            }
+            index += styledStringLength;
+        }
+        return attrStr;
     }
 
     private static void _executeUserPainters(
