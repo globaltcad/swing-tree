@@ -1253,14 +1253,13 @@ final class StyleRenderer
         final boolean              wrapLines         = text.wrapLines();
         // Computing the area available for text rendering after applying the offset and insets:
         final Bounds textBounds = _computeTextBounds(text, boxModel);
-        final float availableWidth = textBounds.size().width().orElse(0f);
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
             g2d.setFont(font);
             // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
             final FontRenderContext frc = g2d.getFontRenderContext();
-            final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, availableWidth, wrapLines, conf.boxModel());
+            final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, textBounds, wrapLines, conf.boxModel(), text.obstacles());
             final List<@Nullable TextLayout> layouts = layoutResult.second();
             final float totalHeight                  = layoutResult.first();
             // Phase 3 - 5: Rendering
@@ -1491,13 +1490,22 @@ final class StyleRenderer
     /**
      *  Builds the list of {@link TextLayout} objects for the given styled text and measures
      *  the total rendered height of all lines (Phase 1 + Phase 2 of the text rendering pipeline).
+     *  When {@code obstacles} is non-empty, each line layout will be built with awareness
+     *  of the obstacle shapes and may contain multiple TextLayout segments to skip over obstacles.
+     *  <b>But hitting an obstacle does not just lead to a simple line break, within a line,
+     *  the text will try to skip over the obstacle shape until it can continue.</b>
      *
      * @param font         The base font to use for unstyled segments.
      * @param frc          The {@link FontRenderContext} used by the measurer.
      * @param text         The styled text to lay out.
-     * @param boundsWidth  The available width, used for line-breaking when {@code wrapLines} is {@code true}.
+     * @param textBounds   The rectangle available for text rendering in component coordinates.
+     *                     Its width drives line-breaking; its origin is used to intersect obstacles.
      * @param wrapLines    Whether long lines should be wrapped at word boundaries.
      * @param boxModelConf The box-model configuration forwarded to per-segment font derivation.
+     * @param obstacles    Shapes (in component coordinates) the text must not be rendered on top of.
+     *                     The text will skip over these shapes and continue rendering on the other side,
+     *                     if possible or break the line if no more horizontal space is left.
+     *                     Pass an empty {@link Tuple} when no obstacles are present.
      * @return A {@link Pair} whose {@link Pair#first()} is the total pixel height of all lines
      *         and whose {@link Pair#second()} is the ordered layout list
      *         ({@code null} entries represent empty/blank lines).
@@ -1506,10 +1514,15 @@ final class StyleRenderer
         final Font                font,
         final FontRenderContext   frc,
         final Tuple<StyledString> text,
-        final float               boundsWidth,
+        final Bounds              textBounds,
         final boolean             wrapLines,
-        final BoxModelConf        boxModelConf
+        final BoxModelConf        boxModelConf,
+        final Tuple<Shape>        obstacles
     ) {
+        final float boundsWidth = textBounds.size().width().orElse(0f);
+        final float boundsX     = textBounds.location().x();
+        final float boundsY     = textBounds.location().y();
+        // TODO IMPLEMENT OBSTACLE AWARE LAYOUT
         final List<@Nullable TextLayout> layouts = new ArrayList<>();
         /*
             ------------------------------------------------
