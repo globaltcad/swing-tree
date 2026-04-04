@@ -13,7 +13,6 @@ import javax.swing.JComponent;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Objects;
@@ -227,8 +226,8 @@ final class StyleConfLayers
                             final Graphics2D g2d = img.createGraphics();
                             try {
                                 final FontRenderContext frc = g2d.getFontRenderContext();
-                                final Pair<Float, List<StyleRenderer.LayoutLine>> layoutResult =
-                                        StyleRenderer._buildTextLayoutsAndPreferredHeight(
+                                final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult =
+                                        TextLayoutEngine._buildTextLayoutsAndPreferredHeight(
                                                 font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles()
                                         );
                                 double totalHeight = layoutResult.first().doubleValue();
