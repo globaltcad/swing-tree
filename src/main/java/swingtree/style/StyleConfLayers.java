@@ -215,7 +215,10 @@ final class StyleConfLayers
                                 return totalHeight;
                             }
                             final Bounds textBounds = StyleRenderer._computeTextBounds(textConf, predictedBoxModel);
-                            if ( textBounds.size().width().orElse(0f) <= 0 )
+                            final float boundsWidth = textBounds.size().width().orElse(0f);
+                            final float boundsX     = textBounds.location().x();
+                            final float boundsY     = textBounds.location().y();
+                            if ( boundsWidth <= 0 )
                                 return -1;
                             final boolean wrapLines = textConf.wrapLines();
                             Font font = Optional.ofNullable(owner.getFont()).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
@@ -226,10 +229,10 @@ final class StyleConfLayers
                                 final FontRenderContext frc = g2d.getFontRenderContext();
                                 final Pair<Float, List<StyleRenderer.LayoutLine>> layoutResult =
                                         StyleRenderer._buildTextLayoutsAndPreferredHeight(
-                                                font, frc, textConf.content(), textBounds, wrapLines, predictedBoxModel, textConf.obstacles()
+                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles()
                                         );
                                 double totalHeight = layoutResult.first().doubleValue();
-                                totalHeight += textBounds.location().y();
+                                totalHeight += boundsY;
                                 totalHeight += insets.bottom().orElse(0f);
                                 return totalHeight;
                             }

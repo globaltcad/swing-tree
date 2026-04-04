@@ -1303,7 +1303,10 @@ final class StyleRenderer
             g2d.setFont(font);
             // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
             final FontRenderContext frc = g2d.getFontRenderContext();
-            final Pair<Float, List<LayoutLine>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, textBounds, wrapLines, conf.boxModel(), text.obstacles());
+            final float boundsWidth = textBounds.size().width().orElse(0f);
+            final float boundsX     = textBounds.location().x();
+            final float boundsY     = textBounds.location().y();
+            final Pair<Float, List<LayoutLine>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles());
             final List<LayoutLine> lines    = layoutResult.second();
             final float            totalHeight = layoutResult.first();
             // Phase 3 - 5: Rendering
@@ -1540,8 +1543,9 @@ final class StyleRenderer
      * @param font         The base font to use for unstyled segments.
      * @param frc          The {@link FontRenderContext} used by the measurer.
      * @param text         The styled text to lay out.
-     * @param textBounds   The rectangle available for text rendering in component coordinates.
-     *                     Its width drives line-breaking; its origin is used to intersect obstacles.
+     * @param boundsWidth  The available width for the text. This property is only relevant when line wrapping is active.
+     * @param boundsX,     The x-offset of the text in the component space. It is important for intersecting obstacles!
+     * @param boundsY,     The y-offset of the text in the component space. It is important for intersecting obstacles!
      * @param wrapLines    Whether long lines should be wrapped at word boundaries.
      * @param boxModelConf The box-model configuration forwarded to per-segment font derivation.
      * @param obstacles    Shapes (in component coordinates) the text must not be rendered on top of.
@@ -1556,15 +1560,13 @@ final class StyleRenderer
         final Font                font,
         final FontRenderContext   frc,
         final Tuple<StyledString> text,
-        final Bounds              textBounds,
+        final float               boundsWidth,
+        final float               boundsX,
+        final float               boundsY,
         final boolean             wrapLines,
         final BoxModelConf        boxModelConf,
         final Tuple<Shape>        obstacles
     ) {
-        final float boundsWidth = textBounds.size().width().orElse(0f);
-        final float boundsX     = textBounds.location().x();
-        final float boundsY     = textBounds.location().y();
-
         final List<LayoutLine> lines = new ArrayList<>();
         /*
             ------------------------------------------------
