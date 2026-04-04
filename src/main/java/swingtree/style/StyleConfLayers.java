@@ -224,7 +224,7 @@ final class StyleConfLayers
                             final Graphics2D g2d = img.createGraphics();
                             try {
                                 final FontRenderContext frc = g2d.getFontRenderContext();
-                                final Pair<Float, List<@Nullable TextLayout>> layoutResult =
+                                final Pair<Float, List<StyleRenderer.LayoutLine>> layoutResult =
                                         StyleRenderer._buildTextLayoutsAndPreferredHeight(
                                                 font, frc, textConf.content(), textBounds, wrapLines, predictedBoxModel, textConf.obstacles()
                                         );

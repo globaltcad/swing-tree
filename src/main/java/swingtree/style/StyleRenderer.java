@@ -39,6 +39,50 @@ final class StyleRenderer
 
     private StyleRenderer() {} // Un-instantiable!
 
+    /**
+     *  Holds a single laid-out text line together with the obstacle-free horizontal region
+     *  it was fitted into.  Both {@code regionX} and {@code regionWidth} are in component
+     *  coordinates and are used by the renderer to position the line, including alignment
+     *  (LEFT / CENTER / RIGHT) within the available region.
+     *  <p>
+     *  When obstacles split a visual line into more than one free interval, every interval
+     *  beyond the first is captured as an extra {@link Segment} in {@code extraSegments}.
+     *  All segments share the same baseline (y is not advanced between them).
+     *  <p>
+     *  A {@code null} {@code layout} represents a blank / empty line — the region fields
+     *  still carry the full text-bounds width so that the blank contributes the correct height.
+     */
+    static final class LayoutLine {
+
+        /** A secondary text fragment placed in one of the additional free intervals on this line. */
+        static final class Segment {
+            final TextLayout layout;
+            final float regionX;
+            final float regionWidth;
+            Segment(TextLayout layout, float regionX, float regionWidth) {
+                this.layout      = layout;
+                this.regionX     = regionX;
+                this.regionWidth = regionWidth;
+            }
+        }
+
+        final @Nullable TextLayout  layout;
+        final float                 regionX;
+        final float                 regionWidth;
+        /** Additional same-baseline fragments produced when obstacles split the line. */
+        final List<Segment>         extraSegments;
+
+        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth) {
+            this(layout, regionX, regionWidth, Collections.emptyList());
+        }
+
+        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth, List<Segment> extraSegments) {
+            this.layout        = layout;
+            this.regionX       = regionX;
+            this.regionWidth   = regionWidth;
+            this.extraSegments = extraSegments;
+        }
+    }
 
     public static void renderStyleOn(
         final UI.Layer layer,
@@ -1259,16 +1303,16 @@ final class StyleRenderer
             g2d.setFont(font);
             // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
             final FontRenderContext frc = g2d.getFontRenderContext();
-            final Pair<Float, List<@Nullable TextLayout>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, textBounds, wrapLines, conf.boxModel(), text.obstacles());
-            final List<@Nullable TextLayout> layouts = layoutResult.second();
-            final float totalHeight                  = layoutResult.first();
+            final Pair<Float, List<LayoutLine>> layoutResult = _buildTextLayoutsAndPreferredHeight(font, frc, textToRender, textBounds, wrapLines, conf.boxModel(), text.obstacles());
+            final List<LayoutLine> lines    = layoutResult.second();
+            final float            totalHeight = layoutResult.first();
             // Phase 3 - 5: Rendering
             Shape newClip = conf.areas().get(clipArea);
             // We merge the new clip with the old one:
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
             g2d.setClip(newClip);
-            _renderTextInternal(g2d, font, textBounds, placement, layouts, totalHeight);
+            _renderTextInternal(g2d, font, textBounds, placement, lines, totalHeight);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
@@ -1343,87 +1387,70 @@ final class StyleRenderer
     }
     
     private static void _renderTextInternal(
-        final Graphics2D g2d,
-        final Font font,
-        final Bounds textBounds,
-        final UI.Placement placement,
-        final List<@Nullable TextLayout> layouts,
-        final float totalHeight
+        final Graphics2D       g2d,
+        final Font             font,
+        final Bounds           textBounds,
+        final UI.Placement     placement,
+        final List<LayoutLine> lines,
+        final float            totalHeight
     ) {
-        final float boundsX = textBounds.location().x();
-        final float boundsY  = textBounds.location().y();
-        final float boundsWidth = textBounds.size().width().orElse(0f);
+        final float boundsY      = textBounds.location().y();
         final float boundsHeight = textBounds.size().height().orElse(0f);
         /*
             ------------------------------------------------
             Phase 3 : Determine visible slice (overflow policy)
             ------------------------------------------------
          */
-        final List<@Nullable TextLayout> visible = new ArrayList<>();
+        final List<LayoutLine> visible = new ArrayList<>();
         float accumulated = 0;
         if (
             placement == UI.Placement.TOP ||
             placement == UI.Placement.TOP_LEFT ||
             placement == UI.Placement.TOP_RIGHT
         ) {
-            for (TextLayout l : layouts) {
-                float h = (l == null)
+            for ( LayoutLine line : lines ) {
+                float h = line.layout == null
                             ? font.getSize2D()
-                            : l.getAscent() + l.getDescent() + l.getLeading();
-
-                if (Math.floor(accumulated + h) > boundsHeight)
+                            : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                if ( Math.floor(accumulated + h) > boundsHeight )
                     break;
-
-                visible.add(l);
+                visible.add(line);
                 accumulated += h;
             }
-
         } else if (
             placement == UI.Placement.BOTTOM ||
             placement == UI.Placement.BOTTOM_LEFT ||
             placement == UI.Placement.BOTTOM_RIGHT
         ) {
-            final ListIterator<@Nullable TextLayout> it = layouts.listIterator(layouts.size());
-
-            while (it.hasPrevious()) {
-                TextLayout l = it.previous();
-
-                float h = (l == null)
+            final ListIterator<LayoutLine> it = lines.listIterator(lines.size());
+            while ( it.hasPrevious() ) {
+                LayoutLine line = it.previous();
+                float h = line.layout == null
                         ? font.getSize2D()
-                        : l.getAscent() + l.getDescent() + l.getLeading();
-
-                if (Math.floor(accumulated + h) > boundsHeight)
+                        : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                if ( Math.floor(accumulated + h) > boundsHeight )
                     break;
-
-                visible.add(0, l);
-
+                visible.add(0, line);
                 accumulated += h;
             }
         } else {
             /*
-                CENTER / LEFT / RIGHT
-
-                overflow both directions
+                CENTER / LEFT / RIGHT — overflow both directions
              */
             final float centerHeight = Math.min(totalHeight, boundsHeight);
-            final float targetTop = (totalHeight - centerHeight) / 2f;
+            final float targetTop    = (totalHeight - centerHeight) / 2f;
             float cursor = 0;
-
-            for (TextLayout l : layouts) {
-                float h = (l == null)
+            for ( LayoutLine line : lines ) {
+                float h = line.layout == null
                         ? font.getSize2D()
-                        : l.getAscent() + l.getDescent() + l.getLeading();
-
-                if (cursor + h < targetTop) {
+                        : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                if ( cursor + h < targetTop ) {
                     cursor += h;
                     continue;
                 }
-
-                if (Math.floor(accumulated + h) > boundsHeight)
+                if ( Math.floor(accumulated + h) > boundsHeight )
                     break;
-
-                visible.add(l);
-
+                visible.add(line);
                 accumulated += h;
                 cursor += h;
             }
@@ -1457,34 +1484,49 @@ final class StyleRenderer
             Phase 5 : Render lines
             ------------------------------------------------
          */
-        for (TextLayout layout : visible) {
-            if (layout == null) {
+        for ( LayoutLine line : visible ) {
+            if ( line.layout == null ) {
                 y += font.getSize2D();
                 continue;
             }
+            y += line.layout.getAscent();
 
-            y += layout.getAscent();
+            // Draw all fragments (primary + obstacle-split extras) at the same baseline.
+            // x positioning is relative to each fragment's own obstacle-free region.
+            _drawLineFragment(g2d, placement, line.layout, line.regionX, line.regionWidth, y);
+            for ( LayoutLine.Segment seg : line.extraSegments )
+                _drawLineFragment(g2d, placement, seg.layout, seg.regionX, seg.regionWidth, y);
 
-            final float advance = layout.getAdvance();
-            float x;
-
-            switch (placement) {
-                case LEFT:
-                case TOP_LEFT:
-                case BOTTOM_LEFT:
-                    x = boundsX;
-                    break;
-                case RIGHT:
-                case TOP_RIGHT:
-                case BOTTOM_RIGHT:
-                    x = boundsX + boundsWidth - advance;
-                    break;
-                default:// UNDEFINED / CENTER / TOP / BOTTOM
-                    x = boundsX + (boundsWidth - advance) / 2f;
-            }
-            layout.draw(g2d, x, y);
-            y += ( layout.getDescent() + layout.getLeading() );
+            y += line.layout.getDescent() + line.layout.getLeading();
         }
+    }
+
+    /** Draws one text fragment aligned within its obstacle-free region at the given baseline y. */
+    private static void _drawLineFragment(
+        final Graphics2D   g2d,
+        final UI.Placement placement,
+        final TextLayout   layout,
+        final float        regionX,
+        final float        regionWidth,
+        final float        baselineY
+    ) {
+        final float advance = layout.getAdvance();
+        final float x;
+        switch (placement) {
+            case LEFT:
+            case TOP_LEFT:
+            case BOTTOM_LEFT:
+                x = regionX;
+                break;
+            case RIGHT:
+            case TOP_RIGHT:
+            case BOTTOM_RIGHT:
+                x = regionX + regionWidth - advance;
+                break;
+            default:// UNDEFINED / CENTER / TOP / BOTTOM
+                x = regionX + (regionWidth - advance) / 2f;
+        }
+        layout.draw(g2d, x, baselineY);
     }
 
     /**
@@ -1507,10 +1549,10 @@ final class StyleRenderer
      *                     if possible or break the line if no more horizontal space is left.
      *                     Pass an empty {@link Tuple} when no obstacles are present.
      * @return A {@link Pair} whose {@link Pair#first()} is the total pixel height of all lines
-     *         and whose {@link Pair#second()} is the ordered layout list
-     *         ({@code null} entries represent empty/blank lines).
+     *         and whose {@link Pair#second()} is the ordered list of {@link LayoutLine} entries,
+     *         each carrying its layout and the obstacle-free horizontal region it was placed into.
      */
-    static Pair<Float, List<@Nullable TextLayout>> _buildTextLayoutsAndPreferredHeight(
+    static Pair<Float, List<LayoutLine>> _buildTextLayoutsAndPreferredHeight(
         final Font                font,
         final FontRenderContext   frc,
         final Tuple<StyledString> text,
@@ -1522,59 +1564,171 @@ final class StyleRenderer
         final float boundsWidth = textBounds.size().width().orElse(0f);
         final float boundsX     = textBounds.location().x();
         final float boundsY     = textBounds.location().y();
-        // TODO IMPLEMENT OBSTACLE AWARE LAYOUT
-        final List<@Nullable TextLayout> layouts = new ArrayList<>();
+
+        final List<LayoutLine> lines = new ArrayList<>();
         /*
             ------------------------------------------------
             Phase 1 : Build layouts using LineBreakMeasurer
             ------------------------------------------------
         */
+        // currentY tracks the top of the next line in component coordinates (TOP-placement
+        // assumption). Used solely for obstacle intersection — a good approximation for all
+        // placement modes because obstacles are typically large enough that the small vertical
+        // offset introduced by CENTER/BOTTOM placement does not change which obstacle a line hits.
+        float currentY = boundsY;
+        final float estLineHeight = font.getSize2D();
+
         final List<@Nullable AttributedString> paragraphs = _splitStyledTextIntoParagraphs(text, font, boxModelConf);
         for ( @Nullable AttributedString attrStr : paragraphs ) {
             if ( attrStr == null ) {
-                layouts.add(null); // represent empty line
+                lines.add(new LayoutLine(null, boundsX, boundsWidth)); // blank line
+                currentY += estLineHeight;
                 continue;
             }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
-            if (wrapLines && boundsWidth >= 0) {// Word wrapping using LineBreakMeasurer
+            if ( wrapLines && boundsWidth >= 0 ) {// Word wrapping using LineBreakMeasurer
                 final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
                 final int end = it.getEndIndex();
-                while (measurer.getPosition() < end) {
-                    TextLayout layout = measurer.nextLayout(boundsWidth);
-                    layouts.add(layout);
+                while ( measurer.getPosition() < end ) {
+                    final List<float[]> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, boundsWidth, obstacles);
+
+                    TextLayout           firstLayout = null;
+                    float                firstX      = boundsX;
+                    float                firstW      = boundsWidth;
+                    List<LayoutLine.Segment> extras  = Collections.emptyList();
+
+                    if ( intervals.isEmpty() ) {
+                        // All space is blocked — fall back to full width so the measurer advances
+                        firstLayout = measurer.nextLayout(boundsWidth);
+                    } else {
+                        for ( float[] iv : intervals ) {
+                            if ( measurer.getPosition() >= end ) break;
+                            final float x = iv[0], w = iv[1];
+                            final TextLayout layout = measurer.nextLayout(w);
+                            if ( firstLayout == null ) {
+                                firstLayout = layout; firstX = x; firstW = w;
+                            } else {
+                                if ( extras.isEmpty() ) extras = new ArrayList<>();
+                                extras.add(new LayoutLine.Segment(layout, x, w));
+                            }
+                        }
+                    }
+
+                    if ( firstLayout != null ) {
+                        lines.add(new LayoutLine(firstLayout, firstX, firstW, extras));
+                        currentY += firstLayout.getAscent() + firstLayout.getDescent() + firstLayout.getLeading();
+                    } else {
+                        currentY += estLineHeight; // all intervals had zero width — skip band
+                    }
                 }
             } else {// No wrapping — render full line even if wider than bounds
-                layouts.add(new TextLayout(it, frc));
+                final TextLayout layout = new TextLayout(it, frc);
+                lines.add(new LayoutLine(layout, boundsX, boundsWidth));
+                currentY += layout.getAscent() + layout.getDescent() + layout.getLeading();
             }
         }
 
         /*
-            remove trailing newline marker
+            remove trailing blank-line marker
          */
-        if (!layouts.isEmpty()) {
-            int last = layouts.size() - 1;
-            if (layouts.get(last) == null)
-                layouts.remove(last);
-        }
+        if ( !lines.isEmpty() && lines.get(lines.size() - 1).layout == null )
+            lines.remove(lines.size() - 1);
 
         /*
             ------------------------------------------------
             Phase 2 : Measure total text height
             ------------------------------------------------
          */
-
         float totalHeight = 0;
-
-        for (TextLayout layout : layouts) {
-            if (layout == null) {
+        for ( LayoutLine line : lines ) {
+            if ( line.layout == null )
                 totalHeight += font.getSize2D();
-                continue;
-            }
-            totalHeight += (layout.getAscent() + layout.getDescent() + layout.getLeading());
+            else
+                totalHeight += line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
         }
 
-        return Pair.of(totalHeight, layouts);
+        return Pair.of(totalHeight, lines);
+    }
+
+    /**
+     *  Returns all contiguous obstacle-free horizontal intervals within
+     *  {@code [boundsX, boundsX+boundsWidth]} for a line whose vertical band spans
+     *  {@code [y, y+lineHeight]} in component coordinates, sorted left to right.
+     *  <p>
+     *  Each obstacle's contribution is derived from its <em>exact geometry</em> via
+     *  {@link Area} intersection (not just the bounding box), so non-rectangular shapes
+     *  such as circles or ellipses are handled correctly — only the actual chord at the
+     *  current y-level is subtracted, not the full bounding-box width.
+     *  <p>
+     *  Returning all intervals (rather than just the widest one) allows the caller to
+     *  fill text into every free gap on a line, so text appears on both sides of an obstacle.
+     *  If all horizontal space is consumed, an empty list is returned.
+     *
+     * @param y            Top of the line in component coordinates.
+     * @param lineHeight   Estimated height of one line (typically {@code font.getSize2D()}).
+     * @param boundsX      Left edge of the text bounds in component coordinates.
+     * @param boundsWidth  Full width of the text bounds.
+     * @param obstacles    Shapes to avoid, in component coordinates.
+     * @return List of {@code float[]{xStart, width}} entries for every obstacle-free interval,
+     *         ordered left to right.  Each width is guaranteed to be {@code > 0}.
+     */
+    private static List<float[]> _freeIntervalsAt(
+        final float        y,
+        final float        lineHeight,
+        final float        boundsX,
+        final float        boundsWidth,
+        final Tuple<Shape> obstacles
+    ) {
+        if ( obstacles.isEmpty() )
+            return Collections.singletonList(new float[]{ boundsX, boundsWidth });
+
+        // Internal representation: {start, end} pairs (converted to {start, width} on exit)
+        List<float[]> free = new ArrayList<>();
+        free.add(new float[]{ boundsX, boundsX + boundsWidth });
+
+        final Area lineStrip = new Area(new Rectangle2D.Float(boundsX, y, boundsWidth, lineHeight));
+
+        for ( Shape obstacle : obstacles ) {
+            // Fast pre-check with the bounding box before the more expensive Area intersection
+            final Rectangle2D ob = obstacle.getBounds2D();
+            if ( ob.getMaxY() <= y || ob.getMinY() >= y + lineHeight )
+                continue;
+
+            // Intersect the exact obstacle geometry with the line strip
+            final Area intersection = new Area(obstacle);
+            intersection.intersect(lineStrip);
+            if ( intersection.isEmpty() )
+                continue;
+
+            final Rectangle2D ib     = intersection.getBounds2D();
+            final float       oLeft  = (float) ib.getMinX();
+            final float       oRight = (float) ib.getMaxX();
+
+            // Subtract [oLeft, oRight] from every free interval (1-D interval difference)
+            final List<float[]> remaining = new ArrayList<>(free.size() + 1);
+            for ( float[] iv : free ) {
+                final float a = iv[0], b = iv[1];
+                if ( oRight <= a || oLeft >= b ) {
+                    remaining.add(iv);                                                               // no overlap
+                } else {
+                    if ( oLeft  > a ) remaining.add(new float[]{ a,                   Math.min(b, oLeft)  }); // left fragment
+                    if ( oRight < b ) remaining.add(new float[]{ Math.max(a, oRight), b                   }); // right fragment
+                }
+            }
+            free = remaining;
+        }
+
+        if ( free.isEmpty() )
+            return Collections.emptyList();
+
+        // Convert {start, end} → {start, width}, filtering out zero-width gaps
+        final List<float[]> result = new ArrayList<>(free.size());
+        for ( float[] iv : free ) {
+            final float w = iv[1] - iv[0];
+            if ( w > 0f ) result.add(new float[]{ iv[0], w });
+        }
+        return result;
     }
 
     private static List<@Nullable AttributedString> _splitStyledTextIntoParagraphs(
