@@ -17,10 +17,103 @@ import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 final class TextLayoutEngine {
     private TextLayoutEngine() {}
+
+    /**
+     *  Immutable cache key for {@link #_buildTextLayoutsAndPreferredHeight}.
+     *  Contains every parameter of that method <em>except</em> the {@link FontRenderContext},
+     *  which is assumed to be consistent across calls in the same rendering environment.
+     *  <p>
+     *  The {@code hashCode} is pre-computed on construction so repeated cache lookups are cheap.
+     *  Floats are compared via {@link Float#floatToIntBits} to avoid {@code NaN} edge cases.
+     *  {@link Shape} instances inside {@code obstacles} rely on their own {@code equals}/{@code hashCode}
+     *  — most AWT shapes use identity, which is fine since {@link TextConf} is immutable and
+     *  reuses the same {@link Tuple} reference across repeated style evaluations.
+     */
+    private static final class TextLayoutKey {
+        private final Font                font;
+        private final Tuple<StyledString> text;
+        private final float               boundsWidth;
+        private final float               boundsX;
+        private final float               boundsY;
+        private final boolean             wrapLines;
+        private final BoxModelConf        boxModelConf;
+        private final Tuple<Shape>        obstacles;
+        private final int                 _hash;
+
+        TextLayoutKey(
+            Font                font,
+            Tuple<StyledString> text,
+            float               boundsWidth,
+            float               boundsX,
+            float               boundsY,
+            boolean             wrapLines,
+            BoxModelConf        boxModelConf,
+            Tuple<Shape>        obstacles
+        ) {
+            this.font         = font;
+            this.text         = text;
+            this.boundsWidth  = boundsWidth;
+            this.boundsX      = boundsX;
+            this.boundsY      = boundsY;
+            this.wrapLines    = wrapLines;
+            this.boxModelConf = boxModelConf;
+            this.obstacles    = obstacles;
+            this._hash        = Objects.hash(
+                                    font, text,
+                                    Float.floatToIntBits(boundsWidth),
+                                    Float.floatToIntBits(boundsX),
+                                    Float.floatToIntBits(boundsY),
+                                    wrapLines, boxModelConf, obstacles
+                                );
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof TextLayoutKey) ) return false;
+            final TextLayoutKey other = (TextLayoutKey) o;
+            return Float.floatToIntBits(boundsWidth) == Float.floatToIntBits(other.boundsWidth) &&
+                   Float.floatToIntBits(boundsX)     == Float.floatToIntBits(other.boundsX)     &&
+                   Float.floatToIntBits(boundsY)     == Float.floatToIntBits(other.boundsY)     &&
+                   wrapLines    == other.wrapLines                                               &&
+                   font        .equals(other.font)                                               &&
+                   text        .equals(other.text)                                               &&
+                   boxModelConf.equals(other.boxModelConf)                                       &&
+                   obstacles   .equals(other.obstacles);
+        }
+
+        @Override public int hashCode() { return _hash; }
+    }
+
+    /**
+     *  LRU cache capped at {@value #_CACHE_MAX_SIZE} entries.
+     *  Uses an access-order {@link LinkedHashMap} so the least-recently-used entry is
+     *  evicted once the cap is reached.  The map is wrapped in
+     *  {@link Collections#synchronizedMap} so concurrent callers on different Swing
+     *  repaint threads do not corrupt it.
+     */
+    private static final int _CACHE_MAX_SIZE = 128;
+    @SuppressWarnings("serial")
+    private static final Map<TextLayoutKey, Pair<Float, List<LayoutLine>>> _LAYOUT_CACHE =
+        Collections.synchronizedMap(
+            new LinkedHashMap<TextLayoutKey, Pair<Float, List<LayoutLine>>>(
+                _CACHE_MAX_SIZE + 1, 0.75f, true /* access-order */
+            ) {
+                @Override
+                protected boolean removeEldestEntry(
+                    Map.Entry<TextLayoutKey, Pair<Float, List<LayoutLine>>> eldest
+                ) {
+                    return size() > _CACHE_MAX_SIZE;
+                }
+            }
+        );
 
     /**
      *  Holds a single laid-out text line together with the obstacle-free horizontal region
@@ -103,6 +196,11 @@ final class TextLayoutEngine {
         final BoxModelConf        boxModelConf,
         final Tuple<Shape>        obstacles
     ) {
+        final TextLayoutKey key = new TextLayoutKey(font, text, boundsWidth, boundsX, boundsY, wrapLines, boxModelConf, obstacles);
+        final Pair<Float, List<LayoutLine>> cached = _LAYOUT_CACHE.get(key);
+        if ( cached != null )
+            return cached;
+
         final List<LayoutLine> lines = new ArrayList<>();
         /*
             ------------------------------------------------
@@ -186,7 +284,9 @@ final class TextLayoutEngine {
                 totalHeight += line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
         }
 
-        return Pair.of(totalHeight, lines);
+        final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
+        _LAYOUT_CACHE.put(key, result);
+        return result;
     }
 
     /**
