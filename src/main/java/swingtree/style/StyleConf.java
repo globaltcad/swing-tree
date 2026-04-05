@@ -497,6 +497,18 @@ public final class StyleConf
         return _withBorder(_border.correctedForRounding());
     }
 
+
+    public <C extends JComponent> StyleConf determineTextConfObstaclesFromChildrenOf( C owner ) {
+        boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
+        if ( !hasStyledText || owner.getComponentCount() <= 0 )
+            return this;
+        Shape[] shapes = Arrays.stream(owner.getComponents()).map(Component::getBounds).toArray(Shape[]::new);
+        StyleConfLayers newLayers = _layers.map( s -> s
+                .withTexts(s.texts().mapStyles( t -> t.obstacles(t.obstacles().addAll(shapes)) ))
+            );
+        return this._withLayers(newLayers);
+    }
+
     StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
         boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
         if ( !hasStyledText )
@@ -717,5 +729,4 @@ public final class StyleConf
                     propertiesString +
                 "]";
     }
-
 }

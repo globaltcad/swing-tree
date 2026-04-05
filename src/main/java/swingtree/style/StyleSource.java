@@ -151,6 +151,7 @@ final class StyleSource<C extends JComponent>
 
         styleConf = styleConf.correctedForRounding();
 
+        styleConf = styleConf.determineTextConfObstaclesFromChildrenOf(owner);
         styleConf = styleConf.determinePreferredHeightFromTextConfigs(owner);
 
         return styleConf;

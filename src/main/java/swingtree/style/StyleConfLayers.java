@@ -10,14 +10,13 @@ import swingtree.api.Configurator;
 import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 @Immutable
@@ -282,4 +281,5 @@ final class StyleConfLayers
             && Objects.equals(_foreground, other._foreground)
             && Objects.equals(_any,        other._any);
     }
+
 }
