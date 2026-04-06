@@ -223,6 +223,12 @@ final class TextLayoutEngine {
             }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
+            /*
+                TODO - Fix bug:
+                When there is a non empty obstacle tuple and the 'wrapLines' flag is set to false,
+                the text layout engine does not handle obstacles AT ALL! So text will be drawn right through
+                obstacles if they lie in the path of the text, which is obviously not the intended behavior.
+            */
             if ( wrapLines && boundsWidth >= 0 ) {// Word wrapping using LineBreakMeasurer
                 final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
                 final int end = it.getEndIndex();
