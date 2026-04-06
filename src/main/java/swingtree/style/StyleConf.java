@@ -506,6 +506,8 @@ public final class StyleConf
                 .withTexts(s.texts().mapStyles( t -> {
                     if ( t.content().isEmpty() )
                         return t; // no text to lay out; obstacles would never be consulted
+                    if ( !t.obstaclesFromChildrenEnabled() )
+                        return t;
                     UI.ComponentArea area = t.obstaclesFromChildrenAs();
                     Shape[] shapes = Arrays.stream(owner.getComponents())
                         .map(child -> _childShapeForArea(child, area))
