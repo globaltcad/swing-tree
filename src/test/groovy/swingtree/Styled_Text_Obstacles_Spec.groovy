@@ -846,4 +846,140 @@ class Styled_Text_Obstacles_Spec extends Specification
             longWithObstacle < mixedWithObstacle
             // Note: mixed is taller because it includes the headings on top of the wrapped body
     }
+
+
+    def 'Child components of a styled container are automatically registered as text-layout obstacles'()
+    {
+        reportInfo """
+            The most natural way to encounter text obstacles in a real application is
+            through child components.  Consider a panel that renders introductory text
+            with a thumbnail image widget anchored to the right: the text should flow
+            to the left of the image rather than disappearing behind it.
+
+            SwingTree handles this automatically.  When the style engine evaluates a
+            component\'s text configuration it inspects `owner.getComponents()` and adds
+            every child\'s `getBounds()` rectangle to the text obstacles.  This happens
+            transparently, without any explicit `TextConf#obstacles(...)` call from
+            application code.
+
+            Because the obstacle shapes come directly from `Component.getBounds()`, which
+            returns the rectangle of each child in the *parent\'s* coordinate system, the
+            positions used by the layout engine are exactly those that the Swing paint
+            system uses — there is no coordinate-space mismatch.
+
+            This test uses a null layout manager so that child bounds can be set precisely
+            via `JComponent.setBounds(x, y, width, height)`.  That makes the relationship
+            between the child\'s on-screen position and the text-layout effect completely
+            transparent and easy to reason about.
+        """
+        given : 'SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text that will wrap clearly whenever the available width is halved:'
+            var content = Tuple.of(
+                StyledString.of(f -> f.size(14),
+                    "When a child component occupies the right half of the parent, " +
+                    "the styled text must wrap earlier on every line — just as if a " +
+                    "200 px wide obstacle had been explicitly registered via " +
+                    "TextConf.obstacles().  The preferred height therefore grows."
+                )
+            )
+
+        and : """
+            A helper that builds a 400-px-wide JBox with the text above, optionally
+            adds a single child at x=200 with width=200, paints the parent, and returns
+            both the preferred height and the full style-conf string so that we can
+            inspect the auto-derived obstacles:
+        """
+            def paintAndCapture = { boolean addChild ->
+                def captured = new Object[2]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                        // No explicit obstacles — they should come from the child
+                                    )
+                                )
+                                .get(JBox)
+                    // Null layout so we control the child position ourselves
+                    box.setLayout(null)
+                    box.setSize(400, 0)
+                    if ( addChild ) {
+                        var child = new JBox()
+                        // Place the child in the right half: x=200, y=0, width=200, height=500
+                        child.setBounds(200, 0, 200, 500)
+                        box.add(child)
+                    }
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    captured[0] = box.getPreferredSize().height
+                    captured[1] = ComponentExtension.from(box).getStyle().toString()
+                })
+                return captured
+            }
+
+        when : 'We paint the box with no children (plain text, no obstacles):'
+            def noChild = paintAndCapture(false)
+        and : 'We paint the box with a child occupying the right half (x=200, w=200):'
+            def withChild = paintAndCapture(true)
+
+        then : 'Without a child, the preferred height is positive but small (full 400 px available):'
+            (noChild[0] as int) > 0
+        and : """
+            With the child present, the layout engine has only 200 px of free horizontal
+            space per line — the child\'s bounding rectangle blocks the right half.
+            This forces more line-breaks and produces a strictly taller preferred height:
+        """
+            (withChild[0] as int) > (noChild[0] as int)
+
+        and : """
+            The style conf recorded after paint with the child present must include
+            the child\'s exact AWT bounds rectangle among the text obstacles.
+            This confirms that SwingTree used `Component.getBounds()` of the child —
+            java.awt.Rectangle[x=200,y=0,width=200,height=500] — as the obstacle shape:
+        """
+            (withChild[1] as String).contains("java.awt.Rectangle[x=200,y=0,width=200,height=500]")
+
+        and : 'Without a child, no Rectangle obstacle shapes appear in the style conf at all:'
+            !(noChild[1] as String).contains("java.awt.Rectangle")
+
+        when : """
+            We also verify that moving the child to the left half of the component (x=0, w=200)
+            produces an equally tall preferred height — confirming the symmetric obstacle behaviour
+            that was demonstrated in an earlier test: left and right obstacles of the same size
+            have identical impact on line-wrapping.
+        """
+            def capturedLeft = new Object[2]
+            UI.runNow({
+                var box = UI.box()
+                            .withStyle(conf -> conf
+                                .text(t -> t
+                                    .font(f -> f.family("Ubuntu"))
+                                    .content(content)
+                                    .wrapLines(true)
+                                    .autoPreferredHeight(true)
+                                )
+                            )
+                            .get(JBox)
+                box.setLayout(null)
+                box.setSize(400, 0)
+                var childLeft = new JBox()
+                childLeft.setBounds(0, 0, 200, 500)   // left half this time
+                box.add(childLeft)
+                var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                box.paintComponent(buf.createGraphics())
+                capturedLeft[0] = box.getPreferredSize().height
+                capturedLeft[1] = ComponentExtension.from(box).getStyle().toString()
+            })
+        then : 'A left-half child produces the same preferred height as a right-half child (symmetric):'
+            (capturedLeft[0] as int) == (withChild[0] as int)
+        and : 'The style conf with a left-half child shows its Rectangle obstacle at x=0:'
+            (capturedLeft[1] as String).contains("java.awt.Rectangle[x=0,y=0,width=200,height=500]")
+    }
 }
