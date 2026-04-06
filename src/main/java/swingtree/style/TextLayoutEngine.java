@@ -340,22 +340,7 @@ final class TextLayoutEngine {
             if ( intersection.isEmpty() )
                 continue;
 
-            final Rectangle2D ib     = intersection.getBounds2D();
-            final float       oLeft  = (float) ib.getMinX();
-            final float       oRight = (float) ib.getMaxX();
-
-            // Subtract [oLeft, oRight] from every free interval (1-D interval difference)
-            final List<Range> remaining = new ArrayList<>(free.size() + 1);
-            for ( Range r : free ) {
-                final float a = r.start, b = r.end;
-                if ( oRight <= a || oLeft >= b ) {
-                    remaining.add(r); // no overlap
-                } else {
-                    if ( oLeft  > a ) remaining.add(new Range( a,                   Math.min(b, oLeft)  )); // left fragment
-                    if ( oRight < b ) remaining.add(new Range( Math.max(a, oRight), b                   )); // right fragment
-                }
-            }
-            free = remaining;
+            free = narrowDownRangesToInclude(intersection, free);
         }
 
         if ( free.isEmpty() )
@@ -368,6 +353,25 @@ final class TextLayoutEngine {
             if ( w > 0f ) result.add(new Band( r.start, w ));
         }
         return result;
+    }
+
+    private static List<Range> narrowDownRangesToInclude( Area intersection, List<Range> free ) {
+        final Rectangle2D ib     = intersection.getBounds2D();
+        final float       oLeft  = (float) ib.getMinX();
+        final float       oRight = (float) ib.getMaxX();
+
+        // Subtract [oLeft, oRight] from every free interval (1-D interval difference)
+        final List<Range> remaining = new ArrayList<>(free.size() + 1);
+        for ( Range r : free ) {
+            final float a = r.start, b = r.end;
+            if ( oRight <= a || oLeft >= b ) {
+                remaining.add(r); // no overlap
+            } else {
+                if ( oLeft  > a ) remaining.add(new Range( a,                   Math.min(b, oLeft)  )); // left fragment
+                if ( oRight < b ) remaining.add(new Range( Math.max(a, oRight), b                   )); // right fragment
+            }
+        }
+        return remaining;
     }
 
     private static final class Range {
