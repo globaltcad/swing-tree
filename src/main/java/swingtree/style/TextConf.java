@@ -528,7 +528,9 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} with the given obstacles.
      */
     public TextConf obstacles( Shape... obstacles ) {
-        Objects.requireNonNull(obstacles);
+        Objects.requireNonNull(obstacles, "obstacles");
+        for ( int i = 0; i < obstacles.length; i++ )
+            Objects.requireNonNull(obstacles[i], "obstacles[" + i + "]");
         return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight,
                   Tuple.of(Shape.class, obstacles), _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
