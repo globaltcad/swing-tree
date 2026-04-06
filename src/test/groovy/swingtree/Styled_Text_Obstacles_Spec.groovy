@@ -395,7 +395,9 @@ class Styled_Text_Obstacles_Spec extends Specification
                     "Geometry matters: an ellipse blocks less horizontal space near its top and bottom " +
                     "than a same-size rectangle does, because the chord of an ellipse narrows as you " +
                     "approach either pole. Lines passing through those tapered regions therefore have " +
-                    "more room, leading to fewer line-breaks and a shorter overall layout height."
+                    "more room, leading to fewer line-breaks and a shorter overall layout height. And so " +
+                    "therefore, you can expect text flowing around an elliptical obstacle to take up less " +
+                    "vertical space than text flowing around a rectangular obstacle of the same width and height."
                 )
             )
         and : 'A helper that measures preferred height at 400 px for the given obstacle:'
@@ -422,7 +424,7 @@ class Styled_Text_Obstacles_Spec extends Specification
             }
 
         and : 'A rectangle and an ellipse sharing the exact same bounding box (right-centre area):'
-            float ox = 200, oy = 0, ow = 150, oh = 200
+            float ox = 100, oy = 0, ow = 200, oh = 300
             var rectangle = new Rectangle2D.Float(ox, oy, ow, oh)
             var ellipse   = new Ellipse2D.Float(ox, oy, ow, oh)
 
