@@ -518,14 +518,14 @@ public final class StyleConf
         return this._withLayers(newLayers);
     }
 
-    private Shape _childShapeForArea( Component child, UI.ComponentArea area ) {
+    private static Shape _childShapeForArea( Component child, UI.ComponentArea area ) {
         if ( area == UI.ComponentArea.ALL || !(child instanceof JComponent) )
             return child.getBounds();
         final JComponent asJComponent = (JComponent) child;
         final ComponentConf previousComponentConf = ComponentExtension.from(asJComponent).getConf();
         final Pair<BoxModelConf, ComponentConf> boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(
                 Bounds.of(asJComponent.getX(), asJComponent.getY(), asJComponent.getWidth(), asJComponent.getHeight()),
-                this,
+                previousComponentConf.style(),
                 StyleInstaller._formerBorderMarginCorrection(asJComponent),
                 previousComponentConf
         );
