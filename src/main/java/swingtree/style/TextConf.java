@@ -55,7 +55,7 @@ import java.util.Objects;
  *          See {@link TextConf#content(StyledString...)} and {@link TextConf#content(Tuple)} for more details
  *          on how to configure the content with multiple styled strings.<br>
  *          The default content is an empty {@link Tuple} of {@link StyledString}s
- *          in which the text configuration is effectively disabled!
+ *          in which case the text configuration is effectively disabled!
  *      </li>
  *      <li><b>Font</b>
  *          The {@link FontConf} object is its own rich configuration object
@@ -119,10 +119,12 @@ import java.util.Objects;
  *      </li>
  *      <li><b>Obstacles</b>
  *          A set of {@link Shape}s (in component coordinates) that the text must skip over and flow
- *          around so that it it is never rendered on top of.<br>
+ *          around so that it is never rendered on top of.<br>
  *          You can configure it through {@link TextConf#obstacles(Shape...)} or
  *          {@link TextConf#obstacles(Tuple)}.<br>
- *          The default value is an empty {@link Tuple}, meaning no obstacles are applied.
+ *          The default value is an empty {@link Tuple}, meaning no obstacles are applied,
+ *          <b>however</b>, if a particular component with a text configuration has child components,
+ *          then the bounding boxes of those child components will automatically be registered as obstacles.
  *      </li>
  *  </ul>
  *  Use {@link TextConf#none()} to access the <i>null object</i> of the {@link TextConf} type.
