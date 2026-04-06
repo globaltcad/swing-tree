@@ -152,8 +152,9 @@ class Styled_Text_Spec extends Specification
                         "offset=Offset[x=0, y=0], " +
                         "wrapLines=true, " +
                         "autoPreferredHeight=false, " +
-                        "obstacles=Tuple<Shape>[]" +
-                    "]")
+                        "obstacles=Tuple<Shape>[]")
+            styleString.contains("obstaclesFromChildrenAs=")
+            styleString.contains("obstaclesFromChildrenEnabled=")
     }
 
     def 'A text configuration that carries only an empty content tuple simplifies to "TextConf[NONE]"'()
