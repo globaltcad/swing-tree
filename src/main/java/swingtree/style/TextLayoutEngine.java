@@ -15,12 +15,7 @@ import java.awt.geom.Rectangle2D;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 final class TextLayoutEngine {
     private TextLayoutEngine() {}
@@ -233,7 +228,7 @@ final class TextLayoutEngine {
                 final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
                 final int end = it.getEndIndex();
                 while ( measurer.getPosition() < end ) {
-                    final List<float[]> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, boundsWidth, obstacles);
+                    final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, boundsWidth, obstacles);
 
                     TextLayout           firstLayout = null;
                     float                firstX      = boundsX;
@@ -244,9 +239,9 @@ final class TextLayoutEngine {
                         // All space is blocked — fall back to full width so the measurer advances
                         firstLayout = measurer.nextLayout(boundsWidth);
                     } else {
-                        for ( float[] iv : intervals ) {
+                        for ( Band band : intervals ) {
                             if ( measurer.getPosition() >= end ) break;
-                            final float x = iv[0], w = iv[1];
+                            final float x = band.start, w = band.size;
                             final TextLayout layout = measurer.nextLayout(w);
                             if ( firstLayout == null ) {
                                 firstLayout = layout; firstX = x; firstW = w;
@@ -296,7 +291,7 @@ final class TextLayoutEngine {
     }
 
     /**
-     *  Returns all contiguous obstacle-free horizontal intervals within
+     *  Returns all contiguous obstacle-free horizontal intervals als {@link Band}s within
      *  {@code [boundsX, boundsX+boundsWidth]} for a line whose vertical band spans
      *  {@code [y, y+lineHeight]} in component coordinates, sorted left to right.
      *  <p>
@@ -314,10 +309,10 @@ final class TextLayoutEngine {
      * @param boundsX      Left edge of the text bounds in component coordinates.
      * @param boundsWidth  Full width of the text bounds.
      * @param obstacles    Shapes to avoid, in component coordinates.
-     * @return List of {@code float[]{xStart, width}} entries for every obstacle-free interval,
+     * @return List of {@code new Band(xStart, width)} entries for every obstacle-free interval,
      *         ordered left to right.  Each width is guaranteed to be {@code > 0}.
      */
-    private static List<float[]> _freeIntervalsAt(
+    private static List<Band> _freeIntervalsAt(
         final float        y,
         final float        lineHeight,
         final float        boundsX,
@@ -325,11 +320,11 @@ final class TextLayoutEngine {
         final Tuple<Shape> obstacles
     ) {
         if ( obstacles.isEmpty() )
-            return Collections.singletonList(new float[]{ boundsX, boundsWidth });
+            return Collections.singletonList(new Band( boundsX, boundsWidth ));
 
         // Internal representation: {start, end} pairs (converted to {start, width} on exit)
-        List<float[]> free = new ArrayList<>();
-        free.add(new float[]{ boundsX, boundsX + boundsWidth });
+        List<Range> free = new ArrayList<>();
+        free.add(new Range( boundsX, boundsX + boundsWidth ));
 
         final Area lineStrip = new Area(new Rectangle2D.Float(boundsX, y, boundsWidth, lineHeight));
 
@@ -350,14 +345,14 @@ final class TextLayoutEngine {
             final float       oRight = (float) ib.getMaxX();
 
             // Subtract [oLeft, oRight] from every free interval (1-D interval difference)
-            final List<float[]> remaining = new ArrayList<>(free.size() + 1);
-            for ( float[] iv : free ) {
-                final float a = iv[0], b = iv[1];
+            final List<Range> remaining = new ArrayList<>(free.size() + 1);
+            for ( Range r : free ) {
+                final float a = r.start, b = r.end;
                 if ( oRight <= a || oLeft >= b ) {
-                    remaining.add(iv);                                                               // no overlap
+                    remaining.add(r); // no overlap
                 } else {
-                    if ( oLeft  > a ) remaining.add(new float[]{ a,                   Math.min(b, oLeft)  }); // left fragment
-                    if ( oRight < b ) remaining.add(new float[]{ Math.max(a, oRight), b                   }); // right fragment
+                    if ( oLeft  > a ) remaining.add(new Range( a,                   Math.min(b, oLeft)  )); // left fragment
+                    if ( oRight < b ) remaining.add(new Range( Math.max(a, oRight), b                   )); // right fragment
                 }
             }
             free = remaining;
@@ -367,12 +362,28 @@ final class TextLayoutEngine {
             return Collections.emptyList();
 
         // Convert {start, end} → {start, width}, filtering out zero-width gaps
-        final List<float[]> result = new ArrayList<>(free.size());
-        for ( float[] iv : free ) {
-            final float w = iv[1] - iv[0];
-            if ( w > 0f ) result.add(new float[]{ iv[0], w });
+        final List<Band> result = new ArrayList<>(free.size());
+        for ( Range r : free ) {
+            final float w = r.end - r.start;
+            if ( w > 0f ) result.add(new Band( r.start, w ));
         }
         return result;
+    }
+
+    private static final class Range {
+        final float start, end;
+        Range(float start, float end) {
+            this.start = start;
+            this.end   = end;
+        }
+    }
+
+    private static final class Band {
+        final float start, size;
+        Band(float start, float size) {
+            this.start = start;
+            this.size  = size;
+        }
     }
 
     private static List<@Nullable AttributedString> _splitStyledTextIntoParagraphs(
