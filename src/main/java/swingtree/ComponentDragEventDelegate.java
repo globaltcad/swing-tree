@@ -64,4 +64,22 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
                             );
     }
 
+    /**
+     * Provides the x-axis movement delta of the mouse since the start of a continuous drag.
+     * @return The x-axis movement delta of the mouse since the start of a continuous drag.
+     */
+    public int deltaX() {
+        if (_dragEventHistory.size() < 2) return 0;
+        return _dragEventHistory.get(_dragEventHistory.size() - 1).getX() - _dragEventHistory.get(0).getX();
+    }
+
+    /**
+     * Provides the y-axis movement delta of the mouse since the start of a continuous drag.
+     * @return The y-axis movement delta of the mouse since the start of a continuous drag.
+     */
+    public int deltaY() {
+        if (_dragEventHistory.size() < 2) return 0;
+        return _dragEventHistory.get(_dragEventHistory.size() - 1).getY() - _dragEventHistory.get(0).getY();
+    }
+
 }
