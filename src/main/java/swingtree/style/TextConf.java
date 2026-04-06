@@ -146,7 +146,8 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 Offset.none(),
                                                 true,
                                                 false,
-                                                Tuple.of(Shape.class)
+                                                Tuple.of(Shape.class),
+                                                UI.ComponentArea.ALL
                                             );
 
     static final TextConf none() {
@@ -162,6 +163,7 @@ public final class TextConf implements Simplifiable<TextConf>
     private final boolean              _wrapLines;
     private final boolean              _autoPreferredHeight;
     private final Tuple<Shape>         _obstacles;
+    private final UI.ComponentArea     _obstaclesFromChildrenAs;
 
     private TextConf(
         Tuple<StyledString>  content,
@@ -172,7 +174,8 @@ public final class TextConf implements Simplifiable<TextConf>
         Offset               offset,
         boolean              wrapLines,
         boolean              autoPreferredHeight,
-        Tuple<Shape>         obstacles
+        Tuple<Shape>         obstacles,
+        UI.ComponentArea     obstaclesFromChildrenAs
     )
     {
         _content             = Objects.requireNonNull(content);
@@ -184,6 +187,7 @@ public final class TextConf implements Simplifiable<TextConf>
         _wrapLines           = wrapLines;
         _autoPreferredHeight = autoPreferredHeight;
         _obstacles           = Objects.requireNonNull(obstacles);
+        _obstaclesFromChildrenAs  = Objects.requireNonNull(obstaclesFromChildrenAs);
     }
 
     private static TextConf of(
@@ -195,7 +199,8 @@ public final class TextConf implements Simplifiable<TextConf>
         Offset               offset,
         boolean              wrapLines,
         boolean              autoPreferredHeight,
-        Tuple<Shape>         obstacles
+        Tuple<Shape>         obstacles,
+        UI.ComponentArea     obstaclesFromChildrenAs
     ) {
         if (
             content.isEmpty() &&
@@ -206,11 +211,12 @@ public final class TextConf implements Simplifiable<TextConf>
             offset.equals(_NONE._offset) &&
             wrapLines == _NONE._wrapLines &&
             autoPreferredHeight == _NONE._autoPreferredHeight &&
-            obstacles.isEmpty()
+            obstacles.isEmpty() &&
+            obstaclesFromChildrenAs == _NONE._obstaclesFromChildrenAs
         ) {
             return _NONE;
         }
-        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight, obstacles);
+        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight, obstacles, obstaclesFromChildrenAs);
     }
 
     Tuple<StyledString> content() {
@@ -249,6 +255,10 @@ public final class TextConf implements Simplifiable<TextConf>
         return _obstacles;
     }
 
+    UI.ComponentArea obstaclesFromChildrenAs() {
+        return _obstaclesFromChildrenAs;
+    }
+
     /**
      * Returns a new {@link TextConf} object with the given text content.
      * @param textString The text content to be rendered onto the component.
@@ -258,7 +268,7 @@ public final class TextConf implements Simplifiable<TextConf>
         Objects.requireNonNull(textString);
         if ( textString.isEmpty() )
             return content(Tuple.of(StyledString.class));
-        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -273,7 +283,7 @@ public final class TextConf implements Simplifiable<TextConf>
      */
     public TextConf content( StyledString... styledStrings ) {
         Objects.requireNonNull(styledStrings);
-        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -290,7 +300,7 @@ public final class TextConf implements Simplifiable<TextConf>
         if ( _content.equals(styledStrings) ) {
             return this;
         }
-        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -309,7 +319,7 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     private TextConf _fontConf(FontConf fontConf) {
-        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -347,7 +357,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given clip area.
      */
     public TextConf clipTo( UI.ComponentArea clipArea ) {
-        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -381,7 +391,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given placement boundary.
      */
     public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
-        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -407,7 +417,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the desired placement.
      */
     public TextConf placement(UI.Placement placement) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -422,7 +432,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -449,7 +459,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given wrap lines property.
      */
     public TextConf wrapLines(boolean wrapLines) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight, _obstacles);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -466,7 +476,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new text configuration with the desired auto height behavior.
      */
     public TextConf autoPreferredHeight(boolean autoPreferredHeight) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight, _obstacles);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     /**
@@ -482,7 +492,7 @@ public final class TextConf implements Simplifiable<TextConf>
     public TextConf obstacles( Shape... obstacles ) {
         Objects.requireNonNull(obstacles);
         return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight,
-                  Tuple.of(Shape.class, obstacles));
+                  Tuple.of(Shape.class, obstacles), _obstaclesFromChildrenAs);
     }
 
     /**
@@ -497,7 +507,36 @@ public final class TextConf implements Simplifiable<TextConf>
      */
     public TextConf obstacles( Tuple<Shape> obstacles ) {
         Objects.requireNonNull(obstacles);
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, obstacles);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, obstacles, _obstaclesFromChildrenAs);
+    }
+
+    /**
+     * Configures which area of each child component should be used when automatically
+     * deriving text-layout obstacles from the parent component's children.
+     * <p>
+     * When a styled component has child components, then the style engine automatically collects
+     * the bounding shapes of the children and registers them as obstacles for the text layout,
+     * so that the text flows around the children rather than rendering on top of them.
+     * <p>
+     * The area value controls <em>which portion</em> of each child is used as the obstacle:
+     * <ul>
+     *     <li>{@link UI.ComponentArea#ALL} — the full bounding rectangle of the child
+     *         (the default — identical to the previous automatic behaviour).</li>
+     *     <li>{@link UI.ComponentArea#BODY} — the child's body area (excluding its margin).</li>
+     *     <li>{@link UI.ComponentArea#INTERIOR} — the child's interior (excluding margin and border).</li>
+     *     <li>{@link UI.ComponentArea#BORDER} — only the child's border band.</li>
+     *     <li>{@link UI.ComponentArea#EXTERIOR} — only the child's margin area.</li>
+     * </ul>
+     * For child components that do not carry a SwingTree style (i.e. plain Swing components
+     * without margin or border styling), all non-{@code UNDEFINED} values fall back to the
+     * full bounding rectangle, equivalent to {@code ALL}.
+     *
+     * @param area The component area of each child that should be treated as an obstacle.
+     * @return An updated {@link TextConf} with the given child-obstacle area setting.
+     */
+    public TextConf obstaclesFromChildrenAs( UI.ComponentArea area ) {
+        Objects.requireNonNull(area);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, area);
     }
 
     @Override
@@ -534,7 +573,8 @@ public final class TextConf implements Simplifiable<TextConf>
             _offset.scale(scale),
             _wrapLines,
             _autoPreferredHeight,
-            _obstacles // obstacle shapes are in component coordinates; scaling is the caller's responsibility
+            _obstacles, // obstacle shapes are in component coordinates; scaling is the caller's responsibility
+            _obstaclesFromChildrenAs
         );
     }
 
@@ -556,12 +596,13 @@ public final class TextConf implements Simplifiable<TextConf>
             _offset.equals(other._offset) &&
             _wrapLines == other._wrapLines &&
             _autoPreferredHeight == other._autoPreferredHeight &&
-            _obstacles.equals(other._obstacles);
+            _obstacles.equals(other._obstacles) &&
+            _obstaclesFromChildrenAs == other._obstaclesFromChildrenAs;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles);
+        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs);
     }
 
     @Override
@@ -577,7 +618,8 @@ public final class TextConf implements Simplifiable<TextConf>
             "offset=" + _offset + ", " +
             "wrapLines=" + _wrapLines + ", " +
             "autoPreferredHeight=" + _autoPreferredHeight + ", " +
-            "obstacles=" + _obstacles +
+            "obstacles=" + _obstacles + ", " +
+            "obstaclesFromChildrenAs=" + _obstaclesFromChildrenAs +
         "]";
     }
 

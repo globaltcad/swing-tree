@@ -502,11 +502,35 @@ public final class StyleConf
         boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
         if ( !hasStyledText || owner.getComponentCount() <= 0 )
             return this;
-        Shape[] shapes = Arrays.stream(owner.getComponents()).map(Component::getBounds).toArray(Shape[]::new);
         StyleConfLayers newLayers = _layers.map( s -> s
-                .withTexts(s.texts().mapStyles( t -> t.obstacles(t.obstacles().addAll(shapes)) ))
+                .withTexts(s.texts().mapStyles( t -> {
+                    if ( t.content().isEmpty() )
+                        return t; // no text to lay out; obstacles would never be consulted
+                    UI.ComponentArea area = t.obstaclesFromChildrenAs();
+                    Shape[] shapes = Arrays.stream(owner.getComponents())
+                        .map(child -> _childShapeForArea(child, area))
+                        .toArray(Shape[]::new);
+                    return t.obstacles(t.obstacles().addAll(shapes));
+                }))
             );
         return this._withLayers(newLayers);
+    }
+
+    private Shape _childShapeForArea( Component child, UI.ComponentArea area ) {
+        if ( area == UI.ComponentArea.ALL || !(child instanceof JComponent) )
+            return child.getBounds();
+        final JComponent asJComponent = (JComponent) child;
+        final ComponentConf previousComponentConf = ComponentExtension.from(asJComponent).getConf();
+        final Pair<BoxModelConf, ComponentConf> boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(
+                Bounds.of(asJComponent.getX(), asJComponent.getY(), asJComponent.getWidth(), asJComponent.getHeight()),
+                this,
+                StyleInstaller._formerBorderMarginCorrection(asJComponent),
+                previousComponentConf
+        );
+        Shape shapeArea = ComponentAreas.of(new Pooled<>(boxAndCompConf.first())).get(area);
+        Rectangle bounds = asJComponent.getBounds();
+        java.awt.geom.AffineTransform translate = java.awt.geom.AffineTransform.getTranslateInstance(bounds.x, bounds.y);
+        return translate.createTransformedShape(shapeArea);
     }
 
     StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
