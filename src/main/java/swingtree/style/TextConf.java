@@ -132,18 +132,21 @@ import java.util.Objects;
  *          When {@code true} (the default), every child contributes an obstacle shape so that
  *          the text flows around the children rather than rendering on top of them.<br>
  *          When {@code false}, child components are completely ignored during obstacle collection
- *          regardless of the {@link TextConf#obstaclesFromChildrenAs(UI.ComponentArea)} setting.<br>
+ *          regardless of the {@link TextConf#obstaclesFromChildren(UI.ComponentBoundary)} setting.<br>
  *          You can configure it through {@link TextConf#obstaclesFromChildrenEnabled(boolean)}.
  *      </li>
- *      <li><b>Obstacles From Children As</b>
- *          A {@link UI.ComponentArea} property that selects <em>which portion</em> of each child
- *          component is used as its obstacle shape when automatic child-obstacle registration is
+ *      <li><b>Obstacles From Children</b>
+ *          A {@link UI.ComponentBoundary} property that selects <em>which boundary layer</em> of each
+ *          child component is used as its obstacle shape when automatic child-obstacle registration is
  *          active (i.e. {@link TextConf#obstaclesFromChildrenEnabled(boolean)} is {@code true}).<br>
- *          {@link UI.ComponentArea#ALL} (the default) uses the full bounding rectangle of the child,
- *          which is equivalent to {@code Component.getBounds()}.  Other values such as
- *          {@link UI.ComponentArea#BODY} or {@link UI.ComponentArea#INTERIOR} use the corresponding
- *          styled area of the child, falling back to the full bounds for children without a SwingTree style.<br>
- *          You can configure it through {@link TextConf#obstaclesFromChildrenAs(UI.ComponentArea)}.<br>
+ *          Think of the boundaries as an onion peeled inward:
+ *          {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} (the default) uses the full bounding
+ *          rectangle of the child including any margin, while inner boundaries such as
+ *          {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} or
+ *          {@link UI.ComponentBoundary#BORDER_TO_INTERIOR} shrink the obstacle progressively inward,
+ *          letting text flow into the child's margin or border areas respectively.
+ *          Children without a SwingTree style fall back to the full bounding rectangle for any value.<br>
+ *          You can configure it through {@link TextConf#obstaclesFromChildren(UI.ComponentBoundary)}.<br>
  *          If you want to disable automatic child-derived obstacles entirely, you can do so by calling
  *          {@link TextConf#obstaclesFromChildrenEnabled(boolean) obstaclesFromChildrenEnabled(false)}.
  *      </li>
@@ -168,7 +171,7 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 true,
                                                 false,
                                                 Tuple.of(Shape.class),
-                                                UI.ComponentArea.ALL,
+                                                UI.ComponentBoundary.OUTER_TO_EXTERIOR,
                                                 true
                                             );
 
@@ -185,7 +188,7 @@ public final class TextConf implements Simplifiable<TextConf>
     private final boolean              _wrapLines;
     private final boolean              _autoPreferredHeight;
     private final Tuple<Shape>         _obstacles;
-    private final UI.ComponentArea     _obstaclesFromChildrenAs;
+    private final UI.ComponentBoundary _obstaclesFromChildrenAs;
     private final boolean              _obstaclesFromChildrenEnabled;
 
     private TextConf(
@@ -198,7 +201,7 @@ public final class TextConf implements Simplifiable<TextConf>
         boolean              wrapLines,
         boolean              autoPreferredHeight,
         Tuple<Shape>         obstacles,
-        UI.ComponentArea     obstaclesFromChildrenAs,
+        UI.ComponentBoundary obstaclesFromChildrenAs,
         boolean              obstaclesFromChildrenEnabled
     )
     {
@@ -225,7 +228,7 @@ public final class TextConf implements Simplifiable<TextConf>
         boolean              wrapLines,
         boolean              autoPreferredHeight,
         Tuple<Shape>         obstacles,
-        UI.ComponentArea     obstaclesFromChildrenAs,
+        UI.ComponentBoundary obstaclesFromChildrenAs,
         boolean              obstaclesFromChildrenEnabled
     ) {
         if (
@@ -283,17 +286,17 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     /**
-     * Returns which area of each child component is used when automatically deriving
+     * Returns which boundary layer of each child component is used when automatically deriving
      * text-layout obstacles from the parent component's children.
      * <p>
-     * This getter is the companion to {@link #obstaclesFromChildrenAs(UI.ComponentArea)}.
+     * This getter is the companion to {@link #obstaclesFromChildren(UI.ComponentBoundary)}.
      * The returned value is only consulted when {@link #obstaclesFromChildrenEnabled()}
      * returns {@code true}.
      *
-     * @return The {@link UI.ComponentArea} that describes which portion of each child
-     *         is registered as a text obstacle; defaults to {@link UI.ComponentArea#ALL}.
+     * @return The {@link UI.ComponentBoundary} that describes how far inward into each child
+     *         its obstacle extends; defaults to {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}.
      */
-    UI.ComponentArea obstaclesFromChildrenAs() {
+    UI.ComponentBoundary obstaclesFromChildren() {
         return _obstaclesFromChildrenAs;
     }
 
@@ -551,32 +554,34 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     /**
-     * Configures which area of each child component should be used when automatically
+     * Configures which boundary layer of each child component should be used when automatically
      * deriving text-layout obstacles from the parent component's children.
      * <p>
-     * When a styled component has child components, then the style engine automatically collects
-     * the bounding shapes of the children and registers them as obstacles for the text layout,
-     * so that the text flows around the children rather than rendering on top of them.
+     * When a styled component has child components, the style engine automatically collects
+     * a shape for each child and registers it as an obstacle for the text layout, so that the
+     * text flows around the children rather than rendering on top of them.
      * <p>
-     * The area value controls <em>which portion</em> of each child is used as the obstacle:
+     * Think of the boundaries as an onion peeled inward — each boundary defines how far inside
+     * a child the obstacle extends.  The available values are:
      * <ul>
-     *     <li>{@link UI.ComponentArea#ALL} — the full bounding rectangle of the child
-     *         (the default — identical to the previous automatic behaviour).</li>
-     *     <li>{@link UI.ComponentArea#BODY} — the child's body area (excluding its margin).</li>
-     *     <li>{@link UI.ComponentArea#INTERIOR} — the child's interior (excluding margin and border).</li>
-     *     <li>{@link UI.ComponentArea#BORDER} — only the child's border band.</li>
-     *     <li>{@link UI.ComponentArea#EXTERIOR} — only the child's margin area.</li>
+     *     <li>{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} — the full bounding rectangle of
+     *         the child including any margin (the default).</li>
+     *     <li>{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} — shrinks the obstacle inward to
+     *         exclude the child's margin, so text may flow into the margin area.</li>
+     *     <li>{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} — shrinks further to exclude both
+     *         margin and border, so text may flow through margin and border areas.</li>
+     *     <li>{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} — shrinks to the content area,
+     *         letting text flow through margin, border, and padding of the child.</li>
      * </ul>
-     * For child components that do not carry a SwingTree style (i.e. plain Swing components
-     * without margin or border styling), all non-{@code UNDEFINED} values fall back to the
-     * full bounding rectangle, equivalent to {@code ALL}.
+     * Child components that do not carry a SwingTree style (i.e. plain Swing components without
+     * margin or border styling) always fall back to the full bounding rectangle.
      *
-     * @param area The component area of each child that should be treated as an obstacle.
-     * @return An updated {@link TextConf} with the given child-obstacle area setting.
+     * @param boundary The component boundary of each child that should be treated as an obstacle.
+     * @return An updated {@link TextConf} with the given child-obstacle boundary setting.
      */
-    public TextConf obstaclesFromChildrenAs( UI.ComponentArea area ) {
-        Objects.requireNonNull(area);
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, area, _obstaclesFromChildrenEnabled);
+    public TextConf obstaclesFromChildren( UI.ComponentBoundary boundary ) {
+        Objects.requireNonNull(boundary);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, boundary, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -584,12 +589,12 @@ public final class TextConf implements Simplifiable<TextConf>
      * child components as text-layout obstacles for this text configuration.
      * <p>
      * When {@code true} (the default), every child of the parent component contributes an
-     * obstacle shape determined by {@link #obstaclesFromChildrenAs(UI.ComponentArea)}, so that
+     * obstacle shape determined by {@link #obstaclesFromChildren(UI.ComponentBoundary)}, so that
      * the text flows around the children rather than rendering on top of them.
      * <p>
      * When {@code false}, child components are completely ignored during obstacle collection —
      * the text layout behaves as if no children exist, regardless of the
-     * {@link #obstaclesFromChildrenAs(UI.ComponentArea)} setting.
+     * {@link #obstaclesFromChildren(UI.ComponentBoundary)} setting.
      *
      * @return {@code true} if child-derived obstacles are enabled; {@code false} if they are suppressed.
      */
@@ -605,7 +610,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * of every child component and adds it to the text obstacles, so that the rendered text
      * flows around the children rather than overlapping them.  The exact portion of each
      * child that is treated as an obstacle can be refined with
-     * {@link #obstaclesFromChildrenAs(UI.ComponentArea)}.
+     * {@link #obstaclesFromChildren(UI.ComponentBoundary)}.
      * <p>
      * When set to {@code false}, child components are completely ignored during obstacle
      * collection.  This is useful when you deliberately want text and child components

@@ -668,7 +668,7 @@ public final class UI extends UIFactoryMethods
      *      </li>
      *  </ul>
      * @see TextConf#clipTo(ComponentArea)
-     * @see TextConf#obstaclesFromChildrenAs(ComponentArea)
+     * @see TextConf#obstaclesFromChildren(ComponentBoundary)
      * @see ImageConf#clipTo(ComponentArea)
      * @see ComponentStyleDelegate#painter(Layer, ComponentArea, Painter)
      * @see UIForAnySwing#onMouseEnter(ComponentArea, Action)

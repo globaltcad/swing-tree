@@ -508,7 +508,7 @@ public final class StyleConf
                         return t; // no text to lay out; obstacles would never be consulted
                     if ( !t.obstaclesFromChildrenEnabled() )
                         return t;
-                    UI.ComponentArea area = t.obstaclesFromChildrenAs();
+                    UI.ComponentBoundary area = t.obstaclesFromChildren();
                     Shape[] shapes = Arrays.stream(owner.getComponents())
                         .map(child -> _childShapeForArea(child, area))
                         .toArray(Shape[]::new);
@@ -518,8 +518,8 @@ public final class StyleConf
         return this._withLayers(newLayers);
     }
 
-    private static Shape _childShapeForArea( Component child, UI.ComponentArea area ) {
-        if ( area == UI.ComponentArea.ALL || !(child instanceof JComponent) )
+    private static Shape _childShapeForArea( Component child, UI.ComponentBoundary area ) {
+        if ( area == UI.ComponentBoundary.OUTER_TO_EXTERIOR || !(child instanceof JComponent) )
             return child.getBounds();
         final JComponent asJComponent = (JComponent) child;
         final ComponentConf previousComponentConf = ComponentExtension.from(asJComponent).getConf();
@@ -529,9 +529,21 @@ public final class StyleConf
                 StyleInstaller._formerBorderMarginCorrection(asJComponent),
                 previousComponentConf
         );
-        Shape shapeArea = ComponentAreas.of(new Pooled<>(boxAndCompConf.first())).get(area);
-        Rectangle bounds = asJComponent.getBounds();
-        java.awt.geom.AffineTransform translate = java.awt.geom.AffineTransform.getTranslateInstance(bounds.x, bounds.y);
+        Shape shapeArea = null;
+        ComponentAreas areas = ComponentAreas.of(new Pooled<>(boxAndCompConf.first()));
+        switch ( area ) {
+            case EXTERIOR_TO_BORDER: shapeArea = areas.get(UI.ComponentArea.BODY); break;
+            case BORDER_TO_INTERIOR: shapeArea = areas.get(UI.ComponentArea.INTERIOR); break;
+            case INTERIOR_TO_CONTENT: shapeArea = areas.getContentArea(); break;
+            case CENTER_TO_CONTENT:
+                // Basically a point. We give it a small area to avoid issues with zero-area shapes:
+                shapeArea = new Rectangle(0, 0, 1, 1);
+                break;
+        }
+        // Now we need to translate to the parent coordinate space:
+        int xOffset = asJComponent.getX(); // -> these are offsets in the parent component coordinate system!
+        int yOffset = asJComponent.getY();
+        java.awt.geom.AffineTransform translate = java.awt.geom.AffineTransform.getTranslateInstance(xOffset, yOffset);
         return translate.createTransformedShape(shapeArea);
     }
 

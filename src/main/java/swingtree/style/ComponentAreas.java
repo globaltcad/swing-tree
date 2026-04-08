@@ -66,6 +66,24 @@ final class ComponentAreas
         }
     }
 
+    /**
+     * @return The intersection between the interior area and the rectangular content area.
+     *         The rectangular content area is essentially all insets from the box model applied to the component's bounds,
+     *         without taking into account any border radius.
+     */
+    public Shape getContentArea() {
+        Outline insets = _boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
+        Size size = _boxModel.size();
+        Area contentArea = new Area(new Rectangle2D.Float(
+                insets.left().orElse(0f),
+                insets.top().orElse(0f),
+                size.width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),
+                size.height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)
+        ));
+        contentArea.intersect(new Area(_interiorArea.get()));
+        return contentArea;
+    }
+
     public Area[] getEdgeAreas() {
         return _borderEdgeAreas.get();
     }
