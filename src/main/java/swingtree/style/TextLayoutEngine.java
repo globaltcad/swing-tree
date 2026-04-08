@@ -95,6 +95,17 @@ final class TextLayoutEngine {
      *  repaint threads do not corrupt it.
      */
     private static final int _CACHE_MAX_SIZE = 128;
+    /**
+     *  A large but geometrically safe line-width cap used when no explicit
+     *  {@code boundsWidth} is available and as the "do not wrap" width passed
+     *  to {@link LineBreakMeasurer#nextLayout} when {@code wrapLines} is false.
+     *  <p>
+     *  {@link Short#MAX_VALUE} (32 767 px) comfortably exceeds any real display width,
+     *  yet stays well within the range of {@code float} arithmetic so that
+     *  {@link java.awt.geom.Rectangle2D.Float} and {@link java.awt.geom.Area}
+     *  operations on it do not overflow or lose precision.
+     */
+    private static final float _UNBOUNDED_LINE_WIDTH = Short.MAX_VALUE;
     @SuppressWarnings("serial")
     private static final Map<TextLayoutKey, Pair<Float, List<LayoutLine>>> _LAYOUT_CACHE =
         Collections.synchronizedMap(
@@ -218,31 +229,34 @@ final class TextLayoutEngine {
             }
             final AttributedCharacterIterator it = attrStr.getIterator();
 
-            /*
-                TODO - Fix bug:
-                When there is a non empty obstacle tuple and the 'wrapLines' flag is set to false,
-                the text layout engine does not handle obstacles AT ALL! So text will be drawn right through
-                obstacles if they lie in the path of the text, which is obviously not the intended behavior.
-            */
-            if ( wrapLines && boundsWidth >= 0 ) {// Word wrapping using LineBreakMeasurer
+            if ( (wrapLines && boundsWidth >= 0) || !obstacles.isEmpty() ) {// LineBreakMeasurer path: word-wrapping and/or splitting around obstacles
+                // When boundsWidth is undefined, fall back to a large practical limit so
+                // that the measurer can still advance and obstacles can still be queried.
+                final float effectiveWidth = boundsWidth >= 0 ? boundsWidth : _UNBOUNDED_LINE_WIDTH;
                 final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
                 final int end = it.getEndIndex();
                 while ( measurer.getPosition() < end ) {
-                    final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, boundsWidth, obstacles);
+                    final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
 
                     TextLayout           firstLayout = null;
                     float                firstX      = boundsX;
-                    float                firstW      = boundsWidth;
+                    float                firstW      = effectiveWidth;
                     List<LayoutLine.Segment> extras  = Collections.emptyList();
 
                     if ( intervals.isEmpty() ) {
-                        // All space is blocked — fall back to full width so the measurer advances
-                        firstLayout = measurer.nextLayout(boundsWidth);
+                        // All space is blocked — advance the measurer so the loop terminates.
+                        // When not wrapping, consume all remaining text in one shot.
+                        firstLayout = measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
                     } else {
-                        for ( Band band : intervals ) {
+                        final int lastIdx = intervals.size() - 1;
+                        for ( int i = 0; i <= lastIdx; i++ ) {
                             if ( measurer.getPosition() >= end ) break;
+                            final Band band = intervals.get(i);
                             final float x = band.start, w = band.size;
-                            final TextLayout layout = measurer.nextLayout(w);
+                            // When not wrapping, give the last band an unlimited width so all
+                            // remaining text is consumed here instead of wrapping to a new line.
+                            final float nextWidth = (wrapLines || i < lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;
+                            final TextLayout layout = measurer.nextLayout(nextWidth);
                             if ( firstLayout == null ) {
                                 firstLayout = layout; firstX = x; firstW = w;
                             } else {
@@ -259,7 +273,7 @@ final class TextLayoutEngine {
                         currentY += estLineHeight; // all intervals had zero width — skip band
                     }
                 }
-            } else {// No wrapping — render full line even if wider than bounds
+            } else {// No obstacles and no wrapping — a single TextLayout suffices
                 final TextLayout layout = new TextLayout(it, frc);
                 lines.add(new LayoutLine(layout, boundsX, boundsWidth));
                 currentY += layout.getAscent() + layout.getDescent() + layout.getLeading();
