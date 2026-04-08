@@ -207,20 +207,76 @@ final class TextLayoutEngine {
         if ( cached != null )
             return cached;
 
-        final List<LayoutLine> lines = new ArrayList<>();
         /*
             ------------------------------------------------
-            Phase 1 : Build layouts using LineBreakMeasurer
+            Phase 0 : Find paragraphs as 'AttributedString's
             ------------------------------------------------
         */
+        final List<@Nullable AttributedString> paragraphs = _splitStyledTextIntoParagraphs(text, font, boxModelConf);
+
+        /*
+            ------------------------------------------------
+            Phase 1 : Build LayoutLines from paragraphs
+            ------------------------------------------------
+        */
+        final List<LayoutLine> lines = _buildLayoutLines(paragraphs, frc, font, boundsX, boundsY, boundsWidth, wrapLines, obstacles);
+
+        /*
+            ------------------------------------------------
+            Phase 2 : Measure total text height
+            ------------------------------------------------
+         */
+        float totalHeight = 0;
+        for ( LayoutLine line : lines ) {
+            if ( line.layout == null )
+                totalHeight += font.getSize2D();
+            else
+                totalHeight += line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+        }
+
+        final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
+        _LAYOUT_CACHE.put(key, result);
+        return result;
+    }
+
+    /**
+     *  Phase 1 of the text rendering pipeline: converts a list of pre-split paragraphs into
+     *  an ordered list of {@link LayoutLine}s, respecting word-wrap and obstacle constraints.
+     *  <p>
+     *  Each non-null paragraph produces one or more {@link LayoutLine}s depending on available
+     *  width and obstacles.  A {@code null} paragraph entry represents a blank line and is
+     *  emitted as a {@link LayoutLine} with a {@code null} layout.  Any trailing blank-line
+     *  marker is stripped before returning.
+     *
+     * @param paragraphs   Attributed paragraphs produced by
+     *                     {@link #_splitStyledTextIntoParagraphs}; {@code null} entries are blank lines.
+     * @param frc          The {@link FontRenderContext} used by the measurer.
+     * @param font         Base font — used for the estimated line height and blank-line placeholders.
+     * @param boundsX      Left edge of the text bounds in component coordinates.
+     * @param boundsY      Top edge of the text bounds in component coordinates (starting y for obstacle queries).
+     * @param boundsWidth  Available width ({@code < 0} means unbounded).
+     * @param wrapLines    Whether to wrap text at word boundaries when it exceeds the available width.
+     * @param obstacles    Shapes (in component coordinates) the text must not overlap.
+     * @return Ordered list of {@link LayoutLine}s ready for Phase 2 height measurement and rendering.
+     */
+    private static List<LayoutLine> _buildLayoutLines(
+        final List<@Nullable AttributedString> paragraphs,
+        final FontRenderContext                frc,
+        final Font                             font,
+        final float                            boundsX,
+        final float                            boundsY,
+        final float                            boundsWidth,
+        final boolean                          wrapLines,
+        final Tuple<Shape>                     obstacles
+    ) {
         // currentY tracks the top of the next line in component coordinates (TOP-placement
         // assumption). Used solely for obstacle intersection — a good approximation for all
         // placement modes because obstacles are typically large enough that the small vertical
         // offset introduced by CENTER/BOTTOM placement does not change which obstacle a line hits.
+        final List<LayoutLine> lines = new ArrayList<>();
         float currentY = boundsY;
         final float estLineHeight = font.getSize2D();
 
-        final List<@Nullable AttributedString> paragraphs = _splitStyledTextIntoParagraphs(text, font, boxModelConf);
         for ( @Nullable AttributedString attrStr : paragraphs ) {
             if ( attrStr == null ) {
                 lines.add(new LayoutLine(null, boundsX, boundsWidth)); // blank line
@@ -280,28 +336,12 @@ final class TextLayoutEngine {
             }
         }
 
-        /*
-            remove trailing blank-line marker
-         */
+        // Strip a trailing blank-line marker that may have been emitted for a paragraph
+        // separator appearing at the very end of the text.
         if ( !lines.isEmpty() && lines.get(lines.size() - 1).layout == null )
             lines.remove(lines.size() - 1);
 
-        /*
-            ------------------------------------------------
-            Phase 2 : Measure total text height
-            ------------------------------------------------
-         */
-        float totalHeight = 0;
-        for ( LayoutLine line : lines ) {
-            if ( line.layout == null )
-                totalHeight += font.getSize2D();
-            else
-                totalHeight += line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
-        }
-
-        final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
-        _LAYOUT_CACHE.put(key, result);
-        return result;
+        return lines;
     }
 
     /**
