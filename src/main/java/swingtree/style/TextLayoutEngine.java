@@ -4,8 +4,7 @@ import org.jspecify.annotations.Nullable;
 import sprouts.Pair;
 import sprouts.Tuple;
 
-import java.awt.Font;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
@@ -16,7 +15,7 @@ import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 final class TextLayoutEngine {
     private TextLayoutEngine() {}
@@ -96,6 +95,37 @@ final class TextLayoutEngine {
      *  repaint threads do not corrupt it.
      */
     private static final int _CACHE_MAX_SIZE = 128;
+
+    /**
+     *  LRU cache of reusable {@link LineBreakMeasurer}s, keyed by paragraph identity.
+     *  <p>
+     *  Creating a {@link LineBreakMeasurer} is expensive — it triggers font-metric lookups
+     *  via {@link java.awt.font.FontRenderContext}.  The measurer itself is designed for
+     *  reuse: calling {@link LineBreakMeasurer#setPosition(int)} resets the read cursor so
+     *  the same instance can re-layout the same paragraph with different widths or after
+     *  obstacle positions have changed (both of which invalidate the main {@link #_LAYOUT_CACHE}
+     *  but leave the paragraph content unchanged).
+     *  <p>
+     *  <b>Borrow semantics:</b> a measurer is {@link Map#remove removed} from this cache
+     *  before use and {@link Map#put returned} afterwards.  This ensures that at most one
+     *  thread uses a given measurer at any time (a concurrent caller simply constructs a
+     *  fresh one on cache-miss, which is always safe).
+     */
+    private static final int _MEASURER_CACHE_SIZE = 64;
+    @SuppressWarnings("serial")
+    private static final Map<Paragraph, LineBreakMeasurer> _MEASURER_CACHE =
+        Collections.synchronizedMap(
+            new LinkedHashMap<Paragraph, LineBreakMeasurer>(
+                _MEASURER_CACHE_SIZE + 1, 0.75f, true /* access-order */
+            ) {
+                @Override
+                protected boolean removeEldestEntry(
+                    Map.Entry<Paragraph, LineBreakMeasurer> eldest
+                ) {
+                    return size() > _MEASURER_CACHE_SIZE;
+                }
+            }
+        );
     /**
      *  A large but geometrically safe line-width cap used when no explicit
      *  {@code boundsWidth} is available and as the "do not wrap" width passed
@@ -214,14 +244,13 @@ final class TextLayoutEngine {
             ------------------------------------------------
         */
         final List<@Nullable Paragraph> paragraphs = _splitStyledTextIntoParagraphs(text);
-        final List<@Nullable AttributedString> attributedStrings = paragraphs.stream().map(p -> p == null ? null : _paragraphToAttributedString(p.styledStrings, font, boxModelConf)).collect(Collectors.toList());
 
         /*
             ------------------------------------------------
             Phase 1 : Build LayoutLines from paragraphs
             ------------------------------------------------
         */
-        final List<LayoutLine> lines = _buildLayoutLines(attributedStrings, frc, font, boundsX, boundsY, boundsWidth, wrapLines, obstacles);
+        final List<LayoutLine> lines = _buildLayoutLines(paragraphs, frc, font, boundsX, boundsY, boundsWidth, wrapLines, obstacles, boxModelConf);
 
         /*
             ------------------------------------------------
@@ -262,14 +291,15 @@ final class TextLayoutEngine {
      * @return Ordered list of {@link LayoutLine}s ready for Phase 2 height measurement and rendering.
      */
     private static List<LayoutLine> _buildLayoutLines(
-        final List<@Nullable AttributedString> paragraphs,
+        final List<@Nullable Paragraph>        paragraphs,
         final FontRenderContext                frc,
         final Font                             font,
         final float                            boundsX,
         final float                            boundsY,
         final float                            boundsWidth,
         final boolean                          wrapLines,
-        final Tuple<Shape>                     obstacles
+        final Tuple<Shape>                     obstacles,
+        final BoxModelConf                     boxModelConf
     ) {
         // currentY tracks the top of the next line in component coordinates (TOP-placement
         // assumption). Used solely for obstacle intersection — a good approximation for all
@@ -279,58 +309,71 @@ final class TextLayoutEngine {
         float currentY = boundsY;
         final float estLineHeight = font.getSize2D();
 
-        for ( @Nullable AttributedString attrStr : paragraphs ) {
-            if ( attrStr == null ) {
+        for ( final Paragraph paragraph : paragraphs ) {
+            if (paragraph == null) {
                 lines.add(new LayoutLine(null, boundsX, boundsWidth)); // blank line
                 currentY += estLineHeight;
                 continue;
             }
+            final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);
             final AttributedCharacterIterator it = attrStr.getIterator();
 
-            if ( (wrapLines && boundsWidth >= 0) || !obstacles.isEmpty() ) {// LineBreakMeasurer path: word-wrapping and/or splitting around obstacles
+            if ((wrapLines && boundsWidth >= 0) || !obstacles.isEmpty()) {// LineBreakMeasurer path: word-wrapping and/or splitting around obstacles
                 // When boundsWidth is undefined, fall back to a large practical limit so
                 // that the measurer can still advance and obstacles can still be queried.
                 final float effectiveWidth = boundsWidth >= 0 ? boundsWidth : _UNBOUNDED_LINE_WIDTH;
-                final LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
+                // Borrow a cached measurer for this paragraph, or create a fresh one.
+                // The borrow pattern (remove → use → return) ensures thread safety: a
+                // concurrent caller that hits the same key simply creates a new measurer.
+                LineBreakMeasurer measurer = _MEASURER_CACHE.remove(paragraph);
+                if (measurer != null)
+                    measurer.setPosition(it.getBeginIndex()); // reset to start of paragraph
+                else
+                    measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
                 final int end = it.getEndIndex();
-                while ( measurer.getPosition() < end ) {
+                while (measurer.getPosition() < end) {
                     final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
 
-                    TextLayout           firstLayout = null;
-                    float                firstX      = boundsX;
-                    float                firstW      = effectiveWidth;
-                    List<LayoutLine.Segment> extras  = Collections.emptyList();
+                    TextLayout firstLayout = null;
+                    float firstX = boundsX;
+                    float firstW = effectiveWidth;
+                    List<LayoutLine.Segment> extras = Collections.emptyList();
 
-                    if ( intervals.isEmpty() ) {
+                    if (intervals.isEmpty()) {
                         // All space is blocked — advance the measurer so the loop terminates.
                         // When not wrapping, consume all remaining text in one shot.
                         firstLayout = measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
                     } else {
                         final int lastIdx = intervals.size() - 1;
-                        for ( int i = 0; i <= lastIdx; i++ ) {
-                            if ( measurer.getPosition() >= end ) break;
+                        for (int i = 0; i <= lastIdx; i++) {
+                            if (measurer.getPosition() >= end) break;
                             final Band band = intervals.get(i);
                             final float x = band.start, w = band.size;
                             // When not wrapping, give the last band an unlimited width so all
                             // remaining text is consumed here instead of wrapping to a new line.
                             final float nextWidth = (wrapLines || i < lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;
                             final TextLayout layout = measurer.nextLayout(nextWidth);
-                            if ( firstLayout == null ) {
-                                firstLayout = layout; firstX = x; firstW = w;
+                            if (firstLayout == null) {
+                                firstLayout = layout;
+                                firstX = x;
+                                firstW = w;
                             } else {
-                                if ( extras.isEmpty() ) extras = new ArrayList<>();
+                                if (extras.isEmpty()) extras = new ArrayList<>();
                                 extras.add(new LayoutLine.Segment(layout, x, w));
                             }
                         }
                     }
 
-                    if ( firstLayout != null ) {
+                    if (firstLayout != null) {
                         lines.add(new LayoutLine(firstLayout, firstX, firstW, extras));
                         currentY += firstLayout.getAscent() + firstLayout.getDescent() + firstLayout.getLeading();
                     } else {
                         currentY += estLineHeight; // all intervals had zero width — skip band
                     }
                 }
+                // Return the measurer to the cache for reuse in subsequent layout passes
+                // that share the same paragraph content (e.g. after obstacle positions change).
+                _MEASURER_CACHE.put(paragraph, measurer);
             } else {// No obstacles and no wrapping — a single TextLayout suffices
                 final TextLayout layout = new TextLayout(it, frc);
                 lines.add(new LayoutLine(layout, boundsX, boundsWidth));
@@ -503,14 +546,11 @@ final class TextLayoutEngine {
         return new Paragraph(Tuple.of(StyledString.class, paragraph));
     }
 
-    private static @Nullable AttributedString _paragraphToAttributedString(
+    private static AttributedString _paragraphToAttributedString(
         final Tuple<StyledString> paragraph,
         final Font font,
         final BoxModelConf boxModelConf
     ) {
-        int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
-        if ( length <= 0 )
-            return null;
         final StringBuilder sb = new StringBuilder();
         for ( StyledString s : paragraph )
             sb.append(s.string());
