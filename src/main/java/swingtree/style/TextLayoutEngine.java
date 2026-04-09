@@ -16,6 +16,7 @@ import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 final class TextLayoutEngine {
     private TextLayoutEngine() {}
@@ -212,14 +213,15 @@ final class TextLayoutEngine {
             Phase 0 : Find paragraphs as 'AttributedString's
             ------------------------------------------------
         */
-        final List<@Nullable AttributedString> paragraphs = _splitStyledTextIntoParagraphs(text, font, boxModelConf);
+        final List<@Nullable Paragraph> paragraphs = _splitStyledTextIntoParagraphs(text);
+        final List<@Nullable AttributedString> attributedStrings = paragraphs.stream().map(p -> p == null ? null : _paragraphToAttributedString(p.styledStrings, font, boxModelConf)).collect(Collectors.toList());
 
         /*
             ------------------------------------------------
             Phase 1 : Build LayoutLines from paragraphs
             ------------------------------------------------
         */
-        final List<LayoutLine> lines = _buildLayoutLines(paragraphs, frc, font, boundsX, boundsY, boundsWidth, wrapLines, obstacles);
+        final List<LayoutLine> lines = _buildLayoutLines(attributedStrings, frc, font, boundsX, boundsY, boundsWidth, wrapLines, obstacles);
 
         /*
             ------------------------------------------------
@@ -444,12 +446,29 @@ final class TextLayoutEngine {
         }
     }
 
-    private static List<@Nullable AttributedString> _splitStyledTextIntoParagraphs(
-        final Tuple<StyledString> text,
-        final Font                font,
-        final BoxModelConf        boxModelConf
+    private static final class Paragraph {
+        final Tuple<StyledString> styledStrings;
+
+        private Paragraph(Tuple<StyledString> styledStrings) {
+            this.styledStrings = styledStrings;
+        }
+        @Override
+        public int hashCode() {
+            return styledStrings.hashCode();
+        }
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof Paragraph) ) return false;
+            final Paragraph other = (Paragraph) o;
+            return styledStrings.equals(other.styledStrings);
+        }
+    }
+
+    private static List<@Nullable Paragraph> _splitStyledTextIntoParagraphs(
+        final Tuple<StyledString> text
     ) {
-        List<@Nullable AttributedString> paragraphs = new ArrayList<>();
+        List<@Nullable Paragraph> paragraphs = new ArrayList<>();
         List<StyledString> currentParagraph = null;
         for ( StyledString styledString : text ) {
             String[] parts = styledString.string().split("\n", -1);
@@ -466,21 +485,28 @@ final class TextLayoutEngine {
                         currentParagraph.add(styledString.withString(part));
                     // if it is not the last part, we start a new line/paragraph:
                     if ( i < parts.length - 1 ) {
-                        paragraphs.add(_paragraphToAttributedString(currentParagraph, font, boxModelConf));
+                        paragraphs.add(paragraphOf(currentParagraph));
                         currentParagraph = null;
                     }
                 }
             }
         }
         if ( currentParagraph != null )
-            paragraphs.add(_paragraphToAttributedString(currentParagraph, font, boxModelConf));
+            paragraphs.add(paragraphOf(currentParagraph));
         return paragraphs;
     }
 
+    private static @Nullable Paragraph paragraphOf(List<StyledString> paragraph) {
+        int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
+        if ( length <= 0 )
+            return null;
+        return new Paragraph(Tuple.of(StyledString.class, paragraph));
+    }
+
     private static @Nullable AttributedString _paragraphToAttributedString(
-        final List<StyledString> paragraph,
+        final Tuple<StyledString> paragraph,
         final Font font,
-        final BoxModelConf       boxModelConf
+        final BoxModelConf boxModelConf
     ) {
         int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
         if ( length <= 0 )
