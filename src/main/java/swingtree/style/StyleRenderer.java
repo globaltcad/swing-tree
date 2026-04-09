@@ -1256,7 +1256,7 @@ final class StyleRenderer
             final float boundsWidth = textBounds.size().width().orElse(0f);
             final float boundsX     = textBounds.location().x();
             final float boundsY     = textBounds.location().y();
-            final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult = TextLayoutEngine._buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles());
+            final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult = TextLayoutEngine._buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles(), placement);
             final List<TextLayoutEngine.LayoutLine> lines    = layoutResult.second();
             final float            totalHeight = layoutResult.first();
             // Phase 3 - 5: Rendering

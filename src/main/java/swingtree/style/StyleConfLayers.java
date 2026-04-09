@@ -227,7 +227,7 @@ final class StyleConfLayers
                                 final FontRenderContext frc = g2d.getFontRenderContext();
                                 final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult =
                                         TextLayoutEngine._buildTextLayoutsAndPreferredHeight(
-                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles()
+                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles(), textConf.placement()
                                         );
                                 double totalHeight = layoutResult.first().doubleValue();
                                 totalHeight += boundsY;

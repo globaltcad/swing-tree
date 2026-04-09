@@ -86,7 +86,9 @@ import java.util.Objects;
  *          The default placement is {@link UI.Placement#UNDEFINED}. At render time this is
  *          first resolved using the horizontal and vertical alignment from the {@code FontConf};
  *          only when those alignments are also {@link UI.Placement#UNDEFINED} does it behave
- *          like {@link swingtree.UI.Placement#CENTER}.
+ *          like {@link swingtree.UI.Placement#CENTER}.<br>
+ *          <b>Important: Note that {@link #obstacles(Shape...)} are only compatible with {@code TOP_LEFT},
+ *          {@code TOP} and {@code TOP_RIGHT}! Any other placement turns off obstacle avoidance...</b>
  *      </li>
  *      <li><b>Offset</b>
  *          The offset holds the x and y placement offset of the text.
@@ -124,7 +126,10 @@ import java.util.Objects;
  *          {@link TextConf#obstacles(Tuple)}.<br>
  *          The default value is an empty {@link Tuple}, meaning no obstacles are applied,
  *          <b>however</b>, if a particular component with a text configuration has child components,
- *          then the bounding boxes of those child components will automatically be registered as obstacles.
+ *          then the bounding boxes of those child components will automatically be registered as obstacles.<br>
+ *          <b>Important: Note that obstacles are only compatible when {@link #placement(UI.Placement)} is
+ *          set to be either one of: {@code TOP_LEFT}, {@code TOP} or {@code TOP_RIGHT}!
+ *          Any other placement turns off obstacle avoidance entirely...</b>
  *      </li>
  *      <li><b>Obstacles From Children Enabled</b>
  *          A boolean property that controls whether child components of the styled component
@@ -452,7 +457,9 @@ public final class TextConf implements Simplifiable<TextConf>
      *     <li>{@link UI.Placement#TOP_RIGHT} - Placed at the top right corner of the component.</li>
      *     <li>{@link UI.Placement#BOTTOM_LEFT} - Placed at the bottom left corner of the component.</li>
      *     <li>{@link UI.Placement#BOTTOM_RIGHT} - Placed at the bottom right corner of the component.</li>
-     * </ul>
+     * </ul><br>
+     * <b>Also note that not all placements are compatible with the {@link #obstacles(Shape...)} avoidance feature.
+     * Only {@code TOP_LEFT}, {@code TOP} and {@code TOP_RIGHT} allow for text to avoid obstacles...</b>
      *
      * @param placement The placement of the text, defined by a {@link UI.Placement} enum.
      * @return An updated {@link TextConf} object with the desired placement.
@@ -525,7 +532,12 @@ public final class TextConf implements Simplifiable<TextConf>
      * for the text layout engine. The text will wrap around and skip over each obstacle and
      * can never be rendered on top of it. Obstacle shapes are specified in component coordinates.
      * <p>
-     * Curved shapes such as circles or ellipses are supported as well.
+     * Curved shapes such as circles or ellipses are supported as well.<br>
+     * <b>Important: Note that obstacles are only compatible when {@link #placement(UI.Placement)} is
+     * configured to be either one of: {@code TOP_LEFT}, {@code TOP} or {@code TOP_RIGHT}!
+     * Any other placement turns off obstacle avoidance entirely...</b>
+     * This is an intentional design decision which was made to keep implementation complexity
+     * low and performance high, since obstacle avoidance is a rather complex feature.
      *
      * @param obstacles One or more {@link Shape}s in component coordinates for text to skip over.
      * @return An updated {@link TextConf} with the given obstacles.
@@ -543,7 +555,12 @@ public final class TextConf implements Simplifiable<TextConf>
      * as obstacles for the text layout engine. The text will wrap around and skip over each obstacle and
      * can never be rendered on top of it. Obstacle shapes are specified in component coordinates.
      * <p>
-     * Curved shapes such as circles or ellipses are supported as well.
+     * Curved shapes such as circles or ellipses are supported as well.<br>
+     * <b>Important: Note that obstacles are only compatible when {@link #placement(UI.Placement)} is
+     * configured to be either one of: {@code TOP_LEFT}, {@code TOP} or {@code TOP_RIGHT}!
+     * Any other placement turns off obstacle avoidance entirely...</b>
+     * This is an intentional design decision which was made to keep implementation complexity
+     * low and performance high, since obstacle avoidance is a rather complex feature.
      *
      * @param obstacles A {@link Tuple} of {@link Shape}s in component coordinates for text to skip over.
      * @return An updated {@link TextConf} with the given obstacles.

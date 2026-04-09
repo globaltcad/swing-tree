@@ -3,6 +3,7 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import sprouts.Pair;
 import sprouts.Tuple;
+import swingtree.UI;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -217,7 +218,11 @@ final class TextLayoutEngine {
      * @param obstacles    Shapes (in component coordinates) the text must not be rendered on top of.
      *                     The text will skip over these shapes and continue rendering on the other side,
      *                     if possible or break the line if no more horizontal space is left.
-     *                     Pass an empty {@link Tuple} when no obstacles are present.
+     *                     Pass an empty {@link Tuple} when no obstacles are present. Ignored when the {@code placement}
+     *                     does not support obstacles (see below).
+     * @param placement    The text placement mode, which determines whether obstacle avoidance is active.
+     *                     Only TOP-based placements support obstacle avoidance, so when CENTER or BOTTOM placement is used,
+     *                     obstacles are ignored even if provided.
      * @return A {@link Pair} whose {@link Pair#first()} is the total pixel height of all lines
      *         and whose {@link Pair#second()} is the ordered list of {@link LayoutLine} entries,
      *         each carrying its layout and the obstacle-free horizontal region it was placed into.
@@ -231,9 +236,11 @@ final class TextLayoutEngine {
         final float               boundsY,
         final boolean             wrapLines,
         final BoxModelConf        boxModelConf,
-        final Tuple<Shape>        obstacles
+        final Tuple<Shape>        obstacles,
+        final UI.Placement        placement
     ) {
-        final TextLayoutKey key = new TextLayoutKey(font, text, boundsWidth, boundsX, boundsY, wrapLines, boxModelConf, obstacles);
+        final Tuple<Shape> compatibleObstacles = _supportsObstacles(placement) ? obstacles : obstacles.clear();
+        final TextLayoutKey key = new TextLayoutKey(font, text, boundsWidth, boundsX, boundsY, wrapLines, boxModelConf, compatibleObstacles);
         final Pair<Float, List<LayoutLine>> cached = _LAYOUT_CACHE.get(key);
         if ( cached != null )
             return cached;
@@ -250,7 +257,7 @@ final class TextLayoutEngine {
             Phase 1 : Build LayoutLines from paragraphs
             ------------------------------------------------
         */
-        final List<LayoutLine> lines = _buildLayoutLines(paragraphs, frc, font, boundsX, boundsY, boundsWidth, wrapLines, obstacles, boxModelConf);
+        final List<LayoutLine> lines = _buildLayoutLines(paragraphs, frc, font, boundsX, boundsY, boundsWidth, wrapLines, compatibleObstacles, boxModelConf);
 
         /*
             ------------------------------------------------
@@ -268,6 +275,13 @@ final class TextLayoutEngine {
         final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
         _LAYOUT_CACHE.put(key, result);
         return result;
+    }
+
+    private static boolean _supportsObstacles(UI.Placement placement) {
+        // Obstacle avoidance relies on TOP-based vertical placement to track the current line's y-level in component coordinates.
+        // When using CENTER or BOTTOM placement, the text block's y-level shifts as lines are added, so obstacle intersection
+        // becomes inaccurate and may produce jumbled layouts. For simplicity, we disable obstacles entirely in these modes.
+        return placement == UI.Placement.TOP_LEFT || placement == UI.Placement.TOP || placement == UI.Placement.TOP_RIGHT;
     }
 
     /**
