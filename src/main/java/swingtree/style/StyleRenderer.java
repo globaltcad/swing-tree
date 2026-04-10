@@ -1241,7 +1241,7 @@ final class StyleRenderer
         final Font initialFont = g2d.getFont();
         final Shape oldClip = g2d.getClip();
 
-        final Tuple<StyledString>  textToRender      = text.content();
+        final Tuple<Pooled<Paragraph>> textToRender  = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
         final UI.Placement         placement         = findDesiredPlacementFrom(text);
         final boolean              wrapLines         = text.wrapLines();

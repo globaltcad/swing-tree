@@ -17,6 +17,7 @@ import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.*;
 import java.util.List;
+import java.util.WeakHashMap;
 
 final class TextLayoutEngine {
     private TextLayoutEngine() {}
@@ -33,28 +34,28 @@ final class TextLayoutEngine {
      *  reuses the same {@link Tuple} reference across repeated style evaluations.
      */
     private static final class TextLayoutKey {
-        private final Font                font;
-        private final Tuple<StyledString> text;
-        private final float               boundsWidth;
-        private final float               boundsX;
-        private final float               boundsY;
-        private final boolean             wrapLines;
-        private final BoxModelConf        boxModelConf;
-        private final Tuple<Shape>        obstacles;
-        private final int                 _hash;
+        private final Font                       font;
+        private final Tuple<Pooled<Paragraph>>   paragraphs;
+        private final float                      boundsWidth;
+        private final float                      boundsX;
+        private final float                      boundsY;
+        private final boolean                    wrapLines;
+        private final BoxModelConf               boxModelConf;
+        private final Tuple<Shape>               obstacles;
+        private final int                        _hash;
 
         TextLayoutKey(
-            Font                font,
-            Tuple<StyledString> text,
-            float               boundsWidth,
-            float               boundsX,
-            float               boundsY,
-            boolean             wrapLines,
-            BoxModelConf        boxModelConf,
-            Tuple<Shape>        obstacles
+            Font                       font,
+            Tuple<Pooled<Paragraph>>   paragraphs,
+            float                      boundsWidth,
+            float                      boundsX,
+            float                      boundsY,
+            boolean                    wrapLines,
+            BoxModelConf               boxModelConf,
+            Tuple<Shape>               obstacles
         ) {
             this.font         = font;
-            this.text         = text;
+            this.paragraphs   = paragraphs;
             this.boundsWidth  = boundsWidth;
             this.boundsX      = boundsX;
             this.boundsY      = boundsY;
@@ -62,7 +63,7 @@ final class TextLayoutEngine {
             this.boxModelConf = boxModelConf;
             this.obstacles    = obstacles;
             this._hash        = Objects.hash(
-                                    font, text,
+                                    font, paragraphs,
                                     Float.floatToIntBits(boundsWidth),
                                     Float.floatToIntBits(boundsX),
                                     Float.floatToIntBits(boundsY),
@@ -80,7 +81,7 @@ final class TextLayoutEngine {
                    Float.floatToIntBits(boundsY)     == Float.floatToIntBits(other.boundsY)     &&
                    wrapLines    == other.wrapLines                                               &&
                    font        .equals(other.font)                                               &&
-                   text        .equals(other.text)                                               &&
+                   paragraphs  .equals(other.paragraphs)                                        &&
                    boxModelConf.equals(other.boxModelConf)                                       &&
                    obstacles   .equals(other.obstacles);
         }
@@ -98,7 +99,8 @@ final class TextLayoutEngine {
     private static final int _CACHE_MAX_SIZE = 128;
 
     /**
-     *  LRU cache of reusable {@link LineBreakMeasurer}s, keyed by paragraph identity.
+     *  Weak-reference cache of reusable {@link LineBreakMeasurer}s, keyed by interned
+     *  {@link Pooled}{@literal <}{@link Paragraph}{@literal >} instances.
      *  <p>
      *  Creating a {@link LineBreakMeasurer} is expensive — it triggers font-metric lookups
      *  via {@link java.awt.font.FontRenderContext}.  The measurer itself is designed for
@@ -107,26 +109,17 @@ final class TextLayoutEngine {
      *  obstacle positions have changed (both of which invalidate the main {@link #_LAYOUT_CACHE}
      *  but leave the paragraph content unchanged).
      *  <p>
+     *  Using a {@link WeakHashMap} allows entries to be reclaimed once no other code holds a
+     *  strong reference to the {@link Pooled} key — paragraphs that have scrolled off or been
+     *  replaced are automatically evicted without a fixed size cap.
+     *  <p>
      *  <b>Borrow semantics:</b> a measurer is {@link Map#remove removed} from this cache
      *  before use and {@link Map#put returned} afterwards.  This ensures that at most one
      *  thread uses a given measurer at any time (a concurrent caller simply constructs a
      *  fresh one on cache-miss, which is always safe).
      */
-    private static final int _MEASURER_CACHE_SIZE = 64;
-    @SuppressWarnings("serial")
-    private static final Map<Paragraph, LineBreakMeasurer> _MEASURER_CACHE =
-        Collections.synchronizedMap(
-            new LinkedHashMap<Paragraph, LineBreakMeasurer>(
-                _MEASURER_CACHE_SIZE + 1, 0.75f, true /* access-order */
-            ) {
-                @Override
-                protected boolean removeEldestEntry(
-                    Map.Entry<Paragraph, LineBreakMeasurer> eldest
-                ) {
-                    return size() > _MEASURER_CACHE_SIZE;
-                }
-            }
-        );
+    private static final Map<Pooled<Paragraph>, LineBreakMeasurer> _MEASURER_CACHE =
+        Collections.synchronizedMap(new WeakHashMap<>());
     /**
      *  A large but geometrically safe line-width cap used when no explicit
      *  {@code boundsWidth} is available and as the "do not wrap" width passed
@@ -209,7 +202,7 @@ final class TextLayoutEngine {
      *
      * @param font         The base font to use for unstyled segments.
      * @param frc          The {@link FontRenderContext} used by the measurer.
-     * @param text         The styled text to lay out.
+     * @param paragraphs   The styled text to lay out.
      * @param boundsWidth  The available width for the text. This property is only relevant when line wrapping is active.
      * @param boundsX,     The x-offset of the text in the component space. It is important for intersecting obstacles!
      * @param boundsY,     The y-offset of the text in the component space. It is important for intersecting obstacles!
@@ -228,29 +221,22 @@ final class TextLayoutEngine {
      *         each carrying its layout and the obstacle-free horizontal region it was placed into.
      */
     static Pair<Float, List<LayoutLine>> _buildTextLayoutsAndPreferredHeight(
-        final Font                font,
-        final FontRenderContext   frc,
-        final Tuple<StyledString> text,
-        final float               boundsWidth,
-        final float               boundsX,
-        final float               boundsY,
-        final boolean             wrapLines,
-        final BoxModelConf        boxModelConf,
-        final Tuple<Shape>        obstacles,
-        final UI.Placement        placement
+        final Font                       font,
+        final FontRenderContext          frc,
+        final Tuple<Pooled<Paragraph>>   paragraphs,
+        final float                      boundsWidth,
+        final float                      boundsX,
+        final float                      boundsY,
+        final boolean                    wrapLines,
+        final BoxModelConf               boxModelConf,
+        final Tuple<Shape>               obstacles,
+        final UI.Placement               placement
     ) {
         final Tuple<Shape> compatibleObstacles = _supportsObstacles(placement) ? obstacles : obstacles.clear();
-        final TextLayoutKey key = new TextLayoutKey(font, text, boundsWidth, boundsX, boundsY, wrapLines, boxModelConf, compatibleObstacles);
+        final TextLayoutKey key = new TextLayoutKey(font, paragraphs, boundsWidth, boundsX, boundsY, wrapLines, boxModelConf, compatibleObstacles);
         final Pair<Float, List<LayoutLine>> cached = _LAYOUT_CACHE.get(key);
         if ( cached != null )
             return cached;
-
-        /*
-            ------------------------------------------------
-            Phase 0 : Find paragraphs as 'AttributedString's
-            ------------------------------------------------
-        */
-        final List<@Nullable Paragraph> paragraphs = _splitStyledTextIntoParagraphs(text);
 
         /*
             ------------------------------------------------
@@ -293,8 +279,8 @@ final class TextLayoutEngine {
      *  emitted as a {@link LayoutLine} with a {@code null} layout.  Any trailing blank-line
      *  marker is stripped before returning.
      *
-     * @param paragraphs   Attributed paragraphs produced by
-     *                     {@link #_splitStyledTextIntoParagraphs}; {@code null} entries are blank lines.
+     * @param paragraphs   Interned paragraphs produced by {@link TextConf#simplified()};
+     *                     entries whose {@link Paragraph#isBlankLine} flag is {@code true} represent blank lines.
      * @param frc          The {@link FontRenderContext} used by the measurer.
      * @param font         Base font — used for the estimated line height and blank-line placeholders.
      * @param boundsX      Left edge of the text bounds in component coordinates.
@@ -305,7 +291,7 @@ final class TextLayoutEngine {
      * @return Ordered list of {@link LayoutLine}s ready for Phase 2 height measurement and rendering.
      */
     private static List<LayoutLine> _buildLayoutLines(
-        final List<@Nullable Paragraph>        paragraphs,
+        final Tuple<Pooled<Paragraph>>         paragraphs,
         final FontRenderContext                frc,
         final Font                             font,
         final float                            boundsX,
@@ -323,8 +309,9 @@ final class TextLayoutEngine {
         float currentY = boundsY;
         final float estLineHeight = font.getSize2D();
 
-        for ( final Paragraph paragraph : paragraphs ) {
-            if (paragraph == null) {
+        for ( final Pooled<Paragraph> pooled : paragraphs ) {
+            final Paragraph paragraph = pooled.get();
+            if ( paragraph.isBlankLine ) {
                 lines.add(new LayoutLine(null, boundsX, boundsWidth)); // blank line
                 currentY += estLineHeight;
                 continue;
@@ -339,7 +326,7 @@ final class TextLayoutEngine {
                 // Borrow a cached measurer for this paragraph, or create a fresh one.
                 // The borrow pattern (remove → use → return) ensures thread safety: a
                 // concurrent caller that hits the same key simply creates a new measurer.
-                LineBreakMeasurer measurer = _MEASURER_CACHE.remove(paragraph);
+                LineBreakMeasurer measurer = _MEASURER_CACHE.remove(pooled);
                 if (measurer != null)
                     measurer.setPosition(it.getBeginIndex()); // reset to start of paragraph
                 else
@@ -387,7 +374,7 @@ final class TextLayoutEngine {
                 }
                 // Return the measurer to the cache for reuse in subsequent layout passes
                 // that share the same paragraph content (e.g. after obstacle positions change).
-                _MEASURER_CACHE.put(paragraph, measurer);
+                _MEASURER_CACHE.put(pooled, measurer);
             } else {// No obstacles and no wrapping — a single TextLayout suffices
                 final TextLayout layout = new TextLayout(it, frc);
                 lines.add(new LayoutLine(layout, boundsX, boundsWidth));
@@ -501,63 +488,6 @@ final class TextLayoutEngine {
             this.start = start;
             this.size  = size;
         }
-    }
-
-    private static final class Paragraph {
-        final Tuple<StyledString> styledStrings;
-
-        private Paragraph(Tuple<StyledString> styledStrings) {
-            this.styledStrings = styledStrings;
-        }
-        @Override
-        public int hashCode() {
-            return styledStrings.hashCode();
-        }
-        @Override
-        public boolean equals( Object o ) {
-            if ( this == o ) return true;
-            if ( !(o instanceof Paragraph) ) return false;
-            final Paragraph other = (Paragraph) o;
-            return styledStrings.equals(other.styledStrings);
-        }
-    }
-
-    private static List<@Nullable Paragraph> _splitStyledTextIntoParagraphs(
-        final Tuple<StyledString> text
-    ) {
-        List<@Nullable Paragraph> paragraphs = new ArrayList<>();
-        List<StyledString> currentParagraph = null;
-        for ( StyledString styledString : text ) {
-            String[] parts = styledString.string().split("\n", -1);
-            if ( parts.length <= 1 ) {
-                if ( currentParagraph == null )
-                    currentParagraph = new ArrayList<>();
-                currentParagraph.add(styledString);
-            } else {
-                for ( int i = 0; i < parts.length; i++ ) {
-                    String part = parts[i];
-                    if ( currentParagraph == null )
-                        currentParagraph = new ArrayList<>();
-                    if ( !part.isEmpty() )
-                        currentParagraph.add(styledString.withString(part));
-                    // if it is not the last part, we start a new line/paragraph:
-                    if ( i < parts.length - 1 ) {
-                        paragraphs.add(paragraphOf(currentParagraph));
-                        currentParagraph = null;
-                    }
-                }
-            }
-        }
-        if ( currentParagraph != null )
-            paragraphs.add(paragraphOf(currentParagraph));
-        return paragraphs;
-    }
-
-    private static @Nullable Paragraph paragraphOf(List<StyledString> paragraph) {
-        int length = paragraph.stream().mapToInt(s -> s.string().length()).sum();
-        if ( length <= 0 )
-            return null;
-        return new Paragraph(Tuple.of(StyledString.class, paragraph));
     }
 
     private static AttributedString _paragraphToAttributedString(

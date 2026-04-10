@@ -11,7 +11,9 @@ import swingtree.api.Styler;
 
 import java.awt.Font;
 import java.awt.Shape;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -184,8 +186,11 @@ public final class TextConf implements Simplifiable<TextConf>
 {
     private static final Logger log = LoggerFactory.getLogger(TextConf.class);
     public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
+    @SuppressWarnings("unchecked")
+    private static final Tuple<Pooled<Paragraph>> _EMPTY_CONTENT = (Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class);
+
     private static final TextConf _NONE = new TextConf(
-                                                Tuple.of(StyledString.class),
+                                                _EMPTY_CONTENT,
                                                 FontConf.none(),
                                                 UI.ComponentArea.INTERIOR,
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
@@ -202,30 +207,30 @@ public final class TextConf implements Simplifiable<TextConf>
         return _NONE;
     }
 
-    private final Tuple<StyledString>  _content;
-    private final FontConf             _fontConf;
-    private final UI.ComponentArea     _clipArea;
-    private final UI.ComponentBoundary _placementBoundary;
-    private final UI.Placement         _placement;
-    private final Offset               _offset;
-    private final boolean              _wrapLines;
-    private final boolean              _autoPreferredHeight;
-    private final Tuple<Shape>         _obstacles;
-    private final UI.ComponentBoundary _obstaclesFromChildrenAs;
-    private final boolean              _obstaclesFromChildrenEnabled;
+    private final Tuple<Pooled<Paragraph>>  _content;
+    private final FontConf                  _fontConf;
+    private final UI.ComponentArea          _clipArea;
+    private final UI.ComponentBoundary      _placementBoundary;
+    private final UI.Placement              _placement;
+    private final Offset                    _offset;
+    private final boolean                   _wrapLines;
+    private final boolean                   _autoPreferredHeight;
+    private final Tuple<Shape>              _obstacles;
+    private final UI.ComponentBoundary      _obstaclesFromChildrenAs;
+    private final boolean                   _obstaclesFromChildrenEnabled;
 
     private TextConf(
-        Tuple<StyledString>  content,
-        FontConf             fontConf,
-        UI.ComponentArea     clipArea,
-        UI.ComponentBoundary placementBoundary,
-        UI.Placement         placement,
-        Offset               offset,
-        boolean              wrapLines,
-        boolean              autoPreferredHeight,
-        Tuple<Shape>         obstacles,
-        UI.ComponentBoundary obstaclesFromChildrenAs,
-        boolean              obstaclesFromChildrenEnabled
+        Tuple<Pooled<Paragraph>>  content,
+        FontConf                  fontConf,
+        UI.ComponentArea          clipArea,
+        UI.ComponentBoundary      placementBoundary,
+        UI.Placement              placement,
+        Offset                    offset,
+        boolean                   wrapLines,
+        boolean                   autoPreferredHeight,
+        Tuple<Shape>              obstacles,
+        UI.ComponentBoundary      obstaclesFromChildrenAs,
+        boolean                   obstaclesFromChildrenEnabled
     )
     {
         _content                      = Objects.requireNonNull(content);
@@ -242,7 +247,7 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     private static TextConf of(
-        Tuple<StyledString>  content,
+        Tuple<Pooled<Paragraph>> content,
         FontConf             fontConf,
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
@@ -272,7 +277,16 @@ public final class TextConf implements Simplifiable<TextConf>
         return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight, obstacles, obstaclesFromChildrenAs, obstaclesFromChildrenEnabled);
     }
 
-    Tuple<StyledString> content() {
+    /**
+     * Returns the interned paragraphs that make up the text content of this configuration.
+     * <p>
+     * Before {@link #simplified()} is called this tuple contains at most one un-split,
+     * un-interned wrapper paragraph.  After {@link #simplified()} the tuple holds the
+     * fully split and interned paragraphs that the layout engine uses as cache keys.
+     *
+     * @return The tuple of {@link Pooled} {@link Paragraph} objects for this text configuration.
+     */
+    Tuple<Pooled<Paragraph>> content() {
         return _content;
     }
 
@@ -331,8 +345,8 @@ public final class TextConf implements Simplifiable<TextConf>
     public TextConf content( String textString ) {
         Objects.requireNonNull(textString);
         if ( textString.isEmpty() )
-            return content(Tuple.of(StyledString.class));
-        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+            return _withRawContent(Tuple.of(StyledString.class));
+        return _withRawContent(Tuple.of(StyledString.of(textString)));
     }
 
     /**
@@ -347,7 +361,7 @@ public final class TextConf implements Simplifiable<TextConf>
      */
     public TextConf content( StyledString... styledStrings ) {
         Objects.requireNonNull(styledStrings);
-        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+        return _withRawContent(Tuple.of(StyledString.class, styledStrings));
     }
 
     /**
@@ -361,10 +375,10 @@ public final class TextConf implements Simplifiable<TextConf>
      * @throws NullPointerException if the supplied styledStrings is null.
      */
     public TextConf content( Tuple<StyledString> styledStrings ) {
-        if ( _content.equals(styledStrings) ) {
+        Objects.requireNonNull(styledStrings);
+        if ( _contentEqualTo(styledStrings) )
             return this;
-        }
-        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+        return _withRawContent(styledStrings);
     }
 
     /**
@@ -380,6 +394,37 @@ public final class TextConf implements Simplifiable<TextConf>
     public TextConf content( Collection<StyledString> styledStrings ) {
         Objects.requireNonNull(styledStrings);
         return content(Tuple.of(StyledString.class, styledStrings));
+    }
+
+    /**
+     * Wraps a raw {@link Tuple} of {@link StyledString}s into a single un-interned
+     * {@link Pooled}{@literal <}{@link Paragraph}{@literal >} and returns a new
+     * {@link TextConf} with that as its content.  Splitting into multiple paragraphs
+     * is deferred until {@link #simplified()} is called.
+     */
+    private TextConf _withRawContent( Tuple<StyledString> strings ) {
+        if ( strings.isEmpty() ) {
+            return of(_EMPTY_CONTENT, _fontConf, _clipArea, _placementBoundary, _placement,
+                      _offset, _wrapLines, _autoPreferredHeight, _obstacles,
+                      _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+        }
+        final Pooled<Paragraph> pooled = new Pooled<>(Paragraph.of(strings));
+        @SuppressWarnings("unchecked")
+        final Tuple<Pooled<Paragraph>> wrapped = (Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class, pooled);
+        return of(wrapped, _fontConf, _clipArea, _placementBoundary, _placement,
+                  _offset, _wrapLines, _autoPreferredHeight, _obstacles,
+                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Returns {@code true} when the pre-simplified content of this instance is a single
+     * (non-blank) paragraph whose {@code styledStrings} tuple equals {@code strings}.
+     * Used to short-circuit no-op calls to {@link #content(Tuple)}.
+     */
+    private boolean _contentEqualTo( Tuple<StyledString> strings ) {
+        if ( _content.size() == 1 && !_content.get(0).get().isBlankLine )
+            return _content.get(0).get().styledStrings.equals(strings);
+        return false;
     }
 
     private TextConf _fontConf(FontConf fontConf) {
@@ -669,16 +714,90 @@ public final class TextConf implements Simplifiable<TextConf>
         //       for the component, even when the content is empty (the resulting height may be 0).
         if ( _content.isEmpty() && !_autoPreferredHeight )
             return _NONE;
-        Tuple<StyledString> simplifiedContent = _content.removeIf( it -> it.string().isEmpty() )
-                                                        .map( it -> it.resolveUsing(_fontConf))
-                                                        .removeIf( it -> it
-                                                                .fontConf()
-                                                                .map( fontConf -> fontConf.size() == 0 )
-                                                                .orElse( false )
-                                                            );
-        if ( simplifiedContent.isEmpty() && !_autoPreferredHeight )
-             return _NONE;
-        return content(simplifiedContent);
+
+        // Collect all StyledStrings from the (pre-simplified) content.
+        // Before simplified() is called, _content holds at most one wrapper paragraph.
+        // After a second call, it holds the already-split interned paragraphs, so we flatten.
+        final Tuple<StyledString> rawStrings;
+        if ( _content.size() == 1 && !_content.get(0).get().isBlankLine ) {
+            rawStrings = _content.get(0).get().styledStrings;
+        } else {
+            // We should never really get here! -> simplification should only happen on un-simplified / un-split content.
+            final List<StyledString> flat = new ArrayList<>();
+            for ( Pooled<Paragraph> p : _content ) {
+                if ( !p.get().isBlankLine ) {
+                    for ( StyledString s : p.get().styledStrings )
+                        flat.add(s);
+                }
+            }
+            rawStrings = Tuple.of(StyledString.class, flat);
+        }
+
+        // Existing simplification: remove empties, resolve font, remove zero-size segments.
+        final Tuple<StyledString> simplified = rawStrings
+                .removeIf( it -> it.string().isEmpty() )
+                .map( it -> it.resolveUsing(_fontConf) )
+                .removeIf( it -> it.fontConf()
+                                   .map( fc -> fc.size() == 0 )
+                                   .orElse(false) );
+
+        if ( simplified.isEmpty() && !_autoPreferredHeight )
+            return _NONE;
+
+        // Split by '\n' into interned paragraphs, then store as the new _content.
+        final Tuple<Pooled<Paragraph>> splitContent = _splitAndIntern(simplified);
+        final Tuple<Pooled<Paragraph>> newContent = splitContent.isEmpty() ? _EMPTY_CONTENT : splitContent;
+
+        if ( newContent.isEmpty() && !_autoPreferredHeight )
+            return _NONE;
+
+        return of(newContent, _fontConf, _clipArea, _placementBoundary, _placement,
+                  _offset, _wrapLines, _autoPreferredHeight, _obstacles,
+                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Splits a flat sequence of {@link StyledString}s at {@code '\n'} boundaries into
+     * interned {@link Pooled}{@literal <}{@link Paragraph}{@literal >} objects.
+     * <p>
+     * Each contiguous run of text between newlines becomes one {@link Paragraph}.
+     * A newline that produces an empty segment (blank line) becomes a
+     * {@link Paragraph#blankLine()} entry.  The resulting paragraphs are interned
+     * via {@link Pooled#intern()} so identical paragraphs share the same reference and
+     * can be used as identity-stable cache keys in the layout engine.
+     */
+    private static Tuple<Pooled<Paragraph>> _splitAndIntern( Tuple<StyledString> content ) {
+        final List<Pooled<Paragraph>> result = new ArrayList<>();
+        List<StyledString> current = null;
+        for ( StyledString s : content ) {
+            final String[] parts = s.string().split("\n", -1);
+            if ( parts.length <= 1 ) {
+                if ( current == null ) current = new ArrayList<>();
+                current.add(s);
+            } else {
+                for ( int i = 0; i < parts.length; i++ ) {
+                    if ( current == null ) current = new ArrayList<>();
+                    if ( !parts[i].isEmpty() ) current.add(s.withString(parts[i]));
+                    if ( i < parts.length - 1 ) {
+                        result.add(_internedParagraphFrom(current));
+                        current = null;
+                    }
+                }
+            }
+        }
+        if ( current != null )
+            result.add(_internedParagraphFrom(current));
+        @SuppressWarnings("unchecked")
+        final Tuple<Pooled<Paragraph>> tuple = ((Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class)).addAll(result);
+        return tuple;
+    }
+
+    private static Pooled<Paragraph> _internedParagraphFrom( List<StyledString> strings ) {
+        final int len = strings.stream().mapToInt(s -> s.string().length()).sum();
+        final Paragraph p = len <= 0
+            ? Paragraph.blankLine()
+            : Paragraph.of(Tuple.of(StyledString.class, strings));
+        return new Pooled<>(p).intern();
     }
 
     @Override
@@ -686,9 +805,24 @@ public final class TextConf implements Simplifiable<TextConf>
         return this.equals(_NONE);
     }
 
-    TextConf _scale(double scale) {
+    TextConf _scale( double scale ) {
+        // Scale each StyledString inside every paragraph, wrapping them back into un-interned
+        // Pooled<Paragraph> objects.  Interning happens later in simplified().
+        final List<Pooled<Paragraph>> scaledParagraphs = new ArrayList<>(_content.size());
+        for ( Pooled<Paragraph> pooled : _content ) {
+            final Paragraph original = pooled.get();
+            if ( original.isBlankLine ) {
+                scaledParagraphs.add(new Pooled<>(Paragraph.blankLine()));
+            } else {
+                final Tuple<StyledString> scaledStrings = original.styledStrings.map( s -> s.mapStyle( st -> st._scale(scale) ) );
+                scaledParagraphs.add(new Pooled<>(Paragraph.of(scaledStrings)));
+            }
+        }
+        @SuppressWarnings("unchecked")
+        final Tuple<Pooled<Paragraph>> scaledContent =
+            (Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class, scaledParagraphs);
         return of(
-            _content.map( it -> it.mapStyle( s -> s._scale(scale) ) ),
+            scaledContent,
             _fontConf._scale(scale),
             _clipArea,
             _placementBoundary,
