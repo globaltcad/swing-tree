@@ -868,8 +868,9 @@ public final class TextConf implements Simplifiable<TextConf>
     public String toString() {
         if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
+        Tuple<StyledString> flatContent = _content.stream().flatMap(p->p.get().styledStrings.stream()).collect(Tuple.collectorOf(StyledString.class));
         return this.getClass().getSimpleName() + "[" +
-            "content=" + _content + ", " +
+            "content=" + flatContent + ", " +
             "fontConf=" + _fontConf + ", " +
             "clipArea=" + _clipArea + ", " +
             "placementBoundary=" + _placementBoundary + ", " +
