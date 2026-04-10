@@ -858,6 +858,110 @@ class Styled_Text_Obstacles_Spec extends Specification
     }
 
 
+    def 'Obstacle avoidance is only active for top-anchored placements; all other placements ignore obstacles'()
+    {
+        reportInfo """
+            The obstacle-avoidance algorithm works by flowing text downward from the top of
+            the available bounds, querying the free horizontal intervals at each successive
+            line\'s y-coordinate.  This mapping is only geometrically correct when the text
+            block is anchored to the top of the bounds — i.e. when placement is TOP, TOP_LEFT,
+            or TOP_RIGHT.
+
+            For *bottom-anchored* placements (BOTTOM, BOTTOM_LEFT, BOTTOM_RIGHT) the algorithm
+            would have to run in reverse — flowing upward — which would require a completely
+            separate implementation and roughly double the complexity.
+
+            For *vertically-centred* placements (CENTER, LEFT, RIGHT) the problem is even more
+            fundamental: the vertical position at which a line is rendered depends on the total
+            height of the text block, but the total height depends on which obstacles each line
+            hits, which in turn depends on the vertical position of each line.  This circular
+            dependency has no clean closed-form solution; resolving it correctly would require
+            iterative convergence similar to a fluid-dynamics solver — far beyond the scope of
+            a UI layout engine.
+
+            Therefore, obstacle avoidance is intentionally disabled for every non-top placement.
+            When an obstacle is registered but an incompatible placement is in use, the layout
+            engine silently ignores the obstacle and renders the text as if none were present.
+            The preferred height is consequently identical to the obstacle-free case.
+
+            This test verifies both sides of that contract:
+             — TOP, TOP_LEFT, and TOP_RIGHT DO apply obstacle avoidance (height increases).
+             — CENTER, LEFT, RIGHT, BOTTOM, BOTTOM_LEFT, and BOTTOM_RIGHT do NOT (height unchanged).
+        """
+        given : 'SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long paragraph whose lines span the full component width at 400 px:'
+            var content = Tuple.of(
+                StyledString.of(f -> f.size(14),
+                    "Obstacle avoidance requires top-anchored placement: only then does the layout engine " +
+                    "know the exact y-coordinate of each line before it is placed, allowing it to query " +
+                    "which horizontal intervals are free at that level and route the text accordingly."
+                )
+            )
+        and : 'A large central obstacle that blocks the right half of every line:'
+            var centralObstacle = new Rectangle2D.Float(200, 0, 200, 10_000)
+
+        and : 'A helper that measures preferred height at 400 px for a given placement and obstacle list:'
+            def preferredHeight = { UI.Placement placement, Shape[] obstacles ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .placement(placement)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                        .obstacles(obstacles)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setSize(400, 0)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    result[0] = box.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We measure the baseline height (no obstacle) for a top-anchored placement:'
+            int baselineHeight = preferredHeight(UI.Placement.TOP, new Shape[0])
+
+        then : 'The baseline is positive:'
+            baselineHeight > 0
+
+        when : 'We measure height WITH the central obstacle for each top-anchored placement:'
+            int hTop      = preferredHeight(UI.Placement.TOP,       new Shape[]{ centralObstacle })
+            int hTopLeft  = preferredHeight(UI.Placement.TOP_LEFT,  new Shape[]{ centralObstacle })
+            int hTopRight = preferredHeight(UI.Placement.TOP_RIGHT, new Shape[]{ centralObstacle })
+
+        then : 'All three top-anchored placements honour the obstacle — height increases:'
+            hTop      > baselineHeight
+            hTopLeft  > baselineHeight
+            hTopRight > baselineHeight
+
+        when : 'We measure height WITH the same obstacle for every non-top placement:'
+            int hCenter      = preferredHeight(UI.Placement.CENTER,       new Shape[]{ centralObstacle })
+            int hLeft        = preferredHeight(UI.Placement.LEFT,         new Shape[]{ centralObstacle })
+            int hRight       = preferredHeight(UI.Placement.RIGHT,        new Shape[]{ centralObstacle })
+            int hBottom      = preferredHeight(UI.Placement.BOTTOM,       new Shape[]{ centralObstacle })
+            int hBottomLeft  = preferredHeight(UI.Placement.BOTTOM_LEFT,  new Shape[]{ centralObstacle })
+            int hBottomRight = preferredHeight(UI.Placement.BOTTOM_RIGHT, new Shape[]{ centralObstacle })
+
+        then : 'Non-top placements ignore the obstacle entirely — height is the same as the baseline:'
+            hCenter      == baselineHeight
+            hLeft        == baselineHeight
+            hRight       == baselineHeight
+            hBottom      == baselineHeight
+            hBottomLeft  == baselineHeight
+            hBottomRight == baselineHeight
+    }
+
+
     def 'Child components of a styled container are automatically registered as text-layout obstacles'()
     {
         reportInfo """
