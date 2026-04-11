@@ -589,7 +589,7 @@ public final class TextConf implements Simplifiable<TextConf>
     }
 
     /**
-     * Returns an updated {@link TextConf} with the given shapes registered as obstacles
+     * Returns an updated {@link TextConf} with the given shapes registered as <i>"text obstacles"</i>
      * for the text layout engine. The text will wrap around and skip over each obstacle and
      * can never be rendered on top of it. Obstacle shapes are specified in component coordinates.
      * <p>
@@ -614,7 +614,8 @@ public final class TextConf implements Simplifiable<TextConf>
 
     /**
      * Returns an updated {@link TextConf} with the given {@link Tuple} of shapes registered
-     * as obstacles for the text layout engine. The text will wrap around and skip over each obstacle and
+     * as <i>"text obstacles"</i> for the text layout engine.
+     * The text will wrap around and skip over each obstacle and
      * can never be rendered on top of it. Obstacle shapes are specified in component coordinates.
      * <p>
      * Curved shapes such as circles or ellipses are supported as well.<br>

@@ -604,7 +604,7 @@ class Styled_Text_Obstacles_Spec extends Specification
     }
 
 
-    def 'A narrow obstacle at the right edge is invisible to short-line text but visible to long-line text'()
+    def 'A narrow text obstacle at the right edge is invisible to short-line text but visible to long-line text'()
     {
         reportInfo """
             The most important mental model for obstacles is that they only
@@ -689,7 +689,7 @@ class Styled_Text_Obstacles_Spec extends Specification
     }
 
 
-    def 'Text placement (alignment) does not affect preferred height, even when obstacles are present'()
+    def 'Text placement (alignment) does not affect preferred height, even when text obstacles are present'()
     {
         reportInfo """
             The `placement` property of a `TextConf` — LEFT, CENTER, RIGHT,
@@ -774,7 +774,7 @@ class Styled_Text_Obstacles_Spec extends Specification
     }
 
 
-    def 'A right-edge obstacle leaves short lines unchanged but increases height for a mix of short and long lines'()
+    def 'A right-edge text obstacle leaves short lines unchanged but increases height for a mix of short and long lines'()
     {
         reportInfo """
             Real-world text is rarely uniform: a document might have a mix of
