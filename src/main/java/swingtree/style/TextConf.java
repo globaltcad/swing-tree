@@ -186,8 +186,7 @@ public final class TextConf implements Simplifiable<TextConf>
 {
     private static final Logger log = LoggerFactory.getLogger(TextConf.class);
     public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
-    @SuppressWarnings("unchecked")
-    private static final Tuple<Pooled<Paragraph>> _EMPTY_CONTENT = (Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class);
+    private static final Tuple<Pooled<Paragraph>> _EMPTY_CONTENT = Tuple.of(Pooled.classTyped(Paragraph.class));
 
     private static final TextConf _NONE = new TextConf(
                                                 _EMPTY_CONTENT,
@@ -409,8 +408,7 @@ public final class TextConf implements Simplifiable<TextConf>
                       _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
         }
         final Pooled<Paragraph> pooled = new Pooled<>(Paragraph.of(strings));
-        @SuppressWarnings("unchecked")
-        final Tuple<Pooled<Paragraph>> wrapped = (Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class, pooled);
+        final Tuple<Pooled<Paragraph>> wrapped = Tuple.of(Pooled.classTyped(Paragraph.class)).add(pooled);
         return of(wrapped, _fontConf, _clipArea, _placementBoundary, _placement,
                   _offset, _wrapLines, _autoPreferredHeight, _obstacles,
                   _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
@@ -787,9 +785,8 @@ public final class TextConf implements Simplifiable<TextConf>
         }
         if ( current != null )
             result.add(_internedParagraphFrom(current));
-        @SuppressWarnings("unchecked")
-        final Tuple<Pooled<Paragraph>> tuple = ((Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class)).addAll(result);
-        return tuple;
+
+        return Tuple.of(Pooled.classTyped(Paragraph.class), result);
     }
 
     private static Pooled<Paragraph> _internedParagraphFrom( List<StyledString> strings ) {
@@ -818,10 +815,9 @@ public final class TextConf implements Simplifiable<TextConf>
                 scaledParagraphs.add(new Pooled<>(Paragraph.of(scaledStrings)));
             }
         }
-        @SuppressWarnings("unchecked")
-        final Tuple<Pooled<Paragraph>> scaledContent = ((Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class)).addAll(scaledParagraphs);
+
         return of(
-            scaledContent,
+            Tuple.of(Pooled.classTyped(Paragraph.class), scaledParagraphs),
             _fontConf._scale(scale),
             _clipArea,
             _placementBoundary,
