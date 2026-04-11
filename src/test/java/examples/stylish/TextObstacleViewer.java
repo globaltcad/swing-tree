@@ -103,7 +103,7 @@ public class TextObstacleViewer extends Panel
                                 .margin(13)
                             )
                             .add(
-                                panel("fill").peek( it -> it.setBounds(50, 100, 150, 200) )
+                                panel("fill").peek( it -> it.setBounds(UI.scale(50), UI.scale(100), UI.scale(150), UI.scale(200)) )
                                 .withStyle( it -> it.backgroundColor("transparent red").borderRadius(64) )
                                 .onMouseDrag( e -> {
                                     e.get().setLocation( e.get().getX() + e.deltaX(), e.get().getY() + e.deltaY() );
@@ -111,7 +111,7 @@ public class TextObstacleViewer extends Panel
                                 })
                             )
                             .add(
-                                panel("fill").peek( it -> it.setBounds(350, 200, 200, 150) )
+                                panel("fill").peek( it -> it.setBounds(UI.scale(350), UI.scale(200), UI.scale(200), UI.scale(150)) )
                                 .withStyle( it -> it.backgroundColor("transparent green").margin(24) )
                                 .onMouseDrag( e -> {
                                     e.get().setLocation( e.get().getX() + e.deltaX(), e.get().getY() + e.deltaY() );
@@ -119,7 +119,7 @@ public class TextObstacleViewer extends Panel
                                 })
                             )
                             .add(
-                                panel("fill").peek( it -> it.setBounds(650, 300, 100, 100) )
+                                panel("fill").peek( it -> it.setBounds(UI.scale(650), UI.scale(300), UI.scale(100), UI.scale(100)) )
                                 .withStyle( it -> it.backgroundColor("transparent blue").padding(24) )
                                 .onMouseDrag( e -> {
                                     e.get().setLocation( e.get().getX() + e.deltaX(), e.get().getY() + e.deltaY() );
