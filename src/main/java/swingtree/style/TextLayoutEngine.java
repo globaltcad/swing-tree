@@ -90,6 +90,91 @@ final class TextLayoutEngine {
     }
 
     /**
+     *  Secondary cache key used inside {@link ParagraphLayoutsData#wrappedLayouts}.
+     *  <p>
+     *  Together with the paragraph content and font configuration stored in the enclosing
+     *  {@link ParagraphLayoutsData} entry, these three fields fully capture the layout
+     *  context needed to reproduce the list of {@link LayoutLine}s produced for the
+     *  wrap/obstacle path of a single paragraph:
+     *  <ul>
+     *    <li>{@code intervals} — obstacle-free horizontal bands at the y-level where this
+     *        paragraph begins, computed by {@link #_freeIntervalsAt}; acts as a compact
+     *        fingerprint of the obstacle geometry relative to this paragraph.</li>
+     *    <li>{@code wrapLines} — whether word-wrapping is active.</li>
+     *    <li>{@code effectiveWidth} — the usable horizontal extent passed to
+     *        {@link LineBreakMeasurer#nextLayout}.</li>
+     *  </ul>
+     *  {@code hashCode} is pre-computed; floats use {@link Float#floatToIntBits} for
+     *  well-defined {@code NaN} handling.
+     */
+    private static final class LineLayoutKey {
+        final List<Band> intervals;     // unmodifiable snapshot
+        final boolean    wrapLines;
+        final float      effectiveWidth;
+        final int        _hash;
+
+        LineLayoutKey( List<Band> intervals, boolean wrapLines, float effectiveWidth ) {
+            this.intervals      = intervals;
+            this.wrapLines      = wrapLines;
+            this.effectiveWidth = effectiveWidth;
+            this._hash          = Objects.hash(intervals, wrapLines, Float.floatToIntBits(effectiveWidth));
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof LineLayoutKey) ) return false;
+            final LineLayoutKey other = (LineLayoutKey) o;
+            return wrapLines == other.wrapLines &&
+                   Float.floatToIntBits(effectiveWidth) == Float.floatToIntBits(other.effectiveWidth) &&
+                   intervals.equals(other.intervals);
+        }
+
+        @Override public int hashCode() { return _hash; }
+    }
+
+    /**
+     *  Per-paragraph cache entry stored in {@link #_PARAGRAPH_DATA_CACHE}.
+     *  <p>
+     *  Holds everything that can be reused across multiple layout passes for the same
+     *  paragraph text and font configuration:
+     *  <ul>
+     *    <li>{@link #attrStr} — the {@link AttributedString} built once from the styled
+     *        strings and their font attributes; avoids repeating the O(n) attribute-setup
+     *        work on every repaint.</li>
+     *    <li>{@link #measurer} — reusable {@link LineBreakMeasurer} ({@code null} while
+     *        borrowed by a concurrent caller or not yet created).</li>
+     *    <li>{@link #singleLayout} — cached {@link TextLayout} for the no-wrap,
+     *        no-obstacle path.  {@code null} until first computed.</li>
+     *    <li>{@link #wrappedLayouts} — cached {@link LayoutLine} lists for the
+     *        wrap/obstacle path, keyed by {@link LineLayoutKey}.</li>
+     *  </ul>
+     *  {@link #font} and {@link #boxModelConf} are stored so that a stale entry built
+     *  for a different styling context is detected and discarded on retrieval.
+     */
+    private static final class ParagraphLayoutsData {
+        final Font             font;
+        final BoxModelConf     boxModelConf;
+        final AttributedString attrStr;
+        /** {@code null} while borrowed by a caller or not yet created. */
+        @Nullable LineBreakMeasurer measurer;
+        /** Non-null once the no-wrap, no-obstacle path has run at least once. */
+        @Nullable TextLayout        singleLayout;
+        /** Cached full-paragraph {@link LayoutLine} lists for the wrap/obstacle path. */
+        final Map<LineLayoutKey, List<LayoutLine>> wrappedLayouts = new HashMap<>();
+
+        ParagraphLayoutsData( Font font, BoxModelConf boxModelConf, AttributedString attrStr ) {
+            this.font         = font;
+            this.boxModelConf = boxModelConf;
+            this.attrStr      = attrStr;
+        }
+
+        boolean isCompatibleWith( Font font, BoxModelConf boxModelConf ) {
+            return this.font.equals(font) && this.boxModelConf.equals(boxModelConf);
+        }
+    }
+
+    /**
      *  LRU cache capped at {@value #_CACHE_MAX_SIZE} entries.
      *  Uses an access-order {@link LinkedHashMap} so the least-recently-used entry is
      *  evicted once the cap is reached.  The map is wrapped in
@@ -99,27 +184,26 @@ final class TextLayoutEngine {
     private static final int _CACHE_MAX_SIZE = 128;
 
     /**
-     *  Weak-reference cache of reusable {@link LineBreakMeasurer}s, keyed by interned
+     *  Weak-reference cache of {@link ParagraphLayoutsData} entries, keyed by interned
      *  {@link Pooled}{@literal <}{@link Paragraph}{@literal >} instances.
      *  <p>
-     *  Creating a {@link LineBreakMeasurer} is expensive — it triggers font-metric lookups
-     *  via {@link java.awt.font.FontRenderContext}.  The measurer itself is designed for
-     *  reuse: calling {@link LineBreakMeasurer#setPosition(int)} resets the read cursor so
-     *  the same instance can re-layout the same paragraph with different widths or after
-     *  obstacle positions have changed (both of which invalidate the main {@link #_LAYOUT_CACHE}
-     *  but leave the paragraph content unchanged).
+     *  Each entry bundles the paragraph's {@link AttributedString}, its reusable
+     *  {@link LineBreakMeasurer}, the single no-wrap {@link TextLayout} (once computed),
+     *  and the map of previously computed {@link LayoutLine} lists for different layout
+     *  contexts — see {@link ParagraphLayoutsData} for details.
      *  <p>
-     *  Using a {@link WeakHashMap} allows entries to be reclaimed once no other code holds a
-     *  strong reference to the {@link Pooled} key — paragraphs that have scrolled off or been
-     *  replaced are automatically evicted without a fixed size cap.
+     *  Using a {@link WeakHashMap} allows entries to be reclaimed once no other code holds
+     *  a strong reference to the {@link Pooled} key — paragraphs that have scrolled off or
+     *  been replaced are automatically evicted without a fixed size cap.
      *  <p>
-     *  <b>Borrow semantics:</b> a measurer is {@link Map#remove removed} from this cache
-     *  before use and {@link Map#put returned} afterwards.  This ensures that at most one
-     *  thread uses a given measurer at any time (a concurrent caller simply constructs a
-     *  fresh one on cache-miss, which is always safe).
+     *  <b>Borrow semantics:</b> an entry is {@link Map#remove removed} from this cache
+     *  before use and {@link Map#put returned} afterwards.  This ensures at most one
+     *  thread mutates a given entry at any time; a concurrent caller that hits the same
+     *  key simply constructs a fresh entry on cache-miss.
      */
-    private static final Map<Pooled<Paragraph>, LineBreakMeasurer> _MEASURER_CACHE =
+    private static final Map<Pooled<Paragraph>, ParagraphLayoutsData> _PARAGRAPH_DATA_CACHE =
         Collections.synchronizedMap(new WeakHashMap<>());
+
     /**
      *  A large but geometrically safe line-width cap used when no explicit
      *  {@code boundsWidth} is available and as the "do not wrap" width passed
@@ -274,10 +358,22 @@ final class TextLayoutEngine {
      *  Phase 1 of the text rendering pipeline: converts a list of pre-split paragraphs into
      *  an ordered list of {@link LayoutLine}s, respecting word-wrap and obstacle constraints.
      *  <p>
-     *  Each non-null paragraph produces one or more {@link LayoutLine}s depending on available
-     *  width and obstacles.  A {@code null} paragraph entry represents a blank line and is
-     *  emitted as a {@link LayoutLine} with a {@code null} layout.  Any trailing blank-line
-     *  marker is stripped before returning.
+     *  Each non-blank paragraph produces one or more {@link LayoutLine}s depending on available
+     *  width and obstacles.  A paragraph whose {@link Paragraph#isBlankLine} flag is {@code true}
+     *  is emitted as a {@link LayoutLine} with a {@code null} layout.  Any trailing blank-line
+     *  entry is stripped before returning.
+     *  <p>
+     *  Results are cached at two levels for maximum reuse:
+     *  <ol>
+     *    <li>The {@link AttributedString} and {@link LineBreakMeasurer} for each paragraph are
+     *        kept in {@link #_PARAGRAPH_DATA_CACHE}, avoiding expensive font-metric setup on
+     *        every repaint.</li>
+     *    <li>The complete {@link LayoutLine} list for each paragraph is cached inside
+     *        {@link ParagraphLayoutsData#wrappedLayouts} (wrap/obstacle path) or
+     *        {@link ParagraphLayoutsData#singleLayout} (no-wrap, no-obstacle path), so
+     *        that a repaint with identical obstacle geometry and bounds skips the
+     *        {@link LineBreakMeasurer#nextLayout} calls entirely.</li>
+     *  </ol>
      *
      * @param paragraphs   Interned paragraphs produced by {@link TextConf#simplified()};
      *                     entries whose {@link Paragraph#isBlankLine} flag is {@code true} represent blank lines.
@@ -316,70 +412,104 @@ final class TextLayoutEngine {
                 currentY += estLineHeight;
                 continue;
             }
-            final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);
-            final AttributedCharacterIterator it = attrStr.getIterator();
 
-            if ((wrapLines && boundsWidth >= 0) || !obstacles.isEmpty()) {// LineBreakMeasurer path: word-wrapping and/or splitting around obstacles
+            // Borrow (or create) the ParagraphLayoutsData for this paragraph.
+            // The remove → use → put borrow pattern ensures thread safety: a concurrent
+            // caller that hits the same key simply constructs a fresh entry on miss.
+            ParagraphLayoutsData data = _PARAGRAPH_DATA_CACHE.remove(pooled);
+            if ( data == null || !data.isCompatibleWith(font, boxModelConf) ) {
+                final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);
+                data = new ParagraphLayoutsData(font, boxModelConf, attrStr);
+            }
+
+            if ( (wrapLines && boundsWidth >= 0) || !obstacles.isEmpty() ) {
+                // LineBreakMeasurer path: word-wrapping and/or splitting around obstacles.
                 // When boundsWidth is undefined, fall back to a large practical limit so
                 // that the measurer can still advance and obstacles can still be queried.
                 final float effectiveWidth = boundsWidth >= 0 ? boundsWidth : _UNBOUNDED_LINE_WIDTH;
-                // Borrow a cached measurer for this paragraph, or create a fresh one.
-                // The borrow pattern (remove → use → return) ensures thread safety: a
-                // concurrent caller that hits the same key simply creates a new measurer.
-                LineBreakMeasurer measurer = _MEASURER_CACHE.remove(pooled);
-                if (measurer != null)
-                    measurer.setPosition(it.getBeginIndex()); // reset to start of paragraph
-                else
-                    measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
-                final int end = it.getEndIndex();
-                while (measurer.getPosition() < end) {
-                    final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
 
-                    TextLayout firstLayout = null;
-                    float firstX = boundsX;
-                    float firstW = effectiveWidth;
-                    List<LayoutLine.Segment> extras = Collections.emptyList();
+                // Check whether we already have a cached result for this paragraph at this
+                // layout context.  The key captures the free intervals at the paragraph's
+                // starting y, plus wrapLines and effectiveWidth — together they identify
+                // the layout context without re-running the measurer.
+                final List<Band>     startIntervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
+                final LineLayoutKey  layoutKey      = new LineLayoutKey(startIntervals, wrapLines, effectiveWidth);
+                final List<LayoutLine> cachedLines  = data.wrappedLayouts.get(layoutKey);
 
-                    if (intervals.isEmpty()) {
-                        // All space is blocked — advance the measurer so the loop terminates.
-                        // When not wrapping, consume all remaining text in one shot.
-                        firstLayout = measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
-                    } else {
-                        final int lastIdx = intervals.size() - 1;
-                        for (int i = 0; i <= lastIdx; i++) {
-                            if (measurer.getPosition() >= end) break;
-                            final Band band = intervals.get(i);
-                            final float x = band.start, w = band.size;
-                            // When not wrapping, give the last band an unlimited width so all
-                            // remaining text is consumed here instead of wrapping to a new line.
-                            final float nextWidth = (wrapLines || i < lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;
-                            final TextLayout layout = measurer.nextLayout(nextWidth);
-                            if (firstLayout == null) {
-                                firstLayout = layout;
-                                firstX = x;
-                                firstW = w;
-                            } else {
-                                if (extras.isEmpty()) extras = new ArrayList<>();
-                                extras.add(new LayoutLine.Segment(layout, x, w));
+                if ( cachedLines != null ) {
+                    lines.addAll(cachedLines);
+                    for ( LayoutLine ll : cachedLines )
+                        currentY += ll.layout == null ? estLineHeight
+                                                      : ll.layout.getAscent() + ll.layout.getDescent() + ll.layout.getLeading();
+                } else {
+                    // Build from scratch and populate the per-paragraph cache.
+                    final AttributedCharacterIterator it = data.attrStr.getIterator();
+                    if ( data.measurer != null )
+                        data.measurer.setPosition(it.getBeginIndex()); // reset to start of paragraph
+                    else
+                        data.measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);
+
+                    final List<LayoutLine> paraLines = new ArrayList<>();
+                    final int end = it.getEndIndex();
+                    while ( data.measurer.getPosition() < end ) {
+                        final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
+
+                        TextLayout firstLayout = null;
+                        float firstX = boundsX;
+                        float firstW = effectiveWidth;
+                        List<LayoutLine.Segment> extras = Collections.emptyList();
+
+                        if ( intervals.isEmpty() ) {
+                            // All space is blocked — advance the measurer so the loop terminates.
+                            // When not wrapping, consume all remaining text in one shot.
+                            firstLayout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
+                        } else {
+                            final int lastIdx = intervals.size() - 1;
+                            for ( int i = 0; i <= lastIdx; i++ ) {
+                                if ( data.measurer.getPosition() >= end ) break;
+                                final Band  band = intervals.get(i);
+                                final float x = band.start, w = band.size;
+                                // When not wrapping, give the last band an unlimited width so all
+                                // remaining text is consumed here instead of wrapping to a new line.
+                                final float      nextWidth = (wrapLines || i < lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;
+                                final TextLayout layout    = data.measurer.nextLayout(nextWidth);
+                                if ( firstLayout == null ) {
+                                    firstLayout = layout;
+                                    firstX      = x;
+                                    firstW      = w;
+                                } else {
+                                    if ( extras.isEmpty() ) extras = new ArrayList<>();
+                                    extras.add(new LayoutLine.Segment(layout, x, w));
+                                }
                             }
+                        }
+
+                        if ( firstLayout != null ) {
+                            paraLines.add(new LayoutLine(firstLayout, firstX, firstW, extras));
+                            currentY += firstLayout.getAscent() + firstLayout.getDescent() + firstLayout.getLeading();
+                        } else {
+                            currentY += estLineHeight; // all intervals had zero width — skip band
                         }
                     }
 
-                    if (firstLayout != null) {
-                        lines.add(new LayoutLine(firstLayout, firstX, firstW, extras));
-                        currentY += firstLayout.getAscent() + firstLayout.getDescent() + firstLayout.getLeading();
-                    } else {
-                        currentY += estLineHeight; // all intervals had zero width — skip band
-                    }
+                    final List<LayoutLine> immutableParaLines = Collections.unmodifiableList(paraLines);
+                    //data.wrappedLayouts.put(layoutKey, immutableParaLines);
+                    lines.addAll(immutableParaLines);
                 }
-                // Return the measurer to the cache for reuse in subsequent layout passes
-                // that share the same paragraph content (e.g. after obstacle positions change).
-                _MEASURER_CACHE.put(pooled, measurer);
-            } else {// No obstacles and no wrapping — a single TextLayout suffices
-                final TextLayout layout = new TextLayout(it, frc);
-                lines.add(new LayoutLine(layout, boundsX, boundsWidth));
-                currentY += layout.getAscent() + layout.getDescent() + layout.getLeading();
+            } else {
+                // No obstacles and no wrapping — a single TextLayout suffices.
+                // Cache it so subsequent repaints (e.g. after a bounds change that does not
+                // affect wrapping) skip the TextLayout construction entirely.
+                if ( data.singleLayout == null ) {
+                    final AttributedCharacterIterator it = data.attrStr.getIterator();
+                    data.singleLayout = new TextLayout(it, frc);
+                }
+                lines.add(new LayoutLine(data.singleLayout, boundsX, boundsWidth));
+                currentY += data.singleLayout.getAscent() + data.singleLayout.getDescent() + data.singleLayout.getLeading();
             }
+
+            // Return the entry to the cache so the next layout pass can reuse it.
+            _PARAGRAPH_DATA_CACHE.put(pooled, data);
         }
 
         // Strip a trailing blank-line marker that may have been emitted for a paragraph
@@ -487,6 +617,20 @@ final class TextLayoutEngine {
         Band(float start, float size) {
             this.start = start;
             this.size  = size;
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof Band) ) return false;
+            final Band other = (Band) o;
+            return Float.floatToIntBits(start) == Float.floatToIntBits(other.start) &&
+                   Float.floatToIntBits(size)  == Float.floatToIntBits(other.size);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Float.floatToIntBits(start) + Float.floatToIntBits(size);
         }
     }
 
