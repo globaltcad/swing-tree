@@ -4,175 +4,25 @@ import org.jspecify.annotations.Nullable;
 import sprouts.Pair;
 import sprouts.Tuple;
 import swingtree.UI;
+import swingtree.layout.Bounds;
 
+import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
-import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.util.*;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class TextLayoutEngine {
     private TextLayoutEngine() {}
-
-    /**
-     *  Immutable cache key for {@link #_buildTextLayoutsAndPreferredHeight}.
-     *  Contains every parameter of that method <em>except</em> the {@link FontRenderContext},
-     *  which is assumed to be consistent across calls in the same rendering environment.
-     *  <p>
-     *  The {@code hashCode} is pre-computed on construction so repeated cache lookups are cheap.
-     *  Floats are compared via {@link Float#floatToIntBits} to avoid {@code NaN} edge cases.
-     *  {@link Shape} instances inside {@code obstacles} rely on their own {@code equals}/{@code hashCode}
-     *  — most AWT shapes use identity, which is fine since {@link TextConf} is immutable and
-     *  reuses the same {@link Tuple} reference across repeated style evaluations.
-     */
-    private static final class TextLayoutKey {
-        private final Font                       font;
-        private final Tuple<Pooled<Paragraph>>   paragraphs;
-        private final float                      boundsWidth;
-        private final float                      boundsX;
-        private final float                      boundsY;
-        private final boolean                    wrapLines;
-        private final BoxModelConf               boxModelConf;
-        private final Tuple<Shape>               obstacles;
-        private final int                        _hash;
-
-        TextLayoutKey(
-            Font                       font,
-            Tuple<Pooled<Paragraph>>   paragraphs,
-            float                      boundsWidth,
-            float                      boundsX,
-            float                      boundsY,
-            boolean                    wrapLines,
-            BoxModelConf               boxModelConf,
-            Tuple<Shape>               obstacles
-        ) {
-            this.font         = font;
-            this.paragraphs   = paragraphs;
-            this.boundsWidth  = boundsWidth;
-            this.boundsX      = boundsX;
-            this.boundsY      = boundsY;
-            this.wrapLines    = wrapLines;
-            this.boxModelConf = boxModelConf;
-            this.obstacles    = obstacles;
-            this._hash        = Objects.hash(
-                                    font, paragraphs,
-                                    Float.floatToIntBits(boundsWidth),
-                                    Float.floatToIntBits(boundsX),
-                                    Float.floatToIntBits(boundsY),
-                                    wrapLines, boxModelConf, obstacles
-                                );
-        }
-
-        @Override
-        public boolean equals( Object o ) {
-            if ( this == o ) return true;
-            if ( !(o instanceof TextLayoutKey) ) return false;
-            final TextLayoutKey other = (TextLayoutKey) o;
-            return Float.floatToIntBits(boundsWidth) == Float.floatToIntBits(other.boundsWidth) &&
-                   Float.floatToIntBits(boundsX)     == Float.floatToIntBits(other.boundsX)     &&
-                   Float.floatToIntBits(boundsY)     == Float.floatToIntBits(other.boundsY)     &&
-                   wrapLines    == other.wrapLines                                               &&
-                   font        .equals(other.font)                                               &&
-                   paragraphs  .equals(other.paragraphs)                                        &&
-                   boxModelConf.equals(other.boxModelConf)                                       &&
-                   obstacles   .equals(other.obstacles);
-        }
-
-        @Override public int hashCode() { return _hash; }
-    }
-
-    /**
-     *  Secondary cache key used inside {@link ParagraphLayoutsData#wrappedLayouts}.
-     *  <p>
-     *  Together with the paragraph content and font configuration stored in the enclosing
-     *  {@link ParagraphLayoutsData} entry, these three fields fully capture the layout
-     *  context needed to reproduce the list of {@link LayoutLine}s produced for the
-     *  wrap/obstacle path of a single paragraph:
-     *  <ul>
-     *    <li>{@code intervals} — obstacle-free horizontal bands at the y-level where this
-     *        paragraph begins, computed by {@link #_freeIntervalsAt}; acts as a compact
-     *        fingerprint of the obstacle geometry relative to this paragraph.</li>
-     *    <li>{@code wrapLines} — whether word-wrapping is active.</li>
-     *    <li>{@code effectiveWidth} — the usable horizontal extent passed to
-     *        {@link LineBreakMeasurer#nextLayout}.</li>
-     *  </ul>
-     *  {@code hashCode} is pre-computed; floats use {@link Float#floatToIntBits} for
-     *  well-defined {@code NaN} handling.
-     */
-    private static final class LineLayoutKey {
-        final List<Band> intervals;     // unmodifiable snapshot
-        final boolean    wrapLines;
-        final float      effectiveWidth;
-        final int        _hash;
-
-        LineLayoutKey( List<Band> intervals, boolean wrapLines, float effectiveWidth ) {
-            this.intervals      = intervals;
-            this.wrapLines      = wrapLines;
-            this.effectiveWidth = effectiveWidth;
-            this._hash          = Objects.hash(intervals, wrapLines, Float.floatToIntBits(effectiveWidth));
-        }
-
-        @Override
-        public boolean equals( Object o ) {
-            if ( this == o ) return true;
-            if ( !(o instanceof LineLayoutKey) ) return false;
-            final LineLayoutKey other = (LineLayoutKey) o;
-            return wrapLines == other.wrapLines &&
-                   Float.floatToIntBits(effectiveWidth) == Float.floatToIntBits(other.effectiveWidth) &&
-                   intervals.equals(other.intervals);
-        }
-
-        @Override public int hashCode() { return _hash; }
-    }
-
-    /**
-     *  Per-paragraph cache entry stored in {@link #_PARAGRAPH_DATA_CACHE}.
-     *  <p>
-     *  Holds everything that can be reused across multiple layout passes for the same
-     *  paragraph text and font configuration:
-     *  <ul>
-     *    <li>{@link #attrStr} — the {@link AttributedString} built once from the styled
-     *        strings and their font attributes; avoids repeating the O(n) attribute-setup
-     *        work on every repaint.</li>
-     *    <li>{@link #measurer} — reusable {@link LineBreakMeasurer} ({@code null} while
-     *        borrowed by a concurrent caller or not yet created).</li>
-     *    <li>{@link #singleLayout} — cached {@link TextLayout} for the no-wrap,
-     *        no-obstacle path.  {@code null} until first computed.</li>
-     *    <li>{@link #wrappedLayouts} — cached {@link LayoutLine} lists for the
-     *        wrap/obstacle path, keyed by {@link LineLayoutKey}.</li>
-     *  </ul>
-     *  {@link #font} and {@link #boxModelConf} are stored so that a stale entry built
-     *  for a different styling context is detected and discarded on retrieval.
-     */
-    private static final class ParagraphLayoutsData {
-        final Font             font;
-        final BoxModelConf     boxModelConf;
-        final AttributedString attrStr;
-        /** {@code null} while borrowed by a caller or not yet created. */
-        @Nullable LineBreakMeasurer measurer;
-        /** Non-null once the no-wrap, no-obstacle path has run at least once. */
-        @Nullable TextLayout        singleLayout;
-        /** Cached full-paragraph {@link LayoutLine} lists for the wrap/obstacle path. */
-        final Map<LineLayoutKey, List<LayoutLine>> wrappedLayouts = new HashMap<>();
-
-        ParagraphLayoutsData( Font font, BoxModelConf boxModelConf, AttributedString attrStr ) {
-            this.font         = font;
-            this.boxModelConf = boxModelConf;
-            this.attrStr      = attrStr;
-        }
-
-        boolean isCompatibleWith( Font font, BoxModelConf boxModelConf ) {
-            return this.font.equals(font) && this.boxModelConf.equals(boxModelConf);
-        }
-    }
 
     /**
      *  LRU cache capped at {@value #_CACHE_MAX_SIZE} entries.
@@ -201,8 +51,7 @@ final class TextLayoutEngine {
      *  thread mutates a given entry at any time; a concurrent caller that hits the same
      *  key simply constructs a fresh entry on cache-miss.
      */
-    private static final Map<Pooled<Paragraph>, ParagraphLayoutsData> _PARAGRAPH_DATA_CACHE =
-        Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<Pooled<Paragraph>, ParagraphLayoutsData> _PARAGRAPH_DATA_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
     /**
      *  A large but geometrically safe line-width cap used when no explicit
@@ -217,62 +66,46 @@ final class TextLayoutEngine {
     private static final float _UNBOUNDED_LINE_WIDTH = Short.MAX_VALUE;
     @SuppressWarnings("serial")
     private static final Map<TextLayoutKey, Pair<Float, List<LayoutLine>>> _LAYOUT_CACHE =
-        Collections.synchronizedMap(
-            new LinkedHashMap<TextLayoutKey, Pair<Float, List<LayoutLine>>>(
-                _CACHE_MAX_SIZE + 1, 0.75f, true /* access-order */
-            ) {
-                @Override
-                protected boolean removeEldestEntry(
-                    Map.Entry<TextLayoutKey, Pair<Float, List<LayoutLine>>> eldest
-                ) {
-                    return size() > _CACHE_MAX_SIZE;
-                }
-            }
+            Collections.synchronizedMap(
+                    new LinkedHashMap<TextLayoutKey, Pair<Float, List<LayoutLine>>>(
+                            _CACHE_MAX_SIZE + 1, 0.75f, true /* access-order */
+                    ) {
+                        @Override
+                        protected boolean removeEldestEntry(
+                                Map.Entry<TextLayoutKey, Pair<Float, List<LayoutLine>>> eldest
+                        ) {
+                            return size() > _CACHE_MAX_SIZE;
+                        }
+                    }
+            );
+
+
+    static Shape childShapeForArea( Component child, UI.ComponentBoundary area ) {
+        if ( area == UI.ComponentBoundary.OUTER_TO_EXTERIOR || !(child instanceof JComponent) )
+            return child.getBounds();
+        final JComponent asJComponent = (JComponent) child;
+        final ComponentConf previousComponentConf = ComponentExtension.from(asJComponent).getConf();
+        final Pair<BoxModelConf, ComponentConf> boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(
+                Bounds.of(asJComponent.getX(), asJComponent.getY(), asJComponent.getWidth(), asJComponent.getHeight()),
+                previousComponentConf.style(),
+                StyleInstaller._formerBorderMarginCorrection(asJComponent),
+                previousComponentConf
         );
-
-    /**
-     *  Holds a single laid-out text line together with the obstacle-free horizontal region
-     *  it was fitted into.  Both {@code regionX} and {@code regionWidth} are in component
-     *  coordinates and are used by the renderer to position the line, including alignment
-     *  (LEFT / CENTER / RIGHT) within the available region.
-     *  <p>
-     *  When obstacles split a visual line into more than one free interval, every interval
-     *  beyond the first is captured as an extra {@link Segment} in {@code extraSegments}.
-     *  All segments share the same baseline (y is not advanced between them).
-     *  <p>
-     *  A {@code null} {@code layout} represents a blank / empty line — the region fields
-     *  still carry the full text-bounds width so that the blank contributes the correct height.
-     */
-    static final class LayoutLine {
-
-        /** A secondary text fragment placed in one of the additional free intervals on this line. */
-        static final class Segment {
-            final TextLayout layout;
-            final float regionX;
-            final float regionWidth;
-            Segment(TextLayout layout, float regionX, float regionWidth) {
-                this.layout      = layout;
-                this.regionX     = regionX;
-                this.regionWidth = regionWidth;
-            }
+        Shape shapeArea = null;
+        ComponentAreas areas = ComponentAreas.of(new Pooled<>(boxAndCompConf.first()));
+        switch ( area ) {
+            case EXTERIOR_TO_BORDER: shapeArea = areas.get(UI.ComponentArea.BODY); break;
+            case BORDER_TO_INTERIOR: shapeArea = areas.get(UI.ComponentArea.INTERIOR); break;
+            case INTERIOR_TO_CONTENT: shapeArea = areas.getContentArea(); break;
+            case CENTER_TO_CONTENT:
+                // Basically a point. We give it a small area to avoid issues with zero-area shapes:
+                shapeArea = new Rectangle(0, 0, 1, 1);
+                break;
         }
-
-        final @Nullable TextLayout  layout;
-        final float                 regionX;
-        final float                 regionWidth;
-        /** Additional same-baseline fragments produced when obstacles split the line. */
-        final List<Segment>         extraSegments;
-
-        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth) {
-            this(layout, regionX, regionWidth, Collections.emptyList());
-        }
-
-        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth, List<Segment> extraSegments) {
-            this.layout        = layout;
-            this.regionX       = regionX;
-            this.regionWidth   = regionWidth;
-            this.extraSegments = extraSegments;
-        }
+        // Now we need to translate to the parent coordinate space:
+        int xOffset = asJComponent.getX(); // -> these are offsets in the parent component coordinate system!
+        int yOffset = asJComponent.getY();
+        return new TextLayoutEngine.TranslatedShape(shapeArea, xOffset, yOffset);
     }
 
 
@@ -417,9 +250,9 @@ final class TextLayoutEngine {
             // The remove → use → put borrow pattern ensures thread safety: a concurrent
             // caller that hits the same key simply constructs a fresh entry on miss.
             ParagraphLayoutsData data = _PARAGRAPH_DATA_CACHE.remove(pooled);
-            if ( data == null || !data.isCompatibleWith(font, boxModelConf) ) {
+            if ( data == null || !data.isCompatibleWith(font) ) {
                 final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);
-                data = new ParagraphLayoutsData(font, boxModelConf, attrStr);
+                data = new ParagraphLayoutsData(font, attrStr);
             }
 
             if ( (wrapLines && boundsWidth >= 0) || !obstacles.isEmpty() ) {
@@ -429,11 +262,11 @@ final class TextLayoutEngine {
                 final float effectiveWidth = boundsWidth >= 0 ? boundsWidth : _UNBOUNDED_LINE_WIDTH;
 
                 // Check whether we already have a cached result for this paragraph at this
-                // layout context.  The key captures the free intervals at the paragraph's
-                // starting y, plus wrapLines and effectiveWidth — together they identify
-                // the layout context without re-running the measurer.
-                final List<Band>     startIntervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
-                final LineLayoutKey  layoutKey      = new LineLayoutKey(startIntervals, wrapLines, effectiveWidth);
+                // layout context.  The key captures obstacles + paragraphY, which together
+                // determine the free intervals at every line within the paragraph — not just
+                // the first.  Using only the first line's intervals would give stale cache
+                // hits when an obstacle moves into a later line but misses the first.
+                final LineLayoutKey  layoutKey      = new LineLayoutKey(obstacles, Math.round(currentY), wrapLines, Math.round(effectiveWidth));
                 final List<LayoutLine> cachedLines  = data.wrappedLayouts.get(layoutKey);
 
                 if ( cachedLines != null ) {
@@ -493,7 +326,7 @@ final class TextLayoutEngine {
                     }
 
                     final List<LayoutLine> immutableParaLines = Collections.unmodifiableList(paraLines);
-                    //data.wrappedLayouts.put(layoutKey, immutableParaLines);
+                    data.wrappedLayouts.put(layoutKey, immutableParaLines);
                     lines.addAll(immutableParaLines);
                 }
             } else {
@@ -559,6 +392,10 @@ final class TextLayoutEngine {
         final Area lineStrip = new Area(new Rectangle2D.Float(boundsX, y, boundsWidth, lineHeight));
 
         for ( Shape obstacle : obstacles ) {
+            if ( obstacle instanceof TranslatedShape ) {
+                // Unwrap to get the actual translated geometry:
+                obstacle = ((TranslatedShape) obstacle).getTranslatedShape();
+            }
             // Fast pre-check with the bounding box before the more expensive Area intersection
             final Rectangle2D ob = obstacle.getBounds2D();
             if ( ob.getMaxY() <= y || ob.getMinY() >= y + lineHeight )
@@ -604,40 +441,10 @@ final class TextLayoutEngine {
         return remaining;
     }
 
-    private static final class Range {
-        final float start, end;
-        Range(float start, float end) {
-            this.start = start;
-            this.end   = end;
-        }
-    }
-
-    private static final class Band {
-        final float start, size;
-        Band(float start, float size) {
-            this.start = start;
-            this.size  = size;
-        }
-
-        @Override
-        public boolean equals( Object o ) {
-            if ( this == o ) return true;
-            if ( !(o instanceof Band) ) return false;
-            final Band other = (Band) o;
-            return Float.floatToIntBits(start) == Float.floatToIntBits(other.start) &&
-                   Float.floatToIntBits(size)  == Float.floatToIntBits(other.size);
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * Float.floatToIntBits(start) + Float.floatToIntBits(size);
-        }
-    }
-
     private static AttributedString _paragraphToAttributedString(
         final Tuple<StyledString> paragraph,
         final Font font,
-        final BoxModelConf boxModelConf
+        final BoxModelConf boxModelConf // Needed for some font configs which have paints that depend on the box model (gradient offsets, etc.)
     ) {
         final StringBuilder sb = new StringBuilder();
         for ( StyledString s : paragraph )
@@ -660,6 +467,342 @@ final class TextLayoutEngine {
             index += styledStringLength;
         }
         return attrStr;
+    }
+
+    /**
+     *  Holds a single laid-out text line together with the obstacle-free horizontal region
+     *  it was fitted into.  Both {@code regionX} and {@code regionWidth} are in component
+     *  coordinates and are used by the renderer to position the line, including alignment
+     *  (LEFT / CENTER / RIGHT) within the available region.
+     *  <p>
+     *  When obstacles split a visual line into more than one free interval, every interval
+     *  beyond the first is captured as an extra {@link Segment} in {@code extraSegments}.
+     *  All segments share the same baseline (y is not advanced between them).
+     *  <p>
+     *  A {@code null} {@code layout} represents a blank / empty line — the region fields
+     *  still carry the full text-bounds width so that the blank contributes the correct height.
+     */
+    static final class LayoutLine {
+
+        /** A secondary text fragment placed in one of the additional free intervals on this line. */
+        static final class Segment {
+            final TextLayout layout;
+            final float regionX;
+            final float regionWidth;
+            Segment(TextLayout layout, float regionX, float regionWidth) {
+                this.layout      = layout;
+                this.regionX     = regionX;
+                this.regionWidth = regionWidth;
+            }
+        }
+
+        final @Nullable TextLayout  layout;
+        final float                 regionX;
+        final float                 regionWidth;
+        /** Additional same-baseline fragments produced when obstacles split the line. */
+        final List<Segment>         extraSegments;
+
+        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth) {
+            this(layout, regionX, regionWidth, Collections.emptyList());
+        }
+
+        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth, List<Segment> extraSegments) {
+            this.layout        = layout;
+            this.regionX       = regionX;
+            this.regionWidth   = regionWidth;
+            this.extraSegments = extraSegments;
+        }
+    }
+
+    private static final class Range {
+        final float start, end;
+        Range(float start, float end) {
+            this.start = start;
+            this.end   = end;
+        }
+    }
+
+    private static final class Band {
+        final float start, size;
+        Band(float start, float size) {
+            this.start = start;
+            this.size  = size;
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof Band) ) return false;
+            final Band other = (Band) o;
+            return Float.floatToIntBits(start) == Float.floatToIntBits(other.start) &&
+                    Float.floatToIntBits(size)  == Float.floatToIntBits(other.size);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Float.floatToIntBits(start) + Float.floatToIntBits(size);
+        }
+    }
+
+    /**
+     *  Immutable cache key for {@link #_buildTextLayoutsAndPreferredHeight}.
+     *  Contains every parameter of that method <em>except</em> the {@link FontRenderContext},
+     *  which is assumed to be consistent across calls in the same rendering environment.
+     *  <p>
+     *  The {@code hashCode} is pre-computed on construction so repeated cache lookups are cheap.
+     *  Floats are compared via {@link Float#floatToIntBits} to avoid {@code NaN} edge cases.
+     *  {@link Shape} instances inside {@code obstacles} rely on their own {@code equals}/{@code hashCode}
+     *  — most AWT shapes use identity, which is fine since {@link TextConf} is immutable and
+     *  reuses the same {@link Tuple} reference across repeated style evaluations.
+     */
+    private static final class TextLayoutKey {
+        private final Font                       font;
+        private final Tuple<Pooled<Paragraph>>   paragraphs;
+        private final float                      boundsWidth;
+        private final float                      boundsX;
+        private final float                      boundsY;
+        private final boolean                    wrapLines;
+        private final BoxModelConf               boxModelConf;
+        private final Tuple<Shape>               obstacles;
+        private final int                        _hash;
+
+        TextLayoutKey(
+                Font                       font,
+                Tuple<Pooled<Paragraph>>   paragraphs,
+                float                      boundsWidth,
+                float                      boundsX,
+                float                      boundsY,
+                boolean                    wrapLines,
+                BoxModelConf               boxModelConf,
+                Tuple<Shape>               obstacles
+        ) {
+            this.font         = font;
+            this.paragraphs   = paragraphs;
+            this.boundsWidth  = boundsWidth;
+            this.boundsX      = boundsX;
+            this.boundsY      = boundsY;
+            this.wrapLines    = wrapLines;
+            this.boxModelConf = boxModelConf;
+            this.obstacles    = obstacles;
+            this._hash        = Objects.hash(
+                    font, paragraphs,
+                    Float.floatToIntBits(boundsWidth),
+                    Float.floatToIntBits(boundsX),
+                    Float.floatToIntBits(boundsY),
+                    wrapLines, boxModelConf, obstacles
+            );
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof TextLayoutKey) ) return false;
+            final TextLayoutKey other = (TextLayoutKey) o;
+            return Float.floatToIntBits(boundsWidth) == Float.floatToIntBits(other.boundsWidth) &&
+                    Float.floatToIntBits(boundsX)     == Float.floatToIntBits(other.boundsX)     &&
+                    Float.floatToIntBits(boundsY)     == Float.floatToIntBits(other.boundsY)     &&
+                    wrapLines    == other.wrapLines                                               &&
+                    font        .equals(other.font)                                               &&
+                    paragraphs  .equals(other.paragraphs)                                        &&
+                    boxModelConf.equals(other.boxModelConf)                                       &&
+                    obstacles   .equals(other.obstacles);
+        }
+
+        @Override public int hashCode() { return _hash; }
+    }
+
+    /**
+     *  Secondary cache key used inside {@link ParagraphLayoutsData#wrappedLayouts}.
+     *  <p>
+     *  Together with the paragraph content and font configuration stored in the enclosing
+     *  {@link ParagraphLayoutsData} entry, these four fields fully capture the layout
+     *  context needed to reproduce the list of {@link LayoutLine}s produced for the
+     *  wrap/obstacle path of a single paragraph:
+     *  <ul>
+     *    <li>{@code obstacles} — the shapes the text must flow around; equality uses each
+     *        shape's own {@code equals} (most AWT shapes compare by value), so any
+     *        positional change produces a new key and a cache miss.</li>
+     *    <li>{@code paragraphY} — the y-coordinate at which this paragraph starts in
+     *        component space; together with {@code obstacles} it determines the free
+     *        intervals at every line within the paragraph.</li>
+     *    <li>{@code wrapLines} — whether word-wrapping is active.</li>
+     *    <li>{@code effectiveWidth} — the usable horizontal extent passed to
+     *        {@link LineBreakMeasurer#nextLayout}.</li>
+     *  </ul>
+     *  Using {@code obstacles + paragraphY} rather than a snapshot of the first line's
+     *  free intervals is essential for correctness: an obstacle that misses the first line
+     *  but covers later lines would otherwise produce a stale cache hit after it moves.
+     *  <p>
+     *  {@code hashCode} is pre-computed; floats use {@link Float#floatToIntBits} for
+     *  well-defined {@code NaN} handling.
+     */
+    private static final class LineLayoutKey {
+        final Tuple<Shape> obstacles;
+        final float        paragraphY;
+        final boolean      wrapLines;
+        final float        effectiveWidth;
+        final int          _hash;
+
+        LineLayoutKey( Tuple<Shape> obstacles, float paragraphY, boolean wrapLines, float effectiveWidth ) {
+            this.obstacles      = obstacles;
+            this.paragraphY     = paragraphY;
+            this.wrapLines      = wrapLines;
+            this.effectiveWidth = effectiveWidth;
+            this._hash          = Objects.hash(obstacles, Float.floatToIntBits(paragraphY), wrapLines, Float.floatToIntBits(effectiveWidth));
+        }
+
+        @Override
+        public boolean equals( Object o ) {
+            if ( this == o ) return true;
+            if ( !(o instanceof LineLayoutKey) ) return false;
+            final LineLayoutKey other = (LineLayoutKey) o;
+            return wrapLines == other.wrapLines &&
+                    Float.floatToIntBits(paragraphY)     == Float.floatToIntBits(other.paragraphY)     &&
+                    Float.floatToIntBits(effectiveWidth) == Float.floatToIntBits(other.effectiveWidth) &&
+                    obstacles.equals(other.obstacles);
+        }
+
+        @Override public int hashCode() { return _hash; }
+    }
+
+    /**
+     *  Per-paragraph cache entry stored in {@link #_PARAGRAPH_DATA_CACHE}.
+     *  <p>
+     *  Holds everything that can be reused across multiple layout passes for the same
+     *  paragraph text and font configuration:
+     *  <ul>
+     *    <li>{@link #attrStr} — the {@link AttributedString} built once from the styled
+     *        strings and their font attributes; avoids repeating the O(n) attribute-setup
+     *        work on every repaint.</li>
+     *    <li>{@link #measurer} — reusable {@link LineBreakMeasurer} ({@code null} while
+     *        borrowed by a concurrent caller or not yet created).</li>
+     *    <li>{@link #singleLayout} — cached {@link TextLayout} for the no-wrap,
+     *        no-obstacle path.  {@code null} until first computed.</li>
+     *    <li>{@link #wrappedLayouts} — cached {@link LayoutLine} lists for the
+     *        wrap/obstacle path, keyed by {@link LineLayoutKey}.</li>
+     *  </ul>
+     *  {@link #font} are stored so that a stale entry built
+     *  for a different styling context is detected and discarded on retrieval.
+     *  <b>A {@link BoxModelConf} is NOT needed, because although it is used by a font for gradient
+     *  and noise paint configuration, this will never affect the layout!</b>
+     */
+    private static final class ParagraphLayoutsData {
+        final Font             font;
+        final AttributedString attrStr;
+        /** {@code null} while borrowed by a caller or not yet created. */
+        @Nullable LineBreakMeasurer measurer;
+        /** Non-null once the no-wrap, no-obstacle path has run at least once. */
+        @Nullable TextLayout        singleLayout;
+        /** Cached full-paragraph {@link LayoutLine} lists for the wrap/obstacle path. */
+        final Map<LineLayoutKey, List<LayoutLine>> wrappedLayouts = new LinkedHashMap<LineLayoutKey, List<LayoutLine>>(
+                32 + 1, 0.75f, true /* access-order */
+        ) {
+            @Override protected boolean removeEldestEntry(Map.Entry<LineLayoutKey, List<LayoutLine>> eldest) {
+                return size() > 32;
+            }
+        };
+
+        ParagraphLayoutsData( Font font, AttributedString attrStr ) {
+            this.font         = font;
+            this.attrStr      = attrStr;
+        }
+
+        boolean isCompatibleWith( Font font ) {
+            return this.font.equals(font);
+        }
+    }
+
+    /**
+     *  This wrapper class exists to make caching more effective by using the source shape
+     *  and the offsets as the basis for equality and hash code, rather than the translated shape's geometry.
+     *  <b>
+     *      This is because {@code AffineTransform.getTranslateInstance(xOffset, yOffset)} produces shapes
+     *      with non-deterministic value semantics for equals() and hashCode().
+     *  </b>
+     */
+    private static final class TranslatedShape implements Shape {
+        private final int _xOffset;
+        private final int _yOffset;
+        private final Shape _sourceShape;
+        private final Shape _translatedShape;
+        private final AtomicReference<@Nullable Integer> _hashCache = new AtomicReference<>(null);
+
+        public TranslatedShape(Shape shapeArea, int xOffset, int yOffset) {
+            java.awt.geom.AffineTransform translate = java.awt.geom.AffineTransform.getTranslateInstance(xOffset, yOffset);
+            _xOffset = xOffset;
+            _yOffset = yOffset;
+            _sourceShape = shapeArea;
+            _translatedShape = translate.createTransformedShape(shapeArea);
+        }
+
+        public Shape getTranslatedShape() { return _translatedShape; }
+
+        @Override
+        public Rectangle getBounds() { return _translatedShape.getBounds(); }
+
+        @Override
+        public Rectangle2D getBounds2D() { return _translatedShape.getBounds2D(); }
+
+        @Override
+        public boolean contains(double x, double y) { return _translatedShape.contains(x, y); }
+
+        @Override
+        public boolean contains(Point2D p) { return _translatedShape.contains(p); }
+
+        @Override
+        public boolean intersects(double x, double y, double w, double h) {
+            return _translatedShape.intersects(x, y, w, h);
+        }
+
+        @Override
+        public boolean intersects(Rectangle2D r) {
+            return _translatedShape.intersects(r);
+        }
+
+        @Override
+        public boolean contains(double x, double y, double w, double h) {
+            return _translatedShape.contains(x, y, w, h);
+        }
+
+        @Override
+        public boolean contains(Rectangle2D r) {
+            return _translatedShape.contains(r);
+        }
+
+        @Override
+        public PathIterator getPathIterator(AffineTransform at) {
+            return _translatedShape.getPathIterator(at);
+        }
+
+        @Override
+        public PathIterator getPathIterator(AffineTransform at, double flatness) {
+            return _translatedShape.getPathIterator(at, flatness);
+        }
+
+        @Override
+        public int hashCode() {
+            Integer cachedHash = _hashCache.get();
+            if ( cachedHash != null ) {
+                return cachedHash;
+            } else {
+                int computedHash = Objects.hash(_xOffset, _yOffset, _sourceShape);
+                _hashCache.compareAndSet(null, computedHash);
+                return computedHash;
+            }
+        }
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if ( this == obj ) return true;
+            if ( obj == null || getClass() != obj.getClass() ) return false;
+            final TranslatedShape other = (TranslatedShape) obj;
+            return _xOffset == other._xOffset &&
+                   _yOffset == other._yOffset &&
+                   Objects.equals(_sourceShape, other._sourceShape);
+        }
+        @Override
+        public String toString() {
+            return "TranslatedShape[source=" + _sourceShape + ", xOffset=" + _xOffset + ", yOffset=" + _yOffset + "]";
+        }
     }
 
 }
