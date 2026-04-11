@@ -819,8 +819,7 @@ public final class TextConf implements Simplifiable<TextConf>
             }
         }
         @SuppressWarnings("unchecked")
-        final Tuple<Pooled<Paragraph>> scaledContent =
-            (Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class, scaledParagraphs);
+        final Tuple<Pooled<Paragraph>> scaledContent = ((Tuple<Pooled<Paragraph>>) (Tuple<?>) Tuple.of(Pooled.class)).addAll(scaledParagraphs);
         return of(
             scaledContent,
             _fontConf._scale(scale),
