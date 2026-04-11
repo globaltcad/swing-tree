@@ -102,6 +102,8 @@ final class TextLayoutEngine {
                 shapeArea = new Rectangle(0, 0, 1, 1);
                 break;
         }
+        if ( shapeArea == null )
+            return asJComponent.getBounds(); // fallback to the whole component bounds if we failed to calculate the area for some reason
         // Now we need to translate to the parent coordinate space:
         int xOffset = asJComponent.getX(); // -> these are offsets in the parent component coordinate system!
         int yOffset = asJComponent.getY();
