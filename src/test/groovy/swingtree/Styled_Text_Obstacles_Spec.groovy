@@ -1098,4 +1098,380 @@ class Styled_Text_Obstacles_Spec extends Specification
         and : 'The style conf with a left-half child shows its Rectangle obstacle at x=0:'
             (capturedLeft[1] as String).contains("java.awt.Rectangle[x=0,y=0,width=200,height=500]")
     }
+
+
+    def 'Disabling automatic child-derived obstacles via obstaclesFromChildrenEnabled(false) makes child components invisible to the text layout'()
+    {
+        reportInfo """
+            By default, SwingTree registers every child of a styled container as a
+            text-layout obstacle so that text flows politely around the children.
+            This is usually the desired behaviour — but there are legitimate cases
+            where you want text and child components to share the same visual area:
+            a transparent overlay badge, a purely decorative widget, a glass-pane
+            effect, or a child component that is positioned far off-screen and would
+            otherwise skew the layout needlessly.
+
+            For those cases the `TextConf#obstaclesFromChildrenEnabled(boolean)` switch
+            lets you turn the automatic child-obstacle registration off entirely.
+            When it is set to `false`, child components are completely ignored by the
+            obstacle-collection pass — the layout engine behaves as if the container
+            had no children at all, regardless of the current
+            `obstaclesFromChildren(UI.ComponentBoundary)` setting.
+
+            This test pins down that contract by measuring three configurations of
+            the same 400 × N box with a 200 × 500 child occupying the right half:
+
+              1. default (enabled, so the child narrows the text area)
+              2. enabled=false (so the child is ignored and the text uses the full width)
+              3. no child at all (as a control baseline)
+
+            The expected outcome is that (2) and (3) produce the exact same preferred
+            height — proving that `obstaclesFromChildrenEnabled(false)` suppresses
+            child-derived obstacles completely — while (1) is strictly taller than both,
+            confirming that the child does interact with the layout when the switch is on.
+
+            We additionally inspect the rendered style-conf string to verify that the
+            disabled case does not leak a child `Rectangle` into the obstacle tuple
+            and that the chosen flag value is faithfully recorded.
+        """
+        given : 'SwingTree with a fixed UI scale so that font metrics stay deterministic:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text that will wrap noticeably whenever the available width is reduced:'
+            var content = Tuple.of(
+                StyledString.of(f -> f.size(14),
+                    "Sometimes you want a child component to share the visual area with the text " +
+                    "without forcing the text to flow around it — a transparent badge, a decorative " +
+                    "marker, or a glass-pane overlay. The obstaclesFromChildrenEnabled flag controls " +
+                    "precisely that behaviour in the SwingTree styled text layout engine."
+                )
+            )
+        and : 'A helper that builds a 400 px box, optionally adds a right-half child, and captures height + style string:'
+            def paintAndCapture = { boolean addChild, boolean enabled ->
+                def captured = new Object[2]
+                UI.runNow({
+                    var box = UI.box()
+                                .withStyle(conf -> conf
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                        .placement(UI.Placement.TOP_LEFT)
+                                        .obstaclesFromChildrenEnabled(enabled)
+                                    )
+                                )
+                                .get(JBox)
+                    box.setLayout(null)
+                    box.setSize(400, 0)
+                    if ( addChild ) {
+                        var child = new JBox()
+                        child.setBounds(200, 0, 200, 500)
+                        box.add(child)
+                    }
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    box.paintComponent(buf.createGraphics())
+                    captured[0] = box.getPreferredSize().height
+                    captured[1] = ComponentExtension.from(box).getStyle().toString()
+                })
+                return captured
+            }
+
+        when : 'We measure the three configurations — child+enabled (default), child+disabled, no child:'
+            def enabled  = paintAndCapture(true,  true)   // the child IS an obstacle
+            def disabled = paintAndCapture(true,  false)  // the child is NOT an obstacle
+            def noChild  = paintAndCapture(false, true)   // control baseline: no child
+
+        then : 'The default (enabled) configuration produces a strictly taller layout than the baseline:'
+            (enabled[0] as int)  > (noChild[0] as int)
+        and : 'Disabling the flag recovers the baseline height exactly — the child is invisible to the layout:'
+            (disabled[0] as int) == (noChild[0] as int)
+
+        and : 'With the flag enabled, the child Rectangle appears in the obstacle tuple of the style conf:'
+            (enabled[1] as String).contains("java.awt.Rectangle[x=200,y=0,width=200,height=500]")
+        and : 'With the flag disabled, no child Rectangle appears in the style conf at all:'
+            !(disabled[1] as String).contains("java.awt.Rectangle")
+
+        and : 'The style conf faithfully records the chosen obstaclesFromChildrenEnabled flag value:'
+            (enabled[1]  as String).contains("obstaclesFromChildrenEnabled=true")
+            (disabled[1] as String).contains("obstaclesFromChildrenEnabled=false")
+    }
+
+
+    def 'The obstaclesFromChildren(ComponentBoundary) setting peels the child\'s obstacle inward through the box-model layers'()
+    {
+        reportInfo """
+            When child components are automatically registered as text obstacles, you
+            can choose *how much* of each child counts as "in the way" of the text
+            by picking a `UI.ComponentBoundary`.  Think of it as peeling an onion
+            inward through the child\'s box model:
+
+              — `OUTER_TO_EXTERIOR` (the default) uses the child\'s full bounding
+                rectangle, including any styled margin.  This is the largest possible
+                obstacle — the text must give the entire child a wide berth.
+
+              — `EXTERIOR_TO_BORDER` excludes the margin, so the text is allowed to
+                flow *into* the child\'s margin area, but then stop at the *body*.  
+                The obstacle shrinks inward on every side by the margin size.
+
+              — `BORDER_TO_INTERIOR` additionally excludes the border, so text may
+                flow through both margin and border areas.  The obstacle shrinks
+                further.
+
+              — `INTERIOR_TO_CONTENT` excludes margin, border *and* padding — only
+                the innermost content rectangle remains as an obstacle.  This is the
+                smallest obstacle the switch can produce.
+
+            A smaller obstacle takes up less horizontal space on each line, leaves
+            more room for text, forces fewer line-breaks, and therefore produces a
+            *shorter* preferred layout height.  The net effect is a monotonically
+            decreasing sequence of preferred heights as we peel the boundary inward:
+
+              height(OUTER_TO_EXTERIOR) ≥ height(EXTERIOR_TO_BORDER)
+                                        ≥ height(BORDER_TO_INTERIOR)
+                                        ≥ height(INTERIOR_TO_CONTENT)
+
+            This property is the mental model users should carry: "closer to the
+            child\'s centre means less space consumed by the child\'s obstacle".
+            The extremes (outermost vs innermost) must differ strictly for a child
+            that has meaningful styled insets, because the innermost boundary sees
+            a substantially smaller rectangle than the outermost one.
+        """
+        given : 'SwingTree with a fixed UI scale so that font metrics stay deterministic:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long paragraph whose line-breaks are sensitive to horizontal width changes:'
+            var content = Tuple.of(
+                StyledString.of(f -> f.size(14),
+                    "The further inward we peel the child obstacle boundary, the more horizontal " +
+                    "space is returned to the text, and the fewer line-breaks the layout engine has " +
+                    "to introduce. A smaller obstacle therefore produces a shorter preferred height, " +
+                    "exactly as if the child had never reserved that outer margin-border-padding ring " +
+                    "in the first place. This is the core intuition behind the boundary switch."
+                )
+            )
+        and : 'A helper that builds a 400 px parent with a right-side child that carries generous margin, border, and padding:'
+            def preferredHeight = { UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    // The parent: styled text, right-anchored so obstacles on the right matter most.
+                    var parent = UI.box()
+                                .withStyle(conf -> conf
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                        .placement(UI.Placement.TOP_LEFT)
+                                        .obstaclesFromChildrenEnabled(true)
+                                        .obstaclesFromChildren(boundary)
+                                    )
+                                )
+                                .get(JBox)
+                    parent.setLayout(null)
+                    parent.setSize(400, 0)
+
+                    // The styled child: big margin, big border, big padding — each layer visibly
+                    // shrinks the obstacle rectangle when it is peeled off by the chosen boundary.
+                    var child = UI.box()
+                                .withStyle(conf -> conf
+                                    .margin(30)       // peeled off by EXTERIOR_TO_BORDER
+                                    .border(20, "black") // peeled off by BORDER_TO_INTERIOR
+                                    .padding(30)      // peeled off by INTERIOR_TO_CONTENT
+                                )
+                                .get(JBox)
+                    child.setBounds(200, 0, 200, 500)
+                    // Force the child's style engine to compute its ComponentConf from the styler
+                    // so that `childShapeForArea(...)` can observe the margin/border/padding values:
+                    ComponentExtension.from(child).gatherApplyAndInstallStyle(true)
+                    parent.add(child)
+
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    parent.paintComponent(buf.createGraphics())
+                    result[0] = parent.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We measure preferred height for each of the four box-model boundaries:'
+            int hOuter    = preferredHeight(UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+            int hExterior = preferredHeight(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+            int hBorder   = preferredHeight(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+            int hInterior = preferredHeight(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+
+        then : 'All four heights are positive (the text is non-empty):'
+            hOuter    > 0
+            hExterior > 0
+            hBorder   > 0
+            hInterior > 0
+
+        and : """
+            Peeling the boundary inward never grows the height — each inner boundary
+            produces an obstacle that is a subset of the previous one, and a smaller
+            obstacle cannot force more wrapping:
+        """
+            hOuter    >= hExterior
+            hExterior >= hBorder
+            hBorder   >= hInterior
+
+        and : """
+            The extremes differ strictly: the innermost boundary (INTERIOR_TO_CONTENT)
+            sees a rectangle shrunk inward on every side by margin+border+padding,
+            leaving meaningfully more horizontal space for the text and therefore a
+            strictly shorter preferred height than the outermost boundary:
+        """
+            hInterior < hOuter
+    }
+
+
+    def 'A child component without a SwingTree style always falls back to its full bounds regardless of the chosen boundary'()
+    {
+        reportInfo """
+            The `obstaclesFromChildren(UI.ComponentBoundary)` setting only has a visible
+            effect when the child has a SwingTree style that defines margin, border and
+            padding — those are the insets that the engine peels off when computing the
+            inner boundaries.  For a plain Swing component (or a SwingTree component
+            without any box-model styling) there is *nothing* to peel off, so all four
+            boundary values collapse to the child\'s full bounding rectangle.
+
+            This fallback is important to document because it explains why the switch
+            appears to "do nothing" in the common case of using vanilla Swing children:
+            there is no styled margin, border or padding to remove, so every boundary
+            value yields the same shape.  Users who want the boundary switch to take
+            effect must style their child components with non-zero margin/border/padding.
+
+            This test verifies the fallback by building four parent boxes with the
+            same unstyled (plain) child and one each of the four boundary values, and
+            confirming that they all produce the same preferred height.
+        """
+        given : 'SwingTree with a fixed UI scale:'
+            SwingTree.initializeUsing( it -> {
+                it = it.uiScaleFactor(1.0f)
+                it = SwingTreeTestConfigurator.get().configure(it)
+            })
+        and : 'A long text so that any change in obstacle size would visibly affect the preferred height:'
+            var content = Tuple.of(
+                StyledString.of(f -> f.size(14),
+                    "A plain Swing child has no styled margin, border or padding for the boundary " +
+                    "switch to peel off, so the obstacle defaults to the full bounding rectangle — " +
+                    "identical to what the outermost boundary produces. Every boundary value " +
+                    "therefore yields the same preferred height for an unstyled child."
+                )
+            )
+        and : 'A helper that builds a 400 px parent with a plain (unstyled) right-half child and the given boundary:'
+            def preferredHeight = { UI.ComponentBoundary boundary ->
+                int[] result = new int[1]
+                UI.runNow({
+                    var parent = UI.box()
+                                .withStyle(conf -> conf
+                                    .text(t -> t
+                                        .font(f -> f.family("Ubuntu"))
+                                        .content(content)
+                                        .wrapLines(true)
+                                        .autoPreferredHeight(true)
+                                        .placement(UI.Placement.TOP_LEFT)
+                                        .obstaclesFromChildrenEnabled(true)
+                                        .obstaclesFromChildren(boundary)
+                                    )
+                                )
+                                .get(JBox)
+                    parent.setLayout(null)
+                    parent.setSize(400, 0)
+                    var plainChild = new JBox() // no withStyle — no margin, no border, no padding
+                    plainChild.setBounds(200, 0, 200, 500)
+                    parent.add(plainChild)
+                    var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+                    parent.paintComponent(buf.createGraphics())
+                    result[0] = parent.getPreferredSize().height
+                })
+                return result[0]
+            }
+
+        when : 'We measure preferred height for each of the four boundary values:'
+            int hOuter    = preferredHeight(UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+            int hExterior = preferredHeight(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+            int hBorder   = preferredHeight(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+            int hInterior = preferredHeight(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+
+        then : 'All four measurements are positive:'
+            hOuter > 0
+        and : 'The plain child falls back to the full bounding rectangle — all boundaries produce the same height:'
+            hOuter    == hExterior
+            hExterior == hBorder
+            hBorder   == hInterior
+    }
+
+
+    def 'The obstaclesFromChildrenEnabled and obstaclesFromChildren settings are faithfully recorded in the TextConf data representation'()
+    {
+        reportInfo """
+            The `TextConf` class is an immutable, value-based configuration type, and
+            its `toString()` serialisation is part of how the style layer communicates
+            *what it was told* to render.  It is also a handy observation window that
+            SwingTree\'s own tests (and users debugging their own code) rely on to
+            verify that values flowed through the fluent API unchanged.
+
+            This test configures a `TextConf` through the public builder API and then
+            reads the resulting object back through three lenses:
+
+              — the object\'s fluent getters (`obstaclesFromChildren()` and the package-
+                private `obstaclesFromChildrenEnabled()`), which are the canonical source
+                of truth,
+              — the `equals`/`hashCode` contract (by building an identical second instance
+                and comparing),
+              — the `toString()` serialisation, which must expose both flags so that
+                debug output and logs remain informative.
+
+            The test also verifies that the two switches are *independent*: changing
+            one does not implicitly change the other.  Finally, it pins down the
+            documented default values — enabled = `true`,
+            boundary = `OUTER_TO_EXTERIOR` — so that regressions in the defaults are
+            caught by this spec rather than silently drifting into user code.
+        """
+        given : 'The default TextConf#none() serves as the starting point for the data checks:'
+            var defaultConf = TextConf.none()
+
+        expect : 'The documented defaults: enabled = true, boundary = OUTER_TO_EXTERIOR'
+            defaultConf.obstaclesFromChildrenEnabled() == true
+            defaultConf.obstaclesFromChildren() == UI.ComponentBoundary.OUTER_TO_EXTERIOR
+
+        when : 'We disable the switch and select the innermost boundary on the default instance:'
+            var customConf = defaultConf
+                                .obstaclesFromChildrenEnabled(false)
+                                .obstaclesFromChildren(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+        then : 'Both values round-trip through the fluent API unchanged:'
+            customConf.obstaclesFromChildrenEnabled() == false
+            customConf.obstaclesFromChildren() == UI.ComponentBoundary.INTERIOR_TO_CONTENT
+        and : 'The original default instance remains unchanged — TextConf is immutable:'
+            defaultConf.obstaclesFromChildrenEnabled() == true
+            defaultConf.obstaclesFromChildren() == UI.ComponentBoundary.OUTER_TO_EXTERIOR
+
+        and : 'Both switches are independent — toggling one does not implicitly change the other:'
+            customConf.obstaclesFromChildrenEnabled(true).obstaclesFromChildren() == UI.ComponentBoundary.INTERIOR_TO_CONTENT
+            customConf.obstaclesFromChildren(UI.ComponentBoundary.OUTER_TO_EXTERIOR).obstaclesFromChildrenEnabled() == false
+
+        when : 'We build a second identical instance via the same builder calls:'
+            var twinConf = TextConf.none()
+                                .obstaclesFromChildrenEnabled(false)
+                                .obstaclesFromChildren(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+        then : 'Value equality and hashCode agree — the two instances are interchangeable:'
+            customConf == twinConf
+            customConf.hashCode() == twinConf.hashCode()
+
+        and : """
+            The textual serialisation of the configuration (`toString()`) exposes both
+            flags so that debug output and logs show exactly what was configured.
+            This is what users see when they inspect the style conf after painting,
+            and what the living-documentation examples above rely on to verify
+            child-obstacle behaviour:
+        """
+            customConf.toString().contains("obstaclesFromChildrenEnabled=false")
+            customConf.toString().contains("obstaclesFromChildrenAs=INTERIOR_TO_CONTENT")
+        and : 'The default instance serialises to a compact NONE marker — defaults never leak into the string:'
+            defaultConf.toString() == "TextConf[NONE]"
+    }
 }
