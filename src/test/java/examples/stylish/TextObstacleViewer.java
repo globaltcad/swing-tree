@@ -106,7 +106,7 @@ public class TextObstacleViewer extends Panel
                                 panel("fill").peek( it -> it.setBounds(UI.scale(50), UI.scale(100), UI.scale(150), UI.scale(200)) )
                                 .withStyle( it -> it.backgroundColor("transparent red").borderRadius(64) )
                                 .onMouseDrag( e -> {
-                                    e.get().setLocation( e.get().getX() + e.deltaX(), e.get().getY() + e.deltaY() );
+                                    e.setLocation(e.getX() + e.deltaXSinceStart(),e.getY() + e.deltaYSinceStart());
                                     e.getParent().repaint();
                                 })
                             )
@@ -114,7 +114,7 @@ public class TextObstacleViewer extends Panel
                                 panel("fill").peek( it -> it.setBounds(UI.scale(350), UI.scale(200), UI.scale(200), UI.scale(150)) )
                                 .withStyle( it -> it.backgroundColor("transparent green").margin(24) )
                                 .onMouseDrag( e -> {
-                                    e.get().setLocation( e.get().getX() + e.deltaX(), e.get().getY() + e.deltaY() );
+                                    e.setLocation(e.getX() + e.deltaXSinceStart(),e.getY() + e.deltaYSinceStart());
                                     e.getParent().repaint();
                                 })
                             )
@@ -122,7 +122,7 @@ public class TextObstacleViewer extends Panel
                                 panel("fill").peek( it -> it.setBounds(UI.scale(650), UI.scale(300), UI.scale(100), UI.scale(100)) )
                                 .withStyle( it -> it.backgroundColor("transparent blue").padding(24) )
                                 .onMouseDrag( e -> {
-                                    e.get().setLocation( e.get().getX() + e.deltaX(), e.get().getY() + e.deltaY() );
+                                    e.setLocation(e.getX() + e.deltaXSinceStart(),e.getY() + e.deltaYSinceStart());
                                     e.getParent().repaint();
                                 })
                             )

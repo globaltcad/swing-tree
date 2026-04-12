@@ -1,15 +1,13 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.Tuple;
 import swingtree.layout.Position;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 
 /**
@@ -22,64 +20,76 @@ import java.util.stream.Collectors;
  */
 public final class ComponentDragEventDelegate<C extends JComponent> extends ComponentMouseEventDelegate<C>
 {
-    private final List<MouseEvent> _dragEventHistory = new java.util.ArrayList<>();
+    private final Tuple<MouseEvent> _dragEventHistory;
 
 
     ComponentDragEventDelegate(
-            C component,
-            MouseEvent event,
-            List<MouseEvent> dragEventHistory
+        C component,
+        MouseEvent event,
+        List<MouseEvent> dragEventHistory
     ) {
         super(component, event);
-        _dragEventHistory.addAll(dragEventHistory);
+        _dragEventHistory = Tuple.of(MouseEvent.class, dragEventHistory);
     }
 
     /**
-     *  Provides a list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
-     *  When a drag ends, the list is cleared.
+     *  Provides a {@link Tuple} (immutable list) of all {@link MouseEvent}s of a
+     *  continuous mouse drag performed on the component.
+     *  When a drag ends, the tuple is empty.
      *
-     * @return A list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
+     * @return A tuple of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
      */
-    public List<MouseEvent> dragEvents() {
-        return Collections.unmodifiableList(_dragEventHistory);
+    public Tuple<MouseEvent> dragEvents() {
+        return _dragEventHistory;
     }
 
     /**
      *  SwingTree keeps track of the most recent mouse drag events of a continuous drag.
-     *  This method returns a list of all mouse {@link Position}s of a continuous mouse drag
-     *  performed on the component. <br>
-     *  Note that this mehod returns an unmodifiable list consisting
+     *  This method returns a {@link Tuple} (immutable list) of all mouse {@link Position}s
+     *  of a continuous mouse drag performed on the component. <br>
+     *  Note that these points are scaled to "developer pixel" instead of the actual "UI scaled component space"
+     *  of the underlying Swing component.<br>
+     *  Use {@link UI#scale(int)} to convert these points back to the actual "UI scaled component space".
+     *  Also note that this method returns an unmodifiable list consisting
      *  of immutable {@link Position} objects instead of mutable {@link Point} objects,
      *  to protect the client from side effects.
      *
-     * @return A list of all mouse {@link Position}s of a continuous mouse drag performed on the component.
+     * @return A tuple (immutable list) of all mouse {@link Position}s of a continuous mouse drag performed on the component.
      *         The points of this list represent the mouse movement track since the start of a continuous drag.
      */
-    public List<Position> dragPositions() {
-        return Collections.unmodifiableList(
-                _dragEventHistory.stream()
-                                .map(MouseEvent::getPoint)
-                                .map(Position::of)
-                                .collect(Collectors.toList())
-                            );
+    public Tuple<Position> dragPositions() {
+        return _dragEventHistory.stream()
+                                .map(it->Position.of(UI.unscale(it.getX()), UI.unscale(it.getY())))
+                                .collect(Tuple.collectorOf(Position.class));
     }
 
     /**
-     * Provides the x-axis movement delta of the mouse since the start of a continuous drag.
+     * Provides the x-axis movement delta of the mouse since the start of a continuous drag <b>without DPI scaling</b>.
+     * So the value is in "developer pixel" not in <b>UI scaled component space</b>.
+     * This means that when you need to interface with the underlying Swing API then you may
+     * want to consider upscaling it again using {@link UI#scale(float)}.
+     *
      * @return The x-axis movement delta of the mouse since the start of a continuous drag.
+     *         This value is in "developer pixel" not in <b>UI scaled component space</b>.
      */
-    public int deltaX() {
+    public float deltaXSinceStart() {
         if (_dragEventHistory.size() < 2) return 0;
-        return _dragEventHistory.get(_dragEventHistory.size() - 1).getX() - _dragEventHistory.get(0).getX();
+        float xInComponentPixel = _dragEventHistory.get(_dragEventHistory.size() - 1).getX() - _dragEventHistory.get(0).getX();
+        return UI.unscale(xInComponentPixel);
     }
 
     /**
-     * Provides the y-axis movement delta of the mouse since the start of a continuous drag.
+     * Provides the y-axis movement delta of the mouse since the start of a continuous drag <b>without DPI scaling</b>.
+     * So the value is in "developer pixel" not in <b>UI scaled component space</b>.
+     * This means that when you need to interface with the underlying Swing API then you may
+     * want to consider upscaling it again using {@link UI#scale(float)}.
      * @return The y-axis movement delta of the mouse since the start of a continuous drag.
+     *         This value is in "developer pixel" not in <b>UI scaled component space</b>.
      */
-    public int deltaY() {
+    public float deltaYSinceStart() {
         if (_dragEventHistory.size() < 2) return 0;
-        return _dragEventHistory.get(_dragEventHistory.size() - 1).getY() - _dragEventHistory.get(0).getY();
+        float yInComponentPixel = _dragEventHistory.get(_dragEventHistory.size() - 1).getY() - _dragEventHistory.get(0).getY();
+        return UI.unscale(yInComponentPixel);
     }
 
 }
