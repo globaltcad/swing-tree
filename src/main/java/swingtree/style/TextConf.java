@@ -716,36 +716,48 @@ public final class TextConf implements Simplifiable<TextConf>
 
         // Collect all StyledStrings from the (pre-simplified) content.
         // Before simplified() is called, _content holds at most one wrapper paragraph.
-        // After a second call, it holds the already-split interned paragraphs, so we flatten.
-        final Tuple<StyledString> rawStrings;
+        // After simplification, it holds the already-split interned paragraphs.
+        final Tuple<Pooled<Paragraph>> newContent;
         if ( _content.size() == 1 && !_content.get(0).get().isBlankLine ) {
-            rawStrings = _content.get(0).get().styledStrings;
+            // Normal case: un-split content — flatten, simplify, then split into paragraphs.
+            final Tuple<StyledString> rawStrings = _content.get(0).get().styledStrings;
+
+            final Tuple<StyledString> simplified = rawStrings
+                    .removeIf( it -> it.string().isEmpty() )
+                    .map( it -> it.resolveUsing(_fontConf) )
+                    .removeIf( it -> it.fontConf()
+                                       .map( fc -> fc.size() == 0 )
+                                       .orElse(false) );
+
+            if ( simplified.isEmpty() && !_autoPreferredHeight )
+                return _NONE;
+
+            // Split by '\n' into interned paragraphs, then store as the new _content.
+            final Tuple<Pooled<Paragraph>> splitContent = _splitAndIntern(simplified);
+            newContent = splitContent.isEmpty() ? _EMPTY_CONTENT : splitContent;
         } else {
-            // We should never really get here! -> simplification should only happen on un-simplified / un-split content.
-            final List<StyledString> flat = new ArrayList<>();
+            // Already-split content (e.g. after _scale on previously simplified content).
+            // Process each paragraph individually so blank lines and paragraph boundaries
+            // are preserved, making simplified() idempotent.
+            final List<Pooled<Paragraph>> result = new ArrayList<>(_content.size());
             for ( Pooled<Paragraph> p : _content ) {
-                if ( !p.get().isBlankLine ) {
-                    for ( StyledString s : p.get().styledStrings )
-                        flat.add(s);
+                if ( p.get().isBlankLine ) {
+                    result.add(new Pooled<>(Paragraph.blankLine()).intern());
+                } else {
+                    final Tuple<StyledString> simplified = p.get().styledStrings
+                            .removeIf( it -> it.string().isEmpty() )
+                            .map( it -> it.resolveUsing(_fontConf) )
+                            .removeIf( it -> it.fontConf()
+                                               .map( fc -> fc.size() == 0 )
+                                               .orElse(false) );
+                    if ( !simplified.isEmpty() )
+                        result.add(new Pooled<>(Paragraph.of(simplified)).intern());
                 }
             }
-            rawStrings = Tuple.of(StyledString.class, flat);
+            newContent = result.isEmpty()
+                ? _EMPTY_CONTENT
+                : Tuple.of(Pooled.classTyped(Paragraph.class), result);
         }
-
-        // Existing simplification: remove empties, resolve font, remove zero-size segments.
-        final Tuple<StyledString> simplified = rawStrings
-                .removeIf( it -> it.string().isEmpty() )
-                .map( it -> it.resolveUsing(_fontConf) )
-                .removeIf( it -> it.fontConf()
-                                   .map( fc -> fc.size() == 0 )
-                                   .orElse(false) );
-
-        if ( simplified.isEmpty() && !_autoPreferredHeight )
-            return _NONE;
-
-        // Split by '\n' into interned paragraphs, then store as the new _content.
-        final Tuple<Pooled<Paragraph>> splitContent = _splitAndIntern(simplified);
-        final Tuple<Pooled<Paragraph>> newContent = splitContent.isEmpty() ? _EMPTY_CONTENT : splitContent;
 
         if ( newContent.isEmpty() && !_autoPreferredHeight )
             return _NONE;
