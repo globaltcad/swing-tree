@@ -92,7 +92,7 @@ final class TextLayoutEngine {
                 previousComponentConf
         );
         Shape shapeArea = null;
-        ComponentAreas areas = ComponentAreas.of(new Pooled<>(boxAndCompConf.first()));
+        ComponentAreas areas = ComponentAreas.of(new Pooled<>(boxAndCompConf.first()).intern());
         switch ( area ) {
             case EXTERIOR_TO_BORDER: shapeArea = areas.get(UI.ComponentArea.BODY); break;
             case BORDER_TO_INTERIOR: shapeArea = areas.get(UI.ComponentArea.INTERIOR); break;
