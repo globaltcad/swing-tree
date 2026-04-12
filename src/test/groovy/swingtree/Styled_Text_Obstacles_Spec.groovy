@@ -742,7 +742,6 @@ class Styled_Text_Obstacles_Spec extends Specification
                                         .wrapLines(true)
                                         .autoPreferredHeight(true)
                                         .obstacles(obstacles)
-                                        .placement(UI.Placement.TOP)
                                     )
                                 )
                                 .get(JBox)
