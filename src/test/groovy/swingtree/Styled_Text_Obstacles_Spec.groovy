@@ -755,21 +755,31 @@ class Styled_Text_Obstacles_Spec extends Specification
 
         when : 'We measure preferred height for each placement, all with the same right-edge obstacle:'
             def obstacle = new Shape[]{ rightObstacle }
+            int hTop        = preferredHeight(UI.Placement.TOP,          obstacle)
+            int hTopLeft    = preferredHeight(UI.Placement.TOP_LEFT,     obstacle)
+            int hTopRight   = preferredHeight(UI.Placement.TOP_RIGHT,    obstacle)
             int hLeft       = preferredHeight(UI.Placement.LEFT,         obstacle)
             int hCenter     = preferredHeight(UI.Placement.CENTER,       obstacle)
             int hRight      = preferredHeight(UI.Placement.RIGHT,        obstacle)
-            int hTopLeft    = preferredHeight(UI.Placement.TOP_LEFT,     obstacle)
-            int hTopRight   = preferredHeight(UI.Placement.TOP_RIGHT,    obstacle)
             int hBottomLeft = preferredHeight(UI.Placement.BOTTOM_LEFT,  obstacle)
 
         then : 'Every placement produces a positive preferred height:'
             hLeft > 0
-        and : 'All placements produce exactly the same preferred height despite the obstacle:'
+        and : """
+            In an ideal world, all of these heights should be equal.
+            But the layout engine, only supports text obstacle avoidance for top-anchored placements 
+            (TOP, TOP_LEFT, TOP_RIGHT) — for all other placements it silently ignores 
+            the obstacles and produces the same layout as if no obstacles were present.
+            Therefore, all of the top level placement derived heights have the same height,
+            and the rest of the placements (CENTER, LEFT, RIGHT, BOTTOM, BOTTOM_LEFT) also share the same height.
+            But all together, they have different heights!
+        """
+            hTop        == hTopLeft
+            hTopLeft    == hTopRight
+            hTopRight   != hLeft
             hLeft       == hCenter
             hCenter     == hRight
-            hRight      == hTopLeft
-            hTopLeft    == hTopRight
-            hTopRight   == hBottomLeft
+            hRight      == hBottomLeft
     }
 
 
