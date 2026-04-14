@@ -10,7 +10,10 @@ import swingtree.api.Configurator;
 import swingtree.api.Styler;
 
 import java.awt.Font;
+import java.awt.Shape;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -54,7 +57,7 @@ import java.util.Objects;
  *          See {@link TextConf#content(StyledString...)} and {@link TextConf#content(Tuple)} for more details
  *          on how to configure the content with multiple styled strings.<br>
  *          The default content is an empty {@link Tuple} of {@link StyledString}s
- *          in which the text configuration is effectively disabled!
+ *          in which case the text configuration is effectively disabled!
  *      </li>
  *      <li><b>Font</b>
  *          The {@link FontConf} object is its own rich configuration object
@@ -85,7 +88,9 @@ import java.util.Objects;
  *          The default placement is {@link UI.Placement#UNDEFINED}. At render time this is
  *          first resolved using the horizontal and vertical alignment from the {@code FontConf};
  *          only when those alignments are also {@link UI.Placement#UNDEFINED} does it behave
- *          like {@link swingtree.UI.Placement#CENTER}.
+ *          like {@link swingtree.UI.Placement#CENTER}.<br>
+ *          <b>Important: Note that {@link #obstacles(Shape...)} are only compatible with {@code TOP_LEFT},
+ *          {@code TOP} and {@code TOP_RIGHT}! Any other placement turns off obstacle avoidance...</b>
  *      </li>
  *      <li><b>Offset</b>
  *          The offset holds the x and y placement offset of the text.
@@ -116,6 +121,60 @@ import java.util.Objects;
  *          of the component will be ignored.</b><br>
  *          You can configure it through {@link TextConf#autoPreferredHeight(boolean)}.<br>
  *      </li>
+ *      <li><b>Obstacles</b>
+ *          A set of {@link Shape}s (in component coordinates) that the text must skip over and flow
+ *          around so that it is never rendered on top of.<br>
+ *          You can configure it through {@link TextConf#obstacles(Shape...)} or
+ *          {@link TextConf#obstacles(Tuple)}.<br>
+ *          The default value is an empty {@link Tuple}, meaning no obstacles are applied,
+ *          <b>however</b>, if a particular component with a text configuration has child components,
+ *          then the bounding boxes of those child components will automatically be registered as obstacles.<br>
+ *          <p>
+ *          <b>Important — placement compatibility:</b> obstacle avoidance is only active when
+ *          {@link #placement(UI.Placement)} is one of
+ *          {@link UI.Placement#TOP_LEFT}, {@link UI.Placement#TOP}, or {@link UI.Placement#TOP_RIGHT}.
+ *          Any other placement silently disables obstacle avoidance and renders the text as if no
+ *          obstacles had been registered.  The reason for this restriction is architectural:
+ *          <ul>
+ *              <li>The algorithm flows text <em>downward</em>, tracking the y-coordinate of each
+ *                  successive line to query which horizontal intervals are free at that level.
+ *                  This maps cleanly only onto a layout that starts from the top and grows downward.
+ *              </li>
+ *              <li>A <b>bottom-anchored</b> placement would require running the entire algorithm
+ *                  in reverse (growing upward), roughly doubling the implementation complexity.
+ *              </li>
+ *              <li>A <b>vertically centred</b> placement creates a circular dependency: the height
+ *                  of the text block depends on the obstacles, but where the lines land vertically
+ *                  depends on the height of the text block.  Resolving this correctly would require
+ *                  iterative convergence akin to a fluid-dynamics solver — far beyond the scope of
+ *                  a UI layout engine.
+ *              </li>
+ *          </ul>
+ *      </li>
+ *      <li><b>Obstacles From Children Enabled</b>
+ *          A boolean property that controls whether child components of the styled component
+ *          are automatically registered as text-layout obstacles.<br>
+ *          When {@code true} (the default), every child contributes an obstacle shape so that
+ *          the text flows around the children rather than rendering on top of them.<br>
+ *          When {@code false}, child components are completely ignored during obstacle collection
+ *          regardless of the {@link TextConf#obstaclesFromChildren(UI.ComponentBoundary)} setting.<br>
+ *          You can configure it through {@link TextConf#obstaclesFromChildrenEnabled(boolean)}.
+ *      </li>
+ *      <li><b>Obstacles From Children</b>
+ *          A {@link UI.ComponentBoundary} property that selects <em>which boundary layer</em> of each
+ *          child component is used as its obstacle shape when automatic child-obstacle registration is
+ *          active (i.e. {@link TextConf#obstaclesFromChildrenEnabled(boolean)} is {@code true}).<br>
+ *          Think of the boundaries as an onion peeled inward:
+ *          {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} (the default) uses the full bounding
+ *          rectangle of the child including any margin, while inner boundaries such as
+ *          {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} or
+ *          {@link UI.ComponentBoundary#BORDER_TO_INTERIOR} shrink the obstacle progressively inward,
+ *          letting text flow into the child's margin or border areas respectively.
+ *          Children without a SwingTree style fall back to the full bounding rectangle for any value.<br>
+ *          You can configure it through {@link TextConf#obstaclesFromChildren(UI.ComponentBoundary)}.<br>
+ *          If you want to disable automatic child-derived obstacles entirely, you can do so by calling
+ *          {@link TextConf#obstaclesFromChildrenEnabled(boolean) obstaclesFromChildrenEnabled(false)}.
+ *      </li>
  *  </ul>
  *  Use {@link TextConf#none()} to access the <i>null object</i> of the {@link TextConf} type.
  *  It is a convenient way to represent a <i>no-op</i> configuration object which will not have any effect
@@ -127,60 +186,77 @@ public final class TextConf implements Simplifiable<TextConf>
 {
     private static final Logger log = LoggerFactory.getLogger(TextConf.class);
     public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
+    private static final Tuple<Pooled<Paragraph>> _EMPTY_CONTENT = Tuple.of(Pooled.classTyped(Paragraph.class));
+
     private static final TextConf _NONE = new TextConf(
-                                                Tuple.of(StyledString.class),
+                                                _EMPTY_CONTENT,
                                                 FontConf.none(),
                                                 UI.ComponentArea.INTERIOR,
                                                 UI.ComponentBoundary.INTERIOR_TO_CONTENT,
                                                 UI.Placement.UNDEFINED,
                                                 Offset.none(),
                                                 true,
-                                                false
+                                                false,
+                                                Tuple.of(Shape.class),
+                                                UI.ComponentBoundary.OUTER_TO_EXTERIOR,
+                                                true
                                             );
 
     static final TextConf none() {
         return _NONE;
     }
 
-    private final Tuple<StyledString>  _content;
-    private final FontConf             _fontConf;
-    private final UI.ComponentArea     _clipArea;
-    private final UI.ComponentBoundary _placementBoundary;
-    private final UI.Placement         _placement;
-    private final Offset               _offset;
-    private final boolean              _wrapLines;
-    private final boolean              _autoPreferredHeight;
+    private final Tuple<Pooled<Paragraph>>  _content;
+    private final FontConf                  _fontConf;
+    private final UI.ComponentArea          _clipArea;
+    private final UI.ComponentBoundary      _placementBoundary;
+    private final UI.Placement              _placement;
+    private final Offset                    _offset;
+    private final boolean                   _wrapLines;
+    private final boolean                   _autoPreferredHeight;
+    private final Tuple<Shape>              _obstacles;
+    private final UI.ComponentBoundary      _obstaclesFromChildrenAs;
+    private final boolean                   _obstaclesFromChildrenEnabled;
 
     private TextConf(
-        Tuple<StyledString>  content,
-        FontConf             fontConf,
-        UI.ComponentArea     clipArea,
-        UI.ComponentBoundary placementBoundary,
-        UI.Placement         placement,
-        Offset               offset,
-        boolean              wrapLines,
-        boolean              autoPreferredHeight
+        Tuple<Pooled<Paragraph>>  content,
+        FontConf                  fontConf,
+        UI.ComponentArea          clipArea,
+        UI.ComponentBoundary      placementBoundary,
+        UI.Placement              placement,
+        Offset                    offset,
+        boolean                   wrapLines,
+        boolean                   autoPreferredHeight,
+        Tuple<Shape>              obstacles,
+        UI.ComponentBoundary      obstaclesFromChildrenAs,
+        boolean                   obstaclesFromChildrenEnabled
     )
     {
-        _content             = Objects.requireNonNull(content);
-        _fontConf            = Objects.requireNonNull(fontConf);
-        _clipArea            = Objects.requireNonNull(clipArea);
-        _placementBoundary   = Objects.requireNonNull(placementBoundary);
-        _placement           = Objects.requireNonNull(placement);
-        _offset              = Objects.requireNonNull(offset);
-        _wrapLines           = wrapLines;
-        _autoPreferredHeight = autoPreferredHeight;
+        _content                      = Objects.requireNonNull(content);
+        _fontConf                     = Objects.requireNonNull(fontConf);
+        _clipArea                     = Objects.requireNonNull(clipArea);
+        _placementBoundary            = Objects.requireNonNull(placementBoundary);
+        _placement                    = Objects.requireNonNull(placement);
+        _offset                       = Objects.requireNonNull(offset);
+        _wrapLines                    = wrapLines;
+        _autoPreferredHeight          = autoPreferredHeight;
+        _obstacles                    = Objects.requireNonNull(obstacles);
+        _obstaclesFromChildrenAs      = Objects.requireNonNull(obstaclesFromChildrenAs);
+        _obstaclesFromChildrenEnabled = obstaclesFromChildrenEnabled;
     }
 
     private static TextConf of(
-        Tuple<StyledString>  content,
+        Tuple<Pooled<Paragraph>> content,
         FontConf             fontConf,
         UI.ComponentArea     clipArea,
         UI.ComponentBoundary placementBoundary,
         UI.Placement         placement,
         Offset               offset,
         boolean              wrapLines,
-        boolean              autoPreferredHeight
+        boolean              autoPreferredHeight,
+        Tuple<Shape>         obstacles,
+        UI.ComponentBoundary obstaclesFromChildrenAs,
+        boolean              obstaclesFromChildrenEnabled
     ) {
         if (
             content.isEmpty() &&
@@ -190,14 +266,26 @@ public final class TextConf implements Simplifiable<TextConf>
             placement.equals(_NONE._placement) &&
             offset.equals(_NONE._offset) &&
             wrapLines == _NONE._wrapLines &&
-            autoPreferredHeight == _NONE._autoPreferredHeight
+            autoPreferredHeight == _NONE._autoPreferredHeight &&
+            obstacles.isEmpty() &&
+            obstaclesFromChildrenAs == _NONE._obstaclesFromChildrenAs &&
+            obstaclesFromChildrenEnabled == _NONE._obstaclesFromChildrenEnabled
         ) {
             return _NONE;
         }
-        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight);
+        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight, obstacles, obstaclesFromChildrenAs, obstaclesFromChildrenEnabled);
     }
 
-    Tuple<StyledString> content() {
+    /**
+     * Returns the interned paragraphs that make up the text content of this configuration.
+     * <p>
+     * Before {@link #simplified()} is called this tuple contains at most one un-split,
+     * un-interned wrapper paragraph.  After {@link #simplified()} the tuple holds the
+     * fully split and interned paragraphs that the layout engine uses as cache keys.
+     *
+     * @return The tuple of {@link Pooled} {@link Paragraph} objects for this text configuration.
+     */
+    Tuple<Pooled<Paragraph>> content() {
         return _content;
     }
 
@@ -229,6 +317,25 @@ public final class TextConf implements Simplifiable<TextConf>
         return _autoPreferredHeight;
     }
 
+    Tuple<Shape> obstacles() {
+        return _obstacles;
+    }
+
+    /**
+     * Returns which boundary layer of each child component is used when automatically deriving
+     * text-layout obstacles from the parent component's children.
+     * <p>
+     * This getter is the companion to {@link #obstaclesFromChildren(UI.ComponentBoundary)}.
+     * The returned value is only consulted when {@link #obstaclesFromChildrenEnabled()}
+     * returns {@code true}.
+     *
+     * @return The {@link UI.ComponentBoundary} that describes how far inward into each child
+     *         its obstacle extends; defaults to {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}.
+     */
+    UI.ComponentBoundary obstaclesFromChildren() {
+        return _obstaclesFromChildrenAs;
+    }
+
     /**
      * Returns a new {@link TextConf} object with the given text content.
      * @param textString The text content to be rendered onto the component.
@@ -237,8 +344,8 @@ public final class TextConf implements Simplifiable<TextConf>
     public TextConf content( String textString ) {
         Objects.requireNonNull(textString);
         if ( textString.isEmpty() )
-            return content(Tuple.of(StyledString.class));
-        return of(Tuple.of(StyledString.of(textString)), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+            return _withRawContent(Tuple.of(StyledString.class));
+        return _withRawContent(Tuple.of(StyledString.of(textString)));
     }
 
     /**
@@ -253,7 +360,7 @@ public final class TextConf implements Simplifiable<TextConf>
      */
     public TextConf content( StyledString... styledStrings ) {
         Objects.requireNonNull(styledStrings);
-        return of(Tuple.of(StyledString.class, styledStrings), _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+        return _withRawContent(Tuple.of(StyledString.class, styledStrings));
     }
 
     /**
@@ -267,10 +374,10 @@ public final class TextConf implements Simplifiable<TextConf>
      * @throws NullPointerException if the supplied styledStrings is null.
      */
     public TextConf content( Tuple<StyledString> styledStrings ) {
-        if ( _content.equals(styledStrings) ) {
+        Objects.requireNonNull(styledStrings);
+        if ( _contentEqualTo(styledStrings) )
             return this;
-        }
-        return of(styledStrings, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+        return _withRawContent(styledStrings);
     }
 
     /**
@@ -288,8 +395,38 @@ public final class TextConf implements Simplifiable<TextConf>
         return content(Tuple.of(StyledString.class, styledStrings));
     }
 
+    /**
+     * Wraps a raw {@link Tuple} of {@link StyledString}s into a single un-interned
+     * {@link Pooled}{@literal <}{@link Paragraph}{@literal >} and returns a new
+     * {@link TextConf} with that as its content.  Splitting into multiple paragraphs
+     * is deferred until {@link #simplified()} is called.
+     */
+    private TextConf _withRawContent( Tuple<StyledString> strings ) {
+        if ( strings.isEmpty() ) {
+            return of(_EMPTY_CONTENT, _fontConf, _clipArea, _placementBoundary, _placement,
+                      _offset, _wrapLines, _autoPreferredHeight, _obstacles,
+                      _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+        }
+        final Pooled<Paragraph> pooled = new Pooled<>(Paragraph.of(strings));
+        final Tuple<Pooled<Paragraph>> wrapped = Tuple.of(Pooled.classTyped(Paragraph.class)).add(pooled);
+        return of(wrapped, _fontConf, _clipArea, _placementBoundary, _placement,
+                  _offset, _wrapLines, _autoPreferredHeight, _obstacles,
+                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Returns {@code true} when the pre-simplified content of this instance is a single
+     * (non-blank) paragraph whose {@code styledStrings} tuple equals {@code strings}.
+     * Used to short-circuit no-op calls to {@link #content(Tuple)}.
+     */
+    private boolean _contentEqualTo( Tuple<StyledString> strings ) {
+        if ( _content.size() == 1 && !_content.get(0).get().isBlankLine )
+            return _content.get(0).get().styledStrings.equals(strings);
+        return false;
+    }
+
     private TextConf _fontConf(FontConf fontConf) {
-        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -327,7 +464,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given clip area.
      */
     public TextConf clipTo( UI.ComponentArea clipArea ) {
-        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -361,7 +498,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given placement boundary.
      */
     public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
-        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -381,13 +518,15 @@ public final class TextConf implements Simplifiable<TextConf>
      *     <li>{@link UI.Placement#TOP_RIGHT} - Placed at the top right corner of the component.</li>
      *     <li>{@link UI.Placement#BOTTOM_LEFT} - Placed at the bottom left corner of the component.</li>
      *     <li>{@link UI.Placement#BOTTOM_RIGHT} - Placed at the bottom right corner of the component.</li>
-     * </ul>
+     * </ul><br>
+     * <b>Also note that not all placements are compatible with the {@link #obstacles(Shape...)} avoidance feature.
+     * Only {@code TOP_LEFT}, {@code TOP} and {@code TOP_RIGHT} allow for text to avoid obstacles...</b>
      *
      * @param placement The placement of the text, defined by a {@link UI.Placement} enum.
      * @return An updated {@link TextConf} object with the desired placement.
      */
     public TextConf placement(UI.Placement placement) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -402,7 +541,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -429,7 +568,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return An updated {@link TextConf} object with the given wrap lines property.
      */
     public TextConf wrapLines(boolean wrapLines) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     /**
@@ -446,7 +585,125 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new text configuration with the desired auto height behavior.
      */
     public TextConf autoPreferredHeight(boolean autoPreferredHeight) {
-        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Returns an updated {@link TextConf} with the given shapes registered as <i>"text obstacles"</i>
+     * for the text layout engine. The text will wrap around and skip over each obstacle and
+     * can never be rendered on top of it. Obstacle shapes are specified in component coordinates.
+     * <p>
+     * Curved shapes such as circles or ellipses are supported as well.<br>
+     * <b>Important — placement compatibility:</b> obstacle avoidance is only active when
+     * {@link #placement(UI.Placement)} is one of
+     * {@link UI.Placement#TOP_LEFT}, {@link UI.Placement#TOP}, or {@link UI.Placement#TOP_RIGHT}.
+     * Any other placement silently disables obstacle avoidance.
+     * See the {@link TextConf} class-level documentation for a detailed explanation of why
+     * bottom-anchored and vertically-centred placements cannot support obstacle avoidance.
+     *
+     * @param obstacles One or more {@link Shape}s in component coordinates for text to skip over.
+     * @return An updated {@link TextConf} with the given obstacles.
+     */
+    public TextConf obstacles( Shape... obstacles ) {
+        Objects.requireNonNull(obstacles, "obstacles");
+        for ( int i = 0; i < obstacles.length; i++ )
+            Objects.requireNonNull(obstacles[i], "obstacles[" + i + "]");
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight,
+                  Tuple.of(Shape.class, obstacles), _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Returns an updated {@link TextConf} with the given {@link Tuple} of shapes registered
+     * as <i>"text obstacles"</i> for the text layout engine.
+     * The text will wrap around and skip over each obstacle and
+     * can never be rendered on top of it. Obstacle shapes are specified in component coordinates.
+     * <p>
+     * Curved shapes such as circles or ellipses are supported as well.<br>
+     * <b>Important — placement compatibility:</b> obstacle avoidance is only active when
+     * {@link #placement(UI.Placement)} is one of
+     * {@link UI.Placement#TOP_LEFT}, {@link UI.Placement#TOP}, or {@link UI.Placement#TOP_RIGHT}.
+     * Any other placement silently disables obstacle avoidance.
+     * See the {@link TextConf} class-level documentation for a detailed explanation of why
+     * bottom-anchored and vertically-centred placements cannot support obstacle avoidance.
+     *
+     * @param obstacles A {@link Tuple} of {@link Shape}s in component coordinates for text to skip over.
+     * @return An updated {@link TextConf} with the given obstacles.
+     */
+    public TextConf obstacles( Tuple<Shape> obstacles ) {
+        Objects.requireNonNull(obstacles);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Configures which boundary layer of each child component should be used when automatically
+     * deriving text-layout obstacles from the parent component's children.
+     * <p>
+     * When a styled component has child components, the style engine automatically collects
+     * a shape for each child and registers it as an obstacle for the text layout, so that the
+     * text flows around the children rather than rendering on top of them.
+     * <p>
+     * Think of the boundaries as an onion peeled inward — each boundary defines how far inside
+     * a child the obstacle extends.  The available values are:
+     * <ul>
+     *     <li>{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} — the full bounding rectangle of
+     *         the child including any margin (the default).</li>
+     *     <li>{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} — shrinks the obstacle inward to
+     *         exclude the child's margin, so text may flow into the margin area.</li>
+     *     <li>{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} — shrinks further to exclude both
+     *         margin and border, so text may flow through margin and border areas.</li>
+     *     <li>{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} — shrinks to the content area,
+     *         letting text flow through margin, border, and padding of the child.</li>
+     * </ul>
+     * Child components that do not carry a SwingTree style (i.e. plain Swing components without
+     * margin or border styling) always fall back to the full bounding rectangle.
+     *
+     * @param boundary The component boundary of each child that should be treated as an obstacle.
+     * @return An updated {@link TextConf} with the given child-obstacle boundary setting.
+     */
+    public TextConf obstaclesFromChildren( UI.ComponentBoundary boundary ) {
+        Objects.requireNonNull(boundary);
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, boundary, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Returns whether the style engine should automatically register the bounding shapes of
+     * child components as text-layout obstacles for this text configuration.
+     * <p>
+     * When {@code true} (the default), every child of the parent component contributes an
+     * obstacle shape determined by {@link #obstaclesFromChildren(UI.ComponentBoundary)}, so that
+     * the text flows around the children rather than rendering on top of them.
+     * <p>
+     * When {@code false}, child components are completely ignored during obstacle collection —
+     * the text layout behaves as if no children exist, regardless of the
+     * {@link #obstaclesFromChildren(UI.ComponentBoundary)} setting.
+     *
+     * @return {@code true} if child-derived obstacles are enabled; {@code false} if they are suppressed.
+     */
+    boolean obstaclesFromChildrenEnabled() {
+        return _obstaclesFromChildrenEnabled;
+    }
+
+    /**
+     * Controls whether the style engine should automatically register child components
+     * of the parent as text-layout obstacles for this text configuration.
+     * <p>
+     * When set to {@code true} (the default), the style engine collects the bounding shape
+     * of every child component and adds it to the text obstacles, so that the rendered text
+     * flows around the children rather than overlapping them.  The exact portion of each
+     * child that is treated as an obstacle can be refined with
+     * {@link #obstaclesFromChildren(UI.ComponentBoundary)}.
+     * <p>
+     * When set to {@code false}, child components are completely ignored during obstacle
+     * collection.  This is useful when you deliberately want text and child components
+     * to share the same visual area — for example when a child is a transparent overlay or
+     * a decorative element that should not interrupt the text flow.
+     *
+     * @param enabled {@code true} to enable automatic child-obstacle registration (the default),
+     *                {@code false} to disable it entirely.
+     * @return An updated {@link TextConf} with the given child-obstacle-enabled setting.
+     */
+    public TextConf obstaclesFromChildrenEnabled( boolean enabled ) {
+        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, enabled);
     }
 
     @Override
@@ -456,16 +713,101 @@ public final class TextConf implements Simplifiable<TextConf>
         //       for the component, even when the content is empty (the resulting height may be 0).
         if ( _content.isEmpty() && !_autoPreferredHeight )
             return _NONE;
-        Tuple<StyledString> simplifiedContent = _content.removeIf( it -> it.string().isEmpty() )
-                                                        .map( it -> it.resolveUsing(_fontConf))
-                                                        .removeIf( it -> it
-                                                                .fontConf()
-                                                                .map( fontConf -> fontConf.size() == 0 )
-                                                                .orElse( false )
-                                                            );
-        if ( simplifiedContent.isEmpty() && !_autoPreferredHeight )
-             return _NONE;
-        return content(simplifiedContent);
+
+        // Collect all StyledStrings from the (pre-simplified) content.
+        // Before simplified() is called, _content holds at most one wrapper paragraph.
+        // After simplification, it holds the already-split interned paragraphs.
+        final Tuple<Pooled<Paragraph>> newContent;
+        if ( _content.size() == 1 && !_content.get(0).get().isBlankLine ) {
+            // Normal case: un-split content — flatten, simplify, then split into paragraphs.
+            final Tuple<StyledString> rawStrings = _content.get(0).get().styledStrings;
+
+            final Tuple<StyledString> simplified = rawStrings
+                    .removeIf( it -> it.string().isEmpty() )
+                    .map( it -> it.resolveUsing(_fontConf) )
+                    .removeIf( it -> it.fontConf()
+                                       .map( fc -> fc.size() == 0 )
+                                       .orElse(false) );
+
+            if ( simplified.isEmpty() && !_autoPreferredHeight )
+                return _NONE;
+
+            // Split by '\n' into interned paragraphs, then store as the new _content.
+            final Tuple<Pooled<Paragraph>> splitContent = _splitAndIntern(simplified);
+            newContent = splitContent.isEmpty() ? _EMPTY_CONTENT : splitContent;
+        } else {
+            // Already-split content (e.g. after _scale on previously simplified content).
+            // Process each paragraph individually so blank lines and paragraph boundaries
+            // are preserved, making simplified() idempotent.
+            final List<Pooled<Paragraph>> result = new ArrayList<>(_content.size());
+            for ( Pooled<Paragraph> p : _content ) {
+                if ( p.get().isBlankLine ) {
+                    result.add(new Pooled<>(Paragraph.blankLine()).intern());
+                } else {
+                    final Tuple<StyledString> simplified = p.get().styledStrings
+                            .removeIf( it -> it.string().isEmpty() )
+                            .map( it -> it.resolveUsing(_fontConf) )
+                            .removeIf( it -> it.fontConf()
+                                               .map( fc -> fc.size() == 0 )
+                                               .orElse(false) );
+                    if ( !simplified.isEmpty() )
+                        result.add(new Pooled<>(Paragraph.of(simplified)).intern());
+                }
+            }
+            newContent = result.isEmpty()
+                ? _EMPTY_CONTENT
+                : Tuple.of(Pooled.classTyped(Paragraph.class), result);
+        }
+
+        if ( newContent.isEmpty() && !_autoPreferredHeight )
+            return _NONE;
+
+        return of(newContent, _fontConf, _clipArea, _placementBoundary, _placement,
+                  _offset, _wrapLines, _autoPreferredHeight, _obstacles,
+                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+    }
+
+    /**
+     * Splits a flat sequence of {@link StyledString}s at {@code '\n'} boundaries into
+     * interned {@link Pooled}{@literal <}{@link Paragraph}{@literal >} objects.
+     * <p>
+     * Each contiguous run of text between newlines becomes one {@link Paragraph}.
+     * A newline that produces an empty segment (blank line) becomes a
+     * {@link Paragraph#blankLine()} entry.  The resulting paragraphs are interned
+     * via {@link Pooled#intern()} so identical paragraphs share the same reference and
+     * can be used as identity-stable cache keys in the layout engine.
+     */
+    private static Tuple<Pooled<Paragraph>> _splitAndIntern( Tuple<StyledString> content ) {
+        final List<Pooled<Paragraph>> result = new ArrayList<>();
+        List<StyledString> current = null;
+        for ( StyledString s : content ) {
+            final String[] parts = s.string().split("\n", -1);
+            if ( parts.length <= 1 ) {
+                if ( current == null ) current = new ArrayList<>();
+                current.add(s);
+            } else {
+                for ( int i = 0; i < parts.length; i++ ) {
+                    if ( current == null ) current = new ArrayList<>();
+                    if ( !parts[i].isEmpty() ) current.add(s.withString(parts[i]));
+                    if ( i < parts.length - 1 ) {
+                        result.add(_internedParagraphFrom(current));
+                        current = null;
+                    }
+                }
+            }
+        }
+        if ( current != null )
+            result.add(_internedParagraphFrom(current));
+
+        return Tuple.of(Pooled.classTyped(Paragraph.class), result);
+    }
+
+    private static Pooled<Paragraph> _internedParagraphFrom( List<StyledString> strings ) {
+        final int len = strings.stream().mapToInt(s -> s.string().length()).sum();
+        final Paragraph p = len <= 0
+            ? Paragraph.blankLine()
+            : Paragraph.of(Tuple.of(StyledString.class, strings));
+        return new Pooled<>(p).intern();
     }
 
     @Override
@@ -473,16 +815,32 @@ public final class TextConf implements Simplifiable<TextConf>
         return this.equals(_NONE);
     }
 
-    TextConf _scale(double scale) {
+    TextConf _scale( double scale ) {
+        // Scale each StyledString inside every paragraph, wrapping them back into un-interned
+        // Pooled<Paragraph> objects.  Interning happens later in simplified().
+        final List<Pooled<Paragraph>> scaledParagraphs = new ArrayList<>(_content.size());
+        for ( Pooled<Paragraph> pooled : _content ) {
+            final Paragraph original = pooled.get();
+            if ( original.isBlankLine ) {
+                scaledParagraphs.add(new Pooled<>(Paragraph.blankLine()));
+            } else {
+                final Tuple<StyledString> scaledStrings = original.styledStrings.map( s -> s.mapStyle( st -> st._scale(scale) ) );
+                scaledParagraphs.add(new Pooled<>(Paragraph.of(scaledStrings)));
+            }
+        }
+
         return of(
-            _content.map( it -> it.mapStyle( s -> s._scale(scale) ) ),
+            Tuple.of(Pooled.classTyped(Paragraph.class), scaledParagraphs),
             _fontConf._scale(scale),
             _clipArea,
             _placementBoundary,
             _placement,
             _offset.scale(scale),
             _wrapLines,
-            _autoPreferredHeight
+            _autoPreferredHeight,
+            _obstacles, // obstacle shapes are in component coordinates; scaling is the caller's responsibility
+            _obstaclesFromChildrenAs,
+            _obstaclesFromChildrenEnabled
         );
     }
 
@@ -503,27 +861,34 @@ public final class TextConf implements Simplifiable<TextConf>
             _placement.equals(other._placement) &&
             _offset.equals(other._offset) &&
             _wrapLines == other._wrapLines &&
-            _autoPreferredHeight == other._autoPreferredHeight;
+            _autoPreferredHeight == other._autoPreferredHeight &&
+            _obstacles.equals(other._obstacles) &&
+            _obstaclesFromChildrenAs == other._obstaclesFromChildrenAs &&
+            _obstaclesFromChildrenEnabled == other._obstaclesFromChildrenEnabled;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight);
+        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
     }
 
     @Override
     public String toString() {
         if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
+        Tuple<StyledString> flatContent = _content.stream().flatMap(p->p.get().styledStrings.stream()).collect(Tuple.collectorOf(StyledString.class));
         return this.getClass().getSimpleName() + "[" +
-            "content=" + _content + ", " +
+            "content=" + flatContent + ", " +
             "fontConf=" + _fontConf + ", " +
             "clipArea=" + _clipArea + ", " +
             "placementBoundary=" + _placementBoundary + ", " +
             "placement=" + _placement + ", " +
             "offset=" + _offset + ", " +
             "wrapLines=" + _wrapLines + ", " +
-            "autoPreferredHeight=" + _autoPreferredHeight +
+            "autoPreferredHeight=" + _autoPreferredHeight + ", " +
+            "obstacles=" + _obstacles + ", " +
+            "obstaclesFromChildrenAs=" + _obstaclesFromChildrenAs + ", " +
+            "obstaclesFromChildrenEnabled=" + _obstaclesFromChildrenEnabled +
         "]";
     }
 

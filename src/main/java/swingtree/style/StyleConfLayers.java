@@ -10,15 +10,13 @@ import swingtree.api.Configurator;
 import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 @Immutable
@@ -215,8 +213,10 @@ final class StyleConfLayers
                                 return totalHeight;
                             }
                             final Bounds textBounds = StyleRenderer._computeTextBounds(textConf, predictedBoxModel);
-                            final float availableWidth = textBounds.size().width().orElse(0f);
-                            if ( availableWidth <= 0 )
+                            final float boundsWidth = textBounds.size().width().orElse(0f);
+                            final float boundsX     = textBounds.location().x();
+                            final float boundsY     = textBounds.location().y();
+                            if ( boundsWidth <= 0 )
                                 return -1;
                             final boolean wrapLines = textConf.wrapLines();
                             Font font = Optional.ofNullable(owner.getFont()).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
@@ -225,12 +225,12 @@ final class StyleConfLayers
                             final Graphics2D g2d = img.createGraphics();
                             try {
                                 final FontRenderContext frc = g2d.getFontRenderContext();
-                                final Pair<Float, List<@Nullable TextLayout>> layoutResult =
-                                        StyleRenderer._buildTextLayoutsAndPreferredHeight(
-                                                font, frc, textConf.content(), availableWidth, wrapLines, predictedBoxModel
+                                final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult =
+                                        TextLayoutEngine._buildTextLayoutsAndPreferredHeight(
+                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles(), textConf.placement()
                                         );
                                 double totalHeight = layoutResult.first().doubleValue();
-                                totalHeight += textBounds.location().y();
+                                totalHeight += boundsY;
                                 totalHeight += insets.bottom().orElse(0f);
                                 return totalHeight;
                             }
@@ -281,4 +281,5 @@ final class StyleConfLayers
             && Objects.equals(_foreground, other._foreground)
             && Objects.equals(_any,        other._any);
     }
+
 }

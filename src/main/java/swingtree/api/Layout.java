@@ -693,7 +693,7 @@ public interface Layout
                 for ( Pair<Integer, Bounds> entry : _childBounds ) {
                     int i = entry.first();
                     if ( i < 0 || i >= children.length ) continue;
-                    java.awt.Rectangle desired  = entry.second().toRectangle();
+                    java.awt.Rectangle desired  = UI.scale(entry.second().toRectangle());
                     java.awt.Rectangle existing = children[i].getBounds();
                     if ( !desired.equals(existing) ) {
                         children[i].setBounds(desired);

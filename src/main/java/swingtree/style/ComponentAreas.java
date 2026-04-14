@@ -24,11 +24,12 @@ final class ComponentAreas
 {
     private static final Map<Pooled<BoxModelConf>, ComponentAreas> _CACHE = new WeakHashMap<>();
 
-    private final BoxModelConf _boxModel;
+    private final BoxModelConf    _boxModel;
     private final LazyRef<Area>   _borderArea;
     private final LazyRef<Area>   _interiorArea;
     private final LazyRef<Area>   _exteriorArea;
     private final LazyRef<Area>   _bodyArea;
+    private final LazyRef<Area>   _contentArea;
     private final LazyRef<Area[]> _borderEdgeAreas;
 
     static ComponentAreas of( Pooled<BoxModelConf> state ) {
@@ -42,6 +43,7 @@ final class ComponentAreas
         _interiorArea    = new LazyRef<>(_boxModel, ComponentAreas::_produceInteriorArea);
         _borderArea      = new LazyRef<>(Pair.of(_interiorArea, _bodyArea), s->ComponentAreas._produceBorderArea(s.first(), s.second()));
         _exteriorArea    = new LazyRef<>(Pair.of(_boxModel, _bodyArea), s->ComponentAreas._produceExteriorArea(s.first(),s.second()));
+        _contentArea     = new LazyRef<>(Pair.of(_boxModel, _interiorArea), s->ComponentAreas._produceContentArea(s.first(), s.second()));
         _borderEdgeAreas = new LazyRef<>(_boxModel, ComponentAreas::calculateEdgeBorderAreas);
     }
 
@@ -64,6 +66,28 @@ final class ComponentAreas
                         boxModel.size().height().map(Float::intValue).orElse(0)
                     );
         }
+    }
+
+    /**
+     * @return The intersection between the interior area and the rectangular content area.
+     *         The rectangular content area is essentially all insets from the box model applied to the component's bounds,
+     *         without taking into account any border radius.
+     */
+    public Shape getContentArea() {
+        return _contentArea.get();
+    }
+
+    private static Area _produceContentArea( BoxModelConf boxModel, LazyRef<Area> interiorArea ) {
+        Outline insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
+        Size size = boxModel.size();
+        Area contentArea = new Area(new Rectangle2D.Float(
+                insets.left().orElse(0f),
+                insets.top().orElse(0f),
+                size.width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),
+                size.height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)
+        ));
+        contentArea.intersect(new Area(interiorArea.get()));
+        return contentArea;
     }
 
     public Area[] getEdgeAreas() {

@@ -497,6 +497,27 @@ public final class StyleConf
         return _withBorder(_border.correctedForRounding());
     }
 
+
+    public <C extends JComponent> StyleConf determineTextConfObstaclesFromChildrenOf( C owner ) {
+        boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
+        if ( !hasStyledText || owner.getComponentCount() <= 0 )
+            return this;
+        StyleConfLayers newLayers = _layers.map( s -> s
+                .withTexts(s.texts().mapStyles( t -> {
+                    if ( t.content().isEmpty() )
+                        return t; // no text to lay out; obstacles would never be consulted
+                    if ( !t.obstaclesFromChildrenEnabled() )
+                        return t;
+                    UI.ComponentBoundary area = t.obstaclesFromChildren();
+                    Shape[] shapes = Arrays.stream(owner.getComponents())
+                        .map(child -> TextLayoutEngine.childShapeForArea(child, area))
+                        .toArray(Shape[]::new);
+                    return t.obstacles(t.obstacles().addAll(shapes));
+                }))
+            );
+        return this._withLayers(newLayers);
+    }
+
     StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
         boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
         if ( !hasStyledText )
@@ -717,5 +738,4 @@ public final class StyleConf
                     propertiesString +
                 "]";
     }
-
 }
