@@ -360,10 +360,16 @@ final class TextLayoutEngine {
      *  {@code [boundsX, boundsX+boundsWidth]} for a line whose vertical band spans
      *  {@code [y, y+lineHeight]} in component coordinates, sorted left to right.
      *  <p>
-     *  Each obstacle's contribution is derived from its <em>exact geometry</em> via
+     *  Each obstacle's contribution is derived from its <em>surface geometry</em> via
      *  {@link Area} intersection (not just the bounding box), so non-rectangular shapes
      *  such as circles or ellipses are handled correctly — only the actual chord at the
-     *  current y-level is subtracted, not the full bounding-box width.
+     *  current y-level is subtracted, not the full bounding-box width.<br>
+     *  <b>
+     *      "Holes" inside shapes are not treated as free space — the line is blocked across the full width of
+     *      the shape, even if the obstacle has a hole at the current y-level. This is a conservative but
+     *      performance-friendly approach that avoids the complexity of handling multiple disjoint
+     *      free intervals per obstacle.
+     *  </b>
      *  <p>
      *  Returning all intervals (rather than just the widest one) allows the caller to
      *  fill text into every free gap on a line, so text appears on both sides of an obstacle.
