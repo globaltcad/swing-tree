@@ -166,4 +166,40 @@ class Slider_Spec extends Specification
         and : 'The sliders max value is updated'
             slider.maximum == (int)(2d * scale)
     }
+
+    def 'Moving the slider after dynamic min/max changes keeps the bound value within [min, max].'()
+    {
+        reportInfo """
+            This is a regression test for a bug where the slider's internal
+            scaling used for non-whole-number bindings could become stale when
+            one of the `min` or `max` properties changed dynamically.
+            When the user then moved the slider knob, the resulting value
+            written into the bound property could fall outside the current
+            `[min, max]` range.
+        """
+        given : 'A bidirectional slider bound to three double properties.'
+            var min = Var.of(5d)
+            var max = Var.of(10d)
+            var value = Var.of(7.5d)
+            var slider =
+                    UI.slider(UI.Align.HORIZONTAL, min, max, value)
+                      .get(JSlider)
+        and : 'We compute the slider integer range after dropping the max.'
+            var newMax = 6d
+        when : 'The application shrinks the max property significantly.'
+            UI.runNow({ max.set(newMax) })
+        and : 'The user then drags the slider knob to a position near its minimum.'
+            UI.runNow({ slider.value = slider.minimum + (slider.maximum - slider.minimum) / 4 as int })
+        then : 'The bound value stays within the new [min, max] range.'
+            value.get() >= min.get()
+            value.get() <= max.get()
+        when : 'The user drags the slider knob all the way to the top.'
+            UI.runNow({ slider.value = slider.maximum })
+        then : 'The bound value equals the user-defined maximum (within rounding).'
+            value.get() == max.get()
+        when : 'The user drags the slider knob all the way to the bottom.'
+            UI.runNow({ slider.value = slider.minimum })
+        then : 'The bound value equals the user-defined minimum (within rounding).'
+            value.get() == min.get()
+    }
 }
