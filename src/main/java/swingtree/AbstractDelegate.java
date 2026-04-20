@@ -536,6 +536,28 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     /**
+    *  As a delegate to the underlying component, you can use this method to
+    *  conveniently set the location of the component int terms of x and y coordinates relative to its parent.
+    *  This method returns the delegate itself, so you can chain calls to this method.
+    *  <p>
+    *  See {@link Component#setLocation(int, int)} for more information.
+    *  </p>
+    *  <b>Important:</b> The supplied {@link Point} is interpreted as "being in developer pixel space"
+    *  without any scaling factor applied to it. And so this method will scale the location
+    *  to DPI aware "component pixel space" by multiplying by {@link UI#scale()}.
+    *
+    * @param x The x coordinate of the new location of the component.
+    *          This is relative to the component's parent.
+    * @param y The y coordinate of the new location of the component.
+    *          This is relative to the component's parent.
+    * @return The delegate itself, so you can chain calls to this method.
+    */
+    public final AbstractDelegate<C> setLocation( double x, double y ) {
+        _component().setLocation((int) UI.scale(x), (int) UI.scale(y));
+        return this;
+    }
+
+    /**
      *  As a delegate to the underlying component, you can use this method to
      *  conveniently get the bounds of the component in the form of an immutable {@link Bounds} value object.
      *  The bounds consist of a location and a size which are relative to the component's parent.

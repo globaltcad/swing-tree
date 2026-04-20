@@ -54,6 +54,7 @@ import swingtree.layout.Bounds
       - `Layout.none()` removing the layout manager
       - `Layout.none()` with child bounds enabling declarative absolute positioning
       - Sparse per-child bound targeting via `withChildBound(int, Bounds)` without placeholder entries
+      - `Layout.none()` child bounds honouring the SwingTree UI scale factor for HiDPI-aware absolute positioning
       - In-place constraint updates for `ForMigLayout`
       - Positional per-child MigLayout add-constraints applied reactively
       - Sparse per-child MigLayout constraint via `withChildConstraint(int, MigAddConstraint)`
@@ -739,6 +740,80 @@ class Reactive_Layout_Spec extends Specification
             layout.set(Layout.mig("fill"))
         then: 'The MigLayout is reinstalled — the panel is managed again:'
             panel.getLayout() instanceof MigLayout
+    }
+
+    def '`Layout.none()` child bounds are multiplied by the SwingTree UI scale factor so absolute positioning stays HiDPI aware.'()
+    {
+        reportInfo """
+            SwingTree supports a global UI scale factor which is applied to virtually every
+            pixel value that flows through the library. This is how SwingTree achieves crisp
+            rendering on HiDPI displays from the very same UI code that also runs on regular
+            displays.
+
+            Absolute positioning via `Layout.none(Bounds...)` is no exception: the `Bounds`
+            you declare in your layout code are specified in logical (unscaled) pixels — the
+            same units you would write in any other SwingTree API. When the layout is
+            installed on a component, each bound is passed through `UI.scale(Rectangle)`
+            before it is forwarded to `Component.setBounds(...)`, so the component ends up
+            at the correct physical location for the current scale factor.
+
+            This means you can author a screen with hand-placed children at, say,
+            `Bounds.of(10, 10, 100, 50)` and have it automatically produce
+            `(20, 20, 200, 100)` on a display running at a UI scale of 2.
+            No special case handling is required in your UI code.
+
+            Because this scaling happens inside `installFor`, it is re-evaluated on every
+            reactive layout update — so even after toggling between different `Layout.none(...)`
+            values at runtime, the final child bounds always reflect the current UI scale.
+        """
+        given: 'We set the UI scale factor to 2 — emulating a HiDPI display:'
+            SwingTree.get().setUiScaleFactor(2f)
+        and: 'A reactive layout property starting with a MigLayout:'
+            def layout = Var.of(Layout.class, Layout.mig("fill"))
+        and: 'A panel with three child components and a bound layout:'
+            def panel =
+                UI.panel()
+                .withLayout(layout)
+                .add(UI.box())
+                .add(UI.box())
+                .add(UI.box())
+                .get(JPanel)
+
+        when: 'We switch to `Layout.none()` with logical (unscaled) bounds declared for each child:'
+            layout.set(
+                Layout.none(
+                    Bounds.of(  0,   0, 120, 40),
+                    Bounds.of(  0,  50, 120, 40),
+                    Bounds.of(  0, 100, 120, 40)
+                )
+            )
+        then: 'The layout manager is removed and the panel enters absolute positioning mode:'
+            panel.getLayout() == null
+        and: 'Each child ends up at its logical bounds multiplied by the UI scale factor of 2:'
+            panel.getComponent(0).getBounds() == new java.awt.Rectangle(  0,   0, 240, 80)
+            panel.getComponent(1).getBounds() == new java.awt.Rectangle(  0, 100, 240, 80)
+            panel.getComponent(2).getBounds() == new java.awt.Rectangle(  0, 200, 240, 80)
+
+        when: 'We reactively update the layout with a new set of logical bounds:'
+            layout.set(
+                Layout.none(
+                    Bounds.of( 10,  10,  80, 30),
+                    Bounds.of( 10,  50,  80, 30),
+                    Bounds.of( 10,  90, 160, 60)
+                )
+            )
+        then: 'The new bounds are, again, scaled by the current UI scale factor before being applied:'
+            panel.getComponent(0).getBounds() == new java.awt.Rectangle( 20,  20, 160, 60)
+            panel.getComponent(1).getBounds() == new java.awt.Rectangle( 20, 100, 160, 60)
+            panel.getComponent(2).getBounds() == new java.awt.Rectangle( 20, 180, 320, 120)
+
+        when: 'We also verify sparse per-child bounds are scaled identically:'
+            layout.set(Layout.none().withChildBound(1, Bounds.of(5, 15, 70, 25)))
+        then: 'Only the targeted child is updated, and its bounds are scaled by the UI scale factor:'
+            panel.getComponent(1).getBounds() == new java.awt.Rectangle(10, 30, 140, 50)
+
+        cleanup: 'We restore the default UI scale factor so later tests are not affected:'
+            SwingTree.get().setUiScaleFactor(1f)
     }
 
     def '`withChildBound(int, Bounds)` targets only the specified child, leaving all others untouched.'()

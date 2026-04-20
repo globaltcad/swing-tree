@@ -26,6 +26,14 @@ import java.util.function.Function;
 @Immutable
 @SuppressWarnings("Immutable")
 final class Pooled<V> {
+
+    static <V> Class<Pooled<V>> classTyped( Class<V> clazz ) {
+        Objects.requireNonNull(clazz);
+        @SuppressWarnings("unchecked")
+        Class<Pooled<V>> pooledClass = (Class<Pooled<V>>) (Class<?>) Pooled.class;
+        return pooledClass;
+    }
+
     private final AtomicReference<@Nullable Integer> _hashCache = new AtomicReference<>();
     private final V value;
 

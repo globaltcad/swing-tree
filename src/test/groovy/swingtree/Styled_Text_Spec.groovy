@@ -151,8 +151,10 @@ class Styled_Text_Spec extends Specification
                         "placement=TOP_LEFT, " +
                         "offset=Offset[x=0, y=0], " +
                         "wrapLines=true, " +
-                        "autoPreferredHeight=false" +
-                    "]")
+                        "autoPreferredHeight=false, " +
+                        "obstacles=Tuple<Shape>[]")
+            styleString.contains("obstaclesFromChildrenAs=")
+            styleString.contains("obstaclesFromChildrenEnabled=")
     }
 
     def 'A text configuration that carries only an empty content tuple simplifies to "TextConf[NONE]"'()
@@ -335,8 +337,7 @@ class Styled_Text_Spec extends Specification
                                 "backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?" +
                             "], " +
                             "clipArea=INTERIOR, placementBoundary=INTERIOR_TO_CONTENT, placement=${placement}, " +
-                            "offset=Offset[x=0, y=0], wrapLines=true, autoPreferredHeight=true" +
-                        "]"
+                            "offset=Offset[x=0, y=0], wrapLines=true, autoPreferredHeight=true, obstacles=Tuple<Shape>[]"
             )
 
         when : 'We remove all contents entirely, which should reset the preferred height to 0 since there is no text to render.'

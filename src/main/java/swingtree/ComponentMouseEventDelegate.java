@@ -122,7 +122,8 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
 
     /**
      * Returns the x coordinate of the mouse event of this delegate <b>without DPI scaling</b>.
-     * So the value is in "developer pixel" coordinate space <b>relative to the underlying component</b>.
+     * So the value is in "developer pixel" not in <b>UI scaled component space</b>.
+     * The coordinate is also <b>relative to the underlying component (not the parent)</b>.
      * So a mouse position of (0,0) would be in the top left corner of the component. <br>
      * <p>
      * <b>For Context:</b><br>
@@ -143,7 +144,8 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
 
     /**
      * Returns the y coordinate of the mouse event of this delegate <b>without DPI scaling</b>.
-     * So the value is in "developer pixel" coordinate space <b>relative to the underlying component</b>.
+     * So the value is in "developer pixel" not in <b>UI scaled component space</b>.
+     * The coordinate is also <b>relative to the underlying component (not the parent)</b>.
      * So a mouse position of (0,0) would be in the top left corner of the component. <br>
      * <p>
      * <b>For Context:</b><br>
