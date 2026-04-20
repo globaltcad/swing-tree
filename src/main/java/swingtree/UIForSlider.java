@@ -267,9 +267,9 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                                     int minInt = _scale(Integer.class, minVal, minVal, maxVal, false);
                                     int maxInt = _scale(Integer.class, maxVal, minVal, maxVal, false);
                                     N targetItem;
-                                    if ( newSliderInt == minInt )
+                                    if ( newSliderInt <= minInt )
                                         targetItem = minVal;
-                                    else if ( newSliderInt == maxInt )
+                                    else if ( newSliderInt >= maxInt )
                                         targetItem = maxVal;
                                     else
                                         targetItem = _scale(userType, newSliderInt, minVal, maxVal, true);
