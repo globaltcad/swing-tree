@@ -307,9 +307,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         int newMin = _scale(Integer.class, minVal, minVal, maxVal, false);
         int newMax = _scale(Integer.class, maxVal, minVal, maxVal, false);
         int newVal = _scale(Integer.class, currentVal, minVal, maxVal, false);
+        int currentExtent = thisComponent.getModel().getExtent();
         _doWithoutListeners(thisComponent, () ->
             thisComponent.getModel().setRangeProperties(
-                newVal, 0, newMin, newMax, thisComponent.getValueIsAdjusting()
+                newVal, currentExtent, newMin, newMax, thisComponent.getValueIsAdjusting()
             )
         );
     }
