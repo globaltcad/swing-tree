@@ -692,7 +692,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
     }
 
     private static int rankOf(ParentSizeClass sizeClass){
-<span class="pc bpc" id="L695" title="4 of 8 branches missed.">        switch (sizeClass) {</span>
+<span class="pc bpc" id="L695" title="2 of 8 branches missed.">        switch (sizeClass) {</span>
             case VOID:
 <span class="nc" id="L697">                return 0;</span>
             case VERY_SMALL:
@@ -702,11 +702,11 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             case MEDIUM:
 <span class="fc" id="L703">                return 3;</span>
             case LARGE:
-<span class="nc" id="L705">                return 4;</span>
+<span class="fc" id="L705">                return 4;</span>
             case VERY_LARGE:
 <span class="fc" id="L707">                return 5;</span>
             case OVERSIZE:
-<span class="nc" id="L709">                return 6;</span>
+<span class="fc" id="L709">                return 6;</span>
             default:
 <span class="nc" id="L711">                return -1;</span>
         }
@@ -728,20 +728,20 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 <span class="pc bpc" id="L728" title="1 of 2 branches missed.">        for ( int offset = 1; offset &lt; numberOfSizeClasses; offset++ ) {</span>
 <span class="fc" id="L729">            sign = -sign;</span>
 <span class="fc" id="L730">            autoSpan = _find(targetOrdinal + offset * sign, cell);</span>
-<span class="pc bpc" id="L731" title="1 of 2 branches missed.">            if ( autoSpan.isPresent() )</span>
+<span class="fc bfc" id="L731" title="All 2 branches covered.">            if ( autoSpan.isPresent() )</span>
 <span class="fc" id="L732">                return autoSpan;</span>
 
-<span class="nc" id="L734">            sign = -sign;</span>
-<span class="nc" id="L735">            autoSpan = _find(targetOrdinal + offset * sign, cell);</span>
-<span class="nc bnc" id="L736" title="All 2 branches missed.">            if ( autoSpan.isPresent() )</span>
+<span class="fc" id="L734">            sign = -sign;</span>
+<span class="fc" id="L735">            autoSpan = _find(targetOrdinal + offset * sign, cell);</span>
+<span class="pc bpc" id="L736" title="1 of 2 branches missed.">            if ( autoSpan.isPresent() )</span>
 <span class="nc" id="L737">                return autoSpan;</span>
         }
 <span class="nc" id="L739">        return Optional.empty();</span>
     }
 
     private static Optional&lt;FlowCellSpanPolicy&gt; _find( int ordinal, FlowCellConf cell ) {
-<span class="pc bpc" id="L743" title="2 of 4 branches missed.">        if ( ordinal &lt; 0 || ordinal &gt;= ParentSizeClass.values().length ) {</span>
-<span class="nc" id="L744">            return Optional.empty();</span>
+<span class="pc bpc" id="L743" title="1 of 4 branches missed.">        if ( ordinal &lt; 0 || ordinal &gt;= ParentSizeClass.values().length ) {</span>
+<span class="fc" id="L744">            return Optional.empty();</span>
         }
 <span class="fc" id="L746">        ParentSizeClass targetSize = ParentSizeClass.values()[ordinal];</span>
 <span class="fc bfc" id="L747" title="All 2 branches covered.">        for ( FlowCellSpanPolicy autoSpan : cell.autoSpans() ) {</span>

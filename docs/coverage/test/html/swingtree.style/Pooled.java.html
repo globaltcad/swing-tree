@@ -26,15 +26,23 @@ import java.util.function.Function;
 @Immutable
 @SuppressWarnings(&quot;Immutable&quot;)
 final class Pooled&lt;V&gt; {
-<span class="fc" id="L29">    private final AtomicReference&lt;@Nullable Integer&gt; _hashCache = new AtomicReference&lt;&gt;();</span>
+
+    static &lt;V&gt; Class&lt;Pooled&lt;V&gt;&gt; classTyped( Class&lt;V&gt; clazz ) {
+<span class="fc" id="L31">        Objects.requireNonNull(clazz);</span>
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L33">        Class&lt;Pooled&lt;V&gt;&gt; pooledClass = (Class&lt;Pooled&lt;V&gt;&gt;) (Class&lt;?&gt;) Pooled.class;</span>
+<span class="fc" id="L34">        return pooledClass;</span>
+    }
+
+<span class="fc" id="L37">    private final AtomicReference&lt;@Nullable Integer&gt; _hashCache = new AtomicReference&lt;&gt;();</span>
     private final V value;
 
-<span class="fc" id="L32">    public Pooled( V value ) {</span>
-<span class="fc" id="L33">        this.value = Objects.requireNonNull(value);</span>
-<span class="fc" id="L34">    }</span>
+<span class="fc" id="L40">    public Pooled( V value ) {</span>
+<span class="fc" id="L41">        this.value = Objects.requireNonNull(value);</span>
+<span class="fc" id="L42">    }</span>
 
     public V get() {
-<span class="fc" id="L37">        return this.value;</span>
+<span class="fc" id="L45">        return this.value;</span>
     }
 
     /**
@@ -52,36 +60,36 @@ final class Pooled&lt;V&gt; {
      *          guaranteed to be from a pool of unique {@code Pooled} instances.
      */
     public Pooled&lt;V&gt; intern() {
-<span class="fc" id="L55">        return ObjectPool.get().intern(this);</span>
+<span class="fc" id="L63">        return ObjectPool.get().intern(this);</span>
     }
 
     public Pooled&lt;V&gt; map( Function&lt;V, V&gt; updater ) {
-<span class="fc" id="L59">        return new Pooled&lt;&gt;(updater.apply(value));</span>
+<span class="fc" id="L67">        return new Pooled&lt;&gt;(updater.apply(value));</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="pc bpc" id="L64" title="1 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
-<span class="fc" id="L65">        Pooled&lt;?&gt; other = (Pooled&lt;?&gt;) o;</span>
-<span class="fc" id="L66">        Integer otherHash = other._hashCache.get();</span>
-<span class="fc" id="L67">        Integer thisHash = this._hashCache.get();</span>
-<span class="fc bfc" id="L68" title="All 4 branches covered.">        if ( thisHash != null &amp;&amp; otherHash != null ) {</span>
-<span class="fc bfc" id="L69" title="All 2 branches covered.">            if ( !Objects.equals(thisHash, otherHash) )</span>
-<span class="fc" id="L70">                return false;</span>
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="fc" id="L73">        Pooled&lt;?&gt; other = (Pooled&lt;?&gt;) o;</span>
+<span class="fc" id="L74">        Integer otherHash = other._hashCache.get();</span>
+<span class="fc" id="L75">        Integer thisHash = this._hashCache.get();</span>
+<span class="fc bfc" id="L76" title="All 4 branches covered.">        if ( thisHash != null &amp;&amp; otherHash != null ) {</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            if ( !Objects.equals(thisHash, otherHash) )</span>
+<span class="fc" id="L78">                return false;</span>
         }
-<span class="fc" id="L72">        return Objects.equals(this.value, other.value);</span>
+<span class="fc" id="L80">        return Objects.equals(this.value, other.value);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L77">        return Objects.requireNonNull(</span>
-<span class="fc bfc" id="L78" title="All 2 branches covered.">            _hashCache.updateAndGet(h -&gt; h != null ? h : Objects.hashCode(value))</span>
+<span class="fc" id="L85">        return Objects.requireNonNull(</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            _hashCache.updateAndGet(h -&gt; h != null ? h : Objects.hashCode(value))</span>
         );
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L84">        return &quot;PooledObject[&quot; + &quot;value=&quot; + value + ']';</span>
+<span class="nc" id="L92">        return &quot;PooledObject[&quot; + &quot;value=&quot; + value + ']';</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

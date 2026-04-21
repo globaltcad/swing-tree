@@ -467,7 +467,7 @@ public abstract class StyleSheet
 <span class="fc" id="L467">            lastAdded = currentTrait;</span>
         }
 <span class="fc" id="L469">        inheritedTraits.remove(currentTrait.group());</span>
-<span class="fc" id="L470">        inheritedTraits.addAll(Arrays.asList(currentTrait.toInherit()));</span>
+<span class="fc" id="L470">        inheritedTraits.addAll(currentTrait.toInherit().toList());</span>
 <span class="fc" id="L471">        return lastAdded;</span>
     }
 

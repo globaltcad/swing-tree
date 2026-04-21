@@ -151,16 +151,17 @@ final class StyleSource&lt;C extends JComponent&gt;
 
 <span class="fc" id="L152">        styleConf = styleConf.correctedForRounding();</span>
 
-<span class="fc" id="L154">        styleConf = styleConf.determinePreferredHeightFromTextConfigs(owner);</span>
+<span class="fc" id="L154">        styleConf = styleConf.determineTextConfObstaclesFromChildrenOf(owner);</span>
+<span class="fc" id="L155">        styleConf = styleConf.determinePreferredHeightFromTextConfigs(owner);</span>
 
-<span class="fc" id="L156">        return styleConf;</span>
+<span class="fc" id="L157">        return styleConf;</span>
     }
 
     private static StyleConf _applyDPIScaling(StyleConf styleConf) {
-<span class="fc bfc" id="L160" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
-<span class="fc" id="L161">            return styleConf;</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
+<span class="fc" id="L162">            return styleConf;</span>
 
-<span class="fc" id="L163">        return styleConf.scale( UI.scale() );</span>
+<span class="fc" id="L164">        return styleConf.scale( UI.scale() );</span>
     }
 
 }

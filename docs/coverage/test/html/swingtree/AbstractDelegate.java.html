@@ -536,6 +536,28 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
     }
 
     /**
+    *  As a delegate to the underlying component, you can use this method to
+    *  conveniently set the location of the component int terms of x and y coordinates relative to its parent.
+    *  This method returns the delegate itself, so you can chain calls to this method.
+    *  &lt;p&gt;
+    *  See {@link Component#setLocation(int, int)} for more information.
+    *  &lt;/p&gt;
+    *  &lt;b&gt;Important:&lt;/b&gt; The supplied {@link Point} is interpreted as &quot;being in developer pixel space&quot;
+    *  without any scaling factor applied to it. And so this method will scale the location
+    *  to DPI aware &quot;component pixel space&quot; by multiplying by {@link UI#scale()}.
+    *
+    * @param x The x coordinate of the new location of the component.
+    *          This is relative to the component's parent.
+    * @param y The y coordinate of the new location of the component.
+    *          This is relative to the component's parent.
+    * @return The delegate itself, so you can chain calls to this method.
+    */
+    public final AbstractDelegate&lt;C&gt; setLocation( double x, double y ) {
+<span class="nc" id="L556">        _component().setLocation((int) UI.scale(x), (int) UI.scale(y));</span>
+<span class="nc" id="L557">        return this;</span>
+    }
+
+    /**
      *  As a delegate to the underlying component, you can use this method to
      *  conveniently get the bounds of the component in the form of an immutable {@link Bounds} value object.
      *  The bounds consist of a location and a size which are relative to the component's parent.
@@ -549,8 +571,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *          This is relative to the component's parent.
      */
     public final Bounds getBounds() {
-<span class="nc" id="L552">        Rectangle rec = _component().getBounds();</span>
-<span class="nc" id="L553">        return Bounds.of(UI.unscale(rec.x), UI.unscale(rec.y), UI.unscale(rec.width), UI.unscale(rec.height));</span>
+<span class="nc" id="L574">        Rectangle rec = _component().getBounds();</span>
+<span class="nc" id="L575">        return Bounds.of(UI.unscale(rec.x), UI.unscale(rec.y), UI.unscale(rec.width), UI.unscale(rec.height));</span>
     }
 
     /**
@@ -568,7 +590,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return An optional value that contains the component area if it is present.
      */
     public Optional&lt;Shape&gt; shapeOf( UI.ComponentArea area ) {
-<span class="nc" id="L571">        return ComponentExtension.from(_component()).getComponentArea(area);</span>
+<span class="nc" id="L593">        return ComponentExtension.from(_component()).getComponentArea(area);</span>
     }
 
     /**
@@ -585,8 +607,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      */
     @Deprecated
     public final AbstractDelegate&lt;C&gt; setPrefSize( Dimension size ) {
-<span class="nc" id="L588">        _scaleAndSetPrefSize(size);</span>
-<span class="nc" id="L589">        return this;</span>
+<span class="nc" id="L610">        _scaleAndSetPrefSize(size);</span>
+<span class="nc" id="L611">        return this;</span>
     }
 
     /**
@@ -606,8 +628,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefSize( Size size ) {
-<span class="nc" id="L609">        _scaleAndSetPrefSize(size.toDimension());</span>
-<span class="nc" id="L610">        return this;</span>
+<span class="nc" id="L631">        _scaleAndSetPrefSize(size.toDimension());</span>
+<span class="nc" id="L632">        return this;</span>
     }
 
     /**
@@ -628,13 +650,13 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefSize( int width, int height ) {
-<span class="nc" id="L631">        _scaleAndSetPrefSize(new Dimension(width, height));</span>
-<span class="nc" id="L632">        return this;</span>
+<span class="nc" id="L653">        _scaleAndSetPrefSize(new Dimension(width, height));</span>
+<span class="nc" id="L654">        return this;</span>
     }
 
     private void _scaleAndSetPrefSize( Dimension size ) {
-<span class="nc" id="L636">        _component().setPreferredSize(UI.scale(size));</span>
-<span class="nc" id="L637">    }</span>
+<span class="nc" id="L658">        _component().setPreferredSize(UI.scale(size));</span>
+<span class="nc" id="L659">    }</span>
 
     /**
      *  Allows you to set the preferred width of the component in DPI agnostic &quot;developer pixels&quot;,
@@ -648,9 +670,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefWidth( int width ) {
-<span class="nc" id="L651">        Dimension size = _component().getPreferredSize();</span>
-<span class="nc" id="L652">        _component().setPreferredSize(new Dimension(UI.scale(width), size.height));</span>
-<span class="nc" id="L653">        return this;</span>
+<span class="nc" id="L673">        Dimension size = _component().getPreferredSize();</span>
+<span class="nc" id="L674">        _component().setPreferredSize(new Dimension(UI.scale(width), size.height));</span>
+<span class="nc" id="L675">        return this;</span>
     }
 
     /**
@@ -665,9 +687,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefHeight( int height ) {
-<span class="nc" id="L668">        Dimension size = _component().getPreferredSize();</span>
-<span class="nc" id="L669">        _component().setPreferredSize(new Dimension(size.width, UI.scale(height)));</span>
-<span class="nc" id="L670">        return this;</span>
+<span class="nc" id="L690">        Dimension size = _component().getPreferredSize();</span>
+<span class="nc" id="L691">        _component().setPreferredSize(new Dimension(size.width, UI.scale(height)));</span>
+<span class="nc" id="L692">        return this;</span>
     }
 
     /**
@@ -681,7 +703,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The preferred size of the component scaled to &quot;developer pixel size&quot;.
      */
     public final Size getPrefSize() {
-<span class="nc" id="L684">        return Size.of(UI.unscale(_component().getPreferredSize()));</span>
+<span class="nc" id="L706">        return Size.of(UI.unscale(_component().getPreferredSize()));</span>
     }
 
     /**
@@ -698,8 +720,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      */
     @Deprecated
     public final AbstractDelegate&lt;C&gt; setMinSize( Dimension size ) {
-<span class="nc bnc" id="L701" title="All 2 branches missed.">        _component().setMinimumSize(size == null ? null : UI.scale(size));</span>
-<span class="nc" id="L702">        return this;</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">        _component().setMinimumSize(size == null ? null : UI.scale(size));</span>
+<span class="nc" id="L724">        return this;</span>
     }
 
     /**
@@ -722,12 +744,12 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @throws NullPointerException if the supplied size is null.
      */
     public final AbstractDelegate&lt;C&gt; setMinSize( Size size ) {
-<span class="nc" id="L725">        Objects.requireNonNull(size, &quot;Use Size.unknown() instead of null to represent the absence of a size.&quot;);</span>
-<span class="nc bnc" id="L726" title="All 2 branches missed.">        if ( size.equals(Size.unknown()) )</span>
-<span class="nc" id="L727">            _component().setMinimumSize(null);</span>
+<span class="nc" id="L747">        Objects.requireNonNull(size, &quot;Use Size.unknown() instead of null to represent the absence of a size.&quot;);</span>
+<span class="nc bnc" id="L748" title="All 2 branches missed.">        if ( size.equals(Size.unknown()) )</span>
+<span class="nc" id="L749">            _component().setMinimumSize(null);</span>
         else
-<span class="nc" id="L729">            _component().setMinimumSize(UI.scale(size.toDimension()));</span>
-<span class="nc" id="L730">        return this;</span>
+<span class="nc" id="L751">            _component().setMinimumSize(UI.scale(size.toDimension()));</span>
+<span class="nc" id="L752">        return this;</span>
     }
 
     /**
@@ -745,8 +767,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinSize( int width, int height ) {
-<span class="nc" id="L748">        _component().setMinimumSize(new Dimension(UI.scale(width), UI.scale(height)));</span>
-<span class="nc" id="L749">        return this;</span>
+<span class="nc" id="L770">        _component().setMinimumSize(new Dimension(UI.scale(width), UI.scale(height)));</span>
+<span class="nc" id="L771">        return this;</span>
     }
 
     /**
@@ -761,9 +783,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinWidth( int width ) {
-<span class="nc" id="L764">        Dimension size = _component().getMinimumSize();</span>
-<span class="nc" id="L765">        _component().setMinimumSize(new Dimension(UI.scale(width), size.height));</span>
-<span class="nc" id="L766">        return this;</span>
+<span class="nc" id="L786">        Dimension size = _component().getMinimumSize();</span>
+<span class="nc" id="L787">        _component().setMinimumSize(new Dimension(UI.scale(width), size.height));</span>
+<span class="nc" id="L788">        return this;</span>
     }
 
     /**
@@ -778,9 +800,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinHeight( int height ) {
-<span class="nc" id="L781">        Dimension size = _component().getMinimumSize();</span>
-<span class="nc" id="L782">        _component().setMinimumSize(new Dimension(size.width, UI.scale(height)));</span>
-<span class="nc" id="L783">        return this;</span>
+<span class="nc" id="L803">        Dimension size = _component().getMinimumSize();</span>
+<span class="nc" id="L804">        _component().setMinimumSize(new Dimension(size.width, UI.scale(height)));</span>
+<span class="nc" id="L805">        return this;</span>
     }
 
     /**
@@ -794,7 +816,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The minimum size of the component.
      */
     public final Size getMinSize() {
-<span class="nc" id="L797">        return Size.of(UI.unscale(_component().getMinimumSize()));</span>
+<span class="nc" id="L819">        return Size.of(UI.unscale(_component().getMinimumSize()));</span>
     }
 
     /**
@@ -810,8 +832,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      */
     @Deprecated
     public final AbstractDelegate&lt;C&gt; setMaxSize( Dimension size ) {
-<span class="nc bnc" id="L813" title="All 2 branches missed.">        _component().setMaximumSize(size == null ? null : UI.scale(size));</span>
-<span class="nc" id="L814">        return this;</span>
+<span class="nc bnc" id="L835" title="All 2 branches missed.">        _component().setMaximumSize(size == null ? null : UI.scale(size));</span>
+<span class="nc" id="L836">        return this;</span>
     }
 
     /**
@@ -833,12 +855,12 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @throws NullPointerException if the supplied size is {@code null}.
      */
     public final AbstractDelegate&lt;C&gt; setMaxSize( Size size ) {
-<span class="nc" id="L836">        Objects.requireNonNull(size, &quot;Use Size.unknown() instead of null to represent the absence of a size.&quot;);</span>
-<span class="nc bnc" id="L837" title="All 2 branches missed.">        if ( size.equals(Size.unknown()) )</span>
-<span class="nc" id="L838">            _component().setMaximumSize(null);</span>
+<span class="nc" id="L858">        Objects.requireNonNull(size, &quot;Use Size.unknown() instead of null to represent the absence of a size.&quot;);</span>
+<span class="nc bnc" id="L859" title="All 2 branches missed.">        if ( size.equals(Size.unknown()) )</span>
+<span class="nc" id="L860">            _component().setMaximumSize(null);</span>
         else
-<span class="nc" id="L840">            _component().setMaximumSize(UI.scale(size.toDimension()));</span>
-<span class="nc" id="L841">        return this;</span>
+<span class="nc" id="L862">            _component().setMaximumSize(UI.scale(size.toDimension()));</span>
+<span class="nc" id="L863">        return this;</span>
     }
 
     /**
@@ -859,8 +881,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxSize( int width, int height ) {
-<span class="nc" id="L862">        _component().setMaximumSize(UI.scale(new Dimension(width, height)));</span>
-<span class="nc" id="L863">        return this;</span>
+<span class="nc" id="L884">        _component().setMaximumSize(UI.scale(new Dimension(width, height)));</span>
+<span class="nc" id="L885">        return this;</span>
     }
 
     /**
@@ -880,9 +902,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxWidth( int width ) {
-<span class="nc" id="L883">        Dimension size = _component().getMaximumSize();</span>
-<span class="nc" id="L884">        _component().setMaximumSize(new Dimension(UI.scale(width), size.height));</span>
-<span class="nc" id="L885">        return this;</span>
+<span class="nc" id="L905">        Dimension size = _component().getMaximumSize();</span>
+<span class="nc" id="L906">        _component().setMaximumSize(new Dimension(UI.scale(width), size.height));</span>
+<span class="nc" id="L907">        return this;</span>
     }
 
     /**
@@ -903,9 +925,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxHeight( int height ) {
-<span class="nc" id="L906">        Dimension size = _component().getMaximumSize();</span>
-<span class="nc" id="L907">        _component().setMaximumSize(new Dimension(size.width, UI.scale(height)));</span>
-<span class="nc" id="L908">        return this;</span>
+<span class="nc" id="L928">        Dimension size = _component().getMaximumSize();</span>
+<span class="nc" id="L929">        _component().setMaximumSize(new Dimension(size.width, UI.scale(height)));</span>
+<span class="nc" id="L930">        return this;</span>
     }
 
     /**
@@ -920,7 +942,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The maximum size of the component in &quot;developer pixels&quot;.
      */
     public final Size getMaxSize() {
-<span class="nc" id="L923">        return Size.of(UI.unscale(_component().getMaximumSize()));</span>
+<span class="nc" id="L945">        return Size.of(UI.unscale(_component().getMaximumSize()));</span>
     }
 
     /**
@@ -938,8 +960,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      */
     @Deprecated
     public final AbstractDelegate&lt;C&gt; setSize( Dimension size ) {
-<span class="nc bnc" id="L941" title="All 2 branches missed.">        _component().setSize(size == null ? null : UI.scale(size));</span>
-<span class="nc" id="L942">        return this;</span>
+<span class="nc bnc" id="L963" title="All 2 branches missed.">        _component().setSize(size == null ? null : UI.scale(size));</span>
+<span class="nc" id="L964">        return this;</span>
     }
 
     /**
@@ -955,9 +977,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setSize( Size size ) {
-<span class="nc" id="L958">        Objects.requireNonNull(size);</span>
-<span class="nc" id="L959">        _component().setSize(UI.scale(size.toDimension()));</span>
-<span class="nc" id="L960">        return this;</span>
+<span class="nc" id="L980">        Objects.requireNonNull(size);</span>
+<span class="nc" id="L981">        _component().setSize(UI.scale(size.toDimension()));</span>
+<span class="nc" id="L982">        return this;</span>
     }
 
     /**
@@ -974,8 +996,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setSize( int width, int height ) {
-<span class="nc" id="L977">        _component().setSize(UI.scale(new Dimension(width, height)));</span>
-<span class="nc" id="L978">        return this;</span>
+<span class="nc" id="L999">        _component().setSize(UI.scale(new Dimension(width, height)));</span>
+<span class="nc" id="L1000">        return this;</span>
     }
 
     /**
@@ -992,9 +1014,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setWidth( int width ) {
-<span class="nc" id="L995">        Dimension size = _component().getSize();</span>
-<span class="nc" id="L996">        _component().setSize(new Dimension(UI.scale(width), size.height));</span>
-<span class="nc" id="L997">        return this;</span>
+<span class="nc" id="L1017">        Dimension size = _component().getSize();</span>
+<span class="nc" id="L1018">        _component().setSize(new Dimension(UI.scale(width), size.height));</span>
+<span class="nc" id="L1019">        return this;</span>
     }
 
     /**
@@ -1009,9 +1031,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setHeight( int height ) {
-<span class="nc" id="L1012">        Dimension size = _component().getSize();</span>
-<span class="nc" id="L1013">        _component().setSize(new Dimension(size.width, UI.scale(height)));</span>
-<span class="nc" id="L1014">        return this;</span>
+<span class="nc" id="L1034">        Dimension size = _component().getSize();</span>
+<span class="nc" id="L1035">        _component().setSize(new Dimension(size.width, UI.scale(height)));</span>
+<span class="nc" id="L1036">        return this;</span>
     }
 
     /**
@@ -1023,7 +1045,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The size of the component.
      */
     public final Size getSize() {
-<span class="nc" id="L1026">        return Size.of(UI.unscale(_component().getSize()));</span>
+<span class="nc" id="L1048">        return Size.of(UI.unscale(_component().getSize()));</span>
     }
 
     /**
@@ -1035,7 +1057,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The width of the component in developer pixels (not scaled for high DPI).
      */
     public final int getWidth() {
-<span class="nc" id="L1038">        return UI.unscale(_component().getSize().width);</span>
+<span class="nc" id="L1060">        return UI.unscale(_component().getSize().width);</span>
     }
 
     /**
@@ -1047,7 +1069,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The height of the component in developer pixels (not scaled for high DPI).
      */
     public final int getHeight() {
-<span class="nc" id="L1050">        return UI.unscale(_component().getSize().height);</span>
+<span class="nc" id="L1072">        return UI.unscale(_component().getSize().height);</span>
     }
 
     /**
@@ -1059,9 +1081,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @throws NullPointerException if the supplied enum instance is {@code null}!
      */
     public final AbstractDelegate&lt;C&gt; setCursor( UI.Cursor cursor ) {
-<span class="nc" id="L1062">        Objects.requireNonNull(cursor);</span>
-<span class="nc" id="L1063">        _component().setCursor(Cursor.getPredefinedCursor(cursor.type));</span>
-<span class="nc" id="L1064">        return this;</span>
+<span class="nc" id="L1084">        Objects.requireNonNull(cursor);</span>
+<span class="nc" id="L1085">        _component().setCursor(Cursor.getPredefinedCursor(cursor.type));</span>
+<span class="nc" id="L1086">        return this;</span>
     }
 
     /**
@@ -1071,8 +1093,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setCursor( Cursor cursor ) {
-<span class="nc" id="L1074">        _component().setCursor(cursor);</span>
-<span class="nc" id="L1075">        return this;</span>
+<span class="nc" id="L1096">        _component().setCursor(cursor);</span>
+<span class="nc" id="L1097">        return this;</span>
     }
 
     /**
@@ -1081,7 +1103,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The {@link Cursor} of the component.
      */
     public final Cursor getCursor() {
-<span class="nc" id="L1084">        return _component().getCursor();</span>
+<span class="nc" id="L1106">        return _component().getCursor();</span>
     }
 
     /**
@@ -1096,9 +1118,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @throws NullPointerException If the text is null, use an empty string to model the absence of a tooltip.
      */
     public final AbstractDelegate&lt;C&gt; setTooltip( String text ) {
-<span class="nc" id="L1099">        Objects.requireNonNull(text, &quot;Use an empty string instead of null to represent the absence of a tooltip.&quot;);</span>
-<span class="nc bnc" id="L1100" title="All 2 branches missed.">        _component().setToolTipText( text.isEmpty() ? null : text );</span>
-<span class="nc" id="L1101">        return this;</span>
+<span class="nc" id="L1121">        Objects.requireNonNull(text, &quot;Use an empty string instead of null to represent the absence of a tooltip.&quot;);</span>
+<span class="nc bnc" id="L1122" title="All 2 branches missed.">        _component().setToolTipText( text.isEmpty() ? null : text );</span>
+<span class="nc" id="L1123">        return this;</span>
     }
 
     /**
@@ -1112,8 +1134,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *         does not have a tooltip, &lt;b&gt;but {@code null} is never returned&lt;/b&gt;!
      */
     public final String getTooltip() {
-<span class="nc" id="L1115">        String nullableToolTip = _component().getToolTipText();</span>
-<span class="nc bnc" id="L1116" title="All 2 branches missed.">        return nullableToolTip == null ? &quot;&quot; : nullableToolTip;</span>
+<span class="nc" id="L1137">        String nullableToolTip = _component().getToolTipText();</span>
+<span class="nc bnc" id="L1138" title="All 2 branches missed.">        return nullableToolTip == null ? &quot;&quot; : nullableToolTip;</span>
     }
 
     /**
@@ -1127,8 +1149,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setEnabled( boolean enabled ) {
-<span class="nc" id="L1130">        _component().setEnabled(enabled);</span>
-<span class="nc" id="L1131">        return this;</span>
+<span class="nc" id="L1152">        _component().setEnabled(enabled);</span>
+<span class="nc" id="L1153">        return this;</span>
     }
 
     /**
@@ -1140,7 +1162,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return True if the component is enabled, false otherwise.
      */
     public final boolean isEnabled() {
-<span class="nc" id="L1143">        return _component().isEnabled();</span>
+<span class="nc" id="L1165">        return _component().isEnabled();</span>
     }
 
     /**
@@ -1154,8 +1176,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setVisible( boolean visible ) {
-<span class="nc" id="L1157">        _component().setVisible(visible);</span>
-<span class="nc" id="L1158">        return this;</span>
+<span class="nc" id="L1179">        _component().setVisible(visible);</span>
+<span class="nc" id="L1180">        return this;</span>
     }
 
     /**
@@ -1167,7 +1189,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return True if the component is visible, false otherwise.
      */
     public final boolean isVisible() {
-<span class="nc" id="L1170">        return _component().isVisible();</span>
+<span class="nc" id="L1192">        return _component().isVisible();</span>
     }
 
     /**
@@ -1179,7 +1201,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return True if the component is opaque, false otherwise.
      */
     public final boolean isOpaque() {
-<span class="nc" id="L1182">        return _component().isOpaque();</span>
+<span class="nc" id="L1204">        return _component().isOpaque();</span>
     }
 
     /**
@@ -1192,9 +1214,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, String id ) {
-<span class="fc" id="L1195">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L1196">        Objects.requireNonNull(id);</span>
-<span class="fc" id="L1197">        return this.find( type, c -&gt; ComponentExtension.from(c).hasId(id) );</span>
+<span class="fc" id="L1217">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L1218">        Objects.requireNonNull(id);</span>
+<span class="fc" id="L1219">        return this.find( type, c -&gt; ComponentExtension.from(c).hasId(id) );</span>
     }
 
     /**
@@ -1207,9 +1229,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, Enum&lt;?&gt; id ) {
-<span class="nc" id="L1210">        Objects.requireNonNull(type);</span>
-<span class="nc" id="L1211">        Objects.requireNonNull(id);</span>
-<span class="nc" id="L1212">        return this.find( type, c -&gt; ComponentExtension.from(c).hasId(id) );</span>
+<span class="nc" id="L1232">        Objects.requireNonNull(type);</span>
+<span class="nc" id="L1233">        Objects.requireNonNull(id);</span>
+<span class="nc" id="L1234">        return this.find( type, c -&gt; ComponentExtension.from(c).hasId(id) );</span>
     }
 
     /**
@@ -1223,12 +1245,12 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, Predicate&lt;T&gt; predicate ) {
-<span class="fc" id="L1226">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L1227">        Objects.requireNonNull(predicate);</span>
-<span class="fc" id="L1228">        return _guiTraverser.find(type, predicate)</span>
-<span class="fc" id="L1229">                .findFirst()</span>
-<span class="fc" id="L1230">                .map(OptionalUI::ofNullable)</span>
-<span class="fc" id="L1231">                .orElse(OptionalUI.empty());</span>
+<span class="fc" id="L1248">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L1249">        Objects.requireNonNull(predicate);</span>
+<span class="fc" id="L1250">        return _guiTraverser.find(type, predicate)</span>
+<span class="fc" id="L1251">                .findFirst()</span>
+<span class="fc" id="L1252">                .map(OptionalUI::ofNullable)</span>
+<span class="fc" id="L1253">                .orElse(OptionalUI.empty());</span>
     }
 
     /**
@@ -1242,9 +1264,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAll( Class&lt;T&gt; type, Predicate&lt;T&gt; predicate ) {
-<span class="fc" id="L1245">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L1246">        Objects.requireNonNull(predicate);</span>
-<span class="fc" id="L1247">        return _guiTraverser.find(type, predicate).collect(Collectors.toList());</span>
+<span class="fc" id="L1267">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L1268">        Objects.requireNonNull(predicate);</span>
+<span class="fc" id="L1269">        return _guiTraverser.find(type, predicate).collect(Collectors.toList());</span>
     }
 
     /**
@@ -1257,9 +1279,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAllByGroup( Class&lt;T&gt; type, String group ) {
-<span class="fc" id="L1260">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L1261">        Objects.requireNonNull(group);</span>
-<span class="fc" id="L1262">        return this.findAll( type, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
+<span class="fc" id="L1282">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L1283">        Objects.requireNonNull(group);</span>
+<span class="fc" id="L1284">        return this.findAll( type, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
     }
 
     /**
@@ -1271,8 +1293,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @throws NullPointerException If the group is null.
      */
     public final List&lt;JComponent&gt; findAllByGroup( String group ) {
-<span class="nc" id="L1274">        Objects.requireNonNull(group);</span>
-<span class="nc" id="L1275">        return this.findAll( JComponent.class, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
+<span class="nc" id="L1296">        Objects.requireNonNull(group);</span>
+<span class="nc" id="L1297">        return this.findAll( JComponent.class, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
     }
 
 
@@ -1286,9 +1308,9 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAllByGroup( Class&lt;T&gt; type, Enum&lt;?&gt; group ) {
-<span class="nc" id="L1289">        Objects.requireNonNull(type);</span>
-<span class="nc" id="L1290">        Objects.requireNonNull(group);</span>
-<span class="nc" id="L1291">        return this.findAll( type, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
+<span class="nc" id="L1311">        Objects.requireNonNull(type);</span>
+<span class="nc" id="L1312">        Objects.requireNonNull(group);</span>
+<span class="nc" id="L1313">        return this.findAll( type, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
     }
 
     /**
@@ -1299,8 +1321,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @return A list of {@link JComponent} instances which all have the given style group.
      */
     public final List&lt;JComponent&gt; findAllByGroup( Enum&lt;?&gt; group ) {
-<span class="nc" id="L1302">        Objects.requireNonNull(group);</span>
-<span class="nc" id="L1303">        return this.findAll( JComponent.class, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
+<span class="nc" id="L1324">        Objects.requireNonNull(group);</span>
+<span class="nc" id="L1325">        return this.findAll( JComponent.class, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
     }
 
     /**
@@ -1332,10 +1354,10 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1335">        Objects.requireNonNull(status);</span>
-<span class="nc" id="L1336">        Objects.requireNonNull(painter);</span>
-<span class="nc" id="L1337">        paint(UI.ComponentArea.BODY, status, painter);</span>
-<span class="nc" id="L1338">    }</span>
+<span class="nc" id="L1357">        Objects.requireNonNull(status);</span>
+<span class="nc" id="L1358">        Objects.requireNonNull(painter);</span>
+<span class="nc" id="L1359">        paint(UI.ComponentArea.BODY, status, painter);</span>
+<span class="nc" id="L1360">    }</span>
 
     /**
      *  A common use case is to render something on top of the component
@@ -1369,11 +1391,11 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( UI.ComponentArea area, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1372">        Objects.requireNonNull(area);</span>
-<span class="nc" id="L1373">        Objects.requireNonNull(status);</span>
-<span class="nc" id="L1374">        Objects.requireNonNull(painter);</span>
-<span class="nc" id="L1375">        this.paint(area, UI.Layer.BORDER, status, painter);</span>
-<span class="nc" id="L1376">    }</span>
+<span class="nc" id="L1394">        Objects.requireNonNull(area);</span>
+<span class="nc" id="L1395">        Objects.requireNonNull(status);</span>
+<span class="nc" id="L1396">        Objects.requireNonNull(painter);</span>
+<span class="nc" id="L1397">        this.paint(area, UI.Layer.BORDER, status, painter);</span>
+<span class="nc" id="L1398">    }</span>
 
     /**
      *  A common use case is to render something on top of the {@link UI.ComponentArea#BODY}
@@ -1405,8 +1427,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( UI.Layer layer, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1408">        this.paint(UI.ComponentArea.BODY, layer, status, painter);</span>
-<span class="nc" id="L1409">    }</span>
+<span class="nc" id="L1430">        this.paint(UI.ComponentArea.BODY, layer, status, painter);</span>
+<span class="nc" id="L1431">    }</span>
 
     /**
      *  A common use case is to render something on top of the component
@@ -1443,13 +1465,13 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *                {@link Graphics2D} instance for doing paint operations...
      */
     public final void paint( UI.ComponentArea area, UI.Layer layer, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1446">        Objects.requireNonNull(status);</span>
-<span class="nc" id="L1447">        Objects.requireNonNull(painter);</span>
-<span class="nc" id="L1448">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1468">        Objects.requireNonNull(status);</span>
+<span class="nc" id="L1469">        Objects.requireNonNull(painter);</span>
+<span class="nc" id="L1470">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the rendering later in the paint method of a custom border implementation!
-<span class="nc" id="L1450">            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);</span>
-<span class="nc" id="L1451">        });</span>
-<span class="nc" id="L1452">    }</span>
+<span class="nc" id="L1472">            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);</span>
+<span class="nc" id="L1473">        });</span>
+<span class="nc" id="L1474">    }</span>
 
     /**
      *  Use this method to delegate to the parent of the component.
@@ -1503,21 +1525,21 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param action The action which should be executed on the delegate of the parent component.
      */
     public final void parentDelegate( sprouts.Action&lt;AbstractDelegate&lt;JComponent&gt;&gt; action ) {
-<span class="nc" id="L1506">        Objects.requireNonNull(action);</span>
-<span class="nc" id="L1507">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
-<span class="nc" id="L1508">            Container parent = _component().getParent();</span>
-<span class="nc bnc" id="L1509" title="All 2 branches missed.">            if ( parent instanceof JComponent ) {</span>
+<span class="nc" id="L1528">        Objects.requireNonNull(action);</span>
+<span class="nc" id="L1529">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1530">            Container parent = _component().getParent();</span>
+<span class="nc bnc" id="L1531" title="All 2 branches missed.">            if ( parent instanceof JComponent ) {</span>
                 try {
-<span class="nc" id="L1511">                    AbstractDelegate&lt;JComponent&gt; delegate = new AbstractDelegate&lt;&gt;( false, (JComponent) parent, (JComponent) parent );</span>
-<span class="nc" id="L1512">                    action.accept(delegate);</span>
-<span class="nc" id="L1513">                } catch( Exception e ) {</span>
-<span class="nc" id="L1514">                    log.error(SwingTree.get().logMarker(), &quot;Error while processing parent delegate!&quot;, e);</span>
-<span class="nc" id="L1515">                }</span>
+<span class="nc" id="L1533">                    AbstractDelegate&lt;JComponent&gt; delegate = new AbstractDelegate&lt;&gt;( false, (JComponent) parent, (JComponent) parent );</span>
+<span class="nc" id="L1534">                    action.accept(delegate);</span>
+<span class="nc" id="L1535">                } catch( Exception e ) {</span>
+<span class="nc" id="L1536">                    log.error(SwingTree.get().logMarker(), &quot;Error while processing parent delegate!&quot;, e);</span>
+<span class="nc" id="L1537">                }</span>
             } else {
-<span class="nc" id="L1517">                log.warn(SwingTree.get().logMarker(), &quot;Parent of component is not a JComponent, cannot apply parent delegate!&quot;);</span>
+<span class="nc" id="L1539">                log.warn(SwingTree.get().logMarker(), &quot;Parent of component is not a JComponent, cannot apply parent delegate!&quot;);</span>
             }
-<span class="nc" id="L1519">        });</span>
-<span class="nc" id="L1520">    }</span>
+<span class="nc" id="L1541">        });</span>
+<span class="nc" id="L1542">    }</span>
 
     /**
      *  A common use case is to animate the style of a component when a user event occurs.
@@ -1561,15 +1583,15 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *               for which you can define the style properties.
      */
     public final void animateStyleFor( double duration, TimeUnit unit, AnimatedStyler&lt;C&gt; styler ) {
-<span class="fc" id="L1564">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L1565">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L1566">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1586">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L1587">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L1588">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="fc" id="L1568">            this.animateFor(duration, unit, status -&gt;</span>
-<span class="fc" id="L1569">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
+<span class="fc" id="L1590">            this.animateFor(duration, unit, status -&gt;</span>
+<span class="fc" id="L1591">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
             );
-<span class="fc" id="L1571">        });</span>
-<span class="fc" id="L1572">    }</span>
+<span class="fc" id="L1593">        });</span>
+<span class="fc" id="L1594">    }</span>
 
     /**
      *  A common use case is to animate the style of a component when a user event occurs.
@@ -1611,15 +1633,15 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *               for which you can define the style properties.
      */
     public final void animateStyleFor( LifeTime lifetime, AnimatedStyler&lt;C&gt; styler ) {
-<span class="nc" id="L1614">        Objects.requireNonNull(lifetime);</span>
-<span class="nc" id="L1615">        Objects.requireNonNull(styler);</span>
-<span class="nc" id="L1616">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1636">        Objects.requireNonNull(lifetime);</span>
+<span class="nc" id="L1637">        Objects.requireNonNull(styler);</span>
+<span class="nc" id="L1638">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="nc" id="L1618">            this.animateFor(lifetime, status -&gt;</span>
-<span class="nc" id="L1619">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
+<span class="nc" id="L1640">            this.animateFor(lifetime, status -&gt;</span>
+<span class="nc" id="L1641">                ComponentExtension.from(_component).addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
             );
-<span class="nc" id="L1621">        });</span>
-<span class="nc" id="L1622">    }</span>
+<span class="nc" id="L1643">        });</span>
+<span class="nc" id="L1644">    }</span>
 
     /**
      *  A common use case is to style the component based on the current animation state.
@@ -1645,13 +1667,13 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void style(AnimationStatus state, Styler&lt;C&gt; styler ) {
-<span class="fc" id="L1648">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L1649">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L1650">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1670">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L1671">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L1672">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="fc" id="L1652">            ComponentExtension.from(_component).addAnimatedStyler(state, styler);</span>
-<span class="fc" id="L1653">        });</span>
-<span class="fc" id="L1654">    }</span>
+<span class="fc" id="L1674">            ComponentExtension.from(_component).addAnimatedStyler(state, styler);</span>
+<span class="fc" id="L1675">        });</span>
+<span class="fc" id="L1676">    }</span>
 
     /**
      *  Exposes access the animation builder API, where you can define the conditions
@@ -1663,8 +1685,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
     public final AnimationDispatcher animateFor(double duration, TimeUnit unit ) {
-<span class="fc" id="L1666">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L1667">        return AnimationDispatcher.animateFor(LifeTime.of(duration, unit), _component());</span>
+<span class="fc" id="L1688">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L1689">        return AnimationDispatcher.animateFor(LifeTime.of(duration, unit), _component());</span>
     }
 
     /**
@@ -1676,8 +1698,8 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
     public final AnimationDispatcher animateFor(LifeTime lifeTime ) {
-<span class="nc" id="L1679">        Objects.requireNonNull(lifeTime);</span>
-<span class="nc" id="L1680">        return AnimationDispatcher.animateFor(lifeTime, _component());</span>
+<span class="nc" id="L1701">        Objects.requireNonNull(lifeTime);</span>
+<span class="nc" id="L1702">        return AnimationDispatcher.animateFor(lifeTime, _component());</span>
     }
 
     /**
@@ -1703,10 +1725,10 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
-<span class="nc" id="L1706">        Objects.requireNonNull(lifeTime);</span>
-<span class="nc" id="L1707">        Objects.requireNonNull(animation);</span>
-<span class="nc" id="L1708">        AnimationDispatcher.animateFor(lifeTime, _component()).go(animation);</span>
-<span class="nc" id="L1709">    }</span>
+<span class="nc" id="L1728">        Objects.requireNonNull(lifeTime);</span>
+<span class="nc" id="L1729">        Objects.requireNonNull(animation);</span>
+<span class="nc" id="L1730">        AnimationDispatcher.animateFor(lifeTime, _component()).go(animation);</span>
+<span class="nc" id="L1731">    }</span>
 
     /**
      *  Use this to schedule and run the provided animation
@@ -1719,10 +1741,10 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
-<span class="fc" id="L1722">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L1723">        Objects.requireNonNull(animation);</span>
-<span class="fc" id="L1724">        this.animateFor(duration, unit).go(animation);</span>
-<span class="fc" id="L1725">    }</span>
+<span class="fc" id="L1744">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L1745">        Objects.requireNonNull(animation);</span>
+<span class="fc" id="L1746">        this.animateFor(duration, unit).go(animation);</span>
+<span class="fc" id="L1747">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

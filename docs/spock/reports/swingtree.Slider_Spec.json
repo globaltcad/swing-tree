@@ -4,7 +4,7 @@
   "narrative":"Sliders are a common way to allow the user to select a value\n    within a range. Swing-Tree provides a way to create sliders\n    in a declarative way, allowing you to configure the slider\n    and then show it to the user.\n\n    Sliders can be vertical or horizontal, and can have a\n    minimum and maximum value, as well as a current value.\n    You can bind any of these values to properties in your\n    application, so that the slider can update itself\n    automatically when your application state changes.",
   "subjects":["swingtree.UIForSlider","swingtree.UI"],
   "statistics":{
-    "runs":"3",
+    "runs":"4",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -100,6 +100,35 @@
         {"kind":"then","text":"The trace shows the max change.","code":["trace == [\"slider=91\", \"property=2.48828125\", \"property=0.75\", \"min=-1.0\", \"max=2.0\"]"]},
 
         {"kind":"and","text":"The sliders max value is updated","code":["slider.maximum == (int)(2d * scale)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Moving the slider after dynamic min/max changes keeps the bound value within [min, max].",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is a regression test for a bug where the slider's internal\n            scaling used for non-whole-number bindings could become stale when\n            one of the `min` or `max` properties changed dynamically.\n            When the user then moved the slider knob, the resulting value\n            written into the bound property could fall outside the current\n            `[min, max]` range.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A bidirectional slider bound to three double properties.","code":["var min = Var.of(5d)","var max = Var.of(10d)","var value = Var.of(7.5d)","var slider =","        UI.slider(UI.Align.HORIZONTAL, min, max, value)","          .get(JSlider)"]},
+
+        {"kind":"and","text":"We compute the slider integer range after dropping the max.","code":["var newMax = 6d"]},
+
+        {"kind":"when","text":"The application shrinks the max property significantly.","code":["UI.runNow({ max.set(newMax) })"]},
+
+        {"kind":"and","text":"The user then drags the slider knob to a position near its minimum.","code":["UI.runNow({ slider.value = slider.minimum + (slider.maximum - slider.minimum) / 4 as int })"]},
+
+        {"kind":"then","text":"The bound value stays within the new [min, max] range.","code":["value.get() >= min.get()","value.get() <= max.get()"]},
+
+        {"kind":"when","text":"The user drags the slider knob all the way to the top.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The bound value equals the user-defined maximum (within rounding).","code":["value.get() == max.get()"]},
+
+        {"kind":"when","text":"The user drags the slider knob all the way to the bottom.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The bound value equals the user-defined minimum (within rounding).","code":["value.get() == min.get()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

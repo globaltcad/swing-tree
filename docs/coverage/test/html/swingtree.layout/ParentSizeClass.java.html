@@ -69,12 +69,12 @@
 <span class="fc" id="L69">            return ParentSizeClass.SMALL;</span>
 <span class="fc bfc" id="L70" title="All 2 branches covered.">        } else if (howFull &lt; 3/5d) {</span>
 <span class="fc" id="L71">            return ParentSizeClass.MEDIUM;</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        } else if (howFull &lt; 4/5d) {</span>
-<span class="nc" id="L73">            return ParentSizeClass.LARGE;</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        } else if (howFull &lt;= 1) {</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        } else if (howFull &lt; 4/5d) {</span>
+<span class="fc" id="L73">            return ParentSizeClass.LARGE;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        } else if (howFull &lt;= 1) {</span>
 <span class="fc" id="L75">            return ParentSizeClass.VERY_LARGE;</span>
         }
-<span class="nc" id="L77">        return ParentSizeClass.OVERSIZE;</span>
+<span class="fc" id="L77">        return ParentSizeClass.OVERSIZE;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

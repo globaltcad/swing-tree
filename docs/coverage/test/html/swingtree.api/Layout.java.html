@@ -4,15 +4,24 @@ import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
+import swingtree.layout.AddConstraint;
+import swingtree.layout.FlowCell;
+import swingtree.layout.FlowCellConf;
+import swingtree.layout.LayoutConstraint;
+import swingtree.layout.MigAddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
 
+import sprouts.Association;
+import sprouts.Pair;
+import swingtree.layout.Bounds;
+
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.util.Objects;
@@ -36,6 +45,8 @@ import java.util.Objects;
  *    &lt;p&gt;
  *    This interface also contains various implementations
  *    for supporting the most common types of {@link LayoutManager}s.
+ *
+ * @see swingtree.UIForAnySwing#withLayout(sprouts.Val) For a common practical usecase, see this method.
  */
 @Immutable
 public interface Layout
@@ -67,70 +78,234 @@ public interface Layout
      *
      * @return A layout that does nothing, i.e. it does not install any layout for a component.
      */
-<span class="fc" id="L70">    static Layout unspecific() { return Constants.UNSPECIFIC_LAYOUT_CONSTANT; }</span>
+<span class="fc" id="L81">    static Layout unspecific() { return Constants.UNSPECIFIC_LAYOUT_CONSTANT; }</span>
 
     /**
-     *  If you don't want to assign any layout to a component style, but you also
-     *  don't want to pass null to the {@link ComponentStyleDelegate#layout(Layout)}
-     *  method, you can use the no-op instance returned by this method.
+     *  Returns a {@link None} layout that removes any existing {@link LayoutManager}
+     *  from a component (sets it to {@code null}), enabling manual positioning of
+     *  child components via their {@link Component#setBounds(int, int, int, int)} method.
+     *  &lt;p&gt;
+     *  To also specify the initial bounds of child components declaratively,
+     *  chain {@link None#withChildBounds(Bounds...)} on the returned instance, or
+     *  use the {@link #none(Bounds...)} shorthand factory.
      *
-     * @return A layout that removes any existing layout from a component.
+     * @return A {@link None} layout that removes any existing layout manager from a component.
      */
-<span class="fc" id="L79">    static Layout none() { return Constants.NONE_LAYOUT_CONSTANT; }</span>
+<span class="fc" id="L94">    static None none() { return (None) Constants.NONE_LAYOUT_CONSTANT; }</span>
 
     /**
-     *  This leads to the installation of the {@link MigLayout} layout manager,
-     *  which is a powerful general purpose layout manager for Swing.
-     *  Click &lt;a href=&quot;http://www.miglayout.com/&quot;&gt;here&lt;/a&gt; for more information.
+     *  A convenience factory that creates a {@link None} layout pre-loaded with
+     *  per-child {@link Bounds}.  This is a shorthand for:
+     *  &lt;pre&gt;{@code
+     *      Layout.none().withChildBounds(childBounds)
+     *  }&lt;/pre&gt;
+     *  When {@code installFor} is called, the layout manager is first removed from
+     *  the component (enabling absolute positioning), and then each supplied
+     *  {@link Bounds} entry is applied to the corresponding child by index via
+     *  {@link Component#setBounds(int, int, int, int)}.
+     *  Because the underlying storage is a sparse {@link Association}, you only
+     *  need to supply bounds for the children you actually want to position;
+     *  children without an entry are left untouched.
      *
-     * @param constr The layout constraints for the layout.
-     * @param rowConstr The row constraints for the layout.
-     * @param colConstr The column constraints for the layout.
-     * @return A layout that uses the MigLayout.
+     * @param childBounds The {@link Bounds} to apply to the component's children,
+     *                    in child-index order.
+     * @return A {@link None} layout that removes any layout manager and applies
+     *         the given bounds to the corresponding children.
      */
-    static Layout mig(
+    static None none( Bounds... childBounds ) {
+<span class="fc" id="L116">        return ((None) Constants.NONE_LAYOUT_CONSTANT).withChildBounds(childBounds);</span>
+    }
+
+    /**
+     *  The preferred factory method for creating a {@link MigLayout}-based layout configuration
+     *  from type-safe {@link LayoutConstraint} objects.
+     *  &lt;p&gt;
+     *  {@link LayoutConstraint} is a composable, type-safe wrapper around MigLayout constraint
+     *  strings. The recommended way to use it is through the constants and factory methods
+     *  available via {@code import static swingtree.UI.*}, which can then be combined
+     *  with {@link LayoutConstraint#and(LayoutConstraint)}:
+     *  &lt;pre&gt;{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Layout.mig( FILL.and(WRAP(2)), &quot;[shrink][grow]&quot;, &quot;[]8[]&quot; )
+     *  }&lt;/pre&gt;
+     *  Using {@link LayoutConstraint} instead of raw strings catches typos at call-site and
+     *  makes constraint composition explicit and refactor-friendly.
+     *  See &lt;a href=&quot;http://www.miglayout.com/whitepaper.html&quot;&gt;the MigLayout whitepaper&lt;/a&gt;
+     *  for full constraint documentation.
+     *  &lt;p&gt;
+     *  The returned {@link ForMigLayout} instance supports fluent chaining to specify
+     *  per-child component constraints via the various
+     *  {@link ForMigLayout#withChildConstraints(MigAddConstraint...)} overloads.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}
+     *               (e.g. {@code FILL.and(WRAP(2))}).
+     * @param colConstr The column constraints for the {@link MigLayout}
+     *                  (e.g. {@code LayoutConstraint.of(&quot;[shrink][grow]&quot;)}).
+     * @param rowConstr The row constraints for the {@link MigLayout}
+     *                  (e.g. {@code LayoutConstraint.of(&quot;[]8[]&quot;)}).
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig(
+        LayoutConstraint constr,
+        LayoutConstraint colConstr,
+        LayoutConstraint rowConstr
+    ) {
+<span class="fc" id="L154">        return new ForMigLayout( constr, colConstr, rowConstr );</span>
+    }
+
+    /**
+     *  A factory method for creating a {@link MigLayout}-based layout configuration
+     *  from type-safe {@link LayoutConstraint} objects, without column constraints.
+     *  This is the preferred approach over the plain-{@link String} overloads.
+     *  &lt;p&gt;
+     *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for
+     *  full details on the {@link LayoutConstraint} API and chaining child constraints.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}.
+     * @param rowConstr The row constraints for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig(
+        LayoutConstraint constr,
+        LayoutConstraint rowConstr
+    ) {
+<span class="nc" id="L173">        return new ForMigLayout( constr, LayoutConstraint.of(&quot;&quot;), rowConstr );</span>
+    }
+
+    /**
+     *  A factory method for creating a {@link MigLayout}-based layout configuration
+     *  from a single type-safe {@link LayoutConstraint}, with no column or row constraints.
+     *  This is the preferred approach over the plain-{@link String} overload.
+     *  &lt;p&gt;
+     *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for
+     *  full details on the {@link LayoutConstraint} API and chaining child constraints.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig( LayoutConstraint constr ) {
+<span class="fc" id="L188">        return new ForMigLayout( constr, LayoutConstraint.of(&quot;&quot;), LayoutConstraint.of(&quot;&quot;) );</span>
+    }
+
+    /**
+     *  A convenience factory method that creates a {@link MigLayout}-based layout configuration
+     *  from a single type-safe {@link LayoutConstraint} together with per-child
+     *  {@link MigAddConstraint}s for the component's direct children.
+     *  &lt;p&gt;
+     *  The {@code childConstraints} are mapped positionally: the first entry is applied to the
+     *  first child, the second to the second child, and so on.
+     *  Excess entries (more constraints than children) are silently ignored;
+     *  children without a matching entry keep whatever constraint the parent
+     *  {@link MigLayout} already has for them.
+     *  &lt;p&gt;
+     *  This is a shorthand for:
+     *  &lt;pre&gt;{@code
+     *      Layout.mig(constr).withChildConstraints(childConstraints)
+     *  }&lt;/pre&gt;
+     *  See {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)} for full details
+     *  on the {@link LayoutConstraint} API.
+     *
+     * @param constr The general layout constraints for the {@link MigLayout}.
+     * @param childConstraints The {@link MigAddConstraint}s to apply to the component's children,
+     *                         in child-index order.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig( LayoutConstraint constr, MigAddConstraint... childConstraints ) {
+<span class="nc" id="L215">        return mig(constr).withChildConstraints(childConstraints);</span>
+    }
+
+    /**
+     *  A convenience overload of {@link #mig(LayoutConstraint, LayoutConstraint, LayoutConstraint)}
+     *  that accepts plain constraint strings instead of {@link LayoutConstraint} objects.
+     *  Each string is wrapped via {@link LayoutConstraint#of(String...)} before being forwarded.
+     *  &lt;p&gt;
+     *  Prefer the {@link LayoutConstraint}-based overloads for new code, as they are
+     *  composable and less error-prone than raw strings.
+     *  Click &lt;a href=&quot;http://www.miglayout.com/&quot;&gt;here&lt;/a&gt; for more information about MigLayout.
+     *
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @param colConstr The column constraints string for the {@link MigLayout}.
+     * @param rowConstr The row constraints string for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig(
         String constr,
         String colConstr,
         String rowConstr
     ) {
-<span class="fc" id="L96">        return new ForMigLayout( constr, colConstr, rowConstr );</span>
+<span class="fc" id="L237">        return mig( LayoutConstraint.of(constr), LayoutConstraint.of(colConstr), LayoutConstraint.of(rowConstr) );</span>
     }
 
     /**
-     *  A factory method for creating a layout that installs the {@link MigLayout}
-     *  manager onto a component based on the supplied parameters.
-     *  The MigLayout layout manager is a powerful general purpose layout manager for Swing.
-     *  Click &lt;a href=&quot;http://www.miglayout.com/&quot;&gt;here&lt;/a&gt; for more information.
+     *  A convenience overload of {@link #mig(LayoutConstraint, LayoutConstraint)}
+     *  that accepts plain constraint strings instead of {@link LayoutConstraint} objects.
+     *  Each string is wrapped via {@link LayoutConstraint#of(String...)} before being forwarded.
+     *  &lt;p&gt;
+     *  Prefer the {@link LayoutConstraint}-based overloads for new code, as they are
+     *  composable and less error-prone than raw strings.
+     *  Click &lt;a href=&quot;http://www.miglayout.com/&quot;&gt;here&lt;/a&gt; for more information about MigLayout.
      *
-     * @param constr The layout constraints for the layout.
-     * @param rowConstr The row constraints for the layout.
-     * @return A layout that uses the MigLayout.
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @param rowConstr The row constraints string for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig(
+    static ForMigLayout mig(
         String constr,
         String rowConstr
     ) {
-<span class="nc" id="L113">        return new ForMigLayout( constr, &quot;&quot;, rowConstr );</span>
+<span class="nc" id="L257">        return mig( LayoutConstraint.of(constr), LayoutConstraint.of(rowConstr) );</span>
     }
 
     /**
-     *  A factory method for creating a layout that installs the {@link MigLayout}
-     *  manager onto a component based on the supplied parameters.
-     *  This will effectively translate to a call to the {@link MigLayout#MigLayout(String)}
-     *  constructor with the supplied constraints.
+     *  A convenience overload of {@link #mig(LayoutConstraint)}
+     *  that accepts a plain constraint string instead of a {@link LayoutConstraint} object.
+     *  The string is wrapped via {@link LayoutConstraint#of(String...)} before being forwarded.
+     *  &lt;p&gt;
+     *  Prefer the {@link LayoutConstraint}-based overloads for new code, as they are
+     *  composable and less error-prone than raw strings.
      *  In case you are not familiar with the MigLayout constraints, you can find more information
      *  about them &lt;a href=&quot;http://www.miglayout.com/whitepaper.html&quot;&gt;here&lt;/a&gt;.
      *
-     * @param constr The layout constraints for the layout.
-     * @return A layout that uses the MigLayout.
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
      */
-    static Layout mig( String constr ) {
-<span class="nc" id="L128">        return new ForMigLayout( constr, &quot;&quot;, &quot;&quot; );</span>
+    static ForMigLayout mig( String constr ) {
+<span class="fc" id="L274">        return mig( LayoutConstraint.of(constr) );</span>
     }
 
     /**
-     * A factory method for creating a layout that installs the {@link FlowLayout}
-     * onto a component based on the supplied parameters.
+     *  A convenience factory method that creates a {@link MigLayout}-based layout configuration
+     *  from a plain constraint string together with per-child {@link MigAddConstraint}s
+     *  for the component's direct children.
+     *  &lt;p&gt;
+     *  The {@code childConstraints} are mapped positionally: the first entry is applied to the
+     *  first child, the second to the second child, and so on.
+     *  This is a shorthand for:
+     *  &lt;pre&gt;{@code
+     *      Layout.mig(constr).withChildConstraints(childConstraints)
+     *  }&lt;/pre&gt;
+     *  Prefer the {@link LayoutConstraint}-based overload
+     *  {@link #mig(LayoutConstraint, MigAddConstraint...)} for new code.
+     *
+     * @param constr The general layout constraints string for the {@link MigLayout}.
+     * @param childConstraints The {@link MigAddConstraint}s to apply to the component's children,
+     *                         in child-index order.
+     * @return A {@link ForMigLayout} configured with the supplied constraints.
+     */
+    static ForMigLayout mig( String constr, MigAddConstraint... childConstraints ) {
+<span class="nc" id="L297">        return mig( LayoutConstraint.of(constr) ).withChildConstraints(childConstraints);</span>
+    }
+
+    /**
+     *  A factory method for creating a {@link ForFlowLayout} configuration that installs
+     *  a {@link ResponsiveGridFlowLayout} onto a component with the given alignment and gaps.
+     *  &lt;p&gt;
+     *  The returned {@link ForFlowLayout} supports fluent chaining to specify per-child
+     *  {@link FlowCell} constraints via the various
+     *  {@link ForFlowLayout#withChildConstraints(FlowCell...)} overloads, enabling fully
+     *  reactive responsive layouts when used together with
+     *  {@link swingtree.UIForAnySwing#withLayout(sprouts.Val)}.
      *
      * @param align The alignment for the layout, which has to be one of &lt;ul&gt;
      *               &lt;li&gt;{@link UI.HorizontalAlignment#LEFT}&lt;/li&gt;
@@ -139,42 +314,90 @@ public interface Layout
      *               &lt;li&gt;{@link UI.HorizontalAlignment#LEADING}&lt;/li&gt;
      *               &lt;li&gt;{@link UI.HorizontalAlignment#TRAILING}&lt;/li&gt;
      *              &lt;/ul&gt;
-     *
-     * @param hgap The horizontal gap for the layout.
-     * @param vgap The vertical gap for the layout.
-     * @return A layout that installs the {@link FlowLayout} onto a component.
+     * @param hgap The horizontal gap between components, in pixels.
+     * @param vgap The vertical gap between component rows, in pixels.
+     * @return A {@link ForFlowLayout} configured with the supplied alignment and gaps.
      */
-    static Layout flow( UI.HorizontalAlignment align, int hgap, int vgap ) {
-<span class="nc" id="L148">        return new ForFlowLayout( align, hgap, vgap );</span>
+    static ForFlowLayout flow( UI.HorizontalAlignment align, int hgap, int vgap ) {
+<span class="nc" id="L322">        return new ForFlowLayout( align, hgap, vgap );</span>
     }
 
     /**
-     * A factory method for creating a layout that installs the {@link FlowLayout}
-     * onto a component based on the supplied parameters.
+     *  A factory method for creating a {@link ForFlowLayout} configuration that installs
+     *  a {@link ResponsiveGridFlowLayout} with the given alignment and default gaps of 5 pixels.
+     *  &lt;p&gt;
+     *  The returned {@link ForFlowLayout} supports fluent chaining to specify per-child
+     *  {@link FlowCell} constraints.
+     *  See {@link #flow(UI.HorizontalAlignment, int, int)} for full details.
      *
-     * @param align The alignment for the layout, which has to be one of &lt;ul&gt;
-     *               &lt;li&gt;{@link UI.HorizontalAlignment#LEFT}&lt;/li&gt;
-     *               &lt;li&gt;{@link UI.HorizontalAlignment#CENTER}&lt;/li&gt;
-     *               &lt;li&gt;{@link UI.HorizontalAlignment#RIGHT}&lt;/li&gt;
-     *               &lt;li&gt;{@link UI.HorizontalAlignment#LEADING}&lt;/li&gt;
-     *               &lt;li&gt;{@link UI.HorizontalAlignment#TRAILING}&lt;/li&gt;
-     *              &lt;/ul&gt;
-     *
-     * @return A layout that installs the {@link FlowLayout} onto a component.
+     * @param align The horizontal alignment for the flow of components.
+     * @return A {@link ForFlowLayout} configured with the supplied alignment.
      */
-    static Layout flow( UI.HorizontalAlignment align ) {
-<span class="nc" id="L166">        return new ForFlowLayout( align, 5, 5 );</span>
+    static ForFlowLayout flow( UI.HorizontalAlignment align ) {
+<span class="nc" id="L337">        return new ForFlowLayout( align, 5, 5 );</span>
     }
 
     /**
-     *  Creates a layout that installs the {@link FlowLayout}
-     *  with a default alignment of {@link UI.HorizontalAlignment#CENTER}
-     *  and a default gap of 5 pixels.
+     *  A factory method for creating a {@link ForFlowLayout} configuration that installs
+     *  a {@link ResponsiveGridFlowLayout} with centered alignment and default gaps of 5 pixels.
+     *  &lt;p&gt;
+     *  The returned {@link ForFlowLayout} supports fluent chaining to specify per-child
+     *  {@link FlowCell} constraints.
+     *  See {@link #flow(UI.HorizontalAlignment, int, int)} for full details.
      *
-     * @return A layout that installs the {@link FlowLayout} onto a component.
+     * @return A {@link ForFlowLayout} with centered alignment and 5-pixel gaps.
      */
-    static Layout flow() {
-<span class="fc" id="L177">        return new ForFlowLayout( UI.HorizontalAlignment.CENTER, 5, 5 );</span>
+    static ForFlowLayout flow() {
+<span class="fc" id="L351">        return new ForFlowLayout( UI.HorizontalAlignment.CENTER, 5, 5 );</span>
+    }
+
+    /**
+     *  A convenience factory method that creates a centered {@link ForFlowLayout} pre-loaded
+     *  with per-child {@link FlowCell} constraints.  This is a shorthand for:
+     *  &lt;pre&gt;{@code
+     *      Layout.flow().withChildConstraints(childConstraints)
+     *  }&lt;/pre&gt;
+     *  Each {@link FlowCell} is typically created via {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+     *  &lt;pre&gt;{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Var&lt;Layout&gt; layout = Var.of(
+     *          Layout.flow(
+     *              AUTO_SPAN( it -&gt; it.small(12).medium(6) ),
+     *              AUTO_SPAN( it -&gt; it.small(12).medium(6) )
+     *          )
+     *      );
+     *      UI.panel()
+     *        .withLayout(layout)
+     *        .add( label(&quot;Left&quot;) )
+     *        .add( label(&quot;Right&quot;) );
+     *  }&lt;/pre&gt;
+     *  Changing the {@code layout} property at runtime will reinstall the layout and re-push
+     *  all child {@link FlowCell} constraints, making the span behaviour fully reactive.
+     *
+     * @param childConstraints The {@link FlowCell} constraints to apply to the component's
+     *                         children in child-index order.
+     * @return A {@link ForFlowLayout} with centered alignment and the given child constraints.
+     */
+    static ForFlowLayout flow( FlowCell... childConstraints ) {
+<span class="fc" id="L383">        return flow().withChildConstraints(childConstraints);</span>
+    }
+
+    /**
+     *  A convenience factory method that creates a {@link ForFlowLayout} with the given
+     *  alignment and per-child {@link FlowCell} constraints pre-loaded.  This is a shorthand for:
+     *  &lt;pre&gt;{@code
+     *      Layout.flow(align).withChildConstraints(childConstraints)
+     *  }&lt;/pre&gt;
+     *  See {@link #flow(FlowCell...)} for a usage example and reactive design notes.
+     *
+     * @param align The horizontal alignment for the flow of components.
+     * @param childConstraints The {@link FlowCell} constraints to apply to the component's
+     *                         children in child-index order.
+     * @return A {@link ForFlowLayout} with the given alignment and child constraints.
+     */
+    static ForFlowLayout flow( UI.HorizontalAlignment align, FlowCell... childConstraints ) {
+<span class="nc" id="L400">        return flow(align).withChildConstraints(childConstraints);</span>
     }
 
     /**
@@ -186,7 +409,7 @@ public interface Layout
      * @return A layout that installs the {@link BorderLayout} onto a component.
      */
     static Layout border( int horizontalGap, int verticalGap ) {
-<span class="fc" id="L189">        return new BorderLayoutInstaller( horizontalGap, verticalGap );</span>
+<span class="fc" id="L412">        return new BorderLayoutInstaller( horizontalGap, verticalGap );</span>
     }
 
     /**
@@ -197,7 +420,7 @@ public interface Layout
      * @return A layout that installs the {@link BorderLayout} onto a component.
      */
     static Layout border() {
-<span class="fc" id="L200">        return new BorderLayoutInstaller( 0, 0 );</span>
+<span class="fc" id="L423">        return new BorderLayoutInstaller( 0, 0 );</span>
     }
 
     /**
@@ -211,7 +434,7 @@ public interface Layout
      * @return A layout that installs the {@link GridLayout} onto a component.
      */
     static Layout grid( int rows, int cols, int horizontalGap, int verticalGap ) {
-<span class="nc" id="L214">        return new GridLayoutInstaller( rows, cols, horizontalGap, verticalGap );</span>
+<span class="nc" id="L437">        return new GridLayoutInstaller( rows, cols, horizontalGap, verticalGap );</span>
     }
 
     /**
@@ -224,7 +447,7 @@ public interface Layout
      * @return A layout that installs the {@link GridLayout} onto a component.
      */
     static Layout grid( int rows, int cols ) {
-<span class="nc" id="L227">        return new GridLayoutInstaller( rows, cols, 0, 0 );</span>
+<span class="fc" id="L450">        return new GridLayoutInstaller( rows, cols, 0, 0 );</span>
     }
 
     /**
@@ -243,7 +466,7 @@ public interface Layout
      * @return A layout that installs the {@link BoxLayout} onto a component.
      */
     static Layout box( UI.Axis axis ) {
-<span class="nc" id="L246">        return new ForBoxLayout( axis.forBoxLayout() );</span>
+<span class="fc" id="L469">        return new ForBoxLayout( axis.forBoxLayout() );</span>
     }
 
     /**
@@ -253,7 +476,7 @@ public interface Layout
      * @return A layout that installs the default {@link BoxLayout} onto a component.
      */
     static Layout box() {
-<span class="nc" id="L256">        return new ForBoxLayout( BoxLayout.X_AXIS );</span>
+<span class="nc" id="L479">        return new ForBoxLayout( BoxLayout.X_AXIS );</span>
     }
 
     /**
@@ -271,228 +494,984 @@ public interface Layout
     @Immutable
     final class Unspecific implements Layout
     {
-<span class="fc" id="L274">        Unspecific() {}</span>
+<span class="fc" id="L497">        Unspecific() {}</span>
 
-<span class="fc" id="L276">        @Override public int hashCode() { return 0; }</span>
+<span class="fc" id="L499">        @Override public int hashCode() { return 0; }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="pc bpc" id="L280" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="pc bpc" id="L281" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="pc bpc" id="L282" title="1 of 2 branches missed.">            return o.getClass() == getClass();</span>
+<span class="pc bpc" id="L503" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L504" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="pc bpc" id="L505" title="1 of 2 branches missed.">            return o.getClass() == getClass();</span>
         }
 
-<span class="nc" id="L285">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
+<span class="nc" id="L508">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
 
         /**
          *  Does nothing.
          * @param component The component to install the layout for.
          */
-<span class="fc" id="L291">        @Override public void installFor( JComponent component ) { /* Do nothing. */ }</span>
+<span class="fc" id="L514">        @Override public void installFor( JComponent component ) { /* Do nothing. */ }</span>
     }
 
     /**
-     *  The {@link None} layout is a layout that represents the absence
-     *  of a {@link LayoutManager} for a component.
-     *  This means that whatever layout is currently installed for a component
-     *  will be removed, and {@code null} will be set as the layout for the component.
+     *  The {@link None} layout removes any existing {@link LayoutManager} from a component
+     *  (sets it to {@code null}), enabling fully manual positioning of child components
+     *  via {@link Component#setBounds(int, int, int, int)}.
      *  &lt;p&gt;
-     *  Note that this is different from the {@link Unspecific} layout,
-     *  which does not represent the absence of a {@link LayoutManager}
-     *  for a component, but rather the absence of it being specified.
+     *  Beyond simply clearing the layout manager, a {@link None} instance can carry a sparse
+     *  {@link Association} of per-child {@link Bounds} that are applied to the component's
+     *  direct children during {@link #installFor(JComponent)}.  This lets you declare the
+     *  absolute position and size of each child you care about right inside the
+     *  {@link Layout} object, keeping the layout specification co-located with the
+     *  component tree rather than scattered across imperative setup code:
+     *  &lt;pre&gt;{@code
+     *      import static swingtree.UI.*;
+     *      import swingtree.layout.Bounds;
+     *      // ...
+     *      Var&lt;Layout&gt; layout = Var.of(
+     *          Layout.none(
+     *              Bounds.of(  0,   0, 120, 40),  // child 0
+     *              Bounds.of(130,   0, 120, 40),  // child 1
+     *              Bounds.of(  0,  50, 250, 80)   // child 2
+     *          )
+     *      );
+     *
+     *      UI.panel().withLayout(layout)
+     *        .add( button(&quot;A&quot;) )
+     *        .add( button(&quot;B&quot;) )
+     *        .add( label(&quot;C&quot;)  );
+     *  }&lt;/pre&gt;
+     *  Because the association is sparse you can also target a single child by index
+     *  without touching the others:
+     *  &lt;pre&gt;{@code
+     *      layout.set( Layout.none().withChildBound(2, Bounds.of(0, 50, 250, 80)) );
+     *  }&lt;/pre&gt;
+     *  &lt;p&gt;
+     *  Note that this is different from the {@link Unspecific} layout, which does nothing
+     *  at all — {@link None} actively removes the layout manager.
      */
     @Immutable
+    @SuppressWarnings(&quot;Immutable&quot;)
     final class None implements Layout
     {
-<span class="fc" id="L307">        None(){}</span>
+        private final Association&lt;Integer, Bounds&gt; _childBounds;
 
-<span class="fc" id="L309">        @Override public int hashCode() { return 0; }</span>
+        None() {
+<span class="fc" id="L561">            this( Association.betweenSorted(Integer.class, Bounds.class) );</span>
+<span class="fc" id="L562">        }</span>
 
-        @Override
-        public boolean equals(Object o) {
-<span class="pc bpc" id="L313" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="pc bpc" id="L314" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="pc bpc" id="L315" title="1 of 2 branches missed.">            return o.getClass() == getClass();</span>
+<span class="fc" id="L564">        None( Association&lt;Integer, Bounds&gt; childBounds ) {</span>
+<span class="fc" id="L565">            _childBounds = Objects.requireNonNull(childBounds);</span>
+<span class="fc" id="L566">        }</span>
+
+        // -- Per-child bounds withers --
+
+        /**
+         *  Returns a new {@link None} layout whose per-child {@link Bounds} are replaced
+         *  by the supplied sorted {@link Association}.
+         *  &lt;p&gt;
+         *  Keys are child indices ({@code 0} = first child, {@code 1} = second, etc.);
+         *  the association is sparse, so you only need to include entries for the children
+         *  you actually want to position.  Children whose index has no entry are left
+         *  untouched.  An empty association produces the plain &quot;remove layout only&quot; behaviour.
+         *
+         * @param childBounds A sorted {@link Association} mapping child indices to
+         *                    the {@link Bounds} to apply.
+         * @return A new {@link None} layout with the updated child bounds,
+         *         or the shared {@link Layout#none()} constant when the association is empty.
+         */
+        public None withChildBounds( Association&lt;Integer, Bounds&gt; childBounds ) {
+<span class="fc" id="L585">            Objects.requireNonNull(childBounds);</span>
+<span class="pc bpc" id="L586" title="1 of 2 branches missed.">            if ( childBounds.isEmpty() )</span>
+<span class="nc" id="L587">                return (None) Constants.NONE_LAYOUT_CONSTANT;</span>
+<span class="fc" id="L588">            return new None(childBounds);</span>
         }
 
-<span class="nc" id="L318">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
+        /**
+         *  Returns a new {@link None} layout with per-child {@link Bounds} built from
+         *  the supplied varargs array.  Entries are mapped positionally: index&amp;nbsp;0
+         *  applies to the first child, index&amp;nbsp;1 to the second, and so on.
+         *  Passing an empty array returns the shared {@link Layout#none()} constant.
+         *
+         * @param childBounds The {@link Bounds} to apply to the component's children,
+         *                    in child-index order.
+         * @return A new {@link None} layout with the updated child bounds.
+         */
+        public None withChildBounds( Bounds... childBounds ) {
+<span class="fc" id="L602">            Association&lt;Integer, Bounds&gt; assoc = Association.betweenSorted(Integer.class, Bounds.class);</span>
+<span class="fc bfc" id="L603" title="All 2 branches covered.">            for ( int i = 0; i &lt; childBounds.length; i++ )</span>
+<span class="fc" id="L604">                assoc = assoc.put(i, childBounds[i]);</span>
+<span class="fc" id="L605">            return withChildBounds(assoc);</span>
+        }
 
-        @Override
-        public void installFor( JComponent component ) {
-            // Contrary to the 'Unspecific' layout, this layout
-            // will remove any existing layout from the component:
-<span class="fc" id="L324">            component.setLayout(null);</span>
-<span class="fc" id="L325">        }</span>
-    }
+        /**
+         *  Returns a new {@link None} layout with the {@link Bounds} at the given child
+         *  index replaced by the supplied value.  All other child bounds are copied unchanged.
+         *  &lt;p&gt;
+         *  Because the underlying storage is a sparse {@link Association}, no padding is
+         *  needed: the bound is stored at exactly {@code index}, regardless of whether
+         *  lower indices have entries.
+         *
+         * @param index The zero-based index of the child whose bounds to update.
+         * @param childBound The new {@link Bounds} for the child at {@code index}.
+         * @return A new {@link None} layout with the updated child bound at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public None withChildBound( int index, Bounds childBound ) {
+<span class="fc" id="L622">            Objects.requireNonNull(childBound);</span>
+<span class="pc bpc" id="L623" title="1 of 2 branches missed.">            if ( index &lt; 0 )</span>
+<span class="nc" id="L624">                throw new IndexOutOfBoundsException(&quot;Child index must not be negative, but was: &quot; + index);</span>
+<span class="fc" id="L625">            return withChildBounds( _childBounds.put(index, childBound) );</span>
+        }
 
-    /**
-     *  The {@link ForMigLayout} layout is a layout that represents
-     *  a {@link MigLayout} layout configuration for a component. &lt;br&gt;
-     *  Whenever this layout configuration changes,
-     *  it will create and re-install a new {@link MigLayout} onto the component
-     *  based on the new configuration,
-     *  which are the constraints, column constraints and row constraints.
-     */
-    @Immutable
-    final class ForMigLayout implements Layout
-    {
-        private final String _constr;
-        private final String _colConstr;
-        private final String _rowConstr;
+        /**
+         *  Returns a new {@link None} layout with the supplied {@link Bounds} appended
+         *  as the constraint for the next child in sequence (i.e. at index = max existing
+         *  key + 1, or 0 if no bounds have been set yet).
+         *
+         * @param childBound The {@link Bounds} to append for the next child.
+         * @return A new {@link None} layout with the bound appended.
+         */
+        public None withAddedChildBound( Bounds childBound ) {
+<span class="nc" id="L637">            Objects.requireNonNull(childBound);</span>
+<span class="nc" id="L638">            int nextIndex = 0;</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">            for ( Integer key : _childBounds.keySet() )</span>
+<span class="nc" id="L640">                nextIndex = key + 1;</span>
+<span class="nc" id="L641">            return withChildBounds( _childBounds.put(nextIndex, childBound) );</span>
+        }
 
+        // -- Object contract --
 
-<span class="fc" id="L344">        ForMigLayout( String constr, String colConstr, String rowConstr ) {</span>
-<span class="fc" id="L345">            _constr    = Objects.requireNonNull(constr);</span>
-<span class="fc" id="L346">            _colConstr = Objects.requireNonNull(colConstr);</span>
-<span class="fc" id="L347">            _rowConstr = Objects.requireNonNull(rowConstr);</span>
-<span class="fc" id="L348">        }</span>
-
-<span class="nc" id="L350">        public ForMigLayout withConstraint( String constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }</span>
-
-<span class="nc" id="L352">        public ForMigLayout withRowConstraint( String rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }</span>
-
-<span class="nc" id="L354">        public ForMigLayout withColumnConstraint( String colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }</span>
-
-<span class="nc" id="L356">        public ForMigLayout withComponentConstraint( String componentConstr ) { return new ForMigLayout( _constr, _colConstr, _rowConstr ); }</span>
-
-<span class="fc" id="L358">        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }</span>
+<span class="fc" id="L646">        @Override public int hashCode() { return _childBounds.hashCode(); }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="pc bpc" id="L362" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="pc bpc" id="L363" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="pc bpc" id="L364" title="1 of 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L365">            ForMigLayout other = (ForMigLayout) o;</span>
-<span class="nc bnc" id="L366" title="All 2 branches missed.">            return _constr.equals( other._constr) &amp;&amp;</span>
-<span class="nc bnc" id="L367" title="All 2 branches missed.">                   _rowConstr.equals( other._rowConstr) &amp;&amp;</span>
-<span class="nc bnc" id="L368" title="All 2 branches missed.">                   _colConstr.equals( other._colConstr);</span>
+<span class="pc bpc" id="L650" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="fc bfc" id="L652" title="All 2 branches covered.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L653">            None other = (None) o;</span>
+<span class="fc" id="L654">            return _childBounds.equals(other._childBounds);</span>
         }
 
+        @Override public String toString() {
+<span class="nc" id="L658">            return getClass().getSimpleName() + &quot;[childBounds=&quot; + _childBounds + &quot;]&quot;;</span>
+        }
+
+        // -- Layout installation --
+
+        /**
+         *  Installs this layout for the supplied component in two phases:
+         *  &lt;ol&gt;
+         *    &lt;li&gt;&lt;b&gt;Layout removal&lt;/b&gt; — the existing {@link LayoutManager} (if any) is
+         *        replaced with {@code null}, enabling absolute positioning of child
+         *        components.&lt;/li&gt;
+         *    &lt;li&gt;&lt;b&gt;Child bounds&lt;/b&gt; — if any per-child {@link Bounds} were specified,
+         *        each stored entry is applied to the corresponding direct child of
+         *        {@code component} (by index) via
+         *        {@link Component#setBounds(int, int, int, int)}.
+         *        Only entries that differ from the child's current bounds are written,
+         *        and {@link JComponent#repaint()} is called exactly once at the end if
+         *        anything changed.&lt;/li&gt;
+         *  &lt;/ol&gt;
+         *
+         * @param component The component to remove the layout manager from and
+         *                  optionally apply child bounds to.
+         */
         @Override
         public void installFor( JComponent component ) {
-<span class="fc" id="L373">            ComponentExtension&lt;?&gt; extension = ComponentExtension.from(component);</span>
-<span class="fc" id="L374">            StyleConf styleConf = extension.getStyle();</span>
-<span class="pc bpc" id="L375" title="1 of 2 branches missed.">            if ( styleConf.layoutConstraint().isPresent() ) {</span>
-                // We ensure that the parent layout has the correct component constraints for the component:
-<span class="nc bnc" id="L377" title="All 2 branches missed.">                LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );</span>
-<span class="nc bnc" id="L378" title="All 2 branches missed.">                if ( parentLayout instanceof MigLayout) {</span>
-<span class="nc" id="L379">                    MigLayout migLayout = (MigLayout) parentLayout;</span>
-<span class="nc" id="L380">                    Object componentConstraints = styleConf.layoutConstraint().get();</span>
-<span class="nc" id="L381">                    Object currentComponentConstraints = migLayout.getComponentConstraints(component);</span>
-                    //     ^ can be a String or a CC object, we want to compare it to the new constraints:
-<span class="nc bnc" id="L383" title="All 2 branches missed.">                    if ( !componentConstraints.equals(currentComponentConstraints) ) {</span>
-<span class="nc" id="L384">                        migLayout.setComponentConstraints(component, componentConstraints);</span>
-<span class="nc" id="L385">                        component.getParent().revalidate();</span>
+            // Phase 1: remove the layout manager:
+<span class="fc" id="L684">            LayoutManager oldManager = component.getLayout();</span>
+<span class="fc bfc" id="L685" title="All 2 branches covered.">            if ( oldManager != null ) {</span>
+<span class="fc" id="L686">                component.setLayout(null);</span>
+<span class="fc" id="L687">                component.revalidate();</span>
+            }
+            // Phase 2: apply per-child bounds if specified:
+<span class="fc bfc" id="L690" title="All 2 branches covered.">            if ( _childBounds.isNotEmpty() ) {</span>
+<span class="fc" id="L691">                Component[] children = component.getComponents();</span>
+<span class="fc" id="L692">                boolean changed = false;</span>
+<span class="fc bfc" id="L693" title="All 2 branches covered.">                for ( Pair&lt;Integer, Bounds&gt; entry : _childBounds ) {</span>
+<span class="fc" id="L694">                    int i = entry.first();</span>
+<span class="pc bpc" id="L695" title="2 of 4 branches missed.">                    if ( i &lt; 0 || i &gt;= children.length ) continue;</span>
+<span class="fc" id="L696">                    java.awt.Rectangle desired  = UI.scale(entry.second().toRectangle());</span>
+<span class="fc" id="L697">                    java.awt.Rectangle existing = children[i].getBounds();</span>
+<span class="pc bpc" id="L698" title="1 of 2 branches missed.">                    if ( !desired.equals(existing) ) {</span>
+<span class="fc" id="L699">                        children[i].setBounds(desired);</span>
+<span class="fc" id="L700">                        changed = true;</span>
+                    }
+<span class="fc" id="L702">                }</span>
+<span class="pc bpc" id="L703" title="1 of 2 branches missed.">                if ( changed )</span>
+<span class="fc" id="L704">                    component.repaint();</span>
+            }
+<span class="fc" id="L706">        }</span>
+    }
+
+    /**
+     *  An immutable {@link Layout} implementation that configures and installs a
+     *  {@link MigLayout} onto a component. It holds three kinds of constraints:
+     *  &lt;ul&gt;
+     *    &lt;li&gt;&lt;b&gt;General layout constraints&lt;/b&gt; ({@code constr}) — control global layout
+     *        behaviour such as wrapping, filling, gaps and hiding mode.&lt;/li&gt;
+     *    &lt;li&gt;&lt;b&gt;Column constraints&lt;/b&gt; ({@code colConstr}) — define the sizing and
+     *        alignment rules for each column in the grid.&lt;/li&gt;
+     *    &lt;li&gt;&lt;b&gt;Row constraints&lt;/b&gt; ({@code rowConstr}) — define the sizing and
+     *        alignment rules for each row in the grid.&lt;/li&gt;
+     *    &lt;li&gt;&lt;b&gt;Per-child component constraints&lt;/b&gt; ({@code childConstraints}) — a
+     *        sorted {@link Association} mapping child indices ({@link Integer}) to
+     *        {@link MigAddConstraint}s applied to the component's direct children.
+     *        Unlike a positional tuple, the association is sparse: you only need to
+     *        include entries for the children you actually want to configure; children
+     *        whose index has no entry keep whatever constraint the
+     *        {@link MigLayout} already has for them.&lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  Instances are created via the {@link Layout#mig(LayoutConstraint)} family of
+     *  factory methods and are further configured through the fluent {@code with*} wither
+     *  methods, which all return a new immutable instance:
+     *  &lt;pre&gt;{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Layout.mig( FILL.and(WRAP(2)), &quot;[shrink][grow]&quot;, &quot;[]8[]&quot; )
+     *            .withChildConstraints( RIGHT, GROW_X, RIGHT, GROW_X )
+     *  }&lt;/pre&gt;
+     *  Whenever any property of this configuration changes (detected by the style engine
+     *  via {@link #equals}/{@link #hashCode}), the {@link #installFor(JComponent)} method
+     *  is called, which surgically updates only the properties that have changed and
+     *  calls {@link JComponent#revalidate()} to trigger a layout refresh.
+     */
+    @Immutable
+    @SuppressWarnings(&quot;Immutable&quot;)
+    final class ForMigLayout implements Layout
+    {
+        private final LayoutConstraint                        _constr;
+        private final LayoutConstraint                        _colConstr;
+        private final LayoutConstraint                        _rowConstr;
+        private final Association&lt;Integer, MigAddConstraint&gt;  _childConstraints;
+
+        ForMigLayout( LayoutConstraint constr, LayoutConstraint colConstr, LayoutConstraint rowConstr ) {
+<span class="fc" id="L752">            this( constr, colConstr, rowConstr, Association.betweenSorted(Integer.class, MigAddConstraint.class) );</span>
+<span class="fc" id="L753">        }</span>
+
+        ForMigLayout(
+            LayoutConstraint                       constr,
+            LayoutConstraint                       colConstr,
+            LayoutConstraint                       rowConstr,
+            Association&lt;Integer, MigAddConstraint&gt; childConstraints
+<span class="fc" id="L760">        ) {</span>
+<span class="fc" id="L761">            _constr           = Objects.requireNonNull(constr);</span>
+<span class="fc" id="L762">            _colConstr        = Objects.requireNonNull(colConstr);</span>
+<span class="fc" id="L763">            _rowConstr        = Objects.requireNonNull(rowConstr);</span>
+<span class="fc" id="L764">            _childConstraints = Objects.requireNonNull(childConstraints);</span>
+<span class="fc" id="L765">        }</span>
+
+        // -- General layout constraint withers --
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied general layout constraints
+         *  and all other properties copied from this instance.
+         *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
+         *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
+         *
+         * @param constr The new general layout constraints for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated layout constraints.
+         */
+        public ForMigLayout withConstraint( LayoutConstraint constr ) {
+<span class="nc" id="L779">            return new ForMigLayout( constr, _colConstr, _rowConstr, _childConstraints );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied general layout constraints
+         *  and all other properties copied from this instance.
+         *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
+         *  to {@link #withConstraint(LayoutConstraint)}.
+         *  Prefer {@link #withConstraint(LayoutConstraint)} for new code.
+         *
+         * @param constr The new general layout constraints string for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated layout constraints.
+         */
+<span class="nc" id="L792">        public ForMigLayout withConstraint( String constr ) { return withConstraint( LayoutConstraint.of(constr) ); }</span>
+
+        // -- Row constraint withers --
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied row constraints
+         *  and all other properties copied from this instance.
+         *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
+         *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
+         *
+         * @param rowConstr The new row constraints for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated row constraints.
+         */
+        public ForMigLayout withRowConstraint( LayoutConstraint rowConstr ) {
+<span class="nc" id="L806">            return new ForMigLayout( _constr, _colConstr, rowConstr, _childConstraints );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied row constraints
+         *  and all other properties copied from this instance.
+         *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
+         *  to {@link #withRowConstraint(LayoutConstraint)}.
+         *  Prefer {@link #withRowConstraint(LayoutConstraint)} for new code.
+         *
+         * @param rowConstr The new row constraints string for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated row constraints.
+         */
+<span class="nc" id="L819">        public ForMigLayout withRowConstraint( String rowConstr ) { return withRowConstraint( LayoutConstraint.of(rowConstr) ); }</span>
+
+        // -- Column constraint withers --
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied column constraints
+         *  and all other properties copied from this instance.
+         *  This is the preferred overload as it works with the type-safe {@link LayoutConstraint}
+         *  API, which supports composition via {@link LayoutConstraint#and(LayoutConstraint)}.
+         *
+         * @param colConstr The new column constraints for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated column constraints.
+         */
+        public ForMigLayout withColumnConstraint( LayoutConstraint colConstr ) {
+<span class="nc" id="L833">            return new ForMigLayout( _constr, colConstr, _rowConstr, _childConstraints );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied column constraints
+         *  and all other properties copied from this instance.
+         *  The string is wrapped via {@link LayoutConstraint#of(String...)} and forwarded
+         *  to {@link #withColumnConstraint(LayoutConstraint)}.
+         *  Prefer {@link #withColumnConstraint(LayoutConstraint)} for new code.
+         *
+         * @param colConstr The new column constraints string for the {@link MigLayout}.
+         * @return A new {@link ForMigLayout} instance with the updated column constraints.
+         */
+<span class="nc" id="L846">        public ForMigLayout withColumnConstraint( String colConstr ) { return withColumnConstraint( LayoutConstraint.of(colConstr) ); }</span>
+
+        // -- Per-child component constraint withers --
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance whose per-child component constraints
+         *  are replaced by the supplied sorted {@link Association}.
+         *  &lt;p&gt;
+         *  Keys are child indices ({@code 0} = first child, {@code 1} = second, etc.);
+         *  the association is sparse, so you only need to include entries for children
+         *  you actually want to configure.
+         *  Children whose index has no entry in the association are left untouched.
+         *  An empty association means no constraints are stored in this layout object;
+         *  any constraints previously applied to children by an earlier {@code installFor}
+         *  call remain in the {@link MigLayout} until explicitly overwritten.
+         *
+         * @param childConstraints A sorted {@link Association} mapping child indices to
+         *                         the {@link MigAddConstraint} to apply.
+         * @return A new {@link ForMigLayout} with the updated child constraints.
+         */
+        public ForMigLayout withChildConstraints( Association&lt;Integer, MigAddConstraint&gt; childConstraints ) {
+<span class="fc" id="L867">            return new ForMigLayout( _constr, _colConstr, _rowConstr, Objects.requireNonNull(childConstraints) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance whose per-child component constraints
+         *  are replaced by the supplied varargs array of {@link MigAddConstraint}s.
+         *  &lt;p&gt;
+         *  The constraints are mapped positionally to the component's children:
+         *  the first argument applies to the first child, the second to the second, and so on.
+         *  Children at indices beyond the supplied array length are left untouched.
+         *  Passing an empty array stores no constraints in this layout object;
+         *  any constraints previously applied to children by an earlier {@code installFor}
+         *  call remain in the {@link MigLayout} until explicitly overwritten.
+         *  &lt;p&gt;
+         *  This is the most concise way to specify per-child constraints for common cases:
+         *  &lt;pre&gt;{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.mig( FILL.and(WRAP(2)) )
+         *            .withChildConstraints( RIGHT, GROW_X, RIGHT, GROW_X )
+         *  }&lt;/pre&gt;
+         *
+         * @param childConstraints The {@link MigAddConstraint}s to apply to the component's
+         *                         children, in child-index order.
+         * @return A new {@link ForMigLayout} with the updated child constraints.
+         */
+        public ForMigLayout withChildConstraints( MigAddConstraint... childConstraints ) {
+<span class="fc" id="L894">            Association&lt;Integer, MigAddConstraint&gt; assoc = Association.betweenSorted(Integer.class, MigAddConstraint.class);</span>
+<span class="fc bfc" id="L895" title="All 2 branches covered.">            for ( int i = 0; i &lt; childConstraints.length; i++ )</span>
+<span class="fc" id="L896">                assoc = assoc.put(i, childConstraints[i]);</span>
+<span class="fc" id="L897">            return withChildConstraints(assoc);</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the {@link MigAddConstraint} at the
+         *  given child index replaced by the supplied value.
+         *  All other child constraints and all other properties are copied unchanged.
+         *  &lt;p&gt;
+         *  Because the underlying storage is a sparse {@link Association}, no padding
+         *  is needed: the constraint is stored at exactly {@code index}, regardless of
+         *  whether lower indices have entries.
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         *              The first child has index&amp;nbsp;0.
+         * @param childConstraint The new {@link MigAddConstraint} for the child at {@code index}.
+         * @return A new {@link ForMigLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForMigLayout withChildConstraint( int index, MigAddConstraint childConstraint ) {
+<span class="fc" id="L916">            Objects.requireNonNull(childConstraint);</span>
+<span class="pc bpc" id="L917" title="1 of 2 branches missed.">            if ( index &lt; 0 )</span>
+<span class="nc" id="L918">                throw new IndexOutOfBoundsException(&quot;Child index must not be negative, but was: &quot; + index);</span>
+<span class="fc" id="L919">            return withChildConstraints( _childConstraints.put(index, childConstraint) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the {@link MigAddConstraint} at the
+         *  given child index replaced by a constraint wrapping the supplied string.
+         *  The string is converted via {@link MigAddConstraint#of(String...)} and then forwarded
+         *  to {@link #withChildConstraint(int, MigAddConstraint)}.
+         *  &lt;p&gt;
+         *  Because the underlying storage is a sparse {@link Association}, no padding is
+         *  needed: the constraint is stored at exactly {@code index}, regardless of whether
+         *  lower indices have entries.
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         * @param childConstraint The MigLayout component-constraint string for the child.
+         * @return A new {@link ForMigLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForMigLayout withChildConstraint( int index, String childConstraint ) {
+<span class="nc" id="L938">            return withChildConstraint( index, MigAddConstraint.of(childConstraint) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with the supplied {@link MigAddConstraint}
+         *  appended to the end of the existing child-constraint tuple.
+         *  This is a convenient alternative to {@link #withChildConstraints(MigAddConstraint...)}
+         *  when building up constraints one at a time:
+         *  &lt;pre&gt;{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.mig( FILL.and(WRAP(2)) )
+         *            .withAddedChildConstraint( RIGHT )
+         *            .withAddedChildConstraint( GROW_X )
+         *            .withAddedChildConstraint( RIGHT )
+         *            .withAddedChildConstraint( GROW_X )
+         *  }&lt;/pre&gt;
+         *
+         * @param childConstraint The {@link MigAddConstraint} to append as the next child
+         *                        component constraint.
+         * @return A new {@link ForMigLayout} with the constraint appended.
+         */
+        public ForMigLayout withAddedChildConstraint( MigAddConstraint childConstraint ) {
+<span class="nc" id="L961">            Objects.requireNonNull(childConstraint);</span>
+<span class="nc" id="L962">            int nextIndex = 0;</span>
+<span class="nc bnc" id="L963" title="All 2 branches missed.">            for ( Integer key : _childConstraints.keySet() )</span>
+<span class="nc" id="L964">                nextIndex = key + 1;</span>
+<span class="nc" id="L965">            return withChildConstraints( _childConstraints.put(nextIndex, childConstraint) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForMigLayout} instance with a {@link MigAddConstraint} wrapping
+         *  the supplied string appended to the end of the existing child-constraint tuple.
+         *  The string is converted via {@link MigAddConstraint#of(String...)} and then forwarded
+         *  to {@link #withAddedChildConstraint(MigAddConstraint)}.
+         *
+         * @param childConstraint The MigLayout component-constraint string to append.
+         * @return A new {@link ForMigLayout} with the constraint appended.
+         */
+        public ForMigLayout withAddedChildConstraint( String childConstraint ) {
+<span class="nc" id="L978">            return withAddedChildConstraint( MigAddConstraint.of(childConstraint) );</span>
+        }
+
+        // -- Object contract --
+
+<span class="fc" id="L983">        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr, _childConstraints); }</span>
+
+        @Override
+        public boolean equals( Object o ) {
+<span class="pc bpc" id="L987" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L988" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="fc bfc" id="L989" title="All 2 branches covered.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L990">            ForMigLayout other = (ForMigLayout) o;</span>
+<span class="pc bpc" id="L991" title="1 of 2 branches missed.">            return _constr.equals(other._constr)           &amp;&amp;</span>
+<span class="nc bnc" id="L992" title="All 2 branches missed.">                   _rowConstr.equals(other._rowConstr)     &amp;&amp;</span>
+<span class="nc bnc" id="L993" title="All 2 branches missed.">                   _colConstr.equals(other._colConstr)     &amp;&amp;</span>
+<span class="pc bnc" id="L994" title="All 2 branches missed.">                   _childConstraints.equals(other._childConstraints);</span>
+        }
+
+        // -- Layout installation --
+
+        /**
+         *  Installs a {@link MigLayout} onto the supplied component and applies all constraints
+         *  stored in this configuration.
+         *  &lt;p&gt;
+         *  The installation proceeds in three phases:
+         *  &lt;ol&gt;
+         *    &lt;li&gt;&lt;b&gt;Self constraint&lt;/b&gt; — if this component's own style holds a
+         *        {@link StyleConf#layoutConstraint() layout constraint} and its parent uses a
+         *        {@link MigLayout}, that constraint is pushed into the parent layout so the
+         *        component is correctly positioned within the parent grid.&lt;/li&gt;
+         *    &lt;li&gt;&lt;b&gt;Layout manager&lt;/b&gt; — if none of the three constraint strings is empty, a
+         *        {@link MigLayout} is installed (or updated in-place if one is already present)
+         *        using the stored general, column, and row constraints.&lt;/li&gt;
+         *    &lt;li&gt;&lt;b&gt;Child constraints&lt;/b&gt; — if the child-constraint tuple is non-empty, each
+         *        stored {@link MigAddConstraint} is applied to the corresponding direct child of
+         *        {@code component} (by position).  Only entries that differ from what the
+         *        {@link MigLayout} already has are written, and
+         *        {@link JComponent#revalidate()} is called exactly once at the end if anything
+         *        changed.&lt;/li&gt;
+         *  &lt;/ol&gt;
+         *
+         * @param component The component to install the {@link MigLayout} for.
+         */
+        @Override
+        public void installFor( JComponent component ) {
+<span class="fc" id="L1024">            ComponentExtension&lt;?&gt; extension = ComponentExtension.from(component);</span>
+<span class="fc" id="L1025">            StyleConf styleConf = extension.getStyle();</span>
+<span class="pc bpc" id="L1026" title="1 of 2 branches missed.">            if ( styleConf.layoutConstraint().isPresent() ) {</span>
+                // Phase 1: push this component's own layout constraint into its parent MigLayout:
+<span class="nc bnc" id="L1028" title="All 2 branches missed.">                LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );</span>
+<span class="nc bnc" id="L1029" title="All 2 branches missed.">                if ( parentLayout instanceof MigLayout) {</span>
+<span class="nc" id="L1030">                    MigLayout migLayout = (MigLayout) parentLayout;</span>
+<span class="nc" id="L1031">                    Object componentConstraints = styleConf.layoutConstraint().get();</span>
+<span class="nc" id="L1032">                    Object currentComponentConstraints = migLayout.getComponentConstraints(component);</span>
+                    //     ^ can be a String or a CC object, we compare it to the desired constraint:
+<span class="nc bnc" id="L1034" title="All 2 branches missed.">                    if ( !componentConstraints.equals(currentComponentConstraints) ) {</span>
+<span class="nc" id="L1035">                        migLayout.setComponentConstraints(component, componentConstraints);</span>
+<span class="nc" id="L1036">                        component.getParent().revalidate();</span>
                     }
                 }
             }
-<span class="pc bpc" id="L389" title="5 of 6 branches missed.">            if ( !_constr.isEmpty() || !_colConstr.isEmpty() || !_rowConstr.isEmpty() ) {</span>
-                // We ensure that the parent layout has the correct layout constraints for the component:
-<span class="fc" id="L391">                LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L392" title="1 of 2 branches missed.">                if ( !( currentLayout instanceof MigLayout ) ) {</span>
-                    // We need to replace the current layout with a MigLayout:
-<span class="nc" id="L394">                    MigLayout newLayout = new MigLayout( _constr, _colConstr, _rowConstr );</span>
-<span class="nc" id="L395">                    component.setLayout(newLayout);</span>
-<span class="nc" id="L396">                    return;</span>
-                }
-<span class="fc" id="L398">                MigLayout migLayout = (MigLayout) currentLayout;</span>
-<span class="fc" id="L399">                String layoutConstraints = _constr;</span>
-<span class="fc" id="L400">                String columnConstraints = _colConstr;</span>
-<span class="fc" id="L401">                String rowConstraints    = _rowConstr;</span>
-
-<span class="fc" id="L403">                Object currentLayoutConstraints = migLayout.getLayoutConstraints();</span>
-<span class="fc" id="L404">                Object currentColumnConstraints = migLayout.getColumnConstraints();</span>
-<span class="fc" id="L405">                Object currentRowConstraints    = migLayout.getRowConstraints();</span>
-
-<span class="pc bpc" id="L407" title="1 of 2 branches missed.">                boolean layoutConstraintsChanged = !layoutConstraints.equals(currentLayoutConstraints);</span>
-<span class="pc bpc" id="L408" title="1 of 2 branches missed.">                boolean columnConstraintsChanged = !columnConstraints.equals(currentColumnConstraints);</span>
-<span class="pc bpc" id="L409" title="1 of 2 branches missed.">                boolean rowConstraintsChanged    = !rowConstraints.equals(currentRowConstraints);</span>
-
-<span class="pc bpc" id="L411" title="5 of 6 branches missed.">                if ( layoutConstraintsChanged || columnConstraintsChanged || rowConstraintsChanged ) {</span>
-<span class="fc" id="L412">                    migLayout.setLayoutConstraints(layoutConstraints);</span>
-<span class="fc" id="L413">                    migLayout.setColumnConstraints(columnConstraints);</span>
-<span class="fc" id="L414">                    migLayout.setRowConstraints(rowConstraints);</span>
-<span class="fc" id="L415">                    component.revalidate();</span>
+            // Phase 2: install / update the MigLayout on the component itself:
+<span class="fc" id="L1041">            final String layoutConstraints = _constr.toString();</span>
+<span class="fc" id="L1042">            final String columnConstraints = _colConstr.toString();</span>
+<span class="fc" id="L1043">            final String rowConstraints    = _rowConstr.toString();</span>
+<span class="pc bpc" id="L1044" title="5 of 6 branches missed.">            if ( !layoutConstraints.isEmpty() || !columnConstraints.isEmpty() || !rowConstraints.isEmpty() ) {</span>
+<span class="fc" id="L1045">                LayoutManager currentLayout = component.getLayout();</span>
+<span class="fc bfc" id="L1046" title="All 2 branches covered.">                if ( !( currentLayout instanceof MigLayout ) ) {</span>
+<span class="fc" id="L1047">                    component.setLayout(new MigLayout( layoutConstraints, columnConstraints, rowConstraints ));</span>
+<span class="fc" id="L1048">                    component.revalidate();</span>
+                } else {
+<span class="fc" id="L1050">                    MigLayout migLayout = (MigLayout) currentLayout;</span>
+<span class="fc bfc" id="L1051" title="All 2 branches covered.">                    boolean layoutConstraintsChanged = !layoutConstraints.equals(migLayout.getLayoutConstraints());</span>
+<span class="fc bfc" id="L1052" title="All 2 branches covered.">                    boolean columnConstraintsChanged = !columnConstraints.equals(migLayout.getColumnConstraints());</span>
+<span class="fc bfc" id="L1053" title="All 2 branches covered.">                    boolean rowConstraintsChanged    = !rowConstraints.equals(migLayout.getRowConstraints());</span>
+<span class="pc bpc" id="L1054" title="2 of 6 branches missed.">                    if ( layoutConstraintsChanged || columnConstraintsChanged || rowConstraintsChanged ) {</span>
+<span class="fc" id="L1055">                        migLayout.setLayoutConstraints(layoutConstraints);</span>
+<span class="fc" id="L1056">                        migLayout.setColumnConstraints(columnConstraints);</span>
+<span class="fc" id="L1057">                        migLayout.setRowConstraints(rowConstraints);</span>
+<span class="fc" id="L1058">                        component.revalidate();</span>
+                    }
                 }
             }
-<span class="fc" id="L418">        }</span>
-
+            // Phase 3: apply per-child component constraints:
+<span class="fc bfc" id="L1063" title="All 2 branches covered.">            if ( _childConstraints.isNotEmpty() ) {</span>
+<span class="fc" id="L1064">                LayoutManager currentLayout = component.getLayout();</span>
+<span class="pc bpc" id="L1065" title="1 of 2 branches missed.">                if ( currentLayout instanceof MigLayout ) {</span>
+<span class="fc" id="L1066">                    MigLayout migLayout     = (MigLayout) currentLayout;</span>
+<span class="fc" id="L1067">                    Component[] children    = component.getComponents();</span>
+<span class="fc" id="L1068">                    boolean childrenChanged = false;</span>
+<span class="fc bfc" id="L1069" title="All 2 branches covered.">                    for ( Pair&lt;Integer, MigAddConstraint&gt; entry : _childConstraints ) {</span>
+<span class="fc" id="L1070">                        int i = entry.first();</span>
+<span class="pc bpc" id="L1071" title="2 of 4 branches missed.">                        if ( i &lt; 0 || i &gt;= children.length ) continue;</span>
+<span class="fc" id="L1072">                        Object desired  = entry.second().toConstraintForLayoutManager();</span>
+<span class="fc" id="L1073">                        Object existing = migLayout.getComponentConstraints(children[i]);</span>
+<span class="fc bfc" id="L1074" title="All 2 branches covered.">                        if ( !desired.equals(existing) ) {</span>
+<span class="fc" id="L1075">                            migLayout.setComponentConstraints(children[i], desired);</span>
+<span class="fc" id="L1076">                            childrenChanged = true;</span>
+                        }
+<span class="fc" id="L1078">                    }</span>
+<span class="pc bpc" id="L1079" title="1 of 2 branches missed.">                    if ( childrenChanged )</span>
+<span class="fc" id="L1080">                        component.revalidate();</span>
+                }
+            }
+<span class="fc" id="L1083">        }</span>
 
         @Override public String toString() {
-<span class="nc" id="L422">            return getClass().getSimpleName() + &quot;[&quot; +</span>
-                        &quot;constr=&quot; + _constr + &quot;, &quot; +
-                        &quot;colConstr=&quot; + _colConstr + &quot;, &quot; +
-                        &quot;rowConstr=&quot; + _rowConstr +
+<span class="nc" id="L1086">            return getClass().getSimpleName() + &quot;[&quot; +</span>
+                        &quot;constr=&quot;           + _constr           + &quot;, &quot; +
+                        &quot;colConstr=&quot;        + _colConstr        + &quot;, &quot; +
+                        &quot;rowConstr=&quot;        + _rowConstr        + &quot;, &quot; +
+                        &quot;childConstraints=&quot; + _childConstraints +
                     &quot;]&quot;;
         }
     }
 
     /**
-     *  The {@link ForFlowLayout} layout is a layout that represents
-     *  a {@link FlowLayout} layout configuration for a component. &lt;br&gt;
-     *  Whenever this layout configuration changes,
-     *  it will create and re-install a new {@link FlowLayout} onto the component
-     *  based on the new configuration,
-     *  which are the alignment, horizontal gap and vertical gap.
+     *  An immutable {@link Layout} implementation that configures and installs a
+     *  {@link ResponsiveGridFlowLayout} onto a component. It holds:
+     *  &lt;ul&gt;
+     *    &lt;li&gt;&lt;b&gt;Alignment&lt;/b&gt; ({@code align}) — the horizontal alignment of components
+     *        within each row of the flow (left, center, right, leading, or trailing).&lt;/li&gt;
+     *    &lt;li&gt;&lt;b&gt;Horizontal gap&lt;/b&gt; ({@code hgap}) — the pixel spacing between components
+     *        in the same row.&lt;/li&gt;
+     *    &lt;li&gt;&lt;b&gt;Vertical gap&lt;/b&gt; ({@code vgap}) — the pixel spacing between rows.&lt;/li&gt;
+     *    &lt;li&gt;&lt;b&gt;Per-child {@link FlowCell} constraints&lt;/b&gt; ({@code childConstraints}) — a
+     *        sorted {@link Association} mapping child indices ({@link Integer}) to
+     *        {@link FlowCell}s that are pushed onto the component's direct children.
+     *        Unlike a positional tuple, the association is sparse: you only need to include
+     *        entries for the children you actually want to configure.
+     *        Each {@link FlowCell} carries a responsive span policy (see
+     *        {@link swingtree.UI#AUTO_SPAN(Configurator)}) that the
+     *        {@link ResponsiveGridFlowLayout} queries on every layout pass to determine
+     *        how many grid columns a child should occupy for the current parent size.&lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  The child-constraint tuple is the key to building &lt;em&gt;fully reactive&lt;/em&gt; responsive
+     *  layouts.  With the static {@code UI.AUTO_SPAN()} approach every child's span policy
+     *  is fixed at the time the component is added.  When child constraints need to change
+     *  at runtime (e.g. the number of columns depends on application state), wrap a
+     *  {@link ForFlowLayout} in a {@link sprouts.Var} and pass it to
+     *  {@link swingtree.UIForAnySwing#withLayout(sprouts.Val)}:
+     *  &lt;pre&gt;{@code
+     *      import static swingtree.UI.*;
+     *      // ...
+     *      Var&lt;Layout&gt; layout = Var.of(
+     *          Layout.flow( AUTO_SPAN(it -&gt; it.small(12).medium(6)),
+     *                       AUTO_SPAN(it -&gt; it.small(12).medium(6)) )
+     *      );
+     *
+     *      UI.panel()
+     *        .withLayout(layout)
+     *        .add( label(&quot;A&quot;) )
+     *        .add( label(&quot;B&quot;) );
+     *
+     *      // Later: swap to a single full-width column for both children:
+     *      layout.set( Layout.flow( AUTO_SPAN(12), AUTO_SPAN(12) ) );
+     *  }&lt;/pre&gt;
+     *  Changing the {@code layout} property triggers a style re-evaluation, which calls
+     *  {@link #installFor(JComponent)}, which re-pushes the updated {@link FlowCell}s as
+     *  client properties onto the children so that the next layout pass picks them up.
+     *  &lt;p&gt;
+     *  Instances are created via the {@link Layout#flow()} family of factory methods and
+     *  are further configured through the fluent {@code with*} wither methods.
      */
     @Immutable
+    @SuppressWarnings(&quot;Immutable&quot;)
     final class ForFlowLayout implements Layout
     {
-        private final UI.HorizontalAlignment _align;
-        private final int                    _horizontalGapSize;
-        private final int                    _verticalGapSize;
+        private final UI.HorizontalAlignment          _align;
+        private final int                             _horizontalGapSize;
+        private final int                             _verticalGapSize;
+        private final Association&lt;Integer, FlowCell&gt;  _childConstraints;
 
-<span class="fc" id="L445">        ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {</span>
-<span class="fc" id="L446">            _align             = Objects.requireNonNull(align);</span>
-<span class="fc" id="L447">            _horizontalGapSize = hgap;</span>
-<span class="fc" id="L448">            _verticalGapSize   = vgap;</span>
-<span class="fc" id="L449">        }</span>
+        ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {
+<span class="fc" id="L1154">            this( align, hgap, vgap, Association.betweenSorted(Integer.class, FlowCell.class) );</span>
+<span class="fc" id="L1155">        }</span>
 
-<span class="fc" id="L451">        @Override public int hashCode() { return Objects.hash( _align, _horizontalGapSize, _verticalGapSize); }</span>
+        ForFlowLayout(
+            UI.HorizontalAlignment              align,
+            int                                 hgap,
+            int                                 vgap,
+            Association&lt;Integer, FlowCell&gt;      childConstraints
+<span class="fc" id="L1162">        ) {</span>
+<span class="fc" id="L1163">            _align             = Objects.requireNonNull(align);</span>
+<span class="fc" id="L1164">            _horizontalGapSize = hgap;</span>
+<span class="fc" id="L1165">            _verticalGapSize   = vgap;</span>
+<span class="fc" id="L1166">            _childConstraints  = Objects.requireNonNull(childConstraints);</span>
+<span class="fc" id="L1167">        }</span>
+
+        // -- Alignment / gap withers --
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the given horizontal alignment and
+         *  all other properties copied unchanged.
+         *
+         * @param align The new horizontal alignment for the flow.
+         * @return A new {@link ForFlowLayout} with the updated alignment.
+         */
+        public ForFlowLayout withAlignment( UI.HorizontalAlignment align ) {
+<span class="nc" id="L1179">            return new ForFlowLayout( align, _horizontalGapSize, _verticalGapSize, _childConstraints );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the given horizontal gap size and
+         *  all other properties copied unchanged.
+         *
+         * @param hgap The new horizontal gap between components, in pixels.
+         * @return A new {@link ForFlowLayout} with the updated horizontal gap.
+         */
+        public ForFlowLayout withHorizontalGap( int hgap ) {
+<span class="nc" id="L1190">            return new ForFlowLayout( _align, hgap, _verticalGapSize, _childConstraints );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the given vertical gap size and
+         *  all other properties copied unchanged.
+         *
+         * @param vgap The new vertical gap between component rows, in pixels.
+         * @return A new {@link ForFlowLayout} with the updated vertical gap.
+         */
+        public ForFlowLayout withVerticalGap( int vgap ) {
+<span class="nc" id="L1201">            return new ForFlowLayout( _align, _horizontalGapSize, vgap, _childConstraints );</span>
+        }
+
+        // -- Per-child FlowCell constraint withers --
+
+        /**
+         *  Returns a new {@link ForFlowLayout} whose per-child {@link FlowCell} constraints
+         *  are replaced by the supplied sorted {@link Association}.
+         *  &lt;p&gt;
+         *  Keys are child indices ({@code 0} = first child, {@code 1} = second, etc.);
+         *  the association is sparse, so you only need to include entries for children
+         *  you actually want to configure.
+         *  Children whose index has no entry keep whatever {@link FlowCell} they already have.
+         *  An empty association means no constraints are stored in this layout object;
+         *  any {@link AddConstraint} client properties previously pushed to children
+         *  by an earlier {@code installFor} call remain on those children until explicitly
+         *  overwritten.&lt;br&gt;
+         *  The intended way of creating {@link FlowCell}s is by using {@link UI#AUTO_SPAN(Configurator)}!&lt;br&gt;
+         *  An important edge case to consider when writing a responsive flow layout:&lt;br&gt;
+         *  &lt;b&gt;
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  &lt;/b&gt;
+         *
+         * @param childConstraints The positional {@link FlowCell} constraints for the children.
+         * @return A new {@link ForFlowLayout} with the updated child constraints.
+         */
+        public ForFlowLayout withChildConstraints( Association&lt;Integer, FlowCell&gt; childConstraints ) {
+<span class="fc" id="L1229">            return new ForFlowLayout( _align, _horizontalGapSize, _verticalGapSize,</span>
+<span class="fc" id="L1230">                                      Objects.requireNonNull(childConstraints) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} whose per-child {@link FlowCell} constraints
+         *  are replaced by the supplied varargs array.
+         *  &lt;p&gt;
+         *  The constraints are mapped positionally to the component's children:
+         *  the first argument applies to the first child, the second to the second, and so on.
+         *  Passing an empty array stores no constraints in this layout object;
+         *  any {@link AddConstraint} client properties previously pushed to children
+         *  by an earlier {@code installFor} call remain on those children until explicitly
+         *  overwritten.
+         *  &lt;p&gt;
+         *  {@link FlowCell} instances are most conveniently created via
+         *  {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+         *  &lt;pre&gt;{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.flow()
+         *            .withChildConstraints(
+         *                AUTO_SPAN( it -&gt; it.small(12).medium(6) ),
+         *                AUTO_SPAN( it -&gt; it.small(12).medium(6) )
+         *            )
+         *  }&lt;/pre&gt;
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!&lt;br&gt;
+         *  An important edge case to consider when writing a responsive flow layout:&lt;br&gt;
+         *  &lt;b&gt;
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  &lt;/b&gt;
+         *
+         * @param childConstraints The {@link FlowCell} constraints to apply to the component's
+         *                         children in child-index order.
+         * @return A new {@link ForFlowLayout} with the updated child constraints.
+         */
+        public ForFlowLayout withChildConstraints( FlowCell... childConstraints ) {
+<span class="fc" id="L1267">            Association&lt;Integer, FlowCell&gt; assoc = Association.betweenSorted(Integer.class, FlowCell.class);</span>
+<span class="fc bfc" id="L1268" title="All 2 branches covered.">            for ( int i = 0; i &lt; childConstraints.length; i++ )</span>
+<span class="fc" id="L1269">                assoc = assoc.put(i, childConstraints[i]);</span>
+<span class="fc" id="L1270">            return withChildConstraints(assoc);</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the {@link FlowCell} at the given child
+         *  index replaced by the supplied value.  All other child constraints and all other
+         *  properties are copied unchanged.
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!&lt;br&gt;
+         *  &lt;p&gt;
+         *  Because the underlying storage is a sparse {@link Association}, no padding
+         *  is needed: the constraint is stored at exactly {@code index}, regardless of
+         *  whether lower indices have entries.&lt;br&gt;
+         *  Another important edge case to consider when writing a responsive flow layout:&lt;br&gt;
+         *  &lt;b&gt;
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  &lt;/b&gt;
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         * @param childConstraint The new {@link FlowCell} for the child at {@code index}.
+         * @return A new {@link ForFlowLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForFlowLayout withChildConstraint( int index, FlowCell childConstraint ) {
+<span class="nc" id="L1294">            Objects.requireNonNull(childConstraint);</span>
+<span class="nc bnc" id="L1295" title="All 2 branches missed.">            if ( index &lt; 0 )</span>
+<span class="nc" id="L1296">                throw new IndexOutOfBoundsException(&quot;Child index must not be negative, but was: &quot; + index);</span>
+<span class="nc" id="L1297">            return withChildConstraints( _childConstraints.put(index, childConstraint) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the {@link FlowCell} at the given child
+         *  index replaced by one built from the supplied {@link Configurator} lambda.
+         *  The lambda receives a {@link FlowCellConf} and returns the configured version,
+         *  matching exactly the API of {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+         *  &lt;pre&gt;{@code
+         *      Layout.flow()
+         *            .withChildConstraint(0, it -&gt; it.small(12).medium(6).large(4))
+         *            .withChildConstraint(1, it -&gt; it.small(12).medium(6).large(8))
+         *  }&lt;/pre&gt;
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!&lt;br&gt;
+         *  An important edge case to consider when writing a responsive flow layout:&lt;br&gt;
+         *  &lt;b&gt;
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  &lt;/b&gt;
+         *
+         * @param index The zero-based index of the child whose constraint to update.
+         * @param cellConfig A {@link Configurator} that configures the {@link FlowCellConf}
+         *                   for the child's responsive span policy.
+         * @return A new {@link ForFlowLayout} with the updated child constraint at {@code index}.
+         * @throws IndexOutOfBoundsException if {@code index} is negative.
+         */
+        public ForFlowLayout withChildConstraint( int index, Configurator&lt;FlowCellConf&gt; cellConfig ) {
+<span class="nc" id="L1324">            return withChildConstraint( index, new FlowCell(Objects.requireNonNull(cellConfig)) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with the supplied {@link FlowCell} appended
+         *  to the end of the existing child-constraint tuple.
+         *  This is a convenient alternative to {@link #withChildConstraints(FlowCell...)}
+         *  when building up constraints one at a time:
+         *  &lt;pre&gt;{@code
+         *      import static swingtree.UI.*;
+         *      // ...
+         *      Layout.flow()
+         *            .withAddedChildConstraint( AUTO_SPAN(it -&gt; it.small(12).medium(6)) )
+         *            .withAddedChildConstraint( AUTO_SPAN(it -&gt; it.small(12).medium(6)) )
+         *  }&lt;/pre&gt;
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!&lt;br&gt;
+         *  An important edge case to consider when writing a responsive flow layout:&lt;br&gt;
+         *  &lt;b&gt;
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  &lt;/b&gt;
+         *
+         * @param childConstraint The {@link FlowCell} to append as the next child constraint.
+         * @return A new {@link ForFlowLayout} with the constraint appended.
+         */
+        public ForFlowLayout withAddedChildConstraint( FlowCell childConstraint ) {
+<span class="nc" id="L1350">            Objects.requireNonNull(childConstraint);</span>
+<span class="nc" id="L1351">            int nextIndex = 0;</span>
+<span class="nc bnc" id="L1352" title="All 2 branches missed.">            for ( Integer key : _childConstraints.keySet() )</span>
+<span class="nc" id="L1353">                nextIndex = key + 1;</span>
+<span class="nc" id="L1354">            return withChildConstraints( _childConstraints.put(nextIndex, childConstraint) );</span>
+        }
+
+        /**
+         *  Returns a new {@link ForFlowLayout} with a {@link FlowCell} built from the
+         *  supplied {@link Configurator} lambda appended to the end of the existing
+         *  child-constraint tuple.
+         *  The lambda receives a {@link FlowCellConf} and returns the configured version,
+         *  matching exactly the API of {@link swingtree.UI#AUTO_SPAN(Configurator)}:
+         *  &lt;pre&gt;{@code
+         *      Layout.flow()
+         *            .withAddedChildConstraint( it -&gt; it.small(12).medium(6) )
+         *            .withAddedChildConstraint( it -&gt; it.small(12).medium(6) )
+         *  }&lt;/pre&gt;
+         *  The intended way of creating {@link FlowCell}s is through the {@link UI#AUTO_SPAN(Configurator)} factory method!&lt;br&gt;
+         *  An important edge case to consider when writing a responsive flow layout:&lt;br&gt;
+         *  &lt;b&gt;
+         *      If a {@link FlowCell} is passed to the responsive flow layout without
+         *      any size specific span policies defined, it will always default to spanning 12 cells at all parent size categories!
+         *  &lt;/b&gt;
+         *
+         * @param cellConfig A {@link Configurator} that configures the {@link FlowCellConf}
+         *                   for the appended child's responsive span policy.
+         * @return A new {@link ForFlowLayout} with the constraint appended.
+         */
+        public ForFlowLayout withAddedChildConstraint( Configurator&lt;FlowCellConf&gt; cellConfig ) {
+<span class="nc" id="L1380">            return withAddedChildConstraint( new FlowCell(Objects.requireNonNull(cellConfig)) );</span>
+        }
+
+        // -- Object contract --
+
+        @Override public int hashCode() {
+<span class="fc" id="L1386">            return Objects.hash( _align, _horizontalGapSize, _verticalGapSize, _childConstraints );</span>
+        }
 
         @Override
         public boolean equals( @Nullable Object o ) {
-<span class="pc bpc" id="L455" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="pc bpc" id="L456" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="pc bpc" id="L457" title="1 of 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L458">            ForFlowLayout other = (ForFlowLayout) o;</span>
-<span class="nc bnc" id="L459" title="All 6 branches missed.">            return _align == other._align &amp;&amp; _horizontalGapSize == other._horizontalGapSize &amp;&amp; _verticalGapSize == other._verticalGapSize;</span>
+<span class="pc bpc" id="L1391" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L1392" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="fc bfc" id="L1393" title="All 2 branches covered.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L1394">            ForFlowLayout other = (ForFlowLayout) o;</span>
+<span class="pc bpc" id="L1395" title="3 of 6 branches missed.">            return _align              == other._align              &amp;&amp;</span>
+                   _horizontalGapSize  == other._horizontalGapSize  &amp;&amp;
+                   _verticalGapSize    == other._verticalGapSize    &amp;&amp;
+<span class="fc bfc" id="L1398" title="All 2 branches covered.">                   _childConstraints.equals(other._childConstraints);</span>
         }
 
+        // -- Layout installation --
+
+        /**
+         *  Installs a {@link ResponsiveGridFlowLayout} onto the supplied component and
+         *  applies all constraints stored in this configuration.
+         *  &lt;p&gt;
+         *  The installation proceeds in two phases:
+         *  &lt;ol&gt;
+         *    &lt;li&gt;&lt;b&gt;Layout manager&lt;/b&gt; — if no {@link ResponsiveGridFlowLayout} is currently
+         *        installed, a new one is created with the stored alignment and gap settings.
+         *        If one is already installed, only the properties that have changed are
+         *        updated in-place and {@link JComponent#revalidate()} is called.&lt;/li&gt;
+         *    &lt;li&gt;&lt;b&gt;Child constraints&lt;/b&gt; — if the child-constraint tuple is non-empty,
+         *        each stored {@link FlowCell} is written as a
+         *        {@link AddConstraint} client property onto the corresponding direct child
+         *        (using the same key that {@link ResponsiveGridFlowLayout#addLayoutComponent}
+         *        uses, so the layout manager picks them up on the next layout pass).
+         *        Only entries that differ from the currently stored value are written, and
+         *        {@link JComponent#revalidate()} is called exactly once at the end if
+         *        anything changed.&lt;/li&gt;
+         *  &lt;/ol&gt;
+         *
+         * @param component The component to install the {@link ResponsiveGridFlowLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
-<span class="fc" id="L464">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L465" title="1 of 2 branches missed.">            if ( !( currentLayout instanceof ResponsiveGridFlowLayout) ) {</span>
-                // We need to replace the current layout with a FlowLayout:
-<span class="fc" id="L467">                ResponsiveGridFlowLayout newLayout = new ResponsiveGridFlowLayout(_align, _horizontalGapSize, _verticalGapSize);</span>
-<span class="fc" id="L468">                component.setLayout(newLayout);</span>
-<span class="fc" id="L469">                return;</span>
+            // Phase 1: install / update the ResponsiveGridFlowLayout:
+<span class="fc" id="L1428">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="fc bfc" id="L1429" title="All 2 branches covered.">            if ( !( currentLayout instanceof ResponsiveGridFlowLayout ) ) {</span>
+<span class="fc" id="L1430">                component.setLayout(new ResponsiveGridFlowLayout(_align, _horizontalGapSize, _verticalGapSize));</span>
+<span class="fc" id="L1431">                component.revalidate();</span>
+            } else {
+<span class="fc" id="L1433">                ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;</span>
+<span class="pc bpc" id="L1434" title="1 of 2 branches missed.">                boolean alignmentChanged     = _align             != flowLayout.getAlignment();</span>
+<span class="pc bpc" id="L1435" title="1 of 2 branches missed.">                boolean horizontalGapChanged = _horizontalGapSize != flowLayout.horizontalGapSize();</span>
+<span class="pc bpc" id="L1436" title="1 of 2 branches missed.">                boolean verticalGapChanged   = _verticalGapSize   != flowLayout.verticalGapSize();</span>
+<span class="pc bpc" id="L1437" title="3 of 6 branches missed.">                if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="nc" id="L1438">                    flowLayout.setAlignment(_align);</span>
+<span class="nc" id="L1439">                    flowLayout.setHorizontalGapSize(_horizontalGapSize);</span>
+<span class="nc" id="L1440">                    flowLayout.setVerticalGapSize(_verticalGapSize);</span>
+<span class="nc" id="L1441">                    component.revalidate();</span>
+                }
             }
-<span class="nc" id="L471">            ResponsiveGridFlowLayout flowLayout = (ResponsiveGridFlowLayout) currentLayout;</span>
-<span class="nc" id="L472">            UI.HorizontalAlignment alignment = _align;</span>
-<span class="nc" id="L473">            int horizontalGap                = _horizontalGapSize;</span>
-<span class="nc" id="L474">            int verticalGap                  = _verticalGapSize;</span>
-
-<span class="nc bnc" id="L476" title="All 2 branches missed.">            boolean alignmentChanged     = alignment != flowLayout.getAlignment();</span>
-<span class="nc bnc" id="L477" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != flowLayout.horizontalGapSize();</span>
-<span class="nc bnc" id="L478" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != flowLayout.verticalGapSize();</span>
-
-<span class="nc bnc" id="L480" title="All 6 branches missed.">            if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {</span>
-<span class="nc" id="L481">                flowLayout.setAlignment(alignment);</span>
-<span class="nc" id="L482">                flowLayout.setHorizontalGapSize(horizontalGap);</span>
-<span class="nc" id="L483">                flowLayout.setVerticalGapSize(verticalGap);</span>
-<span class="nc" id="L484">                component.revalidate();</span>
+            // Phase 2: push per-child FlowCell constraints as client properties:
+<span class="fc bfc" id="L1445" title="All 2 branches covered.">            if ( _childConstraints.isNotEmpty() ) {</span>
+<span class="fc" id="L1446">                Component[] children  = component.getComponents();</span>
+<span class="fc" id="L1447">                boolean changed       = false;</span>
+<span class="fc bfc" id="L1448" title="All 2 branches covered.">                for ( Pair&lt;Integer, FlowCell&gt; entry : _childConstraints ) {</span>
+<span class="fc" id="L1449">                    int i = entry.first();</span>
+<span class="pc bpc" id="L1450" title="2 of 4 branches missed.">                    if ( i &lt; 0 || i &gt;= children.length ) continue;</span>
+<span class="pc bpc" id="L1451" title="1 of 2 branches missed.">                    if ( !( children[i] instanceof JComponent ) )</span>
+<span class="nc" id="L1452">                        continue;</span>
+<span class="fc" id="L1453">                    JComponent child  = (JComponent) children[i];</span>
+<span class="fc" id="L1454">                    FlowCell desired  = entry.second();</span>
+<span class="fc" id="L1455">                    Object existing   = child.getClientProperty(AddConstraint.class);</span>
+<span class="pc bpc" id="L1456" title="1 of 2 branches missed.">                    if ( !desired.equals(existing) ) {</span>
+<span class="fc" id="L1457">                        child.putClientProperty(AddConstraint.class, desired);</span>
+<span class="fc" id="L1458">                        changed = true;</span>
+                    }
+<span class="fc" id="L1460">                }</span>
+<span class="pc bpc" id="L1461" title="1 of 2 branches missed.">                if ( changed )</span>
+<span class="fc" id="L1462">                    component.revalidate();</span>
             }
-<span class="nc" id="L486">        }</span>
+<span class="fc" id="L1464">        }</span>
 
         @Override public String toString() {
-<span class="nc" id="L489">            return getClass().getSimpleName() + &quot;[&quot; +</span>
-                        &quot;align=&quot; + _align + &quot;, &quot; +
-                        &quot;hgap=&quot; + _horizontalGapSize + &quot;, &quot; +
-                        &quot;vgap=&quot; + _verticalGapSize +
+<span class="nc" id="L1467">            return getClass().getSimpleName() + &quot;[&quot; +</span>
+                        &quot;align=&quot;            + _align             + &quot;, &quot; +
+                        &quot;hgap=&quot;             + _horizontalGapSize + &quot;, &quot; +
+                        &quot;vgap=&quot;             + _verticalGapSize   + &quot;, &quot; +
+                        &quot;childConstraints=&quot; + _childConstraints  +
                     &quot;]&quot;;
-            }
         }
+    }
 
     /**
      *  The {@link BorderLayoutInstaller} layout is a layout that represents
@@ -508,47 +1487,56 @@ public interface Layout
         private final int _hgap;
         private final int _vgap;
 
-<span class="fc" id="L511">        BorderLayoutInstaller( int hgap, int vgap ) {</span>
-<span class="fc" id="L512">            _hgap = hgap;</span>
-<span class="fc" id="L513">            _vgap = vgap;</span>
-<span class="fc" id="L514">        }</span>
+<span class="fc" id="L1490">        BorderLayoutInstaller( int hgap, int vgap ) {</span>
+<span class="fc" id="L1491">            _hgap = hgap;</span>
+<span class="fc" id="L1492">            _vgap = vgap;</span>
+<span class="fc" id="L1493">        }</span>
 
-<span class="fc" id="L516">        @Override public int hashCode() { return Objects.hash(_hgap, _vgap); }</span>
+<span class="fc" id="L1495">        @Override public int hashCode() { return Objects.hash(_hgap, _vgap); }</span>
 
         @Override
         public boolean equals( @Nullable Object o ) {
-<span class="pc bpc" id="L520" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="pc bpc" id="L521" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="pc bpc" id="L522" title="1 of 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L523">            BorderLayoutInstaller other = (BorderLayoutInstaller) o;</span>
-<span class="nc bnc" id="L524" title="All 4 branches missed.">            return _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
+<span class="pc bpc" id="L1499" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L1500" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="pc bpc" id="L1501" title="1 of 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L1502">            BorderLayoutInstaller other = (BorderLayoutInstaller) o;</span>
+<span class="nc bnc" id="L1503" title="All 4 branches missed.">            return _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
         }
 
+        /**
+         *  Installs a {@link BorderLayout} onto the supplied component using the horizontal
+         *  and vertical gap sizes stored in this configuration. If a {@link BorderLayout}
+         *  is already installed, only the gap values that have changed are updated and
+         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link BorderLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
-<span class="fc" id="L529">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L530" title="1 of 2 branches missed.">            if ( !(currentLayout instanceof BorderLayout) ) {</span>
+<span class="fc" id="L1516">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="pc bpc" id="L1517" title="1 of 2 branches missed.">            if ( !(currentLayout instanceof BorderLayout) ) {</span>
                 // We need to replace the current layout with a BorderLayout:
-<span class="fc" id="L532">                BorderLayout newLayout = new BorderLayout(_hgap, _vgap);</span>
-<span class="fc" id="L533">                component.setLayout(newLayout);</span>
-<span class="fc" id="L534">                return;</span>
+<span class="fc" id="L1519">                BorderLayout newLayout = new BorderLayout(_hgap, _vgap);</span>
+<span class="fc" id="L1520">                component.setLayout(newLayout);</span>
+<span class="fc" id="L1521">                component.revalidate();</span>
+<span class="fc" id="L1522">                return;</span>
             }
-<span class="nc" id="L536">            BorderLayout borderLayout = (BorderLayout) currentLayout;</span>
-<span class="nc" id="L537">            int horizontalGap = _hgap;</span>
-<span class="nc" id="L538">            int verticalGap   = _vgap;</span>
+<span class="nc" id="L1524">            BorderLayout borderLayout = (BorderLayout) currentLayout;</span>
+<span class="nc" id="L1525">            int horizontalGap = _hgap;</span>
+<span class="nc" id="L1526">            int verticalGap   = _vgap;</span>
 
-<span class="nc bnc" id="L540" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != borderLayout.getHgap();</span>
-<span class="nc bnc" id="L541" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != borderLayout.getVgap();</span>
+<span class="nc bnc" id="L1528" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != borderLayout.getHgap();</span>
+<span class="nc bnc" id="L1529" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != borderLayout.getVgap();</span>
 
-<span class="nc bnc" id="L543" title="All 4 branches missed.">            if ( horizontalGapChanged || verticalGapChanged ) {</span>
-<span class="nc" id="L544">                borderLayout.setHgap(horizontalGap);</span>
-<span class="nc" id="L545">                borderLayout.setVgap(verticalGap);</span>
-<span class="nc" id="L546">                component.revalidate();</span>
+<span class="nc bnc" id="L1531" title="All 4 branches missed.">            if ( horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="nc" id="L1532">                borderLayout.setHgap(horizontalGap);</span>
+<span class="nc" id="L1533">                borderLayout.setVgap(verticalGap);</span>
+<span class="nc" id="L1534">                component.revalidate();</span>
             }
-<span class="nc" id="L548">        }</span>
+<span class="nc" id="L1536">        }</span>
 
         @Override public String toString() {
-<span class="fc" id="L551">            return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L1539">            return getClass().getSimpleName() + &quot;[&quot; +</span>
                         &quot;hgap=&quot; + _hgap + &quot;, &quot; +
                         &quot;vgap=&quot; + _vgap +
                     &quot;]&quot;;
@@ -571,55 +1559,64 @@ public interface Layout
         private final int _hgap;
         private final int _vgap;
 
-<span class="nc" id="L574">        GridLayoutInstaller( int rows, int cols, int hgap, int vgap ) {</span>
-<span class="nc" id="L575">            _rows = rows;</span>
-<span class="nc" id="L576">            _cols = cols;</span>
-<span class="nc" id="L577">            _hgap = hgap;</span>
-<span class="nc" id="L578">            _vgap = vgap;</span>
-<span class="nc" id="L579">        }</span>
+<span class="fc" id="L1562">        GridLayoutInstaller( int rows, int cols, int hgap, int vgap ) {</span>
+<span class="fc" id="L1563">            _rows = rows;</span>
+<span class="fc" id="L1564">            _cols = cols;</span>
+<span class="fc" id="L1565">            _hgap = hgap;</span>
+<span class="fc" id="L1566">            _vgap = vgap;</span>
+<span class="fc" id="L1567">        }</span>
 
-<span class="nc" id="L581">        @Override public int hashCode() { return Objects.hash(_rows, _cols, _hgap, _vgap); }</span>
+<span class="fc" id="L1569">        @Override public int hashCode() { return Objects.hash(_rows, _cols, _hgap, _vgap); }</span>
 
         @Override
         public boolean equals(Object o) {
-<span class="nc bnc" id="L585" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L586" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L587" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L588">            GridLayoutInstaller other = (GridLayoutInstaller) o;</span>
-<span class="nc bnc" id="L589" title="All 8 branches missed.">            return _rows == other._rows &amp;&amp; _cols == other._cols &amp;&amp; _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
+<span class="pc bpc" id="L1573" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L1574" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="fc bfc" id="L1575" title="All 2 branches covered.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L1576">            GridLayoutInstaller other = (GridLayoutInstaller) o;</span>
+<span class="pc bpc" id="L1577" title="7 of 8 branches missed.">            return _rows == other._rows &amp;&amp; _cols == other._cols &amp;&amp; _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
         }
 
+        /**
+         *  Installs a {@link GridLayout} onto the supplied component using the row count,
+         *  column count, and gap sizes stored in this configuration. If a {@link GridLayout}
+         *  is already installed, only the properties that have changed are updated and
+         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link GridLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
-<span class="nc" id="L594">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="nc bnc" id="L595" title="All 2 branches missed.">            if ( !(currentLayout instanceof GridLayout) ) {</span>
+<span class="fc" id="L1590">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="fc bfc" id="L1591" title="All 2 branches covered.">            if ( !(currentLayout instanceof GridLayout) ) {</span>
                 // We need to replace the current layout with a GridLayout:
-<span class="nc" id="L597">                GridLayout newLayout = new GridLayout(_rows, _cols, _hgap, _vgap);</span>
-<span class="nc" id="L598">                component.setLayout(newLayout);</span>
-<span class="nc" id="L599">                return;</span>
+<span class="fc" id="L1593">                GridLayout newLayout = new GridLayout(_rows, _cols, _hgap, _vgap);</span>
+<span class="fc" id="L1594">                component.setLayout(newLayout);</span>
+<span class="fc" id="L1595">                component.revalidate();</span>
+<span class="fc" id="L1596">                return;</span>
             }
-<span class="nc" id="L601">            GridLayout gridLayout = (GridLayout) currentLayout;</span>
-<span class="nc" id="L602">            int rows          = _rows;</span>
-<span class="nc" id="L603">            int cols          = _cols;</span>
-<span class="nc" id="L604">            int horizontalGap = _hgap;</span>
-<span class="nc" id="L605">            int verticalGap   = _vgap;</span>
+<span class="fc" id="L1598">            GridLayout gridLayout = (GridLayout) currentLayout;</span>
+<span class="fc" id="L1599">            int rows          = _rows;</span>
+<span class="fc" id="L1600">            int cols          = _cols;</span>
+<span class="fc" id="L1601">            int horizontalGap = _hgap;</span>
+<span class="fc" id="L1602">            int verticalGap   = _vgap;</span>
 
-<span class="nc bnc" id="L607" title="All 2 branches missed.">            boolean rowsChanged = rows != gridLayout.getRows();</span>
-<span class="nc bnc" id="L608" title="All 2 branches missed.">            boolean colsChanged = cols != gridLayout.getColumns();</span>
-<span class="nc bnc" id="L609" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != gridLayout.getHgap();</span>
-<span class="nc bnc" id="L610" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != gridLayout.getVgap();</span>
+<span class="pc bpc" id="L1604" title="1 of 2 branches missed.">            boolean rowsChanged = rows != gridLayout.getRows();</span>
+<span class="pc bpc" id="L1605" title="1 of 2 branches missed.">            boolean colsChanged = cols != gridLayout.getColumns();</span>
+<span class="pc bpc" id="L1606" title="1 of 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != gridLayout.getHgap();</span>
+<span class="pc bpc" id="L1607" title="1 of 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != gridLayout.getVgap();</span>
 
-<span class="nc bnc" id="L612" title="All 8 branches missed.">            if ( rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {</span>
-<span class="nc" id="L613">                gridLayout.setRows(rows);</span>
-<span class="nc" id="L614">                gridLayout.setColumns(cols);</span>
-<span class="nc" id="L615">                gridLayout.setHgap(horizontalGap);</span>
-<span class="nc" id="L616">                gridLayout.setVgap(verticalGap);</span>
-<span class="nc" id="L617">                component.revalidate();</span>
+<span class="pc bpc" id="L1609" title="7 of 8 branches missed.">            if ( rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="fc" id="L1610">                gridLayout.setRows(rows);</span>
+<span class="fc" id="L1611">                gridLayout.setColumns(cols);</span>
+<span class="fc" id="L1612">                gridLayout.setHgap(horizontalGap);</span>
+<span class="fc" id="L1613">                gridLayout.setVgap(verticalGap);</span>
+<span class="fc" id="L1614">                component.revalidate();</span>
             }
-<span class="nc" id="L619">        }</span>
+<span class="fc" id="L1616">        }</span>
 
         @Override public String toString() {
-<span class="nc" id="L622">            return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L1619">            return getClass().getSimpleName() + &quot;[&quot; +</span>
                         &quot;rows=&quot; + _rows + &quot;, &quot; +
                         &quot;cols=&quot; + _cols + &quot;, &quot; +
                         &quot;hgap=&quot; + _hgap + &quot;, &quot; +
@@ -643,44 +1640,54 @@ public interface Layout
     {
         private final int _axis;
 
-<span class="nc" id="L646">        ForBoxLayout( int axis ) { _axis = axis; }</span>
+<span class="fc" id="L1643">        ForBoxLayout( int axis ) { _axis = axis; }</span>
 
-<span class="nc" id="L648">        @Override public int hashCode() { return Objects.hash(_axis); }</span>
+<span class="fc" id="L1645">        @Override public int hashCode() { return Objects.hash(_axis); }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="nc bnc" id="L652" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L653" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L654" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L655">            ForBoxLayout other = (ForBoxLayout) o;</span>
-<span class="nc bnc" id="L656" title="All 2 branches missed.">            return _axis == other._axis;</span>
+<span class="pc bpc" id="L1649" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L1650" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="fc bfc" id="L1651" title="All 2 branches covered.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L1652">            ForBoxLayout other = (ForBoxLayout) o;</span>
+<span class="pc bpc" id="L1653" title="1 of 2 branches missed.">            return _axis == other._axis;</span>
         }
 
+        /**
+         *  Installs a {@link BoxLayout} onto the supplied component using the axis
+         *  stored in this configuration. If a {@link BoxLayout} with a different axis
+         *  is already installed, a new {@link BoxLayout} is created and installed
+         *  (since {@link BoxLayout} does not support changing the axis after construction)
+         *  and {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *
+         * @param component The component to install the {@link BoxLayout} for.
+         */
         @Override
         public void installFor( JComponent component ) {
-<span class="nc" id="L661">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="nc bnc" id="L662" title="All 2 branches missed.">            if ( !( currentLayout instanceof BoxLayout ) ) {</span>
+<span class="fc" id="L1667">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="fc bfc" id="L1668" title="All 2 branches covered.">            if ( !( currentLayout instanceof BoxLayout ) ) {</span>
                 // We need to replace the current layout with a BoxLayout:
-<span class="nc" id="L664">                BoxLayout newLayout = new BoxLayout( component, _axis);</span>
-<span class="nc" id="L665">                component.setLayout(newLayout);</span>
-<span class="nc" id="L666">                return;</span>
+<span class="fc" id="L1670">                BoxLayout newLayout = new BoxLayout( component, _axis);</span>
+<span class="fc" id="L1671">                component.setLayout(newLayout);</span>
+<span class="fc" id="L1672">                component.revalidate();</span>
+<span class="fc" id="L1673">                return;</span>
             }
-<span class="nc" id="L668">            BoxLayout boxLayout = (BoxLayout) currentLayout;</span>
-<span class="nc" id="L669">            int axis = _axis;</span>
+<span class="fc" id="L1675">            BoxLayout boxLayout = (BoxLayout) currentLayout;</span>
+<span class="fc" id="L1676">            int axis = _axis;</span>
 
-<span class="nc bnc" id="L671" title="All 2 branches missed.">            boolean axisChanged = axis != boxLayout.getAxis();</span>
+<span class="pc bpc" id="L1678" title="1 of 2 branches missed.">            boolean axisChanged = axis != boxLayout.getAxis();</span>
 
-<span class="nc bnc" id="L673" title="All 2 branches missed.">            if ( axisChanged ) {</span>
+<span class="pc bpc" id="L1680" title="1 of 2 branches missed.">            if ( axisChanged ) {</span>
                 // The BoxLayout does not have a 'setAxis' method!
                 // Instead, we need to create and install a new BoxLayout with the new axis:
-<span class="nc" id="L676">                BoxLayout newLayout = new BoxLayout( component, axis );</span>
-<span class="nc" id="L677">                component.setLayout(newLayout);</span>
-<span class="nc" id="L678">                component.revalidate();</span>
+<span class="fc" id="L1683">                BoxLayout newLayout = new BoxLayout( component, axis );</span>
+<span class="fc" id="L1684">                component.setLayout(newLayout);</span>
+<span class="fc" id="L1685">                component.revalidate();</span>
             }
-<span class="nc" id="L680">        }</span>
+<span class="fc" id="L1687">        }</span>
 
         @Override public String toString() {
-<span class="nc" id="L683">            return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L1690">            return getClass().getSimpleName() + &quot;[&quot; +</span>
                         &quot;axis=&quot; + _axis +
                     &quot;]&quot;;
         }

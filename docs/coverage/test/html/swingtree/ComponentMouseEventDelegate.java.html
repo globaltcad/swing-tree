@@ -122,7 +122,8 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
 
     /**
      * Returns the x coordinate of the mouse event of this delegate &lt;b&gt;without DPI scaling&lt;/b&gt;.
-     * So the value is in &quot;developer pixel&quot; coordinate space &lt;b&gt;relative to the underlying component&lt;/b&gt;.
+     * So the value is in &quot;developer pixel&quot; not in &lt;b&gt;UI scaled component space&lt;/b&gt;.
+     * The coordinate is also &lt;b&gt;relative to the underlying component (not the parent)&lt;/b&gt;.
      * So a mouse position of (0,0) would be in the top left corner of the component. &lt;br&gt;
      * &lt;p&gt;
      * &lt;b&gt;For Context:&lt;/b&gt;&lt;br&gt;
@@ -138,12 +139,13 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return An integer value representing the x coordinate without DPI scaling (aka &quot;developer pixel&quot;).
      */
     public final int mouseX() {
-<span class="nc" id="L141">        return UI.unscale(getEvent().getX());</span>
+<span class="nc" id="L142">        return UI.unscale(getEvent().getX());</span>
     }
 
     /**
      * Returns the y coordinate of the mouse event of this delegate &lt;b&gt;without DPI scaling&lt;/b&gt;.
-     * So the value is in &quot;developer pixel&quot; coordinate space &lt;b&gt;relative to the underlying component&lt;/b&gt;.
+     * So the value is in &quot;developer pixel&quot; not in &lt;b&gt;UI scaled component space&lt;/b&gt;.
+     * The coordinate is also &lt;b&gt;relative to the underlying component (not the parent)&lt;/b&gt;.
      * So a mouse position of (0,0) would be in the top left corner of the component. &lt;br&gt;
      * &lt;p&gt;
      * &lt;b&gt;For Context:&lt;/b&gt;&lt;br&gt;
@@ -158,7 +160,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return An integer value representing the y coordinate without DPI scaling (aka &quot;developer pixel&quot;).
      */
     public final int mouseY() {
-<span class="nc" id="L161">        return UI.unscale(getEvent().getY());</span>
+<span class="nc" id="L163">        return UI.unscale(getEvent().getY());</span>
     }
 
     /**
@@ -180,7 +182,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return The component relative position of the mouse event in the developer pixel coordinate space (without DPI scaling applied).
      */
     public final Position mousePosition() {
-<span class="nc" id="L183">        return Position.of(mouseX(), mouseY());</span>
+<span class="nc" id="L185">        return Position.of(mouseX(), mouseY());</span>
     }
 
     /**
@@ -194,7 +196,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return x  an integer indicating absolute horizontal position.
      */
     public final int mouseXOnScreen() {
-<span class="nc" id="L197">        return getEvent().getXOnScreen();</span>
+<span class="nc" id="L199">        return getEvent().getXOnScreen();</span>
     }
 
     /**
@@ -208,7 +210,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return y  an integer indicating absolute vertical position.
      */
     public final int mouseYOnScreen() {
-<span class="nc" id="L211">        return getEvent().getYOnScreen();</span>
+<span class="nc" id="L213">        return getEvent().getYOnScreen();</span>
     }
 
     /**
@@ -220,7 +222,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      * @return the absolute position of the mouse event
      */
     public final Position mousePositionOnScreen() {
-<span class="nc" id="L223">        return Position.of(getEvent().getLocationOnScreen());</span>
+<span class="nc" id="L225">        return Position.of(getEvent().getLocationOnScreen());</span>
     }
 
 }
