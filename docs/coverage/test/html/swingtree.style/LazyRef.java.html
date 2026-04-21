@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LazyRef.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LazyRef.java</span></div><h1>LazyRef.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Function;
+
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class LazyRef&lt;T&gt;
+{
+    private final Object _source;
+    private final Function&lt;Object, T&gt; _producer;
+    private @Nullable T _value;
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L18">    &lt;S&gt; LazyRef(S source, Function&lt;S, T&gt; producer) {</span>
+<span class="fc" id="L19">        Objects.requireNonNull(producer);</span>
+<span class="fc" id="L20">        _source = Objects.requireNonNull(source);</span>
+<span class="fc" id="L21">        _producer = (Function&lt;Object, T&gt;) producer;</span>
+<span class="fc" id="L22">    }</span>
+
+    final T get() {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if ( _value == null )</span>
+<span class="fc" id="L26">            _value = _producer.apply(_source);</span>
+<span class="fc" id="L27">        return _value;</span>
+    }
+
+    final boolean exists() {
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        return _value != null;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="nc bnc" id="L36" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="nc" id="L37">        LazyRef&lt;?&gt; lazyRef = (LazyRef&lt;?&gt;) o;</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        return Objects.equals(_source, lazyRef._source) &amp;&amp;</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">                Objects.equals(_producer, lazyRef._producer);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L44">        return Objects.hash(_source, _producer);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
