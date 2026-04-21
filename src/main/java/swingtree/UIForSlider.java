@@ -243,20 +243,42 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         Class<N> userType = userMin.type();
         boolean isWholeNumber = userType == Integer.class || userType == Long.class || userType == Short.class || userType == Byte.class;
         if ( !isWholeNumber ) {
-            Function<N,Integer> scaleToSliderInt = n -> _scale(Integer.class, n, userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), false);
-            Val<Integer> sliderMin     = userMin.viewAsInt( scaleToSliderInt );
-            Val<Integer> sliderMax     = userMax.viewAsInt( scaleToSliderInt );
-            Val<Integer> sliderCurrent = userCurrent.viewAsInt( scaleToSliderInt );
-            return _withBindingInternal(
-                        sliderMin, sliderMax, sliderCurrent, biDirectional ? (Var) userCurrent : null,
-                        n -> {
-                            if ( sliderMin.is(n) )
-                                return userMin.orElseThrowUnchecked();
-                            if ( sliderMax.is(n) )
-                                return userMax.orElseThrowUnchecked();
-                            return _scale(userType, n, userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), true);
+            // The scale factor depends on both userMin and userMax, so whenever either of them changes,
+            // the slider's min, max and value all need to be recomputed together — otherwise the user
+            // could drag the knob into a position whose inverse-scaled value falls outside [userMin, userMax].
+            return _withOnShow( userMin, (thisComponent, v) ->
+                        _updateScaledSliderRange(thisComponent, userMin, userMax, userCurrent)
+                    )
+                    ._withOnShow( userMax, (thisComponent, v) ->
+                        _updateScaledSliderRange(thisComponent, userMin, userMax, userCurrent)
+                    )
+                    ._withOnShow( userCurrent, (thisComponent, v) -> {
+                        int newVal = _scale(Integer.class, v, userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), false);
+                        _setValue(thisComponent, newVal);
+                    })
+                    ._with( thisComponent -> {
+                        _updateScaledSliderRange(thisComponent, userMin, userMax, userCurrent);
+                        if ( biDirectional ) {
+                            Var<N> target = (Var<N>) userCurrent;
+                            _onChange(thisComponent,
+                                e -> _runInApp(thisComponent.getValue(), newSliderInt -> {
+                                    N minVal = userMin.orElseThrowUnchecked();
+                                    N maxVal = userMax.orElseThrowUnchecked();
+                                    int minInt = _scale(Integer.class, minVal, minVal, maxVal, false);
+                                    int maxInt = _scale(Integer.class, maxVal, minVal, maxVal, false);
+                                    N targetItem;
+                                    if ( newSliderInt <= minInt )
+                                        targetItem = minVal;
+                                    else if ( newSliderInt >= maxInt )
+                                        targetItem = maxVal;
+                                    else
+                                        targetItem = _scale(userType, newSliderInt, minVal, maxVal, true);
+                                    target.set(From.VIEW, targetItem);
+                                })
+                            );
                         }
-                    );
+                    })
+                    ._this();
         }
         if ( userType != Integer.class )
             return _withBindingInternal(
@@ -274,6 +296,23 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                     biDirectional ? (Var<N>) userCurrent : null,
                     n->_convertTo(userType, n)
                 );
+    }
+
+    private <N extends Number> void _updateScaledSliderRange(
+        S thisComponent, Val<N> userMin, Val<N> userMax, Val<N> userCurrent
+    ) {
+        N minVal = userMin.orElseThrowUnchecked();
+        N maxVal = userMax.orElseThrowUnchecked();
+        N currentVal = userCurrent.orElseThrowUnchecked();
+        int newMin = _scale(Integer.class, minVal, minVal, maxVal, false);
+        int newMax = _scale(Integer.class, maxVal, minVal, maxVal, false);
+        int newVal = _scale(Integer.class, currentVal, minVal, maxVal, false);
+        int currentExtent = thisComponent.getModel().getExtent();
+        _doWithoutListeners(thisComponent, () ->
+            thisComponent.getModel().setRangeProperties(
+                newVal, currentExtent, newMin, newMax, thisComponent.getValueIsAdjusting()
+            )
+        );
     }
 
     final <N extends Number, T extends Number> UIForSlider<S> _withBindingInternal(
