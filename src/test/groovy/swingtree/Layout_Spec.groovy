@@ -395,4 +395,55 @@ class Layout_Spec extends Specification
               2f    | Size.of(120,200) | true   | UI.VerticalAlignment.BOTTOM    || [[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]
     }
 
+    def 'The `preferredLayoutSize` of a responsive flow layout is based on the children\' preferred sizes, not on their current actual sizes.'()
+    {
+        reportInfo """
+            When a parent container asks its layout manager for its
+            `preferredLayoutSize`, the layout has to answer based on the
+            **preferred** sizes of the child components, *not* on the
+            current actual sizes returned by `Component.getSize()`.
+
+            This is important because a parent component typically queries
+            the preferred size *before* any actual layout pass has happened,
+            and at that point the children have never been sized (so their
+            `getSize()` yields `(0, 0)`). If the layout were to consult
+            `getSize()` instead of `getPreferredSize()`, the parent would
+            see a near-empty preferred size and fail to reserve room for
+            its own content.
+        """
+        given : 'A fixed UI scale factor of 1 so that the numbers stay deterministic.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A fresh flow-layout panel whose children have explicit preferred sizes.'
+            var panel =
+                        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                        .add(UI.box().withPrefSize(30, 20))
+                        .add(UI.box().withPrefSize(40, 20))
+                        .add(UI.box().withPrefSize(50, 20))
+                        .get(JPanel)
+        expect : 'Before any layout pass the children have a zero actual size...'
+            panel.getComponent(0).getSize() == new Dimension(0, 0)
+            panel.getComponent(1).getSize() == new Dimension(0, 0)
+            panel.getComponent(2).getSize() == new Dimension(0, 0)
+        and : '...but their preferred sizes are set.'
+            panel.getComponent(0).getPreferredSize() == new Dimension(30, 20)
+            panel.getComponent(1).getPreferredSize() == new Dimension(40, 20)
+            panel.getComponent(2).getPreferredSize() == new Dimension(50, 20)
+
+        when : 'We ask the layout manager for its preferred size directly, before any layout pass.'
+            var preferred = panel.getLayout().preferredLayoutSize(panel)
+        then : """
+            The preferred layout size reflects the *preferred* widths of the
+            three children (30 + 40 + 50 = 120), plus the two inner and two
+            outer horizontal gaps of 5 each (→ 140), and the maximum preferred
+            height (20) plus the two outer vertical gaps of 5 each (→ 30).
+
+            Were the layout to consult `getSize()` instead of `getPreferredSize()`
+            here, every child would contribute `0` and the returned width
+            would collapse down to just the gap contribution (~20).
+        """
+            preferred == new Dimension(140, 30)
+        cleanup :
+            SwingTree.clear()
+    }
+
 }
