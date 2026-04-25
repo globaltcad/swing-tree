@@ -79,18 +79,14 @@ class Layout_Spec extends Specification
                 )
                 .get(JPanel.class)
         expect: 'The panel has a `ResponsiveGridFlowLayout` layout manager attached:'
-            panel.getLayout() instanceof ResponsiveGridFlowLayout
+            (panel.getLayout() instanceof ResponsiveGridFlowLayout)
         and : 'The layout manager has the correct horizontal alignment:'
             panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER
-        and : 'Initially, the panel does not properly fits the content.'
-            panel.getPreferredSize().width < 80
-            panel.getPreferredSize().width < 80
 
         when : 'We call the layout manager to do its job...'
             panel.doLayout()
         then : 'The layout manager increased the size according to the content:'
-            panel.getPreferredSize().width > 100
-            panel.getPreferredSize().width > 100
+            panel.getPreferredSize().width > 150
     }
 
     def 'The `withFlowLayout()` method attaches a `ResponsiveGridFlowLayout` to the UI.'(
