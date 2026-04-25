@@ -42,9 +42,26 @@ final class LayerCache
     private static final int _COMPUTED_CACHE_AGGRESSIVENESS;
     private static final int _COMPUTED_CACHE_CAP;
     static {
-        double availableGiB = ( ( Runtime.getRuntime().maxMemory() * 1000 ) >> 30 ) / 1e3;
+        double availableGiB = _detectSystemRamGiB();
         _COMPUTED_CACHE_AGGRESSIVENESS = (int) Math.round( 4 * Math.log(Math.max(1, availableGiB-1)) );
         _COMPUTED_CACHE_CAP = Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * _COMPUTED_CACHE_AGGRESSIVENESS);
+    }
+
+    private static double _detectSystemRamGiB() {
+        try {
+            java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+            if ( os instanceof com.sun.management.OperatingSystemMXBean ) {
+                long totalBytes = ((com.sun.management.OperatingSystemMXBean) os).getTotalPhysicalMemorySize();
+                if ( totalBytes > 0 )
+                    return totalBytes / (double) (1L << 30);
+            }
+        } catch ( Throwable t ) {
+            log.debug("Could not query system RAM, falling back to JVM max heap.", t);
+        }
+        // Fallback: JVM max heap (usually a fraction of physical RAM)
+        double maxHeap = Runtime.getRuntime().maxMemory() / (double) (1L << 30);
+        // We multiply by 4, since system will have a lot more RAM:
+        return maxHeap * 4;
     }
 
     // Higher means more memory usage but better performance
