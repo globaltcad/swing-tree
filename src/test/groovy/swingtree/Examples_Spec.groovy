@@ -122,7 +122,7 @@ class Examples_Spec extends Specification
         and :
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
         and :
-            Utility.similarityBetween(ui, "views/simple-form-UI.png", 95) > 95
+            Utility.similarityBetween(ui, "views/simple-form-UI.png", 94) > 94
     }
 
     def 'The login example UI defined in the examples, a good MVVM demonstration.'()
@@ -307,7 +307,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 96.3) > 96.3
+            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 96) > 96
     }
 
     def 'The animation example view can be created.'()

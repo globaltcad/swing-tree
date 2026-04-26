@@ -70,19 +70,21 @@ public final class SwingTree
      *  (see {@link #initializeUsing(SwingTreeConfigurator)}).
      */
     public static void clear() {
-        if ( _INSTANCE != null && _INSTANCE.hasValue()) {
-            SwingTree swingTree = _INSTANCE.get();
-            swingTree._iconCache.clear();
-            swingTree._globalAwtBinding.values().forEach( pair ->{
-                Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
-            });
-            swingTree._globalAwtBinding.clear();
-            if ( swingTree._uiScale.hasValue() ) {
-                swingTree._uiScale.get().cleanup();
+        UI.runNow(()->{
+            if ( _INSTANCE != null && _INSTANCE.hasValue()) {
+                SwingTree swingTree = _INSTANCE.get();
+                swingTree._iconCache.clear();
+                swingTree._globalAwtBinding.values().forEach( pair ->{
+                    Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
+                });
+                swingTree._globalAwtBinding.clear();
+                if ( swingTree._uiScale.hasValue() ) {
+                    swingTree._uiScale.get().cleanup();
+                }
+                EnterExitComponentBoundsEventDispatcher.clear(); // The singleton may hold a now outdated AWTEvent binding!
             }
-            EnterExitComponentBoundsEventDispatcher.clear(); // The singleton may hold a now outdated AWTEvent binding!
-        }
-        _INSTANCE = null;
+            _INSTANCE = null;
+        });
     }
 
     /**
@@ -93,7 +95,9 @@ public final class SwingTree
      *  Also see {@link #initializeUsing(SwingTreeConfigurator)}.
      */
     public static void initialize() {
-        _INSTANCE = new LazyRef<>(SwingTree::new);
+        UI.runNow(()-> {
+            _INSTANCE = new LazyRef<>(SwingTree::new);
+        });
     }
 
     /**
@@ -109,7 +113,9 @@ public final class SwingTree
      *                     to configure the {@link SwingTree} instance.
      */
     public static void initializeUsing( SwingTreeConfigurator configurator ) {
-        _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
+        UI.runNow(()->{
+            _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
+        });
     }
 
     private SwingTreeInitConfig _config;

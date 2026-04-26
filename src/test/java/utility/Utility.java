@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -152,6 +153,46 @@ public class Utility
         }
     }
 
+    /**
+     *  Creates a {@link BufferedImage} with a fixed configuration ({@link BufferedImage#TYPE_INT_ARGB})
+     *  so that the bit-layout of the rendering target is identical on every JDK / OS / GPU.
+     */
+    public static BufferedImage createDeterministicImage(int width, int height) {
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    /**
+     *  Returns a {@link Graphics2D} pinned to a fixed set of {@link RenderingHints} so that
+     *  rendering – especially text – is reproducible across JDKs, operating systems and graphics
+     *  back-ends.
+     * <p>
+     *  Background: a {@code Graphics2D} obtained from {@code BufferedImage.createGraphics()} starts
+     *  with mostly-default hints, but Swing's text path ({@code SwingUtilities2.drawString}) consults
+     *  the desktop property {@code awt.font.desktophints} when {@code KEY_TEXT_ANTIALIASING} is
+     *  {@code VALUE_TEXT_ANTIALIAS_DEFAULT}. On this dev machine that desktop hint resolves to
+     *  {@code LCD HRGB}, on a CI runner it might be {@code GASP} or simply absent. To kill that
+     *  drift we override every relevant hint up-front. {@code VALUE_TEXT_ANTIALIAS_ON} maps to
+     *  pure software grayscale AA; the {@code _LCD_*} variants are intentionally avoided because
+     *  LCD subpixel rendering depends on subpixel order, gamma and platform.
+     */
+    public static Graphics2D createDeterministicGraphics(BufferedImage image) {
+        Graphics2D g = image.createGraphics();
+        // Text – the by far biggest source of cross-JDK drift.
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,   RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,   RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST,   140); // matches probed default; harmless when AA = ON (grayscale)
+        // Geometry / shapes.
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,        RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,      RenderingHints.VALUE_STROKE_NORMALIZE);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,           RenderingHints.VALUE_RENDER_QUALITY);
+        // Image / colour pipeline.
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,       RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,     RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_DITHERING,           RenderingHints.VALUE_DITHER_DISABLE);
+        return g;
+    }
+
     public static BufferedImage offscreenRender(Component component) {
         CompletableFuture<BufferedImage> future = new CompletableFuture<>();
         SwingUtilities.invokeLater(() -> {
@@ -159,8 +200,8 @@ public class Utility
             f.add(component);
             f.pack();
             SwingUtilities.invokeLater(()->{
-                BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = image.createGraphics();
+                BufferedImage image = createDeterministicImage(component.getWidth(), component.getHeight());
+                Graphics2D g2d = createDeterministicGraphics(image);
                 component.paint(g2d);
                 g2d.dispose();
                 future.complete(image);
@@ -186,8 +227,8 @@ public class Utility
         int finalWidth = w;
         int finalHeight = h;
         SwingUtilities.invokeLater(() -> {
-            BufferedImage image = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = image.createGraphics();
+            BufferedImage image = createDeterministicImage(finalWidth, finalHeight);
+            Graphics2D g2d = createDeterministicGraphics(image);
             component.paint(g2d);
             g2d.dispose();
             future.complete(image);
@@ -211,12 +252,12 @@ public class Utility
         System.exit(0);
     }
 
-    public static void safeUIAsImage(JComponent ui, String path) {
+    private static void safeUIAsImage(JComponent ui, String path) {
         BufferedImage image = offscreenRender(ui);
         safeUIImage( image, path );
     }
 
-    public static void safeUIImage(BufferedImage image, String path) {
+    private static void safeUIImage(BufferedImage image, String path) {
         try {
             if ( !new File(path).exists() ) {
                 File parent = new File(path).getParentFile();

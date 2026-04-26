@@ -118,6 +118,17 @@ test {
     testLogging {
         exceptionFormat = 'full'
     }
+    // Make Swing's text rendering deterministic across JDKs / OS / GPUs so that
+    // pixel-similarity snapshot tests in `utility.Utility` are stable.
+    // `awt.useSystemAAFontSettings=on` forces grayscale AA and prevents
+    // `SwingUtilities2.drawString` from consulting the OS desktop hints (which
+    // on Linux/X11 default to LCD HRGB, on macOS to a different LCD variant, etc.).
+    // `swing.aatext=true` is the legacy companion switch and is kept for safety on
+    // older JDKs / L&Fs that look at it.
+    systemProperty 'awt.useSystemAAFontSettings', 'on'
+    systemProperty 'swing.aatext', 'true'
+    systemProperty 'sun.java2d.uiScale', '1.0'
+    systemProperty 'sun.java2d.uiScale.enabled', 'false'
 }
 
 // CONFIGURING TEST REPORTING :

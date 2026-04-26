@@ -237,9 +237,9 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             for (int i = 0; i < nmembers; i++) {
                 Component m = target.getComponent(i);
                 if (m.isVisible()) {
-                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(m.getSize()).plus(hgap, vgap));
+                    Dimension d = m.getPreferredSize();
+                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(d).plus(hgap, vgap));
                     bounds = bounds.merge(childBounds);
-                    Dimension d = m.getSize();
                     dim.height = Math.max(dim.height, d.height);
                     if (firstVisibleComponent) {
                         firstVisibleComponent = false;
