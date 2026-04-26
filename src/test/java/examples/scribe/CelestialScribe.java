@@ -170,18 +170,9 @@ public final class CelestialScribe extends Panel {
         Val<String> name = starVar.viewAsString(Star::name);
 
         return panel().id("star-" + id)
-            .peek( c -> {
-                // Seed the component with the VM's current bounds *before*
-                // it is added to the parent. From that moment on, the
-                // Val<Layout> keeps it in sync.
-                Bounds b = starVar.get().bounds();
-                c.setBounds(
-                    (int) UI.scale(b.location().x()),
-                    (int) UI.scale(b.location().y()),
-                    (int) UI.scale(b.size().width().orElse(80f)),
-                    (int) UI.scale(b.size().height().orElse(80f))
-                );
-            })
+            // Seed the component with the VM's current bounds. From that moment
+            // on, the Val<Layout> on the parent keeps it in sync.
+            .withBounds(starVar.get().bounds())
             .withCursor(Cursor.MOVE)
             .withRepaintOn(hue, brightness)
             .withStyle( it -> {
