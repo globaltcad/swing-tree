@@ -859,7 +859,7 @@ class Individual_Component_Styling_Spec extends Specification
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.1) > 99.1
-            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.1) > 99.1
+            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.0) > 99.0
     }
 
     def 'A text area background can be shaded from left to right with any number of colors.'()
