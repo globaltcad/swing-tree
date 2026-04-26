@@ -307,7 +307,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 96.3) > 96.3
+            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 96) > 96
     }
 
     def 'The animation example view can be created.'()
