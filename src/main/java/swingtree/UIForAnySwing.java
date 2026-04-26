@@ -23,10 +23,7 @@ import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JBox;
 import swingtree.components.JScrollPanels;
 import swingtree.input.Keyboard;
-import swingtree.layout.AddConstraint;
-import swingtree.layout.LayoutConstraint;
-import swingtree.layout.ResponsiveGridFlowLayout;
-import swingtree.layout.Size;
+import swingtree.layout.*;
 import swingtree.style.ComponentExtension;
 import swingtree.style.FontConf;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
@@ -4141,17 +4138,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I onMouseDrag( Action<ComponentDragEventDelegate<C>> onDrag ) {
         NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
         return _with( thisComponent -> {
-                   java.util.List<MouseEvent> dragEventHistory = new ArrayList<>();
+                   java.util.List<Pair<Position, MouseEvent>> dragEventHistory = new ArrayList<>();
                    MouseAdapter listener = new MouseAdapter() {
+                       private Position positionFromEventSource(MouseEvent e) {
+                           Object source = e.getSource();
+                            if ( source instanceof Component ) {
+                                Component sourceComponent = (Component) source;
+                                return Position.of(sourceComponent.getX(), sourceComponent.getY());
+                            } else {
+                                log.warn(SwingTree.get().logMarker(), "Unexpected mouse event source type: {}! Defaulting to position (0,0) for this event.", e.getSource().getClass());
+                                return Position.origin();
+                            }
+                       }
                        @Override public void mousePressed(MouseEvent e) {
                            dragEventHistory.clear();
-                           dragEventHistory.add(e);
+                           dragEventHistory.add(Pair.of(positionFromEventSource(e), e));
                        }
                        @Override public void mouseReleased(MouseEvent e) {
                            dragEventHistory.clear();
                        }
                        @Override public void mouseDragged(MouseEvent e) {
-                           dragEventHistory.add(e);
+                           dragEventHistory.add(Pair.of(positionFromEventSource(e), e));
                            _runInApp(() -> {
                                try {
                                    onDrag.accept(new ComponentDragEventDelegate<>(thisComponent, e, dragEventHistory));

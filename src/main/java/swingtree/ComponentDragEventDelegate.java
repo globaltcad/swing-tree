@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.Pair;
 import sprouts.Tuple;
 import swingtree.layout.Position;
 
@@ -20,16 +21,26 @@ import java.util.List;
  */
 public final class ComponentDragEventDelegate<C extends JComponent> extends ComponentMouseEventDelegate<C>
 {
-    private final Tuple<MouseEvent> _dragEventHistory;
+    /*
+        Important, we also track the position history of the dragged component relative
+        to the parent component. This is extremely important in order for the drag coordinate
+        history to stay correct even when the component is moved during the drag.
+    */
+    private final Tuple<Pair<Position, MouseEvent>> _dragEventHistory;
 
 
     ComponentDragEventDelegate(
         C component,
         MouseEvent event,
-        List<MouseEvent> dragEventHistory
+        List<Pair<Position, MouseEvent>> dragEventHistory
     ) {
         super(component, event);
-        _dragEventHistory = Tuple.of(MouseEvent.class, dragEventHistory);
+        _dragEventHistory = Tuple.of(Pair.classTyped(Position.class, MouseEvent.class), dragEventHistory);
+    }
+
+    public Position initialComponentPosition() {
+         Position scaledPosition = !_dragEventHistory.isEmpty() ? _dragEventHistory.get(0).first() : Position.origin();
+         return Position.of(UI.unscale(scaledPosition.x()), UI.unscale(scaledPosition.y()));
     }
 
     /**
@@ -40,7 +51,7 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
      * @return A tuple of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
      */
     public Tuple<MouseEvent> dragEvents() {
-        return _dragEventHistory;
+        return _dragEventHistory.mapTo(MouseEvent.class, Pair::second);
     }
 
     /**
@@ -58,8 +69,17 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
      *         The points of this list represent the mouse movement track since the start of a continuous drag.
      */
     public Tuple<Position> dragPositions() {
+        Position firstPosition = !_dragEventHistory.isEmpty() ? _dragEventHistory.get(0).first() : Position.origin();
         return _dragEventHistory.stream()
-                                .map(it->Position.of(UI.unscale(it.getX()), UI.unscale(it.getY())))
+                                .map(it->{
+                                    Position positionAtEvent = it.first();
+                                    Position correction = positionAtEvent.minus(firstPosition);
+                                    MouseEvent event = it.second();
+                                    return Position.of(
+                                            UI.unscale(event.getX()) + UI.unscale(correction.x()),
+                                            UI.unscale(event.getY()) + UI.unscale(correction.y())
+                                    );
+                                })
                                 .collect(Tuple.collectorOf(Position.class));
     }
 
@@ -74,8 +94,8 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
      */
     public float deltaXSinceStart() {
         if (_dragEventHistory.size() < 2) return 0;
-        float xInComponentPixel = _dragEventHistory.get(_dragEventHistory.size() - 1).getX() - _dragEventHistory.get(0).getX();
-        return UI.unscale(xInComponentPixel);
+        Tuple<Position> positions = dragPositions();
+        return positions.get(positions.size() - 1).x() - positions.get(0).x();
     }
 
     /**
@@ -88,8 +108,8 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
      */
     public float deltaYSinceStart() {
         if (_dragEventHistory.size() < 2) return 0;
-        float yInComponentPixel = _dragEventHistory.get(_dragEventHistory.size() - 1).getY() - _dragEventHistory.get(0).getY();
-        return UI.unscale(yInComponentPixel);
+        Tuple<Position> positions = dragPositions();
+        return positions.get(positions.size() - 1).y() - positions.get(0).y();
     }
 
 }
