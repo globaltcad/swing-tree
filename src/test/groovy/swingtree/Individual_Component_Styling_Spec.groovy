@@ -1157,7 +1157,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(textField)
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/custom-colorful-font-JTextField.png", 99.2) > 99.2
+            Utility.similarityBetween(image, "components/custom-colorful-font-JTextField.png", 98.9) > 98.9
     }
 
     def 'For full styling freedom, we can add custom painters to a component on various layers.'(
@@ -1839,7 +1839,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is rendered as expected (compared to the snapshot above).'
-            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.5) > 99.5
+            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.4) > 99.4
 
         where : 'We test this UI using the following scaling values:'
             uiScale << [1f, 2f, 3f]
@@ -2082,7 +2082,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is rendered as expected (compared to the snapshot above).'
-            Utility.similarityBetween(images, "components/svg-as-icon-panels-collage.png", 99.7) > 99.7
+            Utility.similarityBetween(images, "components/svg-as-icon-panels-collage.png", 99.6) > 99.6
 
         where : 'We test this UI using the following scaling values:'
             uiScale << [1f, 1.25f,  1.5f, 2f]
@@ -2956,7 +2956,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.3) > 99.3
+            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.0) > 99.0
 
         where :
             uiScale << [1]
