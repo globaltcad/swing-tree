@@ -1362,9 +1362,7 @@ final class StyleRenderer
             placement == UI.Placement.TOP_RIGHT
         ) {
             for ( TextLayoutEngine.LayoutLine line : lines ) {
-                float h = line.layout == null
-                            ? font.getSize2D()
-                            : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                float h = _lineHeight(line, font);
                 if ( Math.floor(accumulated + h) > boundsHeight )
                     break;
                 visible.add(line);
@@ -1378,9 +1376,7 @@ final class StyleRenderer
             final ListIterator<TextLayoutEngine.LayoutLine> it = lines.listIterator(lines.size());
             while ( it.hasPrevious() ) {
                 TextLayoutEngine.LayoutLine line = it.previous();
-                float h = line.layout == null
-                        ? font.getSize2D()
-                        : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                float h = _lineHeight(line, font);
                 if ( Math.floor(accumulated + h) > boundsHeight )
                     break;
                 visible.add(0, line);
@@ -1394,9 +1390,7 @@ final class StyleRenderer
             final float targetTop    = (totalHeight - centerHeight) / 2f;
             float cursor = 0;
             for ( TextLayoutEngine.LayoutLine line : lines ) {
-                float h = line.layout == null
-                        ? font.getSize2D()
-                        : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                float h = _lineHeight(line, font);
                 if ( cursor + h < targetTop ) {
                     cursor += h;
                     continue;
@@ -1438,20 +1432,29 @@ final class StyleRenderer
             ------------------------------------------------
          */
         for ( TextLayoutEngine.LayoutLine line : visible ) {
-            if ( line.layout == null ) {
+            final TextLayout primary = line.primary().layout;
+            if ( primary == null ) {
                 y += font.getSize2D();
                 continue;
             }
-            y += line.layout.getAscent();
+            y += primary.getAscent();
 
-            // Draw all fragments (primary + obstacle-split extras) at the same baseline.
-            // x positioning is relative to each fragment's own obstacle-free region.
-            _drawLineFragment(g2d, placement, line.layout, line.regionX, line.regionWidth, y);
-            for ( TextLayoutEngine.LayoutLine.Segment seg : line.extraSegments )
-                _drawLineFragment(g2d, placement, seg.layout, seg.regionX, seg.regionWidth, y);
+            // Draw all fragments at the same baseline; x positioning is relative
+            // to each fragment's own obstacle-free region.
+            for ( TextLayoutEngine.LayoutLine.Segment seg : line.segments ) {
+                if ( seg.layout != null )
+                    _drawLineFragment(g2d, placement, seg.layout, seg.regionX, seg.regionWidth, y);
+            }
 
-            y += line.layout.getDescent() + line.layout.getLeading();
+            y += primary.getDescent() + primary.getLeading();
         }
+    }
+
+    private static float _lineHeight( TextLayoutEngine.LayoutLine line, Font font ) {
+        final TextLayout primary = line.primary().layout;
+        return primary == null
+                ? font.getSize2D()
+                : primary.getAscent() + primary.getDescent() + primary.getLeading();
     }
 
     /** Draws one text fragment aligned within its obstacle-free region at the given baseline y. */
