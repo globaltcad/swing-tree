@@ -55,7 +55,13 @@ class SwingTree_Library_Context_Spec extends Specification {
         given: 'We snapshot the original default font to reset it after the test'
             var originalDefaultFont = UIManager.getDefaults().get("defaultFont")
         and: 'We initialize SwingTree with some custom settings!'
-            var myStyleSheet = Mock(StyleSheet)
+            // Use a real StyleSheet (no-op `configure()`) rather than `Mock(StyleSheet)` here.
+            // Spock/ByteBuddy mocks bypass the constructor and leave `final` fields like
+            // `_styleSheetChangeEvent` as `null`. That leak can later flow through stale
+            // UI-scale listeners into other specs and surface as a `NullPointerException`
+            // in `StyleSheet.observable()`. We only need identity equality below, so a real
+            // instance is a behaviour-preserving substitute.
+            var myStyleSheet = new StyleSheet() { @Override protected void configure() {} }
             var myEventProcessor = Mock(EventProcessor)
             var myMarker = MarkerFactory.getMarker("MyMarker")
             var myFont = new java.awt.Font("Arial", java.awt.Font.ITALIC, 73)
