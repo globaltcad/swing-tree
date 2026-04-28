@@ -2,6 +2,7 @@ package swingtree.animation;
 
 import org.slf4j.Logger;
 import swingtree.SwingTree;
+import swingtree.UI;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.JComponent;
@@ -27,9 +28,11 @@ final class AnimationRunner
 
     public static void add( RunningAnimation toBeRun ) {
         Objects.requireNonNull(toBeRun);
-        int interval = (int) toBeRun.lifeSpan().lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
-        AnimationRunner runner = _INSTANCES.computeIfAbsent(interval, it -> new AnimationRunner(interval));
-        runner._add(toBeRun);
+        UI.run(()->{
+            int interval = (int) toBeRun.lifeSpan().lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
+            AnimationRunner runner = _INSTANCES.computeIfAbsent(interval, it -> new AnimationRunner(interval));
+            runner._add(toBeRun);
+        });
     }
 
 

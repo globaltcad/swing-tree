@@ -195,11 +195,12 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
         Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
-        if ( _isUndefinedColor(color) )
-            _component().setBackground(null);
-        else
-            _component().setBackground(color);
-
+        UI.run(()->{
+            if ( _isUndefinedColor(color) )
+                _component().setBackground(null);
+            else
+                _component().setBackground(color);
+        });
         return this;
     }
 
@@ -285,11 +286,13 @@ public class AbstractDelegate<C extends JComponent>
      *         The return value will never be <code>null</code>.
      */
     public final Color getBackground() {
-        Color backgroundColor = _component().getBackground();
-        if ( backgroundColor == null )
-            return UI.Color.UNDEFINED;
-        else
-            return backgroundColor;
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            Color backgroundColor = _component().getBackground();
+            if ( backgroundColor == null )
+                return UI.Color.UNDEFINED;
+            else
+                return backgroundColor;
+        }));
     }
 
     /**
@@ -307,10 +310,12 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
         Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
-        if ( _isUndefinedColor(color) )
-            _component().setForeground( null );
-        else
-            _component().setForeground( color );
+        UI.run(()->{
+            if ( _isUndefinedColor(color) )
+                _component().setForeground( null );
+            else
+                _component().setForeground( color );
+        });
         return this;
     }
 
@@ -326,11 +331,13 @@ public class AbstractDelegate<C extends JComponent>
      *        The return value will never be <code>null</code>.
      */
     public final Color getForeground() {
-        Color foregroundColor = _component().getForeground();
-        if ( foregroundColor == null )
-            return UI.Color.UNDEFINED;
-        else
-            return foregroundColor;
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            Color foregroundColor = _component().getForeground();
+            if ( foregroundColor == null )
+                return UI.Color.UNDEFINED;
+            else
+                return foregroundColor;
+        }));
     }
 
     /**
@@ -418,10 +425,12 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setFont( Font font ) {
         Objects.requireNonNull(font, "Use UI.Font.UNDEFINED instead of null to represent the absence of a font.");
-        if ( _isUndefinedFont(font) )
-            _component().setFont(null);
-        else
-            _component().setFont(font);
+        UI.run(()->{
+            if ( _isUndefinedFont(font) )
+                _component().setFont(null);
+            else
+                _component().setFont(font);
+        });
         return this;
     }
 
@@ -435,11 +444,13 @@ public class AbstractDelegate<C extends JComponent>
      * @return The font of the component.
      */
     public final Font getFont() {
-        Font font = _component().getFont();
-        if ( font == null )
-            return UI.Font.UNDEFINED;
-        else
-            return font;
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            Font font = _component().getFont();
+            if ( font == null )
+                return UI.Font.UNDEFINED;
+            else
+                return font;
+        }));
     }
 
     /**
@@ -456,7 +467,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setBorder( Border border ) {
-        _component().setBorder(border);
+        UI.run(()->{
+            _component().setBorder(border);
+        });
         return this;
     }
 
@@ -470,7 +483,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return The border of the component.
      */
     public final Border getBorder() {
-        return _component().getBorder();
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return _component().getBorder();
+        }));
     }
 
     /**
@@ -491,7 +506,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( int x, int y, int width, int height ) {
-        _component().setBounds(UI.scale(x), UI.scale(y), UI.scale(width), UI.scale(height));
+        UI.run(()->{
+            _component().setBounds(UI.scale(x), UI.scale(y), UI.scale(width), UI.scale(height));
+        });
         return this;
     }
 
@@ -532,7 +549,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( Rectangle bounds ) {
-        _component().setBounds(UI.scale(bounds));
+        UI.run(()->{
+            _component().setBounds(UI.scale(bounds));
+        });
         return this;
     }
 
@@ -554,7 +573,9 @@ public class AbstractDelegate<C extends JComponent>
     * @return The delegate itself, so you can chain calls to this method.
     */
     public final AbstractDelegate<C> setLocation( double x, double y ) {
-        _component().setLocation((int) UI.scale(x), (int) UI.scale(y));
+        UI.run(()->{
+            _component().setLocation((int) UI.scale(x), (int) UI.scale(y));
+        });
         return this;
     }
 
@@ -572,8 +593,10 @@ public class AbstractDelegate<C extends JComponent>
      *          This is relative to the component's parent.
      */
     public final Bounds getBounds() {
-        Rectangle rec = _component().getBounds();
-        return Bounds.of(UI.unscale(rec.x), UI.unscale(rec.y), UI.unscale(rec.width), UI.unscale(rec.height));
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            Rectangle rec = _component().getBounds();
+            return Bounds.of(UI.unscale(rec.x), UI.unscale(rec.y), UI.unscale(rec.width), UI.unscale(rec.height));
+        }));
     }
 
     /**
@@ -591,7 +614,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return An optional value that contains the component area if it is present.
      */
     public Optional<Shape> shapeOf( UI.ComponentArea area ) {
-        return ComponentExtension.from(_component()).getComponentArea(area);
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return ComponentExtension.from(_component()).getComponentArea(area);
+        }));
     }
 
     /**
@@ -656,7 +681,9 @@ public class AbstractDelegate<C extends JComponent>
     }
 
     private void _scaleAndSetPrefSize( Dimension size ) {
-        _component().setPreferredSize(UI.scale(size));
+        UI.run(()->{
+            _component().setPreferredSize(UI.scale(size));
+        });
     }
 
     /**
@@ -671,8 +698,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setPrefWidth( int width ) {
-        Dimension size = _component().getPreferredSize();
-        _component().setPreferredSize(new Dimension(UI.scale(width), size.height));
+        UI.run(()->{
+            Dimension size = _component().getPreferredSize();
+            _component().setPreferredSize(new Dimension(UI.scale(width), size.height));
+        });
         return this;
     }
 
@@ -688,8 +717,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setPrefHeight( int height ) {
-        Dimension size = _component().getPreferredSize();
-        _component().setPreferredSize(new Dimension(size.width, UI.scale(height)));
+        UI.run(()->{
+            Dimension size = _component().getPreferredSize();
+            _component().setPreferredSize(new Dimension(size.width, UI.scale(height)));
+        });
         return this;
     }
 
@@ -704,7 +735,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The preferred size of the component scaled to "developer pixel size".
      */
     public final Size getPrefSize() {
-        return Size.of(UI.unscale(_component().getPreferredSize()));
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return Size.of(UI.unscale(_component().getPreferredSize()));
+        }));
     }
 
     /**
@@ -721,7 +754,9 @@ public class AbstractDelegate<C extends JComponent>
      */
     @Deprecated
     public final AbstractDelegate<C> setMinSize( Dimension size ) {
-        _component().setMinimumSize(size == null ? null : UI.scale(size));
+        UI.run(()->{
+            _component().setMinimumSize(size == null ? null : UI.scale(size));
+        });
         return this;
     }
 
@@ -746,10 +781,12 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setMinSize( Size size ) {
         Objects.requireNonNull(size, "Use Size.unknown() instead of null to represent the absence of a size.");
-        if ( size.equals(Size.unknown()) )
-            _component().setMinimumSize(null);
-        else
-            _component().setMinimumSize(UI.scale(size.toDimension()));
+        UI.run(()->{
+            if ( size.equals(Size.unknown()) )
+                _component().setMinimumSize(null);
+            else
+                _component().setMinimumSize(UI.scale(size.toDimension()));
+        });
         return this;
     }
 
@@ -768,7 +805,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinSize( int width, int height ) {
-        _component().setMinimumSize(new Dimension(UI.scale(width), UI.scale(height)));
+        UI.run(()->{
+            _component().setMinimumSize(new Dimension(UI.scale(width), UI.scale(height)));
+        });
         return this;
     }
 
@@ -784,8 +823,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinWidth( int width ) {
-        Dimension size = _component().getMinimumSize();
-        _component().setMinimumSize(new Dimension(UI.scale(width), size.height));
+        UI.run(()->{
+            Dimension size = _component().getMinimumSize();
+            _component().setMinimumSize(new Dimension(UI.scale(width), size.height));
+        });
         return this;
     }
 
@@ -801,8 +842,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinHeight( int height ) {
-        Dimension size = _component().getMinimumSize();
-        _component().setMinimumSize(new Dimension(size.width, UI.scale(height)));
+        UI.run(()->{
+            Dimension size = _component().getMinimumSize();
+            _component().setMinimumSize(new Dimension(size.width, UI.scale(height)));
+        });
         return this;
     }
 
@@ -817,7 +860,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The minimum size of the component.
      */
     public final Size getMinSize() {
-        return Size.of(UI.unscale(_component().getMinimumSize()));
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return Size.of(UI.unscale(_component().getMinimumSize()));
+        }));
     }
 
     /**
@@ -833,7 +878,9 @@ public class AbstractDelegate<C extends JComponent>
      */
     @Deprecated
     public final AbstractDelegate<C> setMaxSize( Dimension size ) {
-        _component().setMaximumSize(size == null ? null : UI.scale(size));
+        UI.run(()->{
+            _component().setMaximumSize(size == null ? null : UI.scale(size));
+        });
         return this;
     }
 
@@ -857,10 +904,12 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setMaxSize( Size size ) {
         Objects.requireNonNull(size, "Use Size.unknown() instead of null to represent the absence of a size.");
-        if ( size.equals(Size.unknown()) )
-            _component().setMaximumSize(null);
-        else
-            _component().setMaximumSize(UI.scale(size.toDimension()));
+        UI.run(()->{
+            if ( size.equals(Size.unknown()) )
+                _component().setMaximumSize(null);
+            else
+                _component().setMaximumSize(UI.scale(size.toDimension()));
+        });
         return this;
     }
 
@@ -882,7 +931,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxSize( int width, int height ) {
-        _component().setMaximumSize(UI.scale(new Dimension(width, height)));
+        UI.run(()-> {
+            _component().setMaximumSize(UI.scale(new Dimension(width, height)));
+        });
         return this;
     }
 
@@ -903,8 +954,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxWidth( int width ) {
-        Dimension size = _component().getMaximumSize();
-        _component().setMaximumSize(new Dimension(UI.scale(width), size.height));
+        UI.run(()->{
+            Dimension size = _component().getMaximumSize();
+            _component().setMaximumSize(new Dimension(UI.scale(width), size.height));
+        });
         return this;
     }
 
@@ -926,8 +979,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxHeight( int height ) {
-        Dimension size = _component().getMaximumSize();
-        _component().setMaximumSize(new Dimension(size.width, UI.scale(height)));
+        UI.run(()->{
+            Dimension size = _component().getMaximumSize();
+            _component().setMaximumSize(new Dimension(size.width, UI.scale(height)));
+        });
         return this;
     }
 
@@ -943,7 +998,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The maximum size of the component in "developer pixels".
      */
     public final Size getMaxSize() {
-        return Size.of(UI.unscale(_component().getMaximumSize()));
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return Size.of(UI.unscale(_component().getMaximumSize()));
+        }));
     }
 
     /**
@@ -961,7 +1018,9 @@ public class AbstractDelegate<C extends JComponent>
      */
     @Deprecated
     public final AbstractDelegate<C> setSize( Dimension size ) {
-        _component().setSize(size == null ? null : UI.scale(size));
+        UI.run(()->{
+            _component().setSize(size == null ? null : UI.scale(size));
+        });
         return this;
     }
 
@@ -979,7 +1038,9 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setSize( Size size ) {
         Objects.requireNonNull(size);
-        _component().setSize(UI.scale(size.toDimension()));
+        UI.run(()->{
+            _component().setSize(UI.scale(size.toDimension()));
+        });
         return this;
     }
 
@@ -997,7 +1058,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setSize( int width, int height ) {
-        _component().setSize(UI.scale(new Dimension(width, height)));
+        UI.run(()->{
+            _component().setSize(UI.scale(new Dimension(width, height)));
+        });
         return this;
     }
 
@@ -1015,8 +1078,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setWidth( int width ) {
-        Dimension size = _component().getSize();
-        _component().setSize(new Dimension(UI.scale(width), size.height));
+        UI.run(()->{
+            Dimension size = _component().getSize();
+            _component().setSize(new Dimension(UI.scale(width), size.height));
+        });
         return this;
     }
 
@@ -1032,8 +1097,10 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setHeight( int height ) {
-        Dimension size = _component().getSize();
-        _component().setSize(new Dimension(size.width, UI.scale(height)));
+        UI.run(()->{
+            Dimension size = _component().getSize();
+            _component().setSize(new Dimension(size.width, UI.scale(height)));
+        });
         return this;
     }
 
@@ -1046,7 +1113,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The size of the component.
      */
     public final Size getSize() {
-        return Size.of(UI.unscale(_component().getSize()));
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return Size.of(UI.unscale(_component().getSize()));
+        }));
     }
 
     /**
@@ -1058,7 +1127,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The width of the component in developer pixels (not scaled for high DPI).
      */
     public final int getWidth() {
-        return UI.unscale(_component().getSize().width);
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return UI.unscale(_component().getSize().width);
+        }));
     }
 
     /**
@@ -1070,7 +1141,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The height of the component in developer pixels (not scaled for high DPI).
      */
     public final int getHeight() {
-        return UI.unscale(_component().getSize().height);
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return UI.unscale(_component().getSize().height);
+        }));
     }
 
     /**
@@ -1083,7 +1156,9 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setCursor( UI.Cursor cursor ) {
         Objects.requireNonNull(cursor);
-        _component().setCursor(Cursor.getPredefinedCursor(cursor.type));
+        UI.run(()->{
+            _component().setCursor(Cursor.getPredefinedCursor(cursor.type));
+        });
         return this;
     }
 
@@ -1094,7 +1169,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setCursor( Cursor cursor ) {
-        _component().setCursor(cursor);
+        UI.run(()->{
+            _component().setCursor(cursor);
+        });
         return this;
     }
 
@@ -1104,7 +1181,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return The {@link Cursor} of the component.
      */
     public final Cursor getCursor() {
-        return _component().getCursor();
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return _component().getCursor();
+        }));
     }
 
     /**
@@ -1120,7 +1199,9 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setTooltip( String text ) {
         Objects.requireNonNull(text, "Use an empty string instead of null to represent the absence of a tooltip.");
-        _component().setToolTipText( text.isEmpty() ? null : text );
+        UI.run(()->{
+            _component().setToolTipText( text.isEmpty() ? null : text );
+        });
         return this;
     }
 
@@ -1135,8 +1216,10 @@ public class AbstractDelegate<C extends JComponent>
      *         does not have a tooltip, <b>but {@code null} is never returned</b>!
      */
     public final String getTooltip() {
-        String nullableToolTip = _component().getToolTipText();
-        return nullableToolTip == null ? "" : nullableToolTip;
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            String nullableToolTip = _component().getToolTipText();
+            return nullableToolTip == null ? "" : nullableToolTip;
+        }));
     }
 
     /**
@@ -1150,7 +1233,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setEnabled( boolean enabled ) {
-        _component().setEnabled(enabled);
+        UI.run(()->{
+            _component().setEnabled(enabled);
+        });
         return this;
     }
 
@@ -1163,7 +1248,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return True if the component is enabled, false otherwise.
      */
     public final boolean isEnabled() {
-        return _component().isEnabled();
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return _component().isEnabled();
+        }));
     }
 
     /**
@@ -1177,7 +1264,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setVisible( boolean visible ) {
-        _component().setVisible(visible);
+        UI.run(()->{
+            _component().setVisible(visible);
+        });
         return this;
     }
 
@@ -1190,7 +1279,9 @@ public class AbstractDelegate<C extends JComponent>
      *  @return True if the component is visible, false otherwise.
      */
     public final boolean isVisible() {
-        return _component().isVisible();
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return _component().isVisible();
+        }));
     }
 
     /**
@@ -1202,7 +1293,9 @@ public class AbstractDelegate<C extends JComponent>
      * @return True if the component is opaque, false otherwise.
      */
     public final boolean isOpaque() {
-        return _component().isOpaque();
+        return Objects.requireNonNull(UI.runAndGet(()->{
+            return _component().isOpaque();
+        }));
     }
 
     /**
@@ -1685,7 +1778,7 @@ public class AbstractDelegate<C extends JComponent>
      *  @param unit The time unit of the duration.
      *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
-    public final AnimationDispatcher animateFor(double duration, TimeUnit unit ) {
+    public final AnimationDispatcher animateFor( double duration, TimeUnit unit ) {
         Objects.requireNonNull(unit);
         return AnimationDispatcher.animateFor(LifeTime.of(duration, unit), _component());
     }
@@ -1698,7 +1791,7 @@ public class AbstractDelegate<C extends JComponent>
      *  @param lifeTime The lifetime of the animation.
      *  @return An {@link AnimationDispatcher} instance which can be used to define how the animation should be executed.
      */
-    public final AnimationDispatcher animateFor(LifeTime lifeTime ) {
+    public final AnimationDispatcher animateFor( LifeTime lifeTime ) {
         Objects.requireNonNull(lifeTime);
         return AnimationDispatcher.animateFor(lifeTime, _component());
     }

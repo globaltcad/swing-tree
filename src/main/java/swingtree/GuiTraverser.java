@@ -27,21 +27,23 @@ final class GuiTraverser
     }
 
     <C extends Component> Stream<C> find( final Class<C> type, final Predicate<C> predicate ) {
-        return _find( c -> {
-                   boolean isType = type.isAssignableFrom(c.getClass());
-                   if ( !isType )
-                       return false;
-                   try {
-                       return predicate.test(type.cast(c));
-                   } catch (Exception e) {
-                       log.error(
-                               "An exception occurred while testing a component of type '{}'!",
-                               type.getSimpleName(), e
-                            );
-                       return false;
-                   }
-               })
-               .map( type::cast );
+        return Objects.requireNonNull(UI.runAndGet(()->
+                   _find( c -> {
+                       boolean isType = type.isAssignableFrom(c.getClass());
+                       if ( !isType )
+                           return false;
+                       try {
+                           return predicate.test(type.cast(c));
+                       } catch (Exception e) {
+                           log.error(
+                                   "An exception occurred while testing a component of type '{}'!",
+                                   type.getSimpleName(), e
+                                );
+                           return false;
+                       }
+                   })
+                   .map( type::cast )
+            ));
     }
 
     private Stream<Component> _find( Predicate<Component> predicate ) {
