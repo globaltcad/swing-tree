@@ -2,6 +2,7 @@ package swingtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Tuple;
 import sprouts.Val;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationDispatcher;
@@ -1260,13 +1261,13 @@ public class AbstractDelegate<C extends JComponent>
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
      * @param predicate The predicate which should be used to test the {@link JComponent}.
-     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @return A tuple (immutable list) of {@link JComponent} instances which match the given type and predicate.
      * @param <T> The type parameter of the component which should be found.
      */
-    public final <T extends JComponent> List<T> findAll( Class<T> type, Predicate<T> predicate ) {
+    public final <T extends JComponent> Tuple<T> findAll( Class<T> type, Predicate<T> predicate ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(predicate);
-        return _guiTraverser.find(type, predicate).collect(Collectors.toList());
+        return _guiTraverser.find(type, predicate).collect(Tuple.collectorOf(type));
     }
 
     /**
@@ -1275,10 +1276,10 @@ public class AbstractDelegate<C extends JComponent>
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
      * @param group The style group which should be used to test the {@link JComponent}.
-     * @return A list of {@link JComponent} instances which match the given type and group.
+     * @return A tuple (immutable list) of {@link JComponent} instances which match the given type and group.
      * @param <T> The type parameter of the component which should be found.
      */
-    public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, String group ) {
+    public final <T extends JComponent> Tuple<T> findAllByGroup( Class<T> type, String group ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(group);
         return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
@@ -1289,10 +1290,10 @@ public class AbstractDelegate<C extends JComponent>
      *  that belong to a particular style group.
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
-     * @return A list of {@link JComponent} instances which all have the given style group.
+     * @return A tuple (immutable list) of {@link JComponent} instances which all have the given style group.
      * @throws NullPointerException If the group is null.
      */
-    public final List<JComponent> findAllByGroup( String group ) {
+    public final Tuple<JComponent> findAllByGroup( String group ) {
         Objects.requireNonNull(group);
         return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
@@ -1304,10 +1305,10 @@ public class AbstractDelegate<C extends JComponent>
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
      * @param group The style group which should be used to test the {@link JComponent}.
-     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @return A tuple (immutable list) of {@link JComponent} instances which match the given type and predicate.
      * @param <T> The type parameter of the component which should be found.
      */
-    public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, Enum<?> group ) {
+    public final <T extends JComponent> Tuple<T> findAllByGroup( Class<T> type, Enum<?> group ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(group);
         return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
@@ -1318,9 +1319,9 @@ public class AbstractDelegate<C extends JComponent>
      *  that belong to a particular style group.
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
-     * @return A list of {@link JComponent} instances which all have the given style group.
+     * @return A tuple (immutable list) of {@link JComponent} instances which all have the given style group.
      */
-    public final List<JComponent> findAllByGroup( Enum<?> group ) {
+    public final Tuple<JComponent> findAllByGroup( Enum<?> group ) {
         Objects.requireNonNull(group);
         return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
