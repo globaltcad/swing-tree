@@ -27,8 +27,7 @@ final class GuiTraverser
     }
 
     <C extends Component> Stream<C> find( final Class<C> type, final Predicate<C> predicate ) {
-        return Objects.requireNonNull(UI.runAndGet(()->
-                   _find( c -> {
+        return _find( c -> {
                        boolean isType = type.isAssignableFrom(c.getClass());
                        if ( !isType )
                            return false;
@@ -42,8 +41,7 @@ final class GuiTraverser
                            return false;
                        }
                    })
-                   .map( type::cast )
-            ));
+                   .map( type::cast );
     }
 
     private Stream<Component> _find( Predicate<Component> predicate ) {

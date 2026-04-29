@@ -1344,10 +1344,12 @@ public class AbstractDelegate<C extends JComponent>
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Predicate<T> predicate ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(predicate);
-        return _guiTraverser.find(type, predicate)
+        return Objects.requireNonNull(UI.runAndGet(()->
+                _guiTraverser.find(type, predicate)
                 .findFirst()
                 .map(OptionalUI::ofNullable)
-                .orElse(OptionalUI.empty());
+                .orElse(OptionalUI.empty())
+            ));
     }
 
     /**
@@ -1363,7 +1365,11 @@ public class AbstractDelegate<C extends JComponent>
     public final <T extends JComponent> Tuple<T> findAll( Class<T> type, Predicate<T> predicate ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(predicate);
-        return _guiTraverser.find(type, predicate).collect(Tuple.collectorOf(type));
+        return Objects.requireNonNull(UI.runAndGet(()->
+                    _guiTraverser
+                        .find(type, predicate)
+                        .collect(Tuple.collectorOf(type))
+                ));
     }
 
     /**
