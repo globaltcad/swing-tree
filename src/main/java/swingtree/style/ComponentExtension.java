@@ -483,11 +483,10 @@ public final class ComponentExtension<C extends JComponent>
      *  invoked. The counter is local to this component instance and increases on
      *  every paint that is served from the cache.
      *  <p>
-     *  This counter never decreases on its own. It is reset only when the
-     *  underlying cache entry is freed (e.g. because the layer's style was
-     *  changed in a way that disables caching for it) – at which point fresh
-     *  paints start contributing to {@link #cacheMissCount(UI.Layer)} again
-     *  until the cache rebuilds.
+     *  This counter is cumulative for the lifetime of this component instance.
+     *  It does not automatically reset when the underlying cache entry is freed,
+     *  invalidated, or rebuilt; such events only affect whether future paints
+     *  contribute to this counter or to {@link #cacheMissCount(UI.Layer)}.
      *
      * @param layer The style layer to query.
      * @return Number of paint calls served from the cache, since this component
