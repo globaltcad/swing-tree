@@ -478,12 +478,15 @@ public class AbstractDelegate<C extends JComponent>
      *  conveniently get the border of the component.
      *  <p>
      *  Note that this method is a delegate to {@link JComponent#getBorder()}.
+     *  The returned {@link Optional} will be empty if the component has no border,
+     *  which is a perfectly valid state for Swing components.
      *  </p>
      *
-     * @return The border of the component.
+     * @return An {@link Optional} containing the border of the component,
+     *         or an empty {@link Optional} if the component has no border.
      */
-    public final Border getBorder() {
-        return Objects.requireNonNull(UI.runAndGet(()->{
+    public final Optional<Border> getBorder() {
+        return Optional.ofNullable(UI.runAndGet(()->{
             return _component().getBorder();
         }));
     }
