@@ -111,11 +111,18 @@ public class AbstractDelegate<C extends JComponent>
      *  This is a delegate to the underlying component, but not every method of the component
      *  is delegated. This method allows you to access the underlying component directly.
      *  <p>
-     *  Note that this method expects that the accessing thread is the event dispatch thread,
-     *  not the application thread.
-     *  If you want to access the component from the application thread, you should use <br>
-     *  {@code UI.runAndGet(() -> delegate.get())} to safely retrieve the component reference,
-     *  or {@code UI.run(() -> { ... delegate.get() ... })} to operate on it on the EDT.
+     *  <b>Threading:</b> A {@link JComponent} is owned by the GUI thread (the AWT
+     *  Event Dispatch Thread). This method <b>requires the calling thread to be
+     *  the GUI thread</b> and throws an {@link IllegalStateException} otherwise.
+     *  Under a non-coupled threading model
+     *  (see {@link swingtree.threading.EventProcessor}), event actions may be invoked
+     *  on the application thread; in that case use
+     *  {@code UI.runAndGet(() -> delegate.get())} to safely retrieve the component
+     *  reference, or wrap your access in {@code UI.run(() -> { ... delegate.get() ... })}
+     *  to operate on it on the EDT. Subclasses such as
+     *  {@link ComponentDelegate} additionally provide
+     *  {@link ComponentDelegate#forComponent(java.util.function.Consumer) forComponent(Consumer)}
+     *  for thread-safe access via a lambda.
      *
      * @return The underlying component.
      * @throws IllegalStateException If the accessing thread is not the event dispatch thread.
@@ -180,7 +187,18 @@ public class AbstractDelegate<C extends JComponent>
      *  This is a component delegate API, which means that it represents
      *  the API of a wrapped component. So this method allows you to access
      *  the parent of the underlying component.
-     *  In essence, this is a delegate to {@link Component#getParent()}. <br>
+     *  In essence, this is a delegate to {@link Component#getParent()}.
+     *  <p>
+     *  <b>Threading:</b> The parent of the delegated component is part of the
+     *  Swing component tree, which is owned by the GUI thread (the AWT Event
+     *  Dispatch Thread). This method <b>requires the calling thread to be the
+     *  GUI thread</b> and throws an {@link IllegalStateException} otherwise.
+     *  Under a non-coupled threading model
+     *  (see {@link swingtree.threading.EventProcessor}), event actions may be invoked
+     *  on the application thread; in that case use
+     *  {@code UI.runAndGet(() -> delegate.getParent())} to retrieve the parent
+     *  on the GUI thread, or wrap your access in {@code UI.run(...)} to operate
+     *  on it from the GUI thread.
      *
      * @return The parent {@link Container} of the underlying component.
      * @throws IllegalStateException If the accessing thread is not the event dispatch thread.
@@ -191,7 +209,7 @@ public class AbstractDelegate<C extends JComponent>
         else
             throw new IllegalStateException(
                     "You can only access the parent component from the GUI thread. " +
-                    "Use 'UI.run(() -> delegate.getParent())' to access the parent component from the application thread."
+                    "Use 'UI.runAndGet(() -> delegate.getParent())' to access the parent component from the application thread."
                 );
     }
 
