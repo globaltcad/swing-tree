@@ -297,7 +297,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param i The item index of the {@link JMenuItem} which should be selected.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> selectItem(int i) {
+    public SplitItemDelegate<I> selectItem( int i ) {
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {
             UI.run(() -> selectItem(i));
@@ -313,7 +313,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> selectOnlyItem(int i) {
+    public SplitItemDelegate<I> selectOnlyItem( int i ) {
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {
             UI.run(() -> selectOnlyItem(i));
@@ -329,7 +329,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param i The item index of the {@link JMenuItem} which should be unselected.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> unselectItem(int i) {
+    public SplitItemDelegate<I> unselectItem( int i ) {
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {
             UI.run(() -> unselectItem(i));
