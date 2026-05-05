@@ -42,9 +42,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
          *  This method exposes all of the {@link JMenuItem}s which are
          *  part of the {@link JSplitButton} in an immutable list.
          *
-         * @return A list of all split button items.
+         * @return A tuple (immutable list) of all split button items.
          */
-        List<I> getItems() {
+        Tuple<I> getItems() {
             return _itemsDelegate.getSiblinghood();
         }
 

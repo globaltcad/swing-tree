@@ -1,10 +1,7 @@
 package swingtree;
 
 import org.slf4j.Logger;
-import sprouts.Action;
-import sprouts.Event;
-import sprouts.From;
-import sprouts.Var;
+import sprouts.*;
 import swingtree.components.JSplitButton;
 import swingtree.style.ComponentExtension;
 
@@ -54,7 +51,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                     new SplitItemDelegate<>(
                                             e,
                                             thisComponent,
-                                            () -> new ArrayList<>(extraState.options.keySet()),
+                                            () -> Tuple.of(JMenuItem.class, extraState.options.keySet()),
                                             item
                                     )
                             );
@@ -240,7 +237,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                                         thisComponent,
                                                         new SplitItemDelegate<>(
                                                                 e, thisComponent,
-                                                                () -> new ArrayList<>(state.options.keySet()),
+                                                                () -> Tuple.of(JMenuItem.class, state.options.keySet()),
                                                                 state.lastSelected[0]
                                                         )
                                                 )
@@ -305,7 +302,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                                         new SplitItemDelegate<>(
                                                 e,
                                                 thisComponent,
-                                                () -> new ArrayList<>(state.options.keySet()),
+                                                () -> Tuple.of(JMenuItem.class, state.options.keySet()),
                                                 state.lastSelected[0]
                                         )
                                 );
@@ -527,11 +524,12 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
             e -> _runInApp(()->{
                 state.lastSelected[0] = item;
                 item.setSelected(true);
+                Class<I> type = (Class<I>) JMenuItem.class;
                 SplitItemDelegate<I> delegate =
                         new SplitItemDelegate<>(
                                 e,
                                 thisComponent,
-                                () -> state.options.keySet().stream().map(o -> (I) o ).collect(Collectors.toList()),
+                                () -> state.options.keySet().stream().map(type::cast).collect(Tuple.collectorOf(type)),
                                 item
                             );
                 state.onSelections.forEach(action -> {
