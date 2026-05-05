@@ -1,9 +1,9 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.Tuple;
 
 import javax.swing.JComponent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -137,18 +137,18 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
      *  {@link #forSiblings(Consumer)} instead, which dispatches the supplied
      *  lambda to the GUI thread for you.
      *
-     * @return A list of all siblings excluding the component from which this instance originated.
+     * @return A tuple (immutable list) of all siblings excluding the component from which this instance originated.
      * @throws IllegalStateException If this method is called from a non-Swing thread.
      * @see #forSiblings(Consumer)
      */
-    public final List<JComponent> getSiblings() {
+    public final Tuple<JComponent> getSiblings() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblings(..)' methods instead."
                 );
-        return _siblingsSource().stream().filter( s -> _component() != s ).collect(Collectors.toList());
+        return _siblingsSource().retainIf( s -> _component() != s );
     }
 
     /**
@@ -167,7 +167,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
      *               which will be executed by the Swing thread.
      * @see #getSiblings()
      */
-    public final void forSiblings( Consumer<List<JComponent>> action ) {
+    public final void forSiblings( Consumer<Tuple<JComponent>> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblings());
         else
@@ -249,18 +249,18 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
      *  {@link #forSiblinghood(Consumer)} instead, which dispatches the supplied
      *  lambda to the GUI thread for you.
      *
-     * @return A list of all siblings including the component from which this instance originated.
+     * @return A tuple (immutable list) of all siblings including the component from which this instance originated.
      * @throws IllegalStateException If this method is called from a non-Swing thread.
      * @see #forSiblinghood(Consumer)
      */
-    public final List<JComponent> getSiblinghood() {
+    public final Tuple<JComponent> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblinghood(..)' methods instead."
             );
-        return new ArrayList<>(_siblingsSource());
+        return _siblingsSource();
     }
 
     /**
@@ -280,7 +280,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
      *               which will be executed by the Swing thread.
      * @see #getSiblinghood()
      */
-    public final void forSiblinghood( Consumer<List<JComponent>> action ) {
+    public final void forSiblinghood( Consumer<Tuple<JComponent>> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblinghood());
         else
@@ -308,18 +308,18 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
      * @throws IllegalStateException If this method is called from a non-Swing thread.
      * @see #forSiblinghoodOfType(Class, Consumer)
      */
-    public final <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
+    public final <T extends JComponent> Tuple<T> getSiblinghoodOfType( Class<T> type ) {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                 "Sibling components can only be accessed by the Swing thread. " +
                 "Please use 'forSiblinghoodOfType(..)' methods instead."
             );
-        return new ArrayList<>(_siblingsSource())
+        return _siblingsSource()
                 .stream()
                 .filter( s -> type.isAssignableFrom(s.getClass()) )
-                .map( s -> (T) s )
-                .collect(Collectors.toList());
+                .map(type::cast)
+                .collect(Tuple.collectorOf(type));
     }
 
     /**
@@ -336,13 +336,13 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
      *
      * @param type The type of the sibling components to return.
      * @param <T> The {@link JComponent} type of the sibling components to return.
-     * @param action The action consuming a list of all siblings of the specified type,
+     * @param action The action consuming a tuple (immutable list) of all siblings of the specified type,
      *               including the component from which this instance originated,
      *               which will be executed by the Swing thread.
      * @see #getSiblinghoodOfType(Class)
      */
     public final <T extends JComponent> void forSiblinghoodOfType(
-        Class<T> type, Consumer<List<T>> action
+        Class<T> type, Consumer<Tuple<T>> action
     ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblinghoodOfType(type));

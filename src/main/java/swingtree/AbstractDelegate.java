@@ -21,12 +21,10 @@ import javax.swing.JComponent;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -93,9 +91,9 @@ public class AbstractDelegate<C extends JComponent>
      *  of the delegated component. Access to the component tree is dispatched
      *  to the EDT to ensure thread safety when called from the application thread
      *  (e.g. under a decoupled {@link swingtree.threading.EventProcessor}).
-     * @return A list of sibling components.
+     * @return A tuple (immutable list) of sibling components.
      */
-    protected final List<JComponent> _siblingsSource() {
+    protected final Tuple<JComponent> _siblingsSource() {
         return Objects.requireNonNull(UI.runAndGet(() ->
                 Optional.ofNullable(_component.getParent())
                         .map(Container::getComponents)
@@ -103,7 +101,7 @@ public class AbstractDelegate<C extends JComponent>
                         .orElseGet(Stream::empty)
                         .filter(c -> c instanceof JComponent)
                         .map(c -> (JComponent) c)
-                        .collect(Collectors.toList())
+                        .collect(Tuple.collectorOf(JComponent.class))
             ));
     }
 
