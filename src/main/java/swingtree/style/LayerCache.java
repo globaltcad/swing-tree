@@ -143,7 +143,6 @@ final class LayerCache
         }
 
         boolean cacheIsInvalid = true;
-        boolean cacheIsFull    = _CACHE.size() > DYNAMIC_CACHE_CAP();
 
         boolean newBufferNeeded = false;
 
@@ -155,11 +154,6 @@ final class LayerCache
         if ( cacheIsInvalid ) {
             _freeLocalCache();
             newBufferNeeded = true;
-        }
-
-        if ( cacheIsFull ) {
-            _layerRenderData = new Pooled<>(newState);
-            return;
         }
 
         if ( newBufferNeeded )
@@ -218,6 +212,9 @@ final class LayerCache
      */
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {
+        if ( _CACHE.size() > DYNAMIC_CACHE_CAP() )
+            return -1; // The cache is already too full, we don't want to add more entries to it!
+
         final Size size = state.boxModel().size();
 
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
