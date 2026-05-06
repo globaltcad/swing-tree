@@ -3374,6 +3374,50 @@ public final class UI extends UIFactoryMethods
         public Color withBrightness( double brightness ) {
             return Color.ofHsb(hue(), saturation(), brightness, opacity());
         }
+
+        /**
+         *  Creates a new color that is a linear interpolation between this color and the
+         *  specified other color. The interpolation factor {@code t} controls the blending:
+         *  a value of {@code 0.0} returns this color, a value of {@code 1.0} returns the
+         *  other color, and intermediate values produce a smooth blend. Each of the red,
+         *  green, blue and alpha components is interpolated independently in the sRGB
+         *  color space.
+         *
+         * @param other The color to blend with this color, must not be {@code null}.
+         * @param t     The interpolation factor in the range {@code 0.0} to {@code 1.0}.
+         *              Values outside this range are clamped.
+         * @return A new color that is a linear blend of this color and the specified color.
+         * @throws NullPointerException If {@code other} is {@code null}.
+         * @see #shade(double)
+         */
+        public Color blend( java.awt.Color other, double t ) {
+            Objects.requireNonNull(other);
+            t = Math.max(0, Math.min(1, t));
+            int r = (int) Math.round(getRed()   * (1 - t) + other.getRed()   * t);
+            int g = (int) Math.round(getGreen() * (1 - t) + other.getGreen() * t);
+            int b = (int) Math.round(getBlue()  * (1 - t) + other.getBlue()  * t);
+            int a = (int) Math.round(getAlpha() * (1 - t) + other.getAlpha() * t);
+            return new Color(r, g, b, a);
+        }
+
+        /**
+         *  Creates a shaded version of this color by mixing it towards either {@link #WHITE}
+         *  or {@link #BLACK}, depending on the sign of the supplied {@code amount}.
+         *  A positive amount mixes this color towards white (a tint), a negative amount
+         *  mixes it towards black (a shade), and a value of {@code 0.0} returns this
+         *  color unchanged. The magnitude of {@code amount} controls how strongly the
+         *  color is pulled towards the target — equivalent to calling
+         *  {@code blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))}.
+         *
+         * @param amount The shading factor in the range {@code -1.0} to {@code 1.0}.
+         *               Negative values darken (towards black), positive values lighten
+         *               (towards white). The magnitude is clamped to {@code 0.0..1.0}.
+         * @return A shaded version of this color.
+         * @see #blend(java.awt.Color, double)
+         */
+        public Color shade( double amount ) {
+            return blend(amount < 0 ? BLACK : WHITE, Math.abs(amount));
+        }
     }
 
     /**

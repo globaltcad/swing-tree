@@ -18,6 +18,7 @@ import swingtree.style.StyledString;
 import swingtree.threading.EventProcessor;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -141,7 +142,7 @@ public final class CelestialScribe extends Panel {
                         .shadowSpreadRadius(-4)
                         .shadowOffset(0, 8)
                         .gradient("grain", g -> g
-                            .colors(pageColor(mood.get()), shade(pageColor(mood.get()), -0.06))
+                            .colors(pageColor(mood.get()), pageColor(mood.get()).shade(-0.06))
                             .span(Span.TOP_TO_BOTTOM)
                             .clipTo(ComponentArea.BODY)
                         )
@@ -176,9 +177,9 @@ public final class CelestialScribe extends Panel {
             .withCursor(Cursor.MOVE)
             .withRepaintOn(hue, brightness)
             .withStyle( it -> {
-                Color core = hsbColor(hue.get(), 0.35, 1.00);
-                Color mid  = hsbColor(hue.get(), 0.65, 0.90);
-                Color rim  = hsbColor(hue.get(), 0.80, 0.70);
+                UI.Color core = hsbColor(hue.get(), 0.35, 1.00);
+                Color    mid  = hsbColor(hue.get(), 0.65, 0.90);
+                Color    rim  = hsbColor(hue.get(), 0.80, 0.70);
                 boolean selected = id.equals(vm.get().selectedStarId());
                 return it
                     .borderRadius(1000)
@@ -193,7 +194,7 @@ public final class CelestialScribe extends Panel {
                         .clipTo(ComponentArea.BODY)
                         .size(Math.min(it.componentWidth(), it.componentHeight()) * brightness.get() + 12)
                         .colors(
-                            blend(core, Color.WHITE, 0.15 * brightness.get()),
+                            core.blend(Color.WHITE, 0.15 * brightness.get()),
                             withAlpha(mid, (int) (200 * brightness.get())),
                             withAlpha(rim, 0)
                         )
@@ -207,7 +208,7 @@ public final class CelestialScribe extends Panel {
                     );
             })
             .onMousePress( e -> {
-                e.forComponent(c -> c.repaint());
+                e.forComponent(Component::repaint);
                 vm.update( v -> v.selectStar(id) );
             })
             .onMouseDrag( e -> {
@@ -351,12 +352,12 @@ public final class CelestialScribe extends Panel {
 
     // ── Palette helpers ──────────────────────────────────────────────────
 
-    private static Color pageColor( Mood m ) {
+    private static UI.Color pageColor( Mood m ) {
         switch ( m ) {
-            case DAWN:     return new Color(250, 232, 205);  // warm ivory
-            case DUSK:     return new Color(237, 220, 230);  // cool lavender-ivory
+            case DAWN:     return UI.Color.ofRgb(250, 232, 205);  // warm ivory
+            case DUSK:     return UI.Color.ofRgb(237, 220, 230);  // cool lavender-ivory
             case MIDNIGHT:
-            default:       return new Color( 18,  22,  46);  // deep navy parchment
+            default:       return UI.Color.ofRgb( 18,  22,  46);  // deep navy parchment
         }
     }
 
@@ -396,26 +397,13 @@ public final class CelestialScribe extends Panel {
         }
     }
 
-    private static Color hsbColor( double hue, double sat, double bri ) {
-        return Color.getHSBColor((float) hue, (float) sat, (float) bri);
+    private static UI.Color hsbColor( double hue, double sat, double bri ) {
+        return UI.Color.of(Color.getHSBColor((float) hue, (float) sat, (float) bri));
     }
 
     private static Color withAlpha( Color c, int alpha ) {
         alpha = Math.max(0, Math.min(255, alpha));
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
-    }
-
-    private static Color blend( Color a, Color b, double t ) {
-        t = Math.max(0, Math.min(1, t));
-        int r = (int) Math.round(a.getRed()   * (1 - t) + b.getRed()   * t);
-        int g = (int) Math.round(a.getGreen() * (1 - t) + b.getGreen() * t);
-        int bl= (int) Math.round(a.getBlue()  * (1 - t) + b.getBlue()  * t);
-        int al= (int) Math.round(a.getAlpha() * (1 - t) + b.getAlpha() * t);
-        return new Color(r, g, bl, al);
-    }
-
-    private static Color shade( Color c, double amount ) {
-        return blend(c, amount < 0 ? Color.BLACK : Color.WHITE, Math.abs(amount));
     }
 
     // ── main ─────────────────────────────────────────────────────────────
