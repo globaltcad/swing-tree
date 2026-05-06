@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.Tuple;
 import swingtree.components.JSplitButton;
 
 import javax.swing.JMenuItem;
@@ -24,14 +25,14 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     
     private final ActionEvent       _event;
     private final JSplitButton      _splitButton;
-    private final Supplier<List<I>> _siblingsSource;
+    private final Supplier<Tuple<I>> _siblingsSource;
 
 
     SplitItemDelegate(
-        ActionEvent       event,
-        JSplitButton      splitButton,
-        Supplier<List<I>> siblingsSource,
-        I                 currentItem
+        ActionEvent        event,
+        JSplitButton       splitButton,
+        Supplier<Tuple<I>> siblingsSource,
+        I                  currentItem
     ) {
         super(true, currentItem, splitButton);
         Objects.requireNonNull(event);
@@ -39,7 +40,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
         Objects.requireNonNull(siblingsSource);
         _event          = event;
         _splitButton    = splitButton;
-        _siblingsSource = () -> Collections.unmodifiableList(siblingsSource.get());
+        _siblingsSource = siblingsSource;
     }
 
     /**
@@ -94,9 +95,10 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      *  This method provides a convenient way to access all the children of the parent component
      *  of the split item this delegate is for.
      *
-     * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
+     * @return A tuple (immutable list) of all the {@link JMenuItem} which constitute the
+     *          options exposed by the {@link JSplitButton}.
      */
-    public List<I> getSiblinghood() {
+    public Tuple<I> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( UI.thisIsUIThread() )
             return _siblingsSource.get();
@@ -295,7 +297,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param i The item index of the {@link JMenuItem} which should be selected.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> selectItem(int i) {
+    public SplitItemDelegate<I> selectItem( int i ) {
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {
             UI.run(() -> selectItem(i));
@@ -311,7 +313,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> selectOnlyItem(int i) {
+    public SplitItemDelegate<I> selectOnlyItem( int i ) {
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {
             UI.run(() -> selectOnlyItem(i));
@@ -327,7 +329,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param i The item index of the {@link JMenuItem} which should be unselected.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> unselectItem(int i) {
+    public SplitItemDelegate<I> unselectItem( int i ) {
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {
             UI.run(() -> unselectItem(i));

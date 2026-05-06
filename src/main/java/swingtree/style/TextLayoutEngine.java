@@ -171,10 +171,11 @@ final class TextLayoutEngine {
          */
         float totalHeight = 0;
         for ( LayoutLine line : lines ) {
-            if ( line.layout == null )
+            final TextLayout primary = line.primary().layout;
+            if ( primary == null )
                 totalHeight += font.getSize2D();
             else
-                totalHeight += line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();
+                totalHeight += primary.getAscent() + primary.getDescent() + primary.getLeading();
         }
 
         final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
@@ -243,7 +244,7 @@ final class TextLayoutEngine {
         for ( final Pooled<Paragraph> pooled : paragraphs ) {
             final Paragraph paragraph = pooled.get();
             if ( paragraph.isBlankLine ) {
-                lines.add(new LayoutLine(null, boundsX, boundsWidth)); // blank line
+                lines.add(LayoutLine.blank(boundsX, boundsWidth));
                 currentY += estLineHeight;
                 continue;
             }
@@ -273,9 +274,11 @@ final class TextLayoutEngine {
 
                 if ( cachedLines != null ) {
                     lines.addAll(cachedLines);
-                    for ( LayoutLine ll : cachedLines )
-                        currentY += ll.layout == null ? estLineHeight
-                                                      : ll.layout.getAscent() + ll.layout.getDescent() + ll.layout.getLeading();
+                    for ( LayoutLine ll : cachedLines ) {
+                        final TextLayout primary = ll.primary().layout;
+                        currentY += primary == null ? estLineHeight
+                                                    : primary.getAscent() + primary.getDescent() + primary.getLeading();
+                    }
                 } else {
                     // Build from scratch and populate the per-paragraph cache.
                     final AttributedCharacterIterator it = data.attrStr.getIterator();
@@ -289,15 +292,14 @@ final class TextLayoutEngine {
                     while ( data.measurer.getPosition() < end ) {
                         final List<Band> intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);
 
-                        TextLayout firstLayout = null;
-                        float firstX = boundsX;
-                        float firstW = effectiveWidth;
-                        List<LayoutLine.Segment> extras = Collections.emptyList();
+                        final List<LayoutLine.Segment> segments = new ArrayList<>(Math.max(1, intervals.size()));
 
                         if ( intervals.isEmpty() ) {
                             // All space is blocked — advance the measurer so the loop terminates.
                             // When not wrapping, consume all remaining text in one shot.
-                            firstLayout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
+                            final TextLayout layout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
+                            if ( layout != null )
+                                segments.add(new LayoutLine.Segment(layout, boundsX, effectiveWidth));
                         } else {
                             final int lastIdx = intervals.size() - 1;
                             for ( int i = 0; i <= lastIdx; i++ ) {
@@ -308,20 +310,14 @@ final class TextLayoutEngine {
                                 // remaining text is consumed here instead of wrapping to a new line.
                                 final float      nextWidth = (wrapLines || i < lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;
                                 final TextLayout layout    = data.measurer.nextLayout(nextWidth);
-                                if ( firstLayout == null ) {
-                                    firstLayout = layout;
-                                    firstX      = x;
-                                    firstW      = w;
-                                } else {
-                                    if ( extras.isEmpty() ) extras = new ArrayList<>();
-                                    extras.add(new LayoutLine.Segment(layout, x, w));
-                                }
+                                segments.add(new LayoutLine.Segment(layout, x, w));
                             }
                         }
 
-                        if ( firstLayout != null ) {
-                            paraLines.add(new LayoutLine(firstLayout, firstX, firstW, extras));
-                            currentY += firstLayout.getAscent() + firstLayout.getDescent() + firstLayout.getLeading();
+                        final TextLayout primary = segments.isEmpty() ? null : segments.get(0).layout;
+                        if ( primary != null ) {
+                            paraLines.add(new LayoutLine(Collections.unmodifiableList(segments)));
+                            currentY += primary.getAscent() + primary.getDescent() + primary.getLeading();
                         } else {
                             currentY += estLineHeight; // all intervals had zero width — skip band
                         }
@@ -339,7 +335,7 @@ final class TextLayoutEngine {
                     final AttributedCharacterIterator it = data.attrStr.getIterator();
                     data.singleLayout = new TextLayout(it, frc);
                 }
-                lines.add(new LayoutLine(data.singleLayout, boundsX, boundsWidth));
+                lines.add(LayoutLine.single(data.singleLayout, boundsX, boundsWidth));
                 currentY += data.singleLayout.getAscent() + data.singleLayout.getDescent() + data.singleLayout.getLeading();
             }
 
@@ -349,7 +345,7 @@ final class TextLayoutEngine {
 
         // Strip a trailing blank-line marker that may have been emitted for a paragraph
         // separator appearing at the very end of the text.
-        if ( !lines.isEmpty() && lines.get(lines.size() - 1).layout == null )
+        if ( !lines.isEmpty() && lines.get(lines.size() - 1).isBlank() )
             lines.remove(lines.size() - 1);
 
         return lines;
@@ -478,48 +474,51 @@ final class TextLayoutEngine {
     }
 
     /**
-     *  Holds a single laid-out text line together with the obstacle-free horizontal region
-     *  it was fitted into.  Both {@code regionX} and {@code regionWidth} are in component
-     *  coordinates and are used by the renderer to position the line, including alignment
-     *  (LEFT / CENTER / RIGHT) within the available region.
+     *  Holds a laid-out text line as an ordered list of {@link Segment}s, each covering one
+     *  obstacle-free horizontal region the text was fitted into.  All segments share the same
+     *  baseline (y is not advanced between them) and only differ in their {@code regionX} and
+     *  {@code regionWidth}, which are in component coordinates and drive the renderer's
+     *  per-fragment alignment (LEFT / CENTER / RIGHT) within the available region.
      *  <p>
-     *  When obstacles split a visual line into more than one free interval, every interval
-     *  beyond the first is captured as an extra {@link Segment} in {@code extraSegments}.
-     *  All segments share the same baseline (y is not advanced between them).
+     *  When no obstacles split the line, {@link #segments} contains exactly one entry. When
+     *  obstacles divide the line into multiple free intervals, each interval is its own
+     *  {@link Segment} with its own {@link TextLayout}.
      *  <p>
-     *  A {@code null} {@code layout} represents a blank / empty line — the region fields
-     *  still carry the full text-bounds width so that the blank contributes the correct height.
+     *  A blank / empty line is represented by a single {@link Segment} whose {@code layout}
+     *  is {@code null}; the region fields still carry the full text-bounds width so that the
+     *  blank contributes the correct height. Use {@link #isBlank()} to test for this.
      */
     static final class LayoutLine {
 
-        /** A secondary text fragment placed in one of the additional free intervals on this line. */
+        /** A text fragment placed in one of the obstacle-free intervals on this line. */
         static final class Segment {
-            final TextLayout layout;
-            final float regionX;
-            final float regionWidth;
-            Segment(TextLayout layout, float regionX, float regionWidth) {
+            final @Nullable TextLayout layout;
+            final float                regionX;
+            final float                regionWidth;
+            Segment(@Nullable TextLayout layout, float regionX, float regionWidth) {
                 this.layout      = layout;
                 this.regionX     = regionX;
                 this.regionWidth = regionWidth;
             }
         }
 
-        final @Nullable TextLayout  layout;
-        final float                 regionX;
-        final float                 regionWidth;
-        /** Additional same-baseline fragments produced when obstacles split the line. */
-        final List<Segment>         extraSegments;
+        final List<Segment> segments;
 
-        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth) {
-            this(layout, regionX, regionWidth, Collections.emptyList());
+        LayoutLine(List<Segment> segments) {
+            this.segments = segments;
         }
 
-        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth, List<Segment> extraSegments) {
-            this.layout        = layout;
-            this.regionX       = regionX;
-            this.regionWidth   = regionWidth;
-            this.extraSegments = extraSegments;
+        static LayoutLine blank(float regionX, float regionWidth) {
+            return new LayoutLine(Collections.singletonList(new Segment(null, regionX, regionWidth)));
         }
+
+        static LayoutLine single(TextLayout layout, float regionX, float regionWidth) {
+            return new LayoutLine(Collections.singletonList(new Segment(layout, regionX, regionWidth)));
+        }
+
+        Segment primary() { return segments.get(0); }
+
+        boolean isBlank() { return primary().layout == null; }
     }
 
     private static final class Range {

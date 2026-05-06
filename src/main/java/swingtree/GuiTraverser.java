@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.awt.Component;
@@ -20,49 +21,50 @@ final class GuiTraverser
     private final Component _current;
 
 
-    GuiTraverser( Component current ) {
+    GuiTraverser( final Component current ) {
         Objects.requireNonNull(current);
         _current = current;
     }
 
-    <C extends Component> Stream<C> find( Class<C> type, Predicate<C> predicate ) {
-        return find( c -> {
-                   boolean isType = type.isAssignableFrom(c.getClass());
-                   if ( !isType ) return false;
-                   try {
-                       return predicate.test(type.cast(c));
-                   } catch (Exception e) {
-                       log.error(
-                               "An exception occurred while testing " +
-                               "a component of type '" + type.getSimpleName() + "'!",
-                               e
-                           );
-                       return false;
-                   }
-               })
-               .map( type::cast );
+    <C extends Component> Stream<C> find( final Class<C> type, final Predicate<C> predicate ) {
+        return _find( c -> {
+                       boolean isType = type.isAssignableFrom(c.getClass());
+                       if ( !isType )
+                           return false;
+                       try {
+                           return predicate.test(type.cast(c));
+                       } catch (Exception e) {
+                           log.error(
+                                   "An exception occurred while testing a component of type '{}'!",
+                                   type.getSimpleName(), e
+                                );
+                           return false;
+                       }
+                   })
+                   .map( type::cast );
     }
 
-    Stream<Component> find( Predicate<Component> predicate ) {
+    private Stream<Component> _find( Predicate<Component> predicate ) {
         List<Component> roots = traverseUpwardsAndFindAllRoots(_current, new ArrayList<>());
         return roots.stream()
                     .flatMap( c -> _traverseDownwardsAndFind(c, predicate).stream() );
     }
 
     private List<Component> traverseUpwardsAndFindAllRoots(
-        Component component,
-        List<Component> roots
+        final Component component,
+        final List<Component> roots
     ) {
         Component parent = _findRootParentOf(component);
         roots.add(parent);
-        if ( parent.getParent() != null ) {
-            return traverseUpwardsAndFindAllRoots(parent.getParent(), roots);
+        Container grandParent = parent.getParent();
+        if ( grandParent != null ) {
+            return traverseUpwardsAndFindAllRoots(grandParent, roots);
         }
         else
             return roots;
     }
 
-    private Component _findRootParentOf( Component component ) {
+    private Component _findRootParentOf( final Component component ) {
         Container parent = component.getParent();
         if ( _acknowledgesParenthood( parent, component ) )
             return _findRootParentOf( parent );
@@ -70,7 +72,7 @@ final class GuiTraverser
             return component;
     }
 
-    private boolean _acknowledgesParenthood( Component parent, Component child ) {
+    private boolean _acknowledgesParenthood( final Component parent, final Component child ) {
         if ( parent instanceof Container ) {
             Container container = (Container) parent;
             for ( Component component : container.getComponents() )
@@ -80,7 +82,7 @@ final class GuiTraverser
         return false;
     }
 
-    private List<Component> _traverseDownwardsAndFind( Component cmp, Predicate<Component> predicate )
+    private List<Component> _traverseDownwardsAndFind( final Component cmp, final Predicate<Component> predicate )
     {
         List<Component> found = new ArrayList<>();
         _traverseDownwardsAndFind(cmp, predicate, found);
@@ -88,11 +90,12 @@ final class GuiTraverser
     }
 
     private void _traverseDownwardsAndFind(
-        Component cmp,
-        Predicate<Component> predicate,
-        List<Component> found
+        final @Nullable Component cmp,
+        final Predicate<Component> predicate,
+        final List<Component> found
     ) {
-        if( cmp == null ) return; // Not a container, return
+        if( cmp == null )
+            return; // Not a container, return
         // Add this component
         if ( predicate.test(cmp) && !found.contains(cmp) )
             found.add(cmp);

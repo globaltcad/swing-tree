@@ -1,9 +1,9 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.Tuple;
 
 import javax.swing.JComponent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -59,13 +59,23 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
-     *  Exposes the underlying component from which this delegate
+     *  Exposes the underlying {@link JComponent} from which this delegate
      *  and user event actions originate.
-     *  This method may only be called by the Swing thread.
-     *  If another thread calls this method, an exception will be thrown.
+     *  <p>
+     *  <b>Threading:</b> A {@link JComponent} is owned by the GUI thread (the AWT
+     *  Event Dispatch Thread). Under a non-coupled threading model
+     *  (see {@link swingtree.threading.EventProcessor}), event actions may be invoked
+     *  on the application thread rather than on the EDT. To prevent unsafe access
+     *  to Swing state, this method <b>requires the calling thread to be the GUI
+     *  thread</b> and throws an {@link IllegalStateException} otherwise.
+     *  <p>
+     *  If you need to access the component from the application thread,
+     *  use {@link #forComponent(Consumer)} instead, which will safely dispatch
+     *  the supplied lambda to the GUI thread for you.
      *
      * @return The component for which the current {@link Action} originated.
      * @throws IllegalStateException If this method is called from a non-Swing thread.
+     * @see #forComponent(Consumer)
      */
     public final C getComponent() {
         // We make sure that only the Swing thread can access the component:
@@ -73,17 +83,30 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
             return _component();
         else
             throw new IllegalStateException(
-                    "Component can only be accessed by the Swing thread."
+                    "Component can only be accessed by the Swing thread. " +
+                    "Use 'forComponent(Consumer)' to access the component from the application thread."
                 );
     }
 
     /**
-     *  Use this to access the component of this delegate in the swing thread.
-     *  This method will make sure that the passed lambda will
-     *  be executed by the Swing thread.
-     *  <br><br>
+     *  Provides a thread-safe way to access the underlying {@link JComponent} of this
+     *  delegate by passing a {@link Consumer} lambda which will always be executed on
+     *  the GUI thread (the AWT Event Dispatch Thread).
+     *  <p>
+     *  This is the recommended counterpart to {@link #getComponent()} when the calling
+     *  code may run on the application thread (e.g. under a decoupled
+     *  {@link swingtree.threading.EventProcessor}). If the current thread is already
+     *  the GUI thread, the lambda is executed immediately; otherwise it is dispatched
+     *  via {@link UI#run(Runnable)}.
+     *  <p>
+     *  Example:
+     *  <pre>{@code
+     *      it.forComponent( button -> button.setText("Updated on the EDT") );
+     *  }</pre>
+     *
      * @param action The action consuming the component,
      *               which will be executed by the Swing thread.
+     * @see #getComponent()
      */
     public final void forComponent( Consumer<C> action ) {
         if ( UI.thisIsUIThread() )
@@ -101,32 +124,50 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     public final E getEvent() { return _event; }
 
     /**
-     *  Exposes the "siblings", which consist of all
-     *  the child components of the parent of the delegated component
-     *  except the for the delegated component itself.
+     *  Exposes the "siblings", which consist of all the child components
+     *  of the parent of the delegated component, <b>except for the delegated
+     *  component itself</b>.
+     *  <p>
+     *  <b>Threading:</b> Sibling components are part of the Swing component
+     *  tree, which is owned by the GUI thread (the AWT Event Dispatch Thread).
+     *  This method <b>requires the calling thread to be the GUI thread</b> and
+     *  throws an {@link IllegalStateException} otherwise. Under a non-coupled
+     *  {@link swingtree.threading.EventProcessor}, event actions are usually
+     *  invoked on the application thread, in which case you must use
+     *  {@link #forSiblings(Consumer)} instead, which dispatches the supplied
+     *  lambda to the GUI thread for you.
      *
-     * @return A list of all siblings excluding the component from which this instance originated.
+     * @return A tuple (immutable list) of all siblings excluding the component from which this instance originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
+     * @see #forSiblings(Consumer)
      */
-    public final List<JComponent> getSiblings() {
+    public final Tuple<JComponent> getSiblings() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblings(..)' methods instead."
                 );
-        return _siblingsSource().stream().filter( s -> _component() != s ).collect(Collectors.toList());
+        return _siblingsSource().retainIf( s -> _component() != s );
     }
-    
+
     /**
-     *  Use this to access the sibling components of this delegate in the swing thread.
-     *  This method will make sure that the passed lambda will
-     *  be executed by the Swing thread.
-     *  <br><br>
+     *  Provides a thread-safe way to access the sibling components of this delegate
+     *  by passing a {@link Consumer} lambda which will always be executed on the GUI
+     *  thread (the AWT Event Dispatch Thread).
+     *  <p>
+     *  This is the recommended counterpart to {@link #getSiblings()} when the calling
+     *  code may run on the application thread (e.g. under a decoupled
+     *  {@link swingtree.threading.EventProcessor}). If the current thread is already
+     *  the GUI thread, the lambda is executed immediately; otherwise it is dispatched
+     *  via {@link UI#run(Runnable)}.
+     *
      * @param action The action consuming a list of all siblings (excluding the
      *               component from which this instance originated),
      *               which will be executed by the Swing thread.
+     * @see #getSiblings()
      */
-    public final void forSiblings( Consumer<List<JComponent>> action ) {
+    public final void forSiblings( Consumer<Tuple<JComponent>> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblings());
         else
@@ -136,15 +177,22 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     /**
      *  Allows you to query the sibling components of the delegated component
      *  of the specified type. So a list of all siblings which are of the specified type
-     *  will be returned, <b>excluding</b> the currently delegated component itself. <br>
-     *  Note that this method may only be called by the Swing thread.
-     *  If another thread calls this method, an exception will be thrown.
-     *  Use {@link #forSiblingsOfType(Class, Consumer)} to access the sibling components
-     *  of the specified type in a thread-safe way.
+     *  will be returned, <b>excluding</b> the currently delegated component itself.
+     *  <p>
+     *  <b>Threading:</b> Sibling components are part of the Swing component tree,
+     *  which is owned by the GUI thread (the AWT Event Dispatch Thread). This method
+     *  <b>requires the calling thread to be the GUI thread</b> and throws an
+     *  {@link IllegalStateException} otherwise. Under a non-coupled
+     *  {@link swingtree.threading.EventProcessor}, event actions are usually invoked
+     *  on the application thread, in which case you must use
+     *  {@link #forSiblingsOfType(Class, Consumer)} instead, which dispatches the
+     *  supplied lambda to the GUI thread for you.
      *
      * @param type The type class of the sibling components to return.
      * @param <T> The type of the sibling components to return.
      * @return A list of all siblings of the specified type, excluding the component from which this instance originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
+     * @see #forSiblingsOfType(Class, Consumer)
      */
     public final <T extends JComponent> List<T> getSiblingsOfType(Class<T> type) {
         // We make sure that only the Swing thread can access the sibling components:
@@ -161,16 +209,22 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
-     *  Use this to access the sibling components of this delegate
-     *  of the specified type in the swing thread.
-     *  This method will make sure that the passed lambda will
-     *  be executed by the Swing thread.
-     *  <br><br>
+     *  Provides a thread-safe way to access the sibling components of this delegate
+     *  filtered by the given type by passing a {@link Consumer} lambda which will
+     *  always be executed on the GUI thread (the AWT Event Dispatch Thread).
+     *  <p>
+     *  This is the recommended counterpart to {@link #getSiblingsOfType(Class)} when
+     *  the calling code may run on the application thread (e.g. under a decoupled
+     *  {@link swingtree.threading.EventProcessor}). If the current thread is already
+     *  the GUI thread, the lambda is executed immediately; otherwise it is dispatched
+     *  via {@link UI#run(Runnable)}.
+     *
      * @param type The type class of the sibling components to return.
      * @param <T> The {@link JComponent} type of the sibling components to return.
      * @param action The action consuming a list of all siblings of the specified type,
      *               excluding the component from which this instance originated,
      *               which will be executed by the Swing thread.
+     * @see #getSiblingsOfType(Class)
      */
     public final <T extends JComponent> void forSiblingsOfType(
         Class<T> type, Consumer<List<T>> action
@@ -182,34 +236,51 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
-     *  This method provides a convenient way to access all the children of the parent component
-     *  of the component this delegate is for.
-     *  Note that this method may only be called by the Swing thread.
-     *  If another thread calls this method, an exception will be thrown.
-     *  Use {@link #forSiblinghood(Consumer)} to access the sibling components
+     *  This method provides a convenient way to access all the children of the parent
+     *  component of the component this delegate is for, <b>including the delegated
+     *  component itself</b>.
+     *  <p>
+     *  <b>Threading:</b> Sibling components are part of the Swing component tree,
+     *  which is owned by the GUI thread (the AWT Event Dispatch Thread). This method
+     *  <b>requires the calling thread to be the GUI thread</b> and throws an
+     *  {@link IllegalStateException} otherwise. Under a non-coupled
+     *  {@link swingtree.threading.EventProcessor}, event actions are usually invoked
+     *  on the application thread, in which case you must use
+     *  {@link #forSiblinghood(Consumer)} instead, which dispatches the supplied
+     *  lambda to the GUI thread for you.
      *
-     * @return A list of all siblings including the component from which this instance originated.
+     * @return A tuple (immutable list) of all siblings including the component from which this instance originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
+     * @see #forSiblinghood(Consumer)
      */
-    public final List<JComponent> getSiblinghood() {
+    public final Tuple<JComponent> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblinghood(..)' methods instead."
             );
-        return new ArrayList<>(_siblingsSource());
+        return _siblingsSource();
     }
 
     /**
-     *  Use this to access the sibling components of this delegate in the swing thread.
-     *  This method will make sure that the passed lambda will
-     *  be executed by the Swing thread.
-     *  <br><br>
+     *  Provides a thread-safe way to access the entire siblinghood of this delegate
+     *  (the delegated component <i>and</i> its siblings) by passing a {@link Consumer}
+     *  lambda which will always be executed on the GUI thread (the AWT Event Dispatch
+     *  Thread).
+     *  <p>
+     *  This is the recommended counterpart to {@link #getSiblinghood()} when the
+     *  calling code may run on the application thread (e.g. under a decoupled
+     *  {@link swingtree.threading.EventProcessor}). If the current thread is already
+     *  the GUI thread, the lambda is executed immediately; otherwise it is dispatched
+     *  via {@link UI#run(Runnable)}.
+     *
      * @param action The action consuming a list of all siblings (including the
      *               component from which this instance originated),
      *               which will be executed by the Swing thread.
+     * @see #getSiblinghood()
      */
-    public final void forSiblinghood( Consumer<List<JComponent>> action ) {
+    public final void forSiblinghood( Consumer<Tuple<JComponent>> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblinghood());
         else
@@ -217,46 +288,61 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
-     *  Allows you to query the sibling components of the delegated component
-     *  of the specified type. So a list of all siblings which are of the specified type
-     *  will be returned, possibly including the delegated component itself. <br>
-     *  Note that this method may only be called by the Swing thread.
-     *  If another thread calls this method, an exception will be thrown.
-     *  Use {@link #forSiblinghoodOfType(Class, Consumer)} to access the sibling components
-     *  of the specified type in a thread-safe way.
+     *  Allows you to query the entire siblinghood of the delegated component
+     *  filtered by the specified type. So a list of all siblings which are of the
+     *  specified type will be returned, <b>possibly including the delegated component
+     *  itself</b>.
+     *  <p>
+     *  <b>Threading:</b> Sibling components are part of the Swing component tree,
+     *  which is owned by the GUI thread (the AWT Event Dispatch Thread). This method
+     *  <b>requires the calling thread to be the GUI thread</b> and throws an
+     *  {@link IllegalStateException} otherwise. Under a non-coupled
+     *  {@link swingtree.threading.EventProcessor}, event actions are usually invoked
+     *  on the application thread, in which case you must use
+     *  {@link #forSiblinghoodOfType(Class, Consumer)} instead, which dispatches the
+     *  supplied lambda to the GUI thread for you.
      *
      * @param type The type of the sibling components to return.
      * @param <T> The {@link JComponent} type of the sibling components to return.
      * @return A list of all siblings of the specified type, including the component from which this instance originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
+     * @see #forSiblinghoodOfType(Class, Consumer)
      */
-    public final <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
+    public final <T extends JComponent> Tuple<T> getSiblinghoodOfType( Class<T> type ) {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                 "Sibling components can only be accessed by the Swing thread. " +
                 "Please use 'forSiblinghoodOfType(..)' methods instead."
             );
-        return new ArrayList<>(_siblingsSource())
+        return _siblingsSource()
                 .stream()
                 .filter( s -> type.isAssignableFrom(s.getClass()) )
-                .map( s -> (T) s )
-                .collect(Collectors.toList());
+                .map(type::cast)
+                .collect(Tuple.collectorOf(type));
     }
 
     /**
-     *  Use this to access all sibling components (including the one represented by this delegate)
-     *  of the specified type in the swing thread.
-     *  This method will make sure that the passed lambda will
-     *  be executed by the Swing thread.
-     *  <br><br>
+     *  Provides a thread-safe way to access the entire siblinghood of this delegate
+     *  (including the delegated component itself) filtered by the given type, by
+     *  passing a {@link Consumer} lambda which will always be executed on the GUI
+     *  thread (the AWT Event Dispatch Thread).
+     *  <p>
+     *  This is the recommended counterpart to {@link #getSiblinghoodOfType(Class)}
+     *  when the calling code may run on the application thread (e.g. under a
+     *  decoupled {@link swingtree.threading.EventProcessor}). If the current thread
+     *  is already the GUI thread, the lambda is executed immediately; otherwise it
+     *  is dispatched via {@link UI#run(Runnable)}.
+     *
      * @param type The type of the sibling components to return.
      * @param <T> The {@link JComponent} type of the sibling components to return.
-     * @param action The action consuming a list of all siblings of the specified type,
+     * @param action The action consuming a tuple (immutable list) of all siblings of the specified type,
      *               including the component from which this instance originated,
      *               which will be executed by the Swing thread.
+     * @see #getSiblinghoodOfType(Class)
      */
     public final <T extends JComponent> void forSiblinghoodOfType(
-        Class<T> type, Consumer<List<T>> action
+        Class<T> type, Consumer<Tuple<T>> action
     ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblinghoodOfType(type));

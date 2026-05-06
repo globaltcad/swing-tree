@@ -1,14 +1,14 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.Tuple;
 import swingtree.components.JSplitButton;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  *  This class is a delegate for events of the {@link JSplitButton} component.
@@ -42,9 +42,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
          *  This method exposes all of the {@link JMenuItem}s which are
          *  part of the {@link JSplitButton} in an immutable list.
          *
-         * @return A list of all split button items.
+         * @return A tuple (immutable list) of all split button items.
          */
-        List<I> getItems() {
+        Tuple<I> getItems() {
             return _itemsDelegate.getSiblinghood();
         }
 
@@ -62,9 +62,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
          * This is contrary to the {@link #getSiblings()} method which returns all children of the parent component
          * except the current component.
          *
-         * @return A list of all the {@link JComponent} siblings of the split button, including the split button itself.
+         * @return A tuple (immutable list) of all the {@link JComponent} siblings of the split button, including the split button itself.
          */
-        public List<JComponent> getSiblinghood() {
+        public Tuple<JComponent> getSiblinghood() {
             // We make sure that only the Swing thread can access the sibling components:
             if ( !UI.thisIsUIThread() )
                 throw new IllegalStateException(
@@ -78,10 +78,10 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
          *  This is contrary to the {@link #getSiblinghood()} method which returns all children of the parent component
          *  including the current component.
          *
-         * @return A list of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
+         * @return A tuple (immutable list) of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
          *          except the current {@link JSplitButton} itself.
          */
-        public List<JComponent> getSiblings() {
+        public Tuple<JComponent> getSiblings() {
             // We make sure that only the Swing thread can access the sibling components:
             if ( !UI.thisIsUIThread() )
                 throw new IllegalStateException(
@@ -90,7 +90,7 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
             return _siblingsSource()
                     .stream()
                     .filter( s -> s != getCurrentItem() )
-                    .collect(Collectors.toList());
+                    .collect(Tuple.collectorOf(JComponent.class));
         }
 
         /**

@@ -42,9 +42,26 @@ final class LayerCache
     private static final int _COMPUTED_CACHE_AGGRESSIVENESS;
     private static final int _COMPUTED_CACHE_CAP;
     static {
-        double availableGiB = ( ( Runtime.getRuntime().maxMemory() * 1000 ) >> 30 ) / 1e3;
+        double availableGiB = _detectSystemRamGiB();
         _COMPUTED_CACHE_AGGRESSIVENESS = (int) Math.round( 4 * Math.log(Math.max(1, availableGiB-1)) );
         _COMPUTED_CACHE_CAP = Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * _COMPUTED_CACHE_AGGRESSIVENESS);
+    }
+
+    private static double _detectSystemRamGiB() {
+        try {
+            java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+            if ( os instanceof com.sun.management.OperatingSystemMXBean ) {
+                long totalBytes = ((com.sun.management.OperatingSystemMXBean) os).getTotalPhysicalMemorySize();
+                if ( totalBytes > 0 )
+                    return totalBytes / (double) (1L << 30);
+            }
+        } catch ( Throwable t ) {
+            log.debug("Could not query system RAM, falling back to JVM max heap.", t);
+        }
+        // Fallback: JVM max heap (usually a fraction of physical RAM)
+        double maxHeap = Runtime.getRuntime().maxMemory() / (double) (1L << 30);
+        // We multiply by 4, since system will have a lot more RAM:
+        return maxHeap * 4;
     }
 
     // Higher means more memory usage but better performance
@@ -67,6 +84,16 @@ final class LayerCache
     private Pooled<LayerRenderConf> _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
+    /*
+     *  Per-instance utilisation counters. Each {@link LayerCache} instance lives
+     *  inside the style engine of exactly one {@link JComponent}, so these
+     *  counters describe the cache behaviour of *that* component's *that* layer.
+     *  They are observable via the {@link ComponentExtension} public API and used
+     *  by the test suite to reason about cache effectiveness without coupling to
+     *  any of the package-private machinery.
+     */
+    private int                     _paintCacheHitCount  = 0; // paint() served entirely from a rendered cache image
+    private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
 
     public LayerCache( UI.Layer layer ) {
@@ -82,6 +109,18 @@ final class LayerCache
 
     public boolean hasBufferedImage() {
         return _localCache != null;
+    }
+
+    /**
+     *  Tells whether this layer cache has a fully rendered cached image ready to be
+     *  blitted on the next paint call. This is stronger than {@link #hasBufferedImage()}
+     *  in that it also waits for the lazy allocation count-down to have reached zero
+     *  and for the renderer to have actually filled the image once.
+     *
+     * @return {@code true} when subsequent paint calls will use the cache, otherwise {@code false}.
+     */
+    public boolean hasRenderedImage() {
+        return _localCache != null && _localCache.isRendered();
     }
 
     private void _allocateOrGetCachedBuffer( Pooled<LayerRenderConf> layerRenderConf )
@@ -103,7 +142,6 @@ final class LayerCache
             Size size = layerRenderConf.get().boxModel().size();
             bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
             CACHE.put(layerRenderConf, bufferedImage);
-
         }
         _layerRenderData = layerRenderConf;
 
@@ -152,7 +190,12 @@ final class LayerCache
             cacheIsInvalid = !oldState.equals(newState);
 
         if ( cacheIsInvalid ) {
-            _freeLocalCache();
+            // We only drop the local cached image here – we deliberately do not
+            // reset `_cacheHitsUntilAllocation` and `_isInitialized` (as
+            // `_freeLocalCache()` does), because we just computed the correct
+            // `_cacheHitsUntilAllocation` for the new state above and we want
+            // it to be used by the upcoming `_allocateOrGetCachedBuffer` call.
+            _localCache    = null;
             newBufferNeeded = true;
         }
 
@@ -169,6 +212,7 @@ final class LayerCache
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             renderer.accept(_layerRenderData.get(), g);
+            _paintCacheMissCount++;
             return;
         }
 
@@ -184,6 +228,7 @@ final class LayerCache
                     So we just do normal rendering instead:
                 */
                 renderer.accept(_layerRenderData.get(), g);
+                _paintCacheMissCount++;
                 return;
             }
             try {
@@ -196,10 +241,27 @@ final class LayerCache
                 renderer.accept(_layerRenderData.get(), g2);
                 g2.dispose();
             }
+            _paintCacheMissCount++;
+        } else {
+            _paintCacheHitCount++;
         }
 
         g.drawImage(_localCache.getImage(), 0, 0, null);
     }
+
+    /**
+     *  Returns the number of {@link #paint(Graphics2D, BiConsumer)} calls served entirely
+     *  from the cached image (i.e. the renderer was <i>not</i> invoked). Counts since this
+     *  {@link LayerCache} instance was created.
+     */
+    int paintCacheHitCount()  { return _paintCacheHitCount;  }
+
+    /**
+     *  Returns the number of {@link #paint(Graphics2D, BiConsumer)} calls that had to
+     *  invoke the renderer because the cache was either disabled or not yet rendered.
+     *  Counts since this {@link LayerCache} instance was created.
+     */
+    int paintCacheMissCount() { return _paintCacheMissCount; }
 
     /**
      *  Determines if caching makes sense for the given rendering configuration of the layer

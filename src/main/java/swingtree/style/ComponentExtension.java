@@ -448,6 +448,74 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Tells whether SwingTree has a fully rendered cache image standing by for the
+     *  given style {@link swingtree.UI.Layer} of this component. When this returns
+     *  {@code true}, the next repaint of that layer will be served from the cache
+     *  (a single {@code drawImage} blit) rather than re-running the style renderer.
+     *  <p>
+     *  This is a per-component window into the internal {@link LayerCache} pipeline
+     *  that is safe to use from tests and tooling. It is intentionally <em>not</em>
+     *  a hard guarantee about how SwingTree will behave on the next paint – cache
+     *  entries are weakly referenced and may be reclaimed under memory pressure –
+     *  but it is the observable signal that lets you assert "this component's style
+     *  ended up cached" without coupling to private internals.
+     *  <p>
+     *  Caching only kicks in for layers that contain at least one <em>heavy</em>
+     *  style ingredient (rounded backgrounds with a base/foundation colour, borders
+     *  with width and colour, gradients, shadows, noise, painted text, sized icons).
+     *  Layers without such ingredients return {@code false} here permanently because
+     *  caching them would not pay for itself.
+     *
+     * @param layer The style layer to query (typically {@link swingtree.UI.Layer#BACKGROUND}
+     *              for the cases people care about most).
+     * @return {@code true} if a rendered cached image is currently associated with
+     *         the given layer of this component, {@code false} otherwise.
+     */
+    public boolean hasCachedRendering( UI.Layer layer ) {
+        Objects.requireNonNull(layer);
+        LayerCache[] caches = _styleEngine.getLayerCaches();
+        return caches[layer.ordinal()].hasRenderedImage();
+    }
+
+    /**
+     *  Returns the number of times this <em>component's</em> given style {@link swingtree.UI.Layer}
+     *  was painted entirely from a cached image, i.e. the style renderer was not
+     *  invoked. The counter is local to this component instance and increases on
+     *  every paint that is served from the cache.
+     *  <p>
+     *  This counter is cumulative for the lifetime of this component instance.
+     *  It does not automatically reset when the underlying cache entry is freed,
+     *  invalidated, or rebuilt; such events only affect whether future paints
+     *  contribute to this counter or to {@link #cacheMissCount(UI.Layer)}.
+     *
+     * @param layer The style layer to query.
+     * @return Number of paint calls served from the cache, since this component
+     *         was constructed.
+     */
+    public int cacheHitCount( UI.Layer layer ) {
+        Objects.requireNonNull(layer);
+        LayerCache[] caches = _styleEngine.getLayerCaches();
+        return caches[layer.ordinal()].paintCacheHitCount();
+    }
+
+    /**
+     *  Returns the number of times this <em>component's</em> given style {@link swingtree.UI.Layer}
+     *  had to invoke the style renderer because no usable cache image was
+     *  available – either because caching is disabled for that layer, or because
+     *  the cache was not yet populated. The counter is local to this component
+     *  instance.
+     *
+     * @param layer The style layer to query.
+     * @return Number of paint calls that had to render fresh, since this component
+     *         was constructed.
+     */
+    public int cacheMissCount( UI.Layer layer ) {
+        Objects.requireNonNull(layer);
+        LayerCache[] caches = _styleEngine.getLayerCaches();
+        return caches[layer.ordinal()].paintCacheMissCount();
+    }
+
+    /**
      *  Allows for the retrieval of a specific {@link Shape} which represents
      *  a specific area of the component identified by the given {@link UI.ComponentArea}.
      *  The following areas are available:

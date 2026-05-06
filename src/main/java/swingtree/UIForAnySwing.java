@@ -23,10 +23,7 @@ import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JBox;
 import swingtree.components.JScrollPanels;
 import swingtree.input.Keyboard;
-import swingtree.layout.AddConstraint;
-import swingtree.layout.LayoutConstraint;
-import swingtree.layout.ResponsiveGridFlowLayout;
-import swingtree.layout.Size;
+import swingtree.layout.*;
 import swingtree.style.ComponentExtension;
 import swingtree.style.FontConf;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
@@ -3466,6 +3463,164 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    /**
+     *  Sets the location (top-left corner) of this {@link JComponent} from a {@link Position}
+     *  value, leaving its current size untouched. Use this when you want to move a component
+     *  without resizing it – the size complement of {@link #withSize(Size)} is
+     *  {@link #withLocation(Position)}.
+     *  <p>
+     *  <b>Pixel space:</b> the supplied {@link Position} is interpreted in
+     *  <em>developer pixel space</em>, not in raw component pixel space. The coordinates are
+     *  multiplied by the active SwingTree UI scale factor (see {@link UI#scale()}) before
+     *  being handed off to {@link JComponent#setLocation(int, int)}. So on a 1.5x HiDPI
+     *  screen, {@code Position.of(40, 40)} ends up at the physical pixel coordinate
+     *  {@code (60, 60)}. SwingTree also re-applies the location whenever the UI scale
+     *  factor changes at runtime, keeping your logical layout DPI-stable.
+     *  <p>
+     *  Note that this method only has a lasting visual effect when the parent layout
+     *  does not reposition its children (typically {@link Layout#none()}). For layout-driven
+     *  positioning, configure the appropriate layout constraints on the parent instead. <br>
+     *  This method translates to {@link JComponent#setLocation(int, int)} on the underlying
+     *  component.
+     *
+     * @param position The {@link Position} (top-left corner) of the component, in developer pixel space.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withLocation( Position position ) {
+        NullUtil.nullArgCheck(position, "position", Position.class);
+        return _with( c -> {
+                    c.setLocation(UI.scale((int) position.x()), UI.scale((int) position.y()));
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                        c.setLocation(UI.scale((int) position.x()), UI.scale((int) position.y()));
+                    });
+                })
+                ._this();
+    }
+
+    /**
+     *  Binds a {@link Val} property of {@link Position} to the location of this
+     *  {@link JComponent}. Whenever the property changes, the component is moved to the
+     *  new top-left corner reactively – the size of the component is not affected.
+     *  <p>
+     *  This is the reactive counterpart to {@link #withLocation(Position)} and pairs well
+     *  with view models that expose a position lens (e.g. via {@code Var.zoomTo(...)}).
+     *  Drag-and-drop interactions become a one-liner in the view: update the property in
+     *  the {@code onMouseDrag} handler and the component follows.
+     *  <p>
+     *  <b>Pixel space:</b> like {@link #withLocation(Position)}, the {@link Position} value
+     *  is in <em>developer pixel space</em>, not raw component pixel space. SwingTree
+     *  multiplies it by the active UI scale factor (see {@link UI#scale()}) before each
+     *  {@link JComponent#setLocation(int, int)} call, so your view-model coordinates are
+     *  DPI-independent. The translation is re-applied on every property change and on
+     *  every UI scale factor change.
+     *  <p>
+     *  Note that, like the static variant, this method only has a lasting visual effect
+     *  when the parent's layout does not reposition its children (typically
+     *  {@link Layout#none()}).
+     *
+     * @param position A {@link Val} property carrying the {@link Position} of the component, in developer pixel space.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withLocation( Val<Position> position ) {
+        NullUtil.nullArgCheck(position, "position", Val.class);
+        NullUtil.nullPropertyCheck(position, "position", "Null is not allowed to model the location of this component!");
+        return _withOnShow( position, (c,p) -> {
+                    c.setLocation(UI.scale((int) p.x()), UI.scale((int) p.y()));
+                })
+                ._with( c -> {
+                    Position p = position.get();
+                    c.setLocation(UI.scale((int) p.x()), UI.scale((int) p.y()));
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                        Position cur = position.get();
+                        c.setLocation(UI.scale((int) cur.x()), UI.scale((int) cur.y()));
+                    });
+                })
+                ._this();
+    }
+
+    /**
+     *  Sets both the location <i>and</i> the size of this {@link JComponent} from a single
+     *  {@link Bounds} value, which is essentially a combination of a {@link Position} and a
+     *  {@link Size}. <br>
+     *  This is the imperative twin of giving the component a {@link Layout#none()} layout and
+     *  then dictating where it sits and how big it is. It is most useful when you place
+     *  components into a parent that does <em>not</em> auto-layout its children
+     *  (i.e. {@code Layout.none()}, a custom canvas, an absolute-positioning surface, ...).
+     *  <p>
+     *  <b>Pixel space:</b> the supplied {@link Bounds} are interpreted in <em>developer pixel
+     *  space</em>, not in raw component pixel space. Internally the value is multiplied by the
+     *  active SwingTree UI scale factor (see {@link UI#scale()}) before being handed off to
+     *  {@link JComponent#setBounds(int, int, int, int)}, so on a 2x HiDPI screen a
+     *  {@code Bounds.of(0, 0, 80, 80)} translates to a 160x160 px rectangle on screen.
+     *  This means you author your layout once, in logical pixels, and SwingTree keeps it
+     *  visually consistent across DPI changes – including live-reacting to runtime
+     *  {@code SwingTree.get().setUiScaleFactor(...)} updates.
+     *  <p>
+     *  Note that calling this method may not have a lasting visual effect if the component is
+     *  inside a layout manager that overrides bounds during layout. In that case prefer
+     *  {@link #withPrefSize(Size)} together with the parent's layout constraints, or attach
+     *  a {@link Layout#none()} layout to the parent. <br>
+     *  This method translates to {@link JComponent#setBounds(java.awt.Rectangle)} on the
+     *  underlying component.
+     *
+     * @param bounds The {@link Bounds} (location + size) of the component, in developer pixel space.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withBounds( Bounds bounds ) {
+        NullUtil.nullArgCheck(bounds, "bounds", Bounds.class);
+        return _with( c -> {
+                    c.setBounds(UI.scale(bounds.toRectangle()));
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                        c.setBounds(UI.scale(bounds.toRectangle()));
+                        _revalidate(c);
+                    });
+                })
+                ._this();
+    }
+
+    /**
+     *  Binds a {@link Val} property of {@link Bounds} to the location <i>and</i> size of
+     *  this {@link JComponent}. Whenever the property changes, the underlying component's
+     *  bounds are updated reactively – so any view-model wither that produces a fresh
+     *  {@link Bounds} value is reflected in the GUI without imperative
+     *  {@code setBounds(...)} calls in your view code.
+     *  <p>
+     *  This is the reactive counterpart to {@link #withBounds(Bounds)} and is the
+     *  recommended way to seed a freshly-created component with a model-driven
+     *  position-and-size, especially in MVI/MVVM setups where the source-of-truth lives in
+     *  an immutable view model.
+     *  <p>
+     *  <b>Pixel space:</b> the {@link Bounds} carried by the property are in
+     *  <em>developer pixel space</em>, not in raw component pixel space. They are scaled by
+     *  the active SwingTree UI scale factor (see {@link UI#scale()}) before being applied
+     *  to the underlying component, both on initial display and on every subsequent
+     *  property update. This keeps your view-model coordinate system DPI-independent.
+     *  <p>
+     *  Note that, like {@link #withBounds(Bounds)}, this method only has a lasting visual
+     *  effect when the parent layout does not override bounds (typically
+     *  {@link Layout#none()}). It translates to
+     *  {@link JComponent#setBounds(java.awt.Rectangle)} on the underlying component.
+     *
+     * @param bounds A {@link Val} property carrying the {@link Bounds} of the component, in developer pixel space.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withBounds( Val<Bounds> bounds ) {
+        NullUtil.nullArgCheck(bounds, "bounds", Val.class);
+        NullUtil.nullPropertyCheck(bounds, "bounds", "Null is not allowed to model the bounds of this component!");
+        return _withOnShow( bounds, (c,b) -> {
+                    c.setBounds(UI.scale(b.toRectangle()));
+                    _revalidate(c);
+                })
+                ._with( c -> {
+                    c.setBounds(UI.scale(bounds.get().toRectangle()));
+                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                        c.setBounds(UI.scale(bounds.get().toRectangle()));
+                        _revalidate(c);
+                    });
+                })
+                ._this();
+    }
+
     private static void _revalidate( Component comp ) {
         comp.revalidate();
         if ( comp instanceof JScrollPane )
@@ -4141,17 +4296,27 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I onMouseDrag( Action<ComponentDragEventDelegate<C>> onDrag ) {
         NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
         return _with( thisComponent -> {
-                   java.util.List<MouseEvent> dragEventHistory = new ArrayList<>();
+                   java.util.List<Pair<Position, MouseEvent>> dragEventHistory = new ArrayList<>();
                    MouseAdapter listener = new MouseAdapter() {
+                       private Position positionFromEventSource(MouseEvent e) {
+                           Object source = e.getSource();
+                            if ( source instanceof Component ) {
+                                Component sourceComponent = (Component) source;
+                                return Position.of(sourceComponent.getX(), sourceComponent.getY());
+                            } else {
+                                log.warn(SwingTree.get().logMarker(), "Unexpected mouse event source type: {}! Defaulting to position (0,0) for this event.", e.getSource().getClass());
+                                return Position.origin();
+                            }
+                       }
                        @Override public void mousePressed(MouseEvent e) {
                            dragEventHistory.clear();
-                           dragEventHistory.add(e);
+                           dragEventHistory.add(Pair.of(positionFromEventSource(e), e));
                        }
                        @Override public void mouseReleased(MouseEvent e) {
                            dragEventHistory.clear();
                        }
                        @Override public void mouseDragged(MouseEvent e) {
-                           dragEventHistory.add(e);
+                           dragEventHistory.add(Pair.of(positionFromEventSource(e), e));
                            _runInApp(() -> {
                                try {
                                    onDrag.accept(new ComponentDragEventDelegate<>(thisComponent, e, dragEventHistory));
