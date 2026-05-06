@@ -177,9 +177,10 @@ public final class CelestialScribe extends Panel {
             .withCursor(Cursor.MOVE)
             .withRepaintOn(hue, brightness)
             .withStyle( it -> {
-                UI.Color core = hsbColor(hue.get(), 0.35, 1.00);
-                Color    mid  = hsbColor(hue.get(), 0.65, 0.90);
-                Color    rim  = hsbColor(hue.get(), 0.80, 0.70);
+                double   hueDeg = hue.get() * 360;
+                UI.Color core   = UI.Color.ofHsb(hueDeg, 0.35, 1.00);
+                Color    mid    = UI.Color.ofHsb(hueDeg, 0.65, 0.90);
+                Color    rim    = UI.Color.ofHsb(hueDeg, 0.80, 0.70);
                 boolean selected = id.equals(vm.get().selectedStarId());
                 return it
                     .borderRadius(1000)
@@ -395,10 +396,6 @@ public final class CelestialScribe extends Panel {
             case MIDNIGHT:
             default:       return new Color(  3,   4,  12);
         }
-    }
-
-    private static UI.Color hsbColor( double hue, double sat, double bri ) {
-        return UI.Color.of(Color.getHSBColor((float) hue, (float) sat, (float) bri));
     }
 
     private static Color withAlpha( Color c, int alpha ) {

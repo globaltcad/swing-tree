@@ -2980,6 +2980,26 @@ public final class UI extends UIFactoryMethods
             return Color.of(rgb[0], rgb[1], rgb[2], opacity);
         }
 
+        /**
+         * Creates a fully opaque {@code Color} based on the specified values in
+         * the HSB color model. This is a convenience overload of
+         * {@link #ofHsb(double, double, double, double)} with the opacity fixed
+         * at {@code 1.0}.
+         *
+         * @param hue the hue, in degrees (the value is normalized into the
+         *            {@code 0.0 - 360.0} range, so values outside this range
+         *            wrap around)
+         * @param saturation the saturation, {@code 0.0 to 1.0}
+         * @param brightness the brightness, {@code 0.0 to 1.0}
+         * @return the {@code Color}
+         * @throws IllegalArgumentException if {@code saturation} or
+         *         {@code brightness} are out of range
+         * @see #ofHsb(double, double, double, double)
+         */
+        public static Color ofHsb(double hue, double saturation, double brightness) {
+            return ofHsb(hue, saturation, brightness, 1.0);
+        }
+
         public static Color of( String colorString ) {
             try {
                 return ColorUtility.parseColor(colorString);

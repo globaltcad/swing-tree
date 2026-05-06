@@ -225,6 +225,50 @@ class Color_Spec extends Specification
             midpoint.alpha  == 128
     }
 
+    def 'Use the "ofHsb(double, double, double)" factory to build a fully opaque color from HSB components.'(
+            double hue, double saturation, double brightness, Color expected
+    ) {
+        reportInfo """
+            The `UI.Color.ofHsb(double, double, double)` factory is a convenience
+            overload of `ofHsb(double, double, double, double)` that always
+            produces a fully opaque color (opacity `1.0`). The hue is given in
+            degrees (so values are normalized into the `0.0 - 360.0` range —
+            negative hues and hues `>= 360` simply wrap around), while saturation
+            and brightness are in the `0.0 - 1.0` range.
+
+            This is the canonical way to dial in colors by their perceptual
+            attributes, e.g. when computing a swatch from a single hue slider in
+            a UI.
+        """
+        expect :
+            UI.Color.ofHsb(hue, saturation, brightness) == expected
+        and : 'It always produces a fully opaque color.'
+            UI.Color.ofHsb(hue, saturation, brightness).alpha == 255
+        where :
+            hue    | saturation | brightness ||  expected
+              0.0  |   1.0      |   1.0      ||  new Color(255,  0,  0)
+            120.0  |   1.0      |   1.0      ||  new Color(  0,255,  0)
+            240.0  |   1.0      |   1.0      ||  new Color(  0,  0,255)
+             60.0  |   1.0      |   1.0      ||  new Color(255,255,  0)
+              0.0  |   0.0      |   1.0      ||  new Color(255,255,255)
+              0.0  |   0.0      |   0.0      ||  new Color(  0,  0,  0)
+              0.0  |   0.0      |   0.5      ||  new Color(128,128,128)
+            210.0  |   0.5      |   0.8      ||  new Color(102,153,204)
+    }
+
+    def 'The "ofHsb(double, double, double)" factory normalizes the hue into the 0.0..360.0 range.'() {
+        reportInfo """
+            The `ofHsb(...)` factories normalize the hue value, so equivalent
+            hues like `-120.0`, `240.0` and `600.0` all yield exactly the same
+            color. This makes the method safe to call with arithmetic that may
+            wrap around the color wheel.
+        """
+        expect :
+            UI.Color.ofHsb(  240.0, 1.0, 1.0) == UI.Color.ofHsb( -120.0, 1.0, 1.0)
+            UI.Color.ofHsb(  240.0, 1.0, 1.0) == UI.Color.ofHsb(  600.0, 1.0, 1.0)
+            UI.Color.ofHsb(    0.0, 1.0, 1.0) == UI.Color.ofHsb(  360.0, 1.0, 1.0)
+    }
+
     def 'Use "shade(double)" to lighten a color towards white or darken it towards black.'(
             UI.Color colorIn, double amount, Color shaded
     ) {
