@@ -207,7 +207,7 @@ public final class CelestialScribe extends Panel {
                     );
             })
             .onMousePress( e -> {
-                e.get().repaint();
+                e.forComponent(c -> c.repaint());
                 vm.update( v -> v.selectStar(id) );
             })
             .onMouseDrag( e -> {
