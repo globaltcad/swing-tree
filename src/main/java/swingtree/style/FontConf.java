@@ -460,6 +460,8 @@ public final class FontConf
      */
     public boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }
 
+    boolean isStrikeThrough() { return _isStrike != null ? _isStrike : false; }
+
     Optional<AffineTransform> transform() { // Deliberately package private to prevent leaking mutable state!
         return Optional.ofNullable(_transform);
     }
@@ -1258,6 +1260,7 @@ public final class FontConf
         hash = 97 * hash + Float.hashCode(_spacing);
         hash = 97 * hash + Objects.hashCode(_selectionColor);
         hash = 97 * hash + Objects.hashCode(_isUnderlined);
+        hash = 97 * hash + Objects.hashCode(_isStrike);
         hash = 97 * hash + Objects.hashCode(_transform);
         hash = 97 * hash + Objects.hashCode(_paint);
         hash = 97 * hash + Objects.hashCode(_backgroundPaint);
@@ -1287,6 +1290,8 @@ public final class FontConf
         if ( !Objects.equals(_selectionColor, other._selectionColor) )
             return false;
         if ( !Objects.equals(_isUnderlined, other._isUnderlined) )
+            return false;
+        if ( !Objects.equals(_isStrike, other._isStrike) )
             return false;
         if ( !Objects.equals(_transform, other._transform) )
             return false;
