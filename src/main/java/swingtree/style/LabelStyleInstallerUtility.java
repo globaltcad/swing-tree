@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicHTML;
 import java.awt.*;
+import java.util.Objects;
 
 /*
     We achieve HTML-label styling by injecting a <head><style>...</style></head>
@@ -92,6 +93,13 @@ final class LabelStyleInstallerUtility {
             ComponentExtension.from(label).gatherApplyAndInstallStyle(true);
 
         });
+    }
+
+    static void _stripHtmlInjection(JLabel label) {
+        String currentText = label.getText();
+        String stripped = _stripHtmlInjection(currentText);
+        if ( !Objects.equals(stripped, currentText) )
+            label.setText(stripped);
     }
 
     static @Nullable String _stripHtmlInjection( @Nullable String html ) {

@@ -265,10 +265,7 @@ final class StyleInstaller<C extends JComponent>
                     _initialFont = null;
                 }
                 if ( owner instanceof JLabel ) {
-                    JLabel label = (JLabel) owner;
-                    String stripped = LabelStyleInstallerUtility._stripHtmlInjection(label.getText());
-                    if ( !Objects.equals(stripped, label.getText()) )
-                        label.setText(stripped);
+                    LabelStyleInstallerUtility._stripHtmlInjection((JLabel) owner);
                 }
                 return _updateEngine(owner, engine, newStyle);
             }
@@ -712,11 +709,7 @@ final class StyleInstaller<C extends JComponent>
                 _initialFont = null;
             }
             if ( owner instanceof JLabel ) {
-                JLabel label = (JLabel) owner;
-                String currentText = label.getText();
-                String stripped = LabelStyleInstallerUtility._stripHtmlInjection(currentText);
-                if ( !Objects.equals(stripped, currentText) )
-                    label.setText(stripped);
+                LabelStyleInstallerUtility._stripHtmlInjection((JLabel) owner);
             }
             return;
         } else if ( _initialFont == null ) {
