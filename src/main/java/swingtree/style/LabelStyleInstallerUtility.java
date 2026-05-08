@@ -98,6 +98,9 @@ final class LabelStyleInstallerUtility {
         if ( html == null )
             return null;
 
+        if ( !BasicHTML.isHTMLString(html) )
+            return html;
+
         if ( html.length() < _HTML_OPEN_TAG_LEN )
             return html;
 
