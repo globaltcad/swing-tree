@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicHTML;
 import java.awt.*;
@@ -61,9 +63,13 @@ final class LabelStyleInstallerUtility {
         for non-HTML text.
     */
     static void _ensureHtmlTextListenerInstalled(JLabel label) {
+
         if ( label.getClientProperty(_HTML_TEXT_LISTENER_KEY) != null )
             return;
+
         label.putClientProperty(_HTML_TEXT_LISTENER_KEY, Boolean.TRUE);
+
+        // Installing the text listener (once):
         label.addPropertyChangeListener("text", evt -> {
 
             Object newValue = evt.getNewValue();
@@ -88,7 +94,10 @@ final class LabelStyleInstallerUtility {
         });
     }
 
-    static String _stripHtmlInjection(String html) {
+    static @Nullable String _stripHtmlInjection( @Nullable String html ) {
+        if ( html == null )
+            return null;
+
         if ( html.length() < _HTML_OPEN_TAG_LEN )
             return html;
 
@@ -104,7 +113,10 @@ final class LabelStyleInstallerUtility {
                 + afterOpen.substring(closeIdx + _HTML_INJECTION_CLOSE.length());
     }
 
-    static String _injectStyleTag(String html, String css) {
+    static @Nullable String _injectStyleTag( @Nullable String html, String css ) {
+        if ( html == null )
+            return null;
+
         if ( html.length() < _HTML_OPEN_TAG_LEN )
             return html;
 

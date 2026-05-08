@@ -267,7 +267,7 @@ final class StyleInstaller<C extends JComponent>
                 if ( owner instanceof JLabel ) {
                     JLabel label = (JLabel) owner;
                     String stripped = LabelStyleInstallerUtility._stripHtmlInjection(label.getText());
-                    if ( !stripped.equals(label.getText()) )
+                    if ( !Objects.equals(stripped, label.getText()) )
                         label.setText(stripped);
                 }
                 return _updateEngine(owner, engine, newStyle);
@@ -715,7 +715,7 @@ final class StyleInstaller<C extends JComponent>
                 JLabel label = (JLabel) owner;
                 String currentText = label.getText();
                 String stripped = LabelStyleInstallerUtility._stripHtmlInjection(currentText);
-                if ( !stripped.equals(currentText) )
+                if ( !Objects.equals(stripped, currentText) )
                     label.setText(stripped);
             }
             return;
@@ -756,7 +756,7 @@ final class StyleInstaller<C extends JComponent>
         String css = LabelStyleInstallerUtility._buildHtmlBodyCss(fontConf);
         String desiredText = css.isEmpty() ? original : LabelStyleInstallerUtility._injectStyleTag(original, css);
 
-        if ( !desiredText.equals(currentText) )
+        if ( !Objects.equals(desiredText, currentText) )
             label.setText(desiredText);
 
         if ( !css.isEmpty() )
