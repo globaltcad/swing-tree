@@ -17,6 +17,7 @@ import swingtree.layout.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Objects;
@@ -262,6 +263,9 @@ final class StyleInstaller<C extends JComponent>
                 if ( _initialFont != null && !Objects.equals(_initialFont, owner.getFont()) ) {
                     owner.setFont(_initialFont);
                     _initialFont = null;
+                }
+                if ( owner instanceof JLabel ) {
+                    LabelStyleInstallerUtility._stripHtmlInjection((JLabel) owner);
                 }
                 return _updateEngine(owner, engine, newStyle);
             }
@@ -704,6 +708,9 @@ final class StyleInstaller<C extends JComponent>
                 owner.setFont(_initialFont);
                 _initialFont = null;
             }
+            if ( owner instanceof JLabel ) {
+                LabelStyleInstallerUtility._stripHtmlInjection((JLabel) owner);
+            }
             return;
         } else if ( _initialFont == null ) {
             _initialFont = owner.getFont();
@@ -722,12 +729,31 @@ final class StyleInstaller<C extends JComponent>
                         owner.setFont( newFont );
                 });
 
+        if ( owner instanceof JLabel )
+            _applyFontConfToHtmlLabel((JLabel) owner, fontConf);
+
         _installLayoutInfoFromFontConf(fontConf, owner);
     }
 
     @SuppressWarnings("DoNotCall")
     private static void _installLayoutInfoFromFontConf(FontConf fontConf, JComponent owner) {
         LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(fontConf, owner);
+    }
+
+    private static void _applyFontConfToHtmlLabel(JLabel label, FontConf fontConf) {
+        String currentText = label.getText();
+        if ( !BasicHTML.isHTMLString(currentText) )
+            return;
+
+        String original = LabelStyleInstallerUtility._stripHtmlInjection(currentText);
+        String css = LabelStyleInstallerUtility._buildHtmlBodyCss(fontConf);
+        String desiredText = css.isEmpty() ? original : LabelStyleInstallerUtility._injectStyleTag(original, css);
+
+        if ( !Objects.equals(desiredText, currentText) )
+            label.setText(desiredText);
+
+        if ( !css.isEmpty() )
+            LabelStyleInstallerUtility._ensureHtmlTextListenerInstalled(label);
     }
 
     private void _applyPropertiesTo( final C owner, final StyleConf styleConf ) {
