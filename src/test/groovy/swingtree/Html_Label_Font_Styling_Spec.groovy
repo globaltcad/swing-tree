@@ -224,8 +224,8 @@ class Html_Label_Font_Styling_Spec extends Specification
             responsible for multiplying them by `UI.scale()` before they reach
             Swing's HTML renderer.
         """
-        given : 'A SwingTree instance configured with the parameterised UI scale:'
-            SwingTree.initializeUsing( it -> it.uiScaleFactor(uiScale) )
+        given : 'The existing SwingTree instance is updated with the parameterised UI scale:'
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'A user-authored HTML string and a label styled through `withStyle`:'
             var userHtml = '<html><h1>Greetings</h1><p>This is an html based label.</p></html>'
             var label = UI.label(userHtml)
