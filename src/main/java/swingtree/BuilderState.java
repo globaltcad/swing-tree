@@ -11,6 +11,7 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicHTML;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -154,6 +155,8 @@ final class BuilderState<C extends java.awt.Component>
             JComponent jComponent = ((JComponent) component);
             ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf((JComponent) component);
             if ( componentUI instanceof SwingTreeStyledComponentUI<?> ) {
+                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
+            } else if ( jComponent instanceof JLabel && BasicHTML.isHTMLString(((JLabel)jComponent).getText()) ) {
                 ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
             }
         }
