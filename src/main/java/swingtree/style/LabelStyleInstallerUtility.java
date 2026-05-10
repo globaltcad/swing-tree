@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
      - Going through label.setText makes the styled HTML the source of truth, so
        subsequent re-derivations stay styled.
 
-    So we need to modify the HTML firectly:
+    So we need to modify the HTML directly:
 
      - To apply FontConf settings (colour, family, size, decoration) we splice
        a `<head><style data-swingtree="injected">...</style></head>` block in
