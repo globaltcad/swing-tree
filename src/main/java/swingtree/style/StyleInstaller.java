@@ -718,9 +718,6 @@ final class StyleInstaller<C extends JComponent>
                 owner.setFont(_initialFont);
                 _initialFont = null;
             }
-            if ( owner instanceof JLabel ) {
-                LabelStyleInstallerUtility._stripHtmlInjection((JLabel) owner);
-            }
             return;
         } else if ( _initialFont == null ) {
             _initialFont = owner.getFont();

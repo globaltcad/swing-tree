@@ -265,13 +265,6 @@ final class LabelStyleInstallerUtility {
         return sb.toString();
     }
 
-    static void _stripHtmlInjection(JLabel label) {
-        String currentText = label.getText();
-        String stripped = _stripHtmlInjection(currentText);
-        if ( !Objects.equals(stripped, currentText) )
-            label.setText(stripped);
-    }
-
     static @Nullable String _stripHtmlInjection( @Nullable String html ) {
         if ( html == null )
             return null;
