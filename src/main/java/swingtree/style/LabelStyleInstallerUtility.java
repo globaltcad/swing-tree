@@ -368,7 +368,7 @@ final class LabelStyleInstallerUtility {
 
         fontConf.weight().ifPresent( w -> {
             if ( w == 2 )
-                body.append("font-style:bold;");
+                body.append("font-weight:bold;");
         });
 
         fontConf.paint().ifPresent( paint -> {

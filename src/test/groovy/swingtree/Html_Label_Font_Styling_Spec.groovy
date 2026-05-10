@@ -242,7 +242,7 @@ class Html_Label_Font_Styling_Spec extends Specification
         and : 'Each configured `FontConf` property surfaces as a CSS declaration — and `fontSize` is multiplied by the active UI scale:'
             label.getText().contains('font-family:"Ubuntu";')
             label.getText().contains('font-size:'+Math.round(42 * uiScale)+'pt;')
-            label.getText().contains('font-style:bold;')
+            label.getText().contains('font-weight:bold;')
             label.getText().contains('color:#0000ff;')
 
         where : 'We exercise a representative spread of UI scale factors:'
