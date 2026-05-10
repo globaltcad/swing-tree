@@ -1048,8 +1048,6 @@ class Html_Label_Font_Styling_Spec extends Specification
     }
 
 
-    // -------- helpers used by the specs above --------
-
     /** Renders the given label's HTML view into a fresh image. */
     private static BufferedImage renderHtmlLabel(JLabel label, int width, int height) {
         UI.runNow { label.setSize(width, height); label.doLayout() }
