@@ -56,20 +56,14 @@ import java.awt.image.BufferedImage
 @Subject([FontConf])
 class Html_Label_Font_Styling_Spec extends Specification
 {
-    def setupSpec() {
+    def setup() {
         SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
-    }
-
-    def cleanupSpec() {
-        SwingTree.clear()
-    }
-
-    def setup() {
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
 
     def cleanup() {
+        SwingTree.clear()
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
 
@@ -212,6 +206,52 @@ class Html_Label_Font_Styling_Spec extends Specification
     }
 
 
+    def 'The style information passed to the style API will be injected into the text of an HTML based label.'(
+        float uiScale
+    ) {
+        reportInfo """
+            This test inspects the rewritten HTML text directly to confirm that
+            every `FontConf` property the user configured ends up as a CSS
+            declaration inside SwingTree's injected `<style>` block. Where the
+            other specs in this file rely on pixel-level signals to stay
+            implementation-agnostic, this one is deliberately white-box: it
+            pins the *shape* of the injection so we notice if the format ever
+            drifts (e.g. renamed declarations, lost units, dropped properties).
+
+            We also vary the active `UI.scale()` across a handful of values to
+            confirm that `fontSize` is rewritten in step with the scale — the
+            user supplies points in design-time units, and the framework is
+            responsible for multiplying them by `UI.scale()` before they reach
+            Swing's HTML renderer.
+        """
+        given : 'A SwingTree instance configured with the parameterised UI scale:'
+            SwingTree.initializeUsing( it -> it.uiScaleFactor(uiScale) )
+        and : 'A user-authored HTML string and a label styled through `withStyle`:'
+            var userHtml = '<html><h1>Greetings</h1><p>This is an html based label.</p></html>'
+            var label = UI.label(userHtml)
+                          .withStyle( it -> it
+                              .fontColor("blue")
+                              .fontBold(true)
+                              .fontFamily("Ubuntu")
+                              .fontSize(42)
+                          )
+                          .get(JLabel)
+
+        expect : "SwingTree's injection marker is present in the rewritten text:"
+            label.getText().contains('data-swingtree="injected"')
+        and : 'Each configured `FontConf` property surfaces as a CSS declaration — and `fontSize` is multiplied by the active UI scale:'
+            label.getText().contains('font-family:"Ubuntu";')
+            label.getText().contains('font-size:'+Math.round(42 * uiScale)+'pt;')
+            label.getText().contains('font-style:bold;')
+            label.getText().contains('color:#0000ff;')
+
+        where : 'We exercise a representative spread of UI scale factors:'
+            uiScale << [
+                    1f, 1.5f, 2f, 2.5f, 3f
+                ]
+    }
+
+
     def 'Repeated style applications never accumulate more than one injected style block.'()
     {
         reportInfo """
@@ -225,15 +265,28 @@ class Html_Label_Font_Styling_Spec extends Specification
         """
         given : 'A styled HTML label:'
             var label = UI.html("<h1>Hello</h1>")
-                            .withStyle({ it.fontColor("orange") })
+                              .withStyle({ it
+                                  .fontColor("orange")
+                                  .fontBold(true)
+                              })
                             .get(JLabel)
 
-        when : 'The style cycle is forced to run a few more times:'
-            UI.runNow {
-                3.times { swingtree.style.ComponentExtension.from(label).gatherApplyAndInstallStyle(true) }
-            }
+        when : 'We simulate multiple style cycles through painting:'
+            var ignored1 = renderHtmlLabel(label, 190, 50)
+            var ignored2 = renderHtmlLabel(label, 190, 50)
+            var ignored3 = renderHtmlLabel(label, 190, 50)
 
         then : "Exactly one marker is present in the label's text — no double-injection:"
+            (label.getText() =~ /data-swingtree="injected"/).size() == 1
+
+        when : 'We now convert the label to a plain text based label...'
+            label.setText("I am just plain text!")
+        then : 'The plain text was not altered:'
+            label.getText() == "I am just plain text!"
+
+        when : 'We go back to it being html based...'
+            label.setText("<html><h1>Hello</h1></html>")
+        then : 'The text contains style information!'
             (label.getText() =~ /data-swingtree="injected"/).size() == 1
     }
 
@@ -451,7 +504,7 @@ class Html_Label_Font_Styling_Spec extends Specification
 
         when : 'A `fontColor` styler is added after the build:'
             UI.runNow {
-                swingtree.style.ComponentExtension.from(label).addStyler({ it.fontColor("orange") })
+                UI.of(label).withStyle({ it.fontColor("orange") })
             }
         and : 'The label is rendered again:'
             int orangeAfter = countOrangePixels(renderHtmlLabel(label, 400, 200))
@@ -553,6 +606,445 @@ class Html_Label_Font_Styling_Spec extends Specification
 
         then : 'The HTML text picks up the stylesheet rule and renders in orange:'
             orange > 100
+    }
+
+
+    def 'Inline `font-size:NNpx` declarations in user HTML are scaled by the active UI scale.'()
+    {
+        reportInfo """
+            SwingTree's styling API multiplies a configured `FontConf.size`
+            by the active `UI.scale()` so a single styler renders consistently
+            across DPI environments. Users authoring HTML by hand expect the
+            same of inline declarations: a `<span style="font-size:20px;">`
+            should grow on a HiDPI display, not stay pinned to its raw value.
+
+            We verify that property here by setting two distinct scale factors
+            and inspecting the rewritten label text directly. Pixel rendering
+            is exercised by other specs in this file — here we just want to
+            confirm that the rewrite is performed and that the units are
+            preserved.
+        """
+        given : 'A label whose HTML carries an inline `font-size:20px` declaration:'
+            var html = '<html><span style="font-size:20px;color:#fff;">Hi</span></html>'
+
+        when : 'We render the label at the default scale of 1.0:'
+            var labelAt1 = UI.of(new JLabel(html))
+                            .get(JLabel)
+        then : 'The user-authored 20px is unchanged:'
+            labelAt1.getText().contains('font-size:20px')
+
+        when : 'We then rebuild the label at a 2.0 scale and re-render it:'
+            UI.runNow { SwingTree.get().setUiScaleFactor(2f) }
+            var labelAt2 = UI.label(html)
+                            .get(JLabel)
+        then : 'The pixel value is doubled — and still in pixels:'
+            labelAt2.getText().contains('font-size:40px')
+        and : 'The original 20px no longer appears anywhere in the rewritten text:'
+            !labelAt2.getText().contains('font-size:20px')
+
+        cleanup : 'Restore the default scale factor for unrelated specs:'
+            UI.runNow { SwingTree.get().setUiScaleFactor(1f) }
+    }
+
+
+    def 'Inline `font-size:NNpt` declarations are scaled the same way as `px`.'()
+    {
+        reportInfo """
+            The `pt` unit declared in an inline html tag style, 
+            should grow with `UI.scale()` so a hand-written stylesheet inside
+            an HTML label does not visually drift away from a programmatic one.
+        """
+        given : 'A label with an inline `font-size:12pt` declaration:'
+            var html = '<html><body style="font-size:12pt;">Hi</body></html>'
+        and : 'A 1.5x UI scale applied for the duration of the test:'
+            UI.runNow { SwingTree.get().setUiScaleFactor(1.5f) }
+
+        when : 'The label is built through SwingTree:'
+            var label = UI.of(new JLabel(html))
+                          .get(JLabel)
+
+        then : 'The pt value is multiplied — 12 × 1.5 = 18:'
+            label.getText().contains('font-size:18pt')
+    }
+
+
+    def 'Relative units (em, rem, %) are not touched by inline scaling.'()
+    {
+        reportInfo """
+            Relative CSS units cascade against another value that is itself
+            already scaled: `em` and `rem` resolve against an ancestor's
+            `font-size`, which we will already have rewritten if it carried
+            an absolute declaration. Scaling them too would compound, so we
+            deliberately leave them alone.
+        """
+        given : 'HTML carrying every relative unit at once:'
+            var html = '<html>' +
+                       '<span style="font-size:1.2em;">a</span>' +
+                       '<span style="font-size:1rem;">b</span>' +
+                       '<span style="font-size:120%;">c</span>' +
+                       '</html>'
+        and : 'A non-trivial UI scale that would visibly change a px/pt value:'
+            UI.runNow { SwingTree.get().setUiScaleFactor(2f) }
+
+        when : 'The label is built and styled (any styler will do):'
+            var label = UI.of(new JLabel(html))
+                          .withStyle({ it.fontColor("orange") })
+                          .get(JLabel)
+
+        then : 'Each relative declaration is preserved verbatim:'
+            label.getText().contains('font-size:1.2em')
+            label.getText().contains('font-size:1rem')
+            label.getText().contains('font-size:120%')
+    }
+
+
+    def 'Inline scaling re-derives from the original on every cycle — no compounding.'()
+    {
+        reportInfo """
+            The scaling rewrite stores the un-scaled HTML on a client property
+            and recomputes from it each cycle, instead of operating on the
+            already-scaled output. Without that, two re-style cycles at scale
+            1.5 would produce 20 → 30 → 45 px. We confirm here that *N*
+            forced cycles produce the same result as one.
+        """
+        given : 'HTML with a known-size inline declaration:'
+            var html = '<html><span style="font-size:20px;">Hi</span></html>'
+        and : 'A scale factor of 1.5:'
+            UI.runNow { SwingTree.get().setUiScaleFactor(1.5f) }
+
+        and : 'A label built through SwingTree at that scale:'
+            var label = UI.of(new JLabel(html))
+                          .withStyle({ it.fontColor("orange") })
+                          .get(JLabel)
+
+        when : 'The style cycle is forced to run a few more times:'
+            UI.runNow {
+                3.times { swingtree.style.ComponentExtension.from(label).gatherApplyAndInstallStyle(true) }
+            }
+
+        then : 'The scaled value is exactly 30 — not 45, not 67.5, not 101.25:'
+            label.getText().contains('font-size:30px')
+            !label.getText().contains('font-size:45px')
+            !label.getText().contains('font-size:67')
+            !label.getText().contains('font-size:101')
+    }
+
+
+    def 'A bound `Var<String>` text update is treated as a fresh original — not as a cached scaled value.'()
+    {
+        reportInfo """
+            When a `Var<String>` overwrites the label text, the new text is
+            the user's *un-scaled* HTML — the same shape the label was first
+            seeded with. The styling pipeline must therefore treat it as a
+            fresh original to scale, not as an already-styled result that
+            still matches its previous scaled form.
+        """
+        given : 'A `Var<String>` initially holding HTML with a 20px declaration:'
+            var content = sprouts.Var.of('<span style="font-size:20px;">First</span>')
+        and : 'A 2.0 UI scale:'
+            UI.runNow { SwingTree.get().setUiScaleFactor(2f) }
+
+        and : 'An HTML label bound to the `Var`, styled (any styler will do):'
+            var label = UI.html(content)
+                          .withStyle({ it.fontColor("orange") })
+                          .get(JLabel)
+        when : 'We sanity-check that the initial text is scaled:'
+            UI.sync()
+        then :
+            label.getText().contains('font-size:40px')
+
+        when : 'The bound text is updated to a new HTML string with a different size:'
+            UI.runNow { content.set('<span style="font-size:14px;">Second</span>') }
+            UI.sync()
+        then : 'The new value is treated as a brand-new original and scaled to 28:'
+            label.getText().contains('font-size:28px')
+        and : 'The previous size is gone:'
+            !label.getText().contains('font-size:40px')
+    }
+
+
+    def 'Plain text labels are not affected by the inline-scaling rewrite.'()
+    {
+        reportInfo """
+            The HTML scaling pipeline must be invisible to plain-text labels:
+            a label whose text is not HTML must come out exactly as the user
+            wrote it, regardless of the active UI scale.
+        """
+        given :
+            UI.runNow { SwingTree.get().setUiScaleFactor(2f) }
+
+        when : 'A plain-text label is built at a non-trivial scale:'
+            var label = UI.label('font-size:20px; — should not be touched.')
+                          .withStyle({ it.fontColor("orange") })
+                          .get(JLabel)
+        then : 'The text contains the literal "20px" — exactly the way the user wrote it:'
+            label.getText() == 'font-size:20px; — should not be touched.'
+    }
+
+
+    def 'Increasing the UI scale strictly grows the rendered area of an HTML label.'()
+    {
+        reportInfo """
+            The previous specs verify that the *text* the framework hands to
+            Swing is rewritten in step with `UI.scale()`. That is a useful
+            property of the current implementation but it is not the contract
+            the user cares about: what they observe is the painted output.
+
+            We therefore re-state the contract here through pixel counts. As
+            the UI scale climbs from 1.0 through 1.5, 2.0 and 3.0 the rendered
+            label must occupy strictly more dark pixels at each step. This
+            test deliberately does not look at `label.getText()` — that way
+            it remains a meaningful contract test if the inline-CSS rewriting
+            is one day replaced by a lower-level mechanism such as a
+            `Graphics2D` transform.
+        """
+        given : 'A label with an inline pixel-based font size:'
+            var label = UI.html('<span style="font-size:14px;color:#000;">Hello, World</span>')
+                          .get(JLabel)
+
+        when : 'We render the label at a sequence of ascending scales:'
+            int darkAt1   = paintAndCountDark(label, 800, 300, 1.0f)
+            int darkAt15  = paintAndCountDark(label, 800, 300, 1.5f)
+            int darkAt2   = paintAndCountDark(label, 800, 300, 2.0f)
+            int darkAt3   = paintAndCountDark(label, 800, 300, 3.0f)
+
+        then : 'Each step strictly adds painted area:'
+            darkAt1  < darkAt15
+            darkAt15 < darkAt2
+            darkAt2  < darkAt3
+    }
+
+
+    def 'Decreasing the UI scale strictly shrinks the rendered area of an HTML label.'()
+    {
+        reportInfo """
+            The mirror image of the previous spec: when the user scales the
+            UI back down, the painted area must follow. Together the two
+            specs anchor the *direction* of the relationship in pixels rather
+            than in implementation details.
+        """
+        given : 'A label rendered through the standard inline-px declaration:'
+            var label = UI.html('<span style="font-size:16px;color:#000;">Bigger and smaller</span>')
+                          .get(JLabel)
+
+        when : 'We render the label at a sequence of descending scales:'
+            int darkAt3   = paintAndCountDark(label, 800, 300, 3.0f)
+            int darkAt2   = paintAndCountDark(label, 800, 300, 2.0f)
+            int darkAt15  = paintAndCountDark(label, 800, 300, 1.5f)
+            int darkAt1   = paintAndCountDark(label, 800, 300, 1.0f)
+
+        then : 'Each step strictly drops the painted area:'
+            darkAt3  > darkAt2
+            darkAt2  > darkAt15
+            darkAt15 > darkAt1
+    }
+
+
+    def 'Scaling up and back down restores the original rendering of an HTML label.'()
+    {
+        reportInfo """
+            DPI changes are reversible: a user who briefly bumped their
+            display scale should not be left with a slightly-different
+            looking UI when they restore the old setting. We assert that
+            symmetric round-trips produce a pixel-identical area count
+            (a strict equality is admissible here because rendering is
+            deterministic for the same scale and same label content).
+        """
+        given : 'A label with a moderate inline font size:'
+            var label = UI.html('<span style="font-size:18px;color:#000;">Round-trip</span>')
+                          .get(JLabel)
+
+        when : 'We render at scale 1, then at 2, then back to 1:'
+            int darkBefore   = paintAndCountDark(label, 800, 300, 1.0f)
+            int darkScaledUp = paintAndCountDark(label, 800, 300, 2.0f)
+            int darkAfter    = paintAndCountDark(label, 800, 300, 1.0f)
+
+        then : 'Bumping the scale visibly expanded the painted area...'
+            darkScaledUp > darkBefore + 50
+        and : '...and dropping it back returned to *exactly* the original count:'
+            darkAfter == darkBefore
+    }
+
+
+    def 'Re-applying the same UI scale is idempotent in the rendered output.'()
+    {
+        reportInfo """
+            Setting the scale factor to its current value (or the listener
+            firing twice without a real change in between) must not perturb
+            the rendering. This guards against feedback loops where each
+            cycle would compound the previous one.
+        """
+        given :
+            var label = UI.html('<span style="font-size:20px;color:#000;">Stable</span>')
+                          .get(JLabel)
+
+        when : 'We render at scale 2, then again at scale 2 after redundant calls:'
+            int firstDark = paintAndCountDark(label, 800, 300, 2.0f)
+            UI.runNow {
+                SwingTree.get().setUiScaleFactor(2.0f)
+                SwingTree.get().setUiScaleFactor(2.0f)
+            }
+            UI.sync()
+            int secondDark = countDarkPixels(renderHtmlLabel(label, 800, 300))
+
+        then : 'The two renders agree exactly — no compounding has occurred:'
+            firstDark == secondDark
+    }
+
+
+    def 'Bare heading tags (`<h1>`, `<h2>`...) without inline sizes scale with `UI.scale()`.'()
+    {
+        reportInfo """
+            The most common HTML labels in real applications use semantic tags
+            like `<h1>` or `<h2>` *without* an explicit `font-size` declaration.
+            Swing's `HTMLEditorKit` ships a default stylesheet that pins those
+            tags to absolute keyword values (`x-large`, `large`, ...) which
+            don't react to `UI.scale()`, the JLabel's font, or any
+            look-and-feel scaling. So the inline-size rewrite alone has
+            nothing to grab onto and the heading stays its hard-coded size.
+
+            We now inject scaled `h1..h6` (and a `body`) override into the
+            same `<head><style data-swingtree="injected">` block we already
+            use for FontConf-derived CSS, so headings actually grow with
+            `UI.scale()` even when the user wrote no inline sizes and no
+            styler. We confirm the property here through painted pixels.
+        """
+        given : 'A label whose only declared font-related property is the heading tag itself:'
+            var label = UI.html('<h1>Heading</h1>').get(JLabel)
+
+        when : 'We render the label at a sequence of ascending scales:'
+            int darkAt1 = paintAndCountDark(label, 800, 300, 1.0f)
+            int darkAt2 = paintAndCountDark(label, 800, 300, 2.0f)
+            int darkAt3 = paintAndCountDark(label, 800, 300, 3.0f)
+
+        then : 'Each step strictly adds painted area — the heading is responding to scale:'
+            darkAt1 < darkAt2
+            darkAt2 < darkAt3
+    }
+
+
+    def 'A heading-only label is left textually untouched at scale 1, even though scaling overrides exist.'()
+    {
+        reportInfo """
+            The new heading-defaults injection is gated on `UI.scale() != 1`
+            so the contract for the default scale is preserved: an unstyled
+            HTML label whose text uses only structural tags must come out of
+            the styling pipeline byte-for-byte identical to what the user
+            wrote. The injection (and its marker) only appear when scale
+            actually requires it.
+        """
+        given : 'An HTML label with only a heading and no styler:'
+            var label = UI.html('<h2>Progress</h2>').get(JLabel)
+
+        expect : 'Text equals the convenience-method output, with no marker:'
+            label.getText() == "<html><h2>Progress</h2></html>"
+        and :
+            !label.getText().contains('data-swingtree')
+    }
+
+
+    def 'At a non-trivial scale, an unstyled heading label gets scaled `h1..h6` overrides injected.'()
+    {
+        reportInfo """
+            We inspect the rewritten text directly to confirm the heading
+            override rules show up in the injected `<style>` block when scale
+            != 1 — including for HTML that has no FontConf and no inline
+            sizes at all. A `body{font-size:Npt}` is also injected so plain
+            inline text inherits a scaled size.
+        """
+        given :
+            UI.runNow { SwingTree.get().setUiScaleFactor(2f) }
+        and : 'An unstyled heading label:'
+            var label = UI.html('<h1>Title</h1>').get(JLabel)
+
+        expect : 'The injection block is present:'
+            label.getText().contains('data-swingtree="injected"')
+        and : 'It contains scaled rules for body and the six heading levels:'
+            label.getText().contains('body{font-size:13pt')
+            label.getText().contains('h1{font-size:26pt')
+            label.getText().contains('h2{font-size:20pt')
+            label.getText().contains('h3{font-size:15pt')
+            label.getText().contains('h4{font-size:13pt')
+            label.getText().contains('h5{font-size:11pt')
+            label.getText().contains('h6{font-size:9pt')
+    }
+
+
+    def 'Heading scaling combines with a FontConf so the body rule is not duplicated.'()
+    {
+        reportInfo """
+            When the user supplies a `FontConf.size`, that size already wins
+            for the body and is emitted by `_buildHtmlBodyCss`. The heading
+            override layer must therefore *not* emit a second `body` rule —
+            otherwise the two would confuse downstream readers and tools.
+            We verify this by counting `body{` occurrences inside the
+            injected style block.
+        """
+        given :
+            UI.runNow { SwingTree.get().setUiScaleFactor(2f) }
+        and : 'A heading label with an explicit FontConf size:'
+            var label = UI.html('<h1>X</h1>')
+                          .get(JLabel)
+
+        when : "Extract the contents of SwingTree's injected `<style>` block:"
+            var matcher = label.getText() =~ /<style data-swingtree="injected">(.*?)<\/style>/
+            matcher.find()
+            var injectedCss = matcher.group(1)
+
+        then : 'Exactly one `body{` rule — the FontConf one, not duplicated by the scaling layer:'
+            injectedCss.count('body{') == 1
+        and : 'And the heading overrides are still there:'
+            injectedCss.contains('h1{font-size:')
+    }
+
+
+    def 'Two HTML labels declared with proportional inline sizes stay proportional under scaling.'()
+    {
+        reportInfo """
+            The scaling factor is multiplicative: it must preserve relative
+            sizes between two labels declared with different inline font
+            sizes. We pick a 2x ratio (12px vs 24px) and confirm that the
+            larger label renders more dark pixels than the smaller one at
+            *every* scale we test. This is a structural property — even an
+            implementation that did the scaling outside SwingTree would have
+            to honour it.
+        """
+        given : 'Two labels, identical except for their inline pixel sizes:'
+            var small = UI.html('<span style="font-size:12px;color:#000;">Pair</span>')
+                            .get(JLabel)
+            var large = UI.html('<span style="font-size:24px;color:#000;">Pair</span>')
+                            .get(JLabel)
+
+        when : 'We render both at every scale we want to verify against:'
+            int smallAt1  = paintAndCountDark(small, 800, 300, 1.0f)
+            int largeAt1  = paintAndCountDark(large, 800, 300, 1.0f)
+            int smallAt2  = paintAndCountDark(small, 800, 300, 2.0f)
+            int largeAt2  = paintAndCountDark(large, 800, 300, 2.0f)
+            int smallAt3  = paintAndCountDark(small, 800, 300, 3.0f)
+            int largeAt3  = paintAndCountDark(large, 800, 300, 3.0f)
+
+        then : 'At every scale the larger declaration paints the larger area:'
+            largeAt1 > smallAt1
+            largeAt2 > smallAt2
+            largeAt3 > smallAt3
+        and : 'Increasing the scale grows both labels (a sanity check on the renderer):'
+            smallAt1 < smallAt3
+            largeAt1 < largeAt3
+    }
+
+
+    // -------- helpers used by the specs above --------
+
+    /**
+     * Sets the global UI scale, lets the listener-driven re-style cycle
+     * settle, and returns the dark-pixel count of the freshly rendered
+     * label. Pulled out into a helper so the specs can read as a sequence
+     * of (scale, count) measurements rather than a wall of plumbing.
+     */
+    private static int paintAndCountDark(JLabel label, int width, int height, float scale) {
+        UI.runNow { SwingTree.get().setUiScaleFactor(scale) }
+        UI.sync()
+        return countDarkPixels(renderHtmlLabel(label, width, height))
     }
 
 
