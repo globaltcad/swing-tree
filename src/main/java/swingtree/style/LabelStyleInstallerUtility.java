@@ -318,8 +318,8 @@ final class LabelStyleInstallerUtility {
         h1..h6 with explicit pt values so the rendered HTML actually scales.
         For the body we use either the FontConf.size (already scaled by the
         StyleConf pipeline) or, when no FontConf size was given, the JLabel's
-        current font-size multiplied by UI.scale(). Headings are sized as
-        multiples of the base, matching the HTML5 default ratios.
+        current font-size. Headings are sized as multiples of the base,
+        matching the HTML5 default ratios.
 
         We deliberately skip this when scale == 1: at the default scale the
         kit's own defaults are the right answer and we want unstyled labels
