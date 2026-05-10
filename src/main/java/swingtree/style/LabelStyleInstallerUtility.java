@@ -75,8 +75,6 @@ import java.util.regex.Pattern;
        quirky string cannot break out of the CSS declaration.
 
     Known caveats from Swing's CSS implementation (not fixable here):
-     - font-weight via CSS does not render. It already propagates through
-       setFont -> Font.isBold(), so we omit it.
      - letter-spacing is not honored at all.
      - User-provided <style> blocks within the original HTML still apply, and
        because their source order is later than ours, they win on conflicts.
@@ -360,14 +358,33 @@ final class LabelStyleInstallerUtility {
         });
 
         fontConf.weight().ifPresent( w -> {
-            if ( w == 2 )
-                body.append("font-weight:bold;");
+            // FontConf weight is on AWT's TextAttribute.WEIGHT scale where 1.0
+            // is regular and 2.0 is bold. CSS font-weight uses 100..900 with
+            // 400=normal and 700=bold. Map piecewise-linearly so the canonical
+            // anchors land exactly, then snap to the nearest 100 since legacy
+            // CSS only honors multiples of 100.
+            int cssWeight;
+            if ( w <= 1f ) cssWeight = Math.round(w * 400f);
+            else           cssWeight = Math.round(400f + (w - 1f) * 300f);
+            cssWeight = Math.max(100, Math.min(900, ((cssWeight + 50) / 100) * 100));
+            String value;
+            if ( cssWeight == 400 )      value = "normal";
+            else if ( cssWeight == 700 ) value = "bold";
+            else                         value = String.valueOf(cssWeight);
+            body.append("font-weight:").append(value).append(";");
         });
 
         fontConf.paint().ifPresent( paint -> {
             if ( paint instanceof Color) {
                 Color c = (Color) paint;
                 body.append(String.format("color:#%02x%02x%02x;", c.getRed(), c.getGreen(), c.getBlue()));
+            }
+        });
+
+        fontConf.backgroundPaint().ifPresent( paint -> {
+            if ( paint instanceof Color ) {
+                Color c = (Color) paint;
+                body.append(String.format("background-color:#%02x%02x%02x;", c.getRed(), c.getGreen(), c.getBlue()));
             }
         });
 

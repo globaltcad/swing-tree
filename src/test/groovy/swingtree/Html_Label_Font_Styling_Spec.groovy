@@ -252,6 +252,65 @@ class Html_Label_Font_Styling_Spec extends Specification
     }
 
 
+    def 'Every `fontWeight` value surfaces as a corresponding CSS `font-weight` declaration.'(
+        float weight, String expectedCss
+    ) {
+        reportInfo """
+            The styling API accepts the full {@link java.awt.font.TextAttribute#WEIGHT}
+            scale: `0.0` for light strokes, `1.0` for regular, `2.0` for bold,
+            and any value in between or beyond. Earlier we only emitted CSS
+            for an exact weight of `2.0` — every other value silently dropped
+            on the floor. This spec pins the contract that *any* configured
+            weight produces a matching `font-weight` declaration in the
+            injected `<style>` block.
+
+            We map AWT's weight scale to CSS's 100..900 scale piecewise so the
+            two canonical anchors land exactly on the corresponding keywords:
+            `1.0` becomes `normal` and `2.0` becomes `bold`. Values further
+            away snap to the nearest 100 since legacy CSS only reliably honors
+            those steps.
+        """
+        given : 'A label styled with a single `fontWeight` declaration:'
+            var label = UI.html("<p>Hi</p>")
+                          .withStyle({ it.fontWeight(weight) })
+                          .get(JLabel)
+
+        expect : "The injected `<style>` block contains the expected `font-weight` declaration:"
+            label.getText().contains(expectedCss)
+
+        where : 'We exercise both the canonical anchors and a spread of intermediate values:'
+            weight | expectedCss
+            0.0f   | 'font-weight:100;'
+            0.5f   | 'font-weight:200;'
+            1.0f   | 'font-weight:normal;'
+            1.5f   | 'font-weight:600;'
+            2.0f   | 'font-weight:bold;'
+            2.5f   | 'font-weight:900;'
+    }
+
+
+    def 'A `fontBackgroundPaint` color surfaces as a `background-color` declaration in the injected CSS.'()
+    {
+        reportInfo """
+            The styling API exposes a *background* paint for fonts (mapped to
+            {@link java.awt.font.TextAttribute#BACKGROUND}) — the visual
+            counterpart of `fontColor`. For HTML labels this should appear as
+            a `background-color` declaration in the injected `<style>` block,
+            so the rendered text is highlighted just like a styled non-HTML
+            label would be.
+        """
+        given : 'A label whose styler configures a font background colour:'
+            var label = UI.html("<p>Hi</p>")
+                          .withStyle({ it.fontBackgroundColor(new Color(255, 165, 0)) })
+                          .get(JLabel)
+
+        expect : 'The CSS injection block surfaces it as a `background-color` declaration:'
+            label.getText().contains('background-color:#ffa500;')
+        and : "SwingTree's marker is in the rewritten text, confirming the body rule was injected:"
+            label.getText().contains('data-swingtree="injected"')
+    }
+
+
     def 'Repeated style applications never accumulate more than one injected style block.'()
     {
         reportInfo """
