@@ -26,6 +26,7 @@ import examples.stylepicker.mvvm.BoxShadowPickerViewModel
 import examples.stylish.*
 import examples.tabs.mvvm.TabSelectionExample1
 import examples.team.mvi.TeamView
+import examples.zen.ThemeGardenView
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -275,8 +276,9 @@ class Examples_Spec extends Specification
             The soft example UI looks like this:
             ${Utility.linkSnapshot('views/soft-example-UI_1_.png')}
             
-            This is the most advanced example of how to use the SwingTree style API to
-            customize the look and feel of your entire application.
+            Thies example demonstrates how to use the style API to
+            customize the look and feel of your entire application to
+            the "soft" / "neunorphism" style theme
             You can turn a plain old metal look and feel into a modern 
             soft UI with just a few lines of code.
            
@@ -289,6 +291,28 @@ class Examples_Spec extends Specification
             var ui = new SoftUIView()
         expect : 'It is rendered as shown in the image.'
             Utility.similarityBetween(ui, "views/soft-example-UI.png", 98.5) > 98.5
+    }
+
+    def 'The theme garden GUI example is rendered as expected.'()
+    {
+        reportInfo """
+            The themed GUI garden example UI looks like this:
+            ${Utility.linkSnapshot('views/theme-garden-UI.png')}
+            
+            This is the most advanced example of how to use the SwingTree style API to
+            customize the look and feel of your entire application.
+            You can turn a plain old metal look and feel into a modern 
+            UI that can switch between themes dynamically, all with just a few lines of code.
+           
+            Here we will only test looks of the UI, if you want to see the code,
+            ${Utility.link('click here', ThemeGardenView)} to visit the class.
+            And also feel free to run
+            it yourself, it has a main method for that purpose already.
+        """
+        given : 'We create the UI.'
+            var ui = new ThemeGardenView({})
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "views/theme-garden-UI.png", 98.5) > 98.5
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()

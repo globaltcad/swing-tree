@@ -81,7 +81,7 @@ final class StyleSource<C extends JComponent>
                               .map(ComponentExtension::getStyle)
                               .map(StyleConf::font)
                               .filter( f -> !f.equals(FontConf.none()) )
-                              .map( f -> StyleConf.none()._withFont(f) )
+                              .map( f -> StyleConf.none()._withFont(f._scale(1/UI.scale())) )
                               .orElse(StyleConf.none());
 
         // 1. Global StyleSheet
