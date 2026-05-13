@@ -9,19 +9,15 @@ import swingtree.api.Configurator
 import swingtree.style.FontConf
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
+import utility.Utility
 
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTextField
-import javax.swing.JTextPane
-import javax.swing.JToggleButton
+import javax.swing.*
 import javax.swing.text.AttributeSet
 import javax.swing.text.Element
 import javax.swing.text.StyleConstants
 import javax.swing.text.StyledDocument
-import java.awt.Font
+import java.awt.*
+import java.awt.image.BufferedImage
 
 @Title("Fonts")
 @Narrative('''
@@ -669,6 +665,89 @@ class Font_Spec extends Specification
             getTextPaneAlignment(textPane2) == StyleConstants.ALIGN_CENTER
             getTextPaneAlignment(textPane3) == StyleConstants.ALIGN_RIGHT
             getTextPaneAlignment(textPane4) == StyleConstants.ALIGN_JUSTIFIED
+    }
+
+
+    def 'The font style of a parent component will be inherited by its children.'(
+        float uiScale, int size
+    ) {
+        reportInfo """
+            The font style of a parent component will be inherited by its children.
+            Here we demonstrate this programmatically by styling a chain of nested 
+            components, where the outer most parent has a custom font size, and then 
+            verifying the that child components inherited that size correctly.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A UI with a higher level of nesting:'
+            var ui =
+                    UI.panel("fill").id("p1").withSizeExactly(100, 50)
+                    .withStyle( it -> it
+                        .fontFamily("Ubuntu")
+                        .fontSize(size)
+                        .fontColor(UI.Color.WHITE)
+                        .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        .margin(5).padding(5)
+                        .borderRadius(6)
+                        .backgroundColor(UI.Color.BLACK)
+                    )
+                    .add("grow",
+                        UI.panel("fill").id("p2")
+                        .withStyle( it -> it
+                            .margin(5).padding(5)
+                            .borderRadius(3)
+                            .backgroundColor(UI.Color.DARK_GRAY)
+                        )
+                        .add("grow",
+                            UI.panel("fill").id("p3")
+                            .withStyle( it -> it
+                                .margin(2).padding(2)
+                                .borderRadius(12)
+                                .backgroundColor(UI.Color.GREEN)
+                            )
+                        )
+                    )
+
+        when :
+            var root = UI.runAndGet({
+                var root = ui.get(JPanel)
+                int width = (int) root.getPreferredSize().width
+                int height = (int) root.getPreferredSize().height
+                var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+                Graphics2D g = img.createGraphics()
+                g.setClip(0,0, width, height)
+                root.setSize(width, height)
+                root.setPreferredSize(new Dimension(width, height))
+                root.validate()
+                root.paint(g)
+                g.dispose()
+                return root
+            })
+        and :
+            int p1Size = new Utility.Query(root).find(JPanel, "p1").get().getFont().getSize()
+            int p2Size = new Utility.Query(root).find(JPanel, "p2").get().getFont().getSize()
+            //int p3Size = new Utility.Query(root).find(JPanel, "p3").get().getFont().getSize()
+        then :
+            p1Size == Math.round(size * uiScale)
+            p2Size == Math.round(size * uiScale)
+            //p3Size == Math.round(size * uiScale)
+
+        where :
+            uiScale  |  size
+            1f       |  7
+            2f       |  7
+            3f       |  7
+            1f       |  42
+            2f       |  42
+            3f       |  42
     }
 
 
