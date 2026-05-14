@@ -24,13 +24,13 @@ final class ComponentAreas
 {
     private static final Map<Pooled<BoxModelConf>, ComponentAreas> _CACHE = new WeakHashMap<>();
 
-    private final BoxModelConf    _boxModel;
-    private final LazyRef<Area>   _borderArea;
-    private final LazyRef<Area>   _interiorArea;
-    private final LazyRef<Area>   _exteriorArea;
-    private final LazyRef<Area>   _bodyArea;
-    private final LazyRef<Area>   _contentArea;
-    private final LazyRef<Area[]> _borderEdgeAreas;
+    private final BoxModelConf     _boxModel;
+    private final LazyRef<Shape>   _borderArea;
+    private final LazyRef<Shape>   _interiorArea;
+    private final LazyRef<Shape>   _exteriorArea;
+    private final LazyRef<Shape>   _bodyArea;
+    private final LazyRef<Shape>   _contentArea;
+    private final LazyRef<Area[]>  _borderEdgeAreas;
 
     static ComponentAreas of( Pooled<BoxModelConf> state ) {
         return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state.get()));
@@ -77,7 +77,7 @@ final class ComponentAreas
         return _contentArea.get();
     }
 
-    private static Area _produceContentArea( BoxModelConf boxModel, LazyRef<Area> interiorArea ) {
+    private static Area _produceContentArea( BoxModelConf boxModel, LazyRef<Shape> interiorArea ) {
         Outline insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
         Size size = boxModel.size();
         Area contentArea = new Area(new Rectangle2D.Float(
@@ -110,8 +110,7 @@ final class ComponentAreas
         }
     }
 
-    static Area calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight )
-    {
+    static Shape calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight ) {
         return _calculateComponentBodyArea(
                     state,
                     insTop,
@@ -121,14 +120,14 @@ final class ComponentAreas
                 );
     }
 
-    private static Area _produceBorderArea(LazyRef<Area> interiorArea, LazyRef<Area> bodyArea) {
-        Area componentArea = interiorArea.get();
+    private static Area _produceBorderArea(LazyRef<Shape> interiorArea, LazyRef<Shape> bodyArea) {
+        Area componentArea = new Area(interiorArea.get());
         Area borderArea = new Area(bodyArea.get());
         borderArea.subtract(componentArea);
         return borderArea;
     }
 
-    private static Area _produceInteriorArea(BoxModelConf currentState) {
+    private static Shape _produceInteriorArea(BoxModelConf currentState) {
         Outline widths = currentState.widths();
         float leftBorderWidth   = widths.left().orElse(0f);
         float topBorderWidth    = widths.top().orElse(0f);
@@ -143,20 +142,20 @@ final class ComponentAreas
                );
     }
 
-    private static Area _produceExteriorArea(BoxModelConf currentState, LazyRef<Area> bodyArea) {
+    private static Area _produceExteriorArea(BoxModelConf currentState, LazyRef<Shape> bodyArea) {
         Size size = currentState.size();
         float width  = size.width().orElse(0f);
         float height = size.height().orElse(0f);
         Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
-        exteriorComponentArea.subtract(bodyArea.get());
+        exteriorComponentArea.subtract(new Area(bodyArea.get()));
         return exteriorComponentArea;
     }
 
-    private static Area _produceBodyArea(BoxModelConf currentState) {
+    private static Shape _produceBodyArea(BoxModelConf currentState) {
         return calculateComponentBodyArea(currentState, 0, 0, 0, 0);
     }
 
-    private static Area _calculateComponentBodyArea(
+    private static Shape _calculateComponentBodyArea(
         final BoxModelConf border,
         float insTop,
         float insLeft,
@@ -174,11 +173,11 @@ final class ComponentAreas
             float top    = insets.top().orElse(0f);
             float right  = insets.right().orElse(0f);
             float bottom = insets.bottom().orElse(0f);
-            return new Area(new Rectangle2D.Float(
+            return new Rectangle2D.Float(
                             left, top,
                             size.width().orElse(0f) - left - right,
                             size.height().orElse(0f) - top - bottom
-                        ));
+                        );
         }
 
         insTop    += outline.top().orElse(0f);
@@ -202,14 +201,14 @@ final class ComponentAreas
             arcWidth  = Math.max(0, arcWidth  - insTop * 2f);
             arcHeight = Math.max(0, arcHeight - insTop * 2f);
             if ( arcWidth == 0 || arcHeight == 0 )
-                return new Area(new Rectangle2D.Float(left, top, width - left - right, height - top - bottom));
+                return new Rectangle2D.Float(left, top, width - left - right, height - top - bottom);
 
             // We can return a simple round rectangle:
-            return new Area(new RoundRectangle2D.Float(
+            return new RoundRectangle2D.Float(
                                 left, top,
                                 width - left - right, height - top - bottom,
                                 arcWidth, arcHeight
-                            ));
+                            );
         } else {
             Arc topLeftArc     = border.topLeftArc().orElse(null);
             Arc topRightArc    = border.topRightArc().orElse(null);
