@@ -85,7 +85,7 @@ public final class ThemeGardenView extends Panel {
             )
 
             // ─── Body: split into "now playing" + "playlist" ───────────────
-            .add("grow, push",
+            .add("grow, push, top",
                 panel("fill, wrap 2, insets 14", "[grow 60][grow 40]")
 
                 // ── Left column: now-playing + transport + EQ + chips ─────
@@ -93,11 +93,11 @@ public final class ThemeGardenView extends Panel {
                     box("fill, wrap 1, insets 0")
 
                     .add("growx",
-                        panel("fill, wrap 2, insets 0", "[shrink][grow]").group(Skin.NOW_PLAYING)
+                        panel("fill, wrap 3, insets 0", "[shrink][grow][shrink]").group(Skin.NOW_PLAYING)
                         .add("w 180!, h 180!",
                             box().group(Skin.ALBUM_ART).withPrefSize(180, 180)
                         )
-                        .add("growx, gapleft 18",
+                        .add("grow, gapleft 18",
                             box("fill, wrap 1, insets 0")
                             .add(label("LANTERNS OVER KYOTO").group(Skin.TRACK_TITLE))
                             .add(label("Hiro & The Tide  ·  Drift Reflections").group(Skin.TRACK_ARTIST))
@@ -111,17 +111,17 @@ public final class ThemeGardenView extends Panel {
                             )
 
                             // Progress slider
-                            .add("growx, gaptop 12",
+                            .add("bottom, growx, gaptop 12",
                                 slider(Align.HORIZONTAL, 0, 100, progress).group(Skin.PROGRESS)
                             )
 
-                            // Volume slider
-                            .add("growx, gaptop 4",
-                                box("insets 0, gap 8", "[shrink][grow]")
-                                .add(label("vol").group(Skin.SECTION_LABEL))
-                                .add("growx",
-                                    slider(Align.HORIZONTAL, 0, 100, volume).group(Skin.VOLUME)
-                                )
+                        )
+                        // Volume slider
+                        .add("growy, gapleft 4",
+                            box("wrap 1, insets 0, gap 8", "[shrink]")
+                            .add(label("vol").group(Skin.SECTION_LABEL))
+                            .add("growy",
+                                slider(Align.VERTICAL, 0, 100, volume).group(Skin.VOLUME)
                             )
                         )
                     )
@@ -131,7 +131,7 @@ public final class ThemeGardenView extends Panel {
                         box("fill, wrap 1, insets 0")
                         .add(label("EQUALIZER").group(Skin.SECTION_LABEL))
                         .add("growx, gaptop 4",
-                            panel("fillx, insets 6, gap 10").group(Skin.EQ_PANEL)
+                            panel("fillx, ins 6 15 6 15, gap 8").group(Skin.EQ_PANEL)
                             .apply(p -> {
                                 String[] bands = { "60", "150", "400", "1k", "2.5k", "6k", "12k" };
                                 int[] vals     = {  55,   70,    62,    48,    72,    58,    66 };
@@ -139,7 +139,7 @@ public final class ThemeGardenView extends Panel {
                                     int v = vals[i];
                                     p.add("",
                                         box("fill, wrap 1, insets 0").withPrefWidth(38)
-                                        .add("center, h 110!",
+                                        .add("center, h 90!",
                                             slider(Align.VERTICAL, 0, 100)
                                                 .withValue(v)
                                                 .group(Skin.EQ_BAR)
