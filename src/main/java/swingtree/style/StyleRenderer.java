@@ -30,7 +30,7 @@ import java.util.List;
 final class StyleRenderer
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
-    private static final Map<Pooled<NoiseConf>, Map<Point2D,NoiseGradientPaint>> _NOISE_PAINT_CACHE = new WeakHashMap<>();
+    private static final Map<Pooled<NoiseConf>, NoisePaintCache> _NOISE_PAINT_CACHE = new WeakHashMap<>();
 
     private StyleRenderer() {} // Un-instantiable!
 
@@ -216,7 +216,7 @@ final class StyleRenderer
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = ComponentAreas.calculateComponentBodyArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = new Area(ComponentAreas.calculateComponentBodyArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment));
         }
         else
             baseArea = new Area(conf.areas().get(UI.ComponentArea.BODY));
@@ -732,47 +732,8 @@ final class StyleRenderer
         final BoxModelConf   boxModel,
         final Pooled<NoiseConf> noise
     ) {
-        if ( noise.get().colors().length == 1 ) {
-            return noise.get().colors()[0];
-        } else {
-            Outline insets = boxModel.insetsFor(noise.get().boundary());
-            Point2D.Float corner1 = new Point2D.Float(
-                                        insets.left().orElse(0f) + noise.get().offset().x(),
-                                        insets.top().orElse(0f) + noise.get().offset().y()
-                                    );
-
-            return _createNoisePaint(corner1, noise);
-        }
-    }
-
-    private static Paint _createNoisePaint(
-        final Point2D.Float  center,
-        final Pooled<NoiseConf> noise
-    ) {
-        Map<Point2D, NoiseGradientPaint> cachedPaints = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new HashMap<>());
-        NoiseGradientPaint paint = cachedPaints.get(center);
-        if ( paint != null ) {
-            return paint;
-        }
-
-        final Color[] colors    = noise.get().colors();
-        final float[] fractions = _fractionsFrom(colors, noise.get().fractions());
-        final float rotation = noise.get().rotation();
-        final Scale scale = noise.get().scale();
-        final float scaleX = scale.x();
-        final float scaleY = scale.y();
-
-        paint = new NoiseGradientPaint(
-                        center,
-                        scaleX,
-                        scaleY,
-                        rotation,
-                        fractions,
-                        colors,
-                        noise.get().function()
-                    );
-        cachedPaints.put(center, paint);
-        return paint;
+        NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new NoisePaintCache());
+        return noiseRenderer.getNoisePaint(boxModel, noise);
     }
 
 
@@ -1639,5 +1600,59 @@ final class StyleRenderer
             matrix[i] /= total;
 
         return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );
+    }
+
+    private static class NoisePaintCache {
+
+        private final Map<Point2D,NoiseGradientPaint> paintCache = new HashMap<>();
+
+
+        Paint getNoisePaint(
+            final BoxModelConf   boxModel,
+            final Pooled<NoiseConf> noise
+        ) {
+            if ( noise.get().colors().length == 1 ) {
+                return noise.get().colors()[0];
+            } else {
+                Outline insets = boxModel.insetsFor(noise.get().boundary());
+                Point2D.Float corner1 = new Point2D.Float(
+                        insets.left().orElse(0f) + noise.get().offset().x(),
+                        insets.top().orElse(0f) + noise.get().offset().y()
+                );
+
+                return getCachedNoisePaint(corner1, noise);
+            }
+        }
+
+        private NoiseGradientPaint getCachedNoisePaint(
+            final Point2D.Float  center,
+            final Pooled<NoiseConf> noise
+        ) {
+            NoisePaintCache noiseRenderer = this;
+            NoiseGradientPaint paint = noiseRenderer.paintCache.get(center);
+            if ( paint != null ) {
+                return paint;
+            }
+
+            final Color[] colors    = noise.get().colors();
+            final float[] fractions = _fractionsFrom(colors, noise.get().fractions());
+            final float rotation = noise.get().rotation();
+            final Scale scale = noise.get().scale();
+            final float scaleX = scale.x();
+            final float scaleY = scale.y();
+
+            paint = new NoiseGradientPaint(
+                    center,
+                    scaleX,
+                    scaleY,
+                    rotation,
+                    fractions,
+                    colors,
+                    noise.get().function()
+            );
+            noiseRenderer.paintCache.put(center, paint);
+            return paint;
+        }
+
     }
 }
