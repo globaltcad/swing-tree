@@ -97,7 +97,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
                         _styles[i], f, e
                     );
             }
-            if ( newStyles == null && !mapped.equals(_styles[i]) ) {
+            if ( newStyles == null && mapped != _styles[i] ) {
+                // Important: We deliberately use `mapped != _styles[i]` instead of `!mapped.equals(_styles[i])`!
+                // This is so that pooling works during simplification (See `NamedConfigs<Pooled<NoiseConf>>` in `StyleConfLayer`)!
                 newStyles = Arrays.copyOf(_styles, _styles.length);
                 // We avoid heap allocation if possible!
             }
