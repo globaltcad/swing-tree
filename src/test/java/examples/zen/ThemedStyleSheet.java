@@ -612,7 +612,7 @@ public final class ThemedStyleSheet extends StyleSheet {
 
         add(group(Skin.GENRE_PANEL), it -> it.backgroundColor(new Color(0, 0, 0, 0)).margin(0));
         add(type(JToggleButton.class).group(Skin.CHIP), it -> {
-            JToggleButton b = (JToggleButton) it.component();
+            JToggleButton b = it.component();
             boolean on = b.isSelected();
             return it
                 .backgroundColor(on ? INK : CONCRETE)
@@ -820,7 +820,7 @@ public final class ThemedStyleSheet extends StyleSheet {
 
         add(group(Skin.GENRE_PANEL), it -> it.backgroundColor(new Color(0, 0, 0, 0)).margin(0));
         add(type(JToggleButton.class).group(Skin.CHIP), it -> {
-            JToggleButton b = (JToggleButton) it.component();
+            JToggleButton b = it.component();
             boolean on = b.isSelected();
             return it
                 .backgroundColor(on ? new Color(255, 214, 120, 200) : new Color(0, 0, 0, 110))
@@ -1020,7 +1020,7 @@ public final class ThemedStyleSheet extends StyleSheet {
 
         add(group(Skin.GENRE_PANEL), it -> it.backgroundColor(new Color(0, 0, 0, 0)).margin(0));
         add(type(JToggleButton.class).group(Skin.CHIP), it -> {
-            JToggleButton b = (JToggleButton) it.component();
+            JToggleButton b = it.component();
             boolean on = b.isSelected();
             return it
                 .backgroundColor(on ? CORAL : new Color(255, 245, 248))
