@@ -276,9 +276,9 @@ class Examples_Spec extends Specification
             The soft example UI looks like this:
             ${Utility.linkSnapshot('views/soft-example-UI_1_.png')}
             
-            Thies example demonstrates how to use the style API to
+            This example demonstrates how to use the style API to
             customize the look and feel of your entire application to
-            the "soft" / "neunorphism" style theme
+            the "soft" / "neumorphism" style theme
             You can turn a plain old metal look and feel into a modern 
             soft UI with just a few lines of code.
            
