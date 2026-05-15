@@ -675,7 +675,7 @@ class Font_Spec extends Specification
             The font style of a parent component will be inherited by its children.
             Here we demonstrate this programmatically by styling a chain of nested 
             components, where the outer most parent has a custom font size, and then 
-            verifying the that child components inherited that size correctly.
+            verifying that the child components inherited that size correctly.
         """
         given : """
             We first set a scaling factor to simulate a platform with higher DPI.
