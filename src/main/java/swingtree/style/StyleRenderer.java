@@ -1637,7 +1637,7 @@ final class StyleRenderer
         /** Areas larger than this (in pixels) use the large-tile blitting strategy. */
         private static final int LARGE_AREA_THRESHOLD = LARGE_TILE_SIZE * LARGE_TILE_SIZE;
         /** Upper bound on retained large tiles (~256KiB each) to keep memory bounded. */
-        private static final int MAX_CACHED_TILES = 128;
+        private static final int MAX_CACHED_TILES = Math.max(1, 10 * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
 
         private final Map<Point2D,NoiseGradientPaint> paintCache = new HashMap<>();
         /** Large pre-rendered tiles, keyed by noise-space tile index, evicted least-recently-used first. */
