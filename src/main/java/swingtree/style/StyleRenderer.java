@@ -723,7 +723,8 @@ final class StyleRenderer
         final Graphics2D g2d
     ) {
         final Shape areaToFill = conf.areas().get(noise.get().area());
-        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new NoisePaintCache());
+        final Pooled<NoiseConf> withoutOffset = noise.get().withoutOffsetForRenderCacheAccess();
+        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(withoutOffset, k -> new NoisePaintCache());
         noiseRenderer.renderNoise(conf.boxModel(), noise, areaToFill, g2d);
     }
 
@@ -736,7 +737,8 @@ final class StyleRenderer
         final BoxModelConf      boxModel,
         final Pooled<NoiseConf> noise
     ) {
-        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new NoisePaintCache());
+        final Pooled<NoiseConf> withoutOffset = noise.get().withoutOffsetForRenderCacheAccess();
+        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(withoutOffset, k -> new NoisePaintCache());
         return noiseRenderer.getNoisePaint(boxModel, noise);
     }
 
