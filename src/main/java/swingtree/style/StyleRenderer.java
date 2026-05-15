@@ -1620,8 +1620,7 @@ final class StyleRenderer
                         insets.top().orElse(0f) + noise.get().offset().y()
                 );
 
-                NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new NoisePaintCache());
-                return noiseRenderer.getCachedNoisePaint(corner1, noise);
+                return getCachedNoisePaint(corner1, noise);
             }
         }
 
