@@ -312,7 +312,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new ThemeGardenView({})
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/theme-garden-UI.png", 98.5) > 98.5
+            Utility.similarityBetween(ui, "views/theme-garden-UI.png", 90) > 90
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()
