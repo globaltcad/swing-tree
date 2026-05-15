@@ -468,7 +468,15 @@ public final class UI extends UIFactoryMethods
         POND_IN_DRIZZLE(NoiseFunctions::voronoiBasedPondInDrizzle),
         POND_IN_RAIN(NoiseFunctions::voronoiBasedPondInRain),
         POND_OF_STRINGS(NoiseFunctions::voronoiBasedPondOfStrings),
-        POND_OF_TANGLED_STRINGS(NoiseFunctions::voronoiBasedPondOfTangledStrings);
+        POND_OF_TANGLED_STRINGS(NoiseFunctions::voronoiBasedPondOfTangledStrings),
+        MARBLE(NoiseFunctions::marble),
+        WOOD(NoiseFunctions::wood),
+        PLASMA(NoiseFunctions::plasma),
+        CLOUDS(NoiseFunctions::clouds),
+        CRACKS(NoiseFunctions::cracks),
+        VORTEX(NoiseFunctions::vortex),
+        FLOW(NoiseFunctions::flow),
+        LIGHTNING(NoiseFunctions::lightning);
 
 
         private final NoiseFunction function;
