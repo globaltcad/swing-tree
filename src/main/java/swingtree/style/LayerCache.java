@@ -65,7 +65,7 @@ final class LayerCache
     }
 
     // Higher means more memory usage but better performance
-    private static int DYNAMIC_CACHE_AGGRESSIVENESS() {
+    static int DYNAMIC_CACHE_AGGRESSIVENESS() {
         if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
             return CACHE_AGGRESSIVENESS_OVERRIDE;
         return _COMPUTED_CACHE_AGGRESSIVENESS;

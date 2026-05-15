@@ -675,6 +675,292 @@ public final class NoiseFunctions
         return (float) _wave(Math.pow(Math.abs(pool*3), 0.5));
     }
 
+    /*
+        ~~~ A few more procedural textures, built on the smooth value-noise toolkit below. ~~~
+    */
+
+    /**
+     *  A turbulent marble texture: a regular striped pattern is distorted by several
+     *  octaves of value noise, bending the stripes into organic, swirling veins.
+     */
+    public static float marble( float xIn, float yIn ) {
+        final float scale = 28;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        final double turbulence = ( _fractalNoise(x, y, 5) - 0.5 ) * 2;
+        final double pattern = Math.sin( ( x + y ) * Math.PI + turbulence * 5 );
+        // 'abs' puts a sharp valley at every zero-crossing, 'pow' thins it into a vein:
+        return (float) Math.pow( Math.abs( pattern ), 0.35 );
+    }
+
+    /**
+     *  Concentric, slightly distorted growth rings reminiscent of a cross-cut piece
+     *  of timber. The rings are warped by fractal noise to give them a natural grain.
+     */
+    public static float wood( float xIn, float yIn ) {
+        final float scale = 48;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        final double distortion = _fractalNoise(x, y, 4) - 0.5;
+        final double rings = Math.sqrt( x * x + y * y ) + distortion * 1.5;
+        final double grain = ( rings * 5 ) % 1.0;
+        return (float) ( ( Math.sin( grain * Math.PI ) + 1 ) / 2 );
+    }
+
+    /**
+     *  A smooth, flowing interference pattern built from a handful of summed sine
+     *  waves - the classic "plasma" demo effect, great for vivid color gradients.
+     */
+    public static float plasma( float xIn, float yIn ) {
+        final double scale = 36;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        double v = Math.sin( x );
+        v += Math.sin( y / 0.9 );
+        v += Math.sin( ( x + y ) / 1.7 );
+        final double cx = x + 0.5 * Math.sin( x / 3.0 );
+        final double cy = y + 0.5 * Math.cos( y / 2.0 );
+        v += Math.sin( Math.sqrt( cx * cx + cy * cy + 1 ) );
+        return (float) ( ( Math.sin( v * Math.PI / 2 ) + 1 ) / 2 );
+    }
+
+    /**
+     *  Soft, billowing clouds produced by fractal Brownian motion and a sigmoid
+     *  contrast curve which crisps the cloud edges up against the open sky.
+     */
+    public static float clouds( float xIn, float yIn ) {
+        final float scale = 64;
+        final double density = _fractalNoise(xIn / scale, yIn / scale, 6);
+        return (float) _sigmoid( ( density - 0.5 ) * 7 );
+    }
+
+    /**
+     *  A network of thin cracks separating irregular plates, computed from the
+     *  difference between the two closest Worley (Voronoi) feature points.
+     */
+    public static float cracks( float xIn, float yIn ) {
+        final float scale = 28;
+        final double[] f1f2 = _worleyF1F2(xIn / scale, yIn / scale);
+        final double edge = f1f2[1] - f1f2[0];
+        return (float) _sigmoid( ( edge - 0.06 ) * 30 );
+    }
+
+    /**
+     *  A swirling vortex created by rotating the sampling angle as a function of
+     *  the radius and an underlying fractal noise field.
+     */
+    public static float vortex( float xIn, float yIn ) {
+        final float scale = 40;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        final double radius = Math.sqrt( x * x + y * y );
+        final double angle = Math.atan2( y, x ) + radius * 0.8 + _fractalNoise(x, y, 4) * 3;
+        final double swirl = Math.sin( angle * 3 + radius * 2 );
+        return (float) ( ( swirl + 1 ) / 2 );
+    }
+
+    /**
+     *  A fluid, organic flow field produced by "domain warping": fractal noise is
+     *  sampled at coordinates that are themselves displaced by other fractal noise.
+     */
+    public static float flow( float xIn, float yIn ) {
+        final float scale = 56;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        final double warpX = _fractalNoise(x, y, 4);
+        final double warpY = _fractalNoise(x + 5.2, y + 1.3, 4);
+        final double warped = _fractalNoise(x + 4 * warpX, y + 4 * warpY, 5);
+        return (float) _clamp01(warped);
+    }
+
+    /**
+     *  Crackling electric arcs. A fractal noise field is traced along the contour
+     *  where it crosses its mid value - that contour naturally branches and loops -
+     *  while a jagged domain warp makes the arcs zig-zag like a real discharge.
+     *  <p>
+     *  The contour is rendered as a uniformly thin bolt by dividing the distance to
+     *  the mid value by the local gradient: {@code |field - 0.5| / |gradient|} is an
+     *  estimate of the true distance to the contour, so the bolt keeps the same
+     *  width regardless of how steep the field is (no fat blobs on flat spots).
+     */
+    public static float lightning( float xIn, float yIn ) {
+        final float scale = 110;
+        double x = xIn / scale;
+        double y = yIn / scale;
+        // Jagged domain warp so the bolts fork and zig-zag instead of curving smoothly:
+        final double warpX = _fractalNoise(x + 1.7, y - 3.1, 4) - 0.5;
+        final double warpY = _fractalNoise(x - 4.3, y + 2.9, 4) - 0.5;
+        x += warpX * 1.6;
+        y += warpY * 1.6;
+
+        final int octaves = 3;
+        final double eps = 0.012;
+        final double field = _fractalNoise(x, y, octaves);
+        // Central-difference gradient of the field, used to normalize the bolt width:
+        final double dx = _fractalNoise(x + eps, y, octaves) - _fractalNoise(x - eps, y, octaves);
+        final double dy = _fractalNoise(x, y + eps, octaves) - _fractalNoise(x, y - eps, octaves);
+        final double gradient = Math.sqrt( dx * dx + dy * dy ) / ( 2 * eps ) + 1e-3;
+
+        final double distance = Math.abs( field - 0.5 ) / gradient; // ~distance to the contour
+        final double bolt = Math.exp( -distance * 24 ); // razor-thin glowing filament
+        final double glow = Math.exp( -distance *  5 ) * 0.25; // soft halo around it
+        return (float) _clamp01( bolt + glow );
+    }
+
+    /**
+     *  A leafy foliage texture. Leaves are scattered from a jittered grid - jittered
+     *  far enough that the underlying grid disappears - and layered by a random depth
+     *  so they overlap naturally. To avoid a sterile, too-perfect look, every leaf is
+     *  individually irregular: its spine bends like a banana, its outline is
+     *  asymmetric (rounded toward the base, drawn to a point at the tip) with a wavy
+     *  edge, and its surface is broken up by value-noise mottling. Each leaf carries a
+     *  lit midrib and faint herringbone side veins, and leaves further back are shaded
+     *  darker for depth.
+     */
+    public static float foliage( float xIn, float yIn ) {
+        final float scale = 72;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        final int cellX = (int) Math.floor(x);
+        final int cellY = (int) Math.floor(y);
+
+        double bestZ = -1;
+        double value = 0.13 + ( _valueNoise(x * 6, y * 6) - 0.5 ) * 0.07; // mottled shade in the gaps
+
+        // Leaves are jittered well beyond their own cell, so a wide neighbourhood is scanned:
+        for ( int oy = -2; oy <= 2; oy++ ) {
+            for ( int ox = -2; ox <= 2; ox++ ) {
+                final int gx = cellX + ox;
+                final int gy = cellY + oy;
+                final double z = _fastPseudoRandomDoubleFrom( gx + 7919, gy + 104729 );
+                if ( z <= bestZ )
+                    continue; // a leaf nearer to the viewer already won this pixel
+
+                final double angle = _fastPseudoRandomDoubleFrom( gx + 101, gy - 57 ) * 2 * Math.PI;
+                final double leafX = gx + 0.5 + ( _fastPseudoRandomDoubleFrom( gx, gy ) - 0.5 ) * 1.4;
+                final double leafY = gy + 0.5 + ( _fastPseudoRandomDoubleFrom( gy, -gx ) - 0.5 ) * 1.4;
+                final double dx = x - leafX;
+                final double dy = y - leafY;
+
+                // Rotate the offset into the leaf's own frame (u = along, v = across):
+                final double sin = Math.sin(angle);
+                final double cos = Math.cos(angle);
+                final double u = dx * cos - dy * sin;
+                final double v = dx * sin + dy * cos;
+
+                final double halfLength = 0.45 + _fastPseudoRandomDoubleFrom( gx - 1597, gy - 2749 ) * 0.6;
+                if ( Math.abs(u) >= halfLength )
+                    continue;
+                final double t = u / halfLength; // -1 at the base, +1 at the tip
+
+                // The spine bows like a banana, so the leaf is not a rigid symmetric lens:
+                final double curve  = ( _fastPseudoRandomDoubleFrom( gx + 53, gy + 877 ) - 0.5 ) * 0.7;
+                final double spineV = curve * ( 1 - t * t );
+
+                // Outline: a lens skewed toward the base, with a per-leaf wavy edge:
+                final double asym    = _fastPseudoRandomDoubleFrom( gx - 71, gy + 311 ) * 0.6;
+                final double aspect  = 0.30 + _fastPseudoRandomDoubleFrom( gx + 211, gy - 19 ) * 0.16;
+                final double wave    = 1 + 0.18 * Math.sin( u * ( 7 + 7 * asym ) + angle * 3 );
+                final double profile = Math.max( 0, ( 1 - t * t ) * ( 1 - asym * t ) );
+                final double halfWidth = aspect * halfLength * profile * wave;
+
+                final double vRel = v - spineV;
+                if ( halfWidth <= 0 || Math.abs(vRel) >= halfWidth )
+                    continue;
+
+                // This leaf both covers the pixel and sits on top, so it wins:
+                bestZ = z;
+                final double rim    = Math.abs(vRel) / halfWidth;       // 0 at the spine .. 1 at the edge
+                final double midrib = Math.exp( -(vRel * vRel) / 0.0016 ); // glowing central vein
+                final double side   = Math.pow( Math.max( 0, Math.sin( u * 9 - Math.abs(vRel) * 16 ) ), 8 );
+                final double bright = _fastPseudoRandomDoubleFrom( gx - 313, gy + 191 );
+                final double mottle = _valueNoise( x * 10 + gx * 7.0, y * 10 + gy * 7.0 ) - 0.5;
+
+                double shade = 0.40 + bright * 0.42; // every leaf gets its own green tone
+                shade += ( 1 - t ) * 0.10;           // a touch lighter toward the base
+                shade -= rim * rim * 0.34;           // darker rim gives the leaves depth
+                shade += midrib * 0.24;              // the midrib catches the light
+                shade += side * ( 1 - rim ) * 0.11;  // faint herringbone side veins
+                shade += mottle * 0.15;              // organic blotchy surface variation
+                shade -= ( 1 - z ) * 0.14;           // leaves further back sit in shadow
+                value = _clamp01( shade );
+            }
+        }
+        return (float) value;
+    }
+
+    /**
+     *  Smoothly interpolated value noise: pseudo random values are placed on an
+     *  integer lattice and blended with a smooth-step fade, giving a continuous
+     *  field in the range 0..1. This is the building block for {@link #_fractalNoise}.
+     */
+    private static double _valueNoise( double x, double y ) {
+        final int x0 = (int) Math.floor(x);
+        final int y0 = (int) Math.floor(y);
+        final double fx = _smoothStep( x - x0 );
+        final double fy = _smoothStep( y - y0 );
+        final double v00 = _fastPseudoRandomDoubleFrom( x0,     y0     );
+        final double v10 = _fastPseudoRandomDoubleFrom( x0 + 1, y0     );
+        final double v01 = _fastPseudoRandomDoubleFrom( x0,     y0 + 1 );
+        final double v11 = _fastPseudoRandomDoubleFrom( x0 + 1, y0 + 1 );
+        final double top    = v00 + ( v10 - v00 ) * fx;
+        final double bottom = v01 + ( v11 - v01 ) * fx;
+        return top + ( bottom - top ) * fy;
+    }
+
+    /**
+     *  Fractal Brownian motion: several octaves of {@link #_valueNoise} are summed
+     *  with halving amplitude and doubling frequency. The result stays in 0..1.
+     */
+    private static double _fractalNoise( double x, double y, int octaves ) {
+        double sum = 0;
+        double amplitude = 1;
+        double frequency = 1;
+        double totalAmplitude = 0;
+        for ( int i = 0; i < octaves; i++ ) {
+            sum += _valueNoise( x * frequency, y * frequency ) * amplitude;
+            totalAmplitude += amplitude;
+            amplitude *= 0.5;
+            frequency *= 2;
+        }
+        return sum / totalAmplitude;
+    }
+
+    /**
+     *  Returns the distances to the closest and second-closest Worley feature
+     *  points around the given coordinate as a {@code [F1, F2]} pair.
+     */
+    private static double[] _worleyF1F2( double x, double y ) {
+        final int cellX = (int) Math.floor(x);
+        final int cellY = (int) Math.floor(y);
+        double f1 = Double.POSITIVE_INFINITY;
+        double f2 = Double.POSITIVE_INFINITY;
+        for ( int oy = -1; oy <= 1; oy++ ) {
+            for ( int ox = -1; ox <= 1; ox++ ) {
+                final int gx = cellX + ox;
+                final int gy = cellY + oy;
+                final double px = gx + _fastPseudoRandomDoubleFrom( gx, gy );
+                final double py = gy + _fastPseudoRandomDoubleFrom( gy, -gx );
+                final double distance = _distanceBetween( px, py, x, y );
+                if ( distance < f1 ) {
+                    f2 = f1;
+                    f1 = distance;
+                } else if ( distance < f2 ) {
+                    f2 = distance;
+                }
+            }
+        }
+        return new double[]{ f1, f2 };
+    }
+
+    private static double _smoothStep( double t ) {
+        return t * t * ( 3 - 2 * t );
+    }
+
+    private static double _clamp01( double value ) {
+        return value < 0 ? 0 : ( value > 1 ? 1 : value );
+    }
+
     private static double _voronoiBasedWavesSum( float xIn, float yIn ) {
         final int minX1 = (int) Math.floor(xIn) - 1 ;
         final int minX2 = (int) Math.floor(xIn)     ;

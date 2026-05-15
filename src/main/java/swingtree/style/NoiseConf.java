@@ -102,6 +102,19 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     private final float                _rotation;
     private final float[]              _fractions;
     private final AtomicReference<@Nullable Integer> _hashCodeCache = new AtomicReference<>();
+    private final LazyRef<Pooled<NoiseConf>> _renderCacheKey = new LazyRef<>(this, n -> {
+        if ( n.offset().equals(Offset.none()) )
+            return new Pooled<>(n);
+        else
+            return new Pooled<>(n.offset(0,0)).intern();
+        /*
+            Caching in SwingTree is based on weak hash maps whose entries
+            are being kept alive by pooled objects (shared immutable value objects).
+            When rendering, the offset of a noise gradient may be animated or multiple
+            components exist which have noise gradient textures with different offsets.
+            We want these to share the same base conf and a common cache!
+        */
+    });
 
 
     private NoiseConf(
@@ -140,7 +153,6 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     float[] fractions() { return _fractions; }
 
-
     boolean isOpaque() {
         if ( _colors.length == 0 )
             return false;
@@ -153,6 +165,10 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
             }
         }
         return !foundTransparentColor;
+    }
+
+    Pooled<NoiseConf> withoutOffsetForRenderCacheAccess() {
+        return _renderCacheKey.get();
     }
 
     NoiseConf _scale( double scale ) {

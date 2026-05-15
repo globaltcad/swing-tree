@@ -722,17 +722,23 @@ final class StyleRenderer
         final LayerRenderConf conf,
         final Graphics2D g2d
     ) {
-        final Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);
         final Shape areaToFill = conf.areas().get(noise.get().area());
-        g2d.setPaint(noisePaint);
-        g2d.fill(areaToFill);
+        final Pooled<NoiseConf> withoutOffset = noise.get().withoutOffsetForRenderCacheAccess();
+        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(withoutOffset, k -> new NoisePaintCache());
+        noiseRenderer.renderNoise(conf.boxModel(), noise, areaToFill, g2d);
     }
 
+    /**
+     *  Returns a {@link Paint} for the supplied noise configuration. Used where a plain
+     *  {@link Paint} object is required (e.g. font painting) and the large-tile blitting
+     *  strategy of {@link #_renderNoise} is not applicable.
+     */
     static Paint _createNoisePaint(
-        final BoxModelConf   boxModel,
+        final BoxModelConf      boxModel,
         final Pooled<NoiseConf> noise
     ) {
-        NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -> new NoisePaintCache());
+        final Pooled<NoiseConf> withoutOffset = noise.get().withoutOffsetForRenderCacheAccess();
+        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(withoutOffset, k -> new NoisePaintCache());
         return noiseRenderer.getNoisePaint(boxModel, noise);
     }
 
@@ -1602,56 +1608,201 @@ final class StyleRenderer
         return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );
     }
 
+    /**
+     *  Caches the work needed to render a {@link NoiseConf} layer.
+     *  <p>
+     *  Two strategies are used depending on the size of the area being filled:
+     *  <ul>
+     *      <li>For <b>small</b> areas a {@link NoiseGradientPaint} is reused and the area
+     *          is filled directly through {@code g2d.fill(..)}. The {@link NoiseGradientPaint}
+     *          internally caches the 32x32 rasters Swing requests, which is optimal here.</li>
+     *      <li>For <b>large</b> areas (e.g. window sized backgrounds) the per-pixel
+     *          {@link Paint} pipeline becomes the bottleneck: Swing rasterizes and composites
+     *          a {@link Paint} in fixed 32x32 chunks, so a large fill turns into thousands of
+     *          tiny blits. To avoid this we pre-render the noise into large
+     *          {@value #LARGE_TILE_SIZE}x{@value #LARGE_TILE_SIZE} {@link BufferedImage} tiles
+     *          and blit those with a single {@code g2d.drawImage(..)} call per tile.</li>
+     *  </ul>
+     *  The large tiles are keyed in <i>noise space</i> (device space translated so the noise
+     *  {@code center} is the origin) rather than device space. The noise pattern only depends
+     *  on these noise-space coordinates, so a tile's pixels are invariant with respect to the
+     *  component size and the noise offset. Resizing the component or scrolling merely changes
+     *  <i>which</i> tiles are visible and <i>where</i> they are drawn - already rendered tiles
+     *  stay valid, which keeps a dynamically resized UI responsive.
+     */
     private static class NoisePaintCache {
 
+        /** Side length of the pre-rendered large tiles, in (unscaled) device pixels. */
+        private static final int LARGE_TILE_SIZE = 256;
+        /** Areas larger than this (in pixels) use the large-tile blitting strategy. */
+        private static final int LARGE_AREA_THRESHOLD = LARGE_TILE_SIZE * LARGE_TILE_SIZE;
+        /** Upper bound on retained large tiles (~256KiB each) to keep memory bounded. */
+        private static final int MAX_CACHED_TILES = Math.max(1, 10 * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
+
         private final Map<Point2D,NoiseGradientPaint> paintCache = new HashMap<>();
+        /** Large pre-rendered tiles, keyed by noise-space tile index, evicted least-recently-used first. */
+        private final Map<Long,BufferedImage> largeTileCache =
+                new LinkedHashMap<Long,BufferedImage>(16, 0.75f, true) {
+                    @Override
+                    protected boolean removeEldestEntry( Map.Entry<Long,BufferedImage> eldest ) {
+                        return size() > MAX_CACHED_TILES;
+                    }
+                };
 
 
-        Paint getNoisePaint(
-            final BoxModelConf   boxModel,
-            final Pooled<NoiseConf> noise
+        void renderNoise(
+            final BoxModelConf      boxModel,
+            final Pooled<NoiseConf> noise,
+            final Shape             areaToFill,
+            final Graphics2D        g2d
         ) {
-            if ( noise.get().colors().length == 1 ) {
-                return noise.get().colors()[0];
-            } else {
-                Outline insets = boxModel.insetsFor(noise.get().boundary());
-                Point2D.Float corner1 = new Point2D.Float(
-                        insets.left().orElse(0f) + noise.get().offset().x(),
-                        insets.top().orElse(0f) + noise.get().offset().y()
-                );
+            final Color[] colors = noise.get().colors();
+            if ( colors.length == 1 ) {
+                g2d.setPaint(colors[0]);
+                g2d.fill(areaToFill);
+                return;
+            }
 
-                return getCachedNoisePaint(corner1, noise);
+            final Outline insets = boxModel.insetsFor(noise.get().boundary());
+            final Point2D.Float center = new Point2D.Float(
+                    insets.left().orElse(0f) + noise.get().offset().x(),
+                    insets.top().orElse(0f) + noise.get().offset().y()
+            );
+
+            final Rectangle bounds = areaToFill.getBounds();
+            final long area = (long) bounds.width * bounds.height;
+
+            if ( area <= LARGE_AREA_THRESHOLD ) {
+                // Small area: the per-pixel Paint pipeline is cheap enough here.
+                g2d.setPaint(getCachedNoisePaint(center, noise));
+                g2d.fill(areaToFill);
+            } else {
+                // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
+                _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
             }
         }
 
-        private NoiseGradientPaint getCachedNoisePaint(
-            final Point2D.Float  center,
+        /**
+         *  Fills {@code areaToFill} by blitting cached large {@link BufferedImage} tiles.
+         *  The tile grid lives in noise space (device space minus {@code center}), so the
+         *  tiles survive component resizing without cache invalidation.
+         */
+        private void _renderWithLargeTiles(
+            final Point2D.Float     center,
+            final Pooled<NoiseConf> noise,
+            final Shape             areaToFill,
+            final Rectangle         bounds,
+            final Graphics2D        g2d
+        ) {
+            final int size = LARGE_TILE_SIZE;
+
+            // Bounds expressed in noise space (device space translated by 'center'):
+            final double uMin = bounds.getMinX() - center.x;
+            final double uMax = bounds.getMaxX() - center.x;
+            final double vMin = bounds.getMinY() - center.y;
+            final double vMax = bounds.getMaxY() - center.y;
+
+            final int tileXMin = Math.floorDiv( (int) Math.floor(uMin), size );
+            final int tileXMax = Math.floorDiv( (int) Math.ceil(uMax) - 1, size );
+            final int tileYMin = Math.floorDiv( (int) Math.floor(vMin), size );
+            final int tileYMax = Math.floorDiv( (int) Math.ceil(vMax) - 1, size );
+
+            final Shape oldClip = g2d.getClip();
+            try {
+                g2d.clip(areaToFill); // Restricts the tile blits to the requested shape.
+                for ( int tileY = tileYMin; tileY <= tileYMax; tileY++ ) {
+                    for ( int tileX = tileXMin; tileX <= tileXMax; tileX++ ) {
+                        final long key = ((long) tileX << 32) | (tileY & 0xFFFFFFFFL);
+                        BufferedImage tile = largeTileCache.get(key);
+                        if ( tile == null ) {
+                            tile = _renderLargeTile(tileX, tileY, noise);
+                            largeTileCache.put(key, tile);
+                        }
+                        final int drawX = Math.round( tileX * (float) size + center.x );
+                        final int drawY = Math.round( tileY * (float) size + center.y );
+                        g2d.drawImage(tile, drawX, drawY, null);
+                    }
+                }
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Failed to render noise using large tiles!", e);
+            } finally {
+                g2d.setClip(oldClip);
+            }
+        }
+
+        /**
+         *  Renders a single large tile of the noise into a fresh {@link BufferedImage}.
+         *  A regular {@link NoiseGradientPaint} centered at {@code (-tileX*size, -tileY*size)}
+         *  maps image pixel {@code (px,py)} to noise-space coordinate
+         *  {@code (tileX*size + px, tileY*size + py)}, so the tile content depends only on the
+         *  tile index - never on the component size or noise offset.
+         */
+        private BufferedImage _renderLargeTile(
+            final int               tileX,
+            final int               tileY,
             final Pooled<NoiseConf> noise
         ) {
-            NoisePaintCache noiseRenderer = this;
-            NoiseGradientPaint paint = noiseRenderer.paintCache.get(center);
+            final int size = LARGE_TILE_SIZE;
+            final NoiseGradientPaint paint = _createNoiseGradientPaint(
+                    new Point2D.Float( -tileX * (float) size, -tileY * (float) size ),
+                    noise
+            );
+            final BufferedImage tile = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D ig = tile.createGraphics();
+            try {
+                ig.setPaint(paint);
+                ig.fillRect(0, 0, size, size);
+            } finally {
+                ig.dispose();
+            }
+            return tile;
+        }
+
+        Paint getNoisePaint(
+            final BoxModelConf      boxModel,
+            final Pooled<NoiseConf> noise
+        ) {
+            final Color[] colors = noise.get().colors();
+            if ( colors.length == 1 ) {
+                return colors[0];
+            }
+            final Outline insets = boxModel.insetsFor(noise.get().boundary());
+            final Point2D.Float center = new Point2D.Float(
+                    insets.left().orElse(0f) + noise.get().offset().x(),
+                    insets.top().orElse(0f) + noise.get().offset().y()
+            );
+            return getCachedNoisePaint(center, noise);
+        }
+
+        private NoiseGradientPaint getCachedNoisePaint(
+            final Point2D.Float     center,
+            final Pooled<NoiseConf> noise
+        ) {
+            NoiseGradientPaint paint = paintCache.get(center);
             if ( paint != null ) {
                 return paint;
             }
+            paint = _createNoiseGradientPaint(center, noise);
+            paintCache.put(center, paint);
+            return paint;
+        }
 
+        private static NoiseGradientPaint _createNoiseGradientPaint(
+            final Point2D           center,
+            final Pooled<NoiseConf> noise
+        ) {
             final Color[] colors    = noise.get().colors();
             final float[] fractions = _fractionsFrom(colors, noise.get().fractions());
-            final float rotation = noise.get().rotation();
-            final Scale scale = noise.get().scale();
-            final float scaleX = scale.x();
-            final float scaleY = scale.y();
-
-            paint = new NoiseGradientPaint(
+            final Scale   scale     = noise.get().scale();
+            return new NoiseGradientPaint(
                     center,
-                    scaleX,
-                    scaleY,
-                    rotation,
+                    scale.x(),
+                    scale.y(),
+                    noise.get().rotation(),
                     fractions,
                     colors,
                     noise.get().function()
             );
-            noiseRenderer.paintCache.put(center, paint);
-            return paint;
         }
 
     }
