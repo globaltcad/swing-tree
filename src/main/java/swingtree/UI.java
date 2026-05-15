@@ -476,7 +476,8 @@ public final class UI extends UIFactoryMethods
         CRACKS(NoiseFunctions::cracks),
         VORTEX(NoiseFunctions::vortex),
         FLOW(NoiseFunctions::flow),
-        LIGHTNING(NoiseFunctions::lightning);
+        LIGHTNING(NoiseFunctions::lightning),
+        FOLIAGE(NoiseFunctions::foliage);
 
 
         private final NoiseFunction function;

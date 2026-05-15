@@ -808,6 +808,88 @@ public final class NoiseFunctions
     }
 
     /**
+     *  A leafy foliage texture. Leaves are scattered from a jittered grid - jittered
+     *  far enough that the underlying grid disappears - and layered by a random depth
+     *  so they overlap naturally. To avoid a sterile, too-perfect look, every leaf is
+     *  individually irregular: its spine bends like a banana, its outline is
+     *  asymmetric (rounded toward the base, drawn to a point at the tip) with a wavy
+     *  edge, and its surface is broken up by value-noise mottling. Each leaf carries a
+     *  lit midrib and faint herringbone side veins, and leaves further back are shaded
+     *  darker for depth.
+     */
+    public static float foliage( float xIn, float yIn ) {
+        final float scale = 72;
+        final double x = xIn / scale;
+        final double y = yIn / scale;
+        final int cellX = (int) Math.floor(x);
+        final int cellY = (int) Math.floor(y);
+
+        double bestZ = -1;
+        double value = 0.13 + ( _valueNoise(x * 6, y * 6) - 0.5 ) * 0.07; // mottled shade in the gaps
+
+        // Leaves are jittered well beyond their own cell, so a wide neighbourhood is scanned:
+        for ( int oy = -2; oy <= 2; oy++ ) {
+            for ( int ox = -2; ox <= 2; ox++ ) {
+                final int gx = cellX + ox;
+                final int gy = cellY + oy;
+                final double z = _fastPseudoRandomDoubleFrom( gx + 7919, gy + 104729 );
+                if ( z <= bestZ )
+                    continue; // a leaf nearer to the viewer already won this pixel
+
+                final double angle = _fastPseudoRandomDoubleFrom( gx + 101, gy - 57 ) * 2 * Math.PI;
+                final double leafX = gx + 0.5 + ( _fastPseudoRandomDoubleFrom( gx, gy ) - 0.5 ) * 1.4;
+                final double leafY = gy + 0.5 + ( _fastPseudoRandomDoubleFrom( gy, -gx ) - 0.5 ) * 1.4;
+                final double dx = x - leafX;
+                final double dy = y - leafY;
+
+                // Rotate the offset into the leaf's own frame (u = along, v = across):
+                final double sin = Math.sin(angle);
+                final double cos = Math.cos(angle);
+                final double u = dx * cos - dy * sin;
+                final double v = dx * sin + dy * cos;
+
+                final double halfLength = 0.45 + _fastPseudoRandomDoubleFrom( gx - 1597, gy - 2749 ) * 0.6;
+                if ( Math.abs(u) >= halfLength )
+                    continue;
+                final double t = u / halfLength; // -1 at the base, +1 at the tip
+
+                // The spine bows like a banana, so the leaf is not a rigid symmetric lens:
+                final double curve  = ( _fastPseudoRandomDoubleFrom( gx + 53, gy + 877 ) - 0.5 ) * 0.7;
+                final double spineV = curve * ( 1 - t * t );
+
+                // Outline: a lens skewed toward the base, with a per-leaf wavy edge:
+                final double asym    = _fastPseudoRandomDoubleFrom( gx - 71, gy + 311 ) * 0.6;
+                final double aspect  = 0.30 + _fastPseudoRandomDoubleFrom( gx + 211, gy - 19 ) * 0.16;
+                final double wave    = 1 + 0.18 * Math.sin( u * ( 7 + 7 * asym ) + angle * 3 );
+                final double profile = Math.max( 0, ( 1 - t * t ) * ( 1 - asym * t ) );
+                final double halfWidth = aspect * halfLength * profile * wave;
+
+                final double vRel = v - spineV;
+                if ( halfWidth <= 0 || Math.abs(vRel) >= halfWidth )
+                    continue;
+
+                // This leaf both covers the pixel and sits on top, so it wins:
+                bestZ = z;
+                final double rim    = Math.abs(vRel) / halfWidth;       // 0 at the spine .. 1 at the edge
+                final double midrib = Math.exp( -(vRel * vRel) / 0.0016 ); // glowing central vein
+                final double side   = Math.pow( Math.max( 0, Math.sin( u * 9 - Math.abs(vRel) * 16 ) ), 8 );
+                final double bright = _fastPseudoRandomDoubleFrom( gx - 313, gy + 191 );
+                final double mottle = _valueNoise( x * 10 + gx * 7.0, y * 10 + gy * 7.0 ) - 0.5;
+
+                double shade = 0.40 + bright * 0.42; // every leaf gets its own green tone
+                shade += ( 1 - t ) * 0.10;           // a touch lighter toward the base
+                shade -= rim * rim * 0.34;           // darker rim gives the leaves depth
+                shade += midrib * 0.24;              // the midrib catches the light
+                shade += side * ( 1 - rim ) * 0.11;  // faint herringbone side veins
+                shade += mottle * 0.15;              // organic blotchy surface variation
+                shade -= ( 1 - z ) * 0.14;           // leaves further back sit in shadow
+                value = _clamp01( shade );
+            }
+        }
+        return (float) value;
+    }
+
+    /**
      *  Smoothly interpolated value noise: pseudo random values are placed on an
      *  integer lattice and blended with a smooth-step fade, giving a continuous
      *  field in the range 0..1. This is the building block for {@link #_fractalNoise}.
