@@ -1,0 +1,895 @@
+{
+  "className":"swingtree.Tuple_Bound_Views_Spec",
+  "title":"Bi-Directional Tuple Bound Views",
+  "narrative":"SwingTree provides a powerful `addAll` binding mechanism that connects\n    a `Var<Tuple<M>>` property to dynamically managed sub-views using a\n    `BoundViewSupplier<M>`. This is designed for **value-based, immutable view models**\n    that implement the `HasId` interface.\n\n    Unlike the simpler `ViewSupplier` based `addAll` overloads, the `BoundViewSupplier`\n    variant is **bi-directional**: each sub-view receives a `Var<M>` lens property\n    that can both read from and write back to the parent tuple. Changes to\n    individual items propagate back up through the lens to the root property.\n\n    A key design goal of this binding is **efficiency**:\n    When the tuple changes, sub-views are only rebuilt if their item's `id()`\n    (from the `HasId` interface) has changed. If an item at a given position\n    retains the same id but has different data (e.g. a text field was edited),\n    the existing sub-view is kept and its lens property simply reflects the new data.\n    This avoids expensive GUI teardown/rebuild cycles for purely data-level changes.\n\n    This specification serves as living documentation for the three overloads:\n    - `addAll(Var<Tuple<M>>, BoundViewSupplier<M>)` — no layout constraints\n    - `addAll(String, Var<Tuple<M>>, BoundViewSupplier<M>)` — with String layout constraints\n    - `addAll(AddConstraint, Var<Tuple<M>>, BoundViewSupplier<M>)` — with typed layout constraints",
+  "subjects":[],
+  "statistics":{
+    "runs":"39",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A panel with `addAll` bound to a `Var<Tuple<M>>` shows one sub-view per item.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The most basic usage of `addAll` with a `BoundViewSupplier` is to bind\n            a tuple of view models to a parent panel. Each item in the tuple gets\n            its own sub-view, created by the supplier lambda. The supplier receives\n            a `Var<M>` lens property that is focused on the item at the corresponding\n            index in the tuple.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We prepare 3 items as our tuple-based view model.","code":["var id1 = UUID.randomUUID()","var id2 = UUID.randomUUID()","var id3 = UUID.randomUUID()","var tuple = Tuple.of(","    new Item(id1, \"Alpha\"),","    new Item(id2, \"Beta\"),","    new Item(id3, \"Gamma\")",")","var models = Var.of(tuple)"]},
+
+        {"kind":"and","text":"A view supplier that creates a labelled panel for each item.","code":["BoundViewSupplier<Item> supplier = { Var<Item> itemProp ->","    UI.panel().id(itemProp.get().name())","        .add(UI.label(itemProp.viewAsString({ it.name() })))","}"]},
+
+        {"kind":"when","text":"We build a panel with the tuple binding.","code":["var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"then","text":"The panel has exactly 3 sub-components, one per item.","code":["panel.componentCount == 3"]},
+
+        {"kind":"and","text":"We can find each sub-view by its id.","code":["new Utility.Query(panel).find(JPanel, \"Alpha\").isPresent()","new Utility.Query(panel).find(JPanel, \"Beta\").isPresent()","new Utility.Query(panel).find(JPanel, \"Gamma\").isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Adding an item to the tuple creates a new sub-view without rebuilding the others.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When an item is appended to the tuple, a new sub-view is added\n            at the end of the parent panel. The existing sub-views for previously\n            existing items are left untouched — they are the exact same component\n            instances as before the update.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with two items and a panel bound to it.","code":["var id1 = UUID.randomUUID()","var id2 = UUID.randomUUID()","var models = Var.of(Tuple.of(","    new Item(id1, \"First\"),","    new Item(id2, \"Second\")","))","BoundViewSupplier<Item> supplier = { Var<Item> p -> UI.label(p.viewAsString({ it.name() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We capture the initial component instances.","code":["var original0 = panel.getComponent(0)","var original1 = panel.getComponent(1)"]},
+
+        {"kind":"when","text":"We add a third item to the tuple.","code":["models.update { it.add(new Item(UUID.randomUUID(), \"Third\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"The panel now has 3 sub-components.","code":["panel.componentCount == 3"]},
+
+        {"kind":"and","text":"The first two components are the exact same object instances (not rebuilt).","code":["panel.getComponent(0).is(original0)","panel.getComponent(1).is(original1)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Removing an item from the tuple removes its sub-view.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When an item is removed from the tuple property, its corresponding\n            sub-view is removed from the parent panel. The remaining views\n            keep their positions and are not recreated.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with three tagged items.","code":["var models = Var.of(Tuple.of(","    new Tag(\"x\", \"TagX\"),","    new Tag(\"y\", \"TagY\"),","    new Tag(\"z\", \"TagZ\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.panel().id(p.get().id()) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"expect","text":"All three sub-views are present initially.","code":["panel.componentCount == 3","new Utility.Query(panel).find(JPanel, \"x\").isPresent()","new Utility.Query(panel).find(JPanel, \"y\").isPresent()","new Utility.Query(panel).find(JPanel, \"z\").isPresent()"]},
+
+        {"kind":"when","text":"We remove the middle item.","code":["models.update { it.removeAt(1) }","UI.sync()"]},
+
+        {"kind":"then","text":"Only two sub-views remain, and \"y\" is gone.","code":["panel.componentCount == 2","new Utility.Query(panel).find(JPanel, \"x\").isPresent()","!new Utility.Query(panel).find(JPanel, \"y\").isPresent()","new Utility.Query(panel).find(JPanel, \"z\").isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Clearing the tuple removes all sub-views from the panel.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Clearing the entire tuple results in all sub-views being removed\n            from the parent panel, leaving it empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel bound to a tuple of two items.","code":["var models = Var.of(Tuple.of(","    new Tag(\"a\", \"Alice\"),","    new Tag(\"b\", \"Bob\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.get().label()) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"expect","text":"Initially two components.","code":["panel.componentCount == 2"]},
+
+        {"kind":"when","text":"We clear the tuple.","code":["models.update { it.clear() }","UI.sync()"]},
+
+        {"kind":"then","text":"The panel is empty.","code":["panel.componentCount == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing an item's data but keeping its id does NOT rebuild the sub-view.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the key efficiency optimization of the `BoundViewSupplier` based `addAll`:\n            When an item in the tuple is replaced with a new instance that has the\n            **same `id()`** but different data (e.g. a name change), the framework\n            does NOT rebuild the sub-view for that item. Instead, the existing lens\n            property is updated with the new data, and any bound UI components\n            refresh themselves through the lens.\n\n            This means the same `JComponent` instance survives the update — \n            only its displayed data changes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with one item and a panel bound to it.","code":["var itemId = UUID.randomUUID()","var models = Var.of(Tuple.of(","    new Item(itemId, \"Original Name\")","))","BoundViewSupplier<Item> supplier = { Var<Item> p -> UI.label(p.viewAsString({ it.name() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We capture the component instance before the update.","code":["var originalComponent = panel.getComponent(0)"]},
+
+        {"kind":"when","text":"We replace the item with one that has the same id but a different name.","code":["models.update { it.setAt(0, new Item(itemId, \"Updated Name\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"The panel still has exactly one component.","code":["panel.componentCount == 1"]},
+
+        {"kind":"and","text":"It is the exact same component instance — no rebuild happened.","code":["panel.getComponent(0).is(originalComponent)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing an item`s id causes that specific sub-view to be rebuilt.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In contrast to a pure data change (same id), replacing an item with one\n            that has a **different `id()`** signals to the framework that the item\n            at that position is conceptually a different entity. The old sub-view\n            is discarded and a new one is created.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with two items.","code":["var id1 = UUID.randomUUID()","var id2 = UUID.randomUUID()","var models = Var.of(Tuple.of(","    new Item(id1, \"Keep Me\"),","    new Item(id2, \"Replace Me\")","))","BoundViewSupplier<Item> supplier = { Var<Item> p -> UI.label(p.viewAsString({ it.name() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We capture both component instances.","code":["var kept = panel.getComponent(0)","var replaced = panel.getComponent(1)"]},
+
+        {"kind":"when","text":"We replace the second item with one that has a brand new id.","code":["var newId = UUID.randomUUID()","models.update { it.setAt(1, new Item(newId, \"I Am New\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"The first sub-view is the same instance (its id did not change).","code":["panel.getComponent(0).is(kept)"]},
+
+        {"kind":"and","text":"The second sub-view is a different instance (it was rebuilt).","code":["!panel.getComponent(1).is(replaced)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The lens property provided to the view supplier reads from and writes back to the tuple.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Each sub-view receives a `Var<M>` lens that is bi-directionally\n            bound to the parent tuple property. Reading the lens returns the\n            current item at that index; writing to the lens updates the item\n            in the tuple. This is what makes the pattern truly bi-directional\n            and suitable for editable views like text fields.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with one item.","code":["var itemId = UUID.randomUUID()","var models = Var.of(Tuple.of(","    new Item(itemId, \"Editable\")","))","Var<Item> capturedLens = null","BoundViewSupplier<Item> supplier = { Var<Item> p ->","    capturedLens = p","    return UI.label(p.viewAsString({ it.name() }))","}","UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"expect","text":"The captured lens reads the current item.","code":["capturedLens.get().name() == \"Editable\""]},
+
+        {"kind":"when","text":"We write a new value through the lens.","code":["capturedLens.set(new Item(itemId, \"Modified\"))","UI.sync()"]},
+
+        {"kind":"then","text":"The parent tuple property is updated with the new value.","code":["models.get().get(0).name() == \"Modified\""]},
+
+        {"kind":"and","text":"The id is preserved — the same conceptual item, just different data.","code":["models.get().get(0).id() == itemId"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The String constraint overload applies MigLayout constraints to each sub-view.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `addAll(String, Var<Tuple<M>>, BoundViewSupplier<M>)` overload lets you\n            specify a MigLayout constraint string that will be applied to every\n            sub-view that is generated by the view supplier. This is useful for\n            ensuring consistent layout across dynamically generated views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with two items and a panel with MigLayout.","code":["var models = Var.of(Tuple.of(","    new Tag(\"p\", \"Panel-P\"),","    new Tag(\"q\", \"Panel-Q\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.panel().id(p.get().id()) }"]},
+
+        {"kind":"when","text":"We build the panel with a String layout constraint.","code":["var panel = UI.panel(\"wrap 1\").addAll(\"growx\", models, supplier).get(JPanel)"]},
+
+        {"kind":"then","text":"Both sub-views are present.","code":["new Utility.Query(panel).find(JPanel, \"p\").isPresent()","new Utility.Query(panel).find(JPanel, \"q\").isPresent()"]},
+
+        {"kind":"and","text":"Each sub-view has the \"growx\" constraint applied in the MigLayout.","code":["var layout = (MigLayout) panel.getLayout()","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"p\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"q\").get()) == \"growx\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Layout constraints persist when items are added or removed dynamically.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a tuple is mutated (items added or removed), the layout constraints\n            specified in the `addAll` call are applied to newly generated sub-views\n            just as they were to the initial ones. The layout manager stays consistent.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with one item and a constrained panel.","code":["var models = Var.of(Tuple.of(","    new Tag(\"first\", \"First Tag\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.panel().id(p.get().id()) }","var panel = UI.panel(\"wrap 1\").addAll(\"growx\", models, supplier).get(JPanel)","var layout = (MigLayout) panel.getLayout()"]},
+
+        {"kind":"expect","text":"Initially one constrained sub-view.","code":["layout.constraintMap.size() == 1"]},
+
+        {"kind":"when","text":"We add a second item.","code":["models.update { it.add(new Tag(\"second\", \"Second Tag\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"Both sub-views have the \"growx\" constraint.","code":["layout.constraintMap.size() == 2","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"first\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"second\").get()) == \"growx\""]},
+
+        {"kind":"when","text":"We remove the first item.","code":["models.update { it.removeAt(0) }","UI.sync()"]},
+
+        {"kind":"then","text":"Only the second sub-view remains, still with its constraint.","code":["layout.constraintMap.size() == 1","!new Utility.Query(panel).find(JPanel, \"first\").isPresent()","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"second\").get()) == \"growx\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Multiple data-only changes in a row never rebuild sub-views when ids are stable.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This test verifies that the id-based optimization works consistently\n            across multiple successive updates. As long as the `HasId.id()` values\n            at each position remain the same, no sub-views are rebuilt, regardless\n            of how many times the data changes. This is essential for scenarios\n            like live-editing text fields bound to a list of items.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with three items.","code":["var ids = [UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()]","var models = Var.of(Tuple.of(","    new Item(ids[0], \"v1\"),","    new Item(ids[1], \"v1\"),","    new Item(ids[2], \"v1\")","))","BoundViewSupplier<Item> supplier = { Var<Item> p -> UI.label(p.viewAsString({ it.name() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We capture the original component instances.","code":["var originals = (0..<3).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We update the data 5 times, always keeping the same ids.","code":["(2..6).each { version ->","    models.update { tuple ->","        tuple.setAt(0, new Item(ids[0], \"v$version\"))","             .setAt(1, new Item(ids[1], \"v$version\"))","             .setAt(2, new Item(ids[2], \"v$version\"))","    }","    UI.sync()","}"]},
+
+        {"kind":"then","text":"All three component instances are still the original ones.","code":["(0..<3).every { panel.getComponent(it).is(originals[it]) }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A bi-directionally bound tuple property computes efficiently across various operations. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test verifies the efficiency of the `addAll` binding\n            across many different tuple operations. Each operation is applied to an\n            initial tuple of 5 items, and we check:\n\n            - Component count matches the resulting tuple size\n            - Components at positions mapped to original indices are reused (same instance)\n            - Components at positions marked `-1` are brand new (not present before)\n            - Components at positions marked `_` (wildcard) are newly created\n\n            This ensures the framework performs minimal GUI work for each change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 5 items with distinct ids, and a panel bound to it.","code":["var tuple = Tuple.of(","    new Tag(\"Comp 1\", \"Comp 1\"),","    new Tag(\"Comp 2\", \"Comp 2\"),","    new Tag(\"Comp 3\", \"Comp 3\"),","    new Tag(\"Comp 4\", \"Comp 4\"),","    new Tag(\"Comp 5\", \"Comp 5\")",")","var models = Var.of(tuple)","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.button(p.viewAsString({ it.label() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"and","text":"We snapshot the initial components.","code":["var iniComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We apply the operation to the tuple.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We snapshot the updated components.","code":["var updatedComps = (0..<panel.componentCount).collect { panel.getComponent(it) }"]},
+
+        {"kind":"then","text":"The panel has the expected number of components.","code":["panel.componentCount == models.get().size()","panel.componentCount == diff.findAll { it == _ || it >= 0 }.size()"]},
+
+        {"kind":"and","text":"Components at mapped original indices are the same object instances.","code":["diff.findAll({ it == _ || it >= 0 }).indexed().every {","    it.value == _ || iniComps[it.value].is(updatedComps[it.key])","}"]},
+
+        {"kind":"and","text":"Components at \"-1\" positions are completely new.","code":["diff.indexed().every {","    it.value == _ || it.value >= 0 || !(iniComps[it.key] in updatedComps)","}"]},
+
+        {"kind":"where","text":"We test the following operations on the tuple:","code":{"diff":["[0, -1, 2, 3, 4]","[0, -1, -1, 3, 4]","[0,  _, 2, 3, 4]","[0, 1, 2, 3, 4, _]","[0, 1, 2, 3, 4, _, _]","[_, 0, 1, 2, 3, 4]","[-1, 1, 2, 3, -1]","[0, 1, -1, -1, -1]","[-1, -1, 2, 3, 4]","[-1, -1, -1, -1, -1]"],"operation":["{ it.removeAt(1) }","{ it.removeAt(1, 2) }","{ it.setAt(1, new Tag(\"Comp X\", \"Comp X\")) }","{ it.add(new Tag(\"Comp X\", \"Comp X\")) }","{ it.addAll(new Tag(\"Comp X\", \"Comp X\"), new Tag(\"Comp Y\", \"Comp Y\")) }","{ it.addAt(0, new Tag(\"Comp X\", \"Comp X\")) }","{ it.slice(1, 4) }","{ it.sliceFirst(2) }","{ it.sliceLast(3) }","{ it.clear() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When an item`s id stays the same during a SET operation, the sub-view of a `JPanel` is NOT rebuilt.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This test specifically isolates the `HasId` based optimization in the SET path,\n            when changing an item at a specific index. The framework relies on the `id()` values to\n            determine whether a sub-view needs to be rebuilt.\n\n            More specifically, the implementation checks `!Objects.equals(oldTuple.get(i).id(), newTuple.get(i).id())`\n            and only rebuilds the sub-view when the ids differ. So replacing an item\n            with one that shares the same id but has different payload data must NOT\n            trigger a view rebuild. The existing sub-view component instance must survive.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with 3 items and a panel.","code":["var id1 = UUID.randomUUID()","var id2 = UUID.randomUUID()","var id3 = UUID.randomUUID()","var models = Var.of(Tuple.of(","    new Item(id1, \"A\"), new Item(id2, \"B\"), new Item(id3, \"C\")","))","int supplierInvocations = 0","BoundViewSupplier<Item> supplier = (Var<Item> p) -> {","    supplierInvocations++","    return UI.label(p.viewAsString({ it.name() }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var comp0 = panel.getComponent(0)","var comp1 = panel.getComponent(1)","var comp2 = panel.getComponent(2)"]},
+
+        {"kind":"expect","text":"The supplier was called exactly 3 times for the initial items.","code":["supplierInvocations == 3"]},
+
+        {"kind":"when","text":"We replace the middle item with one that has the same id but different name.","code":["models.update { it.setAt(1, new Item(id2, \"B-Updated\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"All three component instances are preserved.","code":["panel.getComponent(0).is(comp0)","panel.getComponent(1).is(comp1)","panel.getComponent(2).is(comp2)"]},
+
+        {"kind":"and","text":"The supplier was NOT called again (no rebuild).","code":["supplierInvocations == 3"]},
+
+        {"kind":"when","text":"We replace the middle item with one that has a DIFFERENT id.","code":["models.update { it.setAt(1, new Item(UUID.randomUUID(), \"Newcomer\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"The first and last components are preserved, but the middle one is new.","code":["panel.getComponent(0).is(comp0)","!panel.getComponent(1).is(comp1)","panel.getComponent(2).is(comp2)"]},
+
+        {"kind":"and","text":"The supplier was called once more for the new item.","code":["supplierInvocations == 4"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When an item`s id stays the same during a SET operation, the sub-view of a `JScrollPanels` is NOT rebuilt.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This test specifically isolates the `HasId` based optimization in the SET path,\n            for when the parent container is a `JScrollPanels` instead of a plain `JPanel`.\n\n            The implementation checks `!Objects.equals(oldTuple.get(i).id(), newTuple.get(i).id())`\n            and only rebuilds the sub-view when the ids differ. So replacing an item\n            with one that shares the same id but has different payload data must NOT\n            trigger a view rebuild. The existing sub-view component instance must survive.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with 3 items and a panel.","code":["var id1 = UUID.randomUUID()","var id2 = UUID.randomUUID()","var id3 = UUID.randomUUID()","var models = Var.of(Tuple.of(","    new Item(id1, \"A\"), new Item(id2, \"B\"), new Item(id3, \"C\")","))","int supplierInvocations = 0","BoundViewSupplier<Item> supplier = (Var<Item> p) -> {","    supplierInvocations++","    return UI.label(p.viewAsString({ it.name() }))","}","var panels = UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)","var internalWrapper = panels.getContentPanel()","var comp0 = internalWrapper.getComponent(0).getComponent(0) // JScrollPanels have a wrapper panel for each item!","var comp1 = internalWrapper.getComponent(1).getComponent(0)","var comp2 = internalWrapper.getComponent(2).getComponent(0)"]},
+
+        {"kind":"expect","text":"The supplier was called exactly 3 times for the initial items.","code":["supplierInvocations == 3"]},
+
+        {"kind":"when","text":"We replace the middle item with one that has the same id but different name.","code":["models.update { it.setAt(1, new Item(id2, \"B-Updated\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"All three component instances are preserved.","code":["internalWrapper.getComponent(0).getComponent(0).is(comp0)","internalWrapper.getComponent(1).getComponent(0).is(comp1)","internalWrapper.getComponent(2).getComponent(0).is(comp2)"]},
+
+        {"kind":"and","text":"The supplier was NOT called again (no rebuild).","code":["supplierInvocations == 3"]},
+
+        {"kind":"when","text":"We replace the middle item with one that has a DIFFERENT id.","code":["models.update { it.setAt(1, new Item(UUID.randomUUID(), \"Newcomer\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"The first and last components are preserved, but the middle one is new.","code":["internalWrapper.getComponent(0).getComponent(0).is(comp0)","!internalWrapper.getComponent(1).getComponent(0).is(comp1)","internalWrapper.getComponent(2).getComponent(0).is(comp2)"]},
+
+        {"kind":"and","text":"The supplier was called once more for the new item.","code":["supplierInvocations == 4"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The view supplier is called once per item during initial binding.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the `addAll` binding is first established, the `BoundViewSupplier`\n            is invoked exactly once for each item currently in the tuple. No extra\n            or duplicate calls should occur.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A counter to track invocations and a tuple with 4 items.","code":["var callCount = 0","var models = Var.of(Tuple.of(","    new Tag(\"a\", \"A\"), new Tag(\"b\", \"B\"),","    new Tag(\"c\", \"C\"), new Tag(\"d\", \"D\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p ->","    callCount++","    return UI.label(p.get().label())","}"]},
+
+        {"kind":"when","text":"We build the panel.","code":["UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"then","text":"The supplier was called exactly 4 times.","code":["callCount == 4"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Replacing the entire tuple with a completely different set of items rebuilds all views.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the tuple is replaced wholesale with items that have entirely\n            different ids, all sub-views must be rebuilt from scratch.\n            None of the original component instances should survive.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of 3 items and a panel.","code":["var models = Var.of(Tuple.of(","    new Tag(\"old-1\", \"Old A\"),","    new Tag(\"old-2\", \"Old B\"),","    new Tag(\"old-3\", \"Old C\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.panel().id(p.get().id()) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var originals = (0..<3).collect { panel.getComponent(it) }"]},
+
+        {"kind":"when","text":"We replace the tuple with entirely new items.","code":["models.set(Tuple.of(","    new Tag(\"new-1\", \"New X\"),","    new Tag(\"new-2\", \"New Y\")","))","UI.sync()"]},
+
+        {"kind":"then","text":"The panel has 2 components now (matching the new tuple size).","code":["panel.componentCount == 2"]},
+
+        {"kind":"and","text":"None of the original component instances are present.","code":["originals.every { original -> !(original in (0..<panel.componentCount).collect { panel.getComponent(it) }) }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty initial tuple creates no sub-views, and adding items later works correctly.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Starting from an empty tuple is a valid scenario. The panel should\n            initially have no sub-components, and adding items later should\n            populate the panel correctly through the binding.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty tuple and a panel bound to it.","code":["var models = Var.of(Tuple.of(Item))","BoundViewSupplier<Item> supplier = { Var<Item> p -> UI.label(p.viewAsString({ it.name() })) }","var panel = UI.panel().addAll(models, supplier).get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel starts empty.","code":["panel.componentCount == 0"]},
+
+        {"kind":"when","text":"We add two items to the tuple.","code":["models.update { it.add(new Item(UUID.randomUUID(), \"First\")).add(new Item(UUID.randomUUID(), \"Second\")) }","UI.sync()"]},
+
+        {"kind":"then","text":"The panel now has 2 sub-components.","code":["panel.componentCount == 2"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Views bound bi-directionally to a tuple are reused efficiently across various transformations. [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This data-driven test checks that view instances are correctly \n            reused or discarded depending on whether their underlying model\n            items persist across a tuple transformation.\n\n            Each model item uses its own value as its identity (via `SelfAsId`),\n            so items that remain in the new tuple should map to reused views,\n            while items that disappear should map to discarded views.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of SelfAsId items, a view supplier, and a panel.","code":["var models = Var.of(initialModels.mapTo(SelfAsId, o -> new SelfAsId(o)))","BoundViewSupplier<SelfAsId> supplier = { Var<SelfAsId> p ->","    UI.button(p.viewAsString({ Objects.toString(it.id()) }))","}","var panel = UI.panel().addAll(models, supplier).get(JPanel)","var initialComponents = panel.components as java.util.List<JComponent>"]},
+
+        {"kind":"when","text":"We apply the transformation.","code":["models.update { it -> operation(it) }","UI.sync()"]},
+
+        {"kind":"and","text":"We evaluate which views were reused.","code":["var newComponents = panel.components as java.util.List<JComponent>","var whichViewReused = initialComponents.collect { newComponents.contains(it) }","var whichModelsReused = initialModels.collect { models.get().contains(new SelfAsId(it)) }"]},
+
+        {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
+
+        {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

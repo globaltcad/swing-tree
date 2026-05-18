@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LabelStyleInstallerUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LabelStyleInstallerUtility.java</span></div><h1>LabelStyleInstallerUtility.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import swingtree.UI;
+
+import javax.swing.*;
+import javax.swing.plaf.basic.BasicHTML;
+import java.awt.*;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/*
+    We achieve HTML-label styling and UI scaling by injecting a &lt;head&gt;&lt;style&gt;...&lt;/style&gt;&lt;/head&gt;
+    block into the label's HTML text.
+    Why text rewriting instead of something more
+    surgical (modifying the HTMLDocument's StyleSheet, mutating element
+    AttributeSets, ...)?
+
+     - HTMLDocument resolves CSS at *parse time* into each element's AttributeSet.
+       Stylesheet rules added afterwards do not propagate to existing elements
+       (verified empirically: addRule, setCharacterAttributes via either
+       StyleConstants.Foreground or CSS.Attribute.COLOR all leave rendering
+       unchanged).
+     - Setting only the renderer via BasicHTML.updateRenderer is also unreliable:
+       BasicLabelUI's PropertyChangeHandler can re-derive the renderer from
+       label.getText() on any &quot;text&quot;/&quot;font&quot;/&quot;foreground&quot; change, replacing ours
+       with one built from the unstyled text.
+     - Going through label.setText makes the styled HTML the source of truth, so
+       subsequent re-derivations stay styled.
+
+    So we need to modify the HTML directly:
+
+     - To apply FontConf settings (colour, family, size, decoration) we splice
+       a `&lt;head&gt;&lt;style data-swingtree=&quot;injected&quot;&gt;...&lt;/style&gt;&lt;/head&gt;` block in
+       front of the user's body. HTMLDocument resolves CSS at *parse time*
+       into each element's AttributeSet, so stylesheet rules added afterwards
+       (addRule, setCharacterAttributes via either StyleConstants.Foreground
+       or CSS.Attribute.COLOR) leave rendering unchanged. Setting only the
+       renderer via BasicHTML.updateRenderer is also unreliable: BasicLabelUI's
+       PropertyChangeHandler can re-derive the renderer from label.getText() on
+       any &quot;text&quot;/&quot;font&quot;/&quot;foreground&quot; change. Going through label.setText makes
+       the styled HTML the source of truth, so subsequent re-derivations stay
+       styled.
+     - To apply the {@link UI#scale()} factor to user-authored inline CSS we
+       rewrite `font-size:NNpx|pt` in place. The scale factor is also applied
+       to FontConf elsewhere in the pipeline, so user CSS and SwingTree CSS
+       grow at the same rate.
+     - For HTML that uses bare structural tags (`&lt;h1&gt;`, `&lt;h2&gt;`, ..., `&lt;p&gt;`)
+       without inline sizes the inline rewrite has nothing to match, and
+       `HTMLEditorKit`'s default stylesheet pins heading sizes to absolute
+       keyword values that don't track UI.scale() at all. So when the scale
+       differs from 1 we additionally inject a `body{font-size:Npt}` (derived
+       from the JLabel's font when no FontConf size was supplied) and
+       `h1..h6` overrides at HTML5-default multiples, so headings grow with
+       the rest of the UI.
+
+    Both transformations are reversible: the un-scaled, un-injected text is
+    stashed on a client property so each cycle can recompute from scratch.
+    Combined with a &quot;last installed&quot; snapshot, the property change listener
+    can tell our own setText apart from external ones — and treat the latter
+    as a fresh original.
+
+    To make the rewrite robust we:
+     - Anchor the splice on the literal 6-char &quot;&lt;html&gt;&quot; prefix that
+       BasicHTML.isHTMLString already validated, preserving the user's case
+       (&quot;&lt;HTML&gt;&quot; vs &quot;&lt;html&gt;&quot; etc.).
+     - Wrap our injection in a unique marker so we can detect and strip our
+       previous block on the next cycle, leaving the user's original text
+       recoverable even if the client-property cache is missing (e.g. after
+       a copy/paste that round-trips the text through a JComponent of a
+       different type).
+     - Quote and escape user-provided values (font-family) so a malicious or
+       quirky string cannot break out of the CSS declaration.
+
+    Known caveats from Swing's CSS implementation (not fixable here):
+     - letter-spacing is not honored at all.
+     - User-provided &lt;style&gt; blocks within the original HTML still apply, and
+       because their source order is later than ours, they win on conflicts.
+       That matches the spirit of &quot;user's HTML overrides framework defaults&quot;.
+     - We deliberately do not scale relative units (em, rem, %): they are
+       computed against another value that is itself already scaled
+       (the parent's font-size, which we will have rewritten if it carried
+       a px/pt declaration). Scaling them too would compound.
+*/
+final class LabelStyleInstallerUtility {
+
+    private static final String _HTML_INJECTION_OPEN  = &quot;&lt;head&gt;&lt;style data-swingtree=\&quot;injected\&quot;&gt;&quot;;
+    private static final String _HTML_INJECTION_CLOSE = &quot;&lt;/style&gt;&lt;/head&gt;&quot;;
+    private static final String _HTML_TEXT_LISTENER_KEY  = &quot;swingtree.style.htmlTextListenerInstalled&quot;;
+    private static final String _HTML_LAST_INSTALLED_KEY = &quot;swingtree.style.htmlLastInstalled&quot;;
+    private static final String _HTML_ORIGINAL_KEY       = &quot;swingtree.style.htmlOriginal&quot;;
+    private static final int    _HTML_OPEN_TAG_LEN = 6; // &quot;&lt;html&gt;&quot; — guaranteed by BasicHTML.isHTMLString
+
+    /*
+        Match `font-size: NN(px|pt)` in any context — inline `style=&quot;...&quot;`
+        attributes, embedded `&lt;style&gt;` blocks, etc. Case-insensitive on the
+        property name and unit. Numbers may carry a fractional part.
+    */
+<span class="fc" id="L101">    private static final Pattern _INLINE_FONT_SIZE_PATTERN = Pattern.compile(</span>
+        &quot;(font-size\\s*:\\s*)(\\d+(?:\\.\\d+)?)\\s*(px|pt)&quot;,
+        Pattern.CASE_INSENSITIVE
+    );
+
+    private LabelStyleInstallerUtility() {}
+
+
+    /*
+        When the JLabel's text is changed externally — by a sprouts.Val binding,
+        a manual setText elsewhere in the codebase, or any other mechanism — the
+        renderer is rebuilt by BasicLabelUI from the new (un-styled) text and
+        our injection is gone. To make the styling survive these out-of-band
+        changes we install (once per label) a property change listener that
+        triggers a fresh style cycle whenever the text changes to something
+        that differs from what we last installed. Comparing against the
+        last-installed snapshot is what lets us tell our own setText apart
+        from external ones — without it, every setText we do would trigger
+        another cycle and we would loop.
+    */
+    static void _ensureHtmlTextListenerInstalled(JLabel label) {
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if ( label.getClientProperty(_HTML_TEXT_LISTENER_KEY) != null )</span>
+<span class="fc" id="L124">            return;</span>
+
+<span class="fc" id="L126">        label.putClientProperty(_HTML_TEXT_LISTENER_KEY, Boolean.TRUE);</span>
+
+        // Installing the text listener (once):
+<span class="fc" id="L129">        label.addPropertyChangeListener(&quot;text&quot;, evt -&gt; {</span>
+
+<span class="fc" id="L131">            Object newValue = evt.getNewValue();</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            if ( !(newValue instanceof String) )</span>
+<span class="nc" id="L133">                return;</span>
+<span class="fc" id="L134">            String newText = (String) newValue;</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            if ( !BasicHTML.isHTMLString(newText) )</span>
+<span class="fc" id="L136">                return;</span>
+<span class="fc" id="L137">            Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">            if ( Objects.equals(newText, lastInstalled) )</span>
+<span class="fc" id="L139">                return; // this was our own setText</span>
+            /*
+                Force the cycle (force=true): the engine's stored StyleConf may
+                still match the current styler output, but the label's actual
+                text was just reset externally — so the conf-equality short
+                circuit would skip the re-injection we need.
+            */
+<span class="fc" id="L146">            ComponentExtension.from(label).gatherApplyAndInstallStyle(true);</span>
+
+<span class="fc" id="L148">        });</span>
+<span class="fc" id="L149">    }</span>
+
+    /**
+     *  Combined entry point that brings an HTML JLabel's text in sync with
+     *  both the {@link UI#scale()} factor and the supplied {@link FontConf}.
+     *
+     *  &lt;p&gt;The label's text is treated as a function of three inputs: the
+     *  user-provided &quot;original&quot; HTML, the current UI scale, and the active
+     *  FontConf. The original is recovered from a client property each cycle,
+     *  scaled, optionally augmented with a SwingTree-managed
+     *  &lt;code&gt;&amp;lt;head&amp;gt;&amp;lt;style&amp;gt;&lt;/code&gt; block, and reinstalled via
+     *  {@link JLabel#setText(String)}. The result is also cached on the label
+     *  so the next cycle can distinguish a &quot;we did this&quot; text from one set
+     *  externally.
+     */
+    static void _applyHtmlScalingAndStyle(JLabel label, FontConf fontConf) {
+<span class="fc" id="L165">        String currentText = label.getText();</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if ( !BasicHTML.isHTMLString(currentText) ) {</span>
+            // Text became non-HTML: clear tracking state so a future HTML
+            // value is treated as a fresh original (and not as something
+            // we already installed).
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">            if ( label.getClientProperty(_HTML_LAST_INSTALLED_KEY) != null )</span>
+<span class="nc" id="L171">                label.putClientProperty(_HTML_LAST_INSTALLED_KEY, null);</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">            if ( label.getClientProperty(_HTML_ORIGINAL_KEY) != null )</span>
+<span class="nc" id="L173">                label.putClientProperty(_HTML_ORIGINAL_KEY, null);</span>
+<span class="fc" id="L174">            return;</span>
+        }
+
+<span class="fc" id="L177">        float  scale    = UI.scale();</span>
+<span class="fc" id="L178">        String original = _recoverOriginalHtml(label, currentText);</span>
+<span class="fc" id="L179">        String scaled   = _scaleInlineFontSizes(original, scale);</span>
+<span class="fc" id="L180">        String css      = _buildHtmlBodyCss(fontConf)</span>
+<span class="fc" id="L181">                        + _buildHtmlScalingDefaultsCss(label, scale, fontConf);</span>
+
+        @Nullable String desired;
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if ( css.isEmpty() ) {</span>
+<span class="fc" id="L185">            desired = scaled;</span>
+        } else {
+<span class="fc" id="L187">            desired = _injectStyleTag(scaled, css);</span>
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            if ( desired == null )</span>
+<span class="nc" id="L189">                desired = scaled;</span>
+        }
+
+<span class="fc" id="L192">        label.putClientProperty(_HTML_ORIGINAL_KEY, original);</span>
+
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if ( Objects.equals(desired, currentText) ) {</span>
+<span class="fc" id="L195">            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);</span>
+        } else {
+            // IMPORTANT: write the snapshot BEFORE setText so the listener
+            // installed below can recognise this as our own change.
+<span class="fc" id="L199">            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, desired);</span>
+<span class="fc" id="L200">            label.setText(desired);</span>
+        }
+
+<span class="fc" id="L203">        _ensureHtmlTextListenerInstalled(label);</span>
+<span class="fc" id="L204">    }</span>
+
+    /*
+       Recover the un-scaled, un-injected HTML.
+
+       The label's current text is one of three things:
+        1. The text we installed on the previous cycle (matches lastInstalled).
+           In that case the stored original is authoritative.
+        2. Text set by external code (Var binding, setText elsewhere). The
+           stored original is now stale; we strip our injection (defensively,
+           in case it is still in there) and treat the result as a new
+           original.
+        3. The first time we see this label — neither client property is set
+           yet. Same as (2).
+    */
+    private static String _recoverOriginalHtml(JLabel label, String currentText) {
+<span class="fc" id="L220">        Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">        if ( Objects.equals(currentText, lastInstalled) ) {</span>
+<span class="fc" id="L222">            Object stored = label.getClientProperty(_HTML_ORIGINAL_KEY);</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if ( stored instanceof String )</span>
+<span class="fc" id="L224">                return (String) stored;</span>
+        }
+<span class="fc" id="L226">        String stripped = _stripHtmlInjection(currentText);</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        return stripped != null ? stripped : currentText;</span>
+    }
+
+    /**
+     *  Multiplies every {@code font-size:NN(px|pt)} value found in the given
+     *  HTML by the supplied scale factor and returns the rewritten string.
+     *  Returns the input unchanged when scale equals 1 or no match is found.
+     */
+    static String _scaleInlineFontSizes(String html, float scale) {
+<span class="pc bpc" id="L236" title="1 of 4 branches missed.">        if ( scale == 1f || html.isEmpty() )</span>
+<span class="fc" id="L237">            return html;</span>
+
+<span class="fc" id="L239">        Matcher m = _INLINE_FONT_SIZE_PATTERN.matcher(html);</span>
+<span class="fc" id="L240">        StringBuffer sb = new StringBuffer(html.length() + 16);</span>
+<span class="fc" id="L241">        boolean any = false;</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">        while ( m.find() ) {</span>
+<span class="fc" id="L243">            any = true;</span>
+<span class="fc" id="L244">            String prefix = m.group(1);</span>
+<span class="fc" id="L245">            double value  = Double.parseDouble(m.group(2));</span>
+<span class="fc" id="L246">            String unit   = m.group(3);</span>
+<span class="fc" id="L247">            double result = value * scale;</span>
+            String formatted;
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">            if ( !Double.isFinite(result) ) {</span>
+<span class="nc" id="L250">                formatted = m.group(2); // pathological scale; leave value alone</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">            } else if ( result == Math.floor(result) ) {</span>
+<span class="fc" id="L252">                formatted = Long.toString((long) result);</span>
+            } else {
+                // Two decimals is plenty for sub-pixel precision and avoids
+                // dragging an exponent or a 17-digit double into the CSS.
+<span class="nc" id="L256">                formatted = String.format(Locale.ROOT, &quot;%.2f&quot;, result);</span>
+            }
+<span class="fc" id="L258">            m.appendReplacement(sb, Matcher.quoteReplacement(prefix + formatted + unit));</span>
+<span class="fc" id="L259">        }</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        if ( !any )</span>
+<span class="fc" id="L261">            return html;</span>
+<span class="fc" id="L262">        m.appendTail(sb);</span>
+<span class="fc" id="L263">        return sb.toString();</span>
+    }
+
+    static @Nullable String _stripHtmlInjection( @Nullable String html ) {
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if ( html == null )</span>
+<span class="nc" id="L268">            return null;</span>
+
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if ( !BasicHTML.isHTMLString(html) )</span>
+<span class="nc" id="L271">            return html;</span>
+
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">        if ( html.length() &lt; _HTML_OPEN_TAG_LEN )</span>
+<span class="nc" id="L274">            return html;</span>
+
+<span class="fc" id="L276">        String afterOpen = html.substring(_HTML_OPEN_TAG_LEN);</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">        if ( !afterOpen.startsWith(_HTML_INJECTION_OPEN) )</span>
+<span class="fc" id="L278">            return html;</span>
+
+<span class="nc" id="L280">        int closeIdx = afterOpen.indexOf(_HTML_INJECTION_CLOSE, _HTML_INJECTION_OPEN.length());</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if ( closeIdx &lt; 0 )</span>
+<span class="nc" id="L282">            return html;</span>
+
+<span class="nc" id="L284">        return html.substring(0, _HTML_OPEN_TAG_LEN)</span>
+<span class="nc" id="L285">                + afterOpen.substring(closeIdx + _HTML_INJECTION_CLOSE.length());</span>
+    }
+
+    static @Nullable String _injectStyleTag( @Nullable String html, String css ) {
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">        if ( html == null )</span>
+<span class="nc" id="L290">            return null;</span>
+
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">        if ( html.length() &lt; _HTML_OPEN_TAG_LEN )</span>
+<span class="nc" id="L293">            return html;</span>
+
+<span class="fc" id="L295">        return html.substring(0, _HTML_OPEN_TAG_LEN)</span>
+                + _HTML_INJECTION_OPEN + css + _HTML_INJECTION_CLOSE
+<span class="fc" id="L297">                + html.substring(_HTML_OPEN_TAG_LEN);</span>
+    }
+
+    /*
+        Swing's HTMLEditorKit ships a default stylesheet that pins heading
+        font-sizes to absolute keywords (h1 = x-large, h2 = large, ...). Those
+        keywords resolve, inside javax.swing.text.html.CSS, to fixed pt values
+        that do not react to the JLabel's font, to FlatLaf's HiDPI scaling, or
+        to UI.scale(). The body element is rendered using the JLabel's font,
+        but headings are not.
+
+        When UI.scale() != 1 we therefore need to override both the body and
+        h1..h6 with explicit pt values so the rendered HTML actually scales.
+        For the body we use either the FontConf.size (already scaled by the
+        StyleConf pipeline) or, when no FontConf size was given, the JLabel's
+        current font-size. Headings are sized as multiples of the base,
+        matching the HTML5 default ratios.
+
+        We deliberately skip this when scale == 1: at the default scale the
+        kit's own defaults are the right answer and we want unstyled labels
+        to remain text-untouched.
+    */
+    static String _buildHtmlScalingDefaultsCss(JLabel label, float scale, FontConf fontConf) {
+<span class="fc bfc" id="L320" title="All 2 branches covered.">        if ( scale == 1f )</span>
+<span class="fc" id="L321">            return &quot;&quot;;</span>
+
+        int     baseSize;
+        boolean injectBody;
+<span class="fc bfc" id="L325" title="All 2 branches covered.">        if ( fontConf.size() &gt; 0 ) {</span>
+<span class="fc" id="L326">            baseSize   = fontConf.size(); // FontConf is already scaled upstream</span>
+<span class="fc" id="L327">            injectBody = false;           // _buildHtmlBodyCss already emitted body{font-size:...}</span>
+        } else {
+<span class="fc" id="L329">            Font f = label.getFont();</span>
+<span class="pc bpc" id="L330" title="2 of 4 branches missed.">            baseSize   = ( f != null &amp;&amp; f.getSize() &gt; 0 ) ? f.getSize() : 12; // We already expect SwingTree or the Look and Feel (like FlatLaF) to have the font size scaled!</span>
+<span class="fc" id="L331">            injectBody = true;</span>
+        }
+
+<span class="fc" id="L334">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">        if ( injectBody )</span>
+<span class="fc" id="L336">            sb.append(&quot;body{font-size:&quot;).append(baseSize).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L337">        sb.append(&quot;h1{font-size:&quot;).append(Math.round(baseSize * 2.00f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L338">        sb.append(&quot;h2{font-size:&quot;).append(Math.round(baseSize * 1.50f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L339">        sb.append(&quot;h3{font-size:&quot;).append(Math.round(baseSize * 1.17f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L340">        sb.append(&quot;h4{font-size:&quot;).append(baseSize).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L341">        sb.append(&quot;h5{font-size:&quot;).append(Math.round(baseSize * 0.83f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L342">        sb.append(&quot;h6{font-size:&quot;).append(Math.round(baseSize * 0.67f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L343">        return sb.toString();</span>
+    }
+
+    static String _buildHtmlBodyCss(FontConf fontConf) {
+<span class="fc" id="L347">        StringBuilder body = new StringBuilder();</span>
+
+<span class="fc bfc" id="L349" title="All 2 branches covered.">        if ( !fontConf.family().isEmpty() )</span>
+<span class="fc" id="L350">            body.append(&quot;font-family:\&quot;&quot;).append(_cssEscape(fontConf.family())).append(&quot;\&quot;;&quot;);</span>
+
+<span class="fc bfc" id="L352" title="All 2 branches covered.">        if ( fontConf.size() &gt; 0 )</span>
+<span class="fc" id="L353">            body.append(&quot;font-size:&quot;).append(fontConf.size()).append(&quot;pt;&quot;);</span>
+
+<span class="fc" id="L355">        fontConf.posture().ifPresent( p -&gt; {</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">            if ( p &gt; 0f )</span>
+<span class="fc" id="L357">                body.append(&quot;font-style:italic;&quot;);</span>
+<span class="fc" id="L358">        });</span>
+
+<span class="fc" id="L360">        fontConf.weight().ifPresent( w -&gt; {</span>
+            // FontConf weight is on AWT's TextAttribute.WEIGHT scale where 1.0
+            // is regular and 2.0 is bold. CSS font-weight uses 100..900 with
+            // 400=normal and 700=bold. Map piecewise-linearly so the canonical
+            // anchors land exactly, then snap to the nearest 100 since legacy
+            // CSS only honors multiples of 100.
+            int cssWeight;
+<span class="fc bfc" id="L367" title="All 2 branches covered.">            if ( w &lt;= 1f ) cssWeight = Math.round(w * 400f);</span>
+<span class="fc" id="L368">            else           cssWeight = Math.round(400f + (w - 1f) * 300f);</span>
+<span class="fc" id="L369">            cssWeight = Math.max(100, Math.min(900, ((cssWeight + 50) / 100) * 100));</span>
+            String value;
+<span class="fc bfc" id="L371" title="All 2 branches covered.">            if ( cssWeight == 400 )      value = &quot;normal&quot;;</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">            else if ( cssWeight == 700 ) value = &quot;bold&quot;;</span>
+<span class="fc" id="L373">            else                         value = String.valueOf(cssWeight);</span>
+<span class="fc" id="L374">            body.append(&quot;font-weight:&quot;).append(value).append(&quot;;&quot;);</span>
+<span class="fc" id="L375">        });</span>
+
+<span class="fc" id="L377">        fontConf.paint().ifPresent( paint -&gt; {</span>
+<span class="pc bpc" id="L378" title="1 of 2 branches missed.">            if ( paint instanceof Color) {</span>
+<span class="fc" id="L379">                Color c = (Color) paint;</span>
+<span class="fc" id="L380">                body.append(String.format(&quot;color:#%02x%02x%02x;&quot;, c.getRed(), c.getGreen(), c.getBlue()));</span>
+            }
+<span class="fc" id="L382">        });</span>
+
+<span class="fc" id="L384">        fontConf.backgroundPaint().ifPresent( paint -&gt; {</span>
+<span class="pc bpc" id="L385" title="1 of 2 branches missed.">            if ( paint instanceof Color ) {</span>
+<span class="fc" id="L386">                Color c = (Color) paint;</span>
+<span class="fc" id="L387">                body.append(String.format(&quot;background-color:#%02x%02x%02x;&quot;, c.getRed(), c.getGreen(), c.getBlue()));</span>
+            }
+<span class="fc" id="L389">        });</span>
+
+<span class="fc" id="L391">        StringBuilder decoration = new StringBuilder();</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">        if ( fontConf.isUnderlined() )</span>
+<span class="fc" id="L393">            decoration.append(&quot;underline &quot;);</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        if ( fontConf.isStrikeThrough() )</span>
+<span class="fc" id="L395">            decoration.append(&quot;line-through &quot;);</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">        if ( decoration.length() &gt; 0 )</span>
+<span class="fc" id="L397">            body.append(&quot;text-decoration:&quot;).append(decoration.toString().trim()).append(&quot;;&quot;);</span>
+
+<span class="fc bfc" id="L399" title="All 2 branches covered.">        if ( body.length() == 0 )</span>
+<span class="fc" id="L400">            return &quot;&quot;;</span>
+
+<span class="fc" id="L402">        return &quot;body{&quot; + body + &quot;}&quot;;</span>
+    }
+
+    private static String _cssEscape(String value) {
+        // Strip rather than escape: Swing's CSS parser does not consistently honor
+        // backslash escapes inside string values, so we play it safe and drop any
+        // character that could let a hostile (or just quirky) value break out of
+        // the surrounding &quot;...&quot; declaration.
+<span class="fc" id="L410">        StringBuilder sb = new StringBuilder(value.length());</span>
+<span class="fc bfc" id="L411" title="All 2 branches covered.">        for ( int i = 0; i &lt; value.length(); i++ ) {</span>
+<span class="fc" id="L412">            char ch = value.charAt(i);</span>
+<span class="pc bpc" id="L413" title="7 of 18 branches missed.">            if (</span>
+                ch == '&quot;'  ||
+                ch == ';'  ||
+                ch == '\\' ||
+                ch == '&lt;'  ||
+                ch == '&gt;'  ||
+                ch == '{'  ||
+                ch == '}'  ||
+                ch == '\n' ||
+                ch == '\r'
+            )
+<span class="fc" id="L424">                sb.append(' ');</span>
+            else
+<span class="fc" id="L426">                sb.append(ch);</span>
+        }
+<span class="fc" id="L428">        return sb.toString();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
